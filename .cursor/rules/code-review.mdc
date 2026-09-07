@@ -1,0 +1,6 @@
+---
+description: Apply the shared code review policy when reviewing a diff, a PR, a branch before merge, or code just written
+alwaysApply: false
+---
+
+When reviewing a diff, a PR, a branch before merge, or code you or another agent just wrote, read and follow `docs/agent-rules/code-review.md`. It defines review scope, the automated pre-checks to run first, the KUDY-specific checklist (contracts, layering, offline, Supabase/RLS, payments), and the severity-graded output format.
