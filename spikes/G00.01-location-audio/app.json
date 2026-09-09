@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "KUDY GPS Audio Spike",
+    "slug": "kudy-g00-01-location-audio",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "by.kudy.g0001a",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio", "location"]
+      }
+    },
+    "android": {
+      "package": "by.kudy.g0001a",
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "ACCESS_BACKGROUND_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION"]
+    },
+    "plugins": [
+      ["expo-location", {"locationWhenInUsePermission":"KUDY uses location locally to trigger the selected guide.","locationAlwaysAndWhenInUsePermission":"KUDY uses location during an active walk; coordinates stay on this device."}],
+      ["expo-audio", {"enableBackgroundPlayback":true,"enableBackgroundRecording":false}]
+    ]
+  }
+}
