@@ -1,0 +1,15 @@
+{
+  "name": "kudy-g00-02-a-offline-map-spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare-data": "node scripts/prepare-data.mjs",
+    "serve": "node scripts/serve.mjs",
+    "test": "node --test --test-reporter=spec test/*.test.mjs",
+    "reset-test-data": "node scripts/reset-test-data.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
