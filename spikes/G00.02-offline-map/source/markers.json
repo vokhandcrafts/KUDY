@@ -1,0 +1,5 @@
+[
+  {"id":"stop-green-gate","kind":"stop","label":"Playable stop: Green Gate","x":45,"y":55},
+  {"id":"stop-crane","kind":"locked","label":"Locked stop: Crane","x":72,"y":31},
+  {"id":"poi-water","kind":"poi","label":"POI: water","x":24,"y":73}
+]
