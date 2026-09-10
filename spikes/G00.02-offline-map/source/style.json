@@ -1,0 +1,1 @@
+{"version":8,"name":"KUDY synthetic offline style","sprite":"./sprite","glyphs":"./glyphs/{range}.json","sources":{"local":{"type":"geojson","data":"./map.svg"}},"layers":[{"id":"background","type":"background","paint":{"background-color":"#dce9ef"}}]}
