@@ -14,5 +14,10 @@
     "**/package-lock.json",
     "**/yarn.lock",
     "**/pnpm-lock.yaml"
+  ],
+  "formats": [
+    "javascript",
+    "typescript",
+    "tsx"
   ]
 }

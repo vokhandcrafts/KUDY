@@ -1,0 +1,6 @@
+---
+description: Apply the shared Showboat proof-of-work policy to implementation tasks
+alwaysApply: true
+---
+
+Before completing any implementation task, read and follow `docs/agent-rules/showboat.md`. It defines the mandatory, measurable conditions for creating a Showboat proof of work.

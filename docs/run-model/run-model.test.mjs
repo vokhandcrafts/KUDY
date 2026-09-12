@@ -1,0 +1,293 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { start, step, status, missed } from './run-model.mjs';
+
+const stops = ['a', 'b', 'c'];
+const now = 100_000;
+const fix = (overrides = {}) => ({ at: now, accuracy: 5,
+  distances: { a: 0, b: 0, c: 0 }, ...overrides });
+const trigger = id => ({ type: 'DwellCompleted', stopId: id, radius: 20 });
+const play = id => ({ type: 'UserSelectedStop', stopId: id });
+function fixture() {
+  return step(start('walk-1', stops), { type: 'LocationAccepted', fix: fix() }, now);
+}
+const send = (s, e) => step(s, e, now);
+const finishAudio = s => send(s, { type: 'AudioFinished',
+  sessionId: s.sessionId, playId: s.playing.playId });
+
+test('C2: accepted arrival starts audio and spends automatic attempt', () => {
+  const s = send(fixture(), trigger('a'));
+  assert.equal(s.playing?.stopId, 'a');
+  assert.deepEqual(s.autoFired, ['a']);
+  assert.equal(s.commands[0]?.type, 'PlayStory');
+});
+
+test('C6: completed automatic stop never autoplays twice; manual replay works', () => {
+  let s = finishAudio(send(fixture(), trigger('a')));
+  s = send(s, trigger('a'));
+  assert.equal(s.playing, null);
+  s = send(s, play('a'));
+  assert.equal(s.playing?.stopId, 'a');
+  assert.equal(s.playing?.playId, 2);
+});
+
+test('C7/C11: interrupted replay preserves heard and finish summary', () => {
+  let s = finishAudio(send(fixture(), trigger('a')));
+  s = send(s, play('a'));
+  s = send(s, { type: 'UserPausedAudio' });
+  assert.equal(status(s, 'a'), 'played');
+  s = send(s, { type: 'End' });
+  assert.deepEqual(missed(s), ['b', 'c']);
+});
+
+test('C8: queued stop remains eligible and plays after current audio', () => {
+  let s = send(send(fixture(), trigger('a')), trigger('b'));
+  assert.equal(s.queued?.stopId, 'b');
+  assert.equal(status(s, 'b'), 'pending');
+  assert.deepEqual(s.autoFired, ['a']);
+  s = finishAudio(s);
+  assert.equal(s.playing?.stopId, 'b');
+  assert.deepEqual(s.autoFired, ['a', 'b']);
+});
+
+test('C9/C13/C14: paused session ignores arrivals; explicit resume restores eligibility', () => {
+  let s = send(fixture(), { type: 'Pause' });
+  assert.equal(s.state, 'Paused');
+  assert.ok(s.commands.some(c => c.type === 'ClearGeofences'));
+  s = send(s, trigger('b'));
+  assert.deepEqual(s.autoFired, []);
+  s = send(s, { type: 'Resume' });
+  s = send(s, trigger('b'));
+  assert.equal(s.playing?.stopId, 'b');
+});
+
+test('C10: old completion cannot finish a replay of the same story', () => {
+  let s = send(fixture(), play('a'));
+  const old = s.playing.playId;
+  s = send(s, play('a'));
+  s = send(s, { type: 'AudioFinished', sessionId: s.sessionId, playId: old });
+  assert.equal(s.playing?.playId, old + 1);
+  assert.deepEqual(s.heard, []);
+});
+
+test('C10: equal play numbers from different sessions do not collide', () => {
+  const old = send(fixture(), play('a'));
+  let s = send(start('walk-2', stops), play('b'));
+  assert.equal(old.playing.playId, s.playing.playId);
+  s = send(s, { type: 'AudioFinished', sessionId: old.sessionId,
+    playId: old.playing.playId });
+  assert.equal(s.playing?.stopId, 'b');
+  assert.deepEqual(s.heard, []);
+});
+
+test('C12: manually completed stop does not autoplay on later arrival', () => {
+  let s = finishAudio(send(fixture(), play('a')));
+  assert.deepEqual(s.autoFired, []);
+  s = send(s, trigger('a'));
+  assert.equal(s.playing, null);
+});
+
+test('C13: session pause retires queued attempt and stops playback', () => {
+  let s = send(send(fixture(), trigger('a')), trigger('b'));
+  s = send(s, { type: 'Pause' });
+  assert.equal(s.playing, null);
+  assert.equal(s.queued, null);
+  assert.equal(status(s, 'b'), 'available');
+  assert.ok(s.commands.some(c => c.type === 'StopAudio'));
+});
+
+test('C16: ended session cannot resume or accept manual playback', () => {
+  let s = send(fixture(), { type: 'End' });
+  s = send(s, { type: 'Resume' });
+  s = send(s, play('a'));
+  assert.equal(s.state, 'Ended');
+  assert.equal(s.playing, null);
+  const next = start('walk-2', stops);
+  assert.notEqual(next.sessionId, s.sessionId);
+  assert.deepEqual(next.heard, []);
+});
+
+for (const event of ['UserPausedAudio', 'FocusLoss']) {
+  test(`C18/C19/C20: ${event} blocks arrivals until explicit Play`, () => {
+    let s = send(send(fixture(), trigger('a')), { type: event });
+    s = send(s, trigger('b'));
+    assert.equal(s.playing, null);
+    assert.equal(status(s, 'b'), 'available');
+    s = send(s, { type: 'FocusRegain' });
+    assert.equal(s.playing, null);
+    assert.equal(s.suspended, true);
+    s = send(s, play('b'));
+    assert.equal(s.suspended, false);
+    assert.equal(s.playing?.stopId, 'b');
+  });
+}
+
+test('C5/C21: newest queued stop replaces previous without marking it heard', () => {
+  let s = send(send(send(fixture(), trigger('a')), trigger('b')), trigger('c'));
+  assert.equal(status(s, 'b'), 'available');
+  assert.equal(s.heard.includes('b'), false);
+  s = finishAudio(s);
+  assert.equal(s.playing?.stopId, 'c');
+});
+
+for (const [label, location] of [
+  ['missing', null], ['stale', fix({ at: now - 30_001 })],
+  ['inaccurate', fix({ accuracy: 21 })],
+  ['too far', fix({ distances: { a: 0, b: 41, c: 0 } })],
+]) {
+  test(`C22: ${label} position retires queue without playback`, () => {
+    let s = send(send(fixture(), trigger('a')), trigger('b'));
+    s = send(s, { type: 'LocationAccepted', fix: location });
+    s = finishAudio(s);
+    assert.equal(s.playing, null);
+    assert.equal(status(s, 'b'), 'available');
+    assert.deepEqual(s.heard, ['a']);
+  });
+}
+
+test('C22: exact freshness, accuracy and queued distance boundaries are accepted', () => {
+  let s = send(send(fixture(), trigger('a')), trigger('b'));
+  s = send(s, { type: 'LocationAccepted', fix: fix({ at: now - 30_000,
+    accuracy: 20, distances: { b: 40 } }) });
+  assert.equal(finishAudio(s).playing?.stopId, 'b');
+});
+
+test('C24: selecting another stop stops first before playing second', () => {
+  const s = send(send(fixture(), trigger('a')), play('b'));
+  assert.equal(status(s, 'a'), 'available');
+  assert.equal(s.playing?.stopId, 'b');
+  assert.deepEqual(s.commands.map(c => c.type), ['StopAudio', 'PlayStory']);
+});
+
+test('boundary: inactive state takes precedence over suspended autoplay', () => {
+  let s = send(fixture(), { type: 'Pause' });
+  s = send(s, trigger('a'));
+  assert.equal(status(s, 'a'), 'pending');
+  assert.equal(s.queued, null);
+});
+
+test('boundary: stale immediate trigger spends no attempt; fresh retry succeeds', () => {
+  let s = send(fixture(), { type: 'LocationAccepted', fix: fix({ at: 0 }) });
+  s = send(s, trigger('a'));
+  assert.deepEqual(s.autoFired, []);
+  s = send(s, { type: 'LocationAccepted', fix: fix() });
+  assert.equal(send(s, trigger('a')).playing?.stopId, 'a');
+});
+
+test('boundary: replayed queue notification cannot evict itself', () => {
+  let s = send(send(fixture(), trigger('a')), trigger('b'));
+  s = send(s, trigger('b'));
+  assert.equal(status(s, 'b'), 'pending');
+  assert.equal(finishAudio(s).playing?.stopId, 'b');
+});
+
+test('boundary: unknown stop and future timestamp cannot trigger playback', () => {
+  let s = send(fixture(), trigger('unknown'));
+  assert.equal(s.playing, null);
+  s = send(s, { type: 'LocationAccepted', fix: fix({ at: now + 1 }) });
+  s = send(s, trigger('a'));
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.autoFired, []);
+});
+
+test('reducer does not mutate input state or event', () => {
+  const s = fixture();
+  const event = trigger('a');
+  const original = structuredClone({ s, event });
+  send(s, event);
+  assert.deepEqual({ s, event }, original);
+});
+
+test('C31: every permutation of stop visits works without following suggested order', () => {
+  for (const order of [['a','b','c'], ['a','c','b'], ['b','a','c'],
+    ['b','c','a'], ['c','a','b'], ['c','b','a']]) {
+    let s = fixture();
+    for (const id of order) {
+      s = send(s, trigger(id));
+      assert.equal(s.playing?.stopId, id);
+      s = finishAudio(s);
+    }
+    assert.deepEqual([...s.heard].sort(), stops);
+    assert.equal(s.state, 'Active');
+  }
+});
+
+test('C32: ending after one freely selected stop is a normal session end', () => {
+  const s = send(finishAudio(send(fixture(), trigger('c'))), { type: 'End' });
+  assert.equal(s.state, 'Ended');
+  assert.deepEqual(missed(s), ['a', 'b']);
+  assert.equal(s.commands.some(c => /fail|incomplete/i.test(c.type)), false);
+});
+
+function lockedFixture() {
+  return send(start('walk-1', stops, { version: 'v1', accessibleIds: ['a', 'c'] }),
+    { type: 'LocationAccepted', fix: fix() });
+}
+
+test('C33: locked preview is excluded from manual and automatic playback and remaining list', () => {
+  let s = lockedFixture();
+  assert.equal(status(s, 'b'), 'locked');
+  s = send(send(s, trigger('b')), play('b'));
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.autoFired, []);
+  assert.deepEqual(missed(s), ['a', 'c']);
+});
+
+test('C34: verified downloaded access unlocks any nearby stop without restarting progress', () => {
+  let s = finishAudio(send(lockedFixture(), trigger('c')));
+  s = send(s, { type: 'AccessReady', version: 'v1', stopIds: ['b'] });
+  assert.equal(status(s, 'b'), 'pending');
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.heard, ['c']);
+  s = send(s, trigger('b'));
+  assert.equal(s.playing?.stopId, 'b');
+  assert.equal(s.sessionId, 'walk-1');
+});
+
+test('C35: catalog version change cannot unlock or replace active session content', () => {
+  let s = lockedFixture();
+  s = send(s, { type: 'AccessReady', version: 'v2', stopIds: ['b'] });
+  assert.equal(s.version, 'v1');
+  assert.equal(status(s, 'b'), 'locked');
+});
+
+test('C33: purchase notification alone is not playable access', () => {
+  let s = lockedFixture();
+  s = send(s, { type: 'PurchaseSucceeded', stopIds: ['b'] });
+  s = send(s, play('b'));
+  assert.equal(s.playing, null);
+  assert.equal(status(s, 'b'), 'locked');
+});
+
+test('boundary: access update is atomic and rejects unknown stops', () => {
+  const s = send(lockedFixture(), { type: 'AccessReady', version: 'v1',
+    stopIds: ['b', 'unknown'] });
+  assert.equal(status(s, 'b'), 'locked');
+});
+
+test('bounded exploration: invariants across all 4-event sequences (8 choices per step)', () => {
+  let transitions = 0;
+  function explore(s, depth) {
+    if (!depth) return;
+    const events = [trigger('a'), trigger('b'), play('a'),
+      { type: 'AudioFinished', sessionId: s.sessionId, playId: s.playing?.playId ?? -1 },
+      { type: 'FocusLoss' }, { type: 'Pause' }, { type: 'Resume' }, { type: 'End' }];
+    for (const event of events) {
+      const snapshot = structuredClone(s);
+      const next = send(s, event);
+      const context = JSON.stringify({ state: s, event });
+      assert.deepEqual(s, snapshot, context);
+      assert.ok(s.heard.every(id => next.heard.includes(id)), context);
+      assert.ok(s.autoFired.every(id => next.autoFired.includes(id)), context);
+      assert.equal(new Set(next.autoFired).size, next.autoFired.length, context);
+      assert.equal(new Set(next.heard).size, next.heard.length, context);
+      assert.ok(!next.playing || (next.state === 'Active' && !next.suspended), context);
+      if (s.state === 'Ended') assert.equal(next.state, 'Ended', context);
+      assert.ok(next.commands.filter(c => c.type === 'PlayStory').length <= 1, context);
+      transitions++;
+      explore(next, depth - 1);
+    }
+  }
+  explore(fixture(), 4);
+  assert.equal(transitions, 4680);
+});
