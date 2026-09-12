@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "routeId": "g00-02-a-synthetic-gdansk",
+  "version": "2026-09-09.1",
+  "bbox": [18.646, 54.347, 18.657, 54.354],
+  "minZoom": 14,
+  "maxZoom": 16,
+  "diskBytes": 5541,
+  "files": [
+    {"path":"index.html","bytes":896,"sha256":"7952b440303c155c96379077db8b722e79e85918667532a4dd1edde8e50e1bdd"},
+    {"path":"app.css","bytes":1171,"sha256":"0c21e7889b623e3486b7cb90c0154d78f106202b9698bfda25663d8062a26a00"},
+    {"path":"app.js","bytes":1803,"sha256":"d6fb3e28b2f3a73650100e6f6ffb85dedf640e91805d955466bc89947e70f626"},
+    {"path":"style.json","bytes":253,"sha256":"8916b7ba6fda1fbe9b725b9146095a59979a52a9451316ba39e424b1b0369f18"},
+    {"path":"sprite.svg","bytes":233,"sha256":"e7f1be55ea01675181588c8bde47d4680e167ce5da020a4ed2e26fef33a8ef92"},
+    {"path":"glyphs/0-255.json","bytes":155,"sha256":"d1e8cd649a35ff24ffebdfbc89f78b55610e19ecb1cbf89cbf4f80080d51b3e4"},
+    {"path":"map.svg","bytes":783,"sha256":"0c1c829a936508b6de48c57ba4e112787e71ced5235d7afca691f7e889ec2c28"},
+    {"path":"markers.json","bytes":247,"sha256":"7560ac8dc94bcb5fe0b96c9c0ea924a2d7af1553399ef98edc15639e89658220"}
+  ]
+}
