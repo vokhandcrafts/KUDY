@@ -1,0 +1,10 @@
+name: jscpd
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  jscpd:
+    # After vokhandcrafts/ai-company-infrastructure#1 merges, switch this pin to a main SHA.
+    uses: vokhandcrafts/ai-company-infrastructure/.github/workflows/jscpd.yml@752dff081b8d910ee9763ae73283748185e8af00
