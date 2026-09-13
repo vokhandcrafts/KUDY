@@ -73,3 +73,7 @@ MVP прадае `ROUTE` і `ROUTE_EXTENSION`; `CITY_PASS`/`SUBSCRIPTION` — у
 - Subscription / City Pass — бізнес-логіка і цэны
 - Weather / sunset / opening-hours context engine для Moments
 - Любыя "мяккія" здагадкі пра стан або настрой чалавека
+
+## Падборкі і водгукі — пашырэнне 2026-09-13
+
+Статычны публічны discovery-index змяшчае ўласныя месцы, падборкі і прэв'ю гідаў. Collection мае толькі спасылкі; не новы entitlement або Run. Для непублічных ацэнак дадаюцца аўтарызаваныя feedback endpoints і прыватныя табліцы з RLS, прывязаныя да існуючай устаноўкі, без новага User-акаўнта. Водгукі не захоўваюцца ў route-бандлах. Схемы, выдаленне, даступнасць моў і давер — [21](architecture/21_discovery_feedback_architecture.md). Аўтарскія пазнакі часу/сезону не з'яўляюцца забароненым вышэй context engine.
