@@ -159,10 +159,11 @@ export function step(previous, event, now) {
     }
     case 'AudioFinished': {
       // Late callback rules (ADR §4.11): the session/play pair must match the
-      // current playback; a named story must be the one actually playing.
+      // current playback; a story named by the event — including an empty or
+      // null one — must be the one actually playing.
       if (event.sessionId !== s.sessionId || !s.playing
           || event.playId !== s.playing.playId
-          || (event.storyId && event.storyId !== s.playing.storyId)) break;
+          || ('storyId' in event && event.storyId !== s.playing.storyId)) break;
       add(s.heard, s.playing.storyId);
       s.playing = null;
       const queued = s.queued;
