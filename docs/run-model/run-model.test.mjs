@@ -135,6 +135,19 @@ test('G01.01.b: completion callback naming a foreign story is ignored', () => {
   assert.deepEqual(s.heard, ['story-crane-ext']);
 });
 
+test('G01.01.b: completion with present-but-empty or null story id is ignored', () => {
+  for (const bad of ['', null]) {
+    let s = craneFixture();
+    s = send(s, play('stop-crane'));
+    s = send(s, { type: 'AudioFinished', sessionId: s.sessionId,
+      playId: s.playing.playId, storyId: bad });
+    assert.deepEqual(s.heard, [], `storyId=${JSON.stringify(bad)}`);
+    assert.equal(s.playing?.storyId, 'story-crane-base');
+    s = finishAudio(s);
+    assert.deepEqual(s.heard, ['story-crane-base']);
+  }
+});
+
 test('G01.01.b: markers are stop-level from the primary; additional unheard stays out of pending', () => {
   let s = craneFixture({ tierAvailable: ['base', 'extended'] });
   assert.equal(status(s, 'stop-crane'), 'pending');

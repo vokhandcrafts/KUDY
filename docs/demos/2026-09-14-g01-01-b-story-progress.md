@@ -14,7 +14,7 @@ subprocess.run(['node', '--test', '--test-reporter=dot', 'docs/run-model/run-mod
 ```output
 ....................
 ....................
-.
+..
 ```
 
 ```python
@@ -31,7 +31,7 @@ CAUGHT: credit extended together with base
 CAUGHT: swap primary to extended after unlock
 CAUGHT: accept completion from another session
 CAUGHT: accept completion from earlier playback
-CAUGHT: accept completion naming another story
+CAUGHT: validate story id by truthiness instead of presence
 CAUGHT: accept stale queued location
 CAUGHT: play locked stop manually
 CAUGHT: autoplay locked stop
