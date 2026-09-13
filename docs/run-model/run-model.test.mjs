@@ -5,9 +5,10 @@ import { start, step, status, missed } from './run-model.mjs';
 const stops = ['a', 'b', 'c'];
 const now = 100_000;
 const fix = (overrides = {}) => ({ at: now, accuracy: 5,
-  distances: { a: 0, b: 0, c: 0 }, ...overrides });
+  distances: { a: 0, b: 0, c: 0, 'stop-crane': 0, 'stop-gate': 0 }, ...overrides });
 const trigger = id => ({ type: 'DwellCompleted', stopId: id, radius: 20 });
 const play = id => ({ type: 'UserSelectedStop', stopId: id });
+const playStory = (stopId, storyId) => ({ type: 'UserSelectedStory', stopId, storyId });
 function fixture() {
   return step(start('walk-1', stops), { type: 'LocationAccepted', fix: fix() }, now);
 }
@@ -15,9 +16,21 @@ const send = (s, e) => step(s, e, now);
 const finishAudio = s => send(s, { type: 'AudioFinished',
   sessionId: s.sessionId, playId: s.playing.playId });
 
+// ADR G01.01 variant A fixtures: stop-crane has base + extended stories,
+// stop-gate is paid-only (extended story only, no fake free story).
+const crane = [
+  { id: 'stop-crane', storyBaseId: 'story-crane-base', storyExtendedId: 'story-crane-ext' },
+  { id: 'stop-gate', storyExtendedId: 'story-gate-ext' },
+];
+function craneFixture({ accessibleStopIds = ['stop-crane'], tierAvailable = ['base'] } = {}) {
+  return step(start('session-1', crane, { version: 'v3', accessibleStopIds, tierAvailable }),
+    { type: 'LocationAccepted', fix: fix() }, now);
+}
+
 test('C2: accepted arrival starts audio and spends automatic attempt', () => {
   const s = send(fixture(), trigger('a'));
   assert.equal(s.playing?.stopId, 'a');
+  assert.equal(s.playing?.storyId, 'a');
   assert.deepEqual(s.autoFired, ['a']);
   assert.equal(s.commands[0]?.type, 'PlayStory');
 });
@@ -38,6 +51,111 @@ test('C7/C11: interrupted replay preserves heard and finish summary', () => {
   assert.equal(status(s, 'a'), 'played');
   s = send(s, { type: 'End' });
   assert.deepEqual(missed(s), ['b', 'c']);
+});
+
+test('G01.01.b: base heard stays heard after same-version unlock; no new Play', () => {
+  let s = craneFixture();
+  s = send(s, play('stop-crane'));
+  assert.equal(s.playing?.storyId, 'story-crane-base');
+  s = finishAudio(s);
+  assert.deepEqual(s.heard, ['story-crane-base']);
+  s = send(s, { type: 'AccessReady', version: 'v3', tiers: ['extended'] });
+  assert.deepEqual(s.commands, []);
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.heard, ['story-crane-base']);
+  assert.equal(status(s, 'stop-crane'), 'played');
+  assert.deepEqual(missed(s), ['story-crane-ext']);
+  s = send(s, trigger('stop-crane'));
+  assert.equal(s.playing, null);
+  s = send(s, playStory('stop-crane', 'story-crane-ext'));
+  assert.equal(s.playing?.storyId, 'story-crane-ext');
+});
+
+test('G01.01.b: extended is credited only by its own finished playback', () => {
+  let s = craneFixture({ tierAvailable: ['base', 'extended'] });
+  s = finishAudio(send(s, play('stop-crane')));
+  assert.deepEqual(s.heard, ['story-crane-base']);
+  const first = send(s, playStory('stop-crane', 'story-crane-ext'));
+  assert.equal(first.playing?.playId, 2);
+  s = send(first, { type: 'UserPausedAudio' });
+  assert.deepEqual(s.heard, ['story-crane-base']);
+  assert.equal(status(s, 'stop-crane'), 'played');
+  s = send(s, playStory('stop-crane', 'story-crane-ext'));
+  assert.equal(s.playing?.playId, 3);
+  s = finishAudio(s);
+  assert.deepEqual(s.heard, ['story-crane-base', 'story-crane-ext']);
+  assert.equal(status(s, 'stop-crane'), 'played');
+});
+
+test('G01.01.b: paid-only stop stays locked until same-version unlock, then is a normal stop', () => {
+  let s = craneFixture();
+  assert.equal(status(s, 'stop-gate'), 'locked');
+  s = send(s, trigger('stop-gate'));
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.autoFired, []);
+  s = send(s, { type: 'PurchaseSucceeded', stopIds: ['stop-gate'] });
+  s = send(s, playStory('stop-gate', 'story-gate-ext'));
+  assert.equal(s.playing, null);
+  s = send(s, { type: 'AccessReady', version: 'v3', stopIds: ['stop-gate'], tiers: ['extended'] });
+  assert.equal(status(s, 'stop-gate'), 'pending');
+  assert.equal(s.playing, null);
+  s = send(s, trigger('stop-gate'));
+  assert.equal(s.playing?.storyId, 'story-gate-ext');
+});
+
+test('G01.01.b: manual primary before approach never autoplays again', () => {
+  let s = craneFixture();
+  s = finishAudio(send(s, play('stop-crane')));
+  assert.deepEqual(s.autoFired, []);
+  s = send(s, trigger('stop-crane'));
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.autoFired, []);
+});
+
+test('G01.01.b: queue does not replay a primary heard manually meanwhile', () => {
+  let s = send(send(fixture(), trigger('a')), trigger('b'));
+  assert.equal(s.queued?.stopId, 'b');
+  s = send(s, play('b'));
+  s = finishAudio(s);
+  assert.deepEqual(s.heard, ['b']);
+  assert.equal(s.queued, null);
+  assert.deepEqual(s.autoFired, ['a', 'b']);
+  assert.equal(s.playing, null);
+  assert.equal(s.commands.some(c => c.type === 'PlayStory'), false);
+});
+
+test('G01.01.b: completion callback naming a foreign story is ignored', () => {
+  let s = craneFixture({ tierAvailable: ['base', 'extended'] });
+  s = send(s, playStory('stop-crane', 'story-crane-ext'));
+  s = send(s, { type: 'AudioFinished', sessionId: s.sessionId,
+    playId: s.playing.playId, storyId: 'story-crane-base' });
+  assert.deepEqual(s.heard, []);
+  assert.equal(s.playing?.storyId, 'story-crane-ext');
+  s = finishAudio(s);
+  assert.deepEqual(s.heard, ['story-crane-ext']);
+});
+
+test('G01.01.b: markers are stop-level from the primary; additional unheard stays out of pending', () => {
+  let s = craneFixture({ tierAvailable: ['base', 'extended'] });
+  assert.equal(status(s, 'stop-crane'), 'pending');
+  s = send(s, playStory('stop-crane', 'story-crane-ext'));
+  assert.equal(status(s, 'stop-crane'), 'playing');
+  s = finishAudio(s);
+  assert.equal(status(s, 'stop-crane'), 'pending');
+  s = finishAudio(send(s, play('stop-crane')));
+  assert.equal(status(s, 'stop-crane'), 'played');
+  assert.deepEqual(missed(s), []);
+});
+
+test('G01.01.b: unlock never rewrites the primary of a paid-only stop', () => {
+  let s = craneFixture();
+  s = send(s, { type: 'AccessReady', version: 'v3', stopIds: ['stop-gate'], tiers: ['extended'] });
+  s = send(s, trigger('stop-gate'));
+  const first = s.playing?.storyId;
+  assert.equal(first, 'story-gate-ext');
+  s = finishAudio(s);
+  s = send(s, play('stop-gate'));
+  assert.equal(s.playing?.storyId, 'story-gate-ext');
 });
 
 test('C8: queued stop remains eligible and plays after current audio', () => {
@@ -190,6 +308,15 @@ test('boundary: unknown stop and future timestamp cannot trigger playback', () =
   assert.deepEqual(s.autoFired, []);
 });
 
+test('boundary: unknown story and cross-stop story selection are rejected', () => {
+  let s = send(fixture(), playStory('a', 'nonexistent'));
+  assert.equal(s.playing, null);
+  s = send(s, playStory('a', 'b'));
+  assert.equal(s.playing, null);
+  s = send(s, playStory('a', 'a'));
+  assert.equal(s.playing?.storyId, 'a');
+});
+
 test('reducer does not mutate input state or event', () => {
   const s = fixture();
   const event = trigger('a');
@@ -220,7 +347,7 @@ test('C32: ending after one freely selected stop is a normal session end', () =>
 });
 
 function lockedFixture() {
-  return send(start('walk-1', stops, { version: 'v1', accessibleIds: ['a', 'c'] }),
+  return send(start('walk-1', stops, { version: 'v1', accessibleStopIds: ['a', 'c'] }),
     { type: 'LocationAccepted', fix: fix() });
 }
 
@@ -249,6 +376,7 @@ test('C35: catalog version change cannot unlock or replace active session conten
   s = send(s, { type: 'AccessReady', version: 'v2', stopIds: ['b'] });
   assert.equal(s.version, 'v1');
   assert.equal(status(s, 'b'), 'locked');
+  assert.deepEqual(s.tierAvailable, ['base']);
 });
 
 test('C33: purchase notification alone is not playable access', () => {
@@ -259,17 +387,22 @@ test('C33: purchase notification alone is not playable access', () => {
   assert.equal(status(s, 'b'), 'locked');
 });
 
-test('boundary: access update is atomic and rejects unknown stops', () => {
-  const s = send(lockedFixture(), { type: 'AccessReady', version: 'v1',
+test('boundary: access update is atomic and rejects unknown stops and tiers', () => {
+  let s = send(lockedFixture(), { type: 'AccessReady', version: 'v1',
     stopIds: ['b', 'unknown'] });
   assert.equal(status(s, 'b'), 'locked');
+  s = send(lockedFixture(), { type: 'AccessReady', version: 'v1',
+    tiers: ['extended', 'bogus'] });
+  assert.equal(status(s, 'b'), 'locked');
+  assert.deepEqual(s.tierAvailable, ['base']);
 });
 
-test('bounded exploration: invariants across all 4-event sequences (8 choices per step)', () => {
+test('bounded exploration: invariants across all 4-event sequences (9 choices per step)', () => {
   let transitions = 0;
   function explore(s, depth) {
     if (!depth) return;
     const events = [trigger('a'), trigger('b'), play('a'),
+      playStory('a', 'a'),
       { type: 'AudioFinished', sessionId: s.sessionId, playId: s.playing?.playId ?? -1 },
       { type: 'FocusLoss' }, { type: 'Pause' }, { type: 'Resume' }, { type: 'End' }];
     for (const event of events) {
@@ -289,5 +422,5 @@ test('bounded exploration: invariants across all 4-event sequences (8 choices pe
     }
   }
   explore(fixture(), 4);
-  assert.equal(transitions, 4680);
+  assert.equal(transitions, 7380);
 });
