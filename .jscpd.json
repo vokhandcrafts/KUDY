@@ -1,0 +1,23 @@
+{
+  "minLines": 8,
+  "minTokens": 70,
+  "threshold": 0,
+  "crossFormats": "js-ts",
+  "ignore": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/vendor/**",
+    "**/*.lock",
+    "**/package-lock.json",
+    "**/yarn.lock",
+    "**/pnpm-lock.yaml"
+  ],
+  "formats": [
+    "javascript",
+    "typescript",
+    "tsx"
+  ]
+}
