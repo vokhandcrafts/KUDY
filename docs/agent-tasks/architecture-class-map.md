@@ -127,3 +127,7 @@ Before reporting completion:
 - Read applicable repository review/proof policies. Do not install a TypeScript toolchain just to test Markdown declarations or call documentation checks proof of OS/store behavior.
 
 Report the resulting file, what is ready for implementation, what remains gated, and the exact next runnable task. Keep the user-facing explanation in Belarusian. No application implementation is required for this assignment.
+
+## Scope update — 2026-09-13
+
+Also consume `docs/20_discovery_and_feedback.md`, `docs/architecture/21_discovery_feedback_architecture.md` and `docs/plans/2026-09-13-discovery-feedback.md`. Include the selector, discovery controller/index cache, feedback repository/sync/controller, authenticated feedback API and author-only report in the module map. Use the signatures/owners in 21; do not invent a second rating aggregate, event log, GPS owner or entitlement. Map these modules to existing amended tasks and G15/G16; preserve G01.01.a decision-required and G00 device-proof gates. The planned output remains 19_class_and_module_map.md; this update does not claim it exists.
