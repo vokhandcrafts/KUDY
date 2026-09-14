@@ -47,6 +47,9 @@ export function createRevenueCatProvider({
         return { ok: false, reason: 'unavailable', detail: 'server_credential_rejected' };
       }
       if (response.status === 404) {
+        // ASSUMED to mean subscriber-not-found → "didn't buy". Confirm this
+        // against the live API in G00.03.c: a transient proxy/mis-route 404
+        // must not be read as no_entitlement.
         return { ok: true, entitled: false, environment: null };
       }
       if (!response.ok) {
