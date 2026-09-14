@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "revision": "r-neg-missing-overlap-note",
+  "city_id": "city-a",
+  "themes": [
+    { "id": "theme-history", "labels": { "be": "Гісторыя", "en": "History" } }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-x7-place",
+      "ref": { "kind": "place", "place_id": "place-a1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 2,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Двор сукнараў", "en": "The Cloth Merchants' Courtyard" },
+        "summary": { "be": "Стартавае месца гіда.", "en": "The guide's start place." },
+        "why_recommended": { "be": "Патрэбны для overlap_note трыгера.", "en": "Required for the overlap_note trigger." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-a1/public.json" }
+    },
+    {
+      "offer_id": "offer-x7-guide",
+      "ref": { "kind": "guide", "route_id": "guide-route-a1", "version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 1,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Гід без overlap_note", "en": "Guide without overlap_note" },
+        "summary": { "be": "suggested_start_place_id = place-a1.", "en": "suggested_start_place_id is place-a1." },
+        "why_recommended": { "be": "Трыгер overlap_note выконваецца.", "en": "The overlap_note trigger fires." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "suggested_start_place_id": "place-a1",
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": ["be", "en"] },
+      "access": "paid",
+      "detail_ref": { "kind": "guide_preview" }
+    },
+    {
+      "offer_id": "offer-x7-collection",
+      "ref": { "kind": "collection", "collection_id": "collection-x7", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 3,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Без overlap_note", "en": "Missing overlap_note" },
+        "summary": { "be": "Картка падборкі без overlap_note.", "en": "Collection card whose group omits overlap_note." },
+        "why_recommended": { "be": "Адзінае парушэнне — адсутны overlap_note.", "en": "The only violation is the missing overlap_note." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "mixed",
+      "detail_ref": { "kind": "collection_public", "path": "collections/collection-x7/public.json" }
+    }
+  ],
+  "collections": [
+    {
+      "collection_id": "collection-x7",
+      "content_version": "1",
+      "city_id": "city-a",
+      "localized": {
+        "title": { "be": "Без overlap_note", "en": "Missing overlap_note" },
+        "description": { "be": "Гід і яго suggested_start_place_id у members, overlap_note адсутнічае.", "en": "Guide plus its suggested_start_place_id in members; overlap_note is absent." }
+      },
+      "members": [
+        { "kind": "place", "place_id": "place-a1", "content_version": "1" },
+        { "kind": "guide", "route_id": "guide-route-a1", "version": "1" }
+      ]
+    }
+  ]
+}

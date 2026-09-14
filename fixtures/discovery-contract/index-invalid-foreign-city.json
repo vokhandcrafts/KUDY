@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "revision": "r-neg-foreign-city",
+  "city_id": "city-a",
+  "themes": [
+    { "id": "theme-history", "labels": { "be": "Гісторыя", "en": "History" } }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-x7-guide",
+      "ref": { "kind": "guide", "route_id": "guide-route-b1", "version": "3" },
+      "city_id": "city-b",
+      "editorial_order": 1,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Гід з іншага горада", "en": "Guide from another city" },
+        "summary": { "be": "city_id прапановы не супадае з city_id індэкса.", "en": "The offer city_id differs from the index city_id." },
+        "why_recommended": { "be": "Валідатар і selector адхіляюць чужы горад; гэта ніколі не alternatives.", "en": "Validator and selector reject a foreign city; it never becomes an alternative." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "estimated_duration": { "min_minutes": 20, "max_minutes": 40, "basis": "author_estimate" },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be"], "audio_locales": ["be"] },
+      "access": "free",
+      "detail_ref": { "kind": "guide_preview" }
+    }
+  ],
+  "collections": []
+}

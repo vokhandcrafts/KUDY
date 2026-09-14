@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "revision": "r-neg-unknown-season",
+  "city_id": "city-a",
+  "themes": [
+    { "id": "theme-sea", "labels": { "be": "Мора і спакой", "en": "Sea and calm" } }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-x5-place",
+      "ref": { "kind": "place", "place_id": "place-c1", "content_version": "2" },
+      "city_id": "city-a",
+      "editorial_order": 1,
+      "themes": ["theme-sea"],
+      "localized": {
+        "title": { "be": "Выдуманая «ўсе сезоны»", "en": "Invented all-season value" },
+        "summary": { "be": "Сезон «all» не існуе: адсутнасць ацэнкі — гэта not_assessed, а не вядомае значэнне.", "en": "Season \"all\" does not exist: no assessment means not_assessed, never a known value." },
+        "why_recommended": { "be": "Аўтар не ацэньваў сезон, таму поле павінна адсутнічаць, а не прымаць выдуманы enum.", "en": "The author did not assess a season, so the field must stay absent, not accept an invented enum." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "estimated_duration": { "min_minutes": 30, "max_minutes": 40, "basis": "author_walk" },
+      "season_recommendations": [
+        { "season": "all", "reason": { "be": "Падыходзіць заўсёды — так казаць нельга.", "en": "Fits always — this must never be asserted." } }
+      ],
+      "availability": { "text_locales": ["be"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-c1/public.json" }
+    }
+  ],
+  "collections": []
+}

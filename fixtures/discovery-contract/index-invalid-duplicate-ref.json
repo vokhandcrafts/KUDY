@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "revision": "r-neg-duplicate-member",
+  "city_id": "city-a",
+  "themes": [
+    { "id": "theme-history", "labels": { "be": "Гісторыя", "en": "History" } }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-x1-place",
+      "ref": { "kind": "place", "place_id": "place-a1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 1,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Двор сукнараў", "en": "The Cloth Merchants' Courtyard" },
+        "summary": { "be": "Адзіны легітымны offer гэтай фікстуры.", "en": "The only legitimate offer of this fixture." },
+        "why_recommended": { "be": "Парушэнне ніжэй — толькі дубляванні членства ў падборцы.", "en": "The only violation below is the duplicated collection membership." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "estimated_duration": { "min_minutes": 20, "max_minutes": 30, "basis": "author_walk" },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-a1/public.json" }
+    }
+  ],
+  "collections": [
+    {
+      "collection_id": "collection-x1",
+      "content_version": "1",
+      "city_id": "city-a",
+      "localized": {
+        "title": { "be": "Парэчаны склад членаў", "en": "Duplicated member list" },
+        "description": { "be": "Адзін той самы ref ўваходзіць двойчы.", "en": "The same ref appears twice." }
+      },
+      "members": [
+        { "kind": "place", "place_id": "place-a1", "content_version": "1" },
+        { "kind": "place", "place_id": "place-a1", "content_version": "1" }
+      ]
+    }
+  ]
+}

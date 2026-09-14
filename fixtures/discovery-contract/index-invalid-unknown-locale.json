@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "revision": "r-neg-unknown-locale",
+  "city_id": "city-a",
+  "themes": [
+    {
+      "id": "theme-history",
+      "labels": { "be": "Гісторыя", "ua": "Історія" }
+    }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-x3-place",
+      "ref": { "kind": "place", "place_id": "place-a1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 1,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "ua": "Двор сукнараў" },
+        "summary": { "ua": "Тэкст на невядомай мове «ua» замест дазволенай «uk»." },
+        "why_recommended": { "ua": "Лакал па-за allowlist, таму ўвесь offer адхіляецца." },
+        "conditions": { "ua": "большасць шляху на вуліцы" }
+      },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["ua"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-a1/public.json" }
+    }
+  ],
+  "collections": []
+}

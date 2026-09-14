@@ -1,0 +1,292 @@
+{
+  "note": "Synthetic request/response examples for the feedback CAS contract (21 §5). Every device, secret, id and score is invented for tests; G16.01 consumes these as behavioral cases. read returns only the calling device's own row.",
+  "disclosure_version": "feedback-disclosure-1",
+  "targets": [
+    { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" },
+    { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "en" },
+    { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "uk" },
+    { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "be" },
+    { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "en" }
+  ],
+  "unknown_targets": [
+    { "kind": "place", "place_id": "ext-osm-981723", "content_version": "1", "locale": "be" },
+    { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "pl" }
+  ],
+  "cases": [
+    {
+      "id": "cas-create",
+      "note": "Device A creates its own guide v1/be rating after using the guide; expected_revision 0 creates the row.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-a",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-000000000001",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" },
+          "expected_revision": 0,
+          "score": 2,
+          "reason_codes": ["audio_problem"],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 200, "body": { "revision": 1, "saved": true } }
+    },
+    {
+      "id": "cas-lost-ack-retry",
+      "note": "Lost ACK: the identical mutation_id with the identical payload replays to the same result; the vote count stays one.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-a",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-000000000001",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" },
+          "expected_revision": 0,
+          "score": 2,
+          "reason_codes": ["audio_problem"],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 200, "body": { "revision": 1, "saved": true } }
+    },
+    {
+      "id": "cas-edit",
+      "note": "Device A reconsidered and edits: CAS replace with the acknowledged revision 1.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-a",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-000000000002",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" },
+          "expected_revision": 1,
+          "score": 4,
+          "reason_codes": ["interesting_stories", "audio_problem"],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 200, "body": { "revision": 2, "saved": true } }
+    },
+    {
+      "id": "cas-stale-revision",
+      "note": "A second device-side edit raced ahead; the stale expected_revision must conflict and overwrite nothing.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-a",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-000000000003",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" },
+          "expected_revision": 1,
+          "score": 5,
+          "reason_codes": ["interesting_stories"],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 409, "body": { "error": "revision_conflict" } }
+    },
+    {
+      "id": "cas-delete",
+      "note": "Device A deletes its own rating with a CAS tombstone; the tombstone keeps no score or reasons.",
+      "request": {
+        "method": "POST /v1/feedback/delete",
+        "device": "device-a",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-000000000004",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" },
+          "expected_revision": 2
+        }
+      },
+      "expected": { "status": 200, "body": { "revision": 3, "deleted": true } }
+    },
+    {
+      "id": "cas-read-after-delete",
+      "note": "Reading the deleted target returns the tombstone state only.",
+      "request": {
+        "method": "POST /v1/feedback/read",
+        "device": "device-a",
+        "body": { "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" } }
+      },
+      "expected": { "status": 200, "body": { "revision": 3, "score": null, "reason_codes": [], "deleted": true } }
+    },
+    {
+      "id": "cas-second-device-own-key",
+      "note": "Device B rates the same guide version in en, a second published locale; a separate locale is a separate key with its own row and report line.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-000000000005",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "en" },
+          "expected_revision": 0,
+          "score": 5,
+          "reason_codes": [],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 200, "body": { "revision": 1, "saved": true } }
+    },
+    {
+      "id": "cas-uk-text-only",
+      "note": "Device B rates guide v1/uk after using the published UK text (no UK audio). text_locales includes uk; audio_locales does not. Separate locale is a separate key.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-00000000000b",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "uk" },
+          "expected_revision": 0,
+          "score": 5,
+          "reason_codes": [],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 200, "body": { "revision": 1, "saved": true } }
+    },
+    {
+      "id": "cas-unpublished-locale",
+      "note": "pl is reserved and outside the MVP allowlist; the registry has no guide v1/pl target.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-00000000000d",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "pl" },
+          "expected_revision": 0,
+          "score": 5,
+          "reason_codes": [],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 422, "body": { "error": "unknown_target" } }
+    },
+    {
+      "id": "cas-cross-device-rejection",
+      "note": "Device B must never see or overwrite device A's row: its own guide v1/be row does not exist, so expected_revision 2 (device A's revision) conflicts, and B's read shows only its own empty state.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-000000000006",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" },
+          "expected_revision": 2,
+          "score": 1,
+          "reason_codes": ["description_mismatch"],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 409, "body": { "error": "revision_conflict" } }
+    },
+    {
+      "id": "cas-cross-device-read-empty",
+      "note": "Companion to the rejection case: device B's read of guide v1/be returns its own revision 0, never device A's score or tombstone.",
+      "request": {
+        "method": "POST /v1/feedback/read",
+        "device": "device-b",
+        "body": { "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" } }
+      },
+      "expected": { "status": 200, "body": { "revision": 0, "score": null, "reason_codes": [], "deleted": false } }
+    },
+    {
+      "id": "cas-wrong-kind-reason",
+      "note": "audio_problem belongs to guide reasons; sending it for a place target is invalid.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-000000000007",
+          "target": { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "be" },
+          "expected_revision": 0,
+          "score": 4,
+          "reason_codes": ["audio_problem"],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 422, "body": { "error": "invalid_reason" } }
+    },
+    {
+      "id": "cas-imported-target",
+      "note": "An imported OSM place id is not official content; the registry rejects it as an unknown target.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-000000000008",
+          "target": { "kind": "place", "place_id": "ext-osm-981723", "content_version": "1", "locale": "be" },
+          "expected_revision": 0,
+          "score": 5,
+          "reason_codes": ["worth_visiting"],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 422, "body": { "error": "unknown_target" } }
+    },
+    {
+      "id": "cas-score-out-of-range",
+      "note": "The scale is integer 1-5; six stars and fractional scores like 3.5 are invalid.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-000000000009",
+          "target": { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "be" },
+          "expected_revision": 0,
+          "score": 6,
+          "reason_codes": [],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 422, "body": { "error": "invalid_scale" } }
+    },
+    {
+      "id": "cas-score-fractional",
+      "note": "Fractional scores are invalid the same way as out-of-range ones; the scale is integer 1-5, so 3.5 gets 422 invalid_scale.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-00000000000c",
+          "target": { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "be" },
+          "expected_revision": 0,
+          "score": 3.5,
+          "reason_codes": [],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 422, "body": { "error": "invalid_scale" } }
+    },
+    {
+      "id": "cas-too-many-reasons",
+      "note": "At most three unique reasons per submission; four are rejected. Uses the published uk row from cas-uk-text-only (revision 1).",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-00000000000a",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "uk" },
+          "expected_revision": 1,
+          "score": 3,
+          "reason_codes": ["interesting_stories", "clear_delivery", "too_long", "hard_to_navigate"],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 422, "body": { "error": "invalid_reason" } }
+    },
+    {
+      "id": "cas-delete-device",
+      "note": "Explicit device delete; the next feedback call on device-a must not re-register.",
+      "request": {
+        "method": "DELETE /v1/device",
+        "device": "device-a",
+        "body": {}
+      },
+      "expected": { "status": 200 }
+    },
+    {
+      "id": "cas-deleted-device",
+      "note": "After DELETE /v1/device the device rows cascade; any feedback call answers 401 and must not trigger re-registration for an old queue.",
+      "request": {
+        "method": "POST /v1/feedback/read",
+        "device": "device-a",
+        "body": { "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" } }
+      },
+      "expected": { "status": 401, "body": { "error": "unknown_device" } }
+    }
+  ]
+}
