@@ -102,13 +102,13 @@
     },
     {
       "id": "cas-second-device-own-key",
-      "note": "Device B rates the same guide version in uk; a separate locale is a separate key with its own row and report line.",
+      "note": "Device B rates the same guide version in en, a second published locale; a separate locale is a separate key with its own row and report line.",
       "request": {
         "method": "PUT /v1/feedback",
         "device": "device-b",
         "body": {
           "mutation_id": "00000000-0000-4000-8000-000000000005",
-          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "uk" },
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "en" },
           "expected_revision": 0,
           "score": 5,
           "reason_codes": [],
@@ -116,6 +116,23 @@
         }
       },
       "expected": { "status": 200, "body": { "revision": 1, "saved": true } }
+    },
+    {
+      "id": "cas-unpublished-locale",
+      "note": "uk is planned but not published for this guide (21 §8: planned locale never counts as published), so the registry has no guide v1/uk target and the otherwise valid write is rejected as an unknown target.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-00000000000b",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "uk" },
+          "expected_revision": 0,
+          "score": 5,
+          "reason_codes": [],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 422, "body": { "error": "unknown_target" } }
     },
     {
       "id": "cas-cross-device-rejection",
@@ -189,6 +206,23 @@
           "target": { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "be" },
           "expected_revision": 0,
           "score": 6,
+          "reason_codes": [],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 422, "body": { "error": "invalid_scale" } }
+    },
+    {
+      "id": "cas-score-fractional",
+      "note": "Fractional scores are invalid the same way as out-of-range ones; the scale is integer 1-5, so 3.5 gets 422 invalid_scale.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-00000000000c",
+          "target": { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "be" },
+          "expected_revision": 0,
+          "score": 3.5,
           "reason_codes": [],
           "disclosure_version": "feedback-disclosure-1"
         }
