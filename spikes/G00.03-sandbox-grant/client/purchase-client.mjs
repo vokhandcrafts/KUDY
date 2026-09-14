@@ -8,7 +8,22 @@
 //   no product_id (the server maps route_id × tier itself) and no user_id
 //   (the entitlement is looked up for the authenticated device identity).
 
+// The Bearer device secret crosses this connection, so a non-loopback base
+// URL must be https; plain http is tolerated only for loopback test targets.
+function assertSecureBaseUrl(serverBaseUrl) {
+  let parsed;
+  try {
+    parsed = new URL(serverBaseUrl);
+  } catch {
+    throw new Error('serverBaseUrl must be a valid URL');
+  }
+  const loopback = ['127.0.0.1', 'localhost', '::1', '[::1]'].includes(parsed.hostname);
+  if (parsed.protocol === 'https:' || (parsed.protocol === 'http:' && loopback)) return;
+  throw new Error('serverBaseUrl must use https; http is allowed only for loopback test targets');
+}
+
 export function createPurchaseClient({ serverBaseUrl, storePort, fetchImpl = fetch }) {
+  assertSecureBaseUrl(serverBaseUrl);
   const base = serverBaseUrl.replace(/\/$/, '');
   let device = null;
   let boughtFlag = false;
@@ -20,7 +35,10 @@ export function createPurchaseClient({ serverBaseUrl, storePort, fetchImpl = fet
 
   async function register() {
     const response = await fetchImpl(`${base}/v1/device`, { method: 'POST' });
-    const body = await response.json();
+    const body = await response.json().catch(() => null);
+    if (!response.ok || !body?.device_id || !body?.device_secret) {
+      throw new Error(`device registration failed (${response.status})`);
+    }
     device = { deviceId: body.device_id, deviceSecret: body.device_secret };
     return device;
   }
