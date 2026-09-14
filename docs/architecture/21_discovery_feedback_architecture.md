@@ -238,7 +238,7 @@ Start фіксуе фактычную locale поўнага гатовага а�
 
 | Праверка | Чаканы доказ | Уладальнік |
 |---|---|---|
-| Змешаны індэкс: guide/place/collection; дубль refs, cycle, чужы горад | Схема і builder адхіляюць неваліднае; адзін нарматыўны прыклад кожнага kind; негатыўныя прыклады — `fixtures/discovery-contract/` | G01.06, G02.01–G02.03 |
+| Змешаны індэкс: guide/place/collection; дубль refs, укладзеная collection (якая структурна выключае і цыкл), чужы горад | Схема і builder адхіляюць неваліднае; адзін нарматыўны прыклад кожнага kind; негатыўныя прыклады — `fixtures/discovery-contract/` | G01.06, G02.01–G02.03 |
 | 60 хв супраць [45,75], unknown time, theme OR, season unknown | Unit-тэсты exact/alternatives і стабільнага парадку; няма ўплыву платнасці | G15.01 |
 | Стары каталог, hash mismatch, offline restart, rollback | Працуе валідны кэш або звычайныя гіды; Run не мяняецца | G02.04, G15.03–G15.04 |
 | 5 зорак замест 6; дроб 3.5; wrong-kind reason; падроблены target/device | 422/401, у БД няма змены; cross-device read/delete немагчымы | G16.01 |
