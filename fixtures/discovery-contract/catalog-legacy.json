@@ -5,7 +5,6 @@
     {
       "route_id": "guide-route-a1",
       "version": "1",
-      "city_id": "city-a",
       "locales": ["be", "en"],
       "layers": ["base", "extended"],
       "product_id": "route_a1_extended",
@@ -14,7 +13,6 @@
     {
       "route_id": "guide-route-b1",
       "version": "3",
-      "city_id": "city-b",
       "locales": ["be"],
       "layers": ["base"],
       "bytes": { "base": 41943040 }

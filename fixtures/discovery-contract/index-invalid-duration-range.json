@@ -14,8 +14,8 @@
       "themes": ["theme-history"],
       "localized": {
         "title": { "be": "Перавернуты дыяпазон", "en": "Inverted range" },
-        "summary": { "be": "min_minutes большы за max_minutes, акрамя таго ніжэй за duration_min маршрута.", "en": "min_minutes exceeds max_minutes, and the range drops below the route duration_min." },
-        "why_recommended": { "be": "Дыяпазон мусіць уключаць duration_min рэкамендаванага шляху і быць цэлым min ≤ max.", "en": "The range must include the recommended path duration_min and satisfy min ≤ max in whole minutes." },
+        "summary": { "be": "min_minutes большы за max_minutes; парушана правіла цэлых хвілін min ≤ max.", "en": "min_minutes exceeds max_minutes; the whole-minutes rule min ≤ max is broken." },
+        "why_recommended": { "be": "Дыяпазон гіда мусіць быць цэлымі хвілінамі з min ≤ max і ўключаць duration_min рэкамендаванага шляху.", "en": "A guide range must be whole minutes with min ≤ max and include the recommended path duration_min." },
         "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
       },
       "estimated_duration": { "min_minutes": 75, "max_minutes": 45, "basis": "author_estimate" },
