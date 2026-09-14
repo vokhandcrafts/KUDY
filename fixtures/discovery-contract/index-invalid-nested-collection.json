@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "revision": "r-neg-nested-collection",
+  "city_id": "city-a",
+  "themes": [
+    { "id": "theme-history", "labels": { "be": "Гісторыя", "en": "History" } }
+  ],
+  "offers": [],
+  "collections": [
+    {
+      "collection_id": "collection-x2",
+      "content_version": "1",
+      "city_id": "city-a",
+      "localized": {
+        "title": { "be": "Укладзеная падборка", "en": "Nested collection" },
+        "description": { "be": "Членам падборкі паслана іншая падборка.", "en": "A member of the collection is another collection." }
+      },
+      "members": [
+        { "kind": "collection", "collection_id": "collection-x2-inner", "content_version": "1" }
+      ]
+    }
+  ]
+}
