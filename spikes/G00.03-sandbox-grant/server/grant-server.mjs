@@ -125,7 +125,12 @@ export function createGrantServer({
       const detailPath = url.pathname.startsWith('/private/') ? '<redacted_file_route>' : url.pathname;
       return fail(res, log, { status: 404, code: 'not_found', event: 'route_missed', detail: `${req.method} ${detailPath}` });
     } catch {
-      return fail(res, log, { status: 500, code: 'entitlement_unavailable', event: 'internal_error' });
+      // Keep even the internal fault inside the documented closed list: a
+      // client retries it like any other provider outage.
+      return fail(res, log, {
+        status: 503, code: 'entitlement_unavailable', event: 'internal_error',
+        headers: { 'retry-after': String(retryAfterSeconds) },
+      });
     }
   });
   return httpServer;
@@ -229,17 +234,17 @@ function handlePrivateFile(res, log, context) {
   const verdict = verifyFileToken({ signingKey: urlSigningKey, token });
   if (!verdict.ok) {
     const code = verdict.reason === 'expired' ? 'url_expired' : 'url_invalid';
-    return fail(res, log, { status: 403, code, event: 'file_denied', device_hash: verdict.deviceIdHash });
+    return fail(res, log, { status: 403, code, event: 'file_denied', deviceHash: verdict.deviceIdHash });
   }
   // Defence in depth: the token must still point at a manifest member.
   const manifest = catalog.manifests[verdict.manifestBase];
   if (!manifest || !manifest.paths.includes(verdict.path) || isUnsafePath(verdict.path)) {
-    return fail(res, log, { status: 403, code: 'url_invalid', event: 'file_denied', device_hash: verdict.deviceIdHash });
+    return fail(res, log, { status: 403, code: 'url_invalid', event: 'file_denied', deviceHash: verdict.deviceIdHash });
   }
   const root = tierRoot(storageRoot, verdict.manifestBase);
   const filePath = join(root, ...verdict.path.split('/'));
   if (!filePath.startsWith(root + sep) || !existsSync(filePath) || !statSync(filePath).isFile()) {
-    return fail(res, log, { status: 403, code: 'url_invalid', event: 'file_denied', device_hash: verdict.deviceIdHash });
+    return fail(res, log, { status: 403, code: 'url_invalid', event: 'file_denied', deviceHash: verdict.deviceIdHash });
   }
   const bytes = readFileSync(filePath);
   log('file_served', { device_hash: verdict.deviceIdHash, byte_count: bytes.length });

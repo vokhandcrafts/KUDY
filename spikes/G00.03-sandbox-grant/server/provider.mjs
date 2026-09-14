@@ -17,8 +17,13 @@
 export function createRevenueCatProvider({
   secretApiKey,
   baseUrl = 'https://api.revenuecat.com',
+  timeoutMs = 5000,
 }) {
   if (!secretApiKey) throw new Error('env REVENUECAT_SECRET_API_KEY is required for the live provider');
+  // The secret API key travels in this request; never send it over cleartext.
+  if (!/^https:\/\//.test(baseUrl)) {
+    throw new Error('env REVENUECAT_BASE_URL must use https');
+  }
   return {
     async verifyEntitlement({ deviceId, productId }) {
       let response;
@@ -30,6 +35,9 @@ export function createRevenueCatProvider({
               Authorization: `Bearer ${secretApiKey}`,
               Accept: 'application/json',
             },
+            // A stalled provider call must abort into the fail-closed path
+            // instead of holding the grant request open for minutes.
+            signal: AbortSignal.timeout(timeoutMs),
           },
         );
       } catch {

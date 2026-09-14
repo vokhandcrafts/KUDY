@@ -11,7 +11,7 @@ import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createGrantServer } from '../server/grant-server.mjs';
-import { createTestProvider } from '../server/provider.mjs';
+import { createRevenueCatProvider, createTestProvider } from '../server/provider.mjs';
 import { createPurchaseClient } from '../client/purchase-client.mjs';
 import { createTestStorePort, createTestStoreSim } from '../client/store-port.mjs';
 
@@ -312,6 +312,8 @@ test('logs hold codes and states only — no secrets, receipts or signed URLs', 
   assert.equal(granted.ok, true);
   await client.requestGrant({ ...catalogRequest, paths: ['transcripts/other-story.txt'] });
   await fetch(`${baseUrl}/private/${'x'.repeat(40)}`, { method: 'POST' });
+  const tampered = await client.download({ ...granted.urls[0], url: `${granted.urls[0].url.slice(0, -2)}xy` });
+  assert.equal(tampered.status, 403);
 
   const serialized = JSON.stringify(logs);
   assert.ok(logs.length > 0);
@@ -322,5 +324,41 @@ test('logs hold codes and states only — no secrets, receipts or signed URLs', 
   assert.ok(!serialized.toLowerCase().includes('bearer'));
   assert.ok(!serialized.toLowerCase().includes('receipt'));
   assert.ok(logs.some((entry) => entry.event === 'grant_issued'));
+  assert.ok(logs.some((entry) => entry.event === 'file_denied'));
   assert.ok(logs.every((entry) => entry.device_hash === undefined || /^[0-9a-f]{16}$/.test(entry.device_hash)));
+});
+
+test('createPurchaseClient rejects insecure non-loopback base URLs', () => {
+  const store = createTestStoreSim();
+  assert.throws(
+    () => createPurchaseClient({ serverBaseUrl: 'http://example.com', storePort: createTestStorePort({ store, storeAccount: 'a' }) }),
+    /https/,
+  );
+  for (const okBase of ['https://grant.example.com', 'http://127.0.0.1:8642', 'http://localhost:8642']) {
+    createPurchaseClient({ serverBaseUrl: okBase, storePort: createTestStorePort({ store, storeAccount: 'a' }) });
+  }
+});
+
+test('register() rejects a failed registration and keeps no device', async () => {
+  const store = createTestStoreSim();
+  const client = createPurchaseClient({
+    serverBaseUrl: 'http://127.0.0.1:1',
+    storePort: createTestStorePort({ store, storeAccount: 'a' }),
+    fetchImpl: async () => ({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: { code: 'entitlement_unavailable' } }),
+    }),
+  });
+  await assert.rejects(client.register(), /device registration failed \(500\)/);
+  await assert.rejects(client.purchaseAndGrant(catalogRequest), /not registered/);
+  assert.equal(client.deviceId(), null);
+});
+
+test('the live RevenueCat provider refuses non-https base URLs', () => {
+  assert.throws(
+    () => createRevenueCatProvider({ secretApiKey: 'sk_placeholder', baseUrl: 'http://127.0.0.1:1' }),
+    /https/,
+  );
+  assert.doesNotThrow(() => createRevenueCatProvider({ secretApiKey: 'sk_placeholder' }));
 });
