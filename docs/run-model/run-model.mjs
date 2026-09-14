@@ -5,6 +5,18 @@
 // story is derived (base when present, else the paid-only extended story);
 // an unlock never rewrites it.
 
+// Documentation model; not the application engine or a platform adapter.
+// Narration progress follows the accepted ADR variant A
+// (docs/architecture/decisions/G01.01-narration-progress.md §4):
+// heard is keyed by story_id, auto_fired by stop_id, and a stop's primary
+// story is derived (base when present, else the paid-only extended story);
+// an unlock never rewrites it.
+// Session identity and the AccessReady trust boundary follow the accepted
+// contract (docs/architecture/decisions/G01.03-session-access.md §3): the
+// grant event carries the full identity (route, version, locale, issuer),
+// the pinned version never changes until End, and a mismatched event is
+// ignored without mutating any field.
+
 const storiesOf = stop => [stop.storyBaseId, stop.storyExtendedId].filter(Boolean);
 const primaryOf = stop => stop && (stop.storyBaseId ?? stop.storyExtendedId);
 const findStop = (s, id) => s.stops.find(stop => stop.id === id);
@@ -15,19 +27,35 @@ const storyAccessible = (s, storyId) => {
     && s.tierAvailable.includes(tierOf(stop, storyId));
 };
 
-export function start(sessionId, routeStops, { version = 'v1', accessibleStopIds,
-  tierAvailable = ['base'] } = {}) {
-  // Fixture shorthand: a plain string stop has one base story with the same id.
+export function start(sessionId, routeStops, { routeId = 'route-1', version = 'v1',
+  locale = 'be', accessibleStopIds, tierAvailable = ['base'] } = {}) {
+  // Fixture defaults for routeId/locale are a convenience of synthetic tests,
+  // not app rules; AccessReady events must still carry the full identity.
   const stops = routeStops.map(stop => typeof stop === 'string'
     ? { id: stop, storyBaseId: stop }
     : { id: stop.id, storyBaseId: stop.storyBaseId, storyExtendedId: stop.storyExtendedId });
-  return { sessionId, version, stops,
-    accessibleStopIds: stops.map(stop => stop.id)
-      .filter(id => !accessibleStopIds || accessibleStopIds.includes(id)),
+  // ADR §3.3/§3.6: readiness is verified before the Start transaction, so the
+  // model refuses a session whose package claims no verified layer, an unknown
+  // layer, or accessibility for stops outside the pinned package. Partial
+  // downloads and hash mismatches never reach this point (G04/G05 own disk).
+  if (!Array.isArray(tierAvailable) || tierAvailable.length === 0
+      || !tierAvailable.every(t => t === 'base' || t === 'extended')) {
+    throw new RangeError('start requires at least one verified layer: base|extended');
+  }
+  const accessible = stops.map(stop => stop.id)
+    .filter(id => !accessibleStopIds || accessibleStopIds.includes(id));
+  if (accessibleStopIds && accessible.length !== accessibleStopIds.length) {
+    throw new RangeError('accessibleStopIds must reference stops of the pinned package');
+  }
+  return { sessionId, routeId, version, locale, stops,
+    // `tier` is the informational start record of verified layers (ADR §3.1);
+    // runtime availability lives in tierAvailable and only grows via AccessReady.
+    tier: [...tierAvailable],
+    accessibleStopIds: accessible,
     tierAvailable: [...tierAvailable],
     state: 'Active', heard: [], autoFired: [],
     playing: null, queued: null, suspended: false,
-    sequence: 0, fix: null, commands: [] };
+    playSeq: 0, fix: null, commands: [] };
 }
 
 export function status(s, id) {
@@ -82,7 +110,9 @@ export function step(previous, event, now) {
   const playStory = (stopId, storyId, automatic) => {
     stopAudio();
     if (automatic) add(s.autoFired, stopId);
-    s.playing = { stopId, storyId, playId: ++s.sequence };
+    // playSeq is write-through before the audio command (ADR §3.1): a late
+    // callback of a previous launch can never collide with this playId.
+    s.playing = { stopId, storyId, playId: ++s.playSeq };
     emit('PlayStory', { sessionId: s.sessionId, ...s.playing });
   };
 
@@ -93,11 +123,16 @@ export function step(previous, event, now) {
       s.fix = structuredClone(event.fix);
       break;
     case 'AccessReady':
-      // Trusted adapter event AFTER server grant and complete verified download.
-      // PurchaseSucceeded and arbitrary client claims cannot open content here.
-      // stopIds grant stops; tiers unlock content layers. Both atomic: any
-      // unknown stop or bogus tier rejects the whole event (ADR §4.2).
-      if (event.version !== s.version) break;
+      // Trusted event ONLY from services/download after server grant, complete
+      // per-file sha256 verification and atomic activation (ADR G01.03 §3.5).
+      // The whole identity must match the pinned session: route, version,
+      // locale and the download issuer. A mismatched or foreign-issued event
+      // is ignored entirely — no field mutates, files stay under their own
+      // package key for a session that pins that version later.
+      if (event.issuer !== 'services/download'
+          || event.routeId !== s.routeId
+          || event.version !== s.version
+          || event.locale !== s.locale) break;
       if (!applyAccess(s, event)) break;
       break;
     case 'Pause':
