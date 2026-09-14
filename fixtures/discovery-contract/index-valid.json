@@ -54,25 +54,28 @@
       "editorial_order": 1,
       "themes": ["theme-history"],
       "localized": {
-        "title": { "be": "Гісторыі сукнараў: ад мытні да порта", "en": "Cloth Merchants' Stories: from the Customs House to the Port" },
+        "title": { "be": "Гісторыі сукнараў: ад мытні да порта", "en": "Cloth Merchants' Stories: from the Customs House to the Port", "uk": "Історії сукнарів: від митниці до порту" },
         "summary": {
           "be": "Пешы гід з пяццю гісторыямі пра грошы, кантрабанду і сямейныя спрэчкі сукнаннага двара.",
-          "en": "A walking guide with five stories about money, smuggling and family quarrels of the cloth trade."
+          "en": "A walking guide with five stories about money, smuggling and family quarrels of the cloth trade.",
+          "uk": "Піший гід із п'ятьма історіями про гроші, контрабанду і сімейні суперечки сукняного двору."
         },
         "why_recommended": {
           "be": "Аўтар начытваў усе гісторыі сам і праверыў шлях пешшу двойчы; сярэдняя гісторыя кароткая, фінал з відам на порт.",
-          "en": "The author narrated every story personally and walked the route twice; stories are short, the finale faces the port."
+          "en": "The author narrated every story personally and walked the route twice; stories are short, the finale faces the port.",
+          "uk": "Автор начитав усі історії сам і перевірив шлях пішки двічі; середня історія коротка, фінал з видом на порт."
         },
         "conditions": {
           "be": "адзін мост без тратуара; доўгі ўчастак без прыпынкаў",
-          "en": "one bridge without a sidewalk; one long stretch without stops"
+          "en": "one bridge without a sidewalk; one long stretch without stops",
+          "uk": "один міст без тротуару; довга ділянка без зупинок"
         }
       },
       "estimated_duration": { "min_minutes": 45, "max_minutes": 75, "basis": "author_estimate" },
       "distance_m": 3200,
       "suggested_start_place_id": "place-a1",
       "season_recommendations": [],
-      "availability": { "text_locales": ["be", "en"], "audio_locales": ["be", "en"] },
+      "availability": { "text_locales": ["be", "en", "uk"], "audio_locales": ["be", "en"] },
       "access": "paid",
       "detail_ref": { "kind": "guide_preview" }
     },
@@ -128,6 +131,64 @@
       "detail_ref": { "kind": "place_public", "path": "places/place-e1/public.json" }
     },
     {
+      "offer_id": "offer-g1-place",
+      "ref": { "kind": "place", "place_id": "place-g1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 6,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Двор сукнараў (без сезона)", "en": "Cloth Merchants' Courtyard (no season)" },
+        "summary": {
+          "be": "Той самы двор, што A, без аўтарскай сезоннай ацэнкі.",
+          "en": "The same courtyard shape as A, with no author season assessment."
+        },
+        "why_recommended": {
+          "be": "Крытэрый G: explicit autumn не робіць exact.",
+          "en": "Criteria G: explicit autumn is not exact."
+        },
+        "conditions": {
+          "be": "большасць шляху на вуліцы; адна лесвіца без памосту",
+          "en": "most of the way is outdoors; one stairway without a ramp"
+        }
+      },
+      "estimated_duration": { "min_minutes": 20, "max_minutes": 30, "basis": "author_walk" },
+      "distance_m": 800,
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-g1/public.json" }
+    },
+    {
+      "offer_id": "offer-h1-place",
+      "ref": { "kind": "place", "place_id": "place-h1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 7,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Двор сукнараў (восень)", "en": "Cloth Merchants' Courtyard (autumn)" },
+        "summary": {
+          "be": "Той самы двор, што A, з восеньскай рэкамендацыяй.",
+          "en": "The same courtyard shape as A, with an autumn recommendation."
+        },
+        "why_recommended": {
+          "be": "Крытэрый H: explicit autumn дае exact.",
+          "en": "Criteria H: explicit autumn is exact."
+        },
+        "conditions": {
+          "be": "большасць шляху на вуліцы; адна лесвіца без памосту",
+          "en": "most of the way is outdoors; one stairway without a ramp"
+        }
+      },
+      "estimated_duration": { "min_minutes": 20, "max_minutes": 30, "basis": "author_walk" },
+      "distance_m": 800,
+      "season_recommendations": [
+        { "season": "autumn", "reason": { "be": "Увосень у дворыку жоўтая ліпа.", "en": "In autumn the courtyard linden turns gold." } }
+      ],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-h1/public.json" }
+    },
+    {
       "offer_id": "offer-f1-collection",
       "ref": { "kind": "collection", "collection_id": "collection-f1", "content_version": "1" },
       "city_id": "city-a",
@@ -153,7 +214,7 @@
       "season_recommendations": [
         { "season": "autumn", "reason": { "be": "Увосень у дворыку жоўтая ліпа, а порт сустрэкае цішынёй.", "en": "In autumn the courtyard linden turns gold and the port is quiet." } }
       ],
-      "availability": { "text_locales": ["be", "en"], "audio_locales": ["be", "en"] },
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
       "access": "mixed",
       "detail_ref": { "kind": "collection_public", "path": "collections/collection-f1/public.json" }
     }

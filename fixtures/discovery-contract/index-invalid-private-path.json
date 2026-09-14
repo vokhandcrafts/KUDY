@@ -7,22 +7,21 @@
   ],
   "offers": [
     {
-      "offer_id": "offer-x4-guide",
-      "ref": { "kind": "guide", "route_id": "guide-route-a1", "version": "1" },
+      "offer_id": "offer-x4-place",
+      "ref": { "kind": "place", "place_id": "place-a1", "content_version": "1" },
       "city_id": "city-a",
       "editorial_order": 1,
       "themes": ["theme-history"],
       "localized": {
-        "title": { "be": "Гід з прыватным шляхам", "en": "Guide with a private path" },
-        "summary": { "be": "detail_ref мае дзве памылкі: kind place_public на guide-прапанове і шлях у private-зону extended-медыя.", "en": "detail_ref has two errors: kind place_public on a guide offer and a path into the private extended zone." },
-        "why_recommended": { "be": "Публічны індэкс не раскрывае платны транскрыпт або медыяшлях; guide-прапанова дазваляе толькі kind guide_preview без шляху.", "en": "The public index must not reveal a paid transcript or media path; a guide offer may use only kind guide_preview without a path." },
+        "title": { "be": "Месца з прыватным шляхам", "en": "Place with a private path" },
+        "summary": { "be": "detail_ref.kind карэктны (place_public); шлях уваходзіць у private/extended.", "en": "detail_ref.kind is valid (place_public); the path enters private/extended." },
+        "why_recommended": { "be": "Адзінае парушэнне — сегменты private і extended у шляху.", "en": "The only violation is private and extended path segments." },
         "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
       },
-      "estimated_duration": { "min_minutes": 45, "max_minutes": 75, "basis": "author_estimate" },
       "season_recommendations": [],
-      "availability": { "text_locales": ["be", "en"], "audio_locales": ["be", "en"] },
-      "access": "paid",
-      "detail_ref": { "kind": "place_public", "path": "private/bundles/guide-route-a1/1/be/extended/stops.json" }
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "private/places/place-a1/extended/public.json" }
     }
   ],
   "collections": []

@@ -3,9 +3,13 @@
   "disclosure_version": "feedback-disclosure-1",
   "targets": [
     { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" },
+    { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "en" },
     { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "uk" },
-    { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "be" },
-    { "kind": "place", "place_id": "ext-osm-981723", "content_version": "1", "locale": "be" }
+    { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "be" }
+  ],
+  "unknown_targets": [
+    { "kind": "place", "place_id": "ext-osm-981723", "content_version": "1", "locale": "be" },
+    { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "pl" }
   ],
   "cases": [
     {
@@ -118,14 +122,31 @@
       "expected": { "status": 200, "body": { "revision": 1, "saved": true } }
     },
     {
-      "id": "cas-unpublished-locale",
-      "note": "uk is planned but not published for this guide (21 §8: planned locale never counts as published), so the registry has no guide v1/uk target and the otherwise valid write is rejected as an unknown target.",
+      "id": "cas-uk-text-only",
+      "note": "Device B rates guide v1/uk after using the published UK text (no UK audio). text_locales includes uk; audio_locales does not. Separate locale is a separate key.",
       "request": {
         "method": "PUT /v1/feedback",
         "device": "device-b",
         "body": {
           "mutation_id": "00000000-0000-4000-8000-00000000000b",
           "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "uk" },
+          "expected_revision": 0,
+          "score": 5,
+          "reason_codes": [],
+          "disclosure_version": "feedback-disclosure-1"
+        }
+      },
+      "expected": { "status": 200, "body": { "revision": 1, "saved": true } }
+    },
+    {
+      "id": "cas-unpublished-locale",
+      "note": "pl is reserved and outside the MVP allowlist; the registry has no guide v1/pl target.",
+      "request": {
+        "method": "PUT /v1/feedback",
+        "device": "device-b",
+        "body": {
+          "mutation_id": "00000000-0000-4000-8000-00000000000d",
+          "target": { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "pl" },
           "expected_revision": 0,
           "score": 5,
           "reason_codes": [],
@@ -231,7 +252,7 @@
     },
     {
       "id": "cas-too-many-reasons",
-      "note": "At most three unique reasons per submission; four are rejected.",
+      "note": "At most three unique reasons per submission; four are rejected. Uses the published uk row from cas-uk-text-only (revision 1).",
       "request": {
         "method": "PUT /v1/feedback",
         "device": "device-b",
@@ -245,6 +266,16 @@
         }
       },
       "expected": { "status": 422, "body": { "error": "invalid_reason" } }
+    },
+    {
+      "id": "cas-delete-device",
+      "note": "Explicit device delete; the next feedback call on device-a must not re-register.",
+      "request": {
+        "method": "DELETE /v1/device",
+        "device": "device-a",
+        "body": {}
+      },
+      "expected": { "status": 200 }
     },
     {
       "id": "cas-deleted-device",

@@ -1,4 +1,5 @@
 {
+  "note": "Catalog pointer claims 524289 bytes (512 KiB + 1). G02.01 rejects this before fetch; no 513 KiB blob is committed.",
   "catalog_schema_version": 1,
   "generated_at": "2026-09-14T00:00:00Z",
   "routes": [
@@ -9,20 +10,13 @@
       "layers": ["base", "extended"],
       "product_id": "route_a1_extended",
       "bytes": { "base": 52428800, "extended": 10485760 }
-    },
-    {
-      "route_id": "guide-route-b1",
-      "version": "3",
-      "locales": ["be"],
-      "layers": ["base"],
-      "bytes": { "base": 41943040 }
     }
   ],
   "discovery_index": {
     "schema_version": 1,
     "revision": "r-2026-09-14-1",
     "path": "discovery/city-a/r-2026-09-14-1/index.json",
-    "bytes": 12924,
-    "sha256": "979c0790a653b3441be0510f60b2e52c2f6f3f165e762b376366c081be51e5db"
+    "bytes": 524289,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
   }
 }

@@ -5,7 +5,7 @@
     {
       "route_id": "guide-route-a1",
       "version": "1",
-      "locales": ["be", "en"],
+      "locales": ["be", "en", "uk"],
       "layers": ["base", "extended"],
       "product_id": "route_a1_extended",
       "bytes": { "base": 52428800, "extended": 10485760 }
