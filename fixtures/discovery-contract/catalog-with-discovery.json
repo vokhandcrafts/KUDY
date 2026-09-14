@@ -8,14 +8,14 @@
       "locales": ["be", "en", "uk"],
       "layers": ["base", "extended"],
       "product_id": "route_a1_extended",
-      "bytes": { "base": 52428800, "extended": 10485760 }
+      "sizes": { "base": 52428800, "extended": 10485760 }
     },
     {
       "route_id": "guide-route-b1",
       "version": "3",
       "locales": ["be"],
       "layers": ["base"],
-      "bytes": { "base": 41943040 }
+      "sizes": { "base": 41943040 }
     }
   ],
   "discovery_index": {

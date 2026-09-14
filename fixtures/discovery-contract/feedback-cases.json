@@ -5,7 +5,8 @@
     { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "be" },
     { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "en" },
     { "kind": "guide", "route_id": "guide-route-a1", "version": "1", "locale": "uk" },
-    { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "be" }
+    { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "be" },
+    { "kind": "place", "place_id": "place-a1", "content_version": "1", "locale": "en" }
   ],
   "unknown_targets": [
     { "kind": "place", "place_id": "ext-osm-981723", "content_version": "1", "locale": "be" },
