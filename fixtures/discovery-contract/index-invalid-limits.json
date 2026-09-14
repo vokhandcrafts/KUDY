@@ -1,0 +1,6475 @@
+{
+  "note": "One overflowing case per 21 §3.2 numeric bound that G02.01 must encode. Each index has a single named violation. Locale-count ≤ 8 cannot be overflowed independently: MVP allowlist is be/en/uk (3 codes). File-size bound is catalog-invalid-oversized.json (bytes 524289, reject before fetch).",
+  "cases": [
+    {
+      "id": "lim-offers",
+      "rule": "offers <= 64",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-offers",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-o1",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o1",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o1/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o2",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o2",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 2,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o2/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o3",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o3",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 3,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o3/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o4",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o4",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 4,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o4/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o5",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o5",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 5,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o5/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o6",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o6",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 6,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o6/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o7",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o7",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 7,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o7/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o8",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o8",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 8,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o8/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o9",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o9",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 9,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o9/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o10",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o10",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 10,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o10/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o11",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o11",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 11,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o11/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o12",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o12",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 12,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o12/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o13",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o13",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 13,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o13/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o14",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o14",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 14,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o14/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o15",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o15",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 15,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o15/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o16",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o16",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 16,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o16/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o17",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o17",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 17,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o17/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o18",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o18",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 18,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o18/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o19",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o19",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 19,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o19/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o20",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o20",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 20,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o20/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o21",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o21",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 21,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o21/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o22",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o22",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 22,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o22/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o23",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o23",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 23,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o23/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o24",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o24",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 24,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o24/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o25",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o25",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 25,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o25/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o26",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o26",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 26,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o26/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o27",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o27",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 27,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o27/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o28",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o28",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 28,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o28/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o29",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o29",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 29,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o29/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o30",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o30",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 30,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o30/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o31",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o31",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 31,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o31/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o32",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o32",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 32,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o32/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o33",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o33",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 33,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o33/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o34",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o34",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 34,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o34/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o35",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o35",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 35,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o35/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o36",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o36",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 36,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o36/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o37",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o37",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 37,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o37/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o38",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o38",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 38,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o38/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o39",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o39",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 39,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o39/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o40",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o40",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 40,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o40/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o41",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o41",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 41,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o41/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o42",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o42",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 42,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o42/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o43",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o43",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 43,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o43/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o44",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o44",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 44,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o44/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o45",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o45",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 45,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o45/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o46",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o46",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 46,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o46/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o47",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o47",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 47,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o47/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o48",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o48",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 48,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o48/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o49",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o49",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 49,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o49/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o50",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o50",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 50,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o50/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o51",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o51",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 51,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o51/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o52",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o52",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 52,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o52/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o53",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o53",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 53,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o53/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o54",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o54",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 54,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o54/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o55",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o55",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 55,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o55/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o56",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o56",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 56,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o56/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o57",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o57",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 57,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o57/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o58",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o58",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 58,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o58/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o59",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o59",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 59,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o59/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o60",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o60",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 60,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o60/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o61",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o61",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 61,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o61/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o62",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o62",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 62,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o62/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o63",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o63",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 63,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o63/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o64",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o64",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 64,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o64/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-o65",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-o65",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 65,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-o65/public.json"
+            }
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-collections",
+      "rule": "collections <= 32",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-collections",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-c1",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-c1",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-c1/public.json"
+            }
+          }
+        ],
+        "collections": [
+          {
+            "collection_id": "collection-lim-1",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c1"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-2",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c2"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-3",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c3"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-4",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c4"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-5",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c5"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-6",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c6"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-7",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c7"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-8",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c8"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-9",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c9"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-10",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c10"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-11",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c11"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-12",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c12"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-13",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c13"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-14",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c14"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-15",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c15"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-16",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c16"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-17",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c17"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-18",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c18"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-19",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c19"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-20",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c20"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-21",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c21"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-22",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c22"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-23",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c23"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-24",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c24"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-25",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c25"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-26",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c26"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-27",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c27"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-28",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c28"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-29",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c29"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-30",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c30"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-31",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c31"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-32",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c32"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          },
+          {
+            "collection_id": "collection-lim-33",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "c33"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-c1",
+                "content_version": "1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lim-members",
+      "rule": "members <= 50",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-members",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-m1",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m1",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m1/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m2",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m2",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 2,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m2/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m3",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m3",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 3,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m3/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m4",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m4",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 4,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m4/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m5",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m5",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 5,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m5/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m6",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m6",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 6,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m6/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m7",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m7",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 7,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m7/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m8",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m8",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 8,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m8/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m9",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m9",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 9,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m9/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m10",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m10",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 10,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m10/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m11",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m11",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 11,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m11/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m12",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m12",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 12,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m12/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m13",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m13",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 13,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m13/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m14",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m14",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 14,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m14/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m15",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m15",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 15,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m15/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m16",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m16",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 16,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m16/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m17",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m17",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 17,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m17/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m18",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m18",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 18,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m18/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m19",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m19",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 19,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m19/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m20",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m20",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 20,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m20/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m21",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m21",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 21,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m21/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m22",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m22",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 22,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m22/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m23",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m23",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 23,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m23/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m24",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m24",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 24,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m24/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m25",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m25",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 25,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m25/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m26",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m26",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 26,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m26/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m27",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m27",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 27,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m27/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m28",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m28",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 28,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m28/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m29",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m29",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 29,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m29/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m30",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m30",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 30,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m30/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m31",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m31",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 31,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m31/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m32",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m32",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 32,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m32/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m33",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m33",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 33,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m33/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m34",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m34",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 34,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m34/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m35",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m35",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 35,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m35/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m36",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m36",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 36,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m36/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m37",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m37",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 37,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m37/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m38",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m38",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 38,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m38/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m39",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m39",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 39,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m39/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m40",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m40",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 40,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m40/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m41",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m41",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 41,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m41/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m42",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m42",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 42,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m42/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m43",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m43",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 43,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m43/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m44",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m44",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 44,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m44/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m45",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m45",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 45,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m45/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m46",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m46",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 46,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m46/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m47",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m47",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 47,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m47/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m48",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m48",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 48,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m48/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m49",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m49",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 49,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m49/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m50",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m50",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 50,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m50/public.json"
+            }
+          },
+          {
+            "offer_id": "offer-lim-m51",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-m51",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 51,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-m51/public.json"
+            }
+          }
+        ],
+        "collections": [
+          {
+            "collection_id": "collection-lim-members",
+            "content_version": "1",
+            "city_id": "city-a",
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "description": {
+                "be": "x"
+              }
+            },
+            "members": [
+              {
+                "kind": "place",
+                "place_id": "place-lim-m1",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m2",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m3",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m4",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m5",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m6",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m7",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m8",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m9",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m10",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m11",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m12",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m13",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m14",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m15",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m16",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m17",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m18",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m19",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m20",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m21",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m22",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m23",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m24",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m25",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m26",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m27",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m28",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m29",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m30",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m31",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m32",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m33",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m34",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m35",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m36",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m37",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m38",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m39",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m40",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m41",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m42",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m43",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m44",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m45",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m46",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m47",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m48",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m49",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m50",
+                "content_version": "1"
+              },
+              {
+                "kind": "place",
+                "place_id": "place-lim-m51",
+                "content_version": "1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "lim-themes",
+      "rule": "themes <= 32",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-themes",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-lim-1",
+            "labels": {
+              "be": "t1"
+            }
+          },
+          {
+            "id": "theme-lim-2",
+            "labels": {
+              "be": "t2"
+            }
+          },
+          {
+            "id": "theme-lim-3",
+            "labels": {
+              "be": "t3"
+            }
+          },
+          {
+            "id": "theme-lim-4",
+            "labels": {
+              "be": "t4"
+            }
+          },
+          {
+            "id": "theme-lim-5",
+            "labels": {
+              "be": "t5"
+            }
+          },
+          {
+            "id": "theme-lim-6",
+            "labels": {
+              "be": "t6"
+            }
+          },
+          {
+            "id": "theme-lim-7",
+            "labels": {
+              "be": "t7"
+            }
+          },
+          {
+            "id": "theme-lim-8",
+            "labels": {
+              "be": "t8"
+            }
+          },
+          {
+            "id": "theme-lim-9",
+            "labels": {
+              "be": "t9"
+            }
+          },
+          {
+            "id": "theme-lim-10",
+            "labels": {
+              "be": "t10"
+            }
+          },
+          {
+            "id": "theme-lim-11",
+            "labels": {
+              "be": "t11"
+            }
+          },
+          {
+            "id": "theme-lim-12",
+            "labels": {
+              "be": "t12"
+            }
+          },
+          {
+            "id": "theme-lim-13",
+            "labels": {
+              "be": "t13"
+            }
+          },
+          {
+            "id": "theme-lim-14",
+            "labels": {
+              "be": "t14"
+            }
+          },
+          {
+            "id": "theme-lim-15",
+            "labels": {
+              "be": "t15"
+            }
+          },
+          {
+            "id": "theme-lim-16",
+            "labels": {
+              "be": "t16"
+            }
+          },
+          {
+            "id": "theme-lim-17",
+            "labels": {
+              "be": "t17"
+            }
+          },
+          {
+            "id": "theme-lim-18",
+            "labels": {
+              "be": "t18"
+            }
+          },
+          {
+            "id": "theme-lim-19",
+            "labels": {
+              "be": "t19"
+            }
+          },
+          {
+            "id": "theme-lim-20",
+            "labels": {
+              "be": "t20"
+            }
+          },
+          {
+            "id": "theme-lim-21",
+            "labels": {
+              "be": "t21"
+            }
+          },
+          {
+            "id": "theme-lim-22",
+            "labels": {
+              "be": "t22"
+            }
+          },
+          {
+            "id": "theme-lim-23",
+            "labels": {
+              "be": "t23"
+            }
+          },
+          {
+            "id": "theme-lim-24",
+            "labels": {
+              "be": "t24"
+            }
+          },
+          {
+            "id": "theme-lim-25",
+            "labels": {
+              "be": "t25"
+            }
+          },
+          {
+            "id": "theme-lim-26",
+            "labels": {
+              "be": "t26"
+            }
+          },
+          {
+            "id": "theme-lim-27",
+            "labels": {
+              "be": "t27"
+            }
+          },
+          {
+            "id": "theme-lim-28",
+            "labels": {
+              "be": "t28"
+            }
+          },
+          {
+            "id": "theme-lim-29",
+            "labels": {
+              "be": "t29"
+            }
+          },
+          {
+            "id": "theme-lim-30",
+            "labels": {
+              "be": "t30"
+            }
+          },
+          {
+            "id": "theme-lim-31",
+            "labels": {
+              "be": "t31"
+            }
+          },
+          {
+            "id": "theme-lim-32",
+            "labels": {
+              "be": "t32"
+            }
+          },
+          {
+            "id": "theme-lim-33",
+            "labels": {
+              "be": "t33"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-th1",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-th1",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-lim-1"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-th1/public.json"
+            }
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-themes-per-offer",
+      "rule": "themes per offer <= 8",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-themes-per-offer",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-lim9-1",
+            "labels": {
+              "be": "t1"
+            }
+          },
+          {
+            "id": "theme-lim9-2",
+            "labels": {
+              "be": "t2"
+            }
+          },
+          {
+            "id": "theme-lim9-3",
+            "labels": {
+              "be": "t3"
+            }
+          },
+          {
+            "id": "theme-lim9-4",
+            "labels": {
+              "be": "t4"
+            }
+          },
+          {
+            "id": "theme-lim9-5",
+            "labels": {
+              "be": "t5"
+            }
+          },
+          {
+            "id": "theme-lim9-6",
+            "labels": {
+              "be": "t6"
+            }
+          },
+          {
+            "id": "theme-lim9-7",
+            "labels": {
+              "be": "t7"
+            }
+          },
+          {
+            "id": "theme-lim9-8",
+            "labels": {
+              "be": "t8"
+            }
+          },
+          {
+            "id": "theme-lim9-9",
+            "labels": {
+              "be": "t9"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-tpo",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-tpo",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-lim9-1",
+              "theme-lim9-2",
+              "theme-lim9-3",
+              "theme-lim9-4",
+              "theme-lim9-5",
+              "theme-lim9-6",
+              "theme-lim9-7",
+              "theme-lim9-8",
+              "theme-lim9-9"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-tpo/public.json"
+            }
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-title",
+      "rule": "title <= 140",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-title",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-title",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-title",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-title/public.json"
+            }
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-summary",
+      "rule": "summary <= 400",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-summary",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-sum",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-sum",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-sum/public.json"
+            }
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-season-reason",
+      "rule": "season reason <= 280",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-season-reason",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-sr",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-sr",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [
+              {
+                "season": "summer",
+                "reason": {
+                  "be": "rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+                }
+              }
+            ],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-sr/public.json"
+            }
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-editorial-order",
+      "rule": "editorial_order 0-9999",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-order",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-ord",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-ord",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 10000,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-ord/public.json"
+            }
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-duration-min",
+      "rule": "estimated_duration min >= 1",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-dur-min",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-dmin",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-dmin",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-dmin/public.json"
+            },
+            "estimated_duration": {
+              "min_minutes": 0,
+              "max_minutes": 30,
+              "basis": "author_walk"
+            }
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-duration-max",
+      "rule": "estimated_duration max <= 1440",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-dur-max",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-dmax",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-dmax",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-dmax/public.json"
+            },
+            "estimated_duration": {
+              "min_minutes": 1,
+              "max_minutes": 1441,
+              "basis": "author_walk"
+            }
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-distance",
+      "rule": "distance_m <= 100000",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-distance",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-dist",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-dist",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-dist/public.json"
+            },
+            "distance_m": 100001
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-identifier-charset",
+      "rule": "identifier charset [a-z0-9._-]",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-id-char",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-lim-id!",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-lim-id!",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-lim-id!/public.json"
+            }
+          }
+        ],
+        "collections": []
+      }
+    },
+    {
+      "id": "lim-identifier-length",
+      "rule": "identifier <= 64 chars",
+      "index": {
+        "schema_version": 1,
+        "revision": "r-neg-lim-id-len",
+        "city_id": "city-a",
+        "themes": [
+          {
+            "id": "theme-history",
+            "labels": {
+              "be": "Гісторыя"
+            }
+          }
+        ],
+        "offers": [
+          {
+            "offer_id": "offer-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "ref": {
+              "kind": "place",
+              "place_id": "place-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "content_version": "1"
+            },
+            "city_id": "city-a",
+            "editorial_order": 1,
+            "themes": [
+              "theme-history"
+            ],
+            "localized": {
+              "title": {
+                "be": "x"
+              },
+              "summary": {
+                "be": "x"
+              },
+              "why_recommended": {
+                "be": "x"
+              },
+              "conditions": {
+                "be": "x"
+              }
+            },
+            "season_recommendations": [],
+            "availability": {
+              "text_locales": [
+                "be"
+              ],
+              "audio_locales": []
+            },
+            "access": "free",
+            "detail_ref": {
+              "kind": "place_public",
+              "path": "places/place-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/public.json"
+            }
+          }
+        ],
+        "collections": []
+      }
+    }
+  ]
+}

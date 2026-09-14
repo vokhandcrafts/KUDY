@@ -1,0 +1,87 @@
+{
+  "note": "DiscoveryCriteria A–H against index-valid.json (plan §5). D is empty on this city-a index; city-b rejection is index-invalid-foreign-city.json. G15.01 consumes these as selector cases.",
+  "index": "index-valid.json",
+  "cases": [
+    {
+      "id": "A",
+      "criteria": { "city_id": "city-a", "content_locale": "be", "max_minutes": 60, "theme_ids": ["theme-history"] },
+      "expected": {
+        "exact_offer_ids": ["offer-a1-place", "offer-g1-place", "offer-h1-place"],
+        "alternatives_include": [
+          { "offer_id": "offer-b1-guide", "differences": ["over_time"] },
+          { "offer_id": "offer-f1-collection", "differences": ["over_time"] }
+        ]
+      }
+    },
+    {
+      "id": "B-over-time",
+      "criteria": { "city_id": "city-a", "content_locale": "be", "max_minutes": 60, "theme_ids": ["theme-history"] },
+      "expected": {
+        "exact_excludes": ["offer-b1-guide"],
+        "alternatives_include": [
+          { "offer_id": "offer-b1-guide", "differences": ["over_time"] },
+          { "offer_id": "offer-f1-collection", "differences": ["over_time"] }
+        ],
+        "note": "Paid does not boost rank; sort is editorial_order then offer_id."
+      }
+    },
+    {
+      "id": "B-exact",
+      "criteria": { "city_id": "city-a", "content_locale": "be", "max_minutes": 120, "theme_ids": ["theme-history"] },
+      "expected": {
+        "exact_offer_ids": ["offer-b1-guide", "offer-a1-place", "offer-f1-collection", "offer-g1-place", "offer-h1-place"]
+      }
+    },
+    {
+      "id": "C",
+      "criteria": { "city_id": "city-a", "content_locale": "be", "max_minutes": 60, "theme_ids": ["theme-sea"] },
+      "expected": {
+        "exact_offer_ids": [],
+        "alternatives_include": [{ "offer_id": "offer-c1-place", "differences": ["duration_unknown"] }]
+      }
+    },
+    {
+      "id": "D",
+      "index": "index-invalid-foreign-city.json",
+      "note": "A city-b offer is invalid inside a city-a index. Selector on index-valid.json never sees a city-b offer; G02.01 rejects this file.",
+      "criteria": { "city_id": "city-a", "content_locale": "be", "max_minutes": 60, "theme_ids": [] },
+      "expected": { "index_rejected": true, "exact_offer_ids": [], "alternatives": [] }
+    },
+    {
+      "id": "E",
+      "criteria": { "city_id": "city-a", "content_locale": "be", "theme_ids": ["theme-architecture"] },
+      "expected": {
+        "exact_excludes": ["offer-e1-place"],
+        "alternatives_excludes": ["offer-e1-place"],
+        "note": "en-only offer is never substituted for explicit be."
+      }
+    },
+    {
+      "id": "F",
+      "criteria": { "city_id": "city-a", "content_locale": "be", "max_minutes": 120, "theme_ids": ["theme-history"] },
+      "expected": {
+        "exact_includes": ["offer-f1-collection"],
+        "note": "Collection uses its own [90,120]; no summed/card-derived duration; collection cannot start a Run."
+      }
+    },
+    {
+      "id": "G",
+      "criteria": { "city_id": "city-a", "content_locale": "be", "max_minutes": 60, "theme_ids": ["theme-history"], "preferred_season": "autumn" },
+      "expected": {
+        "exact_excludes": ["offer-g1-place", "offer-a1-place"],
+        "alternatives_include": [
+          { "offer_id": "offer-g1-place", "differences": ["season_unassessed"] },
+          { "offer_id": "offer-a1-place", "differences": ["season_not_recommended"] },
+          { "offer_id": "offer-f1-collection", "differences": ["over_time"] }
+        ]
+      }
+    },
+    {
+      "id": "H",
+      "criteria": { "city_id": "city-a", "content_locale": "be", "max_minutes": 60, "theme_ids": ["theme-history"], "preferred_season": "autumn" },
+      "expected": {
+        "exact_offer_ids": ["offer-h1-place"]
+      }
+    }
+  ]
+}

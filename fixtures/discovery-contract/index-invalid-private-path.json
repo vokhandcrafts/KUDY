@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "revision": "r-neg-private-path",
+  "city_id": "city-a",
+  "themes": [
+    { "id": "theme-history", "labels": { "be": "Гісторыя", "en": "History" } }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-x4-place",
+      "ref": { "kind": "place", "place_id": "place-a1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 1,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Месца з прыватным шляхам", "en": "Place with a private path" },
+        "summary": { "be": "detail_ref.kind карэктны (place_public); шлях уваходзіць у private/extended.", "en": "detail_ref.kind is valid (place_public); the path enters private/extended." },
+        "why_recommended": { "be": "Адзінае парушэнне — сегменты private і extended у шляху.", "en": "The only violation is private and extended path segments." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "private/places/place-a1/extended/public.json" }
+    }
+  ],
+  "collections": []
+}

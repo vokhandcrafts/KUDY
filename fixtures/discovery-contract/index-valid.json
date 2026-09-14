@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "revision": "r-2026-09-14-1",
+  "city_id": "city-a",
+  "themes": [
+    {
+      "id": "theme-history",
+      "labels": { "be": "Гісторыя", "en": "History", "uk": "Історія" }
+    },
+    {
+      "id": "theme-sea",
+      "labels": { "be": "Мора і спакой", "en": "Sea and calm", "uk": "Море і спокій" }
+    },
+    {
+      "id": "theme-architecture",
+      "labels": { "be": "Архітэктура", "en": "Architecture", "uk": "Архітектура" }
+    }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-a1-place",
+      "ref": { "kind": "place", "place_id": "place-a1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 2,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Двор сукнараў", "en": "The Cloth Merchants' Courtyard" },
+        "summary": {
+          "be": "Ціхі дворык з рэшткай гарадской сцены і кароткай апавядальнай табліцай пра сукнанны гандаль.",
+          "en": "A quiet courtyard with a remnant of the town wall and a short interpretive panel on the cloth trade."
+        },
+        "why_recommended": {
+          "be": "Дваццаць хвілін цішыні паміж гучных вуліц; аўтар трымае гэта месца для перапынку, а не для галерэі.",
+          "en": "Twenty minutes of quiet between busy streets; the author keeps this spot for a pause, not a gallery."
+        },
+        "conditions": {
+          "be": "большасць шляху на вуліцы; адна лесвіца без памосту",
+          "en": "most of the way is outdoors; one stairway without a ramp"
+        }
+      },
+      "estimated_duration": { "min_minutes": 20, "max_minutes": 30, "basis": "author_walk" },
+      "distance_m": 800,
+      "season_recommendations": [
+        { "season": "summer", "reason": { "be": "У цяні старой ліпы нават апоўдні прахалодна.", "en": "Shaded by an old linden, cool even at midday." } }
+      ],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-a1/public.json" }
+    },
+    {
+      "offer_id": "offer-b1-guide",
+      "ref": { "kind": "guide", "route_id": "guide-route-a1", "version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 1,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Гісторыі сукнараў: ад мытні да порта", "en": "Cloth Merchants' Stories: from the Customs House to the Port", "uk": "Історії сукнарів: від митниці до порту" },
+        "summary": {
+          "be": "Пешы гід з пяццю гісторыямі пра грошы, кантрабанду і сямейныя спрэчкі сукнаннага двара.",
+          "en": "A walking guide with five stories about money, smuggling and family quarrels of the cloth trade.",
+          "uk": "Піший гід із п'ятьма історіями про гроші, контрабанду і сімейні суперечки сукняного двору."
+        },
+        "why_recommended": {
+          "be": "Аўтар начытваў усе гісторыі сам і праверыў шлях пешшу двойчы; сярэдняя гісторыя кароткая, фінал з відам на порт.",
+          "en": "The author narrated every story personally and walked the route twice; stories are short, the finale faces the port.",
+          "uk": "Автор начитав усі історії сам і перевірив шлях пішки двічі; середня історія коротка, фінал з видом на порт."
+        },
+        "conditions": {
+          "be": "адзін мост без тратуара; доўгі ўчастак без прыпынкаў",
+          "en": "one bridge without a sidewalk; one long stretch without stops",
+          "uk": "один міст без тротуару; довга ділянка без зупинок"
+        }
+      },
+      "estimated_duration": { "min_minutes": 45, "max_minutes": 75, "basis": "author_estimate" },
+      "distance_m": 3200,
+      "suggested_start_place_id": "place-a1",
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en", "uk"], "audio_locales": ["be", "en"] },
+      "access": "paid",
+      "detail_ref": { "kind": "guide_preview" }
+    },
+    {
+      "offer_id": "offer-c1-place",
+      "ref": { "kind": "place", "place_id": "place-c1", "content_version": "2" },
+      "city_id": "city-a",
+      "editorial_order": 3,
+      "themes": ["theme-sea"],
+      "localized": {
+        "title": { "be": "Пляж у Старых Млынах", "en": "Beach at the Old Mills" },
+        "summary": {
+          "be": "Нядаўна расчышчаны ўзбярэжны ўзлесак з лавамі і відам на старыя млынавыя палі.",
+          "en": "A recently cleared stretch of shoreline with benches and a view of the old mill ponds."
+        },
+        "why_recommended": {
+          "be": "Аўтар праверыў месца двойчы ў верасні; людзей мала, але гэта не гарантыя.",
+          "en": "The author checked this spot twice in September; few people, but that is not a promise."
+        },
+        "conditions": {
+          "be": "грунтовая сцежка; пасля дажджу брудна",
+          "en": "unpaved path; muddy after rain"
+        }
+      },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-c1/public.json" }
+    },
+    {
+      "offer_id": "offer-e1-place",
+      "ref": { "kind": "place", "place_id": "place-e1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 5,
+      "themes": ["theme-architecture"],
+      "localized": {
+        "title": { "en": "Brick Arches Photo Stop" },
+        "summary": {
+          "en": "A ten-minute stop at a row of restored brick arches; best light before noon."
+        },
+        "why_recommended": {
+          "en": "The author keeps returning for the light on the arches; a short, honest stop."
+        },
+        "conditions": {
+          "en": "street side; watch the bike lane"
+        }
+      },
+      "estimated_duration": { "min_minutes": 10, "max_minutes": 15, "basis": "author_walk" },
+      "distance_m": 400,
+      "season_recommendations": [],
+      "availability": { "text_locales": ["en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-e1/public.json" }
+    },
+    {
+      "offer_id": "offer-g1-place",
+      "ref": { "kind": "place", "place_id": "place-g1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 6,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Двор сукнараў (без сезона)", "en": "Cloth Merchants' Courtyard (no season)" },
+        "summary": {
+          "be": "Той самы двор, што A, без аўтарскай сезоннай ацэнкі.",
+          "en": "The same courtyard shape as A, with no author season assessment."
+        },
+        "why_recommended": {
+          "be": "Крытэрый G: explicit autumn не робіць exact.",
+          "en": "Criteria G: explicit autumn is not exact."
+        },
+        "conditions": {
+          "be": "большасць шляху на вуліцы; адна лесвіца без памосту",
+          "en": "most of the way is outdoors; one stairway without a ramp"
+        }
+      },
+      "estimated_duration": { "min_minutes": 20, "max_minutes": 30, "basis": "author_walk" },
+      "distance_m": 800,
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-g1/public.json" }
+    },
+    {
+      "offer_id": "offer-h1-place",
+      "ref": { "kind": "place", "place_id": "place-h1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 7,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Двор сукнараў (восень)", "en": "Cloth Merchants' Courtyard (autumn)" },
+        "summary": {
+          "be": "Той самы двор, што A, з восеньскай рэкамендацыяй.",
+          "en": "The same courtyard shape as A, with an autumn recommendation."
+        },
+        "why_recommended": {
+          "be": "Крытэрый H: explicit autumn дае exact.",
+          "en": "Criteria H: explicit autumn is exact."
+        },
+        "conditions": {
+          "be": "большасць шляху на вуліцы; адна лесвіца без памосту",
+          "en": "most of the way is outdoors; one stairway without a ramp"
+        }
+      },
+      "estimated_duration": { "min_minutes": 20, "max_minutes": 30, "basis": "author_walk" },
+      "distance_m": 800,
+      "season_recommendations": [
+        { "season": "autumn", "reason": { "be": "Увосень у дворыку жоўтая ліпа.", "en": "In autumn the courtyard linden turns gold." } }
+      ],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-h1/public.json" }
+    },
+    {
+      "offer_id": "offer-f1-collection",
+      "ref": { "kind": "collection", "collection_id": "collection-f1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 4,
+      "themes": ["theme-history", "theme-sea"],
+      "localized": {
+        "title": { "be": "Адзін дзень сукнара", "en": "A Day of the Cloth Merchant" },
+        "summary": {
+          "be": "Рэдакцыйная параю месца і гіда: двор, сцежка да порта і вяртанне праз набярэжную.",
+          "en": "An editorial pairing of a place and a guide: the courtyard, the path to the port and the walk back along the waterfront."
+        },
+        "why_recommended": {
+          "be": "Парадак падабраны рукамі: спачатку двор, потым гід ад яго ж пачатку; пераходы ўлічаны ў часе.",
+          "en": "The order is hand-picked: courtyard first, then the guide starting from it; transitions are included in the time."
+        },
+        "conditions": {
+          "be": "сумарны час з пераходамі; дарога да пачатку не ўлічана",
+          "en": "total time includes transitions; the trip to the starting point does not"
+        }
+      },
+      "estimated_duration": { "min_minutes": 90, "max_minutes": 120, "basis": "author_estimate" },
+      "suggested_start_place_id": "place-a1",
+      "season_recommendations": [
+        { "season": "autumn", "reason": { "be": "Увосень у дворыку жоўтая ліпа, а порт сустрэкае цішынёй.", "en": "In autumn the courtyard linden turns gold and the port is quiet." } }
+      ],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "mixed",
+      "detail_ref": { "kind": "collection_public", "path": "collections/collection-f1/public.json" }
+    }
+  ],
+  "collections": [
+    {
+      "collection_id": "collection-f1",
+      "content_version": "1",
+      "city_id": "city-a",
+      "localized": {
+        "title": { "be": "Адзін дзень сукнара", "en": "A Day of the Cloth Merchant" },
+        "description": {
+          "be": "Две прапановы ў адным марше: кароткі двор і поўны гід, які пачынаецца ад таго ж двара.",
+          "en": "Two offers in one arc: the short courtyard and the full guide that starts at the same courtyard."
+        }
+      },
+      "members": [
+        { "kind": "place", "place_id": "place-a1", "content_version": "1" },
+        { "kind": "guide", "route_id": "guide-route-a1", "version": "1" }
+      ],
+      "overlap_note": {
+        "be": "Двор сукнараў — першая кропка гіда; наведваць яго асобна не трэба, гэта той самы досвед.",
+        "en": "The Cloth Merchants' Courtyard is the guide's first stop; visiting it separately is not needed — it is the same experience."
+      }
+    }
+  ]
+}

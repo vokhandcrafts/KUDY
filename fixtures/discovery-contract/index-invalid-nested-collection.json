@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "revision": "r-neg-nested-collection",
+  "city_id": "city-a",
+  "themes": [
+    { "id": "theme-history", "labels": { "be": "Гісторыя", "en": "History" } }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-x2-place",
+      "ref": { "kind": "place", "place_id": "place-a1", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 1,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Двор сукнараў", "en": "The Cloth Merchants' Courtyard" },
+        "summary": { "be": "Легітымны place-offer, каб member-refs рэзаліся.", "en": "A legitimate place offer so member refs resolve." },
+        "why_recommended": { "be": "Адзінае парушэнне — kind collection у members.", "en": "The only violation is kind collection in members." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "place_public", "path": "places/place-a1/public.json" }
+    },
+    {
+      "offer_id": "offer-x2-inner",
+      "ref": { "kind": "collection", "collection_id": "collection-x2-inner", "content_version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 2,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Унутраная падборка", "en": "Inner collection" },
+        "summary": { "be": "Апублікаваная collection, на якую спасылаецца забаронены member.", "en": "A published collection that the forbidden member points at." },
+        "why_recommended": { "be": "Ref рэзальваны; парушэнне — kind.", "en": "The ref resolves; the violation is the kind." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] },
+      "access": "free",
+      "detail_ref": { "kind": "collection_public", "path": "collections/collection-x2-inner/public.json" }
+    }
+  ],
+  "collections": [
+    {
+      "collection_id": "collection-x2-inner",
+      "content_version": "1",
+      "city_id": "city-a",
+      "localized": {
+        "title": { "be": "Унутраная падборка", "en": "Inner collection" },
+        "description": { "be": "Толькі place; сапраўдны склад.", "en": "Place only; a legitimate inner membership." }
+      },
+      "members": [
+        { "kind": "place", "place_id": "place-a1", "content_version": "1" }
+      ]
+    },
+    {
+      "collection_id": "collection-x2",
+      "content_version": "1",
+      "city_id": "city-a",
+      "localized": {
+        "title": { "be": "Укладзеная падборка", "en": "Nested collection" },
+        "description": { "be": "Членам падборкі паслана іншая падборка.", "en": "A member of the collection is another collection." }
+      },
+      "members": [
+        { "kind": "collection", "collection_id": "collection-x2-inner", "content_version": "1" }
+      ]
+    }
+  ]
+}
