@@ -14,8 +14,8 @@
       "themes": ["theme-history"],
       "localized": {
         "title": { "be": "Гід з прыватным шляхам", "en": "Guide with a private path" },
-        "summary": { "be": "detail_ref паказвае на extended-шлях з private-зоны.", "en": "detail_ref points into the private/extended zone." },
-        "why_recommended": { "be": "Публічны індэкс не можа раскрыць платны транскрыпт або медыяшлях.", "en": "The public index must not reveal a paid transcript or media path." },
+        "summary": { "be": "detail_ref мае дзве памылкі: kind place_public на guide-прапанове і шлях у private-зону extended-медыя.", "en": "detail_ref has two errors: kind place_public on a guide offer and a path into the private extended zone." },
+        "why_recommended": { "be": "Публічны індэкс не раскрывае платны транскрыпт або медыяшлях; guide-прапанова дазваляе толькі kind guide_preview без шляху.", "en": "The public index must not reveal a paid transcript or media path; a guide offer may use only kind guide_preview without a path." },
         "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
       },
       "estimated_duration": { "min_minutes": 45, "max_minutes": 75, "basis": "author_estimate" },
