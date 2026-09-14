@@ -39,7 +39,15 @@ const mutations = [
     'return !!primary && storyAccessible(s, primary)',
     'return !!primary'],
   ['activate a different content version',
-    'if (event.version !== s.version) break;', 'if (false) break;'],
+    'event.version !== s.version', 'true'],
+  ['accept a grant for another route',
+    'event.routeId !== s.routeId', 'false'],
+  ['accept a grant for another locale',
+    'event.locale !== s.locale', 'false'],
+  ['accept a grant from a foreign issuer',
+    "event.issuer !== 'services/download'", 'false'],
+  ['start without verified layers',
+    'tierAvailable.length === 0', 'false'],
 ];
 
 const directory = mkdtempSync(join(tmpdir(), 'kudy-run-regressions-'));

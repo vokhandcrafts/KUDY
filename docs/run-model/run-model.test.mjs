@@ -15,6 +15,10 @@ function fixture() {
 const send = (s, e) => step(s, e, now);
 const finishAudio = s => send(s, { type: 'AudioFinished',
   sessionId: s.sessionId, playId: s.playing.playId });
+// G01.03 §3.5: the trusted AccessReady identity — issuer, route, version,
+// locale; stopIds/tiers are granted per event. Events never carry defaults.
+const access = (overrides = {}) => ({ type: 'AccessReady', routeId: 'route-1',
+  version: 'v1', locale: 'be', issuer: 'services/download', ...overrides });
 
 // ADR G01.01 variant A fixtures: stop-crane has base + extended stories,
 // stop-gate is paid-only (extended story only, no fake free story).
@@ -59,7 +63,7 @@ test('G01.01.b: base heard stays heard after same-version unlock; no new Play', 
   assert.equal(s.playing?.storyId, 'story-crane-base');
   s = finishAudio(s);
   assert.deepEqual(s.heard, ['story-crane-base']);
-  s = send(s, { type: 'AccessReady', version: 'v3', tiers: ['extended'] });
+  s = send(s, access({ version: 'v3', tiers: ['extended'] }));
   assert.deepEqual(s.commands, []);
   assert.equal(s.playing, null);
   assert.deepEqual(s.heard, ['story-crane-base']);
@@ -96,7 +100,7 @@ test('G01.01.b: paid-only stop stays locked until same-version unlock, then is a
   s = send(s, { type: 'PurchaseSucceeded', stopIds: ['stop-gate'] });
   s = send(s, playStory('stop-gate', 'story-gate-ext'));
   assert.equal(s.playing, null);
-  s = send(s, { type: 'AccessReady', version: 'v3', stopIds: ['stop-gate'], tiers: ['extended'] });
+  s = send(s, access({ version: 'v3', stopIds: ['stop-gate'], tiers: ['extended'] }));
   assert.equal(status(s, 'stop-gate'), 'pending');
   assert.equal(s.playing, null);
   s = send(s, trigger('stop-gate'));
@@ -162,7 +166,7 @@ test('G01.01.b: markers are stop-level from the primary; additional unheard stay
 
 test('G01.01.b: unlock never rewrites the primary of a paid-only stop', () => {
   let s = craneFixture();
-  s = send(s, { type: 'AccessReady', version: 'v3', stopIds: ['stop-gate'], tiers: ['extended'] });
+  s = send(s, access({ version: 'v3', stopIds: ['stop-gate'], tiers: ['extended'] }));
   s = send(s, trigger('stop-gate'));
   const first = s.playing?.storyId;
   assert.equal(first, 'story-gate-ext');
@@ -375,7 +379,7 @@ test('C33: locked preview is excluded from manual and automatic playback and rem
 
 test('C34: verified downloaded access unlocks any nearby stop without restarting progress', () => {
   let s = finishAudio(send(lockedFixture(), trigger('c')));
-  s = send(s, { type: 'AccessReady', version: 'v1', stopIds: ['b'] });
+  s = send(s, access({ stopIds: ['b'] }));
   assert.equal(status(s, 'b'), 'pending');
   assert.equal(s.playing, null);
   assert.deepEqual(s.heard, ['c']);
@@ -386,7 +390,7 @@ test('C34: verified downloaded access unlocks any nearby stop without restarting
 
 test('C35: catalog version change cannot unlock or replace active session content', () => {
   let s = lockedFixture();
-  s = send(s, { type: 'AccessReady', version: 'v2', stopIds: ['b'] });
+  s = send(s, access({ version: 'v2', stopIds: ['b'] }));
   assert.equal(s.version, 'v1');
   assert.equal(status(s, 'b'), 'locked');
   assert.deepEqual(s.tierAvailable, ['base']);
@@ -401,13 +405,91 @@ test('C33: purchase notification alone is not playable access', () => {
 });
 
 test('boundary: access update is atomic and rejects unknown stops and tiers', () => {
-  let s = send(lockedFixture(), { type: 'AccessReady', version: 'v1',
-    stopIds: ['b', 'unknown'] });
+  let s = send(lockedFixture(), access({ stopIds: ['b', 'unknown'] }));
   assert.equal(status(s, 'b'), 'locked');
-  s = send(lockedFixture(), { type: 'AccessReady', version: 'v1',
-    tiers: ['extended', 'bogus'] });
+  s = send(lockedFixture(), access({ tiers: ['extended', 'bogus'] }));
   assert.equal(status(s, 'b'), 'locked');
   assert.deepEqual(s.tierAvailable, ['base']);
+});
+
+test('G01.03.b: grant for another route is ignored entirely', () => {
+  let s = lockedFixture();
+  const before = structuredClone(s);
+  before.commands = [];
+  s = send(s, access({ routeId: 'route-2', stopIds: ['b'] }));
+  assert.deepEqual(s, before);
+});
+
+test('G01.03.b: grant for another locale is ignored entirely', () => {
+  let s = lockedFixture();
+  const before = structuredClone(s);
+  before.commands = [];
+  s = send(s, access({ locale: 'en', stopIds: ['b'] }));
+  assert.deepEqual(s, before);
+});
+
+test('G01.03.b: grant from a non-download issuer is ignored entirely', () => {
+  let s = lockedFixture();
+  for (const issuer of ['purchase-flow', undefined]) {
+    const before = structuredClone(s);
+    before.commands = [];
+    s = send(s, access({ issuer, stopIds: ['b'] }));
+    assert.deepEqual(s, before, `issuer=${String(issuer)}`);
+  }
+});
+
+test('G01.03.b: repeated identical AccessReady is a no-op', () => {
+  const event = access({ stopIds: ['b'], tiers: ['extended'] });
+  let s = lockedFixture();
+  s = send(s, event);
+  const once = structuredClone(s);
+  s = send(s, event);
+  assert.deepEqual(s, once);
+  assert.deepEqual(s.commands, []);
+  assert.equal(status(s, 'b'), 'pending');
+});
+
+test('G01.03.b: late grant after End mutates nothing; a session pinning that version still receives it', () => {
+  let ended = send(fixture(), { type: 'End' });
+  const before = structuredClone(ended);
+  before.commands = [];
+  ended = send(ended, access({ stopIds: ['b'] }));
+  assert.deepEqual(ended, before);
+  let fresh = start('walk-2', stops, { version: 'v1' });
+  fresh = send(fresh, access({ stopIds: ['b'] }));
+  assert.equal(status(fresh, 'b'), 'pending');
+  assert.equal(fresh.version, 'v1');
+});
+
+test('G01.03.b: version stays pinned across pause, resume and a foreign-version grant', () => {
+  let s = lockedFixture();
+  s = send(s, { type: 'Pause' });
+  s = send(s, access({ version: 'v2', stopIds: ['b'] }));
+  s = send(s, { type: 'Resume' });
+  assert.equal(s.version, 'v1');
+  assert.deepEqual(s.tierAvailable, ['base']);
+  assert.equal(status(s, 'b'), 'locked');
+});
+
+test('G01.03.b: playSeq is a write-through counter; an old playSeq cannot credit a newer play', () => {
+  let s = fixture();
+  s = send(s, play('a'));
+  const firstPlaySeq = s.playSeq;
+  assert.equal(s.playing.playId, firstPlaySeq);
+  s = send(s, play('b'));
+  assert.equal(s.playSeq, firstPlaySeq + 1);
+  s = send(s, { type: 'AudioFinished', sessionId: s.sessionId, playId: firstPlaySeq });
+  assert.deepEqual(s.heard, []);
+  assert.equal(s.playing?.stopId, 'b');
+});
+
+test('G01.03.b: start refuses a package claiming no verified layer or an unknown layer', () => {
+  assert.throws(() => start('walk-9', stops, { tierAvailable: [] }), RangeError);
+  assert.throws(() => start('walk-9', stops, { tierAvailable: ['premium'] }), RangeError);
+});
+
+test('G01.03.b: start refuses accessibleStopIds naming stops outside the pinned package', () => {
+  assert.throws(() => start('walk-9', stops, { accessibleStopIds: ['a', 'ghost'] }), RangeError);
 });
 
 test('bounded exploration: invariants across all 4-event sequences (9 choices per step)', () => {
