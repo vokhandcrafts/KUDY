@@ -1,0 +1,13 @@
+{
+  "name": "kudy-g00-03-a-sandbox-grant-spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-reporter=spec test/*.test.mjs",
+    "start": "node scripts/start-server.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
