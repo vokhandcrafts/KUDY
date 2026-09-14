@@ -1,0 +1,30 @@
+{
+  "catalog_schema_version": 1,
+  "generated_at": "2026-09-14T00:00:00Z",
+  "routes": [
+    {
+      "route_id": "guide-route-a1",
+      "version": "1",
+      "city_id": "city-a",
+      "locales": ["be", "en"],
+      "layers": ["base", "extended"],
+      "product_id": "route_a1_extended",
+      "bytes": { "base": 52428800, "extended": 10485760 }
+    },
+    {
+      "route_id": "guide-route-b1",
+      "version": "3",
+      "city_id": "city-b",
+      "locales": ["be"],
+      "layers": ["base"],
+      "bytes": { "base": 41943040 }
+    }
+  ],
+  "discovery_index": {
+    "schema_version": 1,
+    "revision": "r-2026-09-14-1",
+    "path": "discovery/city-a/r-2026-09-14-1/index.json",
+    "bytes": 9505,
+    "sha256": "ba4a6766f2598fb3ddf031a338689a15988caf703185d7d6d26ff3e0b973d260"
+  }
+}

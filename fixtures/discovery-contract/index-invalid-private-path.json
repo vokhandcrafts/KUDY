@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "revision": "r-neg-private-path",
+  "city_id": "city-a",
+  "themes": [
+    { "id": "theme-history", "labels": { "be": "Гісторыя", "en": "History" } }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-x4-guide",
+      "ref": { "kind": "guide", "route_id": "guide-route-a1", "version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 1,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Гід з прыватным шляхам", "en": "Guide with a private path" },
+        "summary": { "be": "detail_ref паказвае на extended-шлях з private-зоны.", "en": "detail_ref points into the private/extended zone." },
+        "why_recommended": { "be": "Публічны індэкс не можа раскрыць платны транскрыпт або медыяшлях.", "en": "The public index must not reveal a paid transcript or media path." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "estimated_duration": { "min_minutes": 45, "max_minutes": 75, "basis": "author_estimate" },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": ["be", "en"] },
+      "access": "paid",
+      "detail_ref": { "kind": "place_public", "path": "private/bundles/guide-route-a1/1/be/extended/stops.json" }
+    }
+  ],
+  "collections": []
+}

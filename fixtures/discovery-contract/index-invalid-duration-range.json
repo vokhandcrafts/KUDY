@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "revision": "r-neg-duration-range",
+  "city_id": "city-a",
+  "themes": [
+    { "id": "theme-history", "labels": { "be": "Гісторыя", "en": "History" } }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-x6-guide",
+      "ref": { "kind": "guide", "route_id": "guide-route-a1", "version": "1" },
+      "city_id": "city-a",
+      "editorial_order": 1,
+      "themes": ["theme-history"],
+      "localized": {
+        "title": { "be": "Перавернуты дыяпазон", "en": "Inverted range" },
+        "summary": { "be": "min_minutes большы за max_minutes, акрамя таго ніжэй за duration_min маршрута.", "en": "min_minutes exceeds max_minutes, and the range drops below the route duration_min." },
+        "why_recommended": { "be": "Дыяпазон мусіць уключаць duration_min рэкамендаванага шляху і быць цэлым min ≤ max.", "en": "The range must include the recommended path duration_min and satisfy min ≤ max in whole minutes." },
+        "conditions": { "be": "негатыўны прыклад", "en": "negative example" }
+      },
+      "estimated_duration": { "min_minutes": 75, "max_minutes": 45, "basis": "author_estimate" },
+      "season_recommendations": [],
+      "availability": { "text_locales": ["be", "en"], "audio_locales": ["be", "en"] },
+      "access": "paid",
+      "detail_ref": { "kind": "guide_preview" }
+    }
+  ],
+  "collections": []
+}

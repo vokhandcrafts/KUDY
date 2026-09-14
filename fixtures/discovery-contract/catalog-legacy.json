@@ -1,0 +1,23 @@
+{
+  "catalog_schema_version": 1,
+  "generated_at": "2026-09-14T00:00:00Z",
+  "routes": [
+    {
+      "route_id": "guide-route-a1",
+      "version": "1",
+      "city_id": "city-a",
+      "locales": ["be", "en"],
+      "layers": ["base", "extended"],
+      "product_id": "route_a1_extended",
+      "bytes": { "base": 52428800, "extended": 10485760 }
+    },
+    {
+      "route_id": "guide-route-b1",
+      "version": "3",
+      "city_id": "city-b",
+      "locales": ["be"],
+      "layers": ["base"],
+      "bytes": { "base": 41943040 }
+    }
+  ]
+}
