@@ -100,6 +100,20 @@ test('an oversized body is rejected with the documented 400 and the server survi
   assert.equal(after.urls.length, 1);
 });
 
+test('a body streaming past the drain limit is reset, not answered', async (t) => {
+  const rig = makeRig();
+  const { base } = await serve(t, rig);
+  const { secret } = await entitledDevice(t, rig, { base, store: rig.store });
+  const flood = { ...GRANT_BODY, paths: ['x'.repeat(2 * 1024 * 1024)] };
+  const reset = await postGrant(base, secret, flood);
+  assert.equal(reset.status, 0, 'past the bounded drain limit the server resets instead of answering');
+  assert.ok(reset.transportError, 'the client sees a transport error, not a grant or a hang');
+  // The bounded reset bought safety, not a dead server.
+  const after = await postGrant(base, secret, GRANT_BODY);
+  assert.equal(after.status, 200);
+  assert.equal(after.urls.length, 1);
+});
+
 test('a denial is never cached: a second device stays refused through an outage', async (t) => {
   const rig = makeRig();
   const { base, events } = await serve(t, rig);

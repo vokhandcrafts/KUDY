@@ -69,16 +69,24 @@ function readJsonBody(req) {
     let size = 0;
     const chunks = [];
     let overflow = false;
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
     // Once over MAX_BODY_BYTES nothing more is buffered, but the remainder is
     // still drained (discarded, never stored) so the client is told
     // 400 invalid_request from the closed list instead of losing the socket
     // mid-request. A client that keeps streaming past DRAIN_LIMIT_BYTES gets
-    // the connection reset instead: input stays bounded either way.
+    // the connection reset instead: input stays bounded either way. A client
+    // that stalls mid-body cannot hold the handler: 'close' settles the
+    // promise when the request dies without 'end'.
     req.on('data', (chunk) => {
       size += chunk.length;
       if (overflow) {
         if (size > DRAIN_LIMIT_BYTES) {
-          resolve({ error: 'too_large' });
+          finish({ error: 'too_large' });
           req.destroy();
         }
         return;
@@ -91,14 +99,17 @@ function readJsonBody(req) {
       chunks.push(chunk);
     });
     req.on('end', () => {
-      if (overflow) return resolve({ error: 'too_large' });
+      if (overflow) return finish({ error: 'too_large' });
       try {
-        resolve({ body: JSON.parse(Buffer.concat(chunks).toString('utf8')) });
+        finish({ body: JSON.parse(Buffer.concat(chunks).toString('utf8')) });
       } catch {
-        resolve({ error: 'bad_json' });
+        finish({ error: 'bad_json' });
       }
     });
-    req.on('error', () => resolve({ error: 'bad_json' }));
+    req.on('close', () => {
+      if (overflow) finish({ error: 'too_large' });
+    });
+    req.on('error', () => finish({ error: 'bad_json' }));
   });
 }
 
