@@ -26,7 +26,7 @@
 | G00.01.b/.c — прыладавыя доказы GPS/аўдыё | фактычныя OS-абмежаванні | канфіг watchdog, абяцанні фону | G05.02, G05.03, G00.04 |
 | G00.02.c — рашэнне пра карту (ADR напісаны, **не прыняты**) | спосаб офлайну, пастаўшчык тайлаў | `services/map` рэалізацыя | G06.02, G00.04 |
 | G00.03.c/.d — рэальныя sandbox-пакупкі | store-факты | `services/entitlement` production | G08.03+ |
-| G07.04 — лікі R07 (парог, dwell, cooldown) | канфігурацыйныя значэнні | `services/config` схемa падказак | G07.05 |
+| G07.04 — лікі R07 (парог, dwell, cooldown) | канфігурацыйныя значэнні | `services/config` схема падказак | G07.05 |
 | G06.06–G06.08 — зацверджаны дызайн | візуальны набор | усе UI-экраны `app/` | G06.01+, G15.03, G16.03 |
 
 Дэталі, якія гэта блакуе, названыя ў раздзеле 7. Пры гэтым чыстыя модулі (`core/engine`, `core/pipeline`, `core/discovery/selectDiscovery`) праектуюцца цяпер без гэтых залежнасцяў — іх уваходы і выхады ўжо зафікаваныя прынятымі кантрактамі.
@@ -85,7 +85,7 @@
 | `services/entitlement.ts` | клас | RevenueCat SDK + запыт сервернага гранта; не вырашае права сам | сесія пакупкі; restore асобны | G08.03 |
 | `services/contentRepo.ts` | сэрвіс | чытанне правераных пакетаў, каталог, fallback моў, вытворная гатоўнасць з дыска | кэш каталога; нічога не піша ў зоне B | G04.03 |
 | `services/db.ts` | клас | SQLite-адкрыццё (module-level singleton promise), транзакцыі §3.3, міграцыі зоны B | адно злучэнне на працэс; памылка міграцыі не дазваляе дроп базы | G04.01 |
-| `services/eventLog.ts` | клас | лакальная чарга падзей, батч, адпраўка толькі са згодай; без каардынат | чарга перажывае restart | G09.01–G09.02 |
+| `services/eventLog.ts` | клас | лакальная чарга падзей з захаваннем у `event_queue` (зона B) праз `services/db`, батч, адпраўка толькі са згодай; без каардынат | чарга перажывае restart; згода брамуе толькі адпраўку | G09.01–G09.02 |
 | `services/config.ts` | сэрвіс | remote config + кэш + бяспечны default; адзін дастаўнік лікаў AR-5 | кэш перажывае офлайн | G09.05 |
 | `services/map.ts` | сэрвіс | MapLibre, офлайн-рэгіён, style/glyphs з бандла, атрыбуцыя ODbL | **gated:** рашэнне G00.02.c не прынятае | G06.02 |
 | `services/feedbackRepository.ts` | сэрвіс | уласная ацэнка, `feedback_local`/`feedback_outbox`, транзакцыі; не чысціць durable разам з кэшам | чарга перажывае restart; макс 1 in-flight на мэту | G16.02 |
@@ -118,6 +118,8 @@
 ## 3. Каталог інтэрфейсаў
 
 Подпісы — спецыфікацыя для агентаў, не ўжо створаныя файлы. Кожная падзея/поле мае адну кананічную крыніцу (раздзел 1.1).
+
+**Межа напісання імёнаў:** кананічныя кантрактныя імёны (`session_id`, `route_id`, `stop_id`, `story_id`, `play_id`, `auto_fired`, `heard`, `accessible_stop_ids`…) застаюцца snake_case даслоўна ў ADR, `09`, SQL-калонках і задакументаваных падзеях. TypeScript-ідэнтыфікатары ніжэй — camelCase па канвенцыі мовы (`sessionId`, `stopId`, `autoFired`…) — гэта механічнае пераўтварэнне таго самага імя, не другі кантракт. Мапаванне жыве ў адным месцы: мяжа кантролер ↔ `services/db` (запіс durable-радка) і кантролер ↔ сэрвісы (тэгі callback'аў). Трэцяе напісанне вынайджаць забаронена; імя палі заўжды правяраецца па сваёй кананічнай крыніцы з раздзела 1.1.
 
 ### 3.1 Engine: падзеі, каманды, рэдуктар
 
@@ -219,7 +221,7 @@ interface DownloadService {
   requestGrant(r: { routeId: RouteId; version: VersionId; locale: Locale; tier: Tier; paths: string[] }):
     Promise<GrantUrls | GrantError>;                        // раздзел 3.6
   activate(r: { routeId: RouteId; version: VersionId; tier: Tier }): Promise<ActivationResult>;
-  // ActivationResult — лакальны вынік загрузкі (гл. правілы крэшаў: ADR G01.03 §3.7): поўны/частковы/хэш-мисмач/недаступнае месца.
+  // ActivationResult — лакальны вынік загрузкі (гл. правілы крэшаў: ADR G01.03 §3.7): поўны/частковы/хэш-несупадзенне/недаступнае месца.
   // Гэта не серверны код з закрытага спісу §3.6 — памылкі актывацыі лакальныя і ідэмпатэнтна паўторныя рэтраем.
   // паспяховая актывацыя — адзінае месца эмісіі AccessReady (§3.2); паўтор тае самай версіі — no-op для сесіі
 }
@@ -387,7 +389,7 @@ sequenceDiagram
   RC->>E: step(падзея)
   E-->>RC: каманды, сярод іх PlayStory(session_id, play_id)
   RC->>AUD: play(...) — адзіны плэер
-  AUD-->>RC: AudioFinished(session_id, play_id) — тэг запуску
+  AUD-->>RC: AudioFinished(session_id, play_id, story_id?) — тэг запуску; story_id правяраецца, калі прысутнічае
   RC->>E: AudioFinished → heard +1
   RC->>DB: PersistProgress (checkpoint)
   U->>RC: Pause
