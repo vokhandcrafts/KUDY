@@ -66,7 +66,7 @@ flowchart TB
 | `services/eventLog` | Лакальная чарга і адпраўка са згодай | валідная падзея → локальны запіс/батч | уплыў consent на працу гіда |
 | Сервер `grant` | Device auth, права, mapping прадукту і manifest membership | route/version/locale/tier/paths → кароткія URL або адмова | давер да чужога product_id, URL або path |
 
-Гукавы owner/tagging і durable-палі не выдумляюцца аўтарамі сэрвісаў: кантракт сесіі/доступу прыняты — [ADR G01.03](G01.03-session-access.md) §3.1–§3.2 (issue #18); яго частка — `play_seq` write-through, табліцы R07 і `migration_log`. Кантракт уладальніка гуку — G01.02.a, ён яшчэ не закрыты. `AudioFinished(session_id, play_id)` — сённяшняя мяжа guide-model; яна патрабуе пашырэння для ручнога кантэнту без сесіі. Да гэтага нельга сцвярджаць, што інтэграцыя Moments гатовая.
+Гукавы owner/tagging і durable-палі не выдумляюцца аўтарамі сэрвісаў: кантракт сесіі/доступу прыняты — [ADR G01.03](decisions/G01.03-session-access.md) §3.1–§3.2 (issue #18); яго частка — `play_seq` write-through, табліцы R07 і `migration_log`. Кантракт уладальніка гуку — G01.02.a, ён яшчэ не закрыты. `AudioFinished(session_id, play_id, story_id?)` — сённяшняя мяжа guide-model; яна патрабуе пашырэння для ручнога кантэнту без сесіі. Да гэтага нельга сцвярджаць, што інтэграцыя Moments гатовая.
 
 ## 3. Дадзеныя і ідэнтычнасць
 
