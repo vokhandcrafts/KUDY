@@ -140,6 +140,7 @@ test('the positive cache is per device: another device never rides on it', async
   assert.equal(ownerAgain.status, 200);
   const strangerAgain = await postGrant(base, stranger.secret, GRANT_BODY);
   assert.equal(strangerAgain.status, 200, 'the stranger grants on its own merit after the owner cached hit');
+  assert.equal(rig.providerAsks(), 2, 'both repeats rode the cache: no provider ask after the first grants');
   const hits = events.filter((entry) => entry.event === 'entitlement_cache_hit');
   assert.equal(hits.length, 2, 'each device rides only its own cache entry');
 });
@@ -284,17 +285,12 @@ test('new negative probes keep secrets, device ids and URLs out of the logs', as
   await postGrant(base, 'junk-secret'.repeat(12), GRANT_BODY);
   await postGrant(base, registration.deviceSecret, { ...GRANT_BODY, paths: [PATH_NON_MEMBER] });
   const serialized = JSON.stringify(events);
-  const forbidden = [
-    registration.deviceSecret,
-    registration.deviceId,
-    'Bearer ',
-    'receipt',
-    '/private/',
-    purchase.urls[0].url,
-  ];
-  for (const value of forbidden) {
-    assert.ok(!serialized.includes(value), 'logs must not carry secrets, ids, bearer, receipts or signed URLs');
+  const lowercased = serialized.toLowerCase();
+  for (const value of [registration.deviceSecret, registration.deviceId, '/private/', purchase.urls[0].url]) {
+    assert.ok(!serialized.includes(value), 'logs must not carry secrets, ids or signed URLs');
   }
+  assert.ok(!lowercased.includes('bearer'), 'logs must not carry the bearer scheme in any case');
+  assert.ok(!lowercased.includes('receipt'), 'logs must not carry receipts');
   assert.ok(events.length > 0);
   assert.ok(events.every((entry) => entry.device_hash === undefined || /^[0-9a-f]{16}$/.test(entry.device_hash)));
 });
