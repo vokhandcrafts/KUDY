@@ -10,12 +10,12 @@ cd spikes/G00.03-sandbox-grant && node --test tests/negative-grant.test.mjs 2>&1
 ```
 
 ```output
-ℹ tests 15
+ℹ tests 16
 ℹ suites 0
-ℹ pass 15
+ℹ pass 16
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1457.7098
+ℹ duration_ms 1501.9972
 ```
