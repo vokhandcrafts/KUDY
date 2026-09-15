@@ -1,0 +1,3 @@
+# AR-1 (#78): lock.json sha256 values are computed over canonical LF bytes.
+# Pin LF so a CRLF checkout cannot break integrity verification of the fixtures.
+spikes/G00.02-offline-map/source/** eol=lf
