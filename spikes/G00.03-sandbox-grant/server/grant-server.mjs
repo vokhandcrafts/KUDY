@@ -65,19 +65,31 @@ function readJsonBody(req) {
   return new Promise((resolve) => {
     let size = 0;
     const chunks = [];
-    let aborted = false;
+    let overflow = false;
+    // Once over MAX_BODY_BYTES nothing more is buffered, but the remainder is
+    // still drained (discarded, never stored) so the client is told
+    // 400 invalid_request from the closed list instead of losing the socket
+    // mid-request. A client that keeps streaming past this drain limit gets
+    // the connection reset instead: input stays bounded either way.
+    const DRAIN_LIMIT_BYTES = 1024 * 1024;
     req.on('data', (chunk) => {
       size += chunk.length;
-      if (size > MAX_BODY_BYTES || aborted) {
-        aborted = true;
-        resolve({ error: 'too_large' });
-        req.destroy();
+      if (overflow) {
+        if (size > DRAIN_LIMIT_BYTES) {
+          resolve({ error: 'too_large' });
+          req.destroy();
+        }
+        return;
+      }
+      if (size > MAX_BODY_BYTES) {
+        overflow = true;
+        chunks.length = 0;
         return;
       }
       chunks.push(chunk);
     });
     req.on('end', () => {
-      if (aborted) return;
+      if (overflow) return resolve({ error: 'too_large' });
       try {
         resolve({ body: JSON.parse(Buffer.concat(chunks).toString('utf8')) });
       } catch {
