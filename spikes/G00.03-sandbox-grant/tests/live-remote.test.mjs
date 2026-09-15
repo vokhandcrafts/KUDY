@@ -30,7 +30,7 @@ test('live: a request without any bearer is refused', { skip: skipReason }, asyn
 });
 
 test('live: malformed Authorization shapes are refused', { skip: skipReason }, async () => {
-  for (const headerValue of ['bearer x', 'Basic dXNlcjpwYXNz', 'Bearer ']) {
+  for (const headerValue of ['bearer x', 'Basic dXNlcjpwYXNz', 'Bearer ', 'not-a-secret-at-all']) {
     const probe = await postGrantRaw(LIVE_URL, headerValue, GRANT_BODY);
     assert.equal(probe.status, 403, headerValue);
     assert.equal(probe.code, 'device_auth_failed', headerValue);
@@ -45,12 +45,15 @@ test('live: a registered device with no purchase fails closed', { skip: skipReas
   // Both are acceptable here; a 200 with URLs is not, ever.
   assert.ok([403, 503].includes(probe.status), `status ${probe.status}`);
   assert.ok(['no_entitlement', 'entitlement_unavailable'].includes(probe.code), `code ${probe.code}`);
+  if (probe.status === 503) {
+    assert.equal(probe.headers.get('retry-after'), '30', 'a 503 must carry the documented Retry-After (09 §5)');
+  }
   assert.equal(probe.urls, null);
 });
 
 test('live: unsafe and non-member paths are refused before any entitlement work', { skip: skipReason }, async () => {
   const device = await registerDevice(LIVE_URL);
-  for (const badPath of [PATH_NON_MEMBER, '../outside.txt', '/etc/passwd', 'C:/win.ini', '']) {
+  for (const badPath of [PATH_NON_MEMBER, '../outside.txt', 'transcripts\\..\\..\\outside.txt', '/etc/passwd', 'C:/win.ini', '']) {
     const probe = await postGrant(LIVE_URL, device.device_secret, { ...GRANT_BODY, paths: [badPath] });
     assert.equal(probe.status, 403, badPath);
     assert.equal(probe.code, 'path_not_allowed', badPath);
