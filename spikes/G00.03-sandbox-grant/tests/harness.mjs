@@ -136,7 +136,7 @@ export async function postGrantRaw(base, authorizationHeader, payload) {
   try {
     response = await fetch(`${base}/v1/grant`, { method: 'POST', headers, body: JSON.stringify(payload) });
   } catch (error) {
-    return { status: 0, code: null, body: null, urls: null, transportError: String(error?.cause?.code ?? error?.message ?? error) };
+    return { status: 0, code: null, body: null, urls: null, headers: null, transportError: String(error?.cause?.code ?? error?.message ?? error) };
   }
   let body = null;
   try {
@@ -144,7 +144,7 @@ export async function postGrantRaw(base, authorizationHeader, payload) {
   } catch {
     body = null;
   }
-  return { status: response.status, code: body?.error?.code ?? null, body, urls: body?.urls ?? null };
+  return { status: response.status, code: body?.error?.code ?? null, body, urls: body?.urls ?? null, headers: response.headers };
 }
 
 export function postGrant(base, deviceSecret, payload) {
