@@ -18,6 +18,7 @@ export function createRevenueCatProvider({
   secretApiKey,
   baseUrl = 'https://api.revenuecat.com',
   timeoutMs = 5000,
+  fetchImpl = fetch,
 }) {
   if (!secretApiKey) throw new Error('env REVENUECAT_SECRET_API_KEY is required for the live provider');
   // The secret API key travels in this request; never send it over cleartext.
@@ -28,7 +29,7 @@ export function createRevenueCatProvider({
     async verifyEntitlement({ deviceId, productId }) {
       let response;
       try {
-        response = await fetch(
+        response = await fetchImpl(
           `${baseUrl.replace(/\/$/, '')}/v1/subscribers/${encodeURIComponent(deviceId)}`,
           {
             headers: {
@@ -61,8 +62,10 @@ export function createRevenueCatProvider({
       } catch {
         return { ok: false, reason: 'unavailable', detail: 'bad_payload' };
       }
+      // RevenueCat's documented v1 entitlement payload carries the store
+      // product under `product_identifier` (not `product_id`).
       const entitled = Object.values(subscriber?.subscriber?.entitlements ?? {})
-        .some((entitlement) => entitlement?.product_id === productId);
+        .some((entitlement) => entitlement?.product_identifier === productId);
       if (!entitled) return { ok: true, entitled: false, environment: null };
       // Sandbox/production attribution is not part of this endpoint's
       // documented payload; verify how to read it in G00.03.c.

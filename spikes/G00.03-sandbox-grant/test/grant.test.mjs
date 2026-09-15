@@ -362,3 +362,35 @@ test('the live RevenueCat provider refuses non-https base URLs', () => {
   );
   assert.doesNotThrow(() => createRevenueCatProvider({ secretApiKey: 'sk_placeholder' }));
 });
+
+test('the live RC adapter reads product_identifier and fails closed on unknown environment', async () => {
+  const provider = createRevenueCatProvider({
+    secretApiKey: 'sk_placeholder',
+    fetchImpl: async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ subscriber: { entitlements: { pro: { product_identifier: PRODUCT } } } }),
+    }),
+  });
+  const verdict = await provider.verifyEntitlement({ deviceId: 'd1', productId: PRODUCT });
+  assert.equal(verdict.ok, false, 'entitled answer without environment attribution fails closed');
+  assert.equal(verdict.detail, 'environment_undeterminable');
+});
+
+test('the live RC adapter treats 404 as no entitlement and other http errors as unavailable', async () => {
+  const notFound = createRevenueCatProvider({
+    secretApiKey: 'sk_placeholder',
+    fetchImpl: async () => ({ ok: false, status: 404, json: async () => ({}) }),
+  });
+  assert.deepEqual(
+    await notFound.verifyEntitlement({ deviceId: 'd1', productId: PRODUCT }),
+    { ok: true, entitled: false, environment: null },
+  );
+  const unavailable = createRevenueCatProvider({
+    secretApiKey: 'sk_placeholder',
+    fetchImpl: async () => ({ ok: false, status: 502, json: async () => ({}) }),
+  });
+  const down = await unavailable.verifyEntitlement({ deviceId: 'd1', productId: PRODUCT });
+  assert.equal(down.ok, false);
+  assert.equal(down.reason, 'unavailable');
+});
