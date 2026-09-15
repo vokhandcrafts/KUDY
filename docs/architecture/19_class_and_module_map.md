@@ -219,6 +219,8 @@ interface DownloadService {
   requestGrant(r: { routeId: RouteId; version: VersionId; locale: Locale; tier: Tier; paths: string[] }):
     Promise<GrantUrls | GrantError>;                        // раздзел 3.6
   activate(r: { routeId: RouteId; version: VersionId; tier: Tier }): Promise<ActivationResult>;
+  // ActivationResult — лакальны вынік загрузкі (гл. правілы крэшаў: ADR G01.03 §3.7): поўны/частковы/хэш-мисмач/недаступнае месца.
+  // Гэта не серверны код з закрытага спісу §3.6 — памылкі актывацыі лакальныя і ідэмпатэнтна паўторныя рэтраем.
   // паспяховая актывацыя — адзінае месца эмісіі AccessReady (§3.2); паўтор тае самай версіі — no-op для сесіі
 }
 ```
@@ -417,7 +419,7 @@ sequenceDiagram
 | Правераная гатоўнасць | дыск + `lock.json` праз `services/download`/`contentRepo` | зоны A (`bundle_asset` — адбудова); **няма сцягу ready у зоне B** | engine, UI |
 | Аўтарызацыя/права | сервер (RevenueCat у момант grant); кліенцкае «куплена» — не крыніца | серверны пазітыўны кэш TTL | `services/entitlement`, `download` |
 | Shown/dismissed R07 | `useNearbyController` | durable `guide_hint_state`/`guide_hint_last` (зона B) | UI «Побач» |
-| Згода на аналітыку | My KUDY праз `services/eventLog` (кантракт G09) | durable налады | `eventLog` (гейт адпраўкі) |
+| Згода на аналітыку | My KUDY праз `services/eventLog` (кантракт G09) | `settings` (зона B) | `eventLog` (гейт адпраўкі) |
 | Уласная ацэнка feedback | `useFeedbackController` → `feedbackRepository` | durable `feedback_local`/`feedback_outbox` (зона B); сервер — CAS | `feedbackSync` |
 
 Забаронена другая незалежна мутуемая копія любога радка: pipeline, сэрвісы і UI не пішуць у радок сесіі і не трымаюць уласных набораў `heard`/`auto_fired` (`09` §6.2 «адзіны ўладальнік набораў — рэдуктар»).
