@@ -220,7 +220,7 @@ interface ContentRepo {
 interface DownloadService {
   requestGrant(r: { routeId: RouteId; version: VersionId; locale: Locale; tier: Tier; paths: string[] }):
     Promise<GrantUrls | GrantError>;                        // раздзел 3.6
-  activate(r: { routeId: RouteId; version: VersionId; tier: Tier }): Promise<ActivationResult>;
+  activate(r: { routeId: RouteId; version: VersionId; locale: Locale; tier: Tier }): Promise<ActivationResult>;
   // ActivationResult — лакальны вынік загрузкі (гл. правілы крэшаў: ADR G01.03 §3.7): поўны/частковы/хэш-несупадзенне/недаступнае месца.
   // Гэта не серверны код з закрытага спісу §3.6 — памылкі актывацыі лакальныя і ідэмпатэнтна паўторныя рэтраем.
   // паспяховая актывацыя — адзінае месца эмісіі AccessReady (§3.2); паўтор тае самай версіі — no-op для сесіі
@@ -378,9 +378,10 @@ sequenceDiagram
   participant E as core/engine step()
   participant AUD as services/audio
   participant DL as services/download
+  participant CR as services/contentRepo
 
   U->>RC: Start(guide)
-  RC->>DL: readiness(version) — паўны выбраны пласт
+  RC->>CR: readiness(route, version) — паўны выбраны пласт
   RC->>DB: транзакцыя: INSERT session (version, play_seq=0) + перанос R07
   RC->>LOC: setMode('active-guide') + SetGeofenceWindow
   LOC->>RC: onFix(сыры фікс)
@@ -479,8 +480,8 @@ sequenceDiagram
 
 ### 6.5 Стары callback пасля End і новай сесіі
 
-1. Сесія A завершана (`state='finished'`), пачатая сесія B (новы радок, `play_seq` пачаўся з write-through гісторыі A).
-2. Прыходзіць `AudioFinished(sessionA, playId)` — раздзел 5.3 і ADR G01.01 §4.11: пара не супадае з `playing` сесіі B → падзея ігнаруецца цалкам; нічога не залічваецца, чарга не стартуе.
+1. Сесія A завершана (`state='finished'`); транзакцыя Start сесіі B стварае **новы радок з `play_seq = 0`** (ADR G01.03 §3.3) — лічыльнік B нічога не ўспадкоўвае ад A. Write-through толькі трымаў пары `(session_id, play_id)` унікальнымі ўнутры гісторыі A, у тым лічбе праз restart.
+2. Прыходзіць `AudioFinished(sessionA, playId)` — гэта пара з гісторыі A, не з пачатковага стану B: `session_id` пары (A) не супадае з `session_id` у `playing` сесіі B → падзея ігнаруецца цалкам (раздзел 5.3, ADR G01.01 §4.11); нічога не залічваецца, чарга не стартуе.
 3. Файлы, дасланыя пасля End, застаюцца на диску пад ключам пакета — даступныя будучай сесіі той самай версіі (ADR §3.5 «позняя загрузка»).
 
 ### 6.6 Restart з замацаванай старой версіяй пры новым каталогу
