@@ -10,6 +10,9 @@ function shortHash(value) {
 }
 
 const MAX_BODY_BYTES = 64 * 1024;
+// Over-limit bodies are drained (never stored) up to this many received bytes
+// before the connection is reset instead of answered.
+const DRAIN_LIMIT_BYTES = 1024 * 1024;
 const MAX_PATHS = 20;
 
 // Canonical API surface: docs/architecture/09 §5. The error codes form a
@@ -69,9 +72,8 @@ function readJsonBody(req) {
     // Once over MAX_BODY_BYTES nothing more is buffered, but the remainder is
     // still drained (discarded, never stored) so the client is told
     // 400 invalid_request from the closed list instead of losing the socket
-    // mid-request. A client that keeps streaming past this drain limit gets
+    // mid-request. A client that keeps streaming past DRAIN_LIMIT_BYTES gets
     // the connection reset instead: input stays bounded either way.
-    const DRAIN_LIMIT_BYTES = 1024 * 1024;
     req.on('data', (chunk) => {
       size += chunk.length;
       if (overflow) {
