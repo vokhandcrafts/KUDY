@@ -1,0 +1,15 @@
+{
+  "products": {
+    "kudy.spike.g00_03.story_01": {
+      "route_id": "g00-03-spike",
+      "tier": "extended",
+      "type": "non_consumable"
+    }
+  },
+  "manifests": {
+    "g00-03-spike/2026-09-15.1/be/extended": {
+      "lock_url": "/public/g00-03-spike/2026-09-15.1/be/lock.json",
+      "paths": ["transcripts/private-story-01.be.txt"]
+    }
+  }
+}

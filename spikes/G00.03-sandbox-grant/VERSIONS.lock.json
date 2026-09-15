@@ -1,0 +1,12 @@
+{
+  "status": "candidate-direct-versions-only",
+  "warning": "This records intended direct versions but is not a generated npm dependency lock.",
+  "node": "24.13.0",
+  "npm": "11.6.2",
+  "dependencies": {},
+  "external_integrations_unverified_offline": [
+    "RevenueCat REST API (adapter shape written, not called in this task)",
+    "Apple StoreKit sandbox",
+    "Google Play Billing testing track"
+  ]
+}
