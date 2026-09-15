@@ -164,10 +164,15 @@ invalidated the Showboat demo's captured output; demo outputs rot whenever a com
 output changes.
 
 **Rule:** any change that alters a command's output (counts, wording, statuses)
-re-captures and re-verifies the affected demos in the same PR.
+re-captures and re-verifies the affected demos in the same PR. Captured output must
+be deterministic in the first place: strip timing lines (`duration_ms`, …), normalize
+line endings (`| tr -d ""` on Windows), and silence process-management noise. When
+a demo starts a background server on a fixed port, kill it by the listening PID
+(`netstat`+`taskkill`) with all kill noise redirected — shell job pids are
+unreliable — and give tests that boot the same server an EADDRINUSE retry.
 
 **Check:** `uvx showboat==0.6.1 verify <file>` passes for every demo touched or
-affected by the diff.
+affected by the diff; two consecutive runs of every demo block are byte-identical.
 
 ## 12. Language self-grep for human-facing text
 
