@@ -10,6 +10,9 @@ function shortHash(value) {
 }
 
 const MAX_BODY_BYTES = 64 * 1024;
+// Over-limit bodies are drained (never stored) up to this many received bytes
+// before the connection is reset instead of answered.
+const DRAIN_LIMIT_BYTES = 1024 * 1024;
 const MAX_PATHS = 20;
 
 // Canonical API surface: docs/architecture/09 §5. The error codes form a
@@ -65,26 +68,48 @@ function readJsonBody(req) {
   return new Promise((resolve) => {
     let size = 0;
     const chunks = [];
-    let aborted = false;
+    let overflow = false;
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    // Once over MAX_BODY_BYTES nothing more is buffered, but the remainder is
+    // still drained (discarded, never stored) so the client is told
+    // 400 invalid_request from the closed list instead of losing the socket
+    // mid-request. A client that keeps streaming past DRAIN_LIMIT_BYTES gets
+    // the connection reset instead: input stays bounded either way. A client
+    // that stalls mid-body cannot hold the handler: 'close' settles the
+    // promise when the request dies without 'end'.
     req.on('data', (chunk) => {
       size += chunk.length;
-      if (size > MAX_BODY_BYTES || aborted) {
-        aborted = true;
-        resolve({ error: 'too_large' });
-        req.destroy();
+      if (overflow) {
+        if (size > DRAIN_LIMIT_BYTES) {
+          finish({ error: 'too_large' });
+          req.destroy();
+        }
+        return;
+      }
+      if (size > MAX_BODY_BYTES) {
+        overflow = true;
+        chunks.length = 0;
         return;
       }
       chunks.push(chunk);
     });
     req.on('end', () => {
-      if (aborted) return;
+      if (overflow) return finish({ error: 'too_large' });
       try {
-        resolve({ body: JSON.parse(Buffer.concat(chunks).toString('utf8')) });
+        finish({ body: JSON.parse(Buffer.concat(chunks).toString('utf8')) });
       } catch {
-        resolve({ error: 'bad_json' });
+        finish({ error: 'bad_json' });
       }
     });
-    req.on('error', () => resolve({ error: 'bad_json' }));
+    req.on('close', () => {
+      if (overflow) finish({ error: 'too_large' });
+    });
+    req.on('error', () => finish({ error: 'bad_json' }));
   });
 }
 

@@ -84,16 +84,31 @@ test('one bad path denies the whole batch: no partial URLs are issued', async (t
   assert.equal(issuedAfter, issuedBefore, 'no batch may partially grant');
 });
 
-test('an oversized body fails closed: the connection drops, the server survives', async (t) => {
+test('an oversized body is rejected with the documented 400 and the server survives', async (t) => {
   const rig = makeRig();
   const { base } = await serve(t, rig);
   const { secret } = await entitledDevice(t, rig, { base, store: rig.store });
   const oversized = { ...GRANT_BODY, paths: ['x'.repeat(70 * 1024)] };
-  const dropped = await postGrant(base, secret, oversized);
-  assert.equal(dropped.status, 0, 'the server must not answer a grant for an oversized body');
-  assert.ok(dropped.transportError, 'the socket is reset instead of granting');
-  // The same device still gets a normal grant afterwards: the reset bought
+  const rejected = await postGrant(base, secret, oversized);
+  assert.equal(rejected.status, 400, 'shape/size answers from the closed list, not with a connection reset');
+  assert.equal(rejected.code, 'invalid_request');
+  assert.equal(rejected.urls, null);
+  // The same device still gets a normal grant afterwards: the rejection bought
   // safety, not a dead server.
+  const after = await postGrant(base, secret, GRANT_BODY);
+  assert.equal(after.status, 200);
+  assert.equal(after.urls.length, 1);
+});
+
+test('a body streaming past the drain limit is reset, not answered', async (t) => {
+  const rig = makeRig();
+  const { base } = await serve(t, rig);
+  const { secret } = await entitledDevice(t, rig, { base, store: rig.store });
+  const flood = { ...GRANT_BODY, paths: ['x'.repeat(2 * 1024 * 1024)] };
+  const reset = await postGrant(base, secret, flood);
+  assert.equal(reset.status, 0, 'past the bounded drain limit the server resets instead of answering');
+  assert.ok(reset.transportError, 'the client sees a transport error, not a grant or a hang');
+  // The bounded reset bought safety, not a dead server.
   const after = await postGrant(base, secret, GRANT_BODY);
   assert.equal(after.status, 200);
   assert.equal(after.urls.length, 1);
