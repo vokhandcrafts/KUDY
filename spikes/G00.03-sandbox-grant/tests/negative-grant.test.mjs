@@ -118,6 +118,7 @@ test('a denial is never cached: a second device stays refused through an outage'
   const outage = await postGrant(base, strangerRegistration.deviceSecret, GRANT_BODY);
   assert.equal(outage.status, 503, 'no cached denial, no cached grant: fail closed');
   assert.equal(outage.code, 'entitlement_unavailable');
+  assert.equal(outage.headers.get('retry-after'), '30', 'the documented Retry-After travels with every 503');
 
   rig.store.setAvailable(true);
   const again = await postGrant(base, strangerRegistration.deviceSecret, GRANT_BODY);
