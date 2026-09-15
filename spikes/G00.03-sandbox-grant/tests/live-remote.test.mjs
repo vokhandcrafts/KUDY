@@ -46,7 +46,7 @@ test('live: a registered device with no purchase fails closed', { skip: skipReas
   assert.ok([403, 503].includes(probe.status), `status ${probe.status}`);
   assert.ok(['no_entitlement', 'entitlement_unavailable'].includes(probe.code), `code ${probe.code}`);
   if (probe.status === 503) {
-    assert.ok(probe.headers.get('retry-after'), 'a 503 must carry Retry-After (09 §5)');
+    assert.equal(probe.headers.get('retry-after'), '30', 'a 503 must carry the documented Retry-After (09 §5)');
   }
   assert.equal(probe.urls, null);
 });
