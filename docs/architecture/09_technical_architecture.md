@@ -307,7 +307,7 @@ tools/               # validate · build-bundle · simulate · readiness
 
 **Чаму два манатонныя наборы замест аднаго `consumed` і замест зменлівага статусу:** `auto_fired` адказвае «ці спрацоўваў аўтатрыгер» і забараняе паўторны аўтазапуск; `heard` адказвае «ці чуў чалавек канкрэтную гісторыю да канца» і дае спіс яшчэ непраслуханых даступных гісторый, без ацэнкі паспяховасці прагулкі. `heard` — набор `story_id`, таму base і extended адной кропкі застаюцца незалежнымі факты. Зменлівае поле статусу тут не працуе: перарваны ручны паўтор ператварыў бы `played` у `available` і зрабіў бы даслуханую кропку прапушчанай.
 
-**Events:** `Start` · `Pause` · `Resume` · `End` · `LocationAccepted` · `DwellCompleted(stop_id)` · `AudioFinished(session_id, play_id)` · `UserSelectedStop(stop_id)` · `UserSelectedStory(stop_id, story_id)` · `UserPausedAudio` · `FocusLoss` · `FocusRegain` · `Timer(id)` · `AccessReady(route_id, version, locale, tier, stop_ids[], issuer='services/download')`.
+**Events:** `Start` · `Pause` · `Resume` · `End` · `LocationAccepted` · `DwellCompleted(stop_id)` · `AudioFinished(session_id, play_id, story_id?)` · `UserSelectedStop(stop_id)` · `UserSelectedStory(stop_id, story_id)` · `UserPausedAudio` · `FocusLoss` · `FocusRegain` · `Timer(id)` · `AccessReady(route_id, version, locale, tier, stop_ids[], issuer='services/download')`.
 
 **Commands:** `PlayStory(story_id, path, session_id, play_id)` · `StopAudio` · `PauseAudio` · `ResumeAudio` · `SetGeofenceWindow(stop_ids[])` · `ClearGeofences` · `ScheduleTimer(id, ms)` · `CancelTimer(id)` · `PersistProgress` · `EmitEvent(type, payload)` · `ShowArrivalCard(stop_id)`.
 
