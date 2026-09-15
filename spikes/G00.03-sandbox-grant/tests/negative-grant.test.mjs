@@ -11,7 +11,7 @@ import { test } from 'node:test';
 import { mintFileToken } from '../server/signed-url.mjs';
 import {
   GRANT_BODY, MANIFEST_BASE, PATH_NON_MEMBER, PATH_OK,
-  clientAt, entitledDevice, makeRig, postGrant, serve,
+  clientAt, entitledDevice, makeRig, postGrant, postGrantRaw, serve,
 } from './harness.mjs';
 
 const malformedAuthCases = [
@@ -26,7 +26,7 @@ test('grant refuses every malformed Authorization shape before reading the body'
   const rig = makeRig();
   const { base } = await serve(t, rig);
   for (const [name, headerValue] of malformedAuthCases) {
-    const probe = await postGrant(base, headerValue, GRANT_BODY);
+    const probe = await postGrantRaw(base, headerValue, GRANT_BODY);
     assert.equal(probe.status, 403, name);
     assert.equal(probe.code, 'device_auth_failed', name);
     assert.equal(probe.urls, null, name);
@@ -134,12 +134,14 @@ test('the positive cache is per device: another device never rides on it', async
   const stranger = await entitledDevice(t, rig, { base, store: rig.store, account: 'acct-2' });
   assert.equal(owner.purchase.ok, true, 'setup: owner purchased and granted');
   assert.equal(stranger.purchase.ok, true, 'setup: stranger purchased and granted');
-  assert.ok(rig.providerAsks() >= 2, 'both first grants consulted the provider: no cross-device reuse');
+  assert.equal(rig.providerAsks(), 2, 'each first grant consulted the provider exactly once: the cache key cannot work without the device');
 
   const ownerAgain = await postGrant(base, owner.secret, GRANT_BODY);
   assert.equal(ownerAgain.status, 200);
+  const strangerAgain = await postGrant(base, stranger.secret, GRANT_BODY);
+  assert.equal(strangerAgain.status, 200, 'the stranger grants on its own merit after the owner cached hit');
   const hits = events.filter((entry) => entry.event === 'entitlement_cache_hit');
-  assert.equal(hits.length, 1, 'only the owner repeat grant rides the cache');
+  assert.equal(hits.length, 2, 'each device rides only its own cache entry');
 });
 
 test('cacheTtl=0 asks the provider on every grant', async (t) => {
@@ -276,13 +278,22 @@ test('an expired URL stays dead after a fresh regrant', async (t) => {
 test('new negative probes keep secrets, device ids and URLs out of the logs', async (t) => {
   const rig = makeRig();
   const { base, events } = await serve(t, rig);
-  const { registration } = await entitledDevice(t, rig, { base, store: rig.store });
+  const { registration, purchase } = await entitledDevice(t, rig, { base, store: rig.store });
+  assert.equal(purchase.ok, true, 'setup: one grant issued whose signed URL must stay out of the logs');
   await postGrant(base, null, GRANT_BODY);
   await postGrant(base, 'junk-secret'.repeat(12), GRANT_BODY);
   await postGrant(base, registration.deviceSecret, { ...GRANT_BODY, paths: [PATH_NON_MEMBER] });
   const serialized = JSON.stringify(events);
-  for (const forbidden of [registration.deviceSecret, registration.deviceId, 'Bearer ', 'receipt']) {
-    assert.ok(!serialized.includes(forbidden), 'logs must not carry secrets, ids, bearer or receipts');
+  const forbidden = [
+    registration.deviceSecret,
+    registration.deviceId,
+    'Bearer ',
+    'receipt',
+    '/private/',
+    purchase.urls[0].url,
+  ];
+  for (const value of forbidden) {
+    assert.ok(!serialized.includes(value), 'logs must not carry secrets, ids, bearer, receipts or signed URLs');
   }
   assert.ok(events.length > 0);
   assert.ok(events.every((entry) => entry.device_hash === undefined || /^[0-9a-f]{16}$/.test(entry.device_hash)));
