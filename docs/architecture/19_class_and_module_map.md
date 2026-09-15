@@ -154,7 +154,7 @@ function step(previous: RunState, event: RunEvent, now: number, config: EngineCo
   { state: RunState; commands: RunCommand[] };
 ```
 
-`RunState` — палі §4.2 ADR G01.01 даслоўна: `heard: Set<story_id>` (манатонны), `auto_fired: Set<stop_id>` (манатонны), `playing: { stop_id, story_id, play_id } | null`, `queued: { stop_id, radius, at } | null`, `accessible_stop_ids`, `tier_available`, `autoplay_suspended`, `last_fix`, `focus_lost_at?` (транзітнае поле `09` §6.1: час FocusLoss для інварыянту 5 — FocusRegain пазней за 10 хв закрывае кропку), плюс замацаваныя `session_id`/`route_id`/`version`/`locale`. Забароненыя сінонімы (`consumed`, `played`-калонка, `heard: Set<stop_id>`) — ADR §4.2.
+`RunState` — палі §4.2 ADR G01.01 даслоўна: `heard: Set<story_id>` (манатонны), `auto_fired: Set<stop_id>` (манатонны), `playing: { stop_id, story_id, play_id } | null`, `queued: { stop_id, radius, at } | null`, `accessible_stop_ids`, `tier_available`, `autoplay_suspended`, `last_fix`, `focus_lost_at?` (транзітнае поле `09` §6.1: час FocusLoss для інварыянту 5 — FocusRegain пазней за 10 хв закрывае кропку), `play_seq` (write-through лічыльнік запускаў ADR G01.03 §3.1: на кожным PlayStory расце на +1 і пішацца ў durable радок; ён і ёсць `play_id` каманды PlayStory), плюс замацаваныя `session_id`/`route_id`/`version`/`locale`. Забароненыя сінонімы (`consumed`, `played`-калонка, `heard: Set<stop_id>`) — ADR §4.2.
 
 `EngineConfig` — толькі значэнні з `services/config` (свежасць, множнік чаргі, вакно FocusRegain 10 хв — інварыянт 5 `09`); без функцый і без чытання гадзінніка.
 
@@ -473,7 +473,7 @@ sequenceDiagram
 ### 6.4 Пакупка → загрузка падае → рэтрай → той самай версіі актывацыя
 
 1. `entitlement` → сервер grant → `download.requestGrant() → GrantUrls`.
-2. Актывацыя падае на хэшы (`ActivationResult.error = 'hash_mismatch'`) → пласт **не** ready; папярэдні гатовы пласт не чапаецца (ADR G01.03 §3.7).
+2. Актывацыя падае на хэшы (катэгорыя «хэш-несупадзенне» з §3.5; дакладныя радковыя значэнні ўласныя рэалізацыі G04.02/G05) → пласт **не** ready; папярэдні гатовы пласт не чапаецца (ADR G01.03 §3.7).
 3. Рэтрай: паўторны `requestGrant` без паўторнай аплаты (серверны пазітыўны кэш) → staging/resume па хэшу → атамарны rename.
 4. `AccessReady` той самай версіі: `tier_available += extended`, `accessible_stop_ids` пералік, геафенсы пералічваюцца; **Play няма**, `heard`/`auto_fired` не мяняюцца (same-version unlock, `11` C34).
 
