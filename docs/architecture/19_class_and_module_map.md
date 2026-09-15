@@ -152,7 +152,7 @@ function step(previous: RunState, event: RunEvent, now: number, config: EngineCo
   { state: RunState; commands: RunCommand[] };
 ```
 
-`RunState` — палі §4.2 ADR G01.01 даслоўна: `heard: Set<story_id>` (манатонны), `auto_fired: Set<stop_id>` (манатонны), `playing: { stop_id, story_id, play_id } | null`, `queued: { stop_id, radius, at } | null`, `accessible_stop_ids`, `tier_available`, `autoplay_suspended`, `last_fix`, плюс замацаваныя `session_id`/`route_id`/`version`/`locale`. Забароненыя сінонімы (`consumed`, `played`-калонка, `heard: Set<stop_id>`) — ADR §4.2.
+`RunState` — палі §4.2 ADR G01.01 даслоўна: `heard: Set<story_id>` (манатонны), `auto_fired: Set<stop_id>` (манатонны), `playing: { stop_id, story_id, play_id } | null`, `queued: { stop_id, radius, at } | null`, `accessible_stop_ids`, `tier_available`, `autoplay_suspended`, `last_fix`, `focus_lost_at?` (транзітнае поле `09` §6.1: час FocusLoss для інварыянту 5 — FocusRegain пазней за 10 хв закрывае кропку), плюс замацаваныя `session_id`/`route_id`/`version`/`locale`. Забароненыя сінонімы (`consumed`, `played`-калонка, `heard: Set<stop_id>`) — ADR §4.2.
 
 `EngineConfig` — толькі значэнні з `services/config` (свежасць, множнік чаргі, вакно FocusRegain 10 хв — інварыянт 5 `09`); без функцый і без чытання гадзінніка.
 
@@ -172,6 +172,8 @@ export interface DownloadAccessPort {
 ### 3.3 Location і pipeline
 
 ```typescript
+// Значэнні LocationMode — прапанова гэтай мапы; кананічны кантракт «рэжым ад кантролера» — 09 §6.3/§18,
+// канчатковы набор станаў фіксуе G01.04/G00.01.c.
 type LocationMode = 'idle' | 'city-surface' | 'active-guide' | 'paused';
 interface FixInput { lat: number; lng: number; accuracy: number; at: number }   // недаступныя/будучыя/адмоўныя значэнні не прымаюцца
 interface AcceptedFix { lat: number; lng: number; accuracy: number; at: number; distances: Map<StopId, number> }
@@ -179,11 +181,13 @@ interface AcceptedFix { lat: number; lng: number; accuracy: number; at: number; 
 interface LocationService {
   setMode(mode: LocationMode): void;          // узбраенне/вызваленне падпіскі і геафенсаў
   setGeofenceWindow(stopIds: StopId[]): void; // ≤ 20 рэгіёнаў; пералік па свежым фіксе
-  onFix(handler: (fix: FixInput) => void): void;   // сыры фікс → pipeline
+  onFix(handler: (fix: FixInput) => void): void;   // сыры фікс → кантролер (далей acceptFix у pipeline, §5.2)
   status(): 'acquiring' | 'live' | 'recovering' | 'stalled';       // watchdog, парог 15 с
 }
+// Выхад pipeline'а кантролер правярае праз step(): падзеі ўжо сабраныя ў формы RunEvent з §3.1,
+// у тым лічбе LocationAccepted несце прыняты fix (крыніца last_fix для праверак свежасці, 09 інварыянт 8).
 function acceptFix(fix: FixInput, candidates: ReadonlyMap<StopId, number>, config: PipelineConfig):
-  { fix: AcceptedFix; events: Array<{ type: 'LocationAccepted' } | { type: 'DwellCompleted'; stopId: StopId }> };
+  { fix: AcceptedFix; events: Array<Extract<RunEvent, { type: 'LocationAccepted' } | { type: 'DwellCompleted'; stopId: StopId }>> };
 ```
 
 - Памылка «дазволу няма» — асобны стан `status()`, не выкітак; UI дае ручны шлях (G00.01.c дакажа OS-дэталі).
@@ -296,7 +300,8 @@ classDiagram
   RunController --> LocationService : SetGeofenceWindow / ClearGeofences
   RunController --> AudioService : PlayStory / Stop / Pause
   RunController --> DbService : PersistProgress (транзакцыя)
-  LocationService --> Pipeline : FixInput → AcceptedFix
+  LocationService --> RunController : onFix (сыры фікс)
+  RunController --> Pipeline : acceptFix(fix, candidates)
   Pipeline --> RunController : LocationAccepted / DwellCompleted
   DownloadService --> RunController : AccessReady (capability-канал)
   DownloadService --> DbService : стан актывацыі (зона A)
@@ -337,7 +342,8 @@ flowchart TB
   RC --> LOC
   RC --> AUD
   RC --> DB
-  LOC --> P
+  LOC --> RC
+  RC --> P
   P --> RC
   DL --> RC
   DL --> SRV
@@ -364,6 +370,7 @@ sequenceDiagram
   participant RC as useRunController
   participant DB as services/db (транзакцыя)
   participant LOC as services/location
+  participant P as core/pipeline acceptFix()
   participant E as core/engine step()
   participant AUD as services/audio
   participant DL as services/download
@@ -372,8 +379,11 @@ sequenceDiagram
   RC->>DL: readiness(version) — паўны выбраны пласт
   RC->>DB: транзакцыя: INSERT session (version, play_seq=0) + перанос R07
   RC->>LOC: setMode('active-guide') + SetGeofenceWindow
-  LOC->>E: LocationAccepted → DwellCompleted (пасля pipeline)
-  E-->>RC: PlayStory(session_id, play_id)
+  LOC->>RC: onFix(сыры фікс)
+  RC->>P: acceptFix(fix, кандыдаты, config)
+  P-->>RC: LocationAccepted(fix) / DwellCompleted(stop) — толькі прынятыя
+  RC->>E: step(падзея)
+  E-->>RC: каманды, сярод іх PlayStory(session_id, play_id)
   RC->>AUD: play(...) — адзіны плэер
   AUD-->>RC: AudioFinished(session_id, play_id) — тэг запуску
   RC->>E: AudioFinished → heard +1
@@ -427,7 +437,7 @@ sequenceDiagram
 
 | Зона | Змест | Аднаўленне |
 |---|---|---|
-| **B — durable** | `session` (у т. л. `heard`, `auto_fired`, `play_seq`), `event_queue` (неадпраўленыя падзеі — таксама незаменныя, `09` §7: дэдуплікацыя і захаванне не патрабуюць згоды), `guide_hint_state`/`guide_hint_last`, `migration_log`, `feedback_local`/`feedback_outbox`, налады і згода | толькі міграцыі дадаваннем; памылка міграцыі не дазваляе дроп базы; cache purge не даходзіць да зоны B |
+| **B — durable** | `session` (у т. л. `heard`, `auto_fired`, `play_seq`), `event_queue` (неадпраўленыя падзеі — таксама незаменныя, `09` §7: дэдуплікацыя і захаванне не патрабуюць згоды), `guide_hint_state`/`guide_hint_last`, `migration_log`, `feedback_local`/`feedback_outbox`, `settings` (налады і згода), `device` (толькі `device_id`; сакрэт жыве ў SecureStore, не ў базе) | толькі міграцыі дадаваннем; памылка міграцыі не дазваляе дроп базы; cache purge не даходзіць да зоны B |
 | **A — аднаўляльная** | пакеты/файлы кантэнту пад ключам, `bundle_asset`, `discovery_cache`, `catalog_cache` | перахэшаванне/перахадбованне з сервера; страта не губляе прагрэс і пакупкі |
 
 Ніколі не аднаўляецца аўтаматычна: гук пасля restart, аўтаматыка (толькі яўнае дзеянне здымае `autoplay_suspended`), чарга трыгераў, замена версіі кантэнту пад жывой сесіяй.
@@ -453,7 +463,7 @@ sequenceDiagram
 ### 6.3 Гід гучыць → Moment адкрыты → яўны Play → вяртанне
 
 1. Адкрыццё карткі Moment — **толькі** прэв'ю: ніякага выкліку аудыё-сэрвіса (R04).
-2. Яўны Play Moment: **прынятае** — аўтаматычны голас толькі ў гіда; кіраванне плэерам (спыніць бягучы файл, прыпыніць аўтаматыку, вярнуць кнопкай «Працягнуць гід») — **прапанова P02, кантракт G01.02 яшчэ адкрыты**. Реалізацыя чакае яго; вынайдзены тут паводзіны забароненыя.
+2. Яўны Play Moment: **прынятае** — аўтаматычны голас толькі ў гіда; кіраванне плэерам (спыніць бягучы файл, прыпыніць аўтаматыку, вярнуць кнопкай «Працягнуць гід») — **прапанова P02, кантракт G01.02 яшчэ адкрыты**. Рэалізацыя гэтага пераходу чакае кантракту; вынайдзеныя тут паводзіны забароненыя.
 3. Вяртанне: сесія і прагрэс непашкоджаныя (сцэнар G07.03); чужы `AudioFinished` Moment не залічваецца гіду пры любой рэалізацыі G01.02 (фільр па пары `(session_id, play_id)`).
 
 ### 6.4 Пакупка → загрузка падае → рэтрай → той самай версіі актывацыя
@@ -466,7 +476,7 @@ sequenceDiagram
 ### 6.5 Стары callback пасля End і новай сесіі
 
 1. Сесія A завершана (`state='finished'`), пачатая сесія B (новы радок, `play_seq` пачаўся з write-through гісторыі A).
-2. Прыходзіць `AudioFinished(sessionA, playId)` — крок 3.5/ADR §4.11: пара не супадае з `playing` сесіі B → падзея ігнаруецца цалкам; нічога не залічваецца, чарга не стартуе.
+2. Прыходзіць `AudioFinished(sessionA, playId)` — раздзел 5.3 і ADR G01.01 §4.11: пара не супадае з `playing` сесіі B → падзея ігнаруецца цалкам; нічога не залічваецца, чарга не стартуе.
 3. Файлы, дасланыя пасля End, застаюцца на диску пад ключам пакета — даступныя будучай сесіі той самай версіі (ADR §3.5 «позняя загрузка»).
 
 ### 6.6 Restart з замацаванай старой версіяй пры новым каталогу
