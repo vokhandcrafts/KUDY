@@ -126,10 +126,12 @@ export async function entitledDevice(t, rig, { base, store, account = 'acct-1' }
   };
 }
 
-// Raw grant probe; never prints or returns the bearer secret.
-export async function postGrant(base, deviceSecret, payload) {
+// Raw grant probe; never prints or returns the bearer secret. Sends the exact
+// Authorization header value given (null = no header), so malformed scheme
+// shapes reach the server verbatim; postGrant wraps a device secret instead.
+export async function postGrantRaw(base, authorizationHeader, payload) {
   const headers = { 'content-type': 'application/json' };
-  if (deviceSecret !== null) headers.authorization = `Bearer ${deviceSecret}`;
+  if (authorizationHeader !== null) headers.authorization = authorizationHeader;
   let response;
   try {
     response = await fetch(`${base}/v1/grant`, { method: 'POST', headers, body: JSON.stringify(payload) });
@@ -143,4 +145,8 @@ export async function postGrant(base, deviceSecret, payload) {
     body = null;
   }
   return { status: response.status, code: body?.error?.code ?? null, body, urls: body?.urls ?? null };
+}
+
+export function postGrant(base, deviceSecret, payload) {
+  return postGrantRaw(base, deviceSecret === null ? null : `Bearer ${deviceSecret}`, payload);
 }

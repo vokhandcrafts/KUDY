@@ -9,7 +9,7 @@
 // entitlement_unavailable without one) — the check asserts exactly that.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { GRANT_BODY, LIVE_URL, PATH_NON_MEMBER, PATH_OK, postGrant } from './harness.mjs';
+import { GRANT_BODY, LIVE_URL, PATH_NON_MEMBER, PATH_OK, postGrant, postGrantRaw } from './harness.mjs';
 
 const skipReason = LIVE_URL ? false : 'mock mode: set G00_03_B_LIVE_URL (npm start with env) to run these against a live server';
 
@@ -31,9 +31,10 @@ test('live: a request without any bearer is refused', { skip: skipReason }, asyn
 
 test('live: malformed Authorization shapes are refused', { skip: skipReason }, async () => {
   for (const headerValue of ['bearer x', 'Basic dXNlcjpwYXNz', 'Bearer ']) {
-    const probe = await postGrant(LIVE_URL, headerValue, GRANT_BODY);
+    const probe = await postGrantRaw(LIVE_URL, headerValue, GRANT_BODY);
     assert.equal(probe.status, 403, headerValue);
     assert.equal(probe.code, 'device_auth_failed', headerValue);
+    assert.equal(probe.urls, null, headerValue);
   }
 });
 
@@ -53,6 +54,7 @@ test('live: unsafe and non-member paths are refused before any entitlement work'
     const probe = await postGrant(LIVE_URL, device.device_secret, { ...GRANT_BODY, paths: [badPath] });
     assert.equal(probe.status, 403, badPath);
     assert.equal(probe.code, 'path_not_allowed', badPath);
+    assert.equal(probe.urls, null, badPath);
   }
 });
 

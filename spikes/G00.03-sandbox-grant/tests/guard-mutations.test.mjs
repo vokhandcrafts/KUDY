@@ -20,7 +20,7 @@ import {
 
 const skipInLive = LIVE_URL ? 'mutation checks need the in-process mock transport' : false;
 
-function buildMutatedSource({ deviceId, replacements }) {
+function buildMutatedSource({ replacements }) {
   const original = readFileSync(join(SPIKE_ROOT, 'server', 'grant-server.mjs'), 'utf8');
   let mutated = original;
   for (const [find, replace] of replacements) {
@@ -38,8 +38,8 @@ function buildMutatedSource({ deviceId, replacements }) {
   return mutated;
 }
 
-async function bootMutated(t, rig, { name, deviceId, replacements, devicesFile, signingKey }) {
-  const mutated = buildMutatedSource({ deviceId, replacements });
+async function bootMutated(t, rig, { name, replacements, devicesFile, signingKey }) {
+  const mutated = buildMutatedSource({ replacements });
   const dir = scratchDir(name);
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const file = join(dir, 'grant-server-mutated.mjs');
@@ -59,7 +59,6 @@ test('mutation: without device auth an anonymous grant goes through', { skip: sk
 
   const mutated = await bootMutated(t, rig, {
     name: 'no-device-auth',
-    deviceId,
     replacements: [[
       'authenticateBearer(req.headers.authorization, devicesFile)',
       `{ ok: true, deviceId: ${JSON.stringify(deviceId)} }`,
@@ -79,7 +78,7 @@ test('mutation: without device auth an anonymous grant goes through', { skip: sk
 test('mutation: without the manifest guard a non-member path grants', { skip: skipInLive }, async (t) => {
   const rig = makeRig();
   const real = await serve(t, rig);
-  const { deviceId, secret } = await entitledDevice(t, rig, { base: real.base, store: rig.store });
+  const { secret } = await entitledDevice(t, rig, { base: real.base, store: rig.store });
 
   const refused = await postGrant(real.base, secret, { ...GRANT_BODY, paths: [PATH_NON_MEMBER] });
   assert.equal(refused.status, 403, 'the real server refuses a non-member path');
@@ -87,7 +86,6 @@ test('mutation: without the manifest guard a non-member path grants', { skip: sk
 
   const mutated = await bootMutated(t, rig, {
     name: 'no-manifest-guard',
-    deviceId,
     replacements: [['!manifest.paths.includes(p)', 'false']],
     devicesFile: real.devicesFile,
     signingKey: real.signingKey,
@@ -120,7 +118,6 @@ test('mutation: without the download guard a signed escape token reads files', {
 
   const mutated = await bootMutated(t, rig, {
     name: 'no-download-guard',
-    deviceId,
     replacements: [
       ['!manifest || !manifest.paths.includes(verdict.path) || isUnsafePath(verdict.path)', 'false'],
       ['!filePath.startsWith(root + sep)', 'false'],
