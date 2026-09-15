@@ -44,7 +44,7 @@
 | Месца | Значэнні | Статус |
 |---|---|---|
 | `docs/run-model/run-model.mjs` `located()` | свежасць 30 000 мс, accuracy ≤ radius, чарга ≤ 2 × radius | мадэлюе engine-межу; супадае з ADR; пасля пераносу ў engine мадэль замярзае як гістарычная ([README мадэлі](../run-model/README.md)) |
-| `spikes/G00.01-location-audio/src/session.mjs` | `MAX_ACCURACY_M = 40` (pipeline-gate), `MAX_FIX_AGE_MS = 15 000`, `DWELL_MS = 6 000` | legacy значэнні спайку: правяралі жыццяздольнасць слаёў на прыладзе, не з'яўляюцца кантрактам; 15 000 мс свежасці — стрык неш спайку, не мяжа engine |
+| `spikes/G00.01-location-audio/src/session.mjs` | `MAX_ACCURACY_M = 40` (pipeline-gate), `MAX_FIX_AGE_MS = 15 000`, `DWELL_MS = 6 000` | legacy значэнні спайку: правяралі жыццяздольнасць слаёў на прыладзе, не з'яўляюцца кантрактам; 15 000 мс свежасці — строгая ўмова тэставага замеру спайку, не мяжа engine |
 
 Спайкі наўмысна ізаляваныя і **не зліваюцца** ў агульныя класы: яны аднаразовыя доказы платформавых паводзін з уласнымі тэстамі. Кансалідацыя дубляў адбываецца ў момант напісання engine паводле гэтай мапы, не праз рэфакторынг спайкаў (рэвю 2026-09-15, дакумент 22, PR #84 — раздзел 4, правіла 3).
 
@@ -107,7 +107,7 @@
 
 ### 2.5 UI-экраны
 
-`app/(tabs)/explore.tsx`, `app/city/[id]/guides.tsx`, `app/route/[id].tsx`, `app/run/[id].tsx`, `app/(tabs)/my.tsx`, `app/map.tsx` — адлюстраванне прыняцатага стану і жэсты → каманды кантролераў; без fetch, аўтарызацыі і persistent-прагрэсу. Уся візуальная рэалізацыя **gated** праз G06.06–G06.08.
+`app/(tabs)/explore.tsx`, `app/city/[id]/guides.tsx`, `app/route/[id].tsx`, `app/run/[id].tsx`, `app/(tabs)/my.tsx`, `app/map.tsx` — адлюстраванне прынятага стану і жэсты → каманды кантролераў; без fetch, аўтарызацыі і persistent-прагрэсу. Уся візуальная рэалізацыя **gated** праз G06.06–G06.08.
 
 ### 2.6 Што наўмысна адсутнічае
 
@@ -124,6 +124,8 @@
 ```typescript
 // Канон: 09 §6.1 + ADR G01.01 §4 + ADR G01.03 §3.5. Сінхранізацыя забаронена рукамі — толькі праз змену крыніцы.
 type RunEvent =
+  // 'Start' тут — рэдуктарная форма ўводаў start() мадэлі (ADR G01.03 §3.3: readiness да транзакцыі);
+  // у пераліку падзей `09` §6.1 Start пазначаны без палёў — гэта дапаўненне мапы, не другі канон.
   | { type: 'Start'; sessionId: SessionId; routeId: RouteId; version: VersionId; locale: Locale; tier: Tier[]; accessibleStopIds: StopId[] }
   | { type: 'Pause' } | { type: 'Resume' } | { type: 'End' }
   | { type: 'LocationAccepted'; fix: AcceptedFix }
@@ -152,7 +154,7 @@ function step(previous: RunState, event: RunEvent, now: number, config: EngineCo
 
 `RunState` — палі §4.2 ADR G01.01 даслоўна: `heard: Set<story_id>` (манатонны), `auto_fired: Set<stop_id>` (манатонны), `playing: { stop_id, story_id, play_id } | null`, `queued: { stop_id, radius, at } | null`, `accessible_stop_ids`, `tier_available`, `autoplay_suspended`, `last_fix`, плюс замацаваныя `session_id`/`route_id`/`version`/`locale`. Забароненыя сінонімы (`consumed`, `played`-калонка, `heard: Set<stop_id>`) — ADR §4.2.
 
-`EngineConfig` — толькі значэнні з `services/config` (свежасць, множнік чаргі, lock-screen таймаўт 10 хв); без функцый і без чытання гадзінніка.
+`EngineConfig` — толькі значэнні з `services/config` (свежасць, множнік чаргі, вакно FocusRegain 10 хв — інварыянт 5 `09`); без функцый і без чытання гадзінніка.
 
 ### 3.2 Межа даверу `AccessReady` (capability-канал)
 
@@ -164,7 +166,7 @@ export interface DownloadAccessPort {
 }
 ```
 
-- Сінхроннасць: падзея аднаразовая, дастаўляецца кантролеру пасля commit актывацыі; **Idempotentнасць** на баку engine: паўтор той самай ідэнтычнасці — no-op.
+- Сінхроннасць: падзея аднаразовая, дастаўляецца кантролеру пасля commit актывацыі; **ідэмпатэнтнасць** на баку engine: паўтор той самай ідэнтычнасці — no-op.
 - Памылкі да гэтай мяжы — раздзел 3.6; сам `AccessReady` не мае «памылковага» выніку: непадобная падзея ігнаруецца цалкам.
 
 ### 3.3 Location і pipeline
@@ -175,7 +177,7 @@ interface FixInput { lat: number; lng: number; accuracy: number; at: number }   
 interface AcceptedFix { lat: number; lng: number; accuracy: number; at: number; distances: Map<StopId, number> }
 
 interface LocationService {
-  setMode(mode: LocationMode): void;          // узброіванне/вызваленне падпіскі і геафенсаў
+  setMode(mode: LocationMode): void;          // узбраенне/вызваленне падпіскі і геафенсаў
   setGeofenceWindow(stopIds: StopId[]): void; // ≤ 20 рэгіёнаў; пералік па свежым фіксе
   onFix(handler: (fix: FixInput) => void): void;   // сыры фікс → pipeline
   status(): 'acquiring' | 'live' | 'recovering' | 'stalled';       // watchdog, парог 15 с
@@ -185,7 +187,7 @@ function acceptFix(fix: FixInput, candidates: ReadonlyMap<StopId, number>, confi
 ```
 
 - Памылка «дазволу няма» — асобны стан `status()`, не выкітак; UI дае ручны шлях (G00.01.c дакажа OS-дэталі).
-- Стары generation пасля перазапуску падпіскі адхіляецца (стал-result rejection).
+- Стары generation пасля перазапуску падпіскі адхіляецца (stale-result rejection).
 
 ### 3.4 Аўдыё (gated: G01.02)
 
@@ -232,7 +234,7 @@ type GrantError =
 
 Адрозненне прычын для UI: няма дазволу (GPS) → ручны шлях; няма права (`no_entitlement`, `403`) → прапанова пакупкі; праверка недаступная (`503`) → рэтрай, не адмова; кантэнт няпоўны (`readiness() = false`) → экран загрузкі; невалідны ўвод (`invalid_request`) → памылка выканаўца, не карыстальніка. Новыя коды па-за спісам забароненыя (`09` §5.1).
 
-### 3.7 Persistэнтнасць: транзакцыі і міграцыі
+### 3.7 Durable-захаванне: транзакцыі і міграцыі
 
 ```typescript
 interface DbService {
@@ -240,7 +242,7 @@ interface DbService {
   migrate(): Promise<{ from: number; to: number }>;          // PRAGMA user_version; крок = адна транзакцыя
 }
 // У транзакцыі Start/Pause/Resume/switch/End/checkpoint — палі §3.1 ADR; каманды эфектаў — толькі пасля commit (кантролер).
-// checkpайнт PersistProgress: UPDATE набораў/last_stop_id/play_seq; паўторны запіс — ідэмпатэнтны; crash паміж падзеяй і checkpoint
+// checkpoint PersistProgress: UPDATE набораў/last_stop_id/play_seq; паўторны запіс — ідэмпатэнтны; crash паміж падзеяй і checkpoint
 // чэсна губляе апошні факт (ADR §3.3, §3.7).
 ```
 
@@ -419,16 +421,16 @@ sequenceDiagram
 - Аўдыё: callback прымаецца толькі пры супадзенні пары `(session_id, play_id)` з бягучым `playing` (ADR G01.01 §4.11); `play_seq` write-through робіць пары ўнікальнымі і праз restart. Чужое завершэнне не залічвае `heard` і не стартуе чаргу.
 - Location: generation counter падпіскі гасіць фіксы мінулай сесіі; непрыгодны фікс адкідваецца pipeline-ам да мутацыі стану.
 - Feedback: адзін in-flight на мэту; рэдагаванне падчас адпраўкі — «наступнае жаданае значэнне»; позні ACK не перацірае новы чарнавік (`21` §5.4).
-- Запісы: усе пісы ў радок сесіі — у транзакцыях §3.3; crash паміж падзеяй і checkpoint губляе апошні факт чэсна, гісторыя не пашкоджваецца; частковы файл/стагінг ніколі не лічыцца ready (ADR §3.7).
+- Запісы: усе запісы ў радок сесіі — у транзакцыях §3.3; crash паміж падзеяй і checkpoint губляе апошні факт чэсна, гісторыя не пашкоджваецца; частковы файл/`staging/` ніколі не лічыцца ready (ADR §3.7).
 
 ### 5.4 Durable супраць аднаўляльнага
 
 | Зона | Змест | Аднаўленне |
 |---|---|---|
-| **B — durable** | `session` (у т. л. `heard`, `auto_fired`, `play_seq`), `guide_hint_state`/`guide_hint_last`, `migration_log`, `feedback_local`/`feedback_outbox`, налады і згода | толькі міграцыі дадаваннем; памылка міграцыі не дазваляе дроп базы; cache purge не даходзіць да зоны B |
-| **A — аднаўляльная** | пакеты/файлы кантэнту пад ключам, `bundle_asset`, `discovery_cache`, чарга падзей да адпраўкі | перахэшаванне/перахадбованне з сервера; страта не губляе прагрэс і пакупкі |
+| **B — durable** | `session` (у т. л. `heard`, `auto_fired`, `play_seq`), `event_queue` (неадпраўленыя падзеі — таксама незаменныя, `09` §7: дэдуплікацыя і захаванне не патрабуюць згоды), `guide_hint_state`/`guide_hint_last`, `migration_log`, `feedback_local`/`feedback_outbox`, налады і згода | толькі міграцыі дадаваннем; памылка міграцыі не дазваляе дроп базы; cache purge не даходзіць да зоны B |
+| **A — аднаўляльная** | пакеты/файлы кантэнту пад ключам, `bundle_asset`, `discovery_cache`, `catalog_cache` | перахэшаванне/перахадбованне з сервера; страта не губляе прагрэс і пакупкі |
 
-Никад не аднаўляецца аўтаматычна: гук пасля restart, аўтаматыка (толькі яўнае дзеянне здымае `autoplay_suspended`), чарга трыгераў, замена версіі кантэнту пад жывой сесіяй.
+Ніколі не аднаўляецца аўтаматычна: гук пасля restart, аўтаматыка (толькі яўнае дзеянне здымае `autoplay_suspended`), чарга трыгераў, замена версіі кантэнту пад жывой сесіяй.
 
 ## 6. Сцэнары (walkthroughs)
 
@@ -457,7 +459,7 @@ sequenceDiagram
 ### 6.4 Пакупка → загрузка падае → рэтрай → той самай версіі актывацыя
 
 1. `entitlement` → сервер grant → `download.requestGrant() → GrantUrls`.
-2. Актывацыя падае на хэшам (`ActivationResult.error = 'hash_mismatch'`) → пласт **не** ready; папярэдні гатовы пласт не чапаецца (ADR G01.03 §3.7).
+2. Актывацыя падае на хэшы (`ActivationResult.error = 'hash_mismatch'`) → пласт **не** ready; папярэдні гатовы пласт не чапаецца (ADR G01.03 §3.7).
 3. Рэтрай: паўторны `requestGrant` без паўторнай аплаты (серверны пазітыўны кэш) → staging/resume па хэшу → атамарны rename.
 4. `AccessReady` той самай версіі: `tier_available += extended`, `accessible_stop_ids` пералік, геафенсы пералічваюцца; **Play няма**, `heard`/`auto_fired` не мяняюцца (same-version unlock, `11` C34).
 
@@ -510,10 +512,10 @@ sequenceDiagram
 - Кантрактныя дакументы `09`, `11`, `15`, `16` — сінхранізацыя толькі адной задачай (узор: G01.03.c).
 - `docs/run-model/run-model.mjs` + тэсты — замарожаны як эталон G01.01/G01.03; змена толькі праз асобную рашаную задачу (README мадэлі).
 - Гэты файл `19` і `18` — змены кантрактаў адлюстроўваюцца адной задачай, не падчас рэалізацыі кода.
-- Будучыя парныя файлы кода: `core/engine/{state,events,commands}.ts` — адзін уладальнік тыпаў; `contracts/` — агульныя з вэбам і CLI (задача G02.01 пише іх аднаразова).
+- Будучыя парныя файлы кода: `core/engine/{state,events,commands}.ts` — адзін уладальнік тыпаў; `contracts/` — агульныя з вэбам і CLI (задача G02.01 піша іх адной задачай).
 
 ### 7.3 Заўвагі да бэклога (не перанумароўванне)
 
 - Пакрыццё мапы задачамі поўнае для Run-кантура і пашырэння `20/21`; дапаўненні G15/G16 і фікстуры G01.06 ўжо маюць заданні ў [agent-tasks/discovery/](../agent-tasks/discovery/README.md).
-- Вузкая дзірка: прамой уладальнік схем `EngineConfig`/`PipelineConfig` (ліміты AR-5 §1.3) у бэклозе ўяўлены толькі G09.05 (бяспечны remote config) і G11.02 (палявая каліброўка). Дастаткова — схемы маюць дзве задачы-брамы; асобны эпік не ствараецца.
-- Гатоўнасць падрабязна (што чакае кантракт/пр такаж/канфіг/дызайн) — [17](../17_development_readiness.md), актуалізавана разам з гэтай мапай.
+- Вузкая дзірка: прамой уладальнік схем `EngineConfig`/`PipelineConfig` (ліміты AR-5 §1.3) у бэклозе прадстаўлены толькі G09.05 (бяспечны remote config) і G11.02 (палявая каліброўка). Дастаткова — схемы маюць дзве задачы-брамы; асобны эпік не ствараецца.
+- Гатоўнасць падрабязна (што чакае кантракт/прыладавы доказ/канфіг/дызайн) — [17](../17_development_readiness.md), актуалізавана разам з гэтай мапай.
