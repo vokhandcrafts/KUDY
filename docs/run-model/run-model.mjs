@@ -4,13 +4,6 @@
 // heard is keyed by story_id, auto_fired by stop_id, and a stop's primary
 // story is derived (base when present, else the paid-only extended story);
 // an unlock never rewrites it.
-
-// Documentation model; not the application engine or a platform adapter.
-// Narration progress follows the accepted ADR variant A
-// (docs/architecture/decisions/G01.01-narration-progress.md §4):
-// heard is keyed by story_id, auto_fired by stop_id, and a stop's primary
-// story is derived (base when present, else the paid-only extended story);
-// an unlock never rewrites it.
 // Session identity and the AccessReady trust boundary follow the accepted
 // contract (docs/architecture/decisions/G01.03-session-access.md §3): the
 // grant event carries the full identity (route, version, locale, issuer),
