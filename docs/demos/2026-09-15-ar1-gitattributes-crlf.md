@@ -35,3 +35,20 @@ cd spikes/G00.02-offline-map && node --test test/offline-map.test.mjs 2>&1 | tai
 ℹ todo 0
 ℹ duration_ms 606.7903
 ```
+
+The session host is the affected machine itself: Windows with core.autocrlf=true. The attribute state and the committed rule are shown below, plus the regression guard test added after review — it fails on any platform (worktree rule has precedence over the index fallback) as soon as the eol=lf rule is removed or narrowed.
+
+```bash
+git config core.autocrlf && git check-attr eol -- spikes/G00.02-offline-map/source/index.html && cd spikes/G00.02-offline-map && node --test test/eol-policy.test.mjs 2>&1 | tail -n 6
+```
+
+```output
+true
+spikes/G00.02-offline-map/source/index.html: eol: lf
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 90.6257
+```
