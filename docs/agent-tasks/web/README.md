@@ -7,16 +7,18 @@
 | Заданне | Вынік | Пасля | Issue |
 |---|---|---|---|
 | [G10.01.a](G10.01.a.md) | Каркас вэба, чытанне public-пласту, leak-гард | G02.03 (#55) | [#111](https://github.com/vokhandcrafts/KUDY/issues/111) |
-| [G10.01.b](G10.01.b.md) | Каталёг, старонка гіда і карта горада (BE/EN), locked-прэв'ю, спакойная прапанова | G10.01.a, G01.04 | [#111](https://github.com/vokhandcrafts/KUDY/issues/111) |
+| [G10.01.b](G10.01.b.md) | Каталёг, старонка гіда і карта горада (BE/EN), locked-прэв'ю, спакойная прапанова | G10.01.a, G01.04 (#109) | [#111](https://github.com/vokhandcrafts/KUDY/issues/111) |
 | [G10.01.c](G10.01.c.md) | Старонкі кропак, ручны плэер, транскрыпты | G10.01.b | [#111](https://github.com/vokhandcrafts/KUDY/issues/111) |
 | [G10.02.a](G10.02.a.md) | Пераход у дадатак: канфіг спасылак, /app, QR, OG-метаданыя | G10.01.c | [#112](https://github.com/vokhandcrafts/KUDY/issues/112) |
-| [G10.02.b](G10.02.b.md) | SEO, публікацыя на Vercel, адкат | G10.02.a, G03.05 | [#112](https://github.com/vokhandcrafts/KUDY/issues/112) |
+| [G10.02.b](G10.02.b.md) | SEO, публікацыя на Vercel, адкат | G10.02.a, G03.05 (#110) | [#112](https://github.com/vokhandcrafts/KUDY/issues/112) |
 
 Бацькоўскія радкі `16`: G10.01 закрываецца пасля complete усіх трох сваіх частак, G10.02 — пасля дзвюх. G03.05 бракуе толькі публічны запуск (G10.02.b), не распрацоўка. Блокеры не аслабленыя: G02.03 — #55 (закрыты PR #105); G01.04 і G03.05 — tracking-ісью [#109](https://github.com/vokhandcrafts/KUDY/issues/109) і [#110](https://github.com/vokhandcrafts/KUDY/issues/110), без `agent:ready` да разбіўкі.
 
 ## Публікацыя ў GitHub — выкананая 2026-09-17
 
 Целы ўзятыя з [issues-draft.md](issues-draft.md) і апублікаваныя пасля мержу плана ў default branch: эпік G10 — [#108](https://github.com/vokhandcrafts/KUDY/issues/108), G10.01 — [#111](https://github.com/vokhandcrafts/KUDY/issues/111), G10.02 — [#112](https://github.com/vokhandcrafts/KUDY/issues/112), tracking-ісью папярэднікаў — [#109](https://github.com/vokhandcrafts/KUDY/issues/109) (G01.04) і [#110](https://github.com/vokhandcrafts/KUDY/issues/110) (G03.05). Пазнакі `agent:ready`/`prio:*` не ставіліся — іх ставіць толькі аператар. Калі целы на GitHub зменяцца, чарнавікі ў `issues-draft.md` застаюцца запісам таго, што было апублікавана.
+
+Перад публікацыяй GitHub правераны на дублікаты; усе пяць issue прачытаныя назад праз API 2026-09-17 — адкрытыя, без пазнак, спасылкі `Epic:`/`Blocked-by` вырашаныя (эпік #108 вядзе на #111 і #112; #111 на #55 і #109; #112 на #111 і #110; #110 на #56), плэйсхолдэраў `#<…>` няма. Бачнасць на дошцы dispatcher з сесіі не правераная (асобнай дошкі-праекту ў рэпазітара няма): праверана толькі бачнасць issue праз GitHub API.
 
 ## Як запускаць
 
