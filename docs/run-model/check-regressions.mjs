@@ -5,7 +5,9 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 
-const source = readFileSync(new URL('./run-model.mjs', import.meta.url), 'utf8');
+// Mutation anchors are written with \n; normalize checkouts that use CRLF.
+const source = readFileSync(new URL('./run-model.mjs', import.meta.url), 'utf8')
+  .replace(/\r\n/g, '\n');
 const tests = readFileSync(new URL('./run-model.test.mjs', import.meta.url), 'utf8');
 const mutations = [
   ['consume queued stop before playback',
@@ -24,12 +26,27 @@ const mutations = [
     'const primaryOf = stop => stop && (stop.storyBaseId ?? stop.storyExtendedId);',
     'const primaryOf = stop => stop && (stop.storyExtendedId ?? stop.storyBaseId);'],
   ['accept completion from another session',
-    'event.sessionId !== s.sessionId || !s.playing', '!s.playing'],
+    'event.sessionId !== s.sessionId', 'false'],
   ['accept completion from earlier playback',
     '|| event.playId !== s.playing.playId', '|| false'],
   ['validate story id by truthiness instead of presence',
     "|| ('storyId' in event && event.storyId !== s.playing.storyId)) break;",
     "|| (event.storyId && event.storyId !== s.playing.storyId)) break;"],
+  ['accept a foreign moment completion',
+    "if (s.playing?.owner !== 'moment' || !tokenMatches(event.token)) break;",
+    "if (s.playing?.owner !== 'moment') break;"],
+  ['credit a moment teaser to guide history',
+    "if (s.playing?.owner !== 'moment' || !tokenMatches(event.token)) break;\n      s.playing = null;",
+    "if (s.playing?.owner !== 'moment') break;\n      add(s.heard, s.playing.storyId);\n      s.playing = null;"],
+  ['resume a stale or closed launch',
+    'if (!s.playing || !s.playing.paused || !tokenMatches(event.token)) break;',
+    'if (!s.playing) break;'],
+  ['stop a moment on session pause',
+    "if (!s.playing || s.playing.owner === 'guide') stopAudio();",
+    'stopAudio();'],
+  ['treat a manual pause as a full stop',
+    'if (s.playing) s.playing.paused = true;\n      s.suspended = true;',
+    'stopAudio();\n      s.suspended = true;'],
   ['accept stale queued location',
     '&& now - f.at <= 30_000', ''],
   ['play locked stop manually',

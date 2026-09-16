@@ -242,20 +242,261 @@ test('C16: ended session cannot resume or accept manual playback', () => {
   assert.deepEqual(next.heard, []);
 });
 
+// G01.02.b — audio ownership (ADR G01.02 §3/§4): moment launches, tagged
+// callbacks, live pause and the single 10-minute focus threshold.
+const momentPlay = (seq = 1) => ({ type: 'PlayMoment', momentId: 'moment-9',
+  storyId: 'story-m9', token: { kind: 'moment', ref: 'moment-9', seq } });
+const momentToken = s => ({ kind: 'moment', ref: s.playing.momentId, seq: s.playing.seq });
+const guideToken = s => ({ kind: 'guide', ref: s.sessionId, seq: s.playing.playId });
+const sendAt = (s, e, at) => step(s, e, at);
+
+// C18/C19/C20 (ADR G01.02 §3.4/§3.7): a manual pause and a focus loss are
+// live pauses — the launch and its token survive; only an explicit human
+// action resumes it, arrivals stay blocked until then.
 for (const event of ['UserPausedAudio', 'FocusLoss']) {
-  test(`C18/C19/C20: ${event} blocks arrivals until explicit Play`, () => {
-    let s = send(send(fixture(), trigger('a')), { type: event });
+  test(`C18/C19/C20: ${event} is a live pause that blocks arrivals until explicit Play`, () => {
+    let s = send(fixture(), trigger('a'));
+    const token = guideToken(s);
+    s = send(s, { type: event });
+    assert.equal(s.playing?.stopId, 'a');
+    assert.equal(s.playing?.paused, true);
+    assert.deepEqual(s.commands, []); // the player keeps the offset, no stop command
     s = send(s, trigger('b'));
-    assert.equal(s.playing, null);
+    assert.equal(s.playing?.stopId, 'a');
+    assert.equal(s.playing?.paused, true);
     assert.equal(status(s, 'b'), 'available');
-    s = send(s, { type: 'FocusRegain' });
-    assert.equal(s.playing, null);
-    assert.equal(s.suspended, true);
-    s = send(s, play('b'));
+    assert.deepEqual(s.autoFired, ['a', 'b']);
+    s = send(s, { type: 'ResumeAudio', token });
+    assert.equal(s.playing?.paused, false);
+    assert.equal(s.playing?.playId, token.seq); // same launch, same token
     assert.equal(s.suspended, false);
-    assert.equal(s.playing?.stopId, 'b');
+    assert.deepEqual(s.commands, [{ type: 'ResumeAudio', token }]);
   });
 }
+
+test('G01.02.b: start injects a sounding moment and refuses any other playingNow', () => {
+  assert.throws(() => start('walk-9', stops,
+    { playingNow: { stopId: 'a', storyId: 'a', playId: 1 } }), RangeError);
+  assert.throws(() => start('walk-9', stops,
+    { playingNow: { momentId: 'moment-9', storyId: 'story-m9', seq: 0 } }), RangeError);
+  const s = start('walk-1', stops,
+    { playingNow: { momentId: 'moment-9', storyId: 'story-m9', seq: 7 } });
+  assert.deepEqual(s.playing, { owner: 'moment', momentId: 'moment-9',
+    storyId: 'story-m9', seq: 7, paused: false });
+  assert.equal(s.playSeq, 0); // moment tokens never touch the session counter
+  assert.equal(s.suspended, false); // Start turns automation on, not the player
+});
+
+test('G01.02.b (§4.2): explicit Play Moment takes the player; guide is stopped by command, not heard', () => {
+  let s = send(send(fixture(), trigger('a')), trigger('b'));
+  s = send(s, momentPlay());
+  assert.deepEqual(s.commands, [
+    { type: 'StopAudio', token: { kind: 'guide', ref: 'walk-1', seq: 1 } },
+    { type: 'PlayMoment', momentId: 'moment-9', storyId: 'story-m9',
+      token: { kind: 'moment', ref: 'moment-9', seq: 1 } },
+  ]);
+  assert.deepEqual(s.playing, { owner: 'moment', momentId: 'moment-9',
+    storyId: 'story-m9', seq: 1, paused: false });
+  assert.deepEqual(s.heard, []);
+  assert.equal(status(s, 'a'), 'available');
+  assert.equal(s.queued, null);
+  assert.deepEqual(s.autoFired, ['a', 'b']); // the queue retired to auto_fired
+  assert.equal(s.suspended, true);
+});
+
+test('G01.02.b (§4.3): moment finished frees the player without crediting history or automation', () => {
+  let s = send(send(fixture(), trigger('a')), momentPlay());
+  s = send(s, { type: 'MomentFinished', token: momentToken(s) });
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.heard, []);
+  assert.equal(s.suspended, true);
+  assert.equal(s.commands.some(c => c.type === 'PlayStory'), false);
+  assert.equal(status(s, 'a'), 'available');
+});
+
+test('G01.02.b (§4.4): a failed moment launch suspends automation and credits nothing', () => {
+  let s = send(send(fixture(), trigger('a')), momentPlay());
+  s = send(s, { type: 'AudioFailed', token: momentToken(s) });
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.heard, []);
+  assert.equal(s.suspended, true);
+  assert.equal(s.commands.some(c => c.type === 'PlayStory'), false);
+});
+
+test('G01.02.b (§4.5): «Працягнуць гід» restores automation; the stale completion is ignored entirely', () => {
+  let s = send(send(send(fixture(), trigger('a')), trigger('b')), momentPlay());
+  s = send(s, { type: 'MomentFinished', token: momentToken(s) });
+  s = send(s, { type: 'GuideResume' });
+  assert.equal(s.suspended, false);
+  assert.equal(s.playing, null); // nothing sounds by itself after the return
+  s = send(s, { type: 'AudioFinished', sessionId: 'walk-1', playId: 1 });
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.heard, []);
+  s = send(s, trigger('c'));
+  assert.equal(s.playing?.stopId, 'c'); // the next trigger runs the general conditions
+});
+
+test('G01.02.b (§4.6): focus loss during a moment is a live pause; resume continues the same token', () => {
+  let s = send(fixture(), momentPlay());
+  s = send(s, { type: 'FocusLoss' });
+  assert.equal(s.playing?.paused, true);
+  assert.equal(s.playing?.seq, 1);
+  assert.equal(s.focusLostAt, now);
+  s = send(s, { type: 'FocusRegain' });
+  assert.equal(s.playing?.paused, true);
+  assert.equal(s.playing?.seq, 1);
+  s = send(s, { type: 'ResumeAudio', token: momentToken(s) });
+  assert.equal(s.playing?.paused, false);
+  assert.equal(s.playing?.seq, 1);
+  assert.equal(s.suspended, true); // a moment resume never clears Play Moment's suspension
+  assert.deepEqual(s.commands,
+    [{ type: 'ResumeAudio', token: { kind: 'moment', ref: 'moment-9', seq: 1 } }]);
+});
+
+test('G01.02.b (§4.7): focus regain past 10 minutes closes the launch; the old token is refused', () => {
+  let s = send(fixture(), momentPlay());
+  s = send(s, { type: 'FocusLoss' });
+  s = sendAt(s, { type: 'FocusRegain' }, now + 600_001);
+  assert.equal(s.playing, null);
+  assert.equal(s.focusLostAt, null);
+  s = send(s, { type: 'ResumeAudio', token: { kind: 'moment', ref: 'moment-9', seq: 1 } });
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.commands, []);
+  s = send(s, momentPlay(2));
+  assert.equal(s.playing?.seq, 2); // a repeat is always a fresh launch
+});
+
+test('G01.02.b (§4.8): End during a moment keeps it sounding; late guide completions are rejected', () => {
+  let s = send(send(fixture(), trigger('a')), momentPlay());
+  s = send(s, { type: 'End' });
+  assert.equal(s.state, 'Ended');
+  assert.equal(s.playing?.owner, 'moment'); // manual content is not session property
+  assert.deepEqual(s.heard, []);
+  assert.ok(s.commands.some(c => c.type === 'ReleaseWakelock'));
+  assert.equal(s.commands.some(c => c.type === 'StopAudio'), false);
+  s = send(s, { type: 'AudioFinished', sessionId: 'walk-1', playId: 1 });
+  assert.equal(s.playing?.owner, 'moment');
+  assert.deepEqual(s.heard, []);
+  s = send(s, { type: 'FocusLoss' });
+  s = send(s, { type: 'ResumeAudio', token: momentToken(s) });
+  assert.equal(s.playing?.paused, false);
+  assert.equal(s.state, 'Ended'); // a moment resume never restores the session
+});
+
+test('G01.02.b (§4.9): a session pause touches only the walk; a moment keeps sounding', () => {
+  let s = start('walk-1', stops,
+    { playingNow: { momentId: 'moment-9', storyId: 'story-m9', seq: 3 } });
+  s = send(s, { type: 'LocationAccepted', fix: fix() });
+  s = send(s, { type: 'Pause' });
+  assert.equal(s.state, 'Paused');
+  assert.deepEqual(s.playing, { owner: 'moment', momentId: 'moment-9',
+    storyId: 'story-m9', seq: 3, paused: false });
+  assert.equal(s.commands.some(c => c.type === 'StopAudio'), false);
+  assert.ok(s.commands.some(c => c.type === 'ReleaseWakelock'));
+  s = send(s, { type: 'ResumeAudio', token: momentToken(s) }); // not paused — refused
+  assert.deepEqual(s.commands, []);
+  s = send(s, momentPlay(4)); // an explicit Play Moment works in a paused session
+  assert.equal(s.state, 'Paused');
+  assert.equal(s.playing?.seq, 4);
+  s = send(s, { type: 'Resume' });
+  assert.equal(s.state, 'Active');
+  assert.equal(s.playing?.owner, 'moment');
+  s = send(s, trigger('a'));
+  assert.equal(s.queued?.stopId, 'a'); // autoplay waits for the occupied player
+  assert.equal(s.playing?.owner, 'moment');
+});
+
+test('G01.02.b (§4.10): a new session sees the occupied player and waits for it', () => {
+  send(start('walk-1', stops,
+    { playingNow: { momentId: 'moment-9', storyId: 'story-m9', seq: 5 } }), { type: 'End' });
+  let s = start('walk-2', stops,
+    { playingNow: { momentId: 'moment-9', storyId: 'story-m9', seq: 5 } });
+  s = send(s, { type: 'LocationAccepted', fix: fix() });
+  assert.equal(s.playing?.owner, 'moment');
+  s = send(s, trigger('a'));
+  assert.equal(s.queued?.stopId, 'a');
+  assert.equal(s.playing?.owner, 'moment');
+  s = send(s, { type: 'MomentFinished', token: momentToken(s) });
+  assert.equal(s.playing, null);
+  assert.equal(s.queued?.stopId, 'a'); // the queue waits; a finish never starts it
+  assert.equal(s.commands.some(c => c.type === 'PlayStory'), false);
+});
+
+test('G01.02.b (§4.12): moment → moment leaves one sound; the old token is ignored entirely', () => {
+  let s = send(fixture(), momentPlay(1));
+  s = send(s, momentPlay(2));
+  assert.deepEqual(s.commands, [
+    { type: 'StopAudio', token: { kind: 'moment', ref: 'moment-9', seq: 1 } },
+    { type: 'PlayMoment', momentId: 'moment-9', storyId: 'story-m9',
+      token: { kind: 'moment', ref: 'moment-9', seq: 2 } },
+  ]);
+  s = send(s, { type: 'ResumeAudio', token: { kind: 'moment', ref: 'moment-9', seq: 1 } });
+  assert.equal(s.playing?.seq, 2);
+  assert.deepEqual(s.commands, []); // a stale resume is a refused command
+  s = send(s, { type: 'MomentFinished', token: { kind: 'moment', ref: 'moment-9', seq: 1 } });
+  assert.equal(s.playing?.seq, 2); // the stale completion changed nothing
+  s = send(s, { type: 'MomentFinished', token: { kind: 'moment', ref: 'moment-9', seq: 2 } });
+  assert.equal(s.playing, null);
+});
+
+test('G01.02.b (§4.12): moment → guide hands the player over; the moment token dies', () => {
+  let s = send(fixture(), momentPlay(4));
+  s = send(s, play('a'));
+  assert.deepEqual(s.commands.map(c => c.type), ['StopAudio', 'PlayStory']);
+  assert.deepEqual(s.commands[0].token, { kind: 'moment', ref: 'moment-9', seq: 4 });
+  assert.equal(s.suspended, false); // an explicit guide play is an explicit return
+  s = send(s, { type: 'MomentFinished', token: { kind: 'moment', ref: 'moment-9', seq: 4 } });
+  assert.equal(s.playing?.owner, 'guide');
+  assert.deepEqual(s.heard, []);
+  s = send(s, { type: 'AudioFinished', sessionId: 'walk-1', playId: s.playing.playId });
+  assert.deepEqual(s.heard, ['a']);
+});
+
+test('G01.02.b (§4.15): a failed guide launch is not heard; «Працягнуць гід» re-arms the next trigger', () => {
+  let s = send(fixture(), play('a'));
+  s = send(s, { type: 'AudioFailed', token: guideToken(s) });
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.heard, []);
+  assert.equal(s.suspended, true);
+  s = send(s, trigger('b'));
+  assert.equal(s.playing, null); // suspended — a failure never starts the next sound
+  assert.deepEqual(s.autoFired, ['b']);
+  s = send(s, { type: 'GuideResume' });
+  s = send(s, trigger('c'));
+  assert.equal(s.playing?.stopId, 'c');
+});
+
+test('G01.02.b (§3.4): a manual audio stop closes the launch and suspends automation', () => {
+  let s = send(fixture(), trigger('a'));
+  s = send(s, { type: 'UserStoppedAudio' });
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.heard, []);
+  assert.equal(status(s, 'a'), 'available');
+  assert.equal(s.suspended, true);
+  assert.deepEqual(s.commands,
+    [{ type: 'StopAudio', token: { kind: 'guide', ref: 'walk-1', seq: 1 } }]);
+});
+
+test('G01.02.b (§3.4): focus regain past 10 minutes closes a guide launch without crediting it', () => {
+  let s = send(fixture(), trigger('a'));
+  s = send(s, { type: 'FocusLoss' });
+  s = sendAt(s, { type: 'FocusRegain' }, now + 600_001);
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.heard, []);
+  assert.equal(status(s, 'a'), 'available');
+  assert.equal(s.suspended, true);
+});
+
+test('G01.02.b (§3.7): a manual pause has no 10-minute threshold', () => {
+  let s = send(fixture(), play('a'));
+  const token = guideToken(s);
+  s = send(s, { type: 'UserPausedAudio' });
+  s = sendAt(s, { type: 'FocusRegain' }, now + 900_000);
+  assert.equal(s.playing?.paused, true); // no focus_lost_at was armed
+  s = send(s, { type: 'ResumeAudio', token });
+  assert.equal(s.playing?.paused, false);
+  assert.equal(s.playing?.playId, token.seq);
+});
 
 test('C5/C21: newest queued stop replaces previous without marking it heard', () => {
   let s = send(send(send(fixture(), trigger('a')), trigger('b')), trigger('c'));
@@ -492,14 +733,27 @@ test('G01.03.b: start refuses accessibleStopIds naming stops outside the pinned 
   assert.throws(() => start('walk-9', stops, { accessibleStopIds: ['a', 'ghost'] }), RangeError);
 });
 
-test('bounded exploration: invariants across all 4-event sequences (9 choices per step)', () => {
+test('bounded exploration: invariants across all 4-event sequences (16 choices per step)', () => {
   let transitions = 0;
   function explore(s, depth) {
     if (!depth) return;
+    const currentToken = s.playing
+      ? (s.playing.owner === 'guide'
+        ? { kind: 'guide', ref: s.sessionId, seq: s.playing.playId }
+        : { kind: 'moment', ref: s.playing.momentId, seq: s.playing.seq })
+      : { kind: 'moment', ref: 'moment-9', seq: 0 };
     const events = [trigger('a'), trigger('b'), play('a'),
       playStory('a', 'a'),
       { type: 'AudioFinished', sessionId: s.sessionId, playId: s.playing?.playId ?? -1 },
-      { type: 'FocusLoss' }, { type: 'Pause' }, { type: 'Resume' }, { type: 'End' }];
+      { type: 'PlayMoment', momentId: 'moment-9', storyId: 'story-m9',
+        token: { kind: 'moment', ref: 'moment-9', seq: 1 } },
+      { type: 'MomentFinished', token: currentToken },
+      { type: 'AudioFailed', token: currentToken },
+      { type: 'ResumeAudio', token: currentToken },
+      { type: 'UserPausedAudio' }, { type: 'UserStoppedAudio' },
+      { type: 'GuideResume' },
+      { type: 'FocusLoss' }, { type: 'FocusRegain' },
+      { type: 'Pause' }, { type: 'End' }];
     for (const event of events) {
       const snapshot = structuredClone(s);
       const next = send(s, event);
@@ -509,13 +763,22 @@ test('bounded exploration: invariants across all 4-event sequences (9 choices pe
       assert.ok(s.autoFired.every(id => next.autoFired.includes(id)), context);
       assert.equal(new Set(next.autoFired).size, next.autoFired.length, context);
       assert.equal(new Set(next.heard).size, next.heard.length, context);
-      assert.ok(!next.playing || (next.state === 'Active' && !next.suspended), context);
+      // ADR G01.02 §3.4: a sounding guide launch requires a live, unsuspended,
+      // unpaused session; a moment mirror may exist in any session state.
+      assert.ok(!next.playing || next.playing.owner === 'moment'
+        || next.playing.paused
+        || (next.state === 'Active' && !next.suspended), context);
       if (s.state === 'Ended') assert.equal(next.state, 'Ended', context);
       assert.ok(next.commands.filter(c => c.type === 'PlayStory').length <= 1, context);
+      assert.ok(next.commands.filter(c => c.type === 'PlayMoment').length <= 1, context);
+      // ADR G01.02 §3.5: a moment launch never credits guide history.
+      if (next.playing?.owner === 'moment') {
+        assert.deepEqual(next.heard.filter(id => !s.heard.includes(id)), [], context);
+      }
       transitions++;
       explore(next, depth - 1);
     }
   }
   explore(fixture(), 4);
-  assert.equal(transitions, 7380);
+  assert.equal(transitions, 69904);
 });
