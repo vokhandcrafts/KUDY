@@ -1,12 +1,12 @@
 # Development setup — каркас KUDY (G00.04.b)
 
-Мінімальны агульны scaffold: адзін набор SDK для аўдыё/лакацыі/карты/крамы, развядзенне асяроддзяў і ўзгодненыя каманды. Стэк — кандыдатны набор з [ADR G00.04-stack-baseline](architecture/decisions/G00.04-stack-baseline.md) §1; ніводная натыўная зборка яшчэ не правераная (статус .b — `blocked-external`, гл. [result G00.04.b](agent-tasks/results/G00.04.b.md)).
+Мінімальны агульны scaffold: адзін набор SDK для аўдыё/лакацыі/карты/крамы, развядзенне асяроддзяў і ўзгодненыя каманды. Стэк — кандыдатны набор з [ADR G00.04-stack-baseline](architecture/decisions/G00.04-stack-baseline.md) §1, піны зафіксаваныя ў §6; натыўная зборка на прыладзе ўсё яшчэ не правераная (статус .b/.c — `blocked-external`), але ўсталяванне з lockfile, праверкі і генерация натыўнага праекта Android пацверджаныя на чыстай копіі (гл. [result G00.04.c](agent-tasks/results/G00.04.c.md)).
 
 ## Патрабаванні
 
 | Інструмент | Версія | Заўвага |
 |---|---|---|
-| Node.js | 22 LTS (мэта `22.23.2` з lock спайку G00.01) | `engines` у `package.json`: `>=22.12.0 <23`; на Node 24 npm паказвае папярэджанне EBADENGINE, не памылку |
+| Node.js | 22 LTS (пін — ADR [G00.04-stack-baseline](architecture/decisions/G00.04-stack-baseline.md) §6; афіцыйная падлога стэку — Node `>= 20.19.4`, поле `engines` react-native `0.81.5`) | `engines` у `package.json`: `>=22.12.0 <23`; Node 24 / npm 11 правераныя практыкай (чысты `npm ci`, doctor 18/18), на іх npm паказвае папярэджанне EBADENGINE, не памылку |
 | npm | `10.9.8` | `engines`: `>=10.9.8 <11` |
 | EAS CLI | `>= 16.0.0` | толькі для натыўных зборак; праверка `npx eas-cli --version` |
 | Android-зборка | JDK + Android SDK альбо EAS build | на хосце G00.04.b адсутныя — зборкі not-run |
@@ -27,8 +27,8 @@ npm ci
 | Каманда | Чаканы вынік |
 |---|---|
 | `npm run typecheck` | `tsc --noEmit` без вываду, exit 0 |
-| `npm test` | suite `docs/run-model/run-model.test.mjs`: **51 pass / 0 fail** |
-| `node docs/run-model/check-regressions.mjs` | **16/16 reviewed regressions rejected. Repository model unchanged.** |
+| `npm test` | suite `docs/run-model/run-model.test.mjs`: **67 pass / 0 fail** (лік рухавы: суіта вырасла з 51 пасля змержання G01.02, commit `947d5f2`; звярай з апошнім змержаным кантрактам) |
+| `node docs/run-model/check-regressions.mjs` | **21/21 reviewed regressions rejected. Repository model unchanged.** (вырасла з 16 па той самай прычыне) |
 | `npx expo-doctor` | **18/18 checks passed. No issues detected!** |
 | `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .` | **Found 0 clones** (0.00%) |
 
@@ -52,6 +52,14 @@ npx eas-cli build --profile development --platform ios
 ```
 
 Пасля ўстаноўкі build-а на прыладу: `npm start` (`expo start --dev-client`).
+
+EAS-зборка патрабуе акаўнта; найбліжэйшы лакальна дасяжны натыўны доказ — генерация натыўнага праекта без зборкі:
+
+```sh
+npx expo prebuild --platform android --no-install
+```
+
+Чакана: `android/` створаны; у `android/app/src/main/AndroidManifest.xml` прысутнічаюць усе пяць кантрактных дазволаў лакацыі (`ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION`, `ACCESS_BACKGROUND_LOCATION`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION`) і аўдыё (`RECORD_AUDIO`), ланцуг плагінаў expo-location → expo-audio → @maplibre/maplibre-react-native → expo-asset прымяняецца без памылак — праверана на чыстай копіі (G00.04.c). Для iOS тая ж каманда на Windows адмаўляецца («Run … again from macOS or Linux») — платформавая мяжа генератара; поўная зборка з натыўным рантаймам даказваецца толькі development build на прыладзе.
 
 Чакана: каркас адкрываецца на прыладзе. Каркас сам не выклікае нілакацыю, ні аўдыё — дазволы толькі аб'яўленыя ў `app.json` як кандыдаты; спайкавыя канстанты (dwell, accuracy, bundle id) не перанесеныя. Профілі адрозніваюцца толькі application IDs — набор канфігаў адзін.
 
@@ -81,7 +89,7 @@ cp .env.example .env
 | дазволы, плагіны, New Architecture | `app.json` |
 | application IDs, профілі зборкі | `eas.json` |
 | кананічныя назвы env | толькі праз рашэнне ў ADR (гл. ніжэй) |
-| цэлевы Node/npm | `engines` у `package.json` (фінальны пін — G00.04.c) |
+| цэлевы Node/npm | `engines` у `package.json` (абгрунтаванне піну — ADR §6; любая змена — разам з перагенераваным lockfile) |
 
 Кандыдатныя дазволы і plugin-налады (expo-location, expo-audio) перанесеныя даслоўна з ADR [G00.01-platform-evidence](architecture/decisions/G00.01-platform-evidence.md) §5.2 як кандыдаты: прыладавай верыфікацыі няма (матрыца спайку G00.01.b — 37/37 not-run). Кананічныя назвы env мяняюцца толькі праз ADR: рэстатэмент кантракту — даслоўная копія, не парафраз (implementation-rules §2).
 
@@ -91,6 +99,6 @@ cp .env.example .env
 
 ## Вядомыя станы і абмежаванні
 
-- `npm audit`: 19 уразлівасцяў (10 moderate, 9 high) у transitive пакетаў (`image-size`, `postcss`, `uuid` і інш.). `npm audit fix --force` зламаў бы запінены набор — не запускаць; перагляд версій — у верыфікацыі G00.04.c.
-- Натыўныя зборкі Android/iOS — not-run на хосце G00.04.b: няма JDK/Android SDK/ADB, macOS/Xcode і прылад. Гэта знешні блокер таго самага класа, што ва ўсіх трох спайках.
-- Фінальны пін Node/npm, MapLibre RN, RevenueCat SDK, Supabase — задача G00.04.c пасля афіцыйнай верыфікацыі.
+- `npm audit`: 19 уразлівасцяў (10 moderate, 9 high), у тым ліку без dev-залежнасцей — усе тры дзёркавыя transitive (`uuid@7.0.3`, `postcss@8.4.49`, `image-size@1.2.1`) ляглі пад expo-інструмантарыяй (`@expo/config-plugins` → xcode, `@expo/metro-config`, `@expo/metro` → metro); прапанаваны `npm audit fix` пераставіў бы expo `57.0.23` — скачок SDK-лініі, адхілены. `audit fix --force` — не запускаць; перагляд разам з чарговай верыфікацыяй SDK-лініі.
+- Натыўныя зборкі Android/iOS — not-run на хостах G00.04.b/.c: няма Android SDK/ADB (`adb`, `ANDROID_HOME` адсутнічаюць), macOS/Xcode і прылад; JDK 25 (Temurin) на хосце .c з'явіўся, але сам па сабе зборкі не дае. Гэта знешні блокер таго самага класа, што ва ўсіх трох спайках.
+- Піны зафіксаваныя ў ADR [G00.04-stack-baseline](architecture/decisions/G00.04-stack-baseline.md) §6 (G00.04.c): MapLibre RN `11.3.10` і react-native-purchases `10.9.1` — актуальныя latest рэестра з выкананымі peers; expo `~54.0.37` — вяршыня праверанай лініі SDK 54 (даступны SDK 57 наўмысна не браліся); Supabase-пакета ў дрэве няма — пін упершыню запатрабуецца з production-бэкендам (G08).
