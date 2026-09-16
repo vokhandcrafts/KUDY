@@ -1,0 +1,14 @@
+{
+  "collection_id": "collection-demo",
+  "content_version": "1",
+  "name": {
+    "be": "Адзін дзень дэма-сукнара",
+    "en": "One Day of the Demo Cloth Merchant",
+    "uk": "Один день демо-сукнара"
+  },
+  "description": {
+    "be": "Рэдакцыйная параю дэма-месца і дэма-гіда: двор, потым увесь маршрут ад яго пачатку.",
+    "en": "An editorial pairing of the demo place and the demo guide: the courtyard, then the whole route from it.",
+    "uk": "Редакційна пара демо-місця та демо-гіда: двір, потім увесь маршрут від його початку."
+  }
+}
