@@ -9,8 +9,8 @@
 | Node.js | 22 LTS (пін — ADR [G00.04-stack-baseline](architecture/decisions/G00.04-stack-baseline.md) §6; афіцыйная падлога стэку — Node `>= 20.19.4`, поле `engines` react-native `0.81.5`) | `engines` у `package.json`: `>=22.12.0 <23`; Node 24 / npm 11 правераныя практыкай (чысты `npm ci`, doctor 18/18), на іх npm паказвае папярэджанне EBADENGINE, не памылку |
 | npm | `10.9.8` | `engines`: `>=10.9.8 <11` |
 | EAS CLI | `>= 16.0.0` | толькі для натыўных зборак; праверка `npx eas-cli --version` |
-| Android-зборка | JDK + Android SDK альбо EAS build | на хосце G00.04.b адсутныя — зборкі not-run |
-| iOS-зборка | macOS + Xcode альбо EAS build | на хосце G00.04.b адсутныя — not-run |
+| Android-зборка | JDK + Android SDK альбо EAS build | на хостах G00.04.b/.c адсутныя (на .c з'явіўся JDK 25 без Android SDK — `adb`/`ANDROID_HOME` няма) — зборкі not-run |
+| iOS-зборка | macOS + Xcode альбо EAS build | на хостах G00.04.b/.c адсутныя — not-run |
 
 ## Устаноўка
 
