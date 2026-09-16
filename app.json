@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "KUDY",
+    "slug": "kudy",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "by.kudy.app",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio",
+          "location"
+        ]
+      }
+    },
+    "android": {
+      "package": "by.kudy.app",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "KUDY uses location locally to trigger the selected guide.",
+          "locationAlwaysAndWhenInUsePermission": "KUDY uses location during an active walk; coordinates stay on this device."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": true,
+          "enableBackgroundRecording": false
+        }
+      ],
+      "@maplibre/maplibre-react-native",
+      "expo-asset"
+    ]
+  }
+}
