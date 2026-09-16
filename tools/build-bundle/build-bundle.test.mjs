@@ -264,6 +264,23 @@ test('AC4: collections are not feedback targets (21 §5.2), registry keeps guide
   assert.equal(registry.targets.some((target) => target.kind === 'collection'), false);
 });
 
+test('AC4: wrong detail_ref content version fails the real build with detail-ref-mismatch', async () => {
+  const work = await tempDir('kudy-author-');
+  await copyTree(fixtureDir, work);
+  const discoveryRel = path.join(work, 'discovery.json');
+  const discovery = JSON.parse(await fsp.readFile(discoveryRel, 'utf8'));
+  // point the place-1 offer at the collection projection file: the path
+  // exists in the public manifest but belongs to another entity/version
+  discovery.offers.find((offer) => offer.offer_id === 'offer-place-1').detail_ref.path =
+    'collections/collection-demo/public.json';
+  await fsp.writeFile(discoveryRel, canonicalJson(discovery), 'utf8');
+  const out = await tempDir('kudy-build-');
+  await assert.rejects(
+    buildBundle({ inDir: work, outDir: out }),
+    (error) => error instanceof BuildError && error.code === 'detail-ref-mismatch',
+  );
+});
+
 test('MEDIUM fix: corrupt tier JSON fails with invalid-json, not an uncaught SyntaxError', async () => {
   for (const tierRel of ['be/base/stops.json', 'be/extended/stops.json']) {
     const work = await tempDir('kudy-author-');
@@ -362,6 +379,86 @@ for (const [file, expectedCode] of negativeCases) {
     );
   });
 }
+
+// Assembly-level codes without contract fixtures: covered here instead of
+// adding files to fixtures/discovery-contract/ (that set belongs to the
+// G01.06 contract and is G02.02's blocking input).
+function minimalContext({ resolveRefOk = true, metaContentVersion = '1' } = {}) {
+  return {
+    cityId: 'demo-city',
+    resolveRef: (ref) =>
+      resolveRefOk && ref.kind === 'place' && ref.place_id === 'place-1' && ref.content_version === '1'
+        ? { ok: true, availability: { text_locales: ['be'], audio_locales: [] }, access: 'free' }
+        : { ok: false },
+    routeDuration: () => null,
+    publicPathMeta: (rel) =>
+      rel === 'places/place-1/public.json'
+        ? { ok: true, placeId: 'place-1', collectionId: undefined, contentVersion: metaContentVersion }
+        : { ok: false },
+  };
+}
+
+function minimalAuthoring({ offerId = 'offer-x1', themeId = 'theme-x1', ref } = {}) {
+  return {
+    revision: 'r-test',
+    city_id: 'demo-city',
+    themes: [{ id: themeId, labels: { be: 'Тэма' } }],
+    offers: [
+      {
+        offer_id: offerId,
+        ref: ref ?? { kind: 'place', place_id: 'place-1', content_version: '1' },
+        city_id: 'demo-city',
+        editorial_order: 1,
+        themes: [themeId],
+        localized: { title: { be: 'Назва' } },
+        season_recommendations: [],
+        detail_ref: { kind: 'place_public', path: 'places/place-1/public.json' },
+      },
+    ],
+    collections: [],
+  };
+}
+
+test('AC4: unknown-ref — an offer ref the context cannot resolve fails assembly', () => {
+  assert.throws(
+    () => assembleIndex(minimalAuthoring(), minimalContext({ resolveRefOk: false })),
+    (error) => error instanceof BuildError && error.code === 'unknown-ref',
+  );
+});
+
+test('AC4: detail-ref-mismatch — a public path of another entity/version fails assembly', () => {
+  assert.throws(
+    () => assembleIndex(minimalAuthoring(), minimalContext({ metaContentVersion: '9' })),
+    (error) => error instanceof BuildError && error.code === 'detail-ref-mismatch',
+  );
+});
+
+test('AC4: duplicate-offer-id — two offers with one id fail assembly', () => {
+  const authoring = minimalAuthoring();
+  authoring.offers.push({ ...authoring.offers[0] });
+  assert.throws(
+    () => assembleIndex(authoring, minimalContext()),
+    (error) => error instanceof BuildError && error.code === 'duplicate-offer-id',
+  );
+});
+
+test('AC4: duplicate-theme — two themes with one id fail assembly', () => {
+  const authoring = minimalAuthoring();
+  authoring.themes.push({ ...authoring.themes[0] });
+  assert.throws(
+    () => assembleIndex(authoring, minimalContext()),
+    (error) => error instanceof BuildError && error.code === 'duplicate-theme',
+  );
+});
+
+test('AC4: invalid-identifier — a bad revision fails assembly', () => {
+  const authoring = minimalAuthoring();
+  authoring.revision = 'Bad Revision!';
+  assert.throws(
+    () => assembleIndex(authoring, minimalContext()),
+    (error) => error instanceof BuildError && error.code === 'invalid-identifier',
+  );
+});
 
 // ------------------------------------------------------------------ guards
 
