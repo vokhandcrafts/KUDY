@@ -168,7 +168,11 @@ async function readAuthorTree(inAbs) {
       locales.add(locale);
       if (segments[1] !== 'base' && segments[1] !== 'extended') fail('invalid-tier-dir', { path: rel });
       tierFiles[segments[1]].push(rel);
-    } else if (segments[0] === 'places' && segments.length === 3 && segments[2] === 'public.json') {
+    } else if (
+      segments.length === 3 &&
+      segments[2] === 'public.json' &&
+      (segments[0] === 'places' || segments[0] === 'collections')
+    ) {
       projectionRels.push(rel);
     } else {
       fail('unknown-author-entry', { path: rel });
@@ -179,7 +183,8 @@ async function readAuthorTree(inAbs) {
   const projections = new Map();
   for (const rel of projectionRels) {
     const doc = await readJsonRel(inAbs, rel);
-    if (!isIdentifier(doc.place_id) || !isIdentifier(doc.content_version)) {
+    const idField = rel.startsWith('collections/') ? 'collection_id' : 'place_id';
+    if (!isIdentifier(doc[idField]) || !isIdentifier(doc.content_version)) {
       fail('invalid-projection', { path: rel });
     }
     projections.set(rel, doc);
@@ -271,7 +276,11 @@ export function assembleIndex(authoring, ctx) {
       if (!isPathSafe(detail.path)) fail('private-path', { ...where, path: detail.path });
       const meta = ctx.publicPathMeta(detail.path);
       if (!meta.ok) fail('unknown-ref', { ...where, path: detail.path });
-      if (ref.kind === 'place' && (meta.placeId !== ref.place_id || meta.contentVersion !== ref.content_version)) {
+      if (
+        (ref.kind === 'place' && (meta.placeId !== ref.place_id || meta.contentVersion !== ref.content_version)) ||
+        (ref.kind === 'collection' &&
+          (meta.collectionId !== ref.collection_id || meta.contentVersion !== ref.content_version))
+      ) {
         fail('detail-ref-mismatch', { ...where, path: detail.path });
       }
     } else {
@@ -362,11 +371,19 @@ export function assembleIndex(authoring, ctx) {
 
 // ------------------------------------------------------------ leak scanning
 
+function parseJsonBuffer(buf, rel) {
+  try {
+    return JSON.parse(buf.toString('utf8'));
+  } catch {
+    return fail('invalid-json', { path: rel });
+  }
+}
+
 function buildPrivateGrams(privateRels, bytesByRel) {
   const grams = new Set();
   for (const rel of privateRels) {
     if (!rel.endsWith('.json')) continue;
-    for (const raw of collectStrings(JSON.parse(bytesByRel.get(rel).toString('utf8')))) {
+    for (const raw of collectStrings(parseJsonBuffer(bytesByRel.get(rel), rel))) {
       for (const gram of ngrams(normalizeText(raw).split(' ').filter(Boolean), 8)) grams.add(gram);
     }
   }
@@ -377,7 +394,7 @@ function scanPublicForLeaks(bytesByRel, grams) {
   for (const [rel, buf] of bytesByRel) {
     if (rel.endsWith('.map')) fail('source-map-in-public', { path: rel });
     if (!rel.endsWith('.json')) continue;
-    for (const raw of collectStrings(JSON.parse(buf.toString('utf8')))) {
+    for (const raw of collectStrings(parseJsonBuffer(buf, rel))) {
       if (raw.includes('/') && !isPathSafe(raw)) fail('private-path-in-public', { path: rel, value: raw });
       for (const gram of ngrams(normalizeText(raw).split(' ').filter(Boolean), 8)) {
         if (grams.has(gram)) fail('private-text-leak', { path: rel });
@@ -456,43 +473,73 @@ export async function buildBundle({ inDir, outDir }) {
     }
   }
 
-  // Public place projections: detail_ref targets (21 §3.2).
+  // Public projections: detail_ref targets (21 §3.2); the author rel IS the
+  // public rel (`places/<id>/public.json`, `collections/<id>/public.json`).
   const publicPathMeta = new Map();
   for (const [rel, doc] of tree.projections) {
-    const relOut = `places/${doc.place_id}/public.json`;
-    publicFiles.set(relOut, await readBytes(inAbs, rel));
-    kinds.set(`public/${relOut}`, 'place_public');
-    publicPathMeta.set(relOut, { ok: true, placeId: doc.place_id, contentVersion: doc.content_version });
+    publicFiles.set(rel, await readBytes(inAbs, rel));
+    kinds.set(`public/${rel}`, rel.startsWith('collections/') ? 'collection_public' : 'place_public');
+    publicPathMeta.set(rel, {
+      ok: true,
+      placeId: doc.place_id,
+      collectionId: doc.collection_id,
+      contentVersion: doc.content_version,
+    });
   }
 
   // Availability computed from published content (21 §3.2); access per layer
-  // contract: guide from Route.access, places and collections free/mixed.
+  // contract: guide from Route.access, places free, collections mixed/free
+  // by members.
   const placeById = new Map(tree.places.map((place) => [place.id, place]));
   const guideAccess = route.access === 'free_base' ? 'free' : 'paid';
+  const resolveBase = (ref) => {
+    if (ref.kind === 'guide') {
+      if (ref.route_id !== route.route_id || ref.version !== route.version) return { ok: false };
+      return {
+        ok: true,
+        availability: { text_locales: textLocales, audio_locales: audioLocales },
+        access: guideAccess,
+      };
+    }
+    if (ref.kind === 'place') {
+      const place = placeById.get(ref.place_id);
+      if (!place || place.content_version !== ref.content_version) return { ok: false };
+      const projection = tree.projections.get(`places/${ref.place_id}/public.json`);
+      return {
+        ok: true,
+        availability: projection
+          ? { text_locales: projectionLocales(projection), audio_locales: [] }
+          : { text_locales: [], audio_locales: [] },
+        access: 'free',
+      };
+    }
+    return { ok: false };
+  };
   const ctx = {
     cityId: discovery.city_id,
     resolveRef(ref) {
-      if (ref.kind === 'guide') {
-        if (ref.route_id !== route.route_id || ref.version !== route.version) return { ok: false };
-        return {
-          ok: true,
-          availability: { text_locales: textLocales, audio_locales: audioLocales },
-          access: guideAccess,
-        };
+      if (ref.kind !== 'collection') return resolveBase(ref);
+      const collection = (discovery.collections ?? []).find(
+        (entry) => entry.collection_id === ref.collection_id && entry.content_version === ref.content_version,
+      );
+      if (!collection) return { ok: false };
+      // 21 §3.2: a collection's text is available where its description AND
+      // every member card's text are available; its audio_locales stay [].
+      let descLocales = projectionLocales(collection.localized ?? {});
+      let anyPaid = false;
+      for (const member of collection.members ?? []) {
+        if (member.kind === 'collection') continue; // rejected as nested below
+        const memberResolved = resolveBase(member);
+        if (!memberResolved.ok) return { ok: false };
+        const memberLocales = new Set(memberResolved.availability.text_locales);
+        descLocales = descLocales.filter((locale) => memberLocales.has(locale));
+        if (memberResolved.access === 'paid') anyPaid = true;
       }
-      if (ref.kind === 'place') {
-        const place = placeById.get(ref.place_id);
-        if (!place || place.content_version !== ref.content_version) return { ok: false };
-        const projection = tree.projections.get(`places/${ref.place_id}/public.json`);
-        return {
-          ok: true,
-          availability: projection
-            ? { text_locales: projectionLocales(projection), audio_locales: [] }
-            : { text_locales: [], audio_locales: [] },
-          access: 'free',
-        };
-      }
-      return { ok: false };
+      return {
+        ok: true,
+        availability: { text_locales: descLocales, audio_locales: [] },
+        access: anyPaid ? 'mixed' : 'free',
+      };
     },
     routeDuration: (routeId) => (routeId === route.route_id ? route.duration_min ?? null : null),
     publicPathMeta: (rel) => publicPathMeta.get(rel) ?? { ok: false },
@@ -512,12 +559,14 @@ export async function buildBundle({ inDir, outDir }) {
   );
 
   // Registry export (21 §5.2): guide targets per published text locale,
-  // place targets per published public projection; prepared, ids only.
+  // place targets per published public projection; collections and single
+  // stories are not targets this release; prepared, ids only.
   const targets = [];
   for (const locale of textLocales) {
     targets.push({ kind: 'guide', route_id: route.route_id, version: route.version, locale, status: 'prepared' });
   }
-  for (const doc of tree.projections.values()) {
+  for (const [rel, doc] of tree.projections) {
+    if (!rel.startsWith('places/')) continue;
     for (const locale of projectionLocales(doc)) {
       targets.push({
         kind: 'place',

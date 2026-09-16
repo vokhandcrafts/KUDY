@@ -237,10 +237,47 @@ test('AC4: index computes availability from published content; uk stays text-onl
   const place = index.offers.find((offer) => offer.offer_id === 'offer-place-1');
   assert.deepEqual(place.availability, { text_locales: ['be', 'en', 'uk'], audio_locales: [] });
   assert.equal(place.access, 'free');
+  const collection = index.offers.find((offer) => offer.offer_id === 'offer-collection-demo');
+  assert.deepEqual(collection.availability, { text_locales: ['be', 'en', 'uk'], audio_locales: [] });
+  assert.equal(collection.access, 'mixed', 'paid guide member makes the collection mixed');
   assert.deepEqual(
     index.offers.map((offer) => offer.offer_id),
-    ['offer-guide-demo', 'offer-place-1'],
+    ['offer-guide-demo', 'offer-place-1', 'offer-collection-demo'],
   );
+  assert.ok(index.collections[0].overlap_note, 'overlap_note required: guide starts at member place-1');
+  assert.equal(index.collections[0].members.length, 2);
+});
+
+test('AC4: collection projection is built through the real packager path (integration)', async () => {
+  const out = await buildDemoFixture();
+  const projection = readJson(out, 'public/collections/collection-demo/public.json');
+  assert.equal(projection.collection_id, 'collection-demo');
+  assert.ok(projection.name.be && projection.description.en);
+  const manifest = readJson(out, 'release/release-manifest.json');
+  const entry = manifest.artifacts.find((artifact) => artifact.path === 'public/collections/collection-demo/public.json');
+  assert.equal(entry?.kind, 'collection_public');
+});
+
+test('AC4: collections are not feedback targets (21 §5.2), registry keeps guide/place only', async () => {
+  const out = await buildDemoFixture();
+  const registry = readJson(out, 'release/feedback-target-registry.json');
+  assert.equal(registry.targets.some((target) => target.kind === 'collection'), false);
+});
+
+test('MEDIUM fix: corrupt tier JSON fails with invalid-json, not an uncaught SyntaxError', async () => {
+  for (const tierRel of ['be/base/stops.json', 'be/extended/stops.json']) {
+    const work = await tempDir('kudy-author-');
+    await copyTree(fixtureDir, work);
+    await fsp.writeFile(path.join(work, ...tierRel.split('/')), '{ not json', 'utf8');
+    const out = await tempDir('kudy-build-');
+    await assert.rejects(
+      buildBundle({ inDir: work, outDir: out }),
+      (error) =>
+        error instanceof BuildError &&
+        error.code === 'invalid-json' &&
+        error.ids.path.endsWith(tierRel),
+    );
+  }
 });
 
 test('AC4: registry export is prepared, ids only, one entry per target revision', async () => {
@@ -275,6 +312,7 @@ function stubContext(index) {
       pathMeta.set(path, {
         ok: true,
         placeId: offer.ref?.place_id,
+        collectionId: offer.ref?.collection_id,
         contentVersion: offer.ref?.content_version,
       });
     }
