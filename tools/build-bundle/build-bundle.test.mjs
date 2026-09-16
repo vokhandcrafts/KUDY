@@ -460,6 +460,50 @@ test('AC4: invalid-identifier — a bad revision fails assembly', () => {
   );
 });
 
+test('AC4: detail-ref-invalid — a detail kind of another ref kind fails assembly', () => {
+  const authoring = minimalAuthoring();
+  authoring.offers[0].ref = { kind: 'guide', route_id: 'route-1', version: '1' };
+  authoring.offers[0].detail_ref = { kind: 'place_public', path: 'places/place-1/public.json' };
+  const ctx = minimalContext();
+  ctx.resolveRef = () => ({ ok: true, availability: { text_locales: ['be'], audio_locales: [] }, access: 'free' });
+  assert.throws(
+    () => assembleIndex(authoring, ctx),
+    (error) => error instanceof BuildError && error.code === 'detail-ref-invalid',
+  );
+});
+
+test('AC4: invalid-duration-basis — basis outside the 21 §3.2 enum fails assembly', () => {
+  const authoring = minimalAuthoring();
+  authoring.offers[0].estimated_duration = { min_minutes: 10, max_minutes: 20, basis: 'auto' };
+  assert.throws(
+    () => assembleIndex(authoring, minimalContext()),
+    (error) => error instanceof BuildError && error.code === 'invalid-duration-basis',
+  );
+});
+
+test('AC4: index-oversized — an index beyond the 512 KiB budget fails assembly', () => {
+  const authoring = {
+    revision: 'r-big',
+    city_id: 'demo-city',
+    themes: [],
+    offers: Array.from({ length: 2500 }, (_, i) => ({
+      offer_id: `offer-big-${i}`,
+      ref: { kind: 'place', place_id: 'place-1', content_version: '1' },
+      city_id: 'demo-city',
+      editorial_order: i,
+      themes: [],
+      localized: { title: { be: 'Назва дэма-прапановы для праверкі бюджэту памеру індэкса. '.repeat(6) } },
+      season_recommendations: [],
+      detail_ref: { kind: 'place_public', path: 'places/place-1/public.json' },
+    })),
+    collections: [],
+  };
+  assert.throws(
+    () => assembleIndex(authoring, minimalContext()),
+    (error) => error instanceof BuildError && error.code === 'index-oversized',
+  );
+});
+
 // ------------------------------------------------------------------ guards
 
 test('guard: build output directory is gitignored (implementation-rules 5)', () => {

@@ -98,8 +98,13 @@ async function writeFileRel(outAbs, rel, buf) {
 
 const isIdentifier = (value) => typeof value === 'string' && /^[a-z0-9._-]{1,64}$/.test(value);
 
-const isPathSafe = (value) =>
-  value.split('/').every((segment) => segment !== 'private' && segment !== 'extended' && segment !== '..' && segment !== '.');
+const isPathSafe = (value, forbidEmptySegments = false) =>
+  value.split('/').every((segment) =>
+    segment !== 'private' &&
+    segment !== 'extended' &&
+    segment !== '..' &&
+    segment !== '.' &&
+    !(forbidEmptySegments && segment === ''));
 
 function assertLocales(value, where) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -215,11 +220,14 @@ function projectionLocales(doc) {
   return [...found].sort();
 }
 
+const DURATION_BASES = ['author_walk', 'author_estimate'];
+
 function validDurationRange(offerId, duration) {
-  const { min_minutes: min, max_minutes: max } = duration;
+  const { min_minutes: min, max_minutes: max, basis } = duration;
   if (!Number.isInteger(min) || !Number.isInteger(max) || min < 1 || min > max || max > 1440) {
     fail('duration-range', { offer_id: offerId });
   }
+  if (!DURATION_BASES.includes(basis)) fail('invalid-duration-basis', { offer_id: offerId });
 }
 
 export function assembleIndex(authoring, ctx) {
@@ -268,23 +276,26 @@ export function assembleIndex(authoring, ctx) {
     const resolved = ctx.resolveRef(ref);
     if (!resolved.ok) fail('unknown-ref', { ...where, ref: JSON.stringify(ref) });
 
+    // 21 §3.2 detail_ref kinds are per-ref-kind: guide → guide_preview (no
+    // path), place → place_public, collection → collection_public (path).
     const detail = offer.detail_ref ?? {};
+    const expectedDetailKind = { guide: 'guide_preview', place: 'place_public', collection: 'collection_public' }[ref.kind];
+    if (detail.kind !== expectedDetailKind) {
+      fail('detail-ref-invalid', { ...where, detail_kind: detail.kind });
+    }
     if (detail.kind === 'guide_preview') {
       if (detail.path !== undefined) fail('detail-ref-invalid', where);
-    } else if (detail.kind === 'place_public' || detail.kind === 'collection_public') {
+    } else {
       if (typeof detail.path !== 'string' || detail.path === '') fail('detail-ref-invalid', where);
-      if (!isPathSafe(detail.path)) fail('private-path', { ...where, path: detail.path });
+      if (!isPathSafe(detail.path, true)) fail('private-path', { ...where, path: detail.path });
       const meta = ctx.publicPathMeta(detail.path);
       if (!meta.ok) fail('unknown-ref', { ...where, path: detail.path });
-      if (
-        (ref.kind === 'place' && (meta.placeId !== ref.place_id || meta.contentVersion !== ref.content_version)) ||
-        (ref.kind === 'collection' &&
-          (meta.collectionId !== ref.collection_id || meta.contentVersion !== ref.content_version))
-      ) {
+      const ownerOk =
+        (ref.kind === 'place' && meta.placeId === ref.place_id) ||
+        (ref.kind === 'collection' && meta.collectionId === ref.collection_id);
+      if (!ownerOk || meta.contentVersion !== ref.content_version) {
         fail('detail-ref-mismatch', { ...where, path: detail.path });
       }
-    } else {
-      fail('detail-ref-invalid', where);
     }
 
     offers.push({
