@@ -21,7 +21,8 @@ node tools/build-bundle/build-bundle.mjs --in <аўтарская-тэчка> --
 
 ```
 route.json places.json voices.json discovery.json
-places/<place_id>/public.json          # публічныя праекцыі месцаў
+places/<place_id>/public.json           # публічныя праекцыі месцаў
+collections/<collection_id>/public.json # публічныя праекцыі падборак
 <locale>/base/{stops.json, audio/*.m4a}
 <locale>/extended/{stops.json, audio/*.m4a}
 ```
@@ -32,7 +33,8 @@ places/<place_id>/public.json          # публічныя праекцыі м�
 
 ```
 public/bundle/<route_id>/<version>/…   # base-пласт: stops, audio, previews.json, lock.json
-public/places/<place_id>/public.json   # detail_ref-мэты
+public/places/<place_id>/public.json   # detail_ref-мэты месцаў
+public/collections/<collection_id>/public.json # detail_ref-мэты падборак
 public/discovery/<city_id>/<revision>/index.json
 private/bundle/<route_id>/<version>/<locale>/extended/…   # lock.json у тым жа фармаце
 release/feedback-target-registry.json  # толькі для сервера, кліенту не выдаецца
@@ -44,10 +46,12 @@ release/release-manifest.json          # поўны спіс артэфакта�
 - `previews.json` — «асобна серыялізаваны публічны анонс locked-кропак» з `09`,
   разд. 5: толькі `stop_id`, `place_id`, `name`, `announce`.
 - `index.json` — `DiscoveryIndexV1` з `21`, разд. 3.2; `availability`
-  вылічаецца з апублікаванага зместу, `access` — з кантракту пласта;
+  вылічаецца з апублікаванага зместу, `access` — з кантракту пласта
+  (collection — `mixed` пры любым платным члене, `audio_locales` заўжды `[]`);
   `detail_ref`-шляхі правяраюцца супраць public-маніфесту.
 - registry — `prepared`-мэты з `21`, разд. 5.2: guide па кожнай апублікаванай
-  тэкставай локалі (у тым ліку text-only), place па апублікаванай праекцыі.
+  тэкставай локалі (у тым ліку text-only), place па апублікаванай праекцыі;
+  collection і асобныя Story мэтаў гэтага выпуску не маюць.
 
 ## Гарантіі
 

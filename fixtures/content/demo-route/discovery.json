@@ -76,7 +76,67 @@
       },
       "season_recommendations": [],
       "detail_ref": { "kind": "place_public", "path": "places/place-1/public.json" }
+    },
+    {
+      "offer_id": "offer-collection-demo",
+      "ref": { "kind": "collection", "collection_id": "collection-demo", "content_version": "1" },
+      "city_id": "demo-city",
+      "editorial_order": 3,
+      "themes": ["theme-demo-history"],
+      "localized": {
+        "title": {
+          "be": "Адзін дзень дэма-сукнара",
+          "en": "One Day of the Demo Cloth Merchant",
+          "uk": "Один день демо-сукнара"
+        },
+        "summary": {
+          "be": "Дэма-падборка: кароткі двор і поўны гід, які пачынаецца ад таго ж двара.",
+          "en": "A demo collection: the short courtyard and the full guide starting at the same courtyard.",
+          "uk": "Демо-підбірка: короткий двір і повний гід, що починається від того самого двору."
+        },
+        "why_recommended": {
+          "be": "Парадак падабраны рукамі: спачатку двор, потым гід ад яго ж пачатку.",
+          "en": "The order is hand-picked: courtyard first, then the guide starting from it.",
+          "uk": "Порядок підібраний вручну: спочатку двір, потім гід від його початку."
+        },
+        "conditions": {
+          "be": "сумарны час з пераходамі; дарога да пачатку не ўлічана",
+          "en": "total time includes transitions; the trip to the starting point does not",
+          "uk": "сумарний час із переходами; дорога до початку не врахована"
+        }
+      },
+      "estimated_duration": { "min_minutes": 50, "max_minutes": 70, "basis": "author_estimate" },
+      "suggested_start_place_id": "place-1",
+      "season_recommendations": [],
+      "detail_ref": { "kind": "collection_public", "path": "collections/collection-demo/public.json" }
     }
   ],
-  "collections": []
+  "collections": [
+    {
+      "collection_id": "collection-demo",
+      "content_version": "1",
+      "city_id": "demo-city",
+      "localized": {
+        "title": {
+          "be": "Адзін дзень дэма-сукнара",
+          "en": "One Day of the Demo Cloth Merchant",
+          "uk": "Один день демо-сукнара"
+        },
+        "description": {
+          "be": "Дзве прапановы ў адным маршруце: кароткі двор і поўны гід ад таго ж двара.",
+          "en": "Two offers in one arc: the short courtyard and the full guide from the same courtyard.",
+          "uk": "Дві пропозиції в одній дузі: короткий двір і повний гід від того самого двору."
+        }
+      },
+      "members": [
+        { "kind": "place", "place_id": "place-1", "content_version": "1" },
+        { "kind": "guide", "route_id": "demo-route-a1", "version": "1" }
+      ],
+      "overlap_note": {
+        "be": "Двор — першая кропка дэма-гіда; наведваць яго асобна не трэба, гэта той самы досвед.",
+        "en": "The courtyard is the demo guide's first stop; visiting it separately is not needed — same experience.",
+        "uk": "Двір — перша зупинка демо-гіда; відвідувати його окремо не потрібно, це той самий досвід."
+      }
+    }
+  ]
 }
