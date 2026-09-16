@@ -1,0 +1,14 @@
+[
+  {
+    "story_id": "story-2-ext",
+    "place_id": "place-2",
+    "tier": "extended",
+    "duration_s": 120,
+    "voice_id": "voice-en-1",
+    "tone": "standard",
+    "text": "Paid demo text of the extended story about the mill weathervane: eighth token, ninth token, tenth token, eleventh token of the canary phrase.",
+    "transcript": "Paid demo transcript of the extended story: a long line that must never reach the public layer in any shape.",
+    "sources": ["Demo source: synthetic archive"],
+    "review": { "by": "demo author", "at": "2026-09-16", "decision": "approved" }
+  }
+]

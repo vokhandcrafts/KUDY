@@ -1,0 +1,14 @@
+{
+  "place_id": "place-1",
+  "content_version": "1",
+  "name": {
+    "be": "Двор сукнараў (дэма)",
+    "en": "Cloth Merchants' Courtyard (demo)",
+    "uk": "Двір сукнарів (демо)"
+  },
+  "summary": {
+    "be": "Ціхі дворык з рэшткай гарадской сцены; сінтэтычны дэма-кантэнт, не рэальнае месца.",
+    "en": "A quiet courtyard with a remnant of the town wall; synthetic demo content, not a real place.",
+    "uk": "Тихий двірик із залишком міської стіни; синтетичний демо-контент, не реальне місце."
+  }
+}

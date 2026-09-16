@@ -1,3 +1,8 @@
 # AR-1 (#78): lock.json sha256 values are computed over canonical LF bytes.
 # Pin LF so a CRLF checkout cannot break integrity verification of the fixtures.
 spikes/G00.02-offline-map/source/** eol=lf
+
+# G02.03: build-bundle hashes the author content bytes; no EOL conversion may
+# touch these paths, otherwise the same checkout produces different sha256
+# values on Windows (core.autocrlf=true) and Linux.
+fixtures/content/** -text
