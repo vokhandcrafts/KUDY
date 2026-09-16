@@ -1,0 +1,142 @@
+{
+  "revision": "r-demo-1",
+  "city_id": "demo-city",
+  "themes": [
+    {
+      "id": "theme-demo-history",
+      "labels": {
+        "be": "Дэма-гісторыя",
+        "en": "Demo history",
+        "uk": "Демо-історія"
+      }
+    }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-guide-demo",
+      "ref": { "kind": "guide", "route_id": "demo-route-a1", "version": "1" },
+      "city_id": "demo-city",
+      "editorial_order": 1,
+      "themes": ["theme-demo-history"],
+      "localized": {
+        "title": {
+          "be": "Дэма-гід: сукнаны двор",
+          "en": "Demo guide: the cloth courtyard",
+          "uk": "Демо-гід: сукняний двір"
+        },
+        "summary": {
+          "be": "Дэма-маршрут з дзвюма гісторыямі: свабодны двор і платная млынавая колана.",
+          "en": "A demo route with two stories: the free courtyard and the paid mill column.",
+          "uk": "Демо-маршрут з двома історіями: вільний двір і платна млинарська колона."
+        },
+        "why_recommended": {
+          "be": "Аўтар прайшоў шлях двойчы і запісаў абедзве гісторыі сам; дэма-прыклад для праверкі зборкі.",
+          "en": "The author walked the route twice and narrated both stories personally; a demo example for build checks.",
+          "uk": "Автор пройшов шлях двічі та начитав обидві історії сам; демо-приклад для перевірки збирання."
+        },
+        "conditions": {
+          "be": "брукаванка і адзін мост без тратуара",
+          "en": "cobblestones and one bridge without a sidewalk",
+          "uk": "бруківка та один міст без тротуару"
+        }
+      },
+      "estimated_duration": { "min_minutes": 40, "max_minutes": 60, "basis": "author_estimate" },
+      "distance_m": 2500,
+      "suggested_start_place_id": "place-1",
+      "season_recommendations": [],
+      "detail_ref": { "kind": "guide_preview" }
+    },
+    {
+      "offer_id": "offer-place-1",
+      "ref": { "kind": "place", "place_id": "place-1", "content_version": "1" },
+      "city_id": "demo-city",
+      "editorial_order": 2,
+      "themes": ["theme-demo-history"],
+      "localized": {
+        "title": {
+          "be": "Двор сукнараў (дэма)",
+          "en": "Cloth Merchants' Courtyard (demo)",
+          "uk": "Двір сукнарів (демо)"
+        },
+        "summary": {
+          "be": "Ціхі дворык з рэшткай гарадской сцены; сінтэтычны дэма-кантэнт.",
+          "en": "A quiet courtyard with a remnant of the town wall; synthetic demo content.",
+          "uk": "Тихий двірик із залишком міської стіни; синтетичний демо-контент."
+        },
+        "why_recommended": {
+          "be": "Дзесяць хвілін цішыні ў дэма-цэнтры; кароткі прыклад месца для перапынку.",
+          "en": "Ten minutes of quiet in the demo centre; a short example of a pause spot.",
+          "uk": "Десять хвилин тиші в демо-центрі; короткий приклад місця для перепочинку."
+        },
+        "conditions": {
+          "be": "большасць шляху на вуліцы",
+          "en": "most of the way is outdoors",
+          "uk": "більшість шляху надворі"
+        }
+      },
+      "season_recommendations": [],
+      "detail_ref": { "kind": "place_public", "path": "places/place-1/public.json" }
+    },
+    {
+      "offer_id": "offer-collection-demo",
+      "ref": { "kind": "collection", "collection_id": "collection-demo", "content_version": "1" },
+      "city_id": "demo-city",
+      "editorial_order": 3,
+      "themes": ["theme-demo-history"],
+      "localized": {
+        "title": {
+          "be": "Адзін дзень дэма-сукнара",
+          "en": "One Day of the Demo Cloth Merchant",
+          "uk": "Один день демо-сукнара"
+        },
+        "summary": {
+          "be": "Дэма-падборка: кароткі двор і поўны гід, які пачынаецца ад таго ж двара.",
+          "en": "A demo collection: the short courtyard and the full guide starting at the same courtyard.",
+          "uk": "Демо-підбірка: короткий двір і повний гід, що починається від того самого двору."
+        },
+        "why_recommended": {
+          "be": "Парадак падабраны рукамі: спачатку двор, потым гід ад яго ж пачатку.",
+          "en": "The order is hand-picked: courtyard first, then the guide starting from it.",
+          "uk": "Порядок підібраний вручну: спочатку двір, потім гід від його початку."
+        },
+        "conditions": {
+          "be": "сумарны час з пераходамі; дарога да пачатку не ўлічана",
+          "en": "total time includes transitions; the trip to the starting point does not",
+          "uk": "сумарний час із переходами; дорога до початку не врахована"
+        }
+      },
+      "estimated_duration": { "min_minutes": 50, "max_minutes": 70, "basis": "author_estimate" },
+      "suggested_start_place_id": "place-1",
+      "season_recommendations": [],
+      "detail_ref": { "kind": "collection_public", "path": "collections/collection-demo/public.json" }
+    }
+  ],
+  "collections": [
+    {
+      "collection_id": "collection-demo",
+      "content_version": "1",
+      "city_id": "demo-city",
+      "localized": {
+        "title": {
+          "be": "Адзін дзень дэма-сукнара",
+          "en": "One Day of the Demo Cloth Merchant",
+          "uk": "Один день демо-сукнара"
+        },
+        "description": {
+          "be": "Дзве прапановы ў адным маршруце: кароткі двор і поўны гід ад таго ж двара.",
+          "en": "Two offers in one arc: the short courtyard and the full guide from the same courtyard.",
+          "uk": "Дві пропозиції в одній дузі: короткий двір і повний гід від того самого двору."
+        }
+      },
+      "members": [
+        { "kind": "place", "place_id": "place-1", "content_version": "1" },
+        { "kind": "guide", "route_id": "demo-route-a1", "version": "1" }
+      ],
+      "overlap_note": {
+        "be": "Двор — першая кропка дэма-гіда; наведваць яго асобна не трэба, гэта той самы досвед.",
+        "en": "The courtyard is the demo guide's first stop; visiting it separately is not needed — same experience.",
+        "uk": "Двір — перша зупинка демо-гіда; відвідувати його окремо не потрібно, це той самий досвід."
+      }
+    }
+  ]
+}

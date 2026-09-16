@@ -1,0 +1,14 @@
+[
+  {
+    "story_id": "story-1-base",
+    "place_id": "place-1",
+    "tier": "base",
+    "duration_s": 95,
+    "voice_id": "voice-en-1",
+    "tone": "standard",
+    "text": "Demo text of the base story about the cloth trade: synthetic sentences for build and public-layer checks.",
+    "transcript": "Demo transcript of the base story. The free layer is published in full, so this line is visible without a purchase.",
+    "sources": ["Demo source: synthetic archive"],
+    "review": { "by": "demo author", "at": "2026-09-16", "decision": "approved" }
+  }
+]
