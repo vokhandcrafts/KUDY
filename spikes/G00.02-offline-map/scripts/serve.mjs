@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { extname, join, normalize, resolve } from 'node:path';
+import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { verify } from '../lib/package.mjs';
 
@@ -12,7 +12,10 @@ const server = createServer(async (request, response) => {
     const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
     const relative = pathname === '/' ? 'index.html' : decodeURIComponent(pathname.slice(1));
     const file = normalize(join(root, relative));
-    if (!file.startsWith(`${root}/`) || !(await stat(file)).isFile()) throw new Error('not found');
+    // Containment must compare with the platform separator: on Windows
+    // normalize/join produce backslashes, so a hardcoded '/' would 404 every
+    // request (AR-2, #79; same idiom as G00.03 grant-server.mjs).
+    if (!file.startsWith(root + sep) || !(await stat(file)).isFile()) throw new Error('not found');
     response.writeHead(200, { 'content-type': mime[extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' });
     response.end(await readFile(file));
   } catch { response.writeHead(404); response.end('not found'); }
