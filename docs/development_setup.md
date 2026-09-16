@@ -20,7 +20,7 @@ cd KUDY
 npm ci
 ```
 
-Чакана: `added 728 packages` (лік ротавацца з патчамі transitive), `node_modules/` створаны. `package-lock.json` у рэпазітары, таму `npm ci`, не `npm install` — ён строгі да lockfile.
+Чакана: `added 733 packages` (замер на чыстым `npm ci` з камітнага lockfile; лік ротавацца з патчамі transitive), `node_modules/` створаны. `package-lock.json` у рэпазітары, таму `npm ci`, не `npm install` — ён строгі да lockfile.
 
 ## Праверкі
 
@@ -28,6 +28,7 @@ npm ci
 |---|---|
 | `npm run typecheck` | `tsc --noEmit` без вываду, exit 0 |
 | `npm test` | suite `docs/run-model/run-model.test.mjs`: **51 pass / 0 fail** |
+| `node docs/run-model/check-regressions.mjs` | **16/16 reviewed regressions rejected. Repository model unchanged.** |
 | `npx expo-doctor` | **18/18 checks passed. No issues detected!** |
 | `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .` | **Found 0 clones** (0.00%) |
 
@@ -43,12 +44,14 @@ Metro bundler; прэв'ю ў Expo Go або эмулятары. **Абмежа�
 
 ## Натыўныя зборкі (development build)
 
+Прадумова: профіль `development` мае `developmentClient: true` — EAS патрабуе залежнасць `expo-dev-client` у `package.json` (у каркасе: `~6.0.21`).
+
 ```sh
 npx eas-cli build --profile development --platform android
 npx eas-cli build --profile development --platform ios
 ```
 
-Пасля ўстаноўкі build-а на прыладу: `npx expo start --dev-client`.
+Пасля ўстаноўкі build-а на прыладу: `npm start` (`expo start --dev-client`).
 
 Чакана: каркас адкрываецца на прыладзе. Каркас сам не выклікае нілакацыю, ні аўдыё — дазволы толькі аб'яўленыя ў `app.json` як кандыдаты; спайкавыя канстанты (dwell, accuracy, bundle id) не перанесеныя. Профілі адрозніваюцца толькі application IDs — набор канфігаў адзін.
 
@@ -88,6 +91,6 @@ cp .env.example .env
 
 ## Вядомыя станы і абмежаванні
 
-- `npm audit`: 16 уразлівасцяў (7 moderate, 9 high) у transitive пакетаў (`image-size`, `postcss`, `uuid` і інш.). `npm audit fix --force` зламаў бы запінены набор — не запускаць; перагляд версій — у верыфікацыі G00.04.c.
+- `npm audit`: 19 уразлівасцяў (10 moderate, 9 high) у transitive пакетаў (`image-size`, `postcss`, `uuid` і інш.). `npm audit fix --force` зламаў бы запінены набор — не запускаць; перагляд версій — у верыфікацыі G00.04.c.
 - Натыўныя зборкі Android/iOS — not-run на хосце G00.04.b: няма JDK/Android SDK/ADB, macOS/Xcode і прылад. Гэта знешні блокер таго самага класа, што ва ўсіх трох спайках.
 - Фінальны пін Node/npm, MapLibre RN, RevenueCat SDK, Supabase — задача G00.04.c пасля афіцыйнай верыфікацыі.
