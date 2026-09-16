@@ -428,8 +428,10 @@ export async function buildBundle({ inDir, outDir }) {
         kinds.set(`${tier === 'base' ? 'public' : 'private'}/${relOut}`, tier === 'base' ? 'public_bundle' : 'private_bundle');
       }
       if (tier === 'base') {
-        textLocales.push(locale);
-        if (files.some((rel) => rel.startsWith(`${locale}/base/audio/`))) audioLocales.push(locale);
+        if (files.some((rel) => rel === `${locale}/base/stops.json`)) textLocales.push(locale);
+        if (files.some((rel) => rel.startsWith(`${locale}/base/audio/`) && rel.endsWith('.m4a'))) {
+          audioLocales.push(locale);
+        }
 
         // 09 §5 grant boundary: the base layer's only representation of a
         // locked stop is the serialized public preview. Field allowlist so

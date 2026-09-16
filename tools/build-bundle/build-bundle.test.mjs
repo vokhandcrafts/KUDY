@@ -75,7 +75,7 @@ test('AC1: lock.json is [{path, bytes, sha256}] covering every layer file except
     assert.ok(Array.isArray(lock), lockRel);
     const layerDir = path.posix.dirname(lockRel);
     const lockFileName = path.posix.basename(lockRel);
-    const layerFiles = Object.keys(await readOutTree(path.join(outDir0(out, layerDir)), ''))
+    const layerFiles = Object.keys(await readOutTree(path.join(out, ...layerDir.split('/'))))
       .map((rel) => rel.replaceAll('\\', '/'))
       .filter((rel) => rel !== lockFileName);
     assert.deepEqual(
@@ -96,10 +96,6 @@ test('AC1: lock.json is [{path, bytes, sha256}] covering every layer file except
   }
 });
 
-function outDir0(out, layerDir) {
-  return path.join(out, ...layerDir.split('/'));
-}
-
 test('AC1: release manifest lists every artifact with bytes and sha256', async () => {
   const out = await buildDemoFixture();
   const manifest = readJson(out, 'release/release-manifest.json');
@@ -110,7 +106,7 @@ test('AC1: release manifest lists every artifact with bytes and sha256', async (
   );
   assert.deepEqual(listed.sort(), onDisk.sort());
   for (const entry of manifest.artifacts) {
-    assert.equal(entry.bytes + 0 > 0, true, entry.path);
+    assert.ok(entry.bytes > 0, entry.path);
     assert.equal(entry.sha256, tree[entry.path], entry.path);
   }
 });
