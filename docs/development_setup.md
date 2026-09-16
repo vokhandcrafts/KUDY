@@ -20,7 +20,7 @@ cd KUDY
 npm ci
 ```
 
-Чакана: `added 733 packages` (замер на чыстым `npm ci` з камітнага lockfile; лік ротавацца з патчамі transitive), `node_modules/` створаны. `package-lock.json` у рэпазітары, таму `npm ci`, не `npm install` — ён строгі да lockfile.
+Чакана: `added ~734 packages` (лік ротавацца з платформы — OS-спецыфічныя optional-пакеты: Windows-хост даваў 733, Linux у рэв'ю — 734 — і з патчамі transitive), `node_modules/` створаны. `package-lock.json` у рэпазітары, таму `npm ci`, не `npm install` — ён строгі да lockfile.
 
 ## Праверкі
 
