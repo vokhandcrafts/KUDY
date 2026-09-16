@@ -30,7 +30,7 @@
 
 | Existing result | Recorded status | Consequence |
 |---|---|---|
-| `tools/build-bundle/` (G02.03, issue #55) | WIP on branch `zcode/55`, commit `530d35b` | The public output contract below is what G10.01.a consumes; web tasks stay blocked until #55 closes |
+| `tools/build-bundle/` (G02.03, issue #55) | closed — merged to `main` (PR #105, 2026-09-16) | The public output contract below is what G10.01.a consumes |
 | `fixtures/content/demo-route/` | present on main | The fixture bundle the web develops against until G03.05 publishes real content |
 | `fixtures/discovery-contract/` | present on main | `DiscoveryIndexV1` examples for the catalog page |
 | Web code | none | `web/` does not exist in the repository yet |
@@ -56,7 +56,7 @@ Every app screen (09 §6.5: `Explore · RouteDetail · Run · Map · MyKUDY · d
 
 | App screen | Web page | Reads | Paid content handling |
 |---|---|---|---|
-| `Explore` | `/` — city catalog | discovery index + catalog | Free guides only; «EXPLORE не імітуе каталог» (01, R08) — with one published guide the home shows that guide's card plus the map entry, not an empty directory |
+| `Explore` | `/` — city catalog | discovery index + catalog | Free guides only; «EXPLORE не імітуе каталог» (15, R08) — with one published guide the home shows that guide's card plus the map entry, not an empty directory |
 | `RouteDetail` | `/guides/[route_id]` | `route.json`, per-locale base `stops.json`, previews | Locked stops visible with padlock + `name` + `announce` from `previews.json`; one calm offer at the bottom → app; languages, duration, distance and stop count shown from the bundle |
 | `Run` (GPS session) | Stop pages `/guides/[route_id]/stops/[stop_id]`, browsable in the recommended order | base `stops.json`, audio, transcripts | Free stories play by explicit user tap only; the full story text (transcript) renders for SEO; locked stops render the public preview + app CTA. No GPS, no autoplay, no session — the web walk is manual by contract |
 | `Map` («Побач») | `/map` — static city map | public place projections | Manual overview only: no position, no «nearby» personalization, ODbL attribution visible and clickable (09 §6.3.1) |
