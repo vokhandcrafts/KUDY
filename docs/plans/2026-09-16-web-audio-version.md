@@ -8,6 +8,8 @@
 
 **Tech stack (proposed; the founder confirms it when G10.01.a starts):** Next.js (App Router, static generation) + TypeScript on Vercel; the standard HTML audio element for the manual player; MapLibre GL JS for the static city map; no database, no server-side state, no analytics in the first release. Alternative considered: Astro. The repo's React/TypeScript base and the accepted Vercel hosting favor Next.js. Nothing in the content contract depends on this choice.
 
+**Map tile provider (proposed; the founder confirms it when G10.01.b starts):** a hosted, ODbL-attributed provider such as MapTiler or OpenFreeMap, not a self-hosted tile server — self-hosting would add infrastructure beyond the Vercel project this plan commits to (§5). This is a cost/ops decision like the stack choice above, not an implementation detail G10.01.b decides on its own; the chosen provider and the reason are recorded in the G10.01.b result file before the map page is built.
+
 **Spec:** [04, «Паралельны трэк — вэб-аўдыёверсія (прынята)»](../04_scope_and_roadmap.md) · [09 §2 «Вэб і платнае», §8 «Мовы і голас», §13 M3](../architecture/09_technical_architecture.md) · [16, эпік G10](../16_delivery_backlog.md) · [01, «Дзе відаць цана»](../01_product_structure.md) · [build-bundle README](../../tools/build-bundle/README.md) · [21 §3.2 `DiscoveryIndexV1`](../architecture/21_discovery_feedback_architecture.md). These travel with every task.
 
 ## Global constraints
