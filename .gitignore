@@ -12,3 +12,6 @@ dist/
 !.env.example
 *.tsbuildinfo
 
+# G02.03: build-bundle output (public/private trees, release artifacts), never tracked
+tools/build-bundle/build/
+

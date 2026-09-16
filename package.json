@@ -12,7 +12,7 @@
     "android": "expo start --dev-client --android",
     "ios": "expo start --dev-client --ios",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --test-reporter=spec docs/run-model/run-model.test.mjs"
+    "test": "node --test --test-reporter=spec docs/run-model/run-model.test.mjs \"tools/build-bundle/*.test.mjs\""
   },
   "dependencies": {
     "@maplibre/maplibre-react-native": "11.3.10",

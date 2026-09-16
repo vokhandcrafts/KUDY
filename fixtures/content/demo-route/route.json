@@ -1,0 +1,40 @@
+{
+  "route_id": "demo-route-a1",
+  "version": "1",
+  "city_id": "demo-city",
+  "access": "paid",
+  "product_id_route": "demo_route_prod",
+  "product_id_extension": "demo_ext_prod",
+  "distance_m": 2500,
+  "duration_min": 40,
+  "free_stop_count": 1,
+  "published": false,
+  "stops": [
+    {
+      "id": "stop-1",
+      "position": 0,
+      "place_id": "place-1",
+      "access_tier": "base",
+      "story_base_id": "story-1-base"
+    },
+    {
+      "id": "stop-2",
+      "position": 1,
+      "place_id": "place-2",
+      "access_tier": "extended",
+      "story_extended_id": "story-2-ext",
+      "preview": {
+        "name": {
+          "be": "Млынавая калона (дэма)",
+          "en": "The Mill Column (demo)",
+          "uk": "Млинарська колона (демо)"
+        },
+        "announce": {
+          "be": "За паваротам — апошняя калона старога млына і гісторыя пра яе вяртуна.",
+          "en": "Around the bend stands the last column of the old mill; a story about its weathervane.",
+          "uk": "За поворотом — остання колона старого млина та історія про її флюгер."
+        }
+      }
+    }
+  ]
+}
