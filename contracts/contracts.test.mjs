@@ -113,6 +113,7 @@ test('criterion 3: history, language, transcript, rights and access are checked 
   const noLicense = { ...media };
   delete noLicense.license;
   assert.ok(!schema('media.schema.json', noLicense).ok, 'media rights (license) required');
+  assert.ok(!schema('media.schema.json', { ...media, credit: '' }).ok, 'credit cannot be an empty string');
   const plVoice = { ...readJson('fixtures/content/demo-route/voices.json')[0], locale: 'pl' };
   assert.ok(!schema('voice.schema.json', plVoice).ok, 'reserved locales are not in the allowlist');
 });
@@ -159,6 +160,15 @@ test('criterion 4: an import cannot claim official provenance', () => {
   assert.ok(
     checkOfficialProfile(credited).ok,
     'imp. inside a non-identifier string (credit, note) is not an official-profile violation',
+  );
+  const borrowedStory = structuredClone(imported);
+  borrowedStory.stops[0].story_base_id = 'official-story';
+  const ns = checkImportedProfile(borrowedStory);
+  assert.ok(!ns.ok, 'an imported route cannot reference official story ids');
+  assert.ok(ns.errors.some((e) => e.rule === 'import-namespace-required'), JSON.stringify(ns.errors));
+  assert.ok(
+    checkImportedProfile({ ...borrowedStory, stops: [{ ...borrowedStory.stops[0], story_base_id: 'imp.ns.story-2' }] }).ok,
+    'the imp. namespace satisfies the story reference',
   );
 });
 
@@ -237,6 +247,14 @@ test('criterion 5: duplicate-offer-id is rejected by the named rules', () => {
   const res = checkIndexRules(dup);
   assert.ok(!res.ok);
   assert.ok(res.errors.some((e) => e.rule === 'duplicate-offer-id'), JSON.stringify(res.errors));
+});
+
+test('criterion 5: a collection of another city is rejected by the named rules', () => {
+  const alien = structuredClone(readJson('fixtures/discovery-contract/index-valid.json'));
+  alien.collections[0].city_id = 'other-city';
+  const res = checkIndexRules(alien);
+  assert.ok(!res.ok);
+  assert.ok(res.errors.some((e) => e.rule === 'foreign-city'), JSON.stringify(res.errors));
 });
 
 test('criterion 5: FeedbackTarget shape per 21 §5.1', () => {
