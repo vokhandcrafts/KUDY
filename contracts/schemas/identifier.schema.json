@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ідэнтыфікатар",
+  "description": "Ліміт з 21 §3.2: да 64 знакаў з [a-z0-9._-]; ужываецца для offer_id, place_id, collection_id, theme_id, route_id і revision. Прэфікс «imp.» зарэзерваваны для імпартаванага кантэнту (G12.03: пазначана паходжаннем, не маскіруецца пад KUDY); забарону imp.-ідэнтыфікатараў у official-кантэнце трымае профіль checkOfficialProfile (contracts/reader.mjs), не гэты патэрн — імпартаваны дакумент таксама валідны структурна.",
+  "type": "string",
+  "pattern": "^[a-z0-9._-]{1,64}$"
+}

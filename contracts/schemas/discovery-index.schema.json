@@ -1,0 +1,244 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DiscoveryIndexV1 (public/discovery/<city_id>/<revision>/index.json)",
+  "description": "Форма і ўсе ліміты — 21 §3.2, фікстуры G01.06 у fixtures/discovery-contract/. schema_version — literal 1; невядомую major-версію не інтэрпрэтаваць. Памер файла ≤ 512 KiB — правяраецца да загрузкі (bytes/sha256 у каталогу).",
+  "type": "object",
+  "required": ["schema_version", "revision", "city_id", "themes", "offers", "collections"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": 1 },
+    "revision": { "type": "string", "pattern": "^(?!imp\\.)[a-z0-9._-]{1,64}$" },
+    "city_id": { "type": "string", "pattern": "^(?!imp\\.)[a-z0-9._-]{1,64}$" },
+    "themes": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "required": ["id", "labels"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^(?!imp\\.)[a-z0-9._-]{1,64}$" },
+          "labels": { "$ref": "../schemas/localized-text.schema.json" }
+        }
+      }
+    },
+    "offers": {
+      "type": "array",
+      "maxItems": 64,
+      "items": { "$ref": "#/definitions/offer" }
+    },
+    "collections": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "$ref": "#/definitions/collection" }
+    }
+  },
+  "definitions": {
+    "memberRef": {
+      "description": "Член collection: толькі guide/place (21 §3.2 — без укладзеных collections).",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "route_id", "version"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "guide" },
+            "route_id": { "$ref": "../schemas/identifier.schema.json" },
+            "version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "place_id", "content_version"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "place" },
+            "place_id": { "$ref": "../schemas/identifier.schema.json" },
+            "content_version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 }
+          }
+        }
+      ]
+    },
+    "ref": {
+      "description": "DiscoveryRef з 21 §3.1: у кожным варыянце дазволены толькі яго палі. Толькі афіцыйны KUDY-кантэнт; лакальны імпарт не ўваходзіць у агульныя падборкі.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "route_id", "version"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "guide" },
+            "route_id": { "$ref": "../schemas/identifier.schema.json" },
+            "version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "place_id", "content_version"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "place" },
+            "place_id": { "$ref": "../schemas/identifier.schema.json" },
+            "content_version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "collection_id", "content_version"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "collection" },
+            "collection_id": { "$ref": "../schemas/identifier.schema.json" },
+            "content_version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 }
+          }
+        }
+      ]
+    },
+    "detailRef": {
+      "description": "detail_ref з 21 §3.2: тыпізаваная спасылка на вядомае прэв'ю або правераны public-файл; не адвольны fetch URL. Шлях — бяспечныя сегменты, без private/ і без уцечак.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind"],
+          "additionalProperties": false,
+          "properties": { "kind": { "const": "guide_preview" } }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "path"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "place_public" },
+            "path": { "type": "string", "pattern": "^places/[a-z0-9._-]{1,64}/public\\.json$" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "path"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "collection_public" },
+            "path": { "type": "string", "pattern": "^collections/[a-z0-9._-]{1,64}/public\\.json$" }
+          }
+        }
+      ]
+    },
+    "offer": {
+      "type": "object",
+      "required": ["offer_id", "ref", "city_id", "editorial_order", "themes", "localized", "season_recommendations", "availability", "access", "detail_ref"],
+      "additionalProperties": false,
+      "properties": {
+        "offer_id": { "type": "string", "pattern": "^(?!imp\\.)[a-z0-9._-]{1,64}$" },
+        "ref": { "$ref": "#/definitions/ref" },
+        "city_id": { "type": "string", "pattern": "^(?!imp\\.)[a-z0-9._-]{1,64}$" },
+        "editorial_order": { "type": "integer", "minimum": 0, "maximum": 9999 },
+        "themes": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "type": "string", "pattern": "^(?!imp\\.)[a-z0-9._-]{1,64}$" }
+        },
+        "localized": {
+          "type": "object",
+          "required": ["title", "summary", "why_recommended", "conditions"],
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "type": "object",
+              "propertyNames": { "enum": ["be", "en", "uk"] },
+              "maxProperties": 8,
+              "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 140 }
+            },
+            "summary": { "$ref": "#/definitions/text400" },
+            "why_recommended": { "$ref": "#/definitions/text400" },
+            "conditions": { "$ref": "#/definitions/text400" }
+          }
+        },
+        "estimated_duration": {
+          "description": "21 §3.2: цэлыя дадатныя хвіліны, 1 ≤ min ≤ max ≤ 1440; для guide дыяпазон уключае duration_min; адсутнасць значыць unknown. Правіла min ≤ max і ўключэнне duration_min правярае рэдар (правіла estimated_duration_range).",
+          "type": "object",
+          "required": ["min_minutes", "max_minutes", "basis"],
+          "additionalProperties": false,
+          "properties": {
+            "min_minutes": { "type": "integer", "minimum": 1, "maximum": 1440 },
+            "max_minutes": { "type": "integer", "minimum": 1, "maximum": 1440 },
+            "basis": { "enum": ["author_walk", "author_estimate"] }
+          }
+        },
+        "distance_m": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "suggested_start_place_id": { "$ref": "../schemas/identifier.schema.json" },
+        "season_recommendations": {
+          "description": "21 §3.2: [{season, reason}]; пусты масіў = not_assessed; аўтаматычнай выставы ўсіх сезонаў няма.",
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": ["season", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "season": { "enum": ["spring", "summer", "autumn", "winter"] },
+              "reason": {
+                "type": "object",
+                "propertyNames": { "enum": ["be", "en", "uk"] },
+                "maxProperties": 8,
+                "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 280 }
+              }
+            }
+          }
+        },
+        "availability": {
+          "description": "21 §3.2: вылічаецца з апублікаванага зместу; для collection audio_locales заўжды [].",
+          "type": "object",
+          "required": ["text_locales", "audio_locales"],
+          "additionalProperties": false,
+          "properties": {
+            "text_locales": { "type": "array", "maxItems": 8, "items": { "enum": ["be", "en", "uk"] } },
+            "audio_locales": { "type": "array", "maxItems": 8, "items": { "enum": ["be", "en", "uk"] } }
+          }
+        },
+        "access": {
+          "description": "21 §3.2: free | paid | mixed; collection — mixed пры любым платным члене.",
+          "enum": ["free", "paid", "mixed"]
+        },
+        "detail_ref": { "$ref": "#/definitions/detailRef" }
+      }
+    },
+    "collection": {
+      "type": "object",
+      "required": ["collection_id", "content_version", "city_id", "localized", "members"],
+      "additionalProperties": false,
+      "properties": {
+        "collection_id": { "type": "string", "pattern": "^(?!imp\\.)[a-z0-9._-]{1,64}$" },
+        "content_version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 },
+        "city_id": { "type": "string", "pattern": "^(?!imp\\.)[a-z0-9._-]{1,64}$" },
+        "localized": {
+          "type": "object",
+          "required": ["title", "description"],
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "type": "object",
+              "propertyNames": { "enum": ["be", "en", "uk"] },
+              "maxProperties": 8,
+              "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 140 }
+            },
+            "description": { "$ref": "#/definitions/text400" }
+          }
+        },
+        "members": {
+          "description": "21 §3.2: толькі guide/place, без укладзеных collections; ≤ 50, без дубляў (правілы рэдара collection_members).",
+          "type": "array",
+          "maxItems": 50,
+          "items": { "$ref": "#/definitions/memberRef" }
+        },
+        "overlap_note": { "$ref": "#/definitions/text400" }
+      }
+    },
+    "text400": {
+      "description": "Ліміт 21 §3.2: ≤ 400 знакаў, ≤ 8 лакалаў з allowlist.",
+      "type": "object",
+      "propertyNames": { "enum": ["be", "en", "uk"] },
+      "maxProperties": 8,
+      "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 400 }
+    }
+  }
+}

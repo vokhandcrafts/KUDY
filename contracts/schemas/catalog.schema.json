@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "catalog.json — версіяваны envelope",
+  "description": "Рашэнне G01.06 пра envelope каталога, выконвае G02.01 (21 §3.3): {catalog_schema_version: 1, generated_at?, routes: [...], discovery_index?}. Route-запісы жывуць у масіве routes без змены сваёй формы; палі горада або індэкса не дадаюцца да асобных route-запісаў. Поле path у discovery_index — адносны шлях ад публічнага origin/CDN без прэфікса public/. Невядомыя палі верхняга ўзроўню ігнаруюцца рэдарам; невядомая major-версія не інтэрпрэтуецца; legacy v0 (босы масіў) чытаецца як каталог без discovery — гэтыя палітыкі ў contracts/reader.mjs, не ў схеме.",
+  "type": "object",
+  "required": ["catalog_schema_version", "routes"],
+  "properties": {
+    "catalog_schema_version": { "const": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["route_id", "version", "locales", "layers", "sizes"],
+        "additionalProperties": false,
+        "properties": {
+          "route_id": { "$ref": "../schemas/identifier.schema.json" },
+          "version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 },
+          "locales": { "type": "array", "minItems": 1, "maxItems": 8, "items": { "enum": ["be", "en", "uk"] } },
+          "layers": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 2,
+            "items": { "enum": ["base", "extended"] }
+          },
+          "product_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "sizes": {
+            "description": "09 §4: route-запіс трымае sizes (па пластах), не bytes.",
+            "type": "object",
+            "required": ["base"],
+            "additionalProperties": false,
+            "properties": {
+              "base": { "type": "integer", "minimum": 0 },
+              "extended": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "discovery_index": {
+      "description": "Апцыянальная версіяваная спасылка на файл індэкса гэтага горада (21 §3.3). bytes/sha256 правяраюцца да загрузкі.",
+      "type": "object",
+      "required": ["schema_version", "revision", "path", "bytes", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": { "const": 1 },
+        "revision": { "type": "string", "pattern": "^(?!imp\\.)[a-z0-9._-]{1,64}$" },
+        "path": {
+          "type": "string",
+          "description": "Адносны шлях без прэфікса public/, бяспечныя сегменты.",
+          "pattern": "^discovery/[a-z0-9._-]{1,64}/[a-z0-9._-]{1,64}/index\\.json$"
+        },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    }
+  }
+}

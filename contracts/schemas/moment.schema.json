@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Moment",
+  "description": "Палі з 09 §3 (Moment): id, place_id, story_id (звычайна тызер), kind, cooldown_min. Moment — трэйлер, не поўная гісторыя; прайграванне — толькі яўны Play праз адзіны плэер з уладальнікам moment (ADR G01.02 §3.1); Moment сам ніколі не гаворыць і яго story_id не залічваецца heard гіда.",
+  "type": "object",
+  "required": ["id", "place_id", "story_id", "kind", "cooldown_min"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "../schemas/identifier.schema.json" },
+    "place_id": { "$ref": "../schemas/identifier.schema.json" },
+    "story_id": { "$ref": "../schemas/identifier.schema.json" },
+    "kind": { "type": "string", "minLength": 1, "maxLength": 32 },
+    "cooldown_min": { "type": "integer", "minimum": 1, "maximum": 525600 }
+  }
+}
