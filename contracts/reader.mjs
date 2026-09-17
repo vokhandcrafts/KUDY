@@ -160,9 +160,11 @@ function walk(value, visit, keyPath = []) {
 
 // Owned identifiers carry the imp.<namespace>.… namespace check in both
 // profiles; other strings (credits, notes, URLs) are never namespace-checked.
+// story_base_id/story_extended_id are included: an imported route must not
+// reference official stories any more than carry official route ids.
 // city_id is excluded: it references the shared city taxonomy, not
 // import-owned content. Charset and limits — 21 §3.2.
-const OWNED_ID_KEYS = new Set(['id', 'route_id', 'story_id', 'place_id', 'collection_id', 'offer_id', 'media_id', 'voice_id', 'theme_id']);
+const OWNED_ID_KEYS = new Set(['id', 'route_id', 'story_id', 'story_base_id', 'story_extended_id', 'place_id', 'collection_id', 'offer_id', 'media_id', 'voice_id', 'theme_id']);
 
 // Criterion 4: an import cannot claim official provenance. The official profile
 // runs on top of the schema: no origin:"imported" anywhere in the document and
@@ -222,6 +224,7 @@ export function checkIndexRules(index) {
   }
   const offerByRef = new Map((index.offers ?? []).map((o) => [JSON.stringify(o.ref), o]));
   for (const collection of index.collections ?? []) {
+    if (collection.city_id !== index.city_id) errors.push({ rule: 'foreign-city', path: collection.collection_id });
     const seenMembers = new Set();
     for (const member of collection.members ?? []) {
       const key = JSON.stringify(member);

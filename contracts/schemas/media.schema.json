@@ -14,6 +14,6 @@
     "locale": { "enum": ["be", "en", "uk"] },
     "voice_id": { "$ref": "../schemas/identifier.schema.json" },
     "license": { "type": "string", "minLength": 1, "maxLength": 140 },
-    "credit": { "type": "string", "maxLength": 400 }
+    "credit": { "type": "string", "minLength": 1, "maxLength": 400 }
   }
 }
