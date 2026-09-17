@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Кропка маршрута (RouteStop)",
+  "description": "Палі з 09 §3 (RouteStop). id — стабільны, генеруецца адзін раз і не мяняецца ніколі; адзіная ідэнтычнасць кропкі ва ўсёй сістэме (выключэнне — heard, які ідэнтыфікуе story_id паводле ADR G01.01 §4.1). position — толькі рэкамендаваны парадак паказу, ніколі ўмова прайгравання; ID не залежыць ад пазіцыі ў масіве (16 §G02). Кропка толькі з extended дазволена; у base яна прадстаўлена толькі публічным прэв'ю (інварыянт 3). preview — публічныя назва і анонс; у previews.json дазволены толькі stop_id, place_id, name, announce (09 §5). origin — рэзерваванае поле паходжання (G02.01, крытэрыі 2 і 4).",
+  "type": "object",
+  "required": ["id", "position", "place_id", "access_tier"],
+  "additionalProperties": false,
+  "properties": {
+    "origin": { "enum": ["official", "imported"] },
+    "id": { "$ref": "../schemas/identifier.schema.json" },
+    "position": { "type": "integer", "minimum": 0 },
+    "place_id": { "$ref": "../schemas/identifier.schema.json" },
+    "access_tier": { "enum": ["base", "extended"] },
+    "story_base_id": { "$ref": "../schemas/identifier.schema.json" },
+    "story_extended_id": { "$ref": "../schemas/identifier.schema.json" },
+    "trigger_radius_m": { "type": "integer", "minimum": 1, "maximum": 200 },
+    "optional": { "type": "boolean" },
+    "preview": {
+      "type": "object",
+      "required": ["name", "announce"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "$ref": "../schemas/localized-text.schema.json" },
+        "announce": { "$ref": "../schemas/localized-text.schema.json" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "access_tier": { "const": "extended" } } },
+      "then": { "required": ["story_extended_id"] }
+    },
+    {
+      "if": { "properties": { "access_tier": { "const": "base" } } },
+      "then": { "required": ["story_base_id"] }
+    }
+  ]
+}

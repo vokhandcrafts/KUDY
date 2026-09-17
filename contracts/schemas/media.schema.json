@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Медыя-запіс (Media)",
+  "description": "Палі з 09 §3 (Media): sha256, bytes, mime, duration_s, locale, voice_id, license, credit. Правы і аўтарства — license і credit (крытэрый 3: файл на правы правяраецца); sha256 лічыцца па байтах файла ў LF/-text-рэжыме (.gitattributes, AR-1).",
+  "type": "object",
+  "required": ["media_id", "sha256", "bytes", "mime", "locale", "license", "credit"],
+  "additionalProperties": false,
+  "properties": {
+    "media_id": { "$ref": "../schemas/identifier.schema.json" },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "bytes": { "type": "integer", "minimum": 1 },
+    "mime": { "enum": ["audio/mp4", "image/webp"] },
+    "duration_s": { "type": "integer", "minimum": 1, "maximum": 86400 },
+    "locale": { "enum": ["be", "en", "uk"] },
+    "voice_id": { "$ref": "../schemas/identifier.schema.json" },
+    "license": { "type": "string", "minLength": 1, "maxLength": 140 },
+    "credit": { "type": "string", "maxLength": 400 }
+  }
+}

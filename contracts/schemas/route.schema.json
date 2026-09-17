@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Маршрут-гід (route.json)",
+  "description": "Палі з 09 §3 (Route) у форме файла route.json + упарадкаваны масіў RouteStop. route_id — ідэнтычнасць гіда: экран «Гід» (RouteDetail з 09 §6.5) і ўвесь прагрэс ключуюцца па route_id, не па пазіцыі ў масіве (16 §G02, крытэрый 1). access = free_base | paid. Бандл нязменны: новы кантэнт = новая версія (09 §4). origin — рэзерваванае поле паходжання (G02.01, крытэрыі 2 і 4).",
+  "type": "object",
+  "required": ["route_id", "version", "city_id", "access", "distance_m", "duration_min", "free_stop_count", "stops"],
+  "additionalProperties": false,
+  "properties": {
+    "origin": { "enum": ["official", "imported"] },
+    "route_id": { "$ref": "../schemas/identifier.schema.json" },
+    "version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 },
+    "city_id": { "$ref": "../schemas/identifier.schema.json" },
+    "access": { "enum": ["free_base", "paid"] },
+    "product_id_route": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "product_id_extension": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "distance_m": { "type": "integer", "minimum": 0, "maximum": 100000 },
+    "duration_min": { "type": "integer", "minimum": 1, "maximum": 1440 },
+    "cover": { "type": "string", "pattern": "^(?!.*(\\.map$)).+$", "maxLength": 256 },
+    "polyline": { "type": "string", "maxLength": 100000 },
+    "published": { "type": "boolean" },
+    "free_stop_count": { "type": "integer", "minimum": 0 },
+    "stops": {
+      "type": "array",
+      "maxItems": 200,
+      "items": { "$ref": "../schemas/stop.schema.json" }
+    }
+  }
+}

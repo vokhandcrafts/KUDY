@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Голас (voices.json)",
+  "description": "Палі з 09 §3 (Voice): id, locale, narrator_credit, character — дракон мусіць пазнавацца ва ўсіх мовах. Лакалі — allowlist з 21 §3.2 (pl/de зарэзерваваныя).",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "locale", "narrator_credit", "character"],
+    "additionalProperties": false,
+    "properties": {
+      "id": { "$ref": "../schemas/identifier.schema.json" },
+      "locale": { "enum": ["be", "en", "uk"] },
+      "narrator_credit": { "type": "string", "minLength": 1, "maxLength": 140 },
+      "character": { "type": "string", "minLength": 1, "maxLength": 140 }
+    }
+  }
+}
