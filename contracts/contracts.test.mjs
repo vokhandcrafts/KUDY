@@ -117,6 +117,30 @@ test('criterion 3: history, language, transcript, rights and access are checked 
   assert.ok(!schema('voice.schema.json', plVoice).ok, 'reserved locales are not in the allowlist');
 });
 
+test('criterion 3: stop tier requires its own story id (if/then required without type)', () => {
+  const stop = readJson('fixtures/content/demo-route/route.json').stops[0];
+  const res = schema('stop.schema.json', stop);
+  assert.ok(res.ok, JSON.stringify(res.errors));
+  const tier = stop.access_tier;
+  const storyField = tier === 'base' ? 'story_base_id' : 'story_extended_id';
+  const otherField = tier === 'base' ? 'story_extended_id' : 'story_base_id';
+  const without = { ...stop };
+  delete without[storyField];
+  const missing = schema('stop.schema.json', without);
+  assert.ok(!missing.ok, `a ${tier} stop without ${storyField} must fail`);
+  const hit = missing.errors.find((e) => e.keyword === 'required' && e.rule.endsWith(storyField));
+  assert.ok(hit, `the failure names required ${storyField}: ${JSON.stringify(missing.errors)}`);
+  assert.ok(hit.path.endsWith(storyField), 'schema errors carry a path');
+  const otherTier = { ...without, [otherField]: stop[storyField] };
+  assert.ok(!schema('stop.schema.json', otherTier).ok, 'a story id of the other tier does not satisfy the requirement');
+});
+
+test('kernel: draft-07 number includes integers', () => {
+  const whole = { id: 'place-int', content_version: '1', lat: 54, lng: 18, trigger_radius_m: 40, kind: 'square' };
+  assert.ok(schema('place.schema.json', whole).ok, JSON.stringify(schema('place.schema.json', whole).errors));
+  assert.ok(schema('place.schema.json', { ...whole, lat: 54.5 }).ok, 'fractional values still pass');
+});
+
 test('criterion 4: an import cannot claim official provenance', () => {
   const imported = readJson('contracts/examples/imported-route.json');
   assert.ok(schema('route.schema.json', imported).ok, 'imported doc is structurally valid content');
@@ -131,6 +155,11 @@ test('criterion 4: an import cannot claim official provenance', () => {
   assert.ok(caught.errors.some((e) => e.rule === 'import-namespace-in-official'));
   const target = { kind: 'guide', route_id: 'imp.osm-demo.route-1', version: '1', locale: 'be' };
   assert.ok(!checkOfficialProfile(target).ok, 'imported ids never reach feedback targets');
+  const credited = { ...readJson('contracts/examples/media-demo.json'), credit: 'photo: imp.archive/example.webp' };
+  assert.ok(
+    checkOfficialProfile(credited).ok,
+    'imp. inside a non-identifier string (credit, note) is not an official-profile violation',
+  );
 });
 
 test('criterion 5: discovery index — valid fixture passes schema and named rules', () => {
@@ -142,29 +171,72 @@ test('criterion 5: discovery index — valid fixture passes schema and named rul
 });
 
 test('criterion 5: index-invalid fixtures fail on their named rule', () => {
+  // Named rules are checked by checkIndexRules (e.rule); schema-level pins are
+  // keywords (e.keyword), because a schema error's `rule` holds the doc path.
   const expected = {
     'index-invalid-duplicate-ref.json': ['duplicate-member-ref'],
     'index-invalid-duration-range.json': ['estimated_duration_range'],
     'index-invalid-foreign-city.json': ['foreign-city'],
     'index-invalid-missing-overlap-note.json': ['missing-overlap-note'],
-    'index-invalid-nested-collection.json': [],
-    'index-invalid-private-path.json': [],
-    'index-invalid-unknown-locale.json': [],
-    'index-invalid-unknown-season.json': [],
-    'index-invalid-limits.json': [],
+    'index-invalid-nested-collection.json': ['oneOf'],
+    'index-invalid-private-path.json': ['oneOf'],
+    'index-invalid-unknown-locale.json': ['enum'],
+    'index-invalid-unknown-season.json': ['enum'],
   };
   for (const [file, namedRules] of Object.entries(expected)) {
     const doc = readJson(`fixtures/discovery-contract/${file}`);
     const res = schema('discovery-index.schema.json', doc);
     const rules = res.ok ? checkIndexRules(doc) : { ok: false, errors: [] };
     assert.ok(!res.ok || !rules.ok, `${file} must fail`);
-    for (const rule of namedRules) {
+    for (const name of namedRules) {
       assert.ok(
-        res.errors.some((e) => e.rule === rule) || rules.errors.some((e) => e.rule === rule),
-        `${file} must fail on ${rule}: ${JSON.stringify({ schema: res.errors, rules: rules.errors })}`,
+        res.errors.some((e) => e.keyword === name || e.rule === name) ||
+          rules.errors.some((e) => e.rule === name),
+        `${file} must fail on ${name}: ${JSON.stringify({ schema: res.errors, rules: rules.errors })}`,
       );
     }
   }
+});
+
+test('criterion 5: every limits case of index-invalid-limits.json fails on its own bound', () => {
+  const wrapper = readJson('fixtures/discovery-contract/index-invalid-limits.json');
+  assert.ok(!schema('discovery-index.schema.json', wrapper).ok, 'the cases wrapper is not itself an index');
+  // The identifier limit (≤ 64 chars of [a-z0-9._-]) is encoded inside the
+  // bounded pattern ^[a-z0-9._-]{1,64}$, so both identifier cases fail as
+  // `pattern`, not as a separate maxLength.
+  const keywords = {
+    'lim-offers': 'maxItems',
+    'lim-collections': 'maxItems',
+    'lim-members': 'maxItems',
+    'lim-themes': 'maxItems',
+    'lim-themes-per-offer': 'maxItems',
+    'lim-title': 'maxLength',
+    'lim-summary': 'maxLength',
+    'lim-season-reason': 'maxLength',
+    'lim-editorial-order': 'maximum',
+    'lim-duration-min': 'minimum',
+    'lim-duration-max': 'maximum',
+    'lim-distance': 'maximum',
+    'lim-identifier-charset': 'pattern',
+    'lim-identifier-length': 'pattern',
+  };
+  assert.equal(wrapper.cases.length, Object.keys(keywords).length, 'one case per 21 §3.2 bound');
+  for (const c of wrapper.cases) {
+    const res = schema('discovery-index.schema.json', c.index);
+    assert.ok(!res.ok, `${c.id} (${c.rule}) must fail schema validation: ${JSON.stringify(res.errors)}`);
+    assert.ok(
+      res.errors.some((e) => e.keyword === keywords[c.id]),
+      `${c.id} must fail on ${keywords[c.id]}: ${JSON.stringify(res.errors)}`,
+    );
+  }
+});
+
+test('criterion 5: duplicate-offer-id is rejected by the named rules', () => {
+  const dup = structuredClone(readJson('fixtures/discovery-contract/index-valid.json'));
+  dup.offers.push({ ...dup.offers[0], offer_id: dup.offers[0].offer_id });
+  const res = checkIndexRules(dup);
+  assert.ok(!res.ok);
+  assert.ok(res.errors.some((e) => e.rule === 'duplicate-offer-id'), JSON.stringify(res.errors));
 });
 
 test('criterion 5: FeedbackTarget shape per 21 §5.1', () => {
@@ -201,6 +273,15 @@ test('catalog rejects an oversized discovery index before any fetch', () => {
   const doc = readCatalogDoc(readJson('fixtures/discovery-contract/catalog-invalid-oversized.json'));
   assert.ok(!doc.ok);
   assert.ok(doc.errors.some((e) => e.rule === 'discovery-index-oversized'));
+});
+
+test('catalog validates the declared date-time format of generated_at', () => {
+  const base = { catalog_schema_version: 1, routes: [] };
+  assert.ok(schema('catalog.schema.json', { ...base, generated_at: '2026-09-17T12:00:00Z' }).ok);
+  assert.ok(schema('catalog.schema.json', { ...base, generated_at: '2026-09-17T12:00:00.500+02:00' }).ok);
+  const bad = schema('catalog.schema.json', { ...base, generated_at: '2026-09-17 12:00:00' });
+  assert.ok(!bad.ok, 'space-separated time is not RFC 3339');
+  assert.ok(bad.errors.some((e) => e.keyword === 'format'), JSON.stringify(bad.errors));
 });
 
 test('examples: moment and media conform; all schema files are valid JSON with $schema', () => {
