@@ -41,24 +41,39 @@ function typeOf(value) {
 }
 
 function fails(keyword, rule, schemaPath) {
-  return { keyword, rule: rule ?? keyword, path: schemaPath };
+  return { keyword, rule: rule ?? keyword, path: schemaPath ?? rule };
 }
+
+// Draft-07 `number` includes integers; typeOf distinguishes them, so a
+// `number` constraint must accept both spellings of the same value.
+function typeMatches(t, got) {
+  if (t === 'integer') return got === 'integer';
+  if (t === 'number') return got === 'number' || got === 'integer';
+  return got === t;
+}
+
+const patternCache = new Map();
+function compiledPattern(pattern) {
+  if (!patternCache.has(pattern)) patternCache.set(pattern, new RegExp(pattern));
+  return patternCache.get(pattern);
+}
+
+// RFC 3339 date-time — the only `format` the schemas declare (catalog generated_at).
+const DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
 
 function checkSimple(schema, value, errors, rule) {
   const t = schema.type;
-  if (t) {
-    const got = typeOf(value);
-    if (t === 'integer' ? got !== 'integer' : got !== t) {
-      errors.push(fails('type', rule));
-      return false;
-    }
+  if (t && !typeMatches(t, typeOf(value))) {
+    errors.push(fails('type', rule));
+    return false;
   }
   if (schema.const !== undefined && value !== schema.const) errors.push(fails('const', rule));
   if (schema.enum && !schema.enum.includes(value)) errors.push(fails('enum', rule));
   if (typeof value === 'string') {
-    if (schema.pattern && !new RegExp(schema.pattern).test(value)) errors.push(fails('pattern', rule));
+    if (schema.pattern && !compiledPattern(schema.pattern).test(value)) errors.push(fails('pattern', rule));
     if (schema.minLength !== undefined && value.length < schema.minLength) errors.push(fails('minLength', rule));
     if (schema.maxLength !== undefined && value.length > schema.maxLength) errors.push(fails('maxLength', rule));
+    if (schema.format === 'date-time' && !DATE_TIME_PATTERN.test(value)) errors.push(fails('format', rule));
   }
   if (typeof value === 'number') {
     if (schema.minimum !== undefined && value < schema.minimum) errors.push(fails('minimum', rule));
@@ -75,7 +90,10 @@ function validateNode(schema, value, errors, rule, ctx) {
     return validateNode(target, value, errors, rule, { root: root ?? ctx.root, rootFile: ctx.rootFile, file });
   }
   let ok = checkSimple(schema, value, errors, rule);
-  if (schema.type === 'object' && value && typeof value === 'object' && !Array.isArray(value)) {
+  // Object keywords apply whenever the value IS an object, not only when the
+  // schema declares type:"object" — if/then branches such as
+  // { then: { required: [...] } } carry required without a type (stop.schema).
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
     for (const req of schema.required ?? []) {
       if (!(req in value)) errors.push(fails('required', `${rule}.${req}`));
     }
@@ -140,6 +158,12 @@ function walk(value, visit, keyPath = []) {
   }
 }
 
+// Owned identifiers carry the imp.<namespace>.… namespace check in both
+// profiles; other strings (credits, notes, URLs) are never namespace-checked.
+// city_id is excluded: it references the shared city taxonomy, not
+// import-owned content. Charset and limits — 21 §3.2.
+const OWNED_ID_KEYS = new Set(['id', 'route_id', 'story_id', 'place_id', 'collection_id', 'offer_id', 'media_id', 'voice_id', 'theme_id']);
+
 // Criterion 4: an import cannot claim official provenance. The official profile
 // runs on top of the schema: no origin:"imported" anywhere in the document and
 // no identifiers carrying the reserved import prefix (21 §3.1: refs point to
@@ -147,10 +171,11 @@ function walk(value, visit, keyPath = []) {
 export function checkOfficialProfile(doc) {
   const errors = [];
   walk(doc, (value, keyPath) => {
-    if (keyPath.at(-1) === 'origin' && value === 'imported') {
+    const key = keyPath.at(-1);
+    if (key === 'origin' && value === 'imported') {
       errors.push({ rule: 'origin-not-official', path: keyPath.join('.') });
     }
-    if (/^imp\.[a-z0-9._-]+/.test(value)) {
+    if (OWNED_ID_KEYS.has(key) && /^imp\.[a-z0-9._-]+/.test(value)) {
       errors.push({ rule: 'import-namespace-in-official', path: keyPath.join('.') });
     }
   });
@@ -159,10 +184,7 @@ export function checkOfficialProfile(doc) {
 
 // Imported document (G12, deferred): origin:"imported" is required and owned
 // identifiers live in the "imp.<namespace>.…" namespace (G12.03: marked by
-// provenance, never masquerading as KUDY). city_id is excluded: it references
-// the shared city taxonomy, not import-owned content. Charset and limits — 21 §3.2.
-const OWNED_ID_KEYS = new Set(['id', 'route_id', 'story_id', 'place_id', 'collection_id', 'offer_id', 'media_id', 'voice_id', 'theme_id']);
-
+// provenance, never masquerading as KUDY).
 export function checkImportedProfile(doc) {
   const errors = [];
   let hasOrigin = false;
