@@ -1,0 +1,19 @@
+{
+  "origin": "imported",
+  "route_id": "imp.osm-demo.route-1",
+  "version": "1",
+  "city_id": "demo-city",
+  "access": "free_base",
+  "distance_m": 1200,
+  "duration_min": 25,
+  "free_stop_count": 1,
+  "stops": [
+    {
+      "id": "imp.osm-demo.stop-1",
+      "position": 0,
+      "place_id": "imp.osm-demo.place-1",
+      "access_tier": "base",
+      "story_base_id": "imp.osm-demo.story-1"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "id": "moment-fountain-teaser",
+  "place_id": "place-1",
+  "story_id": "story-1-base",
+  "kind": "teaser",
+  "cooldown_min": 60
+}

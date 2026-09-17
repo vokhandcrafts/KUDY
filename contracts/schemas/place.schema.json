@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Месца — локаль-нейтральныя геа-факты (places.json)",
+  "description": "Палі з 09 §3 (Place): id, lat, lng, trigger_radius_m, district, kind, photo, name_audio_refs. Без назвы і апісання — яны ў пер-локальных stops.json і public-праекцыі. content_version з 21 §3.1: змена месца стварае новую content_version, стабільны ID захоўваецца. origin — рэзерваванае поле паходжання (G02.01, крытэрыі 2 і 4): у official-кантэнце або адсутнічае (legacy), або роўнае «official»; «imported» правамоцна толькі ў імпартаваных дакументах і не дапускаецца ў official-прафілі.",
+  "type": "object",
+  "required": ["id", "content_version", "lat", "lng", "trigger_radius_m", "kind"],
+  "additionalProperties": false,
+  "properties": {
+    "origin": { "enum": ["official", "imported"] },
+    "id": { "$ref": "../schemas/identifier.schema.json" },
+    "content_version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 },
+    "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+    "lng": { "type": "number", "minimum": -180, "maximum": 180 },
+    "trigger_radius_m": { "type": "integer", "minimum": 1, "maximum": 200 },
+    "district": { "type": "string", "maxLength": 64 },
+    "kind": { "type": "string", "minLength": 1, "maxLength": 32 },
+    "photo": { "type": "string", "pattern": "^(?!.*(\\.map$)).+$", "maxLength": 256 },
+    "name_audio_refs": {
+      "description": "Мапа спасылак на лакалізаваныя Media: «locale → media_id» (09 §3). Вымаўленне назвы па-беларуску і па-англійску — розныя запісы.",
+      "type": "object",
+      "propertyNames": { "enum": ["be", "en", "uk"] },
+      "maxProperties": 8,
+      "additionalProperties": { "$ref": "../schemas/identifier.schema.json" }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Лакалізаваны тэкст (locale → тэкст)",
+  "description": "Мапа «локаль → радок» з 21 §3.2: allowlist BCP-47 MVP = be/en/uk (pl і de зарэзерваваныя і не ўваходзяць), максимум 8 лакалаў на аб'ект. Вольны тэкст локалі забаронены — 09 §3, інварыянт 2.",
+  "type": "object",
+  "propertyNames": { "enum": ["be", "en", "uk"] },
+  "maxProperties": 8,
+  "additionalProperties": { "type": "string", "minLength": 1 }
+}
