@@ -10,12 +10,14 @@ import path from 'node:path';
 import { schemaCheck } from './contract.ts';
 import {
   readBaseStories,
+  readCatalog,
   readDiscoveryIndex as readIndexDoc,
   readPreviews,
   readPublicProjection,
   readRoute,
 } from './readers.ts';
 import type {
+  CatalogView,
   DiscoveryIndex,
   LockedStopPreview,
   Locale,
@@ -66,6 +68,12 @@ function readBundleDoc<T>(
   const loaded = loadJson(path.join(publicRoot, ...pieces, file));
   if (!loaded.ok) return { ok: false, code: loaded.code, errors: [{ rule: loaded.code, path: file }] };
   return validate(loaded.doc);
+}
+
+// The catalog envelope sits at the public root (interim G10.01.b location —
+// the real pointer publication belongs to G02.04).
+export function readBundleCatalog(publicRoot: string): ReadResult<CatalogView> {
+  return readBundleDoc(publicRoot, [], 'catalog.json', readCatalog);
 }
 
 export function readBundleRoute(publicRoot: string, routeId: string, version: string): ReadResult<RouteDoc> {
