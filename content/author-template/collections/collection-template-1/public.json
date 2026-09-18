@@ -1,0 +1,12 @@
+{
+  "collection_id": "collection-template-1",
+  "content_version": "1",
+  "name": {
+    "be": "Адзін шаблонны дзень",
+    "en": "One Template Day"
+  },
+  "description": {
+    "be": "Рэдакцыйная пара прыкладу: кароткі падворак, потым увесь маршрут ад яго пачатку.",
+    "en": "The sample editorial pairing: the short courtyard, then the whole route starting from it."
+  }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "voice-be-1",
+    "locale": "be",
+    "narrator_credit": "Сінтэтычны шаблонны голас",
+    "character": "Дракон"
+  },
+  {
+    "id": "voice-en-1",
+    "locale": "en",
+    "narrator_credit": "Synthetic template voice",
+    "character": "The Dragon"
+  }
+]
