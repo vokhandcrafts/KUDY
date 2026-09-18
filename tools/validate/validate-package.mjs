@@ -161,6 +161,15 @@ function checkStopStability(route, previousDir, errors) {
   });
 }
 
+// checkIndexRules walks collection.members unguarded; feed it inert members
+// for garbage shapes — they already produced `type` diagnostics via asArray.
+function readerSafeCollections(collections) {
+  return collections.map((c) => {
+    const item = c && typeof c === 'object' && !Array.isArray(c) ? c : {};
+    return { ...item, members: Array.isArray(item.members) ? item.members : [] };
+  });
+}
+
 export function validatePackage(dir, options = {}) {
   const rootAbs = path.resolve(dir);
   const errors = [];
@@ -217,9 +226,9 @@ export function validatePackage(dir, options = {}) {
     placeVersions.get(p.id).add(p.content_version);
   });
   const voiceIds = checkUniqueId(voices, 'id', 'voices.json', errors);
-  const themeIds = checkUniqueId(discovery?.themes ?? [], 'id', 'discovery.json#themes', errors);
+  const themeIds = checkUniqueId(asArray(discovery?.themes, 'discovery.json#themes', errors), 'id', 'discovery.json#themes', errors);
   const collectionVersions = new Map();
-  (discovery?.collections ?? []).forEach((c, i) => {
+  asArray(discovery?.collections, 'discovery.json#collections', errors).forEach((c, i) => {
     if (collectionVersions.has(c.collection_id)) diag(errors, 'error', 'duplicate-id', `discovery.json#collections[${i}]#${c.collection_id}`);
     collectionVersions.set(c.collection_id, c.content_version);
   });
@@ -258,12 +267,16 @@ export function validatePackage(dir, options = {}) {
 
   // Discovery offers and collections against the package tree (the reader's
   // named rules cover the index-internal side: duplicate refs, foreign city,
-  // nested collections, missing overlap note, duration range).
+  // nested collections, missing overlap note, duration range). The reader
+  // walks index.offers/collections unguarded, so the validator feeds it a
+  // sanitized shallow copy — garbage shapes become diagnostics above.
   if (discovery) {
-    for (const e of checkIndexRules(discovery).errors) diag(errors, 'error', e.rule, `discovery.json#${e.path}`);
-    (discovery.offers ?? []).forEach((offer, i) => {
+    const offers = asArray(discovery.offers, 'discovery.json#offers', errors);
+    const collections = asArray(discovery.collections, 'discovery.json#collections', errors);
+    for (const e of checkIndexRules({ ...discovery, offers, collections: readerSafeCollections(collections) }).errors) diag(errors, 'error', e.rule, `discovery.json#${e.path}`);
+    offers.forEach((offer, i) => {
       const at = `discovery.json#offers[${i}]`;
-      (offer.themes ?? []).forEach((themeId) => {
+      asArray(offer.themes, `${at}.themes`, errors).forEach((themeId) => {
         if (!themeIds.has(themeId)) diag(errors, 'error', 'unknown-ref', `${at}.themes#${themeId}`);
       });
       const start = offer.suggested_start_place_id;
@@ -282,9 +295,9 @@ export function validatePackage(dir, options = {}) {
         }
       }
     });
-    (discovery.collections ?? []).forEach((c, i) => {
+    collections.forEach((c, i) => {
       const at = `discovery.json#collections[${i}]`;
-      (c.members ?? []).forEach((member, j) => {
+      asArray(c.members, `${at}.members`, errors).forEach((member, j) => {
         const memberAlien = member.kind === 'place'
           ? !placeVersions.get(member.place_id)?.has(member.content_version)
           : member.kind === 'guide' && (member.route_id !== route?.route_id || member.version !== route?.version);
@@ -309,13 +322,18 @@ export function validatePackage(dir, options = {}) {
   }
 
   // A feedback-target registry in the handoff tree is validated as part of
-  // the package: collections are not feedback targets (21 §5.2), so a
-  // wrong-kind entry fails the target schema's oneOf.
+  // the package. The G02.03 packager emits {schema_version, status, targets}
+  // (a bare array from an older handoff is still accepted); collections are
+  // not feedback targets (21 §5.2), so a wrong-kind entry fails the target
+  // schema's oneOf.
   const registryRel = 'release/feedback-target-registry.json';
   if (files.includes(registryRel)) {
-    const registry = readJson(rootAbs, registryRel, errors) ?? [];
-    (Array.isArray(registry) ? registry : []).forEach((target, i) => {
-      schemaCheck('feedback-target.schema.json', target, `${registryRel}[${i}]`, errors);
+    const registry = readJson(rootAbs, registryRel, errors);
+    const targets = registry && typeof registry === 'object' && !Array.isArray(registry)
+      ? asArray(registry.targets, `${registryRel}#targets`, errors)
+      : asArray(registry, registryRel, errors);
+    targets.forEach((target, i) => {
+      schemaCheck('feedback-target.schema.json', target, `${registryRel}#targets[${i}]`, errors);
     });
   }
 
@@ -344,12 +362,14 @@ export function validateDiscoveryIndex(index) {
   const errors = [];
   schemaCheck('discovery-index.schema.json', index, 'discovery.json', errors);
   if (!index || typeof index !== 'object') return { ok: false, errors };
-  for (const e of checkIndexRules(index).errors) diag(errors, 'error', e.rule, `discovery.json#${e.path}`);
-  const themeIds = checkUniqueId(index?.themes ?? [], 'id', 'discovery.json#themes', errors);
-  const collectionIds = checkUniqueId(index?.collections ?? [], 'collection_id', 'discovery.json#collections', errors);
-  (index?.offers ?? []).forEach((offer, i) => {
+  const offers = asArray(index.offers, 'discovery.json#offers', errors);
+  const collections = asArray(index.collections, 'discovery.json#collections', errors);
+  for (const e of checkIndexRules({ ...index, offers, collections: readerSafeCollections(collections) }).errors) diag(errors, 'error', e.rule, `discovery.json#${e.path}`);
+  const themeIds = checkUniqueId(asArray(index.themes, 'discovery.json#themes', errors), 'id', 'discovery.json#themes', errors);
+  const collectionIds = checkUniqueId(collections, 'collection_id', 'discovery.json#collections', errors);
+  offers.forEach((offer, i) => {
     const at = `discovery.json#offers[${i}]`;
-    (offer.themes ?? []).forEach((themeId) => {
+    asArray(offer.themes, `${at}.themes`, errors).forEach((themeId) => {
       if (!themeIds.has(themeId)) diag(errors, 'error', 'unknown-ref', `${at}.themes#${themeId}`);
     });
     const ref = offer.ref ?? {};
@@ -367,17 +387,24 @@ export { readCatalogDoc };
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   const args = process.argv.slice(2);
+  let missingValue = null;
   const get = (flag) => {
     const i = args.indexOf(flag);
-    return i >= 0 ? args[i + 1] : undefined;
+    if (i < 0) return undefined;
+    if (i + 1 >= args.length) {
+      missingValue = flag;
+      return undefined;
+    }
+    return args[i + 1];
   };
   const dir = get('--in');
-  if (!dir) {
+  if (!dir || missingValue) {
     console.error('usage: validate-package.mjs --in <package-dir> [--against <previous-package-dir>]');
-    process.exit(2);
+    process.exitCode = 2;
+  } else {
+    const previous = get('--against');
+    const result = validatePackage(dir, previous ? { previous } : {});
+    console.log(JSON.stringify(result, null, 2));
+    process.exitCode = result.ok ? 0 : 1;
   }
-  const previous = get('--against');
-  const result = validatePackage(dir, previous ? { previous } : {});
-  console.log(JSON.stringify(result, null, 2));
-  process.exit(result.ok ? 0 : 1);
 }
