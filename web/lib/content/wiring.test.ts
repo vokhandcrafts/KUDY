@@ -31,3 +31,9 @@ test('generated web output and content trees are gitignored in the same change',
     assert.ok(out.includes(probe), `${probe} must be gitignored`);
   }
 });
+
+test('the web build wires the content prebuild and the rendered-output scan (revert = empty pages or silent leaks)', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'web', 'package.json'), 'utf8'));
+  assert.match(pkg.scripts.prebuild, /build-content\.ts/, 'the static pages read web/content/ — the prebuild must produce it');
+  assert.match(pkg.scripts.build, /scan-rendered\.ts/, 'the rendered-output leak scan must run after next build (G10.01.b step 6)');
+});
