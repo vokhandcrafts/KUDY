@@ -1,0 +1,14 @@
+[
+  {
+    "story_id": "story-1-base",
+    "place_id": "place-1",
+    "tier": "base",
+    "duration_s": 90,
+    "voice_id": "voice-en-1",
+    "tone": "standard",
+    "text": "Template text of the base story about the coppersmiths' courtyard: replace these sentences with your own narration of the place. The example keeps the file shape so the validator passes on the first run.",
+    "transcript": "Template transcript of the base story. A transcript is required for every story: audio never ships without one (09 §3, invariant 1).",
+    "sources": ["Template source — replace with your own"],
+    "review": { "by": "template author", "at": "2026-09-18", "decision": "approved" }
+  }
+]
