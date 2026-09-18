@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { validateSchemaFile, checkIndexRules, readCatalogDoc } from '../../contracts/reader.mjs';
+import { validateSchemaFile, checkIndexRules } from '../../contracts/reader.mjs';
 
 // Segments a package-relative reference must never carry: traversal, and the
 // private/extended layers a public file may not point into (09 §3 invariant 9;
@@ -83,7 +83,15 @@ function asArray(doc, rel, errors) {
     diag(errors, 'error', 'type', `${rel}#$`);
     return [];
   }
-  return doc;
+  // Sparse null elements are reported here and dropped: they are the one
+  // shape that crashes property access downstream (round-3 review). Scalar
+  // elements (theme ids and the like) are legitimate array members and are
+  // left to the schema and the per-element checks.
+  return doc.filter((item, i) => {
+    if (item !== null && item !== undefined) return true;
+    diag(errors, 'error', 'type', `${rel}[${i}]`);
+    return false;
+  });
 }
 
 export function haversineMeters(lat1, lng1, lat2, lng2) {
@@ -145,8 +153,12 @@ function checkStopStability(route, previousDir, errors) {
     diag(errors, 'error', 'route-id-changed', `route.json#${prevRoute.route_id}->${route.route_id}`);
     return;
   }
-  const prevStops = Array.isArray(prevRoute.stops) ? prevRoute.stops : [];
-  const curStops = Array.isArray(route?.stops) ? route.stops : [];
+  const prevStops = Array.isArray(prevRoute.stops)
+    ? prevRoute.stops.filter((s) => s && typeof s === 'object')
+    : [];
+  const curStops = Array.isArray(route?.stops)
+    ? route.stops.filter((s) => s && typeof s === 'object')
+    : [];
   const prevById = new Map(prevStops.map((s) => [s.id, s]));
   const fieldsEqual = (a, b) => a.place_id === b.place_id && a.access_tier === b.access_tier &&
     a.story_base_id === b.story_base_id && a.story_extended_id === b.story_extended_id;
@@ -191,7 +203,7 @@ export function validatePackage(dir, options = {}) {
 
   const route = readJson(rootAbs, 'route.json', errors);
   if (route) schemaCheck('route.schema.json', route, 'route.json', errors);
-  const stops = Array.isArray(route?.stops) ? route.stops : [];
+  const stops = asArray(route?.stops, 'route.json#stops', errors);
   const places = asArray(readJson(rootAbs, 'places.json', errors), 'places.json', errors);
   places.forEach((p, i) => schemaCheck('place.schema.json', p, `places.json[${i}]`, errors));
   const voicesDoc = readJson(rootAbs, 'voices.json', errors);
@@ -254,9 +266,18 @@ export function validatePackage(dir, options = {}) {
       const layer = layers[tier];
       if (!layer) continue;
       checkUniqueId(layer.stories, 'story_id', `${locale}/${tier}/stops.json`, errors);
+      // 09 §3: a story's primary media is <locale>/<tier>/audio/<story_id>.m4a.
+      // A layer declares itself text-only by shipping no audio directory at
+      // all; once the directory ships, every story in the layer needs its
+      // file — an emptied directory still counts as shipping audio
+      // (round-3 review: only orphan audio was checked, not presence).
+      const layerShipsAudio = fs.existsSync(path.join(rootAbs, locale, tier, 'audio'));
       layer.stories.forEach((story, i) => {
         const at = `${locale}/${tier}/stops.json[${i}]`;
         if (story.tier !== tier) diag(errors, 'error', 'tier-mismatch', at);
+        if (layerShipsAudio && story.story_id !== undefined && !files.includes(`${locale}/${tier}/audio/${story.story_id}.m4a`)) {
+          diag(errors, 'error', 'missing-media', `${at}#audio`);
+        }
         if (!placeVersions.has(story.place_id)) diag(errors, 'error', 'unknown-ref', `${at}#place_id#${story.place_id}`);
         if (!voiceIds.has(story.voice_id)) diag(errors, 'error', 'unknown-ref', `${at}#voice_id#${story.voice_id}`);
         const voice = voices.find((v) => v.id === story.voice_id);
@@ -389,8 +410,6 @@ export function validateDiscoveryIndex(index) {
   });
   return { ok: errors.length === 0, errors };
 }
-
-export { readCatalogDoc };
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   const args = process.argv.slice(2);

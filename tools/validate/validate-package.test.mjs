@@ -173,6 +173,42 @@ test('criterion 1: missing and orphaned media are caught', () => {
   assert.ok(rules(orphan, 'orphan-media').some((e) => e.path === 'be/base/audio/story-ghost.m4a'), JSON.stringify(orphan.errors));
 });
 
+test('round-3 review: a story without its audio file is missing-media; text-only layers stay clean', () => {
+  const missingAudio = validatePackage(copiedTree((d) => {
+    fs.rmSync(path.join(d, 'be', 'base', 'audio', 'story-1-base.m4a'));
+  }));
+  assert.ok(
+    rules(missingAudio, 'missing-media').some((e) => e.path === 'be/base/stops.json[0]#audio'),
+    JSON.stringify(missingAudio.errors),
+  );
+  // The uk layer ships no audio directory at all (text-only): its story must
+  // not be flagged for media the layer never declared.
+  const clean = validatePackage(copiedTree(null));
+  assert.deepEqual(rules(clean, 'missing-media').filter((e) => e.path.startsWith('uk/')), [], JSON.stringify(clean.errors));
+});
+
+test('round-3 review: null array elements yield diagnostics, not crashes', () => {
+  for (const [rel, inject] of [
+    ['places.json', (doc) => { doc.push(null); }],
+    ['voices.json', (doc) => { doc.push(null); }],
+    ['route.json', (doc) => { doc.stops.push(null); }],
+    ['be/base/stops.json', (doc) => { doc.push(null); }],
+    ['discovery.json', (doc) => { doc.offers.push(null); }],
+    ['discovery.json', (doc) => { doc.themes.push(null); }],
+  ]) {
+    const result = validatePackage(copiedTree((d) => {
+      const doc = readJson(d, rel);
+      inject(doc);
+      writeJson(d, rel, doc);
+    }));
+    assert.equal(result.ok, false, `${rel} with a null element must not validate`);
+    assert.ok(
+      result.errors.some((e) => e.rule === 'type' || e.rule === 'required'),
+      `${rel} must carry a diagnostic for the null element: ${JSON.stringify(result.errors)}`,
+    );
+  }
+});
+
 test('criterion 1: unapproved content is caught', () => {
   for (const decision of ['pending', 'rejected']) {
     const result = validatePackage(copiedTree((d) => {
