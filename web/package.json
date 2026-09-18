@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build"
+    "prebuild": "node --experimental-strip-types scripts/build-content.ts",
+    "build": "next build && node --experimental-strip-types scripts/scan-rendered.ts"
   },
   "dependencies": {
     "next": "^15.5.0",

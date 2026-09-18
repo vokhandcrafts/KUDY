@@ -4,27 +4,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildBundle } from '../../../tools/build-bundle/build-bundle.mjs';
+import { buildDemoFixture } from './test-fixture.ts';
 import { readBundleBaseStories, readBundleDiscoveryIndex, readBundlePreviews, readBundleRoute, readPlaceProjection } from './bundle.ts';
 import { readBaseStories, readCatalog, isKnownLocale, readDiscoveryIndex, readPreviews } from './readers.ts';
 
 const REPO_ROOT = fileURLToPath(new URL('../../..', import.meta.url));
-const AUTHOR_TREE = path.join(REPO_ROOT, 'fixtures', 'content', 'demo-route');
 const DISCOVERY_CONTRACT = path.join(REPO_ROOT, 'fixtures', 'discovery-contract');
 
-let publicRoot = '';
-let buildRoot = '';
-
-test('fixture bundle builds with the merged packager', async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-web-readers-'));
-  buildRoot = path.join(tmp, 'build');
-  await buildBundle({ inDir: AUTHOR_TREE, outDir: buildRoot });
-  publicRoot = path.join(buildRoot, 'public');
-  assert.ok(fs.existsSync(path.join(publicRoot, 'bundle', 'demo-route-a1', '1', 'route.json')));
-});
+const { publicRoot, buildRoot } = await buildDemoFixture();
 
 test('route reader returns the demo-route fixture with base/extended stops', () => {
   const res = readBundleRoute(publicRoot, 'demo-route-a1', '1');
