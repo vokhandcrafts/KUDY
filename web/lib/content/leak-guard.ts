@@ -1,0 +1,127 @@
+// Independent verification that the tree the web is pointed at is public-only.
+// The build-bundle guard already stops leaks at assembly; this one re-checks
+// the actual input the web build consumes, with the same error classes:
+//   private-path-in-public  — a private/extended/../-like segment in a tree
+//                             path or in a path-typed JSON string
+//   source-map-in-public    — a *.map file in the public input
+//   private-text-leak       — an 8-word n-gram of private narration (09 §3
+//                             text/transcript) found in a public JSON string
+//   invalid-json            — an unparseable file cannot be verified
+// Build-time only (node:fs); rendered-output scanning is G10.01.b step 6.
+import fs from 'node:fs';
+import path from 'node:path';
+
+export type ViolationCode =
+  | 'private-path-in-public'
+  | 'source-map-in-public'
+  | 'private-text-leak'
+  | 'invalid-json';
+
+export interface Violation {
+  code: ViolationCode;
+  path: string;
+}
+
+export interface ScanResult {
+  ok: boolean;
+  violations: Violation[];
+}
+
+const GRAM_LENGTH = 8;
+
+function unsafeSegments(relPath: string): boolean {
+  const normalized = relPath.replaceAll('\\', '/');
+  return normalized.split('/').some((seg) => seg === '' || seg === '.' || seg === '..' || seg === 'private' || seg === 'extended');
+}
+
+function listFiles(root: string): { abs: string; rel: string }[] {
+  if (!fs.existsSync(root)) return [];
+  const out: { abs: string; rel: string }[] = [];
+  for (const entry of fs.readdirSync(root, { withFileTypes: true, recursive: true })) {
+    if (entry.isFile()) {
+      const abs = path.join(entry.parentPath, entry.name);
+      out.push({ abs, rel: path.relative(root, abs) });
+    }
+  }
+  return out;
+}
+
+function walkStrings(value: unknown, visit: (s: string, key: string) => void, key = ''): void {
+  if (typeof value === 'string') {
+    visit(value, key);
+  } else if (Array.isArray(value)) {
+    for (const item of value) walkStrings(item, visit, key);
+  } else if (value !== null && typeof value === 'object') {
+    for (const [k, v] of Object.entries(value)) walkStrings(v, visit, k);
+  }
+}
+
+function tokenize(text: string): string[] {
+  return text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((t) => t.length > 0);
+}
+
+function eightGrams(tokens: string[]): string[] {
+  const grams: string[] = [];
+  for (let i = 0; i + GRAM_LENGTH <= tokens.length; i++) {
+    grams.push(tokens.slice(i, i + GRAM_LENGTH).join(' '));
+  }
+  return grams;
+}
+
+// Private narration grams: the paid text and transcript fields of the private
+// tree (09 §3 — the fields the public layer must never share wording with).
+function privateGrams(privateDir: string): Set<string> {
+  const grams = new Set<string>();
+  for (const { abs } of listFiles(privateDir)) {
+    if (!abs.endsWith('.json')) continue;
+    let doc: unknown;
+    try {
+      doc = JSON.parse(fs.readFileSync(abs, 'utf8'));
+    } catch {
+      continue;
+    }
+    walkStrings(doc, (value, key) => {
+      if (key === 'text' || key === 'transcript') {
+        for (const gram of eightGrams(tokenize(value))) grams.add(gram);
+      }
+    });
+  }
+  return grams;
+}
+
+export function scanWebContentInput({ publicDir, privateDir }: { publicDir: string; privateDir?: string }): ScanResult {
+  const violations: Violation[] = [];
+  const grams = privateDir ? privateGrams(privateDir) : null;
+  for (const { abs, rel } of listFiles(publicDir)) {
+    if (abs.endsWith('.map')) {
+      violations.push({ code: 'source-map-in-public', path: rel });
+      continue;
+    }
+    if (unsafeSegments(rel)) {
+      violations.push({ code: 'private-path-in-public', path: rel });
+      continue;
+    }
+    if (!abs.endsWith('.json')) continue;
+    let doc: unknown;
+    try {
+      doc = JSON.parse(fs.readFileSync(abs, 'utf8'));
+    } catch {
+      violations.push({ code: 'invalid-json', path: rel });
+      continue;
+    }
+    walkStrings(doc, (value, key) => {
+      if ((key === 'path' || key.endsWith('_path')) && unsafeSegments(value)) {
+        violations.push({ code: 'private-path-in-public', path: `${rel}:${key}` });
+      }
+      if (grams) {
+        for (const gram of eightGrams(tokenize(value))) {
+          if (grams.has(gram)) {
+            violations.push({ code: 'private-text-leak', path: rel });
+            return;
+          }
+        }
+      }
+    });
+  }
+  return { ok: violations.length === 0, violations };
+}
