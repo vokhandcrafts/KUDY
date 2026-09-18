@@ -1,0 +1,8 @@
+# Generated content trees: the web reads build-bundle output dropped here;
+# no content copy is ever committed (implementation-rules 5). Root-anchored so
+# lib/content/ (the readers) is never matched.
+/content/
+/node_modules/
+/.next/
+/out/
+*.tsbuildinfo
