@@ -53,6 +53,20 @@ test('criterion 1: the broken example fails on exactly the seven documented diag
   assert.deepEqual(result.warnings.map((w) => w.rule), ['radius-overlap']);
 });
 
+test('guard: the README error table stays in sync with SEEDED (implementation-rules 1)', () => {
+  const readme = fs.readFileSync(path.join(CONTENT, 'README.md'), 'utf8');
+  const section = readme.split('## Сем памылак')[1].split('\n## ')[0];
+  // Data rows of the error table end with the diagnostic rule in backticks;
+  // header and separator lines carry no trailing rule token.
+  const rules = section
+    .split('\n')
+    .map((line) => line.match(/`([a-z-]+)`\s*\|\s*$/))
+    .filter(Boolean)
+    .map((match) => match[1]);
+  assert.equal(rules.length, SEEDED.length, 'the README table must carry one row per seeded mistake');
+  assert.deepEqual([...new Set(rules)].sort(), SEEDED);
+});
+
 test('criterion 2: texts and media swap without any code change', () => {
   const dir = tempCopy();
   const discovery = readJson(dir, 'discovery.json');

@@ -13,16 +13,10 @@
   "offers": [
     {
       "offer_id": "offer-guide-template",
-      "ref": {
-        "kind": "guide",
-        "route_id": "template-route-1",
-        "version": "1"
-      },
+      "ref": { "kind": "guide", "route_id": "template-route-1", "version": "1" },
       "city_id": "gdansk",
       "editorial_order": 1,
-      "themes": [
-        "template-history"
-      ],
+      "themes": ["template-history"],
       "localized": {
         "title": {
           "be": "Шаблонны гід: ад падворка да вежы",
@@ -41,11 +35,7 @@
           "en": "cobblestones, one climb without a ramp"
         }
       },
-      "estimated_duration": {
-        "min_minutes": 90,
-        "max_minutes": 120,
-        "basis": "author_estimate"
-      },
+      "estimated_duration": { "min_minutes": 90, "max_minutes": 120, "basis": "author_estimate" },
       "distance_m": 1800,
       "suggested_start_place_id": "place-1",
       "season_recommendations": [
@@ -57,22 +47,14 @@
           }
         }
       ],
-      "detail_ref": {
-        "kind": "guide_preview"
-      }
+      "detail_ref": { "kind": "guide_preview" }
     },
     {
       "offer_id": "offer-place-1",
-      "ref": {
-        "kind": "place",
-        "place_id": "place-1",
-        "content_version": "1"
-      },
+      "ref": { "kind": "place", "place_id": "place-1", "content_version": "1" },
       "city_id": "gdansk",
       "editorial_order": 2,
-      "themes": [
-        "template-history"
-      ],
+      "themes": ["template-history"],
       "localized": {
         "title": {
           "be": "Падворак качагараў (шаблон)",
@@ -92,23 +74,14 @@
         }
       },
       "season_recommendations": [],
-      "detail_ref": {
-        "kind": "place_public",
-        "path": "places/place-1/public.json"
-      }
+      "detail_ref": { "kind": "place_public", "path": "places/place-1/public.json" }
     },
     {
       "offer_id": "offer-collection-template",
-      "ref": {
-        "kind": "collection",
-        "collection_id": "collection-template-1",
-        "content_version": "1"
-      },
+      "ref": { "kind": "collection", "collection_id": "collection-template-1", "content_version": "1" },
       "city_id": "gdansk",
       "editorial_order": 3,
-      "themes": [
-        "template-history"
-      ],
+      "themes": ["template-history"],
       "localized": {
         "title": {
           "be": "Адзін шаблонны дзень",
@@ -127,17 +100,10 @@
           "en": "total time includes transitions; the trip to the starting point does not"
         }
       },
-      "estimated_duration": {
-        "min_minutes": 45,
-        "max_minutes": 75,
-        "basis": "author_estimate"
-      },
+      "estimated_duration": { "min_minutes": 45, "max_minutes": 75, "basis": "author_estimate" },
       "suggested_start_place_id": "place-1",
       "season_recommendations": [],
-      "detail_ref": {
-        "kind": "collection_public",
-        "path": "collections/collection-template-1/public.json"
-      }
+      "detail_ref": { "kind": "collection_public", "path": "collections/collection-template-1/public.json" }
     }
   ],
   "collections": [
@@ -156,16 +122,8 @@
         }
       },
       "members": [
-        {
-          "kind": "place",
-          "place_id": "place-1",
-          "content_version": "1"
-        },
-        {
-          "kind": "guide",
-          "route_id": "template-route-1",
-          "version": "1"
-        }
+        { "kind": "place", "place_id": "place-1", "content_version": "1" },
+        { "kind": "guide", "route_id": "template-route-1", "version": "1" }
       ],
       "overlap_note": {
         "be": "Падворак — першая кропка шаблоннага гіда; асобна наведваць яго не трэба, гэта той самы досвед.",
