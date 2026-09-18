@@ -2,6 +2,7 @@
   "route_id": "template-route-1",
   "version": "1",
   "city_id": "gdansk",
+  "cover": "private/cover.webp",
   "access": "paid",
   "product_id_route": "template_route_prod",
   "product_id_extension": "template_ext_prod",
@@ -34,6 +35,5 @@
         }
       }
     }
-  ],
-  "cover": "private/cover.webp"
+  ]
 }
