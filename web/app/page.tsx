@@ -1,10 +1,8 @@
-// Scaffold stub — G10.01.a ships no product UI pages. Catalog, guide and stop
-// pages are G10.01.b/.c; publication is G10.02.b.
+// Home = the city catalog in be, the default locale at the root (plan §4).
+import { CatalogPage } from '../components/catalog-page.tsx';
+import { getContentRoot, readSiteCatalogPage } from '../lib/content/site.ts';
+import { getUiStrings } from '../lib/i18n/index.ts';
+
 export default function Home() {
-  return (
-    <main>
-      <h1>KUDY</h1>
-      <p>Вэб-каркас (G10.01.a). Старонкі кантэнту — у G10.01.b/.c.</p>
-    </main>
-  );
+  return <CatalogPage locale="be" data={readSiteCatalogPage(getContentRoot(), 'be')} strings={getUiStrings('be')} />;
 }

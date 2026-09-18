@@ -7,7 +7,8 @@
 //   private-text-leak       — an 8-word n-gram of private narration (09 §3
 //                             text/transcript) found in a public JSON string
 //   invalid-json            — an unparseable file cannot be verified
-// Build-time only (node:fs); rendered-output scanning is G10.01.b step 6.
+// Build-time only (node:fs). scanRenderedOutput below extends the same classes
+// to the rendered static export (G10.01.b step 6).
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -124,4 +125,29 @@ export function scanWebContentInput({ publicDir, privateDir }: { publicDir: stri
     });
   }
   return { ok: violations.length === 0, violations };
+}
+
+// Rendered-output scan (G10.01.b step 6): the static export under out/ must
+// carry no extended/private path references and no source maps — the same
+// defect classes as the input scan, applied to what the build actually
+// shipped (plan §5: the guard covers rendered output, not just data files).
+// The path-continuation pattern also accepts the RSC payload's escaped
+// slashes (`\/private\/…`); binary assets are skipped by a NUL sniff.
+export function scanRenderedOutput({ outDir }: { outDir: string }): ScanResult {
+  const violations: Violation[] = [];
+  for (const { abs, rel } of listFiles(outDir)) {
+    if (abs.endsWith('.map')) {
+      violations.push({ code: 'source-map-in-public', path: rel });
+      continue;
+    }
+    const bytes = fs.readFileSync(abs);
+    if (bytes.includes(0)) continue;
+    const text = bytes.toString('utf8');
+    if (/(?:^|[^a-z0-9-])(?:extended|private)\\?\/[a-z0-9._-]/i.test(text)) {
+      violations.push({ code: 'private-path-in-public', path: rel });
+    } else if (/sourceMappingURL=/.test(text)) {
+      violations.push({ code: 'source-map-in-public', path: rel });
+    }
+  }
+  return { ok: violations.length === 0, violations: violations.sort((a, b) => a.path.localeCompare(b.path)) };
 }
