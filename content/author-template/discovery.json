@@ -1,0 +1,134 @@
+{
+  "revision": "r-template-1",
+  "city_id": "gdansk",
+  "themes": [
+    {
+      "id": "template-history",
+      "labels": {
+        "be": "Шаблонная гісторыя",
+        "en": "Template history"
+      }
+    }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-guide-template",
+      "ref": { "kind": "guide", "route_id": "template-route-1", "version": "1" },
+      "city_id": "gdansk",
+      "editorial_order": 1,
+      "themes": ["template-history"],
+      "localized": {
+        "title": {
+          "be": "Шаблонны гід: ад падворка да вежы",
+          "en": "Template guide: from the courtyard to the tower"
+        },
+        "summary": {
+          "be": "Дзве гісторыі на кароткай прагулцы: вольны падворак качагараў і платная млынавая вежа.",
+          "en": "Two stories on a short walk: the free coppersmiths' courtyard and the paid mill tower."
+        },
+        "why_recommended": {
+          "be": "Аўтар прайшоў маршрут сам і запісаў абедзве гісторыі; заменіце гэты тэкст на свой довад.",
+          "en": "The author walked the route and recorded both stories; replace this text with your own pitch."
+        },
+        "conditions": {
+          "be": "брукаванка, адзін уздым без пандуса",
+          "en": "cobblestones, one climb without a ramp"
+        }
+      },
+      "estimated_duration": { "min_minutes": 30, "max_minutes": 60, "basis": "author_estimate" },
+      "distance_m": 1800,
+      "suggested_start_place_id": "place-1",
+      "season_recommendations": [
+        {
+          "season": "summer",
+          "reason": {
+            "be": "Цёплы сезон: вечаровыя прагулыцы да 21:00 і працуючыя тэрасы.",
+            "en": "Warm season: evening walks until 21:00 and open terraces."
+          }
+        }
+      ],
+      "detail_ref": { "kind": "guide_preview" }
+    },
+    {
+      "offer_id": "offer-place-1",
+      "ref": { "kind": "place", "place_id": "place-1", "content_version": "1" },
+      "city_id": "gdansk",
+      "editorial_order": 2,
+      "themes": ["template-history"],
+      "localized": {
+        "title": {
+          "be": "Падворак качагараў (шаблон)",
+          "en": "The Coppersmiths' Courtyard (template)"
+        },
+        "summary": {
+          "be": "Ціхі дворык-прыклад; заменіце назву, апісанне і каардынаты на свае.",
+          "en": "A sample quiet courtyard; replace the name, summary and coordinates with your own."
+        },
+        "why_recommended": {
+          "be": "Дзесяць хвілін перапынку; прыклад кароткай прапановы асобнага месца.",
+          "en": "Ten minutes of pause; an example of a short single-place offer."
+        },
+        "conditions": {
+          "be": "адкрыты двор, наведванне дзённае",
+          "en": "open courtyard, daytime visits"
+        }
+      },
+      "season_recommendations": [],
+      "detail_ref": { "kind": "place_public", "path": "places/place-1/public.json" }
+    },
+    {
+      "offer_id": "offer-collection-template",
+      "ref": { "kind": "collection", "collection_id": "collection-template-1", "content_version": "1" },
+      "city_id": "gdansk",
+      "editorial_order": 3,
+      "themes": ["template-history"],
+      "localized": {
+        "title": {
+          "be": "Адзін шаблонны дзень",
+          "en": "One Template Day"
+        },
+        "summary": {
+          "be": "Падборка-прыклад: кароткі падворак і поўны гід, што пачынаецца ад яго.",
+          "en": "A sample collection: the short courtyard and the full guide starting from it."
+        },
+        "why_recommended": {
+          "be": "Парадак падабраны рукамі: спачатку падворак, потым гід ад яго ж пачатку.",
+          "en": "The order is hand-picked: the courtyard first, then the guide starting from it."
+        },
+        "conditions": {
+          "be": "сумарны час з пераходамі; дарога да пачатку не ўлічана",
+          "en": "total time includes transitions; the trip to the starting point does not"
+        }
+      },
+      "estimated_duration": { "min_minutes": 45, "max_minutes": 75, "basis": "author_estimate" },
+      "suggested_start_place_id": "place-1",
+      "season_recommendations": [],
+      "detail_ref": { "kind": "collection_public", "path": "collections/collection-template-1/public.json" }
+    }
+  ],
+  "collections": [
+    {
+      "collection_id": "collection-template-1",
+      "content_version": "1",
+      "city_id": "gdansk",
+      "localized": {
+        "title": {
+          "be": "Адзін шаблонны дзень",
+          "en": "One Template Day"
+        },
+        "description": {
+          "be": "Дзве прапановы ў адной дузе: кароткі падворак і поўны гід ад таго ж пачатку.",
+          "en": "Two offers in one arc: the short courtyard and the full guide from the same start."
+        }
+      },
+      "members": [
+        { "kind": "place", "place_id": "place-1", "content_version": "1" },
+        { "kind": "guide", "route_id": "template-route-1", "version": "1" }
+      ],
+      "overlap_note": {
+        "be": "Падворак — першая кропка шаблоннага гіда; асобна наведваць яго не трэба, гэта той самы досвед.",
+        "en": "The courtyard is the template guide's first stop; no separate visit is needed — same experience."
+      }
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "route_id": "template-route-1",
+  "version": "1",
+  "city_id": "gdansk",
+  "access": "paid",
+  "product_id_route": "template_route_prod",
+  "product_id_extension": "template_ext_prod",
+  "distance_m": 1800,
+  "duration_min": 40,
+  "free_stop_count": 1,
+  "published": false,
+  "stops": [
+    {
+      "id": "stop-1",
+      "position": 0,
+      "place_id": "place-1",
+      "access_tier": "base",
+      "story_base_id": "story-1-base"
+    },
+    {
+      "id": "stop-2",
+      "position": 1,
+      "place_id": "place-2",
+      "access_tier": "extended",
+      "story_extended_id": "story-2-ext",
+      "preview": {
+        "name": {
+          "be": "Млынавая вежа (шаблон)",
+          "en": "The Mill Tower (template)"
+        },
+        "announce": {
+          "be": "За паваротам — вежа старога млына і гісторыя, якая адкрываецца пасля куплі гіда.",
+          "en": "Around the bend stands the old mill tower; its story opens after the guide is purchased."
+        }
+      }
+    }
+  ]
+}
