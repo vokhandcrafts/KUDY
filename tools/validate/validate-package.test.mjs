@@ -249,6 +249,29 @@ test('criterion 2: inserting a stop keeps id stability clean', () => {
   assert.deepEqual(result.errors, [], JSON.stringify(result.errors));
 });
 
+test('round-2 review: a missing current route.json is missing-file, not route-id-changed', () => {
+  const previous = copiedTree(null);
+  const result = validatePackage(copiedTree((d) => {
+    fs.rmSync(path.join(d, 'route.json'));
+  }), { previous });
+  assert.ok(rules(result, 'missing-file').some((e) => e.path === 'route.json'), JSON.stringify(result.errors));
+  assert.deepEqual(rules(result, 'route-id-changed'), [], JSON.stringify(result.errors));
+});
+
+test('round-2 review: entries without an identity field are not duplicate-id verdicts', () => {
+  const result = validatePackage(copiedTree((d) => {
+    const stops = readJson(d, 'be/base/stops.json');
+    const anonymised = { ...stops[0] };
+    delete anonymised.story_id;
+    writeJson(d, 'be/base/stops.json', [anonymised, anonymised]);
+  }));
+  assert.deepEqual(rules(result, 'duplicate-id'), [], JSON.stringify(result.errors));
+  assert.ok(
+    rules(result, 'required').some((e) => e.path.startsWith('be/base/stops.json')),
+    'the schema must carry the missing-identity diagnostic',
+  );
+});
+
 test('criterion 3: radius overlap is a warning, not a rejection', () => {
   const result = validatePackage(copiedTree((d) => {
     const places = readJson(d, 'places.json');
