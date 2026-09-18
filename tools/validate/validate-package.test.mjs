@@ -273,15 +273,43 @@ test('criterion 3: haversine distance is sane for the demo places', () => {
 test('criterion 4: a wrong-kind feedback target in the registry is rejected', () => {
   const result = validatePackage(copiedTree((d) => {
     fs.mkdirSync(path.join(d, 'release'));
-    writeJson(d, 'release/feedback-target-registry.json', [
-      { kind: 'guide', route_id: 'demo-route-a1', version: '1', locale: 'be' },
-      { kind: 'place', place_id: 'place-1', content_version: '1', locale: 'en' },
-      { kind: 'collection', collection_id: 'collection-demo', content_version: '1', locale: 'be' },
-    ]);
+    // The shape the G02.03 packager emits: {schema_version, status, targets}.
+    writeJson(d, 'release/feedback-target-registry.json', {
+      schema_version: 1,
+      status: 'prepared',
+      targets: [
+        { kind: 'guide', route_id: 'demo-route-a1', version: '1', locale: 'be' },
+        { kind: 'place', place_id: 'place-1', content_version: '1', locale: 'en' },
+        { kind: 'collection', collection_id: 'collection-demo', content_version: '1', locale: 'be' },
+      ],
+    });
   }));
   assert.ok(!result.ok);
   const hits = result.errors.filter((e) => e.rule === 'oneOf' && e.path.startsWith('release/feedback-target-registry.json'));
   assert.equal(hits.length, 1, `only the collection entry fails: ${JSON.stringify(result.errors)}`);
+});
+
+test('criterion 1 follow-ups: guide duration range, tier mismatch, detail-ref ownership', () => {
+  const duration = validatePackage(copiedTree((d) => {
+    const index = readJson(d, 'discovery.json');
+    index.offers[0].estimated_duration = { min_minutes: 90, max_minutes: 120, basis: 'author_estimate' };
+    writeJson(d, 'discovery.json', index);
+  }));
+  assert.ok(rules(duration, 'guide-duration-not-in-range').length > 0, JSON.stringify(duration.errors));
+
+  const tier = validatePackage(copiedTree((d) => {
+    const stories = readJson(d, 'be/base/stops.json');
+    stories[0].tier = 'extended';
+    writeJson(d, 'be/base/stops.json', stories);
+  }));
+  assert.ok(rules(tier, 'tier-mismatch').length > 0, JSON.stringify(tier.errors));
+
+  const owner = validatePackage(copiedTree((d) => {
+    const index = readJson(d, 'discovery.json');
+    index.offers[1].detail_ref.path = 'places/place-2/public.json';
+    writeJson(d, 'discovery.json', index);
+  }));
+  assert.ok(rules(owner, 'detail-ref-mismatch').length > 0, JSON.stringify(owner.errors));
 });
 
 test('criterion 4: voice locale must match the story locale', () => {
@@ -387,6 +415,21 @@ test('robustness: a corrupt package yields diagnostics, not a crash', () => {
   const absent = validatePackage(path.join(dir, 'no-such-dir'));
   assert.ok(!absent.ok);
   assert.ok(absent.errors.every((e) => e.rule === 'missing-file'), JSON.stringify(absent.errors));
+});
+
+test('robustness: nested non-arrays in discovery yield diagnostics, not a crash', () => {
+  const dir = copiedTree((d) => {
+    writeJson(d, 'discovery.json', {
+      revision: 'r-demo-1',
+      city_id: 'demo-city',
+      themes: 'oops',
+      offers: 'oops',
+      collections: [{ collection_id: 'c', content_version: '1', city_id: 'demo-city', localized: {}, members: 'oops' }],
+    });
+  });
+  const result = validatePackage(dir);
+  assert.ok(!result.ok);
+  assert.ok(result.errors.filter((e) => e.rule === 'type').length >= 3, JSON.stringify(result.errors));
 });
 
 test('guard: the suite is wired into npm test (implementation-rules 7)', () => {
