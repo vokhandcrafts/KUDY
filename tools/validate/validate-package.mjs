@@ -13,7 +13,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'node:url';
 
 import { validateSchemaFile, checkIndexRules, readCatalogDoc } from '../../contracts/reader.mjs';
 
@@ -95,8 +95,11 @@ export function haversineMeters(lat1, lng1, lat2, lng2) {
 
 function checkUniqueId(list, key, at, errors, seen = new Set()) {
   list.forEach((item, i) => {
-    if (seen.has(item?.[key])) diag(errors, 'error', 'duplicate-id', `${at}[${i}]#${item[key]}`);
-    seen.add(item?.[key]);
+    // A missing identity field is the schema's `required` diagnostic; a
+    // duplicate-`undefined` verdict here would only muddle the report.
+    if (item?.[key] === undefined) return;
+    if (seen.has(item[key])) diag(errors, 'error', 'duplicate-id', `${at}[${i}]#${item[key]}`);
+    seen.add(item[key]);
   });
   return seen;
 }
@@ -134,8 +137,12 @@ function checkStopStability(route, previousDir, errors) {
     diag(errors, 'error', 'previous-unreadable', 'previous/route.json');
     return;
   }
-  if (prevRoute.route_id !== route?.route_id) {
-    diag(errors, 'error', 'route-id-changed', `route.json#${prevRoute.route_id}->${route?.route_id}`);
+  // An absent or corrupt current route.json already reported missing-file or
+  // invalid-json; comparing ids against it would only add a misleading
+  // route-id-changed verdict (round-2 review, PR #116).
+  if (route === null || typeof route !== 'object' || !route.route_id) return;
+  if (prevRoute.route_id !== route.route_id) {
+    diag(errors, 'error', 'route-id-changed', `route.json#${prevRoute.route_id}->${route.route_id}`);
     return;
   }
   const prevStops = Array.isArray(prevRoute.stops) ? prevRoute.stops : [];
