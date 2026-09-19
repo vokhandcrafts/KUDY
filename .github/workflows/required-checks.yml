@@ -25,7 +25,7 @@ jobs:
         run: npm ci
         working-directory: web
       - name: tests
-        run: echo "no product test command yet"
+        run: npm test
   lint:
     runs-on: ubuntu-latest
     steps:
