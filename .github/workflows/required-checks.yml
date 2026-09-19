@@ -5,18 +5,56 @@ on:
 permissions:
   contents: read
 jobs:
+  # TR-1 (docs/architecture/23_technical_remarks.md): the gate runs the real
+  # product checks, not announcements. Node 22.x and 24.x both verify the
+  # engines range; 24.13.0 is the verified dev environment (run-model README).
   tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: install (root)
+        run: npm ci
+      - name: install (web)
+        run: npm ci
+        working-directory: web
       - name: tests
-        run: echo "no product test command yet"
+        run: npm test
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: lint
-        run: echo "no product lint command yet"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: install (root)
+        run: npm ci
+      - name: install (web — tsc resolves web/@types from here)
+        run: npm ci
+        working-directory: web
+      - name: typecheck (root + services)
+        run: npm run typecheck
+      - name: typecheck (web)
+        run: npx tsc --noEmit -p web
+  web-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: install (web)
+        run: npm ci
+        working-directory: web
+      - name: build (content prebuild + next build + scan-rendered)
+        run: npm run build
+        working-directory: web
   gitleaks:
     runs-on: ubuntu-latest
     steps:
