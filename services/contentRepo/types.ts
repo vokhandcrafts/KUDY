@@ -57,7 +57,9 @@ export type Readiness =
       version: string;
       tier: Tier;
       // Layers whose completeness is confirmed on disk (and granted where the
-      // route is paid). The durable tier_available and the derived
+      // route is paid), limited to this evaluation's layers — a base start
+      // evaluates ['base'] only; the card across all tiers is one evaluation
+      // per tier. The durable tier_available and the derived
       // accessible_stop_ids stay owned by the DB/engine (ADR §3.2); this is the
       // disk-fact derivation they consume.
       tierAvailable: Tier[];
