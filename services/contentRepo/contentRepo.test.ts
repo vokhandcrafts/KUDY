@@ -103,6 +103,18 @@ test('criterion 1: a story_id carrying path separators is a packaging fault, not
   }
 });
 
+test('criterion 1: unsafe story_id is flagged even in a text-only layer', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    fs.rmSync(`${root}/be/base/audio`, { recursive: true, force: true });
+    fs.writeFileSync(`${root}/be/base/stops.json`, JSON.stringify([{ ...JSON.parse(fs.readFileSync(`${root}/be/base/stops.json`, 'utf8'))[0], story_id: 'a..b' }]));
+    const result = await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' });
+    assert.deepEqual(result, { status: 'incomplete', missing: ['be/base/stops.json#unsafe-path:a..b'] });
+  } finally {
+    remove();
+  }
+});
+
 test('criterion 2: with the whole extended layer gone, a base start is ready', async () => {
   const { root, remove } = tempPackage();
   try {
