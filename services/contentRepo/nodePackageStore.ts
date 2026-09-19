@@ -1,5 +1,6 @@
 // Node adapter over a package directory (tests, demo, dev tooling). The
-// device wires the same PackageStore seam to expo-file-system instead.
+// device wires the same PackageStore seam to expo-file-system instead — and
+// owns confinement there, since this test adapter joins paths naively.
 // Path idiom matches validate-package.mjs: '/'-separated package-relative
 // paths joined onto the root — the fs APIs accept '/' on Windows.
 import { readFile as fsReadFile, stat } from 'node:fs/promises';

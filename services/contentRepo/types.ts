@@ -31,6 +31,8 @@ export type FileFacts =
 // (expo-file-system) and the node adapter both implement it; paths are
 // package-relative with '/' separators on every platform (validate-package
 // idiom: the fs APIs accept '/' on Windows, so the core stays platform-neutral).
+// The adapter must confine every read to the package root regardless of
+// `rel` — rel values originate in package JSON and are never trusted paths.
 // G04.02 activates packages; ContentRepo only reads them.
 export interface PackageStore {
   key: PackageKey;
