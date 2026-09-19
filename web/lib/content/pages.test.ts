@@ -18,7 +18,7 @@ import { buildDemoFixture } from './test-fixture.ts';
 const REPO_ROOT = fileURLToPath(new URL('../../..', import.meta.url));
 const { publicRoot } = await buildDemoFixture();
 
-test('the home shows the fixture card and the map entry — no placeholder cards (acceptance 3)', () => {
+test('the home shows the fixture card and no dead links — no placeholder cards (acceptance 3)', () => {
   const page = readSiteCatalogPage(publicRoot, 'be');
   assert.equal(page.cards.length, 1);
   assert.equal(page.cards[0]!.title, 'Дэма-гід: сукнаны двор');
@@ -26,14 +26,15 @@ test('the home shows the fixture card and the map entry — no placeholder cards
   assert.equal(page.cards[0]!.duration_min, 40);
   assert.equal(page.cards[0]!.distance_m, 2500);
   assert.equal(page.cards[0]!.stop_count, 2);
-  assert.equal(page.mapHref, '/map');
+  // TR-8: no mapHref on the page data — the /map route does not exist while
+  // the tile-provider decision is open (#111); the dead link stays hidden.
+  assert.equal('mapHref' in page, false);
 });
 
 test('the en home renders the en facts behind the locale prefix', () => {
   const page = readSiteCatalogPage(publicRoot, 'en');
   assert.equal(page.cards[0]!.title, 'Demo guide: the cloth courtyard');
   assert.equal(page.cards[0]!.href, '/en/guides/demo-route-a1');
-  assert.equal(page.mapHref, '/en/map');
 });
 
 test('per-locale availability is shown by fact — uk is text-only (09 §8)', () => {

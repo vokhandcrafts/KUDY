@@ -12,7 +12,6 @@ export interface UiStrings {
   brand: string;
   langSwitchName: string;
   catalogTitle: string;
-  mapEntry: string;
   languages: string;
   duration: string;
   distance: string;
