@@ -35,7 +35,9 @@ export interface CatalogRouteEntry {
   locales: Locale[];
   layers: string[];
   product_id?: string;
-  sizes?: Record<string, number>;
+  // catalog.schema.json: sizes is required and requires base (09 §4: sizes
+  // per layer, not bytes); extended is optional; no other keys allowed.
+  sizes: { base: number; extended?: number };
 }
 
 export interface CatalogPointer {
@@ -96,6 +98,8 @@ export interface DiscoveryIndex {
 
 // route.schema.json / stop.schema.json.
 export interface RouteStop {
+  // origin — reserved provenance field (stop.schema.json, G02.01).
+  origin?: 'official' | 'imported';
   id: string;
   position: number;
   place_id: string;
@@ -108,6 +112,8 @@ export interface RouteStop {
 }
 
 export interface RouteDoc {
+  // origin — reserved provenance field (route.schema.json, G02.01).
+  origin?: 'official' | 'imported';
   route_id: string;
   version: string;
   city_id: string;
