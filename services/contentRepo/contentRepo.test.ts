@@ -81,6 +81,28 @@ test('criterion 1: a story voice and a stop place must resolve inside the packag
   }
 });
 
+test('criterion 1: route.json without its schema-required stops array is not ready', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    fs.writeFileSync(`${root}/route.json`, JSON.stringify({ ...JSON.parse(fs.readFileSync(`${root}/route.json`, 'utf8')), stops: undefined }));
+    const result = await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' });
+    assert.deepEqual(result, { status: 'incomplete', missing: ['route.json#type'] });
+  } finally {
+    remove();
+  }
+});
+
+test('criterion 1: a story_id carrying path separators is a packaging fault, not a lookup', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    fs.writeFileSync(`${root}/be/base/stops.json`, JSON.stringify([{ ...JSON.parse(fs.readFileSync(`${root}/be/base/stops.json`, 'utf8'))[0], story_id: '../evil' }]));
+    const result = await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' });
+    assert.deepEqual(result, { status: 'incomplete', missing: ['be/base/stops.json#unsafe-path:../evil'] });
+  } finally {
+    remove();
+  }
+});
+
 test('criterion 2: with the whole extended layer gone, a base start is ready', async () => {
   const { root, remove } = tempPackage();
   try {

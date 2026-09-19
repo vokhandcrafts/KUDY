@@ -106,7 +106,10 @@ export async function evaluatePackage(store: PackageStore, input: EvaluateInput)
   if (access === null) return { status: 'incomplete', missing: ['route.json#type'] };
 
   const stops = Array.isArray(routeDoc.stops) ? (routeDoc.stops as RouteStop[]) : [];
-  if (routeDoc.stops !== undefined && !Array.isArray(routeDoc.stops)) missing.push('route.json#type');
+  // stops is required by contracts/schemas/route.schema.json — absent and
+  // non-array are the same schema fault, and an empty default would let a
+  // broken package read as ready.
+  if (routeDoc.stops === undefined || !Array.isArray(routeDoc.stops)) missing.push('route.json#type');
   for (const rel of ROOT_FILES) {
     if (rel === 'route.json') continue;
     const file = await readJson(store, rel);
@@ -161,6 +164,13 @@ export async function evaluatePackage(store: PackageStore, input: EvaluateInput)
     if (!(await layerShipsAudio(store, input.locale, tier))) continue;
     for (const story of layerStories.get(tier) ?? []) {
       if (typeof story.story_id !== 'string') continue;
+      // story_id is a file name, not a path: separators and traversal pieces
+      // are a packaging fault in the validator's rule vocabulary, never a
+      // lookup (the PackageStore seam additionally confines reads to the
+      // package root — the device adapter owns that confinement).
+      if (/[/\\]|\.\./.test(story.story_id)) {
+        return { status: 'incomplete', missing: [`${input.locale}/${tier}/stops.json#unsafe-path:${story.story_id}`] };
+      }
       const rel = `${input.locale}/${tier}/audio/${story.story_id}.m4a`;
       let facts: FileFacts;
       try {
