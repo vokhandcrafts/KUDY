@@ -122,7 +122,7 @@ Plus, by hand on the diff:
 
 ### Recurring corpus classes — `docs/agent-rules/lessons-learned.md`
 
-The closed-PR corpus (52 merged PRs → 369 findings, 2026-09-19) ranks the defect classes
+The closed-PR corpus (52 closed PRs → 369 findings, 2026-09-19) ranks the defect classes
 that actually recur. Each has a prevention rule in `implementation-rules.md`; the
 reviewer-side minimum:
 
