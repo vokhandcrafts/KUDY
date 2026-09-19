@@ -10,6 +10,10 @@ work), and `issue-workflow.md` (process). Where a rule extends an existing one, 
 extension is stated explicitly. Add a rule here when the same defect class appears a
 second time; cite its occurrences.
 
+The 2026-09-19 closed-PR corpus (52 closed PRs — 51 merged, #90 closed unmerged — 369
+findings) is the evidence base in `lessons-learned.md`; rules 13–17 and the corpus
+refresh of rules 1, 2, 7 and 12 come from it.
+
 ## 1. Every fix ships with a check that fails when reverted — config counts as code
 
 **Occurrences (×3):** PR #85 HIGH — nothing failed if `.gitattributes` was reverted;
@@ -25,6 +29,10 @@ the fix temporarily and watching the check fail **before** pushing.
 **Check:** for every defect fixed by the diff, name the reverted-line check; no answer
 means not done. (Extends `code-review.md` §4 "a test that fails if the change is
 reverted" to non-test files.)
+
+**Corpus 2026-09-19 (×30 / 8 PRs):** documented rules with no failing-on-removal test —
+PRs #42, #85, #86, #105, #114, #116, #118, #120 (`lessons-learned.md` §4). The rule
+covers documented contract rules, not only fixed defects.
 
 ## 2. Restated contracts are copied verbatim, never paraphrased
 
@@ -45,6 +53,11 @@ single mapping point in the document.
 
 **Check:** pick every restated field/signature in the new artifact, open its canonical
 line, compare. The diff must be empty or intentional.
+
+**Corpus 2026-09-19 (×95 / 18 PRs):** the largest class in the corpus — diagrams,
+catalogues, fixtures, backlogs and code each restating the canon (PR #91 ×22, #42
+fixtures ×17, #43 stale model wording ×13, #107 dependency over-blocking ×10;
+`lessons-learned.md` §1). Fixtures and issue drafts are restatements too.
 
 ## 3. Search the repo for the idiom before writing platform-sensitive code
 
@@ -116,6 +129,10 @@ a visible reason in the reporter output. Runner wiring is guarded (rule 1).
 **Check:** run the default command and match the printed test count against the
 expected total; skip reasons must be visible.
 
+**Corpus 2026-09-19 (×11 / 6 PRs):** #85 unwired spike tests, #92 revertable npm-test
+globs, #101 scaffold checks with no CI workflow, #105 a wiring guard that cannot see
+its own removal (×3, accepted residual) — `lessons-learned.md` §9.
+
 ## 8. Documents about behavior expire — append a resolution pointer, never rewrite
 
 **Occurrences (×2):** AR-1 — the CRLF blocker documented in the G00.02.b evidence and
@@ -186,6 +203,98 @@ stems for terms the repo has already decided (`несупадзенне`, `ні�
 
 **Check:** grep the diff for `[А-Яа-яЁёЎў][A-Za-z]` and `[A-Za-z][А-Яа-яЁёЎў]`
 (mixed script) and for the known Russian stems; fix or justify each hit.
+
+**Corpus 2026-09-19 (×24 / 11 PRs):** the class recurred across 11 PRs after this rule
+existed — «коранi», «дзецi», «Уже», «Манifest», «Канрэтныя» (`lessons-learned.md` §6).
+Ortho convention for Belarusian prose: «ў» only after a vowel, «у» after punctuation.
+
+## 13. Counts and statuses in docs and PR text are regenerated, never hand-typed
+
+**Occurrences (×57 / 25 PRs):** PR #120 "218/218" vs actual 221; PR #116 "151 pass/0
+fail" vs 150/1 and "24 tests" vs 23; PR #98 link-check "36 resolved" vs embedded 18;
+PR #101 728 vs ~723 packages; PR #47 "15/15" vs 20/20; PR #45 "12 mutations" vs 16;
+PR #46 "seven tests" vs 8; blocked/unblocked statuses contradicting the board
+(`lessons-learned.md` §2).
+
+**Rule:** any number or status claim a diff adds to a results doc, README or PR body
+is copied from the output of the command run against final HEAD in the pushing session
+— run the suite and every check last, then write the claims. If the artifact cannot be
+re-run at push time, the claim carries a date and the exact command instead of a bare
+number.
+
+**Check:** re-run the suite and each check the diff reports on; every count and status
+in the diff must match the fresh output. A stale claim is a finding even when the code
+is perfect.
+
+## 14. Every rule ships with an isolating negative test; corrupt input yields diagnostics, not crashes
+
+**Occurrences (×64 / 11 PRs across corpus classes 3–4):** PR #114 Draft-07 semantics
+mis-implemented and declared-but-unvalidated formats; PR #116 null array elements
+crashing the validator and `duplicate-id#undefined` for missing identity fields; PR
+#120 `story_id` interpolated into a store path without separator checks and
+schema-required stops silently defaulted; PR #105 uncaught `SyntaxError` on corrupt
+tier JSON; PR #42 negative fixtures that violated two rules at once
+(`lessons-learned.md` §3–§4).
+
+**Rule:** a validation rule without a negative test that names it does not exist. Each
+negative fixture isolates exactly one violation and says which. Every parser/validator
+also takes a corrupt-input case (null array elements, missing fields, empty strings,
+wrong types) and must answer with diagnostics, never a thrown error. External strings
+that build paths or ids are separator-checked against the existing safe-path idiom
+(rule 3) before interpolation.
+
+**Check:** for each new/changed rule in the diff, name the failing-on-removal negative
+test; for each parser, name the corrupt-input test; both answers must exist before
+push.
+
+## 15. A test must reach the production path; mock and live suites are parity-checked
+
+**Occurrences (×19 / 2 PRs):** PR #53 — mock probes passed auth through a wrapping
+helper production never uses, the live suite omitted the backslash-traversal and
+raw-secret cases the mock had, `Retry-After` stayed unasserted through two rounds; PR
+#105 — the AC4 test ran through `stubContext` and never reached the production
+`resolveRef`, re-flagged three times (`lessons-learned.md` §7).
+
+**Rule:** test helpers may arrange state but must not pre-process inputs in any way the
+production path does not. Live/external suites cover at least the mock suite's
+negative-case list, and every header/field the contract documents is asserted
+explicitly.
+
+**Check:** trace one new test end-to-end from arrange to the production entrypoint, and
+diff the mock and live negative-case lists; both belong in the review notes.
+
+## 16. Links and section citations resolve at push time
+
+**Occurrences (×24 / 11 PRs):** PR #96 — the refund rule cited `09 §6.2` instead of §2
+three times plus broken G01.03 ADR links; PR #99 — a blueprint link resolving under
+`decisions/`, a cross-reference to a nonexistent §3.6.2; PR #46 — `../../spikes/`
+escaping `docs/`; PR #50 — a G05-labelled link targeting the G00.01 brief; PR #113 — a
+dependency cell without its tracking issue (`lessons-learned.md` §5).
+
+**Rule:** every relative link and `§`-citation in the diff is opened before push and
+cites the rule's canonical home, not a secondary mention. A link-check output pasted
+into results docs is re-captured fresh (rule 11) — a stale link-check table is itself a
+stale-claims finding (rule 13).
+
+**Check:** open — or run a link checker over — every link the diff adds; each `§`-cite
+names a section that exists in the cited file.
+
+## 17. Done is walked against the task contract, item by item
+
+**Occurrences (×17 / 3 PRs):** PR #46 — required disposition, checklist rows and the
+self-review step omitted from the results file; device-matrix rows collapsed or
+ambiguous; the author's own severity verdict embedded as if it were an independent
+review. PR #48 — atomic-step-3 run-model checks omitted, re-flagged after a non-fix
+(`lessons-learned.md` §8).
+
+**Rule:** before reporting done, open the issue/task card and the parent matrix and
+tick every atomic step, required row and disposition in the results doc — from the
+card, not from memory. An author self-review is labelled as such and never formatted
+like a reviewer verdict. Ambiguity in a matrix cell is split or annotated, not
+compressed.
+
+**Check:** the review diffs the task card's acceptance criteria against the results doc
+line by line; an unticked card item is a finding regardless of code quality.
 
 ## Environment facts on the primary host — check, don't assume
 
