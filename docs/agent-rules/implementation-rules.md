@@ -10,9 +10,9 @@ work), and `issue-workflow.md` (process). Where a rule extends an existing one, 
 extension is stated explicitly. Add a rule here when the same defect class appears a
 second time; cite its occurrences.
 
-The 2026-09-19 closed-PR corpus (all 52 merged PRs, 369 findings) is the evidence base
-in `lessons-learned.md`; rules 13–17 and the corpus refresh of rules 1, 2, 7 and 12
-come from it.
+The 2026-09-19 closed-PR corpus (52 closed PRs — 51 merged, #90 closed unmerged — 369
+findings) is the evidence base in `lessons-learned.md`; rules 13–17 and the corpus
+refresh of rules 1, 2, 7 and 12 come from it.
 
 ## 1. Every fix ships with a check that fails when reverted — config counts as code
 

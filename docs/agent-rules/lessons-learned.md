@@ -11,7 +11,7 @@ actually recurred in code review, how often, and why, so the rules are not folkl
 
 ## How the corpus was built
 
-- All 52 closed PRs (#2–#120, all merged, 2026-09-07 … 2026-09-19).
+- All 52 closed PRs (#2–#120, 51 merged — #90 was closed unmerged; 2026-09-07 … 2026-09-19).
 - 566 review comments fetched (Cursor 381, CodeRabbit 129, operator 54, dispatcher 2).
 - 369 distinct findings extracted, then clustered **by defect logic**: the same
   underlying mistake is one pattern regardless of wording or file. A finding re-flagged
