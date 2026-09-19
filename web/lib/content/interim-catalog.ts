@@ -10,6 +10,7 @@
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { isIdentifier } from '../../../tools/build-bundle/build-bundle.mjs';
 
 interface InterimRoute {
   route_id: string;
@@ -42,10 +43,21 @@ function dirSize(dir: string): number {
 
 export function deriveInterimCatalog(publicDir: string): InterimCatalog {
   const routes: InterimRoute[] = [];
-  const bundleRoot = path.join(publicDir, 'bundle');
+  const bundleRoot = path.resolve(publicDir, 'bundle');
+  const insideRoot = (target: string): boolean =>
+    target === bundleRoot || target.startsWith(bundleRoot + path.sep);
   for (const routeId of fs.readdirSync(bundleRoot).sort()) {
-    for (const version of fs.readdirSync(path.join(bundleRoot, routeId)).sort()) {
-      const bundleDir = path.join(bundleRoot, routeId, version);
+    // Entry names are interpolated into read paths; only the packager's
+    // identifier shape is accepted, and every read root is pinned inside the
+    // bundle tree, so a tampered tree fails loudly instead of reading
+    // arbitrary files (implementation-rules 14).
+    if (!isIdentifier(routeId)) throw new Error(`unsafe bundle entry name: bundle/${routeId}`);
+    const routeDir = path.resolve(bundleRoot, routeId);
+    if (!insideRoot(routeDir)) continue;
+    for (const version of fs.readdirSync(routeDir).sort()) {
+      if (!isIdentifier(version)) throw new Error(`unsafe bundle entry name: bundle/${routeId}/${version}`);
+      const bundleDir = path.resolve(routeDir, version);
+      if (!insideRoot(bundleDir)) continue;
       const route = JSON.parse(fs.readFileSync(path.join(bundleDir, 'route.json'), 'utf8'));
       const locales = fs
         .readdirSync(bundleDir, { withFileTypes: true })

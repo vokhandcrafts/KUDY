@@ -37,12 +37,18 @@ function unsafeSegments(relPath: string): boolean {
 
 function listFiles(root: string): { abs: string; rel: string }[] {
   if (!fs.existsSync(root)) return [];
+  const rootAbs = path.resolve(root);
   const out: { abs: string; rel: string }[] = [];
   for (const entry of fs.readdirSync(root, { withFileTypes: true, recursive: true })) {
-    if (entry.isFile()) {
-      const abs = path.join(entry.parentPath, entry.name);
-      out.push({ abs, rel: path.relative(root, abs) });
-    }
+    // Walk boundary: regular files of the tree only — links are never read
+    // through; and every result is pinned inside the scan root. An entry
+    // whose resolved path escapes the root is not part of the tree, while an
+    // in-root entry with an unsafe rel is still yielded, so the scans below
+    // can REPORT it (private-path-in-public) instead of silently losing it.
+    if (entry.isSymbolicLink() || !entry.isFile()) continue;
+    const abs = path.resolve(entry.parentPath, entry.name);
+    if (abs !== rootAbs && !abs.startsWith(rootAbs + path.sep)) continue;
+    out.push({ abs, rel: path.relative(rootAbs, abs) });
   }
   return out;
 }

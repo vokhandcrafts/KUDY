@@ -10,8 +10,10 @@ import { scanRenderedOutput } from './leak-guard.ts';
 
 function writeTree(files: Record<string, string | Buffer>): string {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-web-rendered-'));
+  const rootAbs = path.resolve(root);
   for (const [rel, content] of Object.entries(files)) {
-    const abs = path.join(root, rel);
+    const abs = path.resolve(rootAbs, rel);
+    if (abs !== rootAbs && !abs.startsWith(rootAbs + path.sep)) continue;
     fs.mkdirSync(path.dirname(abs), { recursive: true });
     fs.writeFileSync(abs, content);
   }
