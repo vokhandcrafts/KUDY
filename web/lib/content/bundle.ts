@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { schemaCheck } from './contract.ts';
 import {
+  isKnownLocale,
   readBaseStories,
   readCatalog,
   readDiscoveryIndex as readIndexDoc,
@@ -20,7 +21,6 @@ import type {
   CatalogView,
   DiscoveryIndex,
   LockedStopPreview,
-  Locale,
   PublicProjection,
   ReadResult,
   RouteDoc,
@@ -34,9 +34,7 @@ function isSafeId(value: string): boolean {
   return value !== '.' && value !== '..' && schemaCheck('schemas/identifier.schema.json', value).length === 0;
 }
 
-function isKnownLocale(locale: string): locale is Locale {
-  return schemaCheck('schemas/localized-text.schema.json', { [locale]: 'probe' }).length === 0;
-}
+// isKnownLocale comes from readers.ts (TR-6: one implementation, not two).
 
 type JsonLoad = { ok: true; doc: unknown } | { ok: false; code: 'invalid-json' | 'not-found' };
 

@@ -6,7 +6,6 @@ export const en: UiStrings = {
   brand: 'KUDY',
   langSwitchName: 'Беларуская',
   catalogTitle: 'City guides',
-  mapEntry: 'City map',
   languages: 'Languages',
   duration: 'Duration',
   distance: 'Distance',
