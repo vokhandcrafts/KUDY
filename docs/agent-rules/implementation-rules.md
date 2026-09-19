@@ -31,8 +31,8 @@ means not done. (Extends `code-review.md` §4 "a test that fails if the change i
 reverted" to non-test files.)
 
 **Corpus 2026-09-19 (×30 / 8 PRs):** documented rules with no failing-on-removal test —
-PRs #85, #86, #105, #114, #116, #118, #120 (`lessons-learned.md` §4). The rule covers
-documented contract rules, not only fixed defects.
+PRs #42, #85, #86, #105, #114, #116, #118, #120 (`lessons-learned.md` §4). The rule
+covers documented contract rules, not only fixed defects.
 
 ## 2. Restated contracts are copied verbatim, never paraphrased
 
@@ -228,7 +228,7 @@ is perfect.
 
 ## 14. Every rule ships with an isolating negative test; corrupt input yields diagnostics, not crashes
 
-**Occurrences (×64 / 8 PRs across corpus classes 3–4):** PR #114 Draft-07 semantics
+**Occurrences (×64 / 11 PRs across corpus classes 3–4):** PR #114 Draft-07 semantics
 mis-implemented and declared-but-unvalidated formats; PR #116 null array elements
 crashing the validator and `duplicate-id#undefined` for missing identity fields; PR
 #120 `story_id` interpolated into a store path without separator checks and
@@ -283,8 +283,8 @@ names a section that exists in the cited file.
 
 **Occurrences (×17 / 3 PRs):** PR #46 — required disposition, checklist rows and the
 self-review step omitted from the results file; device-matrix rows collapsed or
-ambiguous; PR #48 — atomic-step-3 run-model checks omitted, re-flagged after a
-non-fix; the author's own severity verdict embedded as if it were an independent review
+ambiguous; the author's own severity verdict embedded as if it were an independent
+review. PR #48 — atomic-step-3 run-model checks omitted, re-flagged after a non-fix
 (`lessons-learned.md` §8).
 
 **Rule:** before reporting done, open the issue/task card and the parent matrix and

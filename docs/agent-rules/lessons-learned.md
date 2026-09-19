@@ -34,7 +34,12 @@ actually recurred in code review, how often, and why, so the rules are not folkl
 | 7 | Tests give false confidence: helpers pre-process so probes bypass the production path; live suite weaker than mock; contracted fields unasserted | 19 | 2 | rule 15 |
 | 8 | Deliverable incomplete or ambiguous against the task contract (omitted matrix rows / atomic steps) | 17 | 3 | rule 17 |
 | 9 | The deliverable exists but nothing wires it into the runner/CI — a revert stays green | 11 | 6 | rule 7 |
-| 10 | Smaller recurring classes (§11) | ~26 | ~12 | various |
+| 10 | Smaller recurring classes (§10) | 31 | 13 | various |
+
+Class sums: rows 1–9 = 311 instances, row 10 = 31 → 342 clustered instances; the
+remaining 27 findings were one-offs with no recurring logic and are not listed (311 +
+31 + 27 = 369). Sums carry a ±2 uncertainty from borderline instances that could sit in
+either of two adjacent classes at extraction time.
 
 ## 1. Contract restatement drift — 95 instances / 18 PRs
 
@@ -121,6 +126,10 @@ strings, wrong types) is a normal test case, not an exotic one.
 - PR #118: the README↔seeded-error sync was guarded only by a comment.
 - PR #120: the free+extended tier path was unpinned; the fixture covered paid only.
 - PR #114: the "invalid fixtures" asserted only "something fails", not which rule.
+- PR #42: negative fixtures violated two rules at once (e.g. private-path: kind and
+  path together), so no validator could isolate either.
+- PR #116: implemented and documented rules (detail-ref mismatch, tier mismatch, guide
+  duration range) carried zero regression tests.
 
 Why it keeps happening: the fix or rule lands and the test for it is assumed; teams
 read "documented" as "protected".
@@ -207,7 +216,7 @@ is a separate change nobody makes.
 **Lesson:** a check nobody invokes is a comment. Same PR wires it, and demonstrates it
 failing once.
 
-## 10. Smaller recurring classes (~26 / ~12 PRs)
+## 10. Smaller recurring classes (31 instances / 13 PRs)
 
 - **Dead code and unused imports** (6/4: #42, #45, #116, #120) — unused re-exports,
   duplicate headers, a dead disjunct already covered by the previous condition.
