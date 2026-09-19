@@ -1,0 +1,17 @@
+name: guard-required-checks
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  # TR-1, review round 3: the guard over the checks workflow lives in its own
+  # workflow file — reverting required-checks.yml to echo stubs must turn this
+  # check red instead of disabling it together with npm test. Enforcement is
+  # completed by branch protection listing guard-required-checks as required.
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: required-checks must run real checks
+        run: node tools/ci/check-required-checks.mjs
