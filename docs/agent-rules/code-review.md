@@ -120,6 +120,26 @@ Plus, by hand on the diff:
 - Tests assert behaviour, not implementation details. One passing Node test does not prove a
   platform, a store, or storage works — do not let a test's existence be read as that proof.
 
+### Recurring corpus classes — `docs/agent-rules/lessons-learned.md`
+
+The closed-PR corpus (52 closed PRs → 369 findings, 2026-09-19) ranks the defect classes
+that actually recur. Each has a prevention rule in `implementation-rules.md`; the
+reviewer-side minimum:
+
+- Re-run the default test command; every count and status the diff's docs or PR text
+  claims must match the fresh output (57 stale-claim instances in 25 PRs).
+- Open every relative link and `§`-citation the diff adds (24 instances).
+- For every new or changed validation rule, name the negative test that fails when the
+  rule is removed, and feed the parser corrupt input — diagnostics, not a crash
+  (64 instances across corpus classes 3–4).
+- Trace one new test end-to-end to the production entrypoint; a helper that pre-processes
+  inputs in a way production never does voids the test. Diff the mock vs live
+  negative-case lists (19 instances).
+- Walk the task card's acceptance criteria against the results doc line by line
+  (17 instances).
+- Run the mixed-script grep from `implementation-rules.md` rule 12 over added
+  human-facing text (24 instances).
+
 ## 5. Output format
 
 Group by severity, most severe first. One block per finding:
