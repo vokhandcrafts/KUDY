@@ -9,7 +9,10 @@
 
 export type Tier = 'base' | 'extended';
 
-export type RouteAccess = 'free' | 'paid';
+// route.schema.json:13 — access = free_base | paid (verbatim; TR-3: the old
+// 'free' spelling was never in the schema, and the old reader read schema-valid
+// free_base packages as incomplete).
+export type RouteAccess = 'free_base' | 'paid';
 
 export interface PackageKey {
   routeId: string;

@@ -98,11 +98,18 @@ export async function evaluatePackage(store: PackageStore, input: EvaluateInput)
     missing.push(`route.json#${route.rule}`);
     return { status: 'incomplete', missing };
   }
-  const routeDoc = route.doc as RouteDoc;
+  const routeDoc = route.doc as RouteDoc | null;
+  // JSON "null" (and any non-object document) parses cleanly but is a schema
+  // fault (route.schema.json: type object) — diagnosed with the same rule
+  // vocabulary as the stops fault, never a crash (implementation-rules 14;
+  // the "never throws" contract of evaluatePackage).
+  if (routeDoc === null || typeof routeDoc !== 'object' || Array.isArray(routeDoc)) {
+    return { status: 'incomplete', missing: ['route.json#type'] };
+  }
   if (routeDoc.route_id !== store.key.routeId || routeDoc.version !== store.key.version) {
     return { status: 'incomplete', missing: ['route.json#identity-mismatch'] };
   }
-  const access: RouteAccess | null = routeDoc.access === 'free' || routeDoc.access === 'paid' ? routeDoc.access : null;
+  const access: RouteAccess | null = routeDoc.access === 'free_base' || routeDoc.access === 'paid' ? routeDoc.access : null;
   if (access === null) return { status: 'incomplete', missing: ['route.json#type'] };
 
   const stops = Array.isArray(routeDoc.stops) ? (routeDoc.stops as RouteStop[]) : [];
@@ -183,10 +190,14 @@ export async function evaluatePackage(store: PackageStore, input: EvaluateInput)
   }
   if (media.length > 0) return { status: 'needs-recovery', media };
 
-  // Access gate last (documented precedence): paid extended content needs the
-  // granted tier; the grant itself stays services/download's to issue.
+  // Access gate last (documented precedence): extended content needs the
+  // granted tier on every route (09 §5.2 — free_base makes base public, not
+  // extended); the grant itself stays services/download's to issue. Base
+  // stays a disk fact (G04.03 free start); whether a paid route's base must
+  // also require the grant locally (09 §5.2 can be read that way) is left
+  // unchanged by TR-3 and recorded as an open question in its PR.
   const granted = input.grantedTiers ?? [];
-  const tierAvailable = layers.filter((tier) => tier === 'base' || access === 'free' || granted.includes(tier));
+  const tierAvailable = layers.filter((tier) => tier === 'base' || granted.includes(tier));
   if (!tierAvailable.includes(input.tier)) return { status: 'access-locked', tier: input.tier };
 
   return { status: 'ready', routeId: store.key.routeId, version: store.key.version, tier: input.tier, tierAvailable };
