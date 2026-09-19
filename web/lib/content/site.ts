@@ -112,7 +112,9 @@ export interface CatalogCard {
 export interface CatalogPageData {
   cityId: string;
   cards: CatalogCard[];
-  mapHref: string;
+  // No mapHref: the static /map route does not exist while the tile-provider
+  // decision is open (#111) — a dead catalog entry is the worst of the three
+  // options (hide / show "coming soon" / show 404), so it stays hidden (TR-8).
 }
 
 export function readSiteCatalogPage(root: string, locale: UiLocale): CatalogPageData {
@@ -134,7 +136,7 @@ export function readSiteCatalogPage(root: string, locale: UiLocale): CatalogPage
         languages: languageFacts(offer),
       };
     });
-  return { cityId, cards, mapHref: localePath(locale, '/map') };
+  return { cityId, cards };
 }
 
 export interface StopRow {
