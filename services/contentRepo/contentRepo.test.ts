@@ -15,6 +15,7 @@ import test from 'node:test';
 
 import { evaluatePackage, createDiscoveryCache } from './contentRepo.ts';
 import { storeAt, stubWithUnreadable, tempPackage } from './test-fixture.ts';
+import { nullRouteText, routeDoc, routeDocWithLegacyAccess, truncatedRouteText } from '../../contracts/fixtures/bundle-docs.ts';
 
 test('criterion 1: a missing structural file blocks start with a named reason', async () => {
   const { root, remove } = tempPackage();
@@ -228,4 +229,82 @@ test('text-only layers need no media; the real template package starts in be and
   assert.equal(en.status, 'ready');
   const locked = await evaluatePackage(storeAt(template, { routeId: 'template-route-1', version: '1' }), { locale: 'be', tier: 'extended', grantedTiers: [] });
   assert.deepEqual(locked, { status: 'access-locked', tier: 'extended' });
+});
+
+// TR-3.1 (docs/architecture/23_technical_remarks.md): the reader is aligned
+// with route.schema.json — access = free_base | paid — and corrupt input is a
+// diagnostic. Fixtures are shared with the web reader tests
+// (contracts/fixtures/bundle-docs.ts), so both readers see the same documents.
+
+test('TR-3: a schema-valid free_base package evaluates ready — the pre-fix reader rejected it', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    fs.writeFileSync(`${root}/route.json`, JSON.stringify(routeDoc('free_base')));
+    assert.deepEqual(
+      await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' }),
+      { status: 'ready', routeId: 'route-x', version: '1', tier: 'base', tierAvailable: ['base'] },
+    );
+  } finally {
+    remove();
+  }
+});
+
+test('TR-3: free_base makes base public, not extended — extended still needs the grant (09 §5.2)', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    fs.writeFileSync(`${root}/route.json`, JSON.stringify(routeDoc('free_base')));
+    assert.deepEqual(
+      await evaluatePackage(storeAt(root), { locale: 'be', tier: 'extended', grantedTiers: [] }),
+      { status: 'access-locked', tier: 'extended' },
+    );
+    const granted = await evaluatePackage(storeAt(root), { locale: 'be', tier: 'extended', grantedTiers: ['extended'] });
+    assert.deepEqual(granted, {
+      status: 'ready',
+      routeId: 'route-x',
+      version: '1',
+      tier: 'extended',
+      tierAvailable: ['base', 'extended'],
+    });
+  } finally {
+    remove();
+  }
+});
+
+test('TR-3: access "free" is not in the schema enum — rejected with a type diagnostic, not accepted', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    fs.writeFileSync(`${root}/route.json`, JSON.stringify(routeDocWithLegacyAccess()));
+    assert.deepEqual(
+      await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' }),
+      { status: 'incomplete', missing: ['route.json#type'] },
+    );
+  } finally {
+    remove();
+  }
+});
+
+test('TR-3: route.json holding literal null is a diagnostic — evaluatePackage still never throws', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    fs.writeFileSync(`${root}/route.json`, nullRouteText);
+    assert.deepEqual(
+      await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' }),
+      { status: 'incomplete', missing: ['route.json#type'] },
+    );
+  } finally {
+    remove();
+  }
+});
+
+test('TR-3: truncated route.json is invalid-json, never a crash', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    fs.writeFileSync(`${root}/route.json`, truncatedRouteText);
+    assert.deepEqual(
+      await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' }),
+      { status: 'incomplete', missing: ['route.json#invalid-json'] },
+    );
+  } finally {
+    remove();
+  }
 });
