@@ -1,0 +1,26 @@
+[
+  {
+    "fragment_id": "fr-001",
+    "source_id": "src-eb1911-danzig",
+    "locator": { "volume": "VII", "page": 824, "paragraph": 2 },
+    "quote": "Danzig almost alone of larger German cities still preserves its picturesque medieval aspect."
+  },
+  {
+    "fragment_id": "fr-002",
+    "source_id": "src-eb1911-danzig",
+    "locator": { "volume": "VII", "page": 825, "paragraph": 2 },
+    "quote": "Of these the most important is St Mary’s, begun in 1343 and completed in 1503, one of the largest Protestant churches in existence."
+  },
+  {
+    "fragment_id": "fr-003",
+    "source_id": "src-eb1911-danzig",
+    "locator": { "volume": "VII", "page": 825, "paragraph": 2 },
+    "quote": "It possesses a famous painting of the Last Judgment, formerly attributed to Jan van Eyck, but probably by Memlinc."
+  },
+  {
+    "fragment_id": "fr-004",
+    "source_id": "src-eb1911-danzig",
+    "locator": { "volume": "VII", "page": 825, "paragraph": 4 },
+    "quote": "It was one of the four chief towns of the Hanseatic League."
+  }
+]

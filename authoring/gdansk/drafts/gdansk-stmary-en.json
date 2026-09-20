@@ -1,0 +1,32 @@
+{
+  "draft_id": "gdansk-stmary-en",
+  "locale": "en",
+  "place_id": "place_gdansk_stmary",
+  "tier": "base",
+  "source_draft_id": "gdansk-stmary-be",
+  "title": "St Mary's, Gdańsk",
+  "blocks": [
+    {
+      "block_id": "bl-101",
+      "kind": "fact",
+      "claims": ["cl-002", "cl-003"],
+      "text": "St Mary's took one hundred and sixty years to build: begun in 1343, finished in 1503."
+    },
+    {
+      "block_id": "bl-102",
+      "kind": "artistic",
+      "text": "Seven generations of masons; none of them saw the church whole."
+    },
+    {
+      "block_id": "bl-103",
+      "kind": "fact",
+      "claims": ["cl-005"],
+      "text": "Inside hangs a famous Last Judgment: long credited to Jan van Eyck, named by the 1911 encyclopedia as probably Memlinc."
+    }
+  ],
+  "review": {
+    "by": null,
+    "at": null,
+    "decision": "pending"
+  }
+}
