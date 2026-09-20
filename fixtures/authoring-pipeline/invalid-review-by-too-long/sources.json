@@ -1,0 +1,10 @@
+[
+  {
+    "source_id": "src-fixture-1",
+    "title": "Fixture source (synthetic)",
+    "creator": "fixture",
+    "year": 1900,
+    "rights": "public_domain",
+    "ref": "https://example.invalid/fixture"
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "fragment_id": "fr-1",
+    "source_id": "src-fixture-1",
+    "locator": {
+      "page": 1,
+      "paragraph": 1
+    },
+    "quote": ""
+  }
+]

@@ -25,7 +25,7 @@ const UNSAFE_SEGMENTS = new Set(['..', '.', 'private', 'extended']);
 
 const EARTH_RADIUS_M = 6371008.8;
 
-function diag(list, severity, rule, where) {
+export function diag(list, severity, rule, where) {
   list.push({ severity, rule, path: where });
 }
 
@@ -45,7 +45,7 @@ function listFiles(rootAbs) {
   return found.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
-function readJson(rootAbs, rel, errors) {
+export function readJson(rootAbs, rel, errors) {
   let raw;
   try {
     raw = fs.readFileSync(`${rootAbs}/${rel}`, 'utf8');
