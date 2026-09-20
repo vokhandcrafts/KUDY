@@ -45,6 +45,8 @@ const NEGATIVE = {
   'invalid-draft-id-mismatch': 'draft-id-mismatch',
   'invalid-mark-without-reviewer': 'mark-without-reviewer',
   'invalid-claims-on-non-fact-block': 'claims-on-non-fact-block',
+  'invalid-missing-quote': 'missing-quote',
+  'invalid-review-by-too-long': 'invalid-value',
 };
 
 test('criterion 2: the real walkthrough validates clean — no invented connection passed as a fact', () => {
