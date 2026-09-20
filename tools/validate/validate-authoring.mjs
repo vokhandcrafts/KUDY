@@ -212,6 +212,8 @@ export function validateAuthoring(dir) {
     } else {
       if (!DECISIONS.has(review.decision)) diag(errors, 'error', 'invalid-value', `${at}#review#decision`);
       if (!isDateOrNull(review.at)) diag(errors, 'error', 'invalid-value', `${at}#review#at`);
+      // `by` length copies the story schema canon (maxLength 140).
+      if (isText(review.by) && review.by.length > 140) diag(errors, 'error', 'invalid-value', `${at}#review#by`);
       if (review.decision === 'approved' && (!isText(review.by) || review.at === null)) {
         diag(errors, 'error', 'approval-without-reviewer', `${at}#review`);
       }
