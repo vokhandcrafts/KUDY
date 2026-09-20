@@ -72,8 +72,8 @@ node --test --experimental-strip-types --test-reporter=tap web/dependency-guards
 ```
 
 ```output
-# tests 2
-# pass 2
+# tests 4
+# pass 4
 # fail 0
 ```
 

@@ -17,13 +17,20 @@ const readJson = (rel: string) => {
 };
 
 // The vulnerable range ends at 8.5.22: anything above it clears all four advisories.
+// A spec may be a union or a range ("^8.5.23 || 8.4.31", ">=8.5.23 <9"): every
+// version triple it allows must clear the range, so all triples are checked, and
+// a spec whose versions this cannot fully enumerate (no triple, or a wildcard)
+// fails loudly instead of passing on a partial read.
 function isAboveAdvisoryRange(version: string): boolean {
-  const m = version.match(/[\^~>= ]*(\d+)\.(\d+)\.(\d+)/);
-  assert.ok(m, `unparseable postcss version: ${version}`);
-  const [major, minor, patch] = m.slice(1).map(Number);
-  if (major !== 8) return major > 8;
-  if (minor !== 5) return minor > 5;
-  return patch >= 23;
+  assert.ok(!/[xX*]/.test(version), `unparseable postcss version (wildcards are not supported): ${version}`);
+  const triples = [...version.matchAll(/[\^~>= ]*(\d+)\.(\d+)\.(\d+)/g)];
+  assert.ok(triples.length > 0, `unparseable postcss version: ${version}`);
+  return triples.every((m) => {
+    const [major, minor, patch] = m.slice(1).map(Number);
+    if (major !== 8) return major > 8;
+    if (minor !== 5) return minor > 5;
+    return patch >= 23;
+  });
 }
 
 test('guard: the web postcss override pins above the 8.5.22 advisory range', () => {
@@ -46,5 +53,22 @@ test('guard: the postcss resolution installed from the web lockfile is above the
   assert.ok(
     isAboveAdvisoryRange(resolved),
     `resolved postcss ${resolved} is inside the advisory range (<=8.5.22); the lockfile lost the override`,
+  );
+});
+
+test('guard: a spec is above the range only if every version triple it allows is', () => {
+  assert.equal(isAboveAdvisoryRange('^8.5.23'), true, 'single clean spec must pass');
+  assert.equal(isAboveAdvisoryRange('^8.5.23 || 8.4.31'), false, 'union allowing the transitively pinned 8.4.31 must fail');
+  assert.equal(isAboveAdvisoryRange('^8.5.23 || 8.5.28'), true, 'union of two fixed versions must pass');
+  assert.equal(isAboveAdvisoryRange('>=8.5.23 <9'), true, 'range with an above-range lower bound must pass');
+  assert.equal(isAboveAdvisoryRange('8.5.22'), false, 'the boundary version still inside the advisory range must fail');
+});
+
+test('guard: a spec the guard cannot fully enumerate fails loudly', () => {
+  assert.throws(() => isAboveAdvisoryRange('latest'), /unparseable postcss version: latest/, 'no version triple at all');
+  assert.throws(
+    () => isAboveAdvisoryRange('8.5.x || ^8.5.23'),
+    /wildcards are not supported/,
+    'a wildcard part allows unenumerated versions inside the advisory range',
   );
 });
