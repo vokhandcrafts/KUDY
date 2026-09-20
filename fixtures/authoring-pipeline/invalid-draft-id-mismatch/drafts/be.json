@@ -1,0 +1,24 @@
+{
+  "draft_id": "be2",
+  "locale": "be",
+  "place_id": "place-fixture",
+  "tier": "base",
+  "source_draft_id": null,
+  "title": "Фікстура",
+  "blocks": [
+    {
+      "block_id": "b1",
+      "kind": "fact",
+      "claims": [
+        "cl-1"
+      ],
+      "text": "Вежа пабудавана ў 1442 годзе."
+    }
+  ],
+  "review": {
+    "by": null,
+    "at": null,
+    "decision": "pending"
+  },
+  "forceFileName": "be.json"
+}
