@@ -64,14 +64,18 @@ function isAboveAdvisoryRange(version: string): boolean {
   });
 }
 
-test('guard: the web postcss override pins above the 8.5.22 advisory range', () => {
-  const pkg = readJson('package.json');
-  const spec = pkg.overrides?.postcss;
-  assert.ok(spec, 'the postcss override is missing from web/package.json');
+function assertStringSpec(spec: unknown): asserts spec is string {
   assert.ok(
     typeof spec === 'string',
     `the postcss override must be a version-range string, got: ${JSON.stringify(spec)}`,
   );
+}
+
+test('guard: the web postcss override pins above the 8.5.22 advisory range', () => {
+  const pkg = readJson('package.json');
+  const spec = pkg.overrides?.postcss;
+  assert.ok(spec, 'the postcss override is missing from web/package.json');
+  assertStringSpec(spec);
   assert.ok(
     isAboveAdvisoryRange(spec),
     `the postcss override "${spec}" no longer pins above the vulnerable range (fixed in 8.5.23)`,
@@ -146,5 +150,10 @@ test('guard: a spec the guard cannot fully enumerate fails loudly', () => {
     () => isAboveAdvisoryRange('8.5.23 - 8.6'),
     /hyphen range bounds must be bare full versions/,
     'partial hyphen bounds are outside the supported grammar',
+  );
+  assert.throws(
+    () => assertStringSpec({ '.': '^8.5.23' }),
+    /must be a version-range string/,
+    'the npm object form of an override is outside the guard contract',
   );
 });
