@@ -24,3 +24,29 @@ test('the leak guard never reads through links in the scanned tree', async () =>
   const res = scanWebContentInput({ publicDir: publicRoot });
   assert.deepEqual(res, { ok: true, violations: [] });
 });
+
+test('the leak guard never reads through a directory symlink in the scanned tree', async () => {
+  const { publicRoot, buildRoot } = await buildDemoFixture();
+  const outsideDir = path.join(buildRoot, 'outside-dir');
+  fs.mkdirSync(outsideDir);
+  fs.writeFileSync(
+    path.join(outsideDir, 'nasty.json'),
+    JSON.stringify({ audio_path: 'private/bundle/demo-route-a1/1/be/extended/stops.json' }),
+  );
+  fs.symlinkSync(outsideDir, path.join(publicRoot, 'linked'));
+  const res = scanWebContentInput({ publicDir: publicRoot });
+  assert.deepEqual(res, { ok: true, violations: [] });
+});
+
+test('a symlinked bundle entry is ignored by the catalog derivation', async () => {
+  const { publicRoot, buildRoot } = await buildDemoFixture();
+  const outsideDir = path.join(buildRoot, 'outside-route');
+  fs.mkdirSync(outsideDir);
+  fs.writeFileSync(path.join(outsideDir, 'route.json'), JSON.stringify({ route_id: 'evil-route' }));
+  fs.symlinkSync(outsideDir, path.join(publicRoot, 'bundle', 'evil'));
+  const catalog = deriveInterimCatalog(publicRoot);
+  assert.deepEqual(
+    catalog.routes.map((route) => route.route_id),
+    ['demo-route-a1'],
+  );
+});

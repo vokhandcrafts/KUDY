@@ -33,37 +33,68 @@ export interface InterimCatalog {
   };
 }
 
+// Walk trust boundary (implementation-rules 14): names that reach a read or
+// stat path are type-checked against links and re-pinned to the real tree
+// root — recursive readdir may descend through directory symlinks (node ≥26
+// yields their files as plain entries), so containment is verified on
+// realpath, never on the lexical path.
+function containedFilePath(rootReal: string, dirReal: string, name: string): string {
+  const real = fs.realpathSync(path.resolve(dirReal, name));
+  if (real !== rootReal && !real.startsWith(rootReal + path.sep)) {
+    throw new Error(`unsafe bundle entry: ${path.relative(rootReal, real)}`);
+  }
+  return real;
+}
+
+function containedDirNames(dirReal: string): string[] {
+  return fs
+    .readdirSync(dirReal, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !entry.isSymbolicLink())
+    .map((entry) => entry.name)
+    .filter((name) => name !== '.' && name !== '..')
+    .filter((name) => {
+      const real = fs.realpathSync(path.resolve(dirReal, name));
+      return real === dirReal || real.startsWith(dirReal + path.sep);
+    })
+    .sort();
+}
+
 function dirSize(dir: string): number {
+  const dirReal = fs.realpathSync(dir);
   let total = 0;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true, recursive: true })) {
-    if (entry.isFile()) total += fs.statSync(path.join(entry.parentPath, entry.name)).size;
+  for (const entry of fs.readdirSync(dirReal, { withFileTypes: true, recursive: true })) {
+    if (entry.isSymbolicLink() || !entry.isFile()) continue;
+    const real = fs.realpathSync(path.resolve(entry.parentPath, entry.name));
+    if (real === dirReal || real.startsWith(dirReal + path.sep)) total += fs.statSync(real).size;
   }
   return total;
 }
 
 export function deriveInterimCatalog(publicDir: string): InterimCatalog {
+  const publicReal = fs.realpathSync(publicDir);
+  const bundleRootReal = fs.realpathSync(path.resolve(publicReal, 'bundle'));
   const routes: InterimRoute[] = [];
-  const bundleRoot = path.resolve(publicDir, 'bundle');
-  const insideRoot = (target: string): boolean =>
-    target === bundleRoot || target.startsWith(bundleRoot + path.sep);
-  for (const routeId of fs.readdirSync(bundleRoot).sort()) {
+  for (const routeId of containedDirNames(bundleRootReal)) {
     // Entry names are interpolated into read paths; only the packager's
-    // identifier shape is accepted, and every read root is pinned inside the
-    // bundle tree, so a tampered tree fails loudly instead of reading
-    // arbitrary files (implementation-rules 14).
-    if (!isIdentifier(routeId)) throw new Error(`unsafe bundle entry name: bundle/${routeId}`);
-    const routeDir = path.resolve(bundleRoot, routeId);
-    if (!insideRoot(routeDir)) continue;
-    for (const version of fs.readdirSync(routeDir).sort()) {
-      if (!isIdentifier(version)) throw new Error(`unsafe bundle entry name: bundle/${routeId}/${version}`);
-      const bundleDir = path.resolve(routeDir, version);
-      if (!insideRoot(bundleDir)) continue;
-      const route = JSON.parse(fs.readFileSync(path.join(bundleDir, 'route.json'), 'utf8'));
-      const locales = fs
-        .readdirSync(bundleDir, { withFileTypes: true })
-        .filter((e) => e.isDirectory() && fs.existsSync(path.join(bundleDir, e.name, 'base', 'stops.json')))
-        .map((e) => e.name)
-        .sort();
+    // identifier shape is accepted, so a tampered tree fails with a named
+    // diagnostic instead of reading arbitrary files.
+    if (routeId === '.' || routeId === '..' || !isIdentifier(routeId)) {
+      throw new Error(`unsafe bundle entry name: bundle/${routeId}`);
+    }
+    const routeDir = path.resolve(bundleRootReal, routeId);
+    const routeDirReal = fs.realpathSync(routeDir);
+    if (routeDirReal !== bundleRootReal && !routeDirReal.startsWith(bundleRootReal + path.sep)) continue;
+    for (const version of containedDirNames(routeDirReal)) {
+      if (version === '.' || version === '..' || !isIdentifier(version)) {
+        throw new Error(`unsafe bundle entry name: bundle/${routeId}/${version}`);
+      }
+      const bundleDir = path.resolve(routeDirReal, version);
+      const bundleDirReal = fs.realpathSync(bundleDir);
+      if (bundleDirReal !== bundleRootReal && !bundleDirReal.startsWith(bundleRootReal + path.sep)) continue;
+      const route = JSON.parse(fs.readFileSync(containedFilePath(bundleRootReal, bundleDirReal, 'route.json'), 'utf8'));
+      const locales = containedDirNames(bundleDirReal).filter((name) =>
+        fs.existsSync(path.join(bundleDirReal, name, 'base', 'stops.json')),
+      );
       const layers = route.stops.some((s: { access_tier: string }) => s.access_tier === 'extended')
         ? ['base', 'extended']
         : ['base'];
@@ -71,15 +102,19 @@ export function deriveInterimCatalog(publicDir: string): InterimCatalog {
     }
   }
 
+  const discoveryRoot = path.resolve(publicReal, 'discovery');
+  const discoveryReal = fs.realpathSync(discoveryRoot);
   const indexFiles: string[] = [];
-  for (const entry of fs.readdirSync(path.join(publicDir, 'discovery'), { withFileTypes: true, recursive: true })) {
-    if (entry.isFile() && entry.name === 'index.json') indexFiles.push(path.join(entry.parentPath, entry.name));
+  for (const entry of fs.readdirSync(discoveryReal, { withFileTypes: true, recursive: true })) {
+    if (entry.isSymbolicLink() || !entry.isFile() || entry.name !== 'index.json') continue;
+    const real = fs.realpathSync(path.resolve(entry.parentPath, entry.name));
+    if (real === discoveryReal || real.startsWith(discoveryReal + path.sep)) indexFiles.push(real);
   }
   if (indexFiles.length !== 1) {
     throw new Error(`expected exactly one discovery index, found ${indexFiles.length}`);
   }
   const indexBytes = fs.readFileSync(indexFiles[0]!);
-  const indexPath = path.relative(publicDir, indexFiles[0]!).replaceAll('\\', '/');
+  const indexPath = path.relative(publicReal, indexFiles[0]!).replaceAll('\\', '/');
   const segments = indexPath.split('/');
   return {
     catalog_schema_version: 1,
