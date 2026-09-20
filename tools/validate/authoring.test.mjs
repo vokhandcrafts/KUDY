@@ -62,17 +62,38 @@ test('criterion 1: the committed review report equals the regenerated one (be + 
   }
 });
 
+test('criterion 1: the report renderer refuses a space that fails validation, naming the rule', () => {
+  const dir = path.join(FIXTURES, 'invalid-unbacked-connection');
+  const draftId = JSON.parse(fs.readFileSync(path.join(dir, 'drafts', 'be.json'), 'utf8')).draft_id;
+  assert.throws(
+    () => renderReviewReport(dir, draftId),
+    /прастора не праходзіць праверку \(unbacked-connection\)/,
+    'the renderer must refuse an invalid workspace with the named rule',
+  );
+});
+
 test('criterion 1: every fact block appears with its claim, exact quote and print locator', () => {
   const report = fs.readFileSync(path.join(AUTHORING, 'review', 'gdansk-stmary-be.review.md'), 'utf8');
   const claims = JSON.parse(fs.readFileSync(path.join(AUTHORING, 'claims.json'), 'utf8'));
   const fragments = JSON.parse(fs.readFileSync(path.join(AUTHORING, 'fragments.json'), 'utf8'));
-  const quotesById = new Map(fragments.map((f) => [f.fragment_id, f.quote]));
+  const fragmentsById = new Map(fragments.map((f) => [f.fragment_id, f]));
+  const lines = report.split('\n');
 
   for (const claim of claims) {
     assert.ok(report.includes(`[${claim.claim_id}]`), `claim ${claim.claim_id} missing from the report`);
     for (const fragmentId of claim.support) {
-      assert.ok(report.includes(`„${quotesById.get(fragmentId)}“`), `quote of ${fragmentId} missing from the report`);
-      assert.ok(report.includes('ст. 824') || report.includes('ст. 825'), `locator missing for ${fragmentId}`);
+      const fragment = fragmentsById.get(fragmentId);
+      const quoteLine = lines.findIndex((line) => line.includes(`„${fragment.quote}“`));
+      assert.ok(quoteLine !== -1, `quote of ${fragmentId} missing from the report`);
+      // The locator renders on the line directly under its quote — assert it
+      // there, with this fragment's page and paragraph, not anywhere in the report.
+      const locatorLine = lines[quoteLine + 1] ?? '';
+      assert.ok(
+        locatorLine.includes('Локатар:') &&
+          locatorLine.includes(`ст. ${fragment.locator.page}`) &&
+          locatorLine.includes(`абзац ${fragment.locator.paragraph}`),
+        `locator of ${fragmentId} missing directly under its quote`,
+      );
     }
     assert.ok(report.includes('public_domain'), 'source rights missing from the report');
   }
