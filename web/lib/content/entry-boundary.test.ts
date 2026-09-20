@@ -60,3 +60,54 @@ test('a symlink planted on the bundle root itself fails the derivation with a na
   fs.symlinkSync(outsideDir, path.join(publicRoot, 'bundle'));
   assert.throws(() => deriveInterimCatalog(publicRoot), /unsafe bundle entry/);
 });
+
+test('a locale entry with a non-identifier name fails the derivation with a named diagnostic', async () => {
+  const { publicRoot } = await buildDemoFixture();
+  fs.mkdirSync(path.join(publicRoot, 'bundle', 'demo-route-a1', '1', 'bad locale'), { recursive: true });
+  assert.throws(
+    () => deriveInterimCatalog(publicRoot),
+    /unsafe bundle entry name: bundle\/demo-route-a1\/1\/bad locale/,
+  );
+});
+
+test('a locale whose base tail is a symlink outside the tree does not enter the catalog', async () => {
+  const { publicRoot, buildRoot } = await buildDemoFixture();
+  const versionDir = path.join(publicRoot, 'bundle', 'demo-route-a1', '1');
+  const outsideStops = path.join(buildRoot, 'outside-stops.json');
+  fs.writeFileSync(outsideStops, '{}');
+  fs.mkdirSync(path.join(versionDir, 'evil', 'base'), { recursive: true });
+  fs.symlinkSync(outsideStops, path.join(versionDir, 'evil', 'base', 'stops.json'));
+  const outsideBase = path.join(buildRoot, 'outside-base');
+  fs.mkdirSync(outsideBase);
+  fs.writeFileSync(path.join(outsideBase, 'stops.json'), '{}');
+  fs.mkdirSync(path.join(versionDir, 'evbase'));
+  fs.symlinkSync(outsideBase, path.join(versionDir, 'evbase', 'base'));
+  const catalog = deriveInterimCatalog(publicRoot);
+  assert.deepEqual(catalog.routes.map((route) => route.route_id), ['demo-route-a1']);
+  assert.ok(!catalog.routes[0]!.locales.includes('evil'));
+  assert.ok(!catalog.routes[0]!.locales.includes('evbase'));
+  assert.deepEqual(catalog.routes[0]!.locales, ['be', 'en', 'uk']);
+});
+
+test('a symlink planted on the discovery root itself fails the derivation with a named diagnostic', async () => {
+  const { publicRoot, buildRoot } = await buildDemoFixture();
+  const outsideDir = path.join(buildRoot, 'outside-discovery');
+  fs.mkdirSync(outsideDir);
+  fs.writeFileSync(path.join(outsideDir, 'index.json'), JSON.stringify({ revision: 'evil' }));
+  fs.rmSync(path.join(publicRoot, 'discovery'), { recursive: true });
+  fs.symlinkSync(outsideDir, path.join(publicRoot, 'discovery'));
+  assert.throws(() => deriveInterimCatalog(publicRoot), /unsafe bundle entry/);
+});
+
+test('a directory symlink inside discovery does not surface a foreign index.json', async () => {
+  const { publicRoot, buildRoot } = await buildDemoFixture();
+  const outsideDir = path.join(buildRoot, 'outside-discovery');
+  fs.mkdirSync(outsideDir);
+  fs.writeFileSync(path.join(outsideDir, 'index.json'), JSON.stringify({ revision: 'evil' }));
+  fs.symlinkSync(outsideDir, path.join(publicRoot, 'discovery', 'linked'));
+  // A second counted index would fail the single-index check; the foreign
+  // one behind the link is dropped by the realpath containment filter.
+  const catalog = deriveInterimCatalog(publicRoot);
+  assert.equal(catalog.discovery_index.revision, 'r-demo-1');
+  assert.equal(catalog.discovery_index.path, 'discovery/demo-city/r-demo-1/index.json');
+});
