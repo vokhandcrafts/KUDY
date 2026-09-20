@@ -72,7 +72,11 @@ function dirSize(dir: string): number {
 
 export function deriveInterimCatalog(publicDir: string): InterimCatalog {
   const publicReal = fs.realpathSync(publicDir);
-  const bundleRootReal = fs.realpathSync(path.resolve(publicReal, 'bundle'));
+  // The containment anchors themselves must belong to the public tree: a
+  // symlink planted at `bundle` or `discovery` would otherwise move the
+  // boundary outside and legitimize reads from a foreign tree.
+  const bundleRootReal = containedFilePath(publicReal, publicReal, 'bundle');
+  const discoveryRootReal = containedFilePath(publicReal, publicReal, 'discovery');
   const routes: InterimRoute[] = [];
   for (const routeId of containedDirNames(bundleRootReal)) {
     // Entry names are interpolated into read paths; only the packager's
@@ -102,13 +106,11 @@ export function deriveInterimCatalog(publicDir: string): InterimCatalog {
     }
   }
 
-  const discoveryRoot = path.resolve(publicReal, 'discovery');
-  const discoveryReal = fs.realpathSync(discoveryRoot);
   const indexFiles: string[] = [];
-  for (const entry of fs.readdirSync(discoveryReal, { withFileTypes: true, recursive: true })) {
+  for (const entry of fs.readdirSync(discoveryRootReal, { withFileTypes: true, recursive: true })) {
     if (entry.isSymbolicLink() || !entry.isFile() || entry.name !== 'index.json') continue;
     const real = fs.realpathSync(path.resolve(entry.parentPath, entry.name));
-    if (real === discoveryReal || real.startsWith(discoveryReal + path.sep)) indexFiles.push(real);
+    if (real === discoveryRootReal || real.startsWith(discoveryRootReal + path.sep)) indexFiles.push(real);
   }
   if (indexFiles.length !== 1) {
     throw new Error(`expected exactly one discovery index, found ${indexFiles.length}`);
