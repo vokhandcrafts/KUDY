@@ -1,0 +1,23 @@
+{
+  "draft_id": "en",
+  "locale": "be",
+  "place_id": "place-fixture",
+  "tier": "base",
+  "source_draft_id": "be-missing",
+  "title": "Fixture",
+  "blocks": [
+    {
+      "block_id": "b1",
+      "kind": "fact",
+      "claims": [
+        "cl-1"
+      ],
+      "text": "Вежа пабудавана ў 1442 годзе."
+    }
+  ],
+  "review": {
+    "by": null,
+    "at": null,
+    "decision": "pending"
+  }
+}

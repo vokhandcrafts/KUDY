@@ -1,0 +1,23 @@
+{
+  "draft_id": "en",
+  "locale": "en",
+  "place_id": "place-fixture",
+  "tier": "base",
+  "source_draft_id": "be",
+  "title": "Fixture",
+  "blocks": [
+    {
+      "block_id": "b1",
+      "kind": "fact",
+      "claims": [
+        "cl-1"
+      ],
+      "text": "The tower was built in 1442."
+    }
+  ],
+  "review": {
+    "by": "іншы рэцэнзент",
+    "at": "2026-09-21",
+    "decision": "approved"
+  }
+}
