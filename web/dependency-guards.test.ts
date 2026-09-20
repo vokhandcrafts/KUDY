@@ -37,7 +37,12 @@ test('guard: the web postcss override pins above the 8.5.22 advisory range', () 
 });
 
 test('guard: the postcss resolution installed from the web lockfile is above the advisory range', () => {
-  const resolved = readJson('node_modules/postcss/package.json').version;
+  const target = path.resolve(webRoot, 'node_modules/postcss/package.json');
+  assert.ok(
+    fs.existsSync(target),
+    'web dependencies are not installed — run npm ci in web/ before the suite (the guard reads the installed postcss)',
+  );
+  const resolved = JSON.parse(fs.readFileSync(target, 'utf8')).version;
   assert.ok(
     isAboveAdvisoryRange(resolved),
     `resolved postcss ${resolved} is inside the advisory range (<=8.5.22); the lockfile lost the override`,
