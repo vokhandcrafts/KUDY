@@ -46,7 +46,8 @@ CSS (дызайн G10.01).
 пера-вырашаны на 8.5.28 (актуальная 8.5.x на 2026-09-20); `npm ci` з
 гэтага lockfile паўтарае 8.5.28. Мажорнае абнаўленне next да 16.3.5 не
 праводзіцца (за межамі задачы, issue #137). Guard на абедзве састаўныя
-(override у package.json + resolved з lockfile) — `web/dependency-guards.test.ts`,
+(override у package.json + устаноўленая ў node_modules версія з гэтага
+lockfile) — `web/dependency-guards.test.ts`,
 падключаны існуючым glob `web/**/*.test.ts` без правак тэст-скрыпта
 (implementation-rules 1, 7).
 
