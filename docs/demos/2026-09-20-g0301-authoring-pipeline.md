@@ -60,7 +60,7 @@ node --test --test-reporter=tap --test-concurrency=1 tools/validate/authoring.te
 ```
 
 ```output
-# tests 25
-# pass 25
+# tests 26
+# pass 26
 # fail 0
 ```
