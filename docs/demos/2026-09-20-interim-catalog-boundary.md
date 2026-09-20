@@ -39,17 +39,19 @@ node --experimental-strip-types -e "Promise.all([import('./web/lib/content/test-
 diagnostic: unsafe bundle entry: ../outside-discovery
 ```
 
-Поўны набор boundary-негатыўных тэстаў (9 з 9, у тым ліку 4 новыя) у
-дэфолтным `npm test`; дыр-сімлінк усярэдзіне `discovery/` не павялічвае
-колькасць знойдзеных index.json:
+Поўны набор boundary-негатыўных тэстаў у дэфолтным `npm test`; дыр-сімлінк
+усярэдзіне `discovery/` не павялічвае колькасць знойдзеных index.json.
+(Выкад абноўлены PR #135: набор вырас да 11 — дадаліся 2 тэсты на
+экранаванне кіравальных сімвалаў у дыягностыках гейтаў; на момант гэтага
+дэма было 9 з 9, у тым ліку 4 новыя.)
 
 ```sh
 node --test --experimental-strip-types --test-reporter=tap --test-concurrency=1 web/lib/content/entry-boundary.test.ts 2>&1 | grep -E '^# (tests|pass|fail)'
 ```
 
 ```output
-# tests 9
-# pass 9
+# tests 11
+# pass 11
 # fail 0
 ```
 
