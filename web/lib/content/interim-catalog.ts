@@ -96,9 +96,30 @@ export function deriveInterimCatalog(publicDir: string): InterimCatalog {
       const bundleDirReal = fs.realpathSync(bundleDir);
       if (bundleDirReal !== bundleRootReal && !bundleDirReal.startsWith(bundleRootReal + path.sep)) continue;
       const route = JSON.parse(fs.readFileSync(containedFilePath(bundleRootReal, bundleDirReal, 'route.json'), 'utf8'));
-      const locales = containedDirNames(bundleDirReal).filter((name) =>
-        fs.existsSync(path.join(bundleDirReal, name, 'base', 'stops.json')),
-      );
+      const locales: string[] = [];
+      for (const locale of containedDirNames(bundleDirReal)) {
+        // Locale names reach the stat path below, so they pass the same
+        // identifier gate as route/version — a plain `existsSync` on an
+        // unvalidated name would probe an attacker-chosen path.
+        if (locale === '.' || locale === '..' || !isIdentifier(locale)) {
+          throw new Error(`unsafe bundle entry name: bundle/${routeId}/${version}/${locale}`);
+        }
+        // The existence probe is a stat path too: a symlinked `base/` or
+        // `stops.json` tail must not answer for a foreign tree. Existence is
+        // proven on the realpath-pinned path; an unresolvable or out-of-tree
+        // tail means the locale was not published (same skip idiom as the
+        // route/version containment guards above).
+        try {
+          const stopsReal = containedFilePath(
+            bundleDirReal,
+            path.resolve(bundleDirReal, locale),
+            path.join('base', 'stops.json'),
+          );
+          if (fs.existsSync(stopsReal)) locales.push(locale);
+        } catch {
+          // no published base/stops.json within the bundle tree
+        }
+      }
       const layers = route.stops.some((s: { access_tier: string }) => s.access_tier === 'extended')
         ? ['base', 'extended']
         : ['base'];
