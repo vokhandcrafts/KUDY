@@ -15,3 +15,6 @@ dist/
 # G02.03: build-bundle output (public/private trees, release artifacts), never tracked
 tools/build-bundle/build/
 
+# Mimosa security scans: local scan working dir and history, never tracked
+.mimosa/
+
