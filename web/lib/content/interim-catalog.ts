@@ -59,6 +59,21 @@ function containedDirNames(dirReal: string): string[] {
     .sort();
 }
 
+// Entry names are interpolated into read paths and into the diagnostic text;
+// only the packager's identifier shape is accepted, so a tampered tree fails
+// with a named diagnostic instead of reading arbitrary files. The rejected
+// name is tree-controlled, so its control characters are rendered as \uXXXX —
+// a raw newline in the name would corrupt the log line itself.
+function requireIdentifier(name: string, parentPath: string): void {
+  if (name === '.' || name === '..' || !isIdentifier(name)) {
+    const shown = name.replace(/[\p{C}\u2028\u2029]/gu, (ch) => {
+      const cp = ch.codePointAt(0)!;
+      return cp > 0xffff ? `\\u{${cp.toString(16)}}` : `\\u${cp.toString(16).padStart(4, '0')}`;
+    });
+    throw new Error(`unsafe bundle entry name: ${parentPath}/${shown}`);
+  }
+}
+
 function dirSize(dir: string): number {
   const dirReal = fs.realpathSync(dir);
   let total = 0;
@@ -79,19 +94,12 @@ export function deriveInterimCatalog(publicDir: string): InterimCatalog {
   const discoveryRootReal = containedFilePath(publicReal, publicReal, 'discovery');
   const routes: InterimRoute[] = [];
   for (const routeId of containedDirNames(bundleRootReal)) {
-    // Entry names are interpolated into read paths; only the packager's
-    // identifier shape is accepted, so a tampered tree fails with a named
-    // diagnostic instead of reading arbitrary files.
-    if (routeId === '.' || routeId === '..' || !isIdentifier(routeId)) {
-      throw new Error(`unsafe bundle entry name: bundle/${routeId}`);
-    }
+    requireIdentifier(routeId, 'bundle');
     const routeDir = path.resolve(bundleRootReal, routeId);
     const routeDirReal = fs.realpathSync(routeDir);
     if (routeDirReal !== bundleRootReal && !routeDirReal.startsWith(bundleRootReal + path.sep)) continue;
     for (const version of containedDirNames(routeDirReal)) {
-      if (version === '.' || version === '..' || !isIdentifier(version)) {
-        throw new Error(`unsafe bundle entry name: bundle/${routeId}/${version}`);
-      }
+      requireIdentifier(version, `bundle/${routeId}`);
       const bundleDir = path.resolve(routeDirReal, version);
       const bundleDirReal = fs.realpathSync(bundleDir);
       if (bundleDirReal !== bundleRootReal && !bundleDirReal.startsWith(bundleRootReal + path.sep)) continue;
@@ -101,9 +109,7 @@ export function deriveInterimCatalog(publicDir: string): InterimCatalog {
         // Locale names reach the stat path below, so they pass the same
         // identifier gate as route/version — a plain `existsSync` on an
         // unvalidated name would probe an attacker-chosen path.
-        if (locale === '.' || locale === '..' || !isIdentifier(locale)) {
-          throw new Error(`unsafe bundle entry name: bundle/${routeId}/${version}/${locale}`);
-        }
+        requireIdentifier(locale, `bundle/${routeId}/${version}`);
         // The existence probe is a stat path too: a symlinked `base/` or
         // `stops.json` tail must not answer for a foreign tree. Existence is
         // proven on the realpath-pinned path; an unresolvable or out-of-tree

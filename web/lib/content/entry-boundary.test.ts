@@ -70,6 +70,21 @@ test('a locale entry with a non-identifier name fails the derivation with a name
   );
 });
 
+test('a route entry name with a control character fails with the name escaped in the diagnostic', async () => {
+  const { publicRoot } = await buildDemoFixture();
+  fs.mkdirSync(path.join(publicRoot, 'bundle', 'bad\nroute'));
+  assert.throws(() => deriveInterimCatalog(publicRoot), /unsafe bundle entry name: bundle\/bad\\u000aroute/);
+});
+
+test('a locale name with a control character fails with the name escaped in the diagnostic', async () => {
+  const { publicRoot } = await buildDemoFixture();
+  fs.mkdirSync(path.join(publicRoot, 'bundle', 'demo-route-a1', '1', 'bad\nname'), { recursive: true });
+  assert.throws(
+    () => deriveInterimCatalog(publicRoot),
+    /unsafe bundle entry name: bundle\/demo-route-a1\/1\/bad\\u000aname/,
+  );
+});
+
 test('a locale whose base tail is a symlink outside the tree does not enter the catalog', async () => {
   const { publicRoot, buildRoot } = await buildDemoFixture();
   const versionDir = path.join(publicRoot, 'bundle', 'demo-route-a1', '1');
