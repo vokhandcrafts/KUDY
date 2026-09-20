@@ -23,3 +23,7 @@ After splitting an approved specification into tasks, create or update the corre
 - Verify that referenced documents are available in the runner checkout. If they are only local, state that publication is a prerequisite; do not present broken GitHub links as available documentation or queue the task.
 - Record issue URLs beside the local task index, read back the created/updated issues, and verify their visibility in the dispatcher's backlog. Report any unavailable board verification explicitly.
 - If publishing is blocked by permissions, usage limits or a service failure, preserve the completed drafts and created issue numbers, report the exact remaining tasks, and resume without duplicates when the blocker clears. Do not bypass an approval rejection or claim that unpublished tasks are in GitHub.
+
+## Record human follow-up actions after a task
+
+When a task ends with something a human must do themselves (merge or close a PR, a GitHub UI step, a settings change, a command on their machine, a paid service, and so on), do not leave it only in the chat summary. Append a short entry to `docs/human-actions.md`: what to do, one to three sentences in the imperative; the PR link (or the issue/commit link when there is no PR); the date. One entry per task, newest first. Entries are human-facing documentation, so write them in Belarusian per `docs/agent-rules/documentation-language.md`. When the human confirms an action is done, remove its entry.
