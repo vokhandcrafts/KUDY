@@ -18,18 +18,23 @@ const readJson = (rel: string) => {
 
 // The vulnerable range ends at 8.5.22: anything above it clears all four advisories.
 // A spec may be a union or a range ("^8.5.23 || 8.4.31", ">=8.5.23 <9"): every
-// version triple it allows must clear the range, so all triples are checked, and
-// a spec whose versions this cannot fully enumerate (no triple, or a wildcard)
-// fails loudly instead of passing on a partial read.
+// version triple it allows must clear the range, so the spec is checked per union
+// part. A part without a version triple (a dist-tag or a wildcard) allows versions
+// this check cannot enumerate, so it fails loudly instead of passing on a partial read.
 function isAboveAdvisoryRange(version: string): boolean {
-  assert.ok(!/[xX*]/.test(version), `unparseable postcss version (wildcards are not supported): ${version}`);
-  const triples = [...version.matchAll(/[\^~>= ]*(\d+)\.(\d+)\.(\d+)/g)];
-  assert.ok(triples.length > 0, `unparseable postcss version: ${version}`);
-  return triples.every((m) => {
-    const [major, minor, patch] = m.slice(1).map(Number);
-    if (major !== 8) return major > 8;
-    if (minor !== 5) return minor > 5;
-    return patch >= 23;
+  return version.split('||').every((part) => {
+    assert.ok(
+      !/\d+\.[xX*]|[xX*]\.\d+/.test(part),
+      `unparseable postcss version (wildcards are not supported): ${part.trim()}`,
+    );
+    const triples = [...part.matchAll(/[\^~>= ]*(\d+)\.(\d+)\.(\d+)/g)];
+    assert.ok(triples.length > 0, `unparseable postcss version (no version triple): ${part.trim()}`);
+    return triples.every((m) => {
+      const [major, minor, patch] = m.slice(1).map(Number);
+      if (major !== 8) return major > 8;
+      if (minor !== 5) return minor > 5;
+      return patch >= 23;
+    });
   });
 }
 
@@ -65,7 +70,21 @@ test('guard: a spec is above the range only if every version triple it allows is
 });
 
 test('guard: a spec the guard cannot fully enumerate fails loudly', () => {
-  assert.throws(() => isAboveAdvisoryRange('latest'), /unparseable postcss version: latest/, 'no version triple at all');
+  assert.throws(
+    () => isAboveAdvisoryRange('latest'),
+    /unparseable postcss version \(no version triple\): latest/,
+    'no version triple at all',
+  );
+  assert.throws(
+    () => isAboveAdvisoryRange('^8.5.23 || latest'),
+    /unparseable postcss version \(no version triple\): latest/,
+    'a dist-tag union part allows unenumerated versions inside the advisory range',
+  );
+  assert.throws(
+    () => isAboveAdvisoryRange('^8.5.23 || next'),
+    /unparseable postcss version \(no version triple\): next/,
+    'a part named like a dist-tag is not confused with a wildcard',
+  );
   assert.throws(
     () => isAboveAdvisoryRange('8.5.x || ^8.5.23'),
     /wildcards are not supported/,
