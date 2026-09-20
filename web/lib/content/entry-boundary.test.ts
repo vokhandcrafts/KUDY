@@ -50,3 +50,13 @@ test('a symlinked bundle entry is ignored by the catalog derivation', async () =
     ['demo-route-a1'],
   );
 });
+
+test('a symlink planted on the bundle root itself fails the derivation with a named diagnostic', async () => {
+  const { publicRoot, buildRoot } = await buildDemoFixture();
+  const outsideDir = path.join(buildRoot, 'outside-bundle');
+  fs.mkdirSync(outsideDir);
+  fs.writeFileSync(path.join(outsideDir, 'route.json'), JSON.stringify({ route_id: 'evil-route' }));
+  fs.rmSync(path.join(publicRoot, 'bundle'), { recursive: true });
+  fs.symlinkSync(outsideDir, path.join(publicRoot, 'bundle'));
+  assert.throws(() => deriveInterimCatalog(publicRoot), /unsafe bundle entry/);
+});

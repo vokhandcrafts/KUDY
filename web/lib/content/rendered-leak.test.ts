@@ -13,7 +13,9 @@ function writeTree(files: Record<string, string | Buffer>): string {
   const rootAbs = path.resolve(root);
   for (const [rel, content] of Object.entries(files)) {
     const abs = path.resolve(rootAbs, rel);
-    if (abs !== rootAbs && !abs.startsWith(rootAbs + path.sep)) continue;
+    if (abs !== rootAbs && !abs.startsWith(rootAbs + path.sep)) {
+      throw new Error(`fixture key escapes the temp tree: ${rel}`);
+    }
     fs.mkdirSync(path.dirname(abs), { recursive: true });
     fs.writeFileSync(abs, content);
   }
