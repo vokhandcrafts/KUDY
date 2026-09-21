@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-21 — рэвю сцэнара першага гіда (G03.02)
+Што зрабіць: правядзіце аўтарскае рэвю кампазіцыі першага гіда — адзначце ў `authoring/gdansk/claims.json` усе 16 цвярджэнняў (`mark` ok/rejected з `mark_by` і `mark_at`), прыміце рашэнні па сямі драфтах і праекце сцэнара `scenarios/gdansk-first-walk.json` (тэма, склад і парадак кропак вызначае аўтар, 13 §1); агляды з цытатамі і локатарамі друку — у `authoring/gdansk/review/`.
+PR: https://github.com/vokhandcrafts/KUDY/pull/150 (issue #58)
+
 ### 2026-09-21 — перанос Blocked-by паводле TR-10 (4 issue)
 Што зрабіць: прачытай пералікі TR-10 у каментарах [#56](https://github.com/vokhandcrafts/KUDY/issues/56#issuecomment-5753677647), [#58](https://github.com/vokhandcrafts/KUDY/issues/58#issuecomment-5753677741), [#61](https://github.com/vokhandcrafts/KUDY/issues/61#issuecomment-5753677833), [#68](https://github.com/vokhandcrafts/KUDY/issues/68#issuecomment-5753677908) і прымі рашэнне пра звужэнне; пры згодзе перанесі пазнакі `Blocked-by` сам (змены пазнак — за дыспетчарам). Для #68 дадаткова: знімі супярэчнасць task-файла з `blocked-external` G00.04 і паправі уваход `contracts/discovery.ts`.
 Пералікі: каментары ў #56, #58, #61, #68; PR няма, звязаныя issue — тыя самыя.
