@@ -38,4 +38,9 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/145
 PR: https://github.com/vokhandcrafts/KUDY/pull/147
 Issue: https://github.com/vokhandcrafts/KUDY/issues/68
 
+### 2026-09-21 — змерж PR #149 (публікацыя і адкат каталога, G02.04)
+Што зрабіць: праверце і змержуйце PR #149 у main — ён закрывае issue #56; пасля мержу зніміце метку `agent:running` з закрытай задачы.
+PR: https://github.com/vokhandcrafts/KUDY/pull/149
+Issue: https://github.com/vokhandcrafts/KUDY/issues/56
+
 (пуста — усе астатнія запісаныя дзеянні зроблены)
