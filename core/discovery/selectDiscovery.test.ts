@@ -199,6 +199,26 @@ test('criterion 3 guard: corrupt offer input degrades fail-closed, never throws'
   assert.ok(!ids(result.alternatives).includes('offer-z1-place'));
 });
 
+test('step 4 guard: a corrupt max_minutes degrades fail-closed — nothing exact, time gate labeled', () => {
+  for (const bad of [0, -5, NaN, Infinity]) {
+    const criteria = { ...criteriaOf('B-exact'), max_minutes: bad };
+    const result = selectDiscovery(indexValid, criteria);
+    assert.deepEqual(ids(result.exact), [], `limit ${bad} must not widen the answer into exact matches`);
+    const b1 = result.alternatives.find((m) => m.offer_id === 'offer-b1-guide');
+    assert.ok(b1, `limit ${bad}: the known-duration offer stays surfaced`);
+    assert.ok(b1.differences.includes('duration_unknown'), `limit ${bad}: the unprovable time gate is labeled`);
+  }
+});
+
+test('step 4 guard: a non-array theme_ids degrades fail-closed — nothing exact, theme gate labeled', () => {
+  const criteria = { ...criteriaOf('B-exact'), theme_ids: 'theme-history' } as unknown as DiscoveryCriteria;
+  const result = selectDiscovery(indexValid, criteria);
+  assert.deepEqual(ids(result.exact), [], 'a malformed theme list must not widen the answer into exact matches');
+  const b1 = result.alternatives.find((m) => m.offer_id === 'offer-b1-guide');
+  assert.ok(b1, 'the otherwise-valid offer stays surfaced');
+  assert.ok(b1.differences.includes('theme_mismatch'), 'the unprovable theme gate is labeled');
+});
+
 test('wiring: the discovery core suite runs in the default npm test command', () => {
   const pkg = JSON.parse(read('package.json'));
   assert.match(pkg.scripts.test, /"core\/\*\*\/\*\.test\.ts"/);
