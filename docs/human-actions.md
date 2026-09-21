@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-21 — мерж PR #148 (карта горада G10.01.b)
+Што зрабіць: праверце і змержуйце PR #148 у main — статычная карта горада на OpenFreeMap (частка b issue #111). Суддзя пацвердзіў: задача выканана цалкам, рэвью-раўнды 1–2 чыстыя (адзіны няблакуючы Low — тэкст maplibre-памылкі ў атрыбуце `data-map-error`, `web/components/city-map.tsx:23`).
+PR: https://github.com/vokhandcrafts/KUDY/pull/148 (issue #111)
+
 ### 2026-09-21 — рэвю сцэнара першага гіда (G03.02)
 Што зрабіць: правядзіце аўтарскае рэвю кампазіцыі першага гіда — адзначце ў `authoring/gdansk/claims.json` усе 16 цвярджэнняў (`mark` ok/rejected з `mark_by` і `mark_at`), прыміце рашэнні па сямі драфтах і праекце сцэнара `scenarios/gdansk-first-walk.json` (тэма, склад і парадак кропак вызначае аўтар, 13 §1); агляды з цытатамі і локатарамі друку — у `authoring/gdansk/review/`.
 PR: https://github.com/vokhandcrafts/KUDY/pull/150 (issue #58)

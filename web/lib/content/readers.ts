@@ -14,6 +14,7 @@ import type {
   DiscoveryIndex,
   Locale,
   LockedStopPreview,
+  PlaceGeoDoc,
   PublicProjection,
   ReadResult,
   RejectionCode,
@@ -120,4 +121,19 @@ export function readPublicProjection(doc: unknown): ReadResult<PublicProjection>
 // the allowlist (21 §3.2) stays owned by its contract schema, not by a second list.
 export function isKnownLocale(candidate: string): candidate is Locale {
   return schemaCheck('schemas/localized-text.schema.json', { [candidate]: 'probe' }).length === 0;
+}
+
+// Bundle places.json: an array of place.schema.json geo-fact entries — the
+// schema describes one entry, so the file is checked item by item (same idiom
+// as readBaseStories). The web reads only lat/lng; the whole entry is
+// validated so a malformed geo fact fails the build loudly.
+export function readPlacesGeo(doc: unknown): ReadResult<PlaceGeoDoc[]> {
+  if (!Array.isArray(doc)) {
+    return reject('schema-invalid', [{ rule: 'places-not-an-array', path: '$' }]);
+  }
+  const schemaErrors = doc.flatMap((entry, i) =>
+    schemaCheck('schemas/place.schema.json', entry).map((e) => ({ ...e, path: `places[${i}].${e.path}` })),
+  );
+  if (schemaErrors.length > 0) return reject('schema-invalid', schemaErrors);
+  return { ok: true, data: doc as PlaceGeoDoc[] };
 }
