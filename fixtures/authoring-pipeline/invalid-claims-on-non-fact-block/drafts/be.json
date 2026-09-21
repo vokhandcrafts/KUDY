@@ -7,6 +7,11 @@
   "title": "Фікстура",
   "blocks": [
     {
+      "block_id": "b0",
+      "kind": "orientation",
+      "text": "Арыентоўны сказ фікстуры: паглядзіце на фасад."
+    },
+    {
       "block_id": "b1",
       "kind": "artistic",
       "claims": [
