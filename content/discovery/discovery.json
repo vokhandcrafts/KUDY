@@ -146,7 +146,7 @@
           "en": "total time includes transitions and pauses; the trip to the start is not included; the collection unlocks nothing — the guide's paid layer is bought separately"
         }
       },
-      "estimated_duration": { "min_minutes": 75, "max_minutes": 105, "basis": "author_estimate" },
+      "estimated_duration": { "min_minutes": 65, "max_minutes": 100, "basis": "author_estimate" },
       "suggested_start_place_id": "place_gdansk_townhall",
       "season_recommendations": [],
       "detail_ref": { "kind": "collection_public", "path": "collections/collection-gdansk-halfday/public.json" }
