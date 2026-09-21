@@ -38,7 +38,7 @@ const CONNECTIVES = /таму што|з-за гэтага|з-за чаго|пр�
 // рэкламнага закліку купіць пашырэнне»; 13 §4: «Тэкст не абрываецца дзеля
 // пакупкі»): a base draft may neither call to buy nor dangle the paid
 // continuation.
-const BASE_PURCHASE = /купіць|купля|пакупк|набыцц|за дадатковую плату|поўн(ая|ы|ае) версі|unlock|purchase|upgrade|subscribe/i;
+const BASE_PURCHASE = /купіць|купля|пакупк|набыцц|за дадатковую плату|поўн(ая|ы|ае|ай|ую) версі|unlock|purchase|upgrade|subscribe/i;
 const BASE_DANGLE = /працяг|пашыран(ая|ы|ае|ага|ым)|у поўнай гісторы|to be continued|continue (with|in) the extended/i;
 
 function isPlainObject(value) {
@@ -172,8 +172,10 @@ function checkBlocks(draft, at, errors, claimById) {
 // are answered by checkBlocks.
 function checkTierRules(draft, at, errors) {
   const blocks = Array.isArray(draft.blocks) ? draft.blocks : null;
-  if (draft.tier === 'base' && blocks && blocks.length > 0) {
-    if (!isPlainObject(blocks[0]) || blocks[0].kind !== 'orientation') {
+  if (draft.tier === 'base' && blocks) {
+    // An empty or non-orientation first block means the story has no
+    // orientation at all — the same violation for a base story.
+    if (blocks.length === 0 || !isPlainObject(blocks[0]) || blocks[0].kind !== 'orientation') {
       diag(errors, 'error', 'missing-orientation', `${at}#blocks[0]`);
     }
     blocks.forEach((block, i) => {
