@@ -7,6 +7,11 @@
   "title": "St Mary's, Gdańsk",
   "blocks": [
     {
+      "block_id": "bl-100",
+      "kind": "orientation",
+      "text": "Look up along the façade and walk slowly along the wall: this tower is visible from different corners of the old town."
+    },
+    {
       "block_id": "bl-101",
       "kind": "fact",
       "claims": ["cl-002", "cl-003"],
