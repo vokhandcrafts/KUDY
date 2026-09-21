@@ -37,9 +37,10 @@ const CONNECTIVES = /таму што|з-за гэтага|з-за чаго|пр�
 // G03.02 — the free story must be complete in itself (13 §3: «у наратыве няма
 // рэкламнага закліку купіць пашырэнне»; 13 §4: «Тэкст не абрываецца дзеля
 // пакупкі»): a base draft may neither call to buy nor dangle the paid
-// continuation.
-const BASE_PURCHASE = /купіць|купля|пакупк|набыцц|за дадатковую плату|поўн(ая|ы|ае|ай|ую) версі|unlock|purchase|upgrade|subscribe/i;
-const BASE_DANGLE = /працяг|пашыран(ая|ы|ае|ага|ым)|у поўнай гісторы|to be continued|continue (with|in) the extended/i;
+// continuation. Exported for the acceptance suite to assert the exact
+// patterns (no second copy — implementation-rules 1–2).
+export const BASE_PURCHASE = /купіць|купля|пакупк|набыц|за дадатковую плату|поўн(ая|ы|ае|ай|ую) версі|unlock|purchase|upgrade|subscribe/i;
+export const BASE_DANGLE = /працяг|пашыран(ая|ы|ае|ага|ым)|у пашырэнні|платн\S* пашырэнн|у поўнай гісторы|to be continued|continue (with|in) the extended/i;
 
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -55,6 +56,16 @@ function isText(value) {
 
 function isDateOrNull(value) {
   return value === null || (typeof value === 'string' && DATE.test(value));
+}
+
+// The canon reason is a localized object (be/en/uk, discovery-index schema,
+// 21 §3.2); the authoring draft may hold a plain string instead — both count
+// as «прычына», neither may be empty.
+function isSeasonReason(value) {
+  return (
+    isText(value) ||
+    (isPlainObject(value) && Object.keys(value).length > 0 && Object.values(value).every((v) => isText(v)))
+  );
 }
 
 // Every element is validated before any cross-reference resolution, so corrupt
@@ -264,7 +275,13 @@ function checkScenarios(dir, sourceIds, draftsById, errors) {
             return;
           }
           if (!SEASONS.has(rec.season)) diag(errors, 'error', 'invalid-value', `${where}#season_recommendations[${j}]#season`);
-          if (!isText(rec.reason)) diag(errors, 'error', 'season-recommendation-without-reason', `${where}#season_recommendations[${j}]#reason`);
+          // The draft holds a plain string (the author's working note); the
+          // canon form is the localized object from discovery-index (21 §3.2)
+          // — both are accepted, the export to the discovery index makes the
+          // object (declared in authoring/README.md).
+          if (!isSeasonReason(rec.reason)) {
+            diag(errors, 'error', 'season-recommendation-without-reason', `${where}#season_recommendations[${j}]#reason`);
+          }
         });
       }
     });

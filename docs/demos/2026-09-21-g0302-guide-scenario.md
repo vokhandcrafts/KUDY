@@ -62,7 +62,7 @@ node --input-type=module -e "import fs from 'node:fs'; import { renderReviewRepo
 7 review reports are in sync
 ```
 
-Поўная прыёмачная сюіта: 28 негатыўных фікстур (па адной парушэнні),
+Поўная прыёмачная сюіта: 30 негатыўных фікстур (па адной парушэнні),
 пазітыўныя праверкі крытэраў #58, сінтэтычны цыкл да approved, брама
 `content-not-approved`, вартавы «бандл не чытае authoring/», пашкоджаны ўвод —
 дыягностыкі, не крэх:
@@ -72,7 +72,7 @@ node --test --test-reporter=tap --test-concurrency=1 tools/validate/authoring.te
 ```
 
 ```output
-# tests 41
-# pass 41
+# tests 45
+# pass 45
 # fail 0
 ```
