@@ -91,16 +91,19 @@ test('criterion 2: the collection carries its own duration assessment, not the s
   const own = collectionOffer.estimated_duration;
   assert.ok(own, 'collection offer must carry estimated_duration');
   assert.equal(own.basis, 'author_estimate');
-  // Naive sum of the members' card ranges: guide [45,60] + monastery [15,30].
+  // Naive sum of the members' card ranges: guide [45,60] + monastery [15,30]
+  // = [60,90]. The collection's own range is that plus the 5–10 min
+  // transition between the guide's end and the monastery — longer at both
+  // ends, never the card sum (20 §4.3).
   const guideOffer = offerById.get('offer-guide-gdansk-first-walk');
   const monasteryOffer = offerById.get('offer-place-gdansk-franciscan');
   const sumMin = guideOffer.estimated_duration.min_minutes + monasteryOffer.estimated_duration.min_minutes;
   const sumMax = guideOffer.estimated_duration.max_minutes + monasteryOffer.estimated_duration.max_minutes;
   assert.ok(
-    own.min_minutes > sumMin || own.max_minutes > sumMax,
-    'the collection range must exceed the card sum: transitions and pauses take time (20 §4.3)',
+    own.min_minutes > sumMin && own.max_minutes > sumMax,
+    'the collection range must exceed the card sum: transitions take time (20 §4.3)',
   );
-  assert.deepEqual(own, { min_minutes: 75, max_minutes: 105, basis: 'author_estimate' });
+  assert.deepEqual(own, { min_minutes: 65, max_minutes: 100, basis: 'author_estimate' });
   // Members resolve against the package; the guide member is the paid pilot route.
   assert.equal(route.access, 'paid');
   const guideMember = collection.members.find((m) => m.kind === 'guide');
@@ -137,10 +140,20 @@ test('criterion 4: no card text claims opening hours, entry prices or free admis
     /(бясплатны ўваход|уваход бясплатны|free (entry|admission))/i,
     /(цана|цены|кошт)[^.\n]{0,20}\d/, // a price next to a number
   ];
-  const texts = [...localizedStrings(discovery.offers)];
-  for (const rel of ['places/place_gdansk_highgate/public.json', 'places/place_gdansk_franciscan/public.json']) {
-    texts.push(...localizedStrings(readJson(PKG, rel)));
-  }
+  // Every localized card string in the package: the whole discovery doc
+  // (offers + collection + theme labels) and every public projection.
+  const texts = [...localizedStrings(discovery)];
+  const walkProjections = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walkProjections(full);
+      else if (entry.isFile() && entry.name === 'public.json') {
+        texts.push(...localizedStrings(readJson(path.dirname(full), 'public.json')));
+      }
+    }
+  };
+  walkProjections(path.join(PKG, 'places'));
+  walkProjections(path.join(PKG, 'collections'));
   assert.ok(texts.length >= 10, 'the scan must actually cover the card texts');
   for (const text of texts) {
     for (const pattern of patterns) {
