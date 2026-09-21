@@ -1,0 +1,36 @@
+{
+  "route_id": "gdansk-first-walk",
+  "version": "1",
+  "city_id": "gdansk",
+  "access": "paid",
+  "distance_m": 500,
+  "duration_min": 45,
+  "free_stop_count": 3,
+  "published": false,
+  "stops": [
+    {
+      "id": "stop-gdansk-townhall",
+      "position": 0,
+      "place_id": "place_gdansk_townhall",
+      "access_tier": "base",
+      "story_base_id": "story-gdansk-townhall-base",
+      "story_extended_id": "story-gdansk-townhall-ext"
+    },
+    {
+      "id": "stop-gdansk-artushof",
+      "position": 1,
+      "place_id": "place_gdansk_artushof",
+      "access_tier": "base",
+      "story_base_id": "story-gdansk-artushof-base",
+      "story_extended_id": "story-gdansk-artushof-ext"
+    },
+    {
+      "id": "stop-gdansk-stmary",
+      "position": 2,
+      "place_id": "place_gdansk_stmary",
+      "access_tier": "base",
+      "story_base_id": "story-gdansk-stmary-base",
+      "story_extended_id": "story-gdansk-stmary-ext"
+    }
+  ]
+}
