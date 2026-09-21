@@ -1,0 +1,42 @@
+[
+  {
+    "id": "place_gdansk_townhall",
+    "content_version": "1",
+    "lat": 54.3489,
+    "lng": 18.6533,
+    "trigger_radius_m": 60,
+    "kind": "sight"
+  },
+  {
+    "id": "place_gdansk_artushof",
+    "content_version": "1",
+    "lat": 54.3486,
+    "lng": 18.6542,
+    "trigger_radius_m": 60,
+    "kind": "sight"
+  },
+  {
+    "id": "place_gdansk_stmary",
+    "content_version": "1",
+    "lat": 54.3525,
+    "lng": 18.6527,
+    "trigger_radius_m": 60,
+    "kind": "sight"
+  },
+  {
+    "id": "place_gdansk_highgate",
+    "content_version": "1",
+    "lat": 54.3486,
+    "lng": 18.6492,
+    "trigger_radius_m": 60,
+    "kind": "sight"
+  },
+  {
+    "id": "place_gdansk_franciscan",
+    "content_version": "1",
+    "lat": 54.3528,
+    "lng": 18.6511,
+    "trigger_radius_m": 60,
+    "kind": "sight"
+  }
+]
