@@ -1,0 +1,34 @@
+{
+  "scenario_id": "gdansk-first-walk",
+  "city": "gdansk",
+  "locale": "be",
+  "theme": "Ганзейскае багацце: вуліца, рынак і храм",
+  "path_minutes": 45,
+  "paid_note": "Платны пласт дадае па адной дадатковай гісторыі на кожную з трох кропак: палітыка вольнага горада, гандаль і бурштын, рэлігійная мапа горада.",
+  "stops": [
+    {
+      "place_id": "place_gdansk_townhall",
+      "title": "Ратуша на Доўгім рынку",
+      "walk_minutes": 15,
+      "drafts": ["gdansk-townhall-base-be", "gdansk-townhall-extended-be"],
+      "refs": ["src-eb1911-danzig"],
+      "season_recommendations": []
+    },
+    {
+      "place_id": "place_gdansk_artushof",
+      "title": "Двор Артуса",
+      "walk_minutes": 10,
+      "drafts": ["gdansk-artushof-base-be", "gdansk-artushof-extended-be"],
+      "refs": ["src-eb1911-danzig"],
+      "season_recommendations": []
+    },
+    {
+      "place_id": "place_gdansk_stmary",
+      "title": "Касцёл Св. Марыі",
+      "walk_minutes": 20,
+      "drafts": ["gdansk-stmary-be", "gdansk-stmary-extended-be", "gdansk-stmary-en"],
+      "refs": ["src-eb1911-danzig"],
+      "season_recommendations": []
+    }
+  ]
+}

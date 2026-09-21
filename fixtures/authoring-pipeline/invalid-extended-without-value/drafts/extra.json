@@ -1,0 +1,23 @@
+{
+  "draft_id": "extra",
+  "locale": "be",
+  "place_id": "place-x",
+  "tier": "extended",
+  "source_draft_id": null,
+  "title": "Пашырэнне",
+  "blocks": [
+    {
+      "block_id": "b0",
+      "kind": "fact",
+      "claims": [
+        "cl-1"
+      ],
+      "text": "Факт пашырэння."
+    }
+  ],
+  "review": {
+    "by": null,
+    "at": null,
+    "decision": "pending"
+  }
+}

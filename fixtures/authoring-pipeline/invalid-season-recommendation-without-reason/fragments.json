@@ -1,0 +1,11 @@
+[
+  {
+    "fragment_id": "fr-1",
+    "source_id": "src-x",
+    "locator": {
+      "page": 1,
+      "paragraph": 1
+    },
+    "quote": "Q."
+  }
+]
