@@ -68,8 +68,8 @@ function readBundleDoc<T>(
   return validate(loaded.doc);
 }
 
-// The catalog envelope sits at the public root (interim G10.01.b location —
-// the real pointer publication belongs to G02.04).
+// The catalog envelope sits at the public root; the pointer publication and
+// rollback are tools/publish-catalog (G02.04).
 export function readBundleCatalog(publicRoot: string): ReadResult<CatalogView> {
   return readBundleDoc(publicRoot, [], 'catalog.json', readCatalog);
 }

@@ -47,7 +47,8 @@ export function localePath(locale: UiLocale, pagePath: string): string {
 
 // The content root: build-bundle public output dropped into web/content/
 // (the conventional drop point, gitignored). KUDY_CONTENT_ROOT overrides it —
-// e.g. a real CDN mirror layout; catalog publication itself is G02.04.
+// e.g. a real CDN mirror layout; catalog publication lives in
+// tools/publish-catalog (G02.04).
 export function getContentRoot(): string {
   return process.env.KUDY_CONTENT_ROOT ?? path.join(process.cwd(), 'content', 'public');
 }
