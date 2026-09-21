@@ -10,7 +10,7 @@ Labels: none set by the publisher — `epic`, `agent:ready`, `prio:*` belong to 
 
 ## Epic
 
-`Epic: #NN` — this is the parent epic; the `epic` label is set by the operator.
+Parent epic of the G17 web-collection tasks (the web audio channel epic is #108). The `epic` label is set by the operator.
 
 ## Goal
 
@@ -51,9 +51,9 @@ Epic: #154.
 ## Acceptance criteria
 
 1. [ ] A campaign YAML missing `city` or with invalid `fence` values is rejected with a diagnostic naming the offending field — negative test fails if the validation is reverted.
-2. [ ] First `run` creates the full schema; running the same campaign twice inserts no duplicate `raw_records`/`campaigns` rows.
-3. [ ] An interrupted run (second invocation in a test) resumes without duplicating records.
-4. [ ] Every passport field from the spec table (`24`, «Пашпарт запісу») exists in `raw_records` with the exact spec name.
+2. [ ] First `run` creates the full schema; running the same campaign twice inserts no duplicate `raw_records`/`campaigns` rows (idempotency test).
+3. [ ] An interrupted run (second invocation in a test) resumes without duplicating records (rule: resume, not restart).
+4. [ ] Every passport field from the spec table (`24`, «Пашпарт запісу») exists in `raw_records` with the exact spec name — schema test compares against the documented list.
 5. [ ] The package's test suites are enumerated by the default `npm test` and pass locally; the jscpd gate is clean.
 
 ## Out of scope
@@ -69,7 +69,7 @@ None — first G17 task.
 Revert the Zod fence validation → criterion 1's negative test fails.
 
 ```
-npm test -- tools/collector
+npm test
 ```
 
 ---
@@ -88,7 +88,7 @@ Given a fetched page (fixture HTML — no network), write the raw snapshot per a
 
 1. [ ] Fixture page → snapshot files exist; every anchor in `text.md` keeps its target URL.
 2. [ ] Same fixture twice → one `raw_records` row; same text under a different URL → second row with equal `content_hash` linked to the first.
-3. [ ] A corrupt fixture (empty HTML, missing title) produces a diagnostic and no crash.
+3. [ ] A corrupt fixture (empty HTML, missing title) produces a diagnostic in the run log and no crash (corrupt-input rule).
 4. [ ] `content_hash` verified against the file re-read from disk (no silent EOL conversion).
 5. [ ] Suites wired into default `npm test`; jscpd gate clean.
 
@@ -105,7 +105,7 @@ Fetching pages (later collectors); photo download (empty `media/` dir only); cle
 Revert the `content_hash` dedup check → criterion 2's test fails.
 
 ```
-npm test -- tools/collector
+npm test
 ```
 
 ---
@@ -142,7 +142,7 @@ Photos (G17.03), wiki/YouTube sources (G17.04/05), cleaning (G17.06).
 Revert the same-domain check → criterion 1's audit-log assertion fails.
 
 ```
-npm test -- tools/collector
+npm test
 ```
 
 ---
@@ -178,7 +178,7 @@ Cleaning-stage normalization (G17.06), YouTube thumbnails (G17.05), image proces
 Revert the size filter → criterion 1's negative test fails.
 
 ```
-npm test -- tools/collector
+npm test
 ```
 
 ---
@@ -197,7 +197,7 @@ Fetch campaign articles/categories through the MediaWiki API, expand wiki links 
 
 1. [ ] Fixture API responses produce `raw_records` with `source_type=wiki` and complete attribution metadata (each field asserted).
 2. [ ] Category expansion respects the topic filter and depth — negative test names the filter.
-3. [ ] `rights=licensed` set automatically for wiki sources.
+3. [ ] `rights=licensed` set automatically for wiki sources — reverting the mapping fails the test.
 4. [ ] Missing title → logged diagnostic, run completes; suites wired into `npm test`; jscpd clean.
 
 ## Out of scope
@@ -213,7 +213,7 @@ Non-MediaWiki encyclopedias; cleaning; photos.
 Revert the wiki→licensed rights mapping → criterion 3's test fails.
 
 ```
-npm test -- tools/collector
+npm test
 ```
 
 ---
@@ -249,7 +249,7 @@ Punctuation restoration of auto-captions (G17.06), speech recognition, audio dow
 Revert the manual-over-automatic preference → criterion 2's test fails.
 
 ```
-npm test -- tools/collector
+npm test
 ```
 
 ---
@@ -285,7 +285,7 @@ LLM passes; search/basket (G17.07); changes to `07` stages.
 Revert the "new version" write path (overwrite raw) → criterion 2's byte-identity test fails.
 
 ```
-npm test -- tools/collector
+npm test
 ```
 
 ---
@@ -320,7 +320,7 @@ Guide auto-composition (rejected by the spec), changes to `07`, app code.
 Revert the citation-line writer → criterion 2's test fails.
 
 ```
-npm test -- tools/collector
+npm test
 ```
 
 ---
@@ -347,14 +347,14 @@ Publishing anything, a second city, ASR, changes to `07` or the app.
 
 ## Dependencies
 
-`Blocked-by: #161` — G17.06, and the founder-decisions tracking issue (#153).
+`Blocked-by: #157, #159, #160, #161` — G17.02, G17.04, G17.05, G17.06, and the founder-decisions tracking issue (#153).
 
 ## Proof
 
 The fence audit log of the pilot run shows 0 fetches outside allowed hosts.
 
 ```
-grep -c "off-fence" <audit-log>
+grep -c '"allowed": false' <pilot-run>/fence-audit.jsonl   # prints 0
 ```
 
 ---
