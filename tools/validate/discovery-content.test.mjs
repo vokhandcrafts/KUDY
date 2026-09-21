@@ -135,10 +135,14 @@ test('criterion 3: the autumn recommendation sits on the monastery offer with un
 test('criterion 4: no card text claims opening hours, entry prices or free admission', () => {
   const patterns = [
     /\d{1,2}[:.]\d{2}/, // clock times like 10:00
+    /\d{1,2}\s*[-–—]\s*\d{1,2}(?!\d)/, // hour ranges like 10–18 without a colon
     /opening hours?|open (daily|from)|closed (on|from)/i,
+    /[аа]дкрыт[ао][^.\n]{0,20}\d/, // «адкрыта да 18»
     /(гадзіны працы|час працы)\s*[:\-–—]?\s*\d/,
     /(бясплатны ўваход|уваход бясплатны|free (entry|admission))/i,
+    /(уваход|admission|entry)[^.\n]{0,12}\d/, // a number right after an entry word
     /(цана|цены|кошт)[^.\n]{0,20}\d/, // a price next to a number
+    /€|\bPLN\b|zł/, // currency amounts
   ];
   // Every localized card string in the package: the whole discovery doc
   // (offers + collection + theme labels) and every public projection.
