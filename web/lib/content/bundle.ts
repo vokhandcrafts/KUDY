@@ -13,6 +13,7 @@ import {
   readBaseStories,
   readCatalog,
   readDiscoveryIndex as readIndexDoc,
+  readPlacesGeo,
   readPreviews,
   readPublicProjection,
   readRoute,
@@ -21,6 +22,7 @@ import type {
   CatalogView,
   DiscoveryIndex,
   LockedStopPreview,
+  PlaceGeoDoc,
   PublicProjection,
   ReadResult,
   RouteDoc,
@@ -104,4 +106,9 @@ export function readPlaceProjection(publicRoot: string, placeId: string): ReadRe
 
 export function readBundleDiscoveryIndex(publicRoot: string, cityId: string, revision: string): ReadResult<DiscoveryIndex> {
   return readBundleDoc(publicRoot, ['discovery', cityId, revision], 'index.json', readIndexDoc);
+}
+
+// Locale-neutral geo facts of one bundle (09 §3), the map markers' source.
+export function readBundlePlacesGeo(publicRoot: string, routeId: string, version: string): ReadResult<PlaceGeoDoc[]> {
+  return readBundleDoc(publicRoot, ['bundle', routeId, version], 'places.json', readPlacesGeo);
 }
