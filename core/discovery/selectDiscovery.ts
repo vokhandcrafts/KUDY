@@ -103,11 +103,12 @@ export interface DiscoveryResult {
   alternatives: readonly DiscoveryMatch[];
 }
 
-// Differences are emitted in this fixed order so the label list is stable.
+// Differences are emitted in this fixed order — the §4 union order verbatim —
+// so the label list is stable.
 const DIFFERENCE_ORDER: readonly DiscoveryDifference[] = [
-  'theme_mismatch',
   'duration_unknown',
   'over_time',
+  'theme_mismatch',
   'season_unassessed',
   'season_not_recommended',
 ];
@@ -149,13 +150,18 @@ const knownMaxMinutes = (offer: DiscoveryOffer): number | null => {
 
 export function selectDiscovery(index: DiscoveryIndexV1, criteria: DiscoveryCriteria): DiscoveryResult {
   // Rule 1: unknown themes/locales and invalid max_minutes are rejected at the
-  // controller boundary; the core receives valid types. A corrupt numeric limit
-  // degrades to "no limit" here rather than inventing a difference label.
-  const maxMinutes =
-    typeof criteria.max_minutes === 'number' && Number.isFinite(criteria.max_minutes) && criteria.max_minutes > 0
-      ? criteria.max_minutes
-      : undefined;
-  const themeIds = Array.isArray(criteria.theme_ids) ? criteria.theme_ids : [];
+  // controller boundary; the core receives valid types. A malformed criterion
+  // that slips through is never silently satisfied — a corrupt limit cannot
+  // prove any offer within time and a corrupt theme list cannot prove a theme
+  // match, so both fail closed (nothing exact, labeled differences) instead of
+  // widening the answer.
+  const limitGiven = criteria.max_minutes !== undefined;
+  const limitUsable =
+    typeof criteria.max_minutes === 'number' && Number.isFinite(criteria.max_minutes) && criteria.max_minutes > 0;
+  const maxMinutes = limitUsable ? criteria.max_minutes : undefined;
+  const limitCorrupt = limitGiven && !limitUsable;
+  const themesUsable = Array.isArray(criteria.theme_ids);
+  const themeIds = themesUsable ? criteria.theme_ids : [];
   const season = criteria.preferred_season;
 
   const matches: Array<{ match: DiscoveryMatch; offer: DiscoveryOffer }> = [];
@@ -178,8 +184,8 @@ export function selectDiscovery(index: DiscoveryIndexV1, criteria: DiscoveryCrit
     const seasonRecommended = season !== undefined && recommendations.some((r) => r?.season === season);
 
     const differences = new Set<DiscoveryDifference>();
-    if (!themeMatched) differences.add('theme_mismatch');
-    if (maxMinutes !== undefined && known === null) differences.add('duration_unknown');
+    if (!themesUsable || !themeMatched) differences.add('theme_mismatch');
+    if (limitCorrupt || (maxMinutes !== undefined && known === null)) differences.add('duration_unknown');
     if (maxMinutes !== undefined && known !== null && known > maxMinutes) differences.add('over_time');
     if (season !== undefined && recommendations.length === 0) differences.add('season_unassessed');
     if (season !== undefined && recommendations.length > 0 && !seasonRecommended) differences.add('season_not_recommended');
