@@ -1,0 +1,176 @@
+{
+  "revision": "r-gdansk-discovery-1",
+  "city_id": "gdansk",
+  "themes": [
+    {
+      "id": "theme-hanseatic-trade",
+      "labels": {
+        "be": "Ганза і гандаль",
+        "en": "Hanseatic trade",
+        "uk": "Ганза і торгівля"
+      }
+    },
+    {
+      "id": "theme-brick-gothic",
+      "labels": {
+        "be": "Цагляная готыка",
+        "en": "Brick Gothic",
+        "uk": "Цегляна готика"
+      }
+    },
+    {
+      "id": "theme-art-quiet",
+      "labels": {
+        "be": "Мастацтва і цішыня",
+        "en": "Art and quiet",
+        "uk": "Мистецтво і тиша"
+      }
+    }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-guide-gdansk-first-walk",
+      "ref": { "kind": "guide", "route_id": "gdansk-first-walk", "version": "1" },
+      "city_id": "gdansk",
+      "editorial_order": 10,
+      "themes": ["theme-hanseatic-trade", "theme-brick-gothic"],
+      "localized": {
+        "title": {
+          "be": "Ганзейскае багацце: першая прагулка",
+          "en": "Hanseatic wealth: the first walk"
+        },
+        "summary": {
+          "be": "Тры кропкі старога горада: ратуша з вытанчаным шпілем, двор Артуса на Доўгім рынку і касцёл Св. Марыі. Гісторыі пра гандаль, уладу і веру вольнага горада.",
+          "en": "Three stops of the old town: the town hall crowned with a graceful spire, the Artus Court on the Long Market, and St Mary's. Stories of trade, power and faith in a free city."
+        },
+        "why_recommended": {
+          "be": "Маршрут на каля 45 хвілін, складзены з гісторый, што збіраюцца ў адну вось старога горада: вуліца, рынак, храм.",
+          "en": "A walk of about 45 minutes built from stories that line up into one axis of the old town: street, market, church."
+        },
+        "conditions": {
+          "be": "брукаваныя вуліцы; большая частка шляху пад адкрытым небам; дарога да пачатку не ўлічаная ў часе",
+          "en": "cobblestone streets; most of the route is outdoors; the trip to the starting point is not counted in the time"
+        }
+      },
+      "estimated_duration": { "min_minutes": 45, "max_minutes": 60, "basis": "author_estimate" },
+      "distance_m": 500,
+      "suggested_start_place_id": "place_gdansk_townhall",
+      "season_recommendations": [],
+      "detail_ref": { "kind": "guide_preview" }
+    },
+    {
+      "offer_id": "offer-place-gdansk-highgate",
+      "ref": { "kind": "place", "place_id": "place_gdansk_highgate", "content_version": "1" },
+      "city_id": "gdansk",
+      "editorial_order": 20,
+      "themes": ["theme-hanseatic-trade"],
+      "localized": {
+        "title": {
+          "be": "Высокая брама",
+          "en": "The High Gate"
+        },
+        "summary": {
+          "be": "Пачатак галоўнай восі старога горада: ад брамы галоўная вуліца вядзе да Доўгага рынку.",
+          "en": "The start of the old town's main axis: from the gate the main street runs on to the Long Market."
+        },
+        "why_recommended": {
+          "be": "Добра пачынаць тут: вось старога горада адчуваецца ўжо з брамы, і гэта зручны арыенцір першых крокаў.",
+          "en": "A good place to start: the old town's axis is legible from the gate, and it is an easy landmark for first steps."
+        },
+        "conditions": {
+          "be": "агляд вулічны; карта нічога не сцвярджае пра ўнутраныя памяшканні",
+          "en": "an outdoor sight; the card makes no claim about interiors"
+        }
+      },
+      "estimated_duration": { "min_minutes": 5, "max_minutes": 10, "basis": "author_estimate" },
+      "season_recommendations": [],
+      "detail_ref": { "kind": "place_public", "path": "places/place_gdansk_highgate/public.json" }
+    },
+    {
+      "offer_id": "offer-place-gdansk-franciscan",
+      "ref": { "kind": "place", "place_id": "place_gdansk_franciscan", "content_version": "1" },
+      "city_id": "gdansk",
+      "editorial_order": 30,
+      "themes": ["theme-art-quiet"],
+      "localized": {
+        "title": {
+          "be": "Францысканскі манастыр",
+          "en": "The Franciscan monastery"
+        },
+        "summary": {
+          "be": "Адзін з старажытных будынкаў, што называе крыніца 1911 года: адноўлены ў 1871 годзе, тады змяшчаў гарадскую карцінную галерэю і збор старажытнасцяў.",
+          "en": "One of the ancient buildings the 1911 source names: restored in 1871, then housing the municipal picture gallery and a collection of antiquities."
+        },
+        "why_recommended": {
+          "be": "Цішыня і карціны пасля гаманлівага рынку — аўтарская паўза, якой не хапае шчыльнаму маршруту.",
+          "en": "Quiet and paintings after the busy market — an author's pause the packed route otherwise lacks."
+        },
+        "conditions": {
+          "be": "час працы ўнутранай экспазіцыі не правераны; карта не абяцае ні гадзін, ні цаны ўваходу",
+          "en": "interior opening times are unverified; the card promises neither hours nor an entry price"
+        }
+      },
+      "estimated_duration": { "min_minutes": 15, "max_minutes": 30, "basis": "author_estimate" },
+      "season_recommendations": [
+        {
+          "season": "autumn",
+          "reason": {
+            "be": "Восеньскі ціхі дзень добры для карціннай галерэі і павольнай прагулкі ўглыб кварталаў.",
+            "en": "A quiet autumn day suits a picture gallery and a slow walk into the back streets."
+          }
+        }
+      ],
+      "detail_ref": { "kind": "place_public", "path": "places/place_gdansk_franciscan/public.json" }
+    },
+    {
+      "offer_id": "offer-collection-gdansk-halfday",
+      "ref": { "kind": "collection", "collection_id": "collection-gdansk-halfday", "content_version": "1" },
+      "city_id": "gdansk",
+      "editorial_order": 40,
+      "themes": ["theme-hanseatic-trade", "theme-art-quiet"],
+      "localized": {
+        "title": {
+          "be": "Гданьск за паўдня",
+          "en": "Gdańsk in half a day"
+        },
+        "summary": {
+          "be": "Аўтарская прагулка па трох кропках і ціхая знаходка пасля яе: карціны старога манастыра завяршаюць дзень.",
+          "en": "The author's three-stop walk and one quiet find after it: paintings in the old monastery close the day."
+        },
+        "why_recommended": {
+          "be": "Парадак падабраны рукамі: спачатку вось старога горада з гідам, потым паўза ў манастыры; пераходы ўжо ўлічаны ў часе падборкі.",
+          "en": "The order is hand-picked: first the old town's axis with the guide, then a pause at the monastery; transitions are already counted in the collection's time."
+        },
+        "conditions": {
+          "be": "сумарны час — з пераходамі і запасам на прыпынкі; дарога да пачатку не ўлічаная; падборка нічога не адкрывае: платнае пашырэнне гіда купляецца асобна",
+          "en": "total time includes transitions and pauses; the trip to the start is not included; the collection unlocks nothing — the guide's paid layer is bought separately"
+        }
+      },
+      "estimated_duration": { "min_minutes": 65, "max_minutes": 100, "basis": "author_estimate" },
+      "suggested_start_place_id": "place_gdansk_townhall",
+      "season_recommendations": [],
+      "detail_ref": { "kind": "collection_public", "path": "collections/collection-gdansk-halfday/public.json" }
+    }
+  ],
+  "collections": [
+    {
+      "collection_id": "collection-gdansk-halfday",
+      "content_version": "1",
+      "city_id": "gdansk",
+      "localized": {
+        "title": {
+          "be": "Гданьск за паўдня",
+          "en": "Gdańsk in half a day"
+        },
+        "description": {
+          "be": "Дзве прапановы ў адной дузе: гід па трох кропках старога горада і ціхая карцінная паўза пасля яго.",
+          "en": "Two offers in one arc: the guide through the old town's three stops and a quiet painting pause after it."
+        }
+      },
+      "members": [
+        { "kind": "guide", "route_id": "gdansk-first-walk", "version": "1" },
+        { "kind": "place", "place_id": "place_gdansk_franciscan", "content_version": "1" }
+      ]
+    }
+  ]
+}
