@@ -26,15 +26,17 @@ test('the home shows the fixture card and no dead links — no placeholder cards
   assert.equal(page.cards[0]!.duration_min, 40);
   assert.equal(page.cards[0]!.distance_m, 2500);
   assert.equal(page.cards[0]!.stop_count, 2);
-  // TR-8: no mapHref on the page data — the /map route does not exist while
-  // the tile-provider decision is open (#111); the dead link stays hidden.
-  assert.equal('mapHref' in page, false);
+  // The founder's tile-provider decision (2026-09-21, results/G10.01.b.md)
+  // wired the /map route, so the catalog exposes the locale-prefixed entry —
+  // the TR-8 hiding is resolved, not silently reverted.
+  assert.equal(page.mapHref, '/map');
 });
 
 test('the en home renders the en facts behind the locale prefix', () => {
   const page = readSiteCatalogPage(publicRoot, 'en');
   assert.equal(page.cards[0]!.title, 'Demo guide: the cloth courtyard');
   assert.equal(page.cards[0]!.href, '/en/guides/demo-route-a1');
+  assert.equal(page.mapHref, '/en/map');
 });
 
 test('per-locale availability is shown by fact — uk is text-only (09 §8)', () => {
@@ -120,6 +122,10 @@ test('no page or component hardcodes an href or an external URL (acceptance 5: C
   assert.ok(sources.length > 0);
   for (const source of sources) {
     assert.doesNotMatch(source, /href\s*=\s*["']/, 'href must be a bound expression from appLinks or page data');
-    assert.doesNotMatch(source, /https?:\/\//, 'external URLs live only in lib/app-links.ts');
+    assert.doesNotMatch(
+      source,
+      /https?:\/\//,
+      'external URLs live only in the lib/ configs (app-links.ts, map-config.ts)',
+    );
   }
 });

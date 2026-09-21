@@ -21,4 +21,8 @@ export const en: UiStrings = {
   playStoreName: 'Google Play',
   minutesShort: 'min',
   kilometersShort: 'km',
+  mapTitle: 'City map',
+  mapIntro: 'An overview of the published routes and stops. The visitor’s position is never detected or used.',
+  mapRoutesHeading: 'Routes on the map',
+  mapAttribution: 'Map data © OpenStreetMap contributors (ODbL licence)',
 };

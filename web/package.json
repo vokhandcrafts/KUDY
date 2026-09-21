@@ -8,6 +8,7 @@
     "build": "next build && node --experimental-strip-types scripts/scan-rendered.ts"
   },
   "dependencies": {
+    "maplibre-gl": "^5.24.0",
     "next": "^15.5.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"

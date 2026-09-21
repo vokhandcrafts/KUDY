@@ -8,6 +8,7 @@ import path from 'node:path';
 import {
   readBundleCatalog,
   readBundleDiscoveryIndex,
+  readBundlePlacesGeo,
   readBundlePreviews,
   readBundleRoute,
   readPlaceProjection,
@@ -112,31 +113,38 @@ export interface CatalogCard {
 export interface CatalogPageData {
   cityId: string;
   cards: CatalogCard[];
-  // No mapHref: the static /map route does not exist while the tile-provider
-  // decision is open (#111) — a dead catalog entry is the worst of the three
-  // options (hide / show "coming soon" / show 404), so it stays hidden (TR-8).
+  // The static /map route exists since the founder's tile-provider decision
+  // (2026-09-21, recorded in docs/agent-tasks/results/G10.01.b.md) — until
+  // then the entry stayed hidden (TR-8: a dead link is the worst option).
+  mapHref: string;
+}
+
+// The published routes in catalog order: discovery editorial_order first, the
+// catalog file order breaking ties. One ordering for the catalog cards and the
+// map route list, so every page shows the same sequence.
+function orderedOffers(index: DiscoveryIndex, routes: CatalogRouteEntry[]): { entry: CatalogRouteEntry; offer: DiscoveryOffer }[] {
+  return routes
+    .map((entry, order) => ({ entry, order, offer: guideOffer(index, entry.route_id, entry.version) }))
+    .sort((a, b) => a.offer.editorial_order - b.offer.editorial_order || a.order - b.order)
+    .map(({ entry, offer }) => ({ entry, offer }));
 }
 
 export function readSiteCatalogPage(root: string, locale: UiLocale): CatalogPageData {
   const { routes, index, cityId } = readSiteCatalog(root);
-  const cards = routes
-    .map((entry, order) => ({ entry, order }))
-    .map(({ entry, order }) => ({ entry, order, offer: guideOffer(index, entry.route_id, entry.version) }))
-    .sort((a, b) => a.offer.editorial_order - b.offer.editorial_order || a.order - b.order)
-    .map(({ entry, offer }): CatalogCard => {
-      const route = unwrap(readBundleRoute(root, entry.route_id, entry.version), `bundle/${entry.route_id}/${entry.version}/route.json`);
-      return {
-        route_id: entry.route_id,
-        href: localePath(locale, `/guides/${entry.route_id}`),
-        title: pickText(offer.localized.title, locale, `discovery:offers:${entry.route_id}:${locale}`),
-        summary: pickText(offer.localized.summary, locale, `discovery:offers:${entry.route_id}:${locale}`),
-        duration_min: route.duration_min,
-        distance_m: route.distance_m,
-        stop_count: route.stops.length,
-        languages: languageFacts(offer),
-      };
-    });
-  return { cityId, cards };
+  const cards = orderedOffers(index, routes).map(({ entry, offer }): CatalogCard => {
+    const route = unwrap(readBundleRoute(root, entry.route_id, entry.version), `bundle/${entry.route_id}/${entry.version}/route.json`);
+    return {
+      route_id: entry.route_id,
+      href: localePath(locale, `/guides/${entry.route_id}`),
+      title: pickText(offer.localized.title, locale, `discovery:offers:${entry.route_id}:${locale}`),
+      summary: pickText(offer.localized.summary, locale, `discovery:offers:${entry.route_id}:${locale}`),
+      duration_min: route.duration_min,
+      distance_m: route.distance_m,
+      stop_count: route.stops.length,
+      languages: languageFacts(offer),
+    };
+  });
+  return { cityId, cards, mapHref: localePath(locale, '/map') };
 }
 
 export interface StopRow {
@@ -159,20 +167,15 @@ export interface GuidePageData {
   stops: StopRow[];
 }
 
-export function readSiteGuidePage(root: string, locale: UiLocale, routeId: string): GuidePageData {
-  const { routes, index, cityId } = readSiteCatalog(root);
-  const entry = routes.find((r) => r.route_id === routeId);
-  if (!entry) throw new SiteDataError('not-found', `catalog.json:routes:${routeId}`);
-  const route: RouteDoc = unwrap(readBundleRoute(root, routeId, entry.version), `bundle/${routeId}/${entry.version}/route.json`);
-  if (route.city_id !== cityId) {
-    throw new SiteDataError('schema-invalid', `catalog.json:discovery_index.path:${routeId}`);
-  }
-  const offer = guideOffer(index, routeId, entry.version);
+// Stop rows of one route, position order: base stops read their name from the
+// place projection, locked stops from the four-field previews (09 §5). Shared
+// by the guide page and the map page — one derivation, not two.
+function siteStopRows(root: string, locale: UiLocale, routeId: string, version: string, route: RouteDoc): StopRow[] {
   const previews = unwrap(
-    readBundlePreviews(root, routeId, entry.version, locale),
-    `bundle/${routeId}/${entry.version}/${locale}/base/previews.json`,
+    readBundlePreviews(root, routeId, version, locale),
+    `bundle/${routeId}/${version}/${locale}/base/previews.json`,
   );
-  const stops = [...route.stops]
+  return [...route.stops]
     .sort((a, b) => a.position - b.position)
     .map((stop): StopRow => {
       if (stop.access_tier === 'extended') {
@@ -195,6 +198,18 @@ export function readSiteGuidePage(root: string, locale: UiLocale, routeId: strin
         announce: null,
       };
     });
+}
+
+export function readSiteGuidePage(root: string, locale: UiLocale, routeId: string): GuidePageData {
+  const { routes, index, cityId } = readSiteCatalog(root);
+  const entry = routes.find((r) => r.route_id === routeId);
+  if (!entry) throw new SiteDataError('not-found', `catalog.json:routes:${routeId}`);
+  const route: RouteDoc = unwrap(readBundleRoute(root, routeId, entry.version), `bundle/${routeId}/${entry.version}/route.json`);
+  if (route.city_id !== cityId) {
+    throw new SiteDataError('schema-invalid', `catalog.json:discovery_index.path:${routeId}`);
+  }
+  const offer = guideOffer(index, routeId, entry.version);
+  const stops = siteStopRows(root, locale, routeId, entry.version, route);
   return {
     route_id: route.route_id,
     title: pickText(offer.localized.title, locale, `discovery:offers:${routeId}:${locale}`),
@@ -213,4 +228,82 @@ export function readSiteGuidePage(root: string, locale: UiLocale, routeId: strin
 export function guideStaticParams(): { route_id: string }[] {
   const { routes } = readSiteCatalog(getContentRoot());
   return routes.map((route) => ({ route_id: route.route_id }));
+}
+
+export interface MapStop {
+  stop_id: string;
+  place_id: string;
+  name: string;
+  locked: boolean;
+  lat: number;
+  lng: number;
+}
+
+export interface MapRoute {
+  route_id: string;
+  title: string;
+  href: string;
+  stops: MapStop[];
+}
+
+// GeoJSON point markers for the client map. GeoJSON coordinates are
+// [lng, lat] — the map tests assert the order so the axes can never silently
+// swap. Properties carry public names only; the client renders markers as
+// non-interactive dots.
+export interface MapMarkers {
+  type: 'FeatureCollection';
+  features: {
+    type: 'Feature';
+    geometry: { type: 'Point'; coordinates: [number, number] };
+    properties: { route_id: string; stop_id: string; name: string; locked: boolean };
+  }[];
+}
+
+export interface MapPageData {
+  cityId: string;
+  routes: MapRoute[];
+  markers: MapMarkers;
+}
+
+// The static city map data (G10.01.b step 3): every catalog route with its
+// stops in position order, each stop joined to its place's geo facts from the
+// bundle places.json. A stop whose place has no geo entry fails the build
+// loudly — a marker-less stop must never render as a silently missing dot.
+export function readSiteMapPage(root: string, locale: UiLocale): MapPageData {
+  const { routes, index, cityId } = readSiteCatalog(root);
+  const mapRoutes: MapRoute[] = [];
+  const features: MapMarkers['features'] = [];
+  for (const { entry, offer } of orderedOffers(index, routes)) {
+    const route: RouteDoc = unwrap(readBundleRoute(root, entry.route_id, entry.version), `bundle/${entry.route_id}/${entry.version}/route.json`);
+    const geo = unwrap(readBundlePlacesGeo(root, entry.route_id, entry.version), `bundle/${entry.route_id}/${entry.version}/places.json`);
+    const geoById = new Map(geo.map((place) => [place.id, place]));
+    const stops = siteStopRows(root, locale, entry.route_id, entry.version, route).map((row): MapStop => {
+      const place = geoById.get(row.place_id);
+      if (!place) {
+        throw new SiteDataError('not-found', `bundle/${entry.route_id}/${entry.version}/places.json:${row.place_id}`);
+      }
+      return {
+        stop_id: row.stop_id,
+        place_id: row.place_id,
+        name: row.name,
+        locked: row.locked,
+        lat: place.lat,
+        lng: place.lng,
+      };
+    });
+    mapRoutes.push({
+      route_id: entry.route_id,
+      title: pickText(offer.localized.title, locale, `discovery:offers:${entry.route_id}:${locale}`),
+      href: localePath(locale, `/guides/${entry.route_id}`),
+      stops,
+    });
+    for (const stop of stops) {
+      features.push({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [stop.lng, stop.lat] },
+        properties: { route_id: entry.route_id, stop_id: stop.stop_id, name: stop.name, locked: stop.locked },
+      });
+    }
+  }
+  return { cityId, routes: mapRoutes, markers: { type: 'FeatureCollection', features } };
 }

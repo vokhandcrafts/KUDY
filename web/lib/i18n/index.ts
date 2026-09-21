@@ -27,6 +27,10 @@ export interface UiStrings {
   playStoreName: string;
   minutesShort: string;
   kilometersShort: string;
+  mapTitle: string;
+  mapIntro: string;
+  mapRoutesHeading: string;
+  mapAttribution: string;
 }
 
 const STRINGS: Record<UiLocale, UiStrings> = { be, en };
