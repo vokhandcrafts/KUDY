@@ -30,6 +30,9 @@ export function CityMap({ markers, label }: { markers: MapMarkers; label: string
           container: containerRef.current,
           style: mapProvider.styleUrl,
         });
+        // Async style/tile failures (offline visitor, provider outage) never
+        // reach the synchronous catch — they land here and become visible.
+        map.on('error', fail);
         map.on('load', () => {
           try {
             if (disposed || !map) return;
@@ -77,5 +80,5 @@ export function CityMap({ markers, label }: { markers: MapMarkers; label: string
     };
   }, [markers]);
 
-  return <div ref={containerRef} aria-label={label} style={{ height: 360 }} />;
+  return <div ref={containerRef} role="region" aria-label={label} style={{ height: 360 }} />;
 }
