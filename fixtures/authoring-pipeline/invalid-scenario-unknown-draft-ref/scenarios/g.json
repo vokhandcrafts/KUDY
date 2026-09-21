@@ -1,0 +1,22 @@
+{
+  "scenario_id": "g",
+  "city": "gdansk",
+  "locale": "be",
+  "theme": "Тэма фікстуры",
+  "path_minutes": 30,
+  "stops": [
+    {
+      "place_id": "place-x",
+      "title": "Кропка фікстуры",
+      "walk_minutes": 10,
+      "drafts": [
+        "be",
+        "ghost"
+      ],
+      "refs": [
+        "src-x"
+      ],
+      "season_recommendations": []
+    }
+  ]
+}

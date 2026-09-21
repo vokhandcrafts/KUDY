@@ -9,6 +9,11 @@
 
 ## Блокі
 
+### bl-100 — orientation — увага, без фактаў
+
+> Look up along the façade and walk slowly along the wall: this tower is visible from different corners of the old town.
+
+
 ### bl-101 — fact — факт
 
 > St Mary's took one hundred and sixty years to build: begun in 1343, finished in 1503.
@@ -38,5 +43,5 @@
 
 ## Што зрабіць аўтару
 
-Адзначце ў claims.json кожнае цвярджэнне (mark: ok / rejected, з mark_by і mark_at): чакаюць 6.
+Адзначце ў claims.json кожнае цвярджэнне (mark: ok / rejected, з mark_by і mark_at): чакаюць 16.
 

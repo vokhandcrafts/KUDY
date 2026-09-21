@@ -11,8 +11,8 @@
     "start": "expo start --dev-client",
     "android": "expo start --dev-client --android",
     "ios": "expo start --dev-client --ios",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p services",
-    "test": "node --test --experimental-strip-types --test-reporter=spec docs/run-model/run-model.test.mjs \"tools/build-bundle/*.test.mjs\" \"tools/validate/*.test.mjs\" \"tools/publish-catalog/*.test.mjs\" docs/agent-tasks/web/g10-dependency-guards.test.mjs contracts/contracts.test.mjs \"services/**/*.test.ts\" \"web/**/*.test.ts\""
+    "typecheck": "tsc --noEmit && tsc --noEmit -p services && tsc --noEmit -p core",
+    "test": "node --test --experimental-strip-types --test-reporter=spec docs/run-model/run-model.test.mjs \"tools/build-bundle/*.test.mjs\" \"tools/validate/*.test.mjs\" \"tools/publish-catalog/*.test.mjs\" docs/agent-tasks/web/g10-dependency-guards.test.mjs contracts/contracts.test.mjs \"services/**/*.test.ts\" \"core/**/*.test.ts\" \"web/**/*.test.ts\""
   },
   "dependencies": {
     "@maplibre/maplibre-react-native": "11.3.10",

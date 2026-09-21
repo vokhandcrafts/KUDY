@@ -69,5 +69,5 @@
 
 ## Што зрабіць аўтару
 
-Адзначце ў claims.json кожнае цвярджэнне (mark: ok / rejected, з mark_by і mark_at): чакаюць 6.
+Адзначце ў claims.json кожнае цвярджэнне (mark: ok / rejected, з mark_by і mark_at): чакаюць 16.
 

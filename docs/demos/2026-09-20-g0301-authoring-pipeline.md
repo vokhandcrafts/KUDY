@@ -50,7 +50,7 @@ node tools/validate/authoring-review-report.mjs --in authoring/gdansk --draft gd
   - Локатар: том VII, ст. 824, абзац 2 — src-eb1911-danzig — Danzig. — In: Encyclopædia Britannica. 11th ed. Vol. 7 (Converse, George Thomas — Day, Ernest) (public_domain, 1911)
 ```
 
-Поўная прыёмачная сюіта: 17 негатыўных фікстур (па адной парушэнні),
+Поўная прыёмачная сюіта: 30 негатыўных фікстур (па адной парушэнні),
 сінтэтычны цыкл да approved, брама `content-not-approved` на адзіным шляху
 ў бандл, вартавы «бандл не чытае authoring/», пераклад асобным драфтам,
 пашкоджаны ўвод — дыягностыкі, не крэх:
@@ -60,7 +60,7 @@ node --test --test-reporter=tap --test-concurrency=1 tools/validate/authoring.te
 ```
 
 ```output
-# tests 26
-# pass 26
+# tests 45
+# pass 45
 # fail 0
 ```
