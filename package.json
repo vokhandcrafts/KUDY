@@ -12,8 +12,6 @@
     "android": "expo start --dev-client --android",
     "ios": "expo start --dev-client --ios",
     "typecheck": "tsc --noEmit && tsc --noEmit -p services && tsc --noEmit -p core",
-    "arch:check": "node tools/arch/arch-check.mjs --config .dependency-cruiser.cjs --baseline tools/arch/baseline.json core services contracts tools web",
-    "arch:baseline": "node tools/arch/arch-baseline.mjs --config .dependency-cruiser.cjs --baseline tools/arch/baseline.json core services contracts tools web",
     "test": "node --test --experimental-strip-types --test-reporter=spec docs/run-model/run-model.test.mjs \"tools/build-bundle/*.test.mjs\" \"tools/validate/*.test.mjs\" \"tools/publish-catalog/*.test.mjs\" docs/agent-tasks/web/g10-dependency-guards.test.mjs contracts/contracts.test.mjs \"services/**/*.test.ts\" \"core/**/*.test.ts\" \"web/**/*.test.ts\""
   },
   "dependencies": {
@@ -31,7 +29,6 @@
   "devDependencies": {
     "@types/geojson": "7946.0.16",
     "@types/react": "19.1.10",
-    "dependency-cruiser": "18.4.0",
     "typescript": "5.9.2"
   }
 }
