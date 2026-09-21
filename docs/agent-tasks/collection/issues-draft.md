@@ -16,7 +16,7 @@ Labels: none set by the publisher — `epic`, `agent:ready`, `prio:*` belong to 
 
 An internal, local tool that turns author-chosen web sources (news portals, wikis, YouTube) into a raw library with passports and rights, then cleans it into `Source` records for the content pipeline `07`. Nothing publishes; guides are assembled by the author by hand.
 
-Specification: `docs/24_web_collection.md` (draft — lands via PR #SPEC_PR). Pipeline: `docs/07_content_pipeline.md`.
+Specification: `docs/24_web_collection.md` (draft — lands via PR #152). Pipeline: `docs/07_content_pipeline.md`.
 
 ## Tasks
 
@@ -42,7 +42,7 @@ Tasks stay in backlog until the operator adds labels. G17.08 additionally waits 
 
 ## Epic
 
-G17 (web collection epic).
+Epic: #154.
 
 ## Goal
 
@@ -78,7 +78,7 @@ npm test -- tools/collector
 
 ## Epic
 
-G17 (web collection epic).
+Epic: #154.
 
 ## Goal
 
@@ -98,7 +98,7 @@ Fetching pages (later collectors); photo download (empty `media/` dir only); cle
 
 ## Dependencies
 
-`Blocked-by: #G1701a` — G17.01.a.
+`Blocked-by: #155` — G17.01.a.
 
 ## Proof
 
@@ -114,7 +114,7 @@ npm test -- tools/collector
 
 ## Epic
 
-G17 (web collection epic).
+Epic: #154.
 
 ## Goal
 
@@ -135,7 +135,7 @@ Photos (G17.03), wiki/YouTube sources (G17.04/05), cleaning (G17.06).
 
 ## Dependencies
 
-`Blocked-by: #G1701b` — G17.01.b.
+`Blocked-by: #156` — G17.01.b.
 
 ## Proof
 
@@ -151,7 +151,7 @@ npm test -- tools/collector
 
 ## Epic
 
-G17 (web collection epic).
+Epic: #154.
 
 ## Goal
 
@@ -171,7 +171,7 @@ Cleaning-stage normalization (G17.06), YouTube thumbnails (G17.05), image proces
 
 ## Dependencies
 
-`Blocked-by: #G1701b` — G17.01.b.
+`Blocked-by: #156` — G17.01.b.
 
 ## Proof
 
@@ -187,7 +187,7 @@ npm test -- tools/collector
 
 ## Epic
 
-G17 (web collection epic).
+Epic: #154.
 
 ## Goal
 
@@ -206,7 +206,7 @@ Non-MediaWiki encyclopedias; cleaning; photos.
 
 ## Dependencies
 
-`Blocked-by: #G1701b` — G17.01.b.
+`Blocked-by: #156` — G17.01.b.
 
 ## Proof
 
@@ -222,7 +222,7 @@ npm test -- tools/collector
 
 ## Epic
 
-G17 (web collection epic).
+Epic: #154.
 
 ## Goal
 
@@ -242,7 +242,7 @@ Punctuation restoration of auto-captions (G17.06), speech recognition, audio dow
 
 ## Dependencies
 
-`Blocked-by: #G1701b` — G17.01.b.
+`Blocked-by: #156` — G17.01.b.
 
 ## Proof
 
@@ -258,7 +258,7 @@ npm test -- tools/collector
 
 ## Epic
 
-G17 (web collection epic).
+Epic: #154.
 
 ## Goal
 
@@ -278,7 +278,7 @@ LLM passes; search/basket (G17.07); changes to `07` stages.
 
 ## Dependencies
 
-`Blocked-by: #G1702, #G1704, #G1705` — G17.02, G17.04, G17.05.
+`Blocked-by: #157, #159, #160` — G17.02, G17.04, G17.05.
 
 ## Proof
 
@@ -294,7 +294,7 @@ npm test -- tools/collector
 
 ## Epic
 
-G17 (web collection epic).
+Epic: #154.
 
 ## Goal
 
@@ -313,7 +313,7 @@ Guide auto-composition (rejected by the spec), changes to `07`, app code.
 
 ## Dependencies
 
-`Blocked-by: #G1706` — G17.06.
+`Blocked-by: #161` — G17.06.
 
 ## Proof
 
@@ -329,7 +329,7 @@ npm test -- tools/collector
 
 ## Epic
 
-G17 (web collection epic).
+Epic: #154.
 
 ## Goal
 
@@ -347,7 +347,7 @@ Publishing anything, a second city, ASR, changes to `07` or the app.
 
 ## Dependencies
 
-`Blocked-by: #G1706` — G17.06, and the founder-decisions tracking issue.
+`Blocked-by: #161` — G17.06, and the founder-decisions tracking issue (#153).
 
 ## Proof
 
