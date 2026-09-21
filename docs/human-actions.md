@@ -30,7 +30,7 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/150 (issue #58)
 PR: https://github.com/vokhandcrafts/KUDY/pull/145
 
 ### 2026-09-21 — змерж PR #147 (G15.01, чысты аўтарскі падбор)
-Што зрабіць: праверце і змержуйце PR #147 у main — ён рэалізуе чысты селектар падбору G15.01 і закрывае issue #68.
+Што зрабіць: праверце і змержуйце PR #147 у main — ён рэалізуе чысты селектар падбору G15.01 і закрывае issue #68. Перад гэтым перааўтарызуйце gh на сваёй машыне (`gh auth login -h github.com`): токен сцёк (HTTP 401), без яго агент не можа дапоўніць пайплайн рэвью/суддзі і абнавіць цела PR.
 PR: https://github.com/vokhandcrafts/KUDY/pull/147
 Issue: https://github.com/vokhandcrafts/KUDY/issues/68
 
