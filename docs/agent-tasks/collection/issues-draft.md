@@ -354,7 +354,7 @@ Publishing anything, a second city, ASR, changes to `07` or the app.
 The fence audit log of the pilot run shows 0 fetches outside allowed hosts.
 
 ```
-grep -c '"allowed": false' <pilot-run>/fence-audit.jsonl   # prints 0
+grep -c '"fetched": true, "decision": "denied"' <pilot-run>/fence-audit.jsonl   # prints 0
 ```
 
 ---
