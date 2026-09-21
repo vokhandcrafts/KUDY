@@ -311,6 +311,10 @@ test('g03.02: the season reason accepts the draft string and the canon localized
   fs.writeFileSync(scenarioFile, scenarioWith({ be: '' }));
   const result = validateAuthoring(dir);
   assert.deepEqual(result.errors.map((e) => e.rule), ['season-recommendation-without-reason'], 'an empty localized value is no reason');
+
+  fs.writeFileSync(scenarioFile, scenarioWith({}));
+  const empty = validateAuthoring(dir);
+  assert.deepEqual(empty.errors.map((e) => e.rule), ['season-recommendation-without-reason'], 'an empty object is no reason');
 });
 
 test('corrupt input answers with diagnostics, never a thrown error', () => {
