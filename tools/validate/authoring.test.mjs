@@ -23,7 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { validatePackage } from './validate-package.mjs';
-import { validateAuthoring } from './validate-authoring.mjs';
+import { validateAuthoring, BASE_PURCHASE, BASE_DANGLE } from './validate-authoring.mjs';
 import { renderReviewReport } from './authoring-review-report.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -54,7 +54,9 @@ const NEGATIVE = {
   // G03.02 (issue #58): tier rules and the guide scenario.
   'invalid-missing-orientation': 'missing-orientation',
   'invalid-base-purchase-hook': 'base-purchase-hook',
+  'invalid-base-purchase-hook-nabyts': 'base-purchase-hook',
   'invalid-base-paid-dangle': 'base-paid-dangle',
+  'invalid-base-paid-dangle-noun': 'base-paid-dangle',
   'invalid-extended-without-value': 'extended-without-value',
   'invalid-scenario-id-mismatch': 'scenario-id-mismatch',
   'invalid-scenario-unknown-draft-ref': 'scenario-unknown-draft-ref',
@@ -251,17 +253,64 @@ test('g03.02 criterion 5: the scenario links every stop to own drafts, verified 
 });
 
 test('g03.02: a base draft is free of purchase hooks and paid-layer dangling (13 §3–§4)', () => {
-  const hook = /купіць|купля|пакупк|набыцц|за дадатковую плату|поўн(ая|ы|ае) версі|unlock|purchase|upgrade|subscribe/i;
-  const dangle = /працяг|пашыран(ая|ы|ае|ага|ым)|у поўнай гісторы|to be continued|continue (with|in) the extended/i;
   const draftsDir = path.join(AUTHORING, 'drafts');
   for (const name of fs.readdirSync(draftsDir).filter((n) => n.endsWith('.json'))) {
     const draft = JSON.parse(fs.readFileSync(path.join(draftsDir, name), 'utf8'));
     if (draft.tier !== 'base') continue;
     for (const block of draft.blocks) {
-      assert.doesNotMatch(block.text, hook, `${name}/${block.block_id} must not sell`);
-      assert.doesNotMatch(block.text, dangle, `${name}/${block.block_id} must not dangle the paid layer`);
+      assert.doesNotMatch(block.text, BASE_PURCHASE, `${name}/${block.block_id} must not sell`);
+      assert.doesNotMatch(block.text, BASE_DANGLE, `${name}/${block.block_id} must not dangle the paid layer`);
     }
   }
+});
+
+test('g03.02: the sell/dangle patterns cover the project vocabulary without false positives', () => {
+  // Alternatives beyond the isolating fixtures — pinned here so widening or
+  // narrowing the patterns fails this suite (implementation-rules 1).
+  for (const phrase of ['поўнай версіі', 'поўную версію', 'набыць пашырэнне', 'купіць', 'purchase']) {
+    assert.match(phrase, BASE_PURCHASE, `BASE_PURCHASE must catch «${phrase}»`);
+  }
+  for (const phrase of ['у пашырэнні', 'платнае пашырэнне', 'працяг гісторыі', 'пашыраная версія']) {
+    assert.match(phrase, BASE_DANGLE, `BASE_DANGLE must catch «${phrase}»`);
+  }
+  for (const phrase of ['пашырэнне гандлю', 'сцэнару пашырэнне не тычыцца']) {
+    assert.doesNotMatch(phrase, BASE_DANGLE, `BASE_DANGLE must stay narrow: «${phrase}»`);
+  }
+});
+
+test('g03.02: the season reason accepts the draft string and the canon localized object', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'g0302-season-'));
+  fs.mkdirSync(path.join(dir, 'drafts'));
+  fs.mkdirSync(path.join(dir, 'scenarios'));
+  fs.writeFileSync(path.join(dir, 'sources.json'), JSON.stringify([{ source_id: 'src-x', title: 'T', creator: 'c', year: 1900, rights: 'public_domain', ref: 'https://example.com/x' }]));
+  fs.writeFileSync(path.join(dir, 'fragments.json'), JSON.stringify([{ fragment_id: 'fr-1', source_id: 'src-x', locator: { page: 1, paragraph: 1 }, quote: 'Q.' }]));
+  fs.writeFileSync(path.join(dir, 'claims.json'), JSON.stringify([{ claim_id: 'cl-1', text: 'C', support: ['fr-1'], mark: null, mark_by: null, mark_at: null }]));
+  fs.writeFileSync(
+    path.join(dir, 'drafts', 'be.json'),
+    JSON.stringify({
+      draft_id: 'be', locale: 'be', place_id: 'place-x', tier: 'base', source_draft_id: null, title: 'T',
+      blocks: [
+        { block_id: 'b0', kind: 'orientation', text: 'Арыентоўны сказ: паглядзіце на фасад.' },
+        { block_id: 'b1', kind: 'fact', claims: ['cl-1'], text: 'Факт фікстуры.' },
+      ],
+      review: { by: null, at: null, decision: 'pending' },
+    }),
+  );
+  const scenarioWith = (reason) => JSON.stringify({
+    scenario_id: 'g', city: 'gdansk', locale: 'be', theme: 'Тэма', path_minutes: 30,
+    stops: [{ place_id: 'place-x', title: 'P', walk_minutes: 10, drafts: ['be'], refs: ['src-x'], season_recommendations: [{ season: 'autumn', reason }] }],
+  });
+  const scenarioFile = path.join(dir, 'scenarios', 'g.json');
+
+  fs.writeFileSync(scenarioFile, scenarioWith('Прыгожа ўвосень праз колер дрэў'));
+  assert.deepEqual(validateAuthoring(dir), { ok: true, errors: [], warnings: [] }, 'the draft string form is a reason');
+
+  fs.writeFileSync(scenarioFile, scenarioWith({ be: 'Прыгожа ўвосень праз колер дрэў', en: 'Autumn colours' }));
+  assert.deepEqual(validateAuthoring(dir), { ok: true, errors: [], warnings: [] }, 'the canon localized object is a reason');
+
+  fs.writeFileSync(scenarioFile, scenarioWith({ be: '' }));
+  const result = validateAuthoring(dir);
+  assert.deepEqual(result.errors.map((e) => e.rule), ['season-recommendation-without-reason'], 'an empty localized value is no reason');
 });
 
 test('corrupt input answers with diagnostics, never a thrown error', () => {
