@@ -226,14 +226,14 @@ Epic: #154.
 
 ## Goal
 
-Fetch subtitles with `yt-dlp` (manual > automatic), store the transcript split into paragraphs with timecodes, video metadata, thumbnail as cover; subtitle-less videos land in `asr_backlog`. Tests use bundled VTT fixtures — no network. Full brief: `docs/agent-tasks/collection/G17.05.md`.
+Fetch subtitles with `yt-dlp` (manual > automatic), store the transcript split into paragraphs with timecodes, video metadata, thumbnail as cover; subtitle-less videos land in `asr-backlog`. Tests use bundled VTT fixtures — no network. Full brief: `docs/agent-tasks/collection/G17.05.md`.
 
 ## Acceptance criteria
 
 1. [ ] VTT fixture → paragraphs each anchored to a timecode; paragraph count and first/last timecodes asserted.
 2. [ ] Fixture with both manual and automatic subtitles → manual stored and kind recorded.
 3. [ ] Metadata row complete; thumbnail named per the slug rule.
-4. [ ] Video id without subtitles → `asr_backlog` entry, run continues with a diagnostic.
+4. [ ] Video id without subtitles → `asr-backlog` entry, run continues with a diagnostic.
 5. [ ] Missing yt-dlp binary → explicit diagnostic at startup, no partial records; suites wired into `npm test`; jscpd clean.
 
 ## Out of scope
