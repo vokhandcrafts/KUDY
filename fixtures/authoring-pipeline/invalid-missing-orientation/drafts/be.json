@@ -1,0 +1,23 @@
+{
+  "draft_id": "be",
+  "locale": "be",
+  "place_id": "place-x",
+  "tier": "base",
+  "source_draft_id": null,
+  "title": "Фікстура",
+  "blocks": [
+    {
+      "block_id": "b1",
+      "kind": "fact",
+      "claims": [
+        "cl-1"
+      ],
+      "text": "Факт фікстуры."
+    }
+  ],
+  "review": {
+    "by": null,
+    "at": null,
+    "decision": "pending"
+  }
+}
