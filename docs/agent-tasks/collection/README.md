@@ -6,7 +6,7 @@
 |---|---|---|---|
 | [G17.01.a](G17.01.a.md) | Каркас калектара: схема кампаніі, схема сховішча, цыкл запуску | першым у G17 | [#155](https://github.com/vokhandcrafts/KUDY/issues/155) |
 | [G17.01.b](G17.01.b.md) | Сырая копія старонкі, пашпарт, дэдуплікацыя, працяг пасля перапынку | G17.01.a | [#156](https://github.com/vokhandcrafts/KUDY/issues/156) |
-| [G17.02](G17.02.md) | Паўзук з парканам (Playwright) і аудит-лог паркану | G17.01.b | [#157](https://github.com/vokhandcrafts/KUDY/issues/157) |
+| [G17.02](G17.02.md) | Паўзук з парканам (Playwright) і аўдыт-лог паркану | G17.01.b | [#157](https://github.com/vokhandcrafts/KUDY/issues/157) |
 | [G17.03](G17.03.md) | Фота: імёны па слагу артыкула, табліца `media`, пазіцыі ў тэксце | G17.01.b | [#158](https://github.com/vokhandcrafts/KUDY/issues/158) |
 | [G17.04](G17.04.md) | Вікі-калектар (MediaWiki API, CC BY-SA з атрыбуцыяй) | G17.01.b | [#159](https://github.com/vokhandcrafts/KUDY/issues/159) |
 | [G17.05](G17.05.md) | YouTube-калектар (yt-dlp, ручныя субтытры, `asr-backlog`) | G17.01.b | [#160](https://github.com/vokhandcrafts/KUDY/issues/160) |
@@ -22,6 +22,6 @@
 
 ## Як запускаць
 
-> Выканай толькі `docs/agent-tasks/collection/G17.02.md`. Прачытай яго ўваходы, правер залежнасці, вынік і доказы захавай паводле файла.
+> Выканай толькі `docs/agent-tasks/collection/G17.01.a.md`. Прачытай яго ўваходы, правер залежнасці, вынік і доказы захавай паводле файла.
 
 Перад запускам праверыць, што blocker закрыты ў default branch, а не толькі ў WIP-галіне. Вынікі — у `docs/agent-tasks/results/<ID>.md`.
