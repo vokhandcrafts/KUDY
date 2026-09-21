@@ -278,6 +278,10 @@ test('corrupt input answers with diagnostics, never a thrown error', () => {
     '{"draft_id": "be", "blocks": null, "review": {"decision": "approved"}, "source_draft_id": "be"}',
   );
   fs.writeFileSync(path.join(dir, 'drafts', 'broken.json'), '{"draft_id": ');
+  fs.writeFileSync(
+    path.join(dir, 'drafts', 'empty.json'),
+    '{"draft_id": "empty", "place_id": "place-x", "locale": "be", "tier": "base", "title": "T", "blocks": [], "review": {"decision": "pending"}}',
+  );
   fs.mkdirSync(path.join(dir, 'scenarios'));
   fs.writeFileSync(path.join(dir, 'scenarios', 'broken.json'), '{"scenario_id": ');
   fs.writeFileSync(path.join(dir, 'scenarios', 's2.json'), '{"scenario_id": "s2", "stops": "x"}');
@@ -290,4 +294,5 @@ test('corrupt input answers with diagnostics, never a thrown error', () => {
   assert.ok(rules.has('invalid-shape'), `missing invalid-shape: ${result.errors.map((e) => e.rule).join()}`);
   assert.ok(rules.has('invalid-value'), `missing invalid-value: ${result.errors.map((e) => e.rule).join()}`);
   assert.ok(rules.has('invalid-json'), `missing invalid-json: ${result.errors.map((e) => e.rule).join()}`);
+  assert.ok(rules.has('missing-orientation'), `missing missing-orientation: ${result.errors.map((e) => e.rule).join()}`);
 });
