@@ -1,8 +1,9 @@
 // G10.01.b step 1: the city catalog — only real published entries from the
 // catalog + discovery index («EXPLORE не імітуе каталог», 15 R08): with one
-// fixture guide this renders that guide's card, no placeholder cards. The map
-// entry stays hidden until the tile-provider decision (#111) — a dead link to
-// the nonexistent /map route is worse than no entry (TR-8).
+// fixture guide this renders that guide's card plus the map entry, no
+// placeholder cards. The map entry was hidden while /map did not exist
+// (TR-8); the founder's tile-provider decision (2026-09-21, #111) wired the
+// route, so the entry is back.
 import { localePath } from '../lib/content/site.ts';
 import type { CatalogPageData } from '../lib/content/site.ts';
 import type { UiLocale, UiStrings } from '../lib/i18n/index.ts';
@@ -33,6 +34,10 @@ export function CatalogPage({ locale, data, strings }: {
             />
           </li>
         ))}
+        <li key="map-entry">
+          <a href={data.mapHref}>{strings.mapTitle}</a>
+          <p>{strings.mapIntro}</p>
+        </li>
       </ul>
       <CalmOffer strings={strings} />
     </SiteShell>

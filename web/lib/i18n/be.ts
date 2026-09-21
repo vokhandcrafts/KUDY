@@ -22,4 +22,8 @@ export const be: UiStrings = {
   playStoreName: 'Google Play',
   minutesShort: 'хв',
   kilometersShort: 'км',
+  mapTitle: 'Карта горада',
+  mapIntro: 'Агляд публічных маршрутаў і кропак. Пазіцыя наведвальніка не вызначаецца і не выкарыстоўваецца.',
+  mapRoutesHeading: 'Маршруты на карце',
+  mapAttribution: 'Даныя карты © удзельнікі OpenStreetMap (ліцэнзія ODbL)',
 };

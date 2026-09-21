@@ -167,3 +167,20 @@ export interface CollectionProjection {
 }
 
 export type PublicProjection = PlaceProjection | CollectionProjection;
+
+// place.schema.json — one entry of the bundle places.json (locale-neutral geo
+// facts, 09 §3): lat/lng/trigger_radius_m/kind without names or descriptions,
+// which live in the per-locale projections. Field names verbatim from the
+// schema; the map page reads lat/lng for the static overview markers.
+export interface PlaceGeoDoc {
+  origin?: 'official' | 'imported';
+  id: string;
+  content_version: string;
+  lat: number;
+  lng: number;
+  trigger_radius_m: number;
+  district?: string;
+  kind: string;
+  photo?: string;
+  name_audio_refs?: Partial<Record<Locale, string>>;
+}
