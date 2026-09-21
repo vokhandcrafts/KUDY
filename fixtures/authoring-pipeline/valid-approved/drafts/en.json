@@ -7,6 +7,11 @@
   "title": "Fixture",
   "blocks": [
     {
+      "block_id": "b0",
+      "kind": "orientation",
+      "text": "Fixture orientation line: look at the façade."
+    },
+    {
       "block_id": "b1",
       "kind": "fact",
       "claims": [
