@@ -10,7 +10,7 @@ When you claim, execute, block or hand back a task tracked as a GitHub issue in 
 
 Search before adding helpers. On a jscpd fail, refactor or reuse; do not paste a second variant.
 
-Local pre-push: `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .`
+Local pre-push: `npm run arch:check`, then `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .`
 
 ## Publish task breakdowns to GitHub Issues
 

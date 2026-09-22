@@ -1,0 +1,41 @@
+{
+  "generated": "2026-09-22",
+  "entries": [
+    {
+      "rule": "tools-zone-closed",
+      "from": "tools/publish-catalog/publish-catalog.test.mjs",
+      "to": "web/lib/content/interim-catalog.ts",
+      "since": "2026-09-22"
+    },
+    {
+      "rule": "web-zone-closed",
+      "from": "web/lib/content/interim-catalog.ts",
+      "to": "tools/build-bundle/build-bundle.mjs",
+      "since": "2026-09-22"
+    },
+    {
+      "rule": "web-zone-closed",
+      "from": "web/lib/content/leak-guard.test.ts",
+      "to": "tools/build-bundle/build-bundle.mjs",
+      "since": "2026-09-22"
+    },
+    {
+      "rule": "web-zone-closed",
+      "from": "web/lib/content/leak-parity.test.ts",
+      "to": "tools/build-bundle/build-bundle.mjs",
+      "since": "2026-09-22"
+    },
+    {
+      "rule": "web-zone-closed",
+      "from": "web/lib/content/test-fixture.ts",
+      "to": "tools/build-bundle/build-bundle.mjs",
+      "since": "2026-09-22"
+    },
+    {
+      "rule": "web-zone-closed",
+      "from": "web/scripts/build-content.ts",
+      "to": "tools/build-bundle/build-bundle.mjs",
+      "since": "2026-09-22"
+    }
+  ]
+}
