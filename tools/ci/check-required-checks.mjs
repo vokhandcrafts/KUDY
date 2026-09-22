@@ -25,6 +25,18 @@ if (!/working-directory:\s*web/.test(text)) {
   failures.push('required-checks.yml does not install/build in web/');
 }
 
+// G18.01 revert guard — the layer-boundary gate is config-as-code
+// (implementation-rules 1 and 18): losing the arch:check script or the
+// tools/arch npm-test glob must turn this committed check red, or the gate
+// could be disabled silently.
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+if (!pkg.scripts?.['arch:check']) {
+  failures.push('package.json has no arch:check script');
+}
+if (!/tools\/arch/.test(pkg.scripts?.test ?? '')) {
+  failures.push('npm test glob does not include tools/arch');
+}
+
 if (failures.length > 0) {
   console.error('guard-required-checks: FAIL');
   for (const failure of failures) console.error(`- ${failure}`);
