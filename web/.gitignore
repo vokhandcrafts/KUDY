@@ -2,6 +2,7 @@
 # no content copy is ever committed (implementation-rules 5). Root-anchored so
 # lib/content/ (the readers) is never matched.
 /content/
+/public/content/
 /node_modules/
 /.next/
 /out/
