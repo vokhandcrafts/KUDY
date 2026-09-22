@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p services && tsc --noEmit -p core",
     "arch:check": "node tools/arch/arch-check.mjs --config .dependency-cruiser.cjs --baseline tools/arch/baseline.json core services contracts tools web",
     "arch:baseline": "node tools/arch/arch-baseline.mjs --config .dependency-cruiser.cjs --baseline tools/arch/baseline.json core services contracts tools web",
-    "test": "node --test --experimental-strip-types --test-reporter=spec docs/run-model/run-model.test.mjs \"tools/arch/*.test.mjs\" \"tools/arch-surface/*.test.mjs\" \"tools/build-bundle/*.test.mjs\" \"tools/validate/*.test.mjs\" \"tools/publish-catalog/*.test.mjs\" docs/agent-tasks/web/g10-dependency-guards.test.mjs contracts/contracts.test.mjs \"services/**/*.test.ts\" \"core/**/*.test.ts\" \"web/**/*.test.ts\""
+    "test": "node --test --experimental-strip-types --test-reporter=spec docs/run-model/run-model.test.mjs \"tools/arch/*.test.mjs\" \"tools/arch-surface/*.test.mjs\" \"tools/build-bundle/*.test.mjs\" \"tools/validate/*.test.mjs\" \"tools/publish-catalog/*.test.mjs\" docs/agent-tasks/web/g10-dependency-guards.test.mjs contracts/contracts.test.mjs \"spikes/G06.08-prototype/test/*.test.mjs\" \"services/**/*.test.ts\" \"core/**/*.test.ts\" \"web/**/*.test.ts\""
   },
   "dependencies": {
     "@maplibre/maplibre-react-native": "11.3.10",
