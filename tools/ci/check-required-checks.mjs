@@ -37,6 +37,13 @@ if (!/tools\/arch/.test(pkg.scripts?.test ?? '')) {
   failures.push('npm test glob does not include tools/arch');
 }
 
+// G18.03 revert guard — same class as the tools/arch glob: losing the
+// tools/arch-surface npm-test glob would drop the surface-reader suite
+// silently (implementation-rules 1 and 7).
+if (!/tools\/arch-surface/.test(pkg.scripts?.test ?? '')) {
+  failures.push('npm test glob does not include tools/arch-surface');
+}
+
 if (failures.length > 0) {
   console.error('guard-required-checks: FAIL');
   for (const failure of failures) console.error(`- ${failure}`);

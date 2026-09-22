@@ -173,7 +173,7 @@ export const migrationSteps: MigrationStep[] = [
   {
     version: 1,
     up: (driver) => {
-      driver.exec(INITIAL_SCHEMA_DDL);
+      driver.execSql(INITIAL_SCHEMA_DDL);
     },
   },
 ];
