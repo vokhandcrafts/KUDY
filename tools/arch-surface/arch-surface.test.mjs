@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -97,5 +98,22 @@ test('the fixtures stay valid TypeScript for the repo typecheck scope', () => {
     if (specifier) {
       assert.match(specifier[1], /^node:/, `fixture import must resolve: ${specifier[1]}`);
     }
+  }
+});
+
+test('an unreadable file is marked (unreadable), not misreported as empty', { skip: process.platform === 'win32' && 'POSIX file permissions' }, () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'arch-surface-unreadable-'));
+  try {
+    const file = path.join(dir, 'locked.ts');
+    fs.writeFileSync(file, 'export const secret = 1;\n');
+    fs.chmodSync(file, 0o000);
+    const run = runSurface(dir);
+    fs.chmodSync(file, 0o644);
+    assert.equal(run.status, 0, run.stderr);
+    assert.match(run.stdout, /exports: \(unreadable\)/);
+    assert.match(run.stdout, /imports: \(unreadable\)/);
+    assert.match(run.stderr, /cannot read/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 3 });
   }
 });
