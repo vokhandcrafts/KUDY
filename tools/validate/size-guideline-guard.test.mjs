@@ -1,8 +1,9 @@
 // G18.04 — guard for the size guideline in the review rules (issue #167).
 // Checks docs/agent-rules/code-review.md keeps the "Size orientation — one phrase, not
 // dogma" section with the ≤400-lines / ≤12-public-methods orientation and the one-phrase
-// reviewer obligation. Fails if the section is removed or any of those anchors is lost.
-// The guideline lives only in code-review.md — this guard pins that single home.
+// reviewer obligation. Fails if the section is removed, duplicated, or any of those
+// anchors is lost. The guideline lives only in code-review.md — this guard pins that
+// single home.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -23,8 +24,9 @@ const ANCHORS = [
   'next real touch',
 ];
 
-// Reads the rules file, returns the guideline section body (up to the next heading).
-// Throws on a missing file, a missing section, or a lost anchor.
+// Reads the rules file, returns the guideline section body (up to the next real heading;
+// `#` lines inside ``` fences are body, not boundaries). Throws on a missing file, a
+// missing or duplicated section, or a lost anchor.
 function checkSizeGuideline(filePath = RULES) {
   let text;
   try {
@@ -42,8 +44,12 @@ function checkSizeGuideline(filePath = RULES) {
   }
   const at = lines.findIndex((line) => line.trim() === HEADING);
   const body = [];
-  for (let i = at + 1; i < lines.length && !lines[i].startsWith('#'); i++) {
-    body.push(lines[i]);
+  let inFence = false;
+  for (let i = at + 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.trimStart().startsWith('```')) inFence = !inFence;
+    if (!inFence && line.startsWith('#')) break;
+    body.push(line);
   }
   const bodyText = body.join('\n');
   for (const anchor of ANCHORS) {
@@ -78,15 +84,30 @@ test('the guard fails when the rules file is removed', () => {
 });
 
 test('the guard fails when the guideline section is removed', () => {
-  const withoutSection = (t) => t.replace(`${HEADING}\n\nA file over ~400 lines or a contract with more than ~12 public methods obliges the\nreviewer to write one phrase answering a single question: is there a second owner or\na contract asking to be extracted? The numbers are orientation, not a gate — no CI\ncheck enforces them and nothing is refactored for the count's sake; the assessment\nhappens on the next real touch of the file.\n\n`, '');
-  assert.throws(() => checkMutated(withoutSection), /size guideline section is missing/);
+  assert.throws(() => checkMutated((t) => t.replace(HEADING + '\n', '')),
+    /size guideline section is missing/);
 });
 
-test('the guard fails when an anchor of the guideline is lost', () => {
-  assert.throws(() => checkMutated((t) => t.replace('more than ~12 public methods', 'more than a dozen public methods')),
-    /lost its anchor "12 public methods"/);
-  assert.throws(() => checkMutated((t) => t.split('400').join('four hundred')),
-    /lost its anchor "400"/);
-  assert.throws(() => checkMutated((t) => t.replace('orientation, not a gate', 'orientation; not a gate')),
-    /lost its anchor "orientation, not a gate"/);
+test('the guard fails when the guideline section is duplicated', () => {
+  assert.throws(() => checkMutated((t) => t.replace('### Recurring corpus classes',
+    `${HEADING}\n\n### Recurring corpus classes`)),
+  /appears 2 times/);
+});
+
+test('the guard fails when any anchor of the guideline is lost', () => {
+  for (const anchor of ANCHORS) {
+    assert.throws(() => checkMutated((t) => t.split(anchor).join('')),
+      /lost its anchor|section is missing/,
+      `no rejection when "${anchor}" is stripped from the rules`);
+  }
+});
+
+test('the guideline body is collected through a fenced code block', () => {
+  // A fence with a `#` comment line mid-section must not truncate body extraction —
+  // the anchors after it are still present, so the guard must pass (old extraction
+  // stopped at the `#` line and reported false anchor loss).
+  const withFence = (t) => t.replace('a contract asking to be extracted?',
+    'a contract asking to be extracted?\n\n```\n# example shell comment\n```\n');
+  const body = checkMutated(withFence);
+  assert.ok(body.includes('# example shell comment'), 'fenced content stays inside the section body');
 });
