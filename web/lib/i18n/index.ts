@@ -31,6 +31,14 @@ export interface UiStrings {
   mapIntro: string;
   mapRoutesHeading: string;
   mapAttribution: string;
+  storyTextHeading: string;
+  audioHeading: string;
+  audioUnavailable: string;
+  prevStop: string;
+  nextStop: string;
+  backToGuide: string;
+  versionUnavailable: string;
+  homeLink: string;
 }
 
 const STRINGS: Record<UiLocale, UiStrings> = { be, en };

@@ -36,7 +36,9 @@ export function GuidePage({ locale, data, strings }: {
             <LockedStopRow key={stop.stop_id} stop={stop} strings={strings} />
           ) : (
             <li key={stop.stop_id}>
-              <strong>{stop.name}</strong>
+              <a href={stop.href}>
+                <strong>{stop.name}</strong>
+              </a>
             </li>
           ),
         )}
