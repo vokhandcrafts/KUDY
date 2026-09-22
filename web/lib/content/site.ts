@@ -4,8 +4,10 @@
 // as an empty page (plan §5: pointer-driven pages over immutable bundles).
 // View models keep the contract field names verbatim (implementation-rules 2)
 // wherever they restate one; href/languages/stop_count are site-derived.
+import fs from 'node:fs';
 import path from 'node:path';
 import {
+  readBundleBaseStories,
   readBundleCatalog,
   readBundleDiscoveryIndex,
   readBundlePlacesGeo,
@@ -17,6 +19,7 @@ import type {
   CatalogRouteEntry,
   DiscoveryIndex,
   DiscoveryOffer,
+  Locale,
   LocalizedText,
   ReadResult,
   RejectionCode,
@@ -154,6 +157,9 @@ export interface StopRow {
   locked: boolean;
   name: string;
   announce: string | null;
+  // Site-derived: the stop page's locale-prefixed URL. The scheme is stable
+  // from the first release — the future app deep links (09 §13 M7) mirror it.
+  href: string;
 }
 
 export interface GuidePageData {
@@ -176,6 +182,7 @@ function siteStopRows(root: string, locale: UiLocale, routeId: string, version: 
     readBundlePreviews(root, routeId, version, locale),
     `bundle/${routeId}/${version}/${locale}/base/previews.json`,
   );
+  const stopHref = (stopId: string) => localePath(locale, `/guides/${routeId}/stops/${stopId}`);
   return [...route.stops]
     .sort((a, b) => a.position - b.position)
     .map((stop): StopRow => {
@@ -188,6 +195,7 @@ function siteStopRows(root: string, locale: UiLocale, routeId: string, version: 
           locked: true,
           name: pickText(preview.name, locale, `previews:${stop.id}:${locale}`),
           announce: pickText(preview.announce, locale, `previews:${stop.id}:${locale}`),
+          href: stopHref(preview.stop_id),
         };
       }
       const projection = unwrap(readPlaceProjection(root, stop.place_id), `places/${stop.place_id}/public.json`);
@@ -197,11 +205,19 @@ function siteStopRows(root: string, locale: UiLocale, routeId: string, version: 
         locked: false,
         name: pickText(projection.name, locale, `places/${stop.place_id}:${locale}`),
         announce: null,
+        href: stopHref(stop.id),
       };
     });
 }
 
-export function readSiteGuidePage(root: string, locale: UiLocale, routeId: string): GuidePageData {
+// Shared preamble of the guide and stop pages: resolve the catalog entry for
+// one route, read its route doc and verify the city — one implementation,
+// not two (jscpd gate).
+function resolvedCatalogRoute(root: string, routeId: string): {
+  entry: CatalogRouteEntry;
+  route: RouteDoc;
+  offer: DiscoveryOffer;
+} {
   const { routes, index, cityId } = readSiteCatalog(root);
   const entry = routes.find((r) => r.route_id === routeId);
   if (!entry) throw new SiteDataError('not-found', `catalog.json:routes:${routeId}`);
@@ -210,6 +226,11 @@ export function readSiteGuidePage(root: string, locale: UiLocale, routeId: strin
     throw new SiteDataError('schema-invalid', `catalog.json:discovery_index.path:${routeId}`);
   }
   const offer = guideOffer(index, routeId, entry.version);
+  return { entry, route, offer };
+}
+
+export function readSiteGuidePage(root: string, locale: UiLocale, routeId: string): GuidePageData {
+  const { entry, route, offer } = resolvedCatalogRoute(root, routeId);
   const stops = siteStopRows(root, locale, routeId, entry.version, route);
   return {
     route_id: route.route_id,
@@ -229,6 +250,110 @@ export function readSiteGuidePage(root: string, locale: UiLocale, routeId: strin
 export function guideStaticParams(): { route_id: string }[] {
   const { routes } = readSiteCatalog(getContentRoot());
   return routes.map((route) => ({ route_id: route.route_id }));
+}
+
+// Public bundle assets the pages reference (story audio, covers) are served
+// from the content mirror the prebuild drops into web/public/ — see
+// scripts/build-content.ts. This is the single mapping point between the
+// on-disk public tree and the URL the deployed site serves it at.
+const CONTENT_ASSET_BASE = '/content';
+
+function bundleAudioSrc(routeId: string, version: string, locale: string, storyId: string): string {
+  return `${CONTENT_ASSET_BASE}/bundle/${routeId}/${version}/${locale}/base/audio/${storyId}.m4a`;
+}
+
+function bundleAudioExists(root: string, routeId: string, version: string, locale: string, storyId: string): boolean {
+  return fs.existsSync(path.join(root, 'bundle', routeId, version, locale, 'base', 'audio', `${storyId}.m4a`));
+}
+
+export interface StopNeighbor {
+  stop_id: string;
+  name: string;
+  href: string;
+}
+
+interface StopPageBase {
+  route_id: string;
+  route_title: string;
+  guide_href: string;
+  stop_id: string;
+  name: string;
+  // Recommended order as display order only (09 §3: position is never a
+  // playback condition); any stop stays directly openable by URL.
+  prev: StopNeighbor | null;
+  next: StopNeighbor | null;
+}
+
+export interface FreeStopPageData extends StopPageBase {
+  locked: false;
+  // The full spoken text of the base story, server-rendered for SEO (M3).
+  transcript: string;
+  // One entry per bundle locale whose base audio file actually exists
+  // (09 §8: availability by fact; at launch that is be). An empty list is the
+  // player's user-visible failure state — silence is never a state (step 5).
+  audio: { locale: Locale; src: string }[];
+}
+
+export interface LockedStopPageData extends StopPageBase {
+  locked: true;
+  announce: string;
+  // The leak boundary at the data layer: a locked stop's page data carries no
+  // audio and no transcript field at all — there is nothing to render wrongly.
+}
+
+export type StopPageData = FreeStopPageData | LockedStopPageData;
+
+export function readSiteStopPage(root: string, locale: UiLocale, routeId: string, stopId: string): StopPageData {
+  const { entry, route, offer } = resolvedCatalogRoute(root, routeId);
+  const rows = siteStopRows(root, locale, routeId, entry.version, route);
+  const at = rows.findIndex((row) => row.stop_id === stopId);
+  if (at < 0) throw new SiteDataError('not-found', `route.json:stops:${stopId}`);
+  const row = rows[at]!;
+  const neighbor = (stop: StopRow | undefined): StopNeighbor | null =>
+    stop ? { stop_id: stop.stop_id, name: stop.name, href: stop.href } : null;
+  const base = {
+    route_id: route.route_id,
+    route_title: pickText(offer.localized.title, locale, `discovery:offers:${routeId}:${locale}`),
+    guide_href: localePath(locale, `/guides/${routeId}`),
+    stop_id: row.stop_id,
+    name: row.name,
+    prev: neighbor(rows[at - 1]),
+    next: neighbor(rows[at + 1]),
+  };
+  if (row.locked) {
+    if (row.announce === null) throw new SiteDataError('invalid-preview', `previews:${stopId}:announce`);
+    return { ...base, locked: true, announce: row.announce };
+  }
+  const rawStop = route.stops.find((stop) => stop.id === stopId)!;
+  const storyId = rawStop.story_base_id;
+  if (!storyId) throw new SiteDataError('not-found', `route.json:stops:${stopId}:story_base_id`);
+  const stories = unwrap(
+    readBundleBaseStories(root, routeId, entry.version, locale),
+    `bundle/${routeId}/${entry.version}/${locale}/base/stops.json`,
+  );
+  const story = stories.find((candidate) => candidate.story_id === storyId);
+  if (!story) throw new SiteDataError('not-found', `stops.json:${storyId}`);
+  const audio = [...entry.locales]
+    .sort()
+    .filter((candidate) => bundleAudioExists(root, routeId, entry.version, candidate, storyId))
+    .map((candidate) => ({ locale: candidate, src: bundleAudioSrc(routeId, entry.version, candidate, storyId) }));
+  return { ...base, locked: false, transcript: story.transcript, audio };
+}
+
+// Prerender params for the stop pages: one entry per route × stop of the
+// catalog, free and locked alike (both render a defined page). An unknown
+// stop_id is never prerendered, so an unknown URL reaches the static
+// not-found state instead of a partial render (step 4).
+export function stopStaticParams(root: string = getContentRoot()): { route_id: string; stop_id: string }[] {
+  const { routes } = readSiteCatalog(root);
+  const params: { route_id: string; stop_id: string }[] = [];
+  for (const entry of routes) {
+    const route = unwrap(readBundleRoute(root, entry.route_id, entry.version), `bundle/${entry.route_id}/${entry.version}/route.json`);
+    for (const stop of route.stops) {
+      params.push({ route_id: entry.route_id, stop_id: stop.id });
+    }
+  }
+  return params;
 }
 
 export interface MapStop {
