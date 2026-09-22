@@ -43,6 +43,8 @@ function checkVocabulary(filePath, baseDir = path.dirname(filePath)) {
   const rows = [];
   for (let i = headers[0] + 2; i < lines.length && lines[i].trim().startsWith('|'); i++) {
     const line = lines[i].trim().replace(/^\|/, '').replace(/\|$/, '');
+    // Limitation: cells may not contain escaped pipes (`\|`) — the vocabulary table
+    // does not use them; a future row that does fails loudly as "expected 4 cells".
     const cells = line.split('|').map((cell) => cell.trim());
     const [term, definition, source, avoid] = cells;
     const where = `row ${rows.length + 1} (line ${i + 1}, term "${term ?? ''}")`;
@@ -82,9 +84,13 @@ function checkVocabulary(filePath, baseDir = path.dirname(filePath)) {
 function checkMutated(mutate) {
   const text = mutate(fs.readFileSync(VOCAB, 'utf8'));
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'g1802-'));
-  const copy = path.join(dir, '25_domain_vocabulary.md');
-  fs.writeFileSync(copy, text);
-  return checkVocabulary(copy, VOCAB_DIR);
+  try {
+    const copy = path.join(dir, '25_domain_vocabulary.md');
+    fs.writeFileSync(copy, text);
+    return checkVocabulary(copy, VOCAB_DIR);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 }
 
 test('the real vocabulary file passes the structural guard', () => {
@@ -102,6 +108,8 @@ test('the guard fails when the table header or separator is lost or duplicated',
     /expected exactly one vocabulary table header/);
   const withoutHeader = (t) => t.replace(HEADER + '\n', '');
   assert.throws(() => checkMutated(withoutHeader), /expected exactly one vocabulary table header/);
+  const duplicated = (t) => t.replace('## Тэрміны\n', '## Тэрміны\n\n| Тэрмін | Азначэнне | Крыніца | _Avoid_ |\n|---|---|---|---|\n');
+  assert.throws(() => checkMutated(duplicated), /found 2/);
 });
 
 test('the guard fails when a row loses its source link', () => {
