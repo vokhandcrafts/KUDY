@@ -1,54 +1,55 @@
-# G06.08 interactive prototype and UI-agent package
+# G06.08 — інтэрактыўны пратотып і пакет для UI-агентаў
 
-Issue #61 (G06.08 — «Інтэрактыўны пратотып і пакет для UI-агентаў»). A static,
-zero-dependency prototype you can walk through: Start → manual Play → pause →
-upgrade → return from a Moment → other-guide hint (R07) → End, plus the
-discovery (D01–D07), feedback (F01–F04) and language (L01–L02) scenarios of
+Issue #61 (G06.08 — «Інтэрактыўны пратотып і пакет для UI-агентаў»). Статычны
+пратотып без залежнасцей, які можна прайсці: Start → ручны Play → паўза →
+upgrade → вяртанне з Moment → падказка іншага гіда (R07) → End, а таксама
+сцэнары падбору (D01–D07), водгукаў (F01–F04) і моў (L01–L02) з
 `docs/20_discovery_and_feedback.md` §11.
 
-## What is normative here — and what is not
+## Што тут нарматыўнае — і што не
 
-- Walk-session state is **computed by the normative model**
-  `docs/run-model/run-model.mjs` (`start/step/status/missed`). This prototype
-  does not re-implement engine semantics anywhere.
-- Discovery results are **computed by the real selector**
-  `core/discovery/selectDiscovery.ts` over the accepted fixture copy at prepare
-  time. The UI only renders prepared outcomes.
-- Screen/state specs for production UI agents live in `package/screens.md`;
-  the row-by-row tie-in is `package/package-map.md`.
-- Visual values (colors, spacing, fonts) are a **marked-draft palette** in
-  `prototype/styles.css`, explicitly superseded by G06.06/G06.07 — those tasks
-  own the single source of design values.
-- All data is synthetic; nothing here is published content or a content source.
-- The founder approval gate (criterion 3) is a human review of the PR.
+- Стан прагулкі **лічыць нарматыўная мадэль** `docs/run-model/run-model.mjs`
+  (`start/step/status/missed`). Пратотып не рэалізуе сэмантыку рухавіка нідзе.
+- Вынікі падбору **лічыць рэальны селектар** `core/discovery/selectDiscovery.ts`
+  над вербатыўнай копіяй прынятага фіксчура на этапе падрыхтоўкі. UI толькі
+  малюе гатовыя вынікі.
+- Спекі экранаў і станаў для production UI-агентаў — `package/screens.md`
+  (па-англійску, бо гэта машынныя спекі паводле `documentation-language.md`);
+  прывязка да радкоў бэклогу — `package/package-map.md`.
+- Візуальныя значэнні (колеры, адлегласці, шрыфты) — **пазначаны чарнавіком**
+  у `prototype/styles.css`, іх супярае G06.06/G06.07 — адзіная крыніца
+  дызайнерскіх значэнняў будзе толькі там.
+- Усе дадзеныя сінтэтычныя; гэта не апублікаваны кантэнт і не крыніца зместу.
+- Заснавальніцкае зацвярджэнне (крытэрый 3) — чалавечая брама: рэвю PR.
 
-## Run
+## Запуск
 
-Node 22+ only; no install step.
+Трэба толькі Node 22+; устаноўкі няма.
 
 ```sh
 cd spikes/G06.08-prototype
-npm run prepare    # regenerates data/selection-outcomes.json (gitignored)
+npm run prepare    # перастварае data/selection-outcomes.json (gitignored)
 npm run serve      # http://127.0.0.1:4174/spikes/G06.08-prototype/prototype/
-npm test           # guards: fixture copy identity, walkthrough chain, server containment
-npm run walkthrough  # deterministic headless printout of the same contracts
+npm test           # гварды: тоеснасць копіі фіксчура, ланцуг walkthrough, EOL-піны
+npm run walkthrough  # дэтэрмінаваны headless прынт тых самых кантрактаў
 ```
 
-Open the printed URL. Module imports do not work over `file://`, so use the
-server. The demo toggles (GPS denied, offline, empty city, big text) live on
-the My KUDY screen and are labeled «толькі пратотып».
+Адкрыйце надрукаваны URL. Імпарты модуляў не працуюць праз `file://`, таму
+карыстайцеся серверам. Дэма-пераключальнікі (GPS адхілены, офлайн, пусты
+горад, буйны тэкст) жывуць на экране My KUDY і пазначаныя «толькі пратотып».
 
-## Layout
+## Склад
 
-- `prototype/index.html` + `app.js` + `styles.css` — the interactive surface;
-  `app.js` imports the model from `/docs/run-model/run-model.mjs`.
-- `prototype/walkthrough.mjs` — deterministic scenario runner (also the
-  Showboat demo source); exports `runWalk`, `runDiscovery`, `runFeedback`.
-- `data/synthetic-city.json` — Run-side world (guides/stops/stories/moments);
-  `data/discovery-index.json` — verbatim copy of the accepted fixture (guarded
-  by a test against the canonical file); `data/selection-outcomes.json` —
-  generated, gitignored.
-- `scripts/serve.mjs` — static server over the shared `tools/serve-static.mjs`;
-  `scripts/prepare-data.mjs` — computes the selector outcomes.
-- `test/prototype.test.mjs` — fail-on-revert guards (wired into the root
+- `prototype/index.html` + `app.js` + `styles.css` — інтэрактыўная паверхня;
+  `app.js` імпартуе мадэль з `/docs/run-model/run-model.mjs`, UI-правілы
+  тыпу R07 — з `ui-rules.mjs` (адзінае месца прэдыката, пакрытае тэстам).
+- `prototype/walkthrough.mjs` — дэтэрмінаваны сцэнарны прабег (крыніца
+  Showboat-дэмы); экспартуе `runWalk`, `runDiscovery`, `runFeedback`.
+- `data/synthetic-city.json` — Run-свет (гіды/кропкі/гісторыі/Moments);
+  `data/discovery-index.json` — вербатыўная копія прынятага фіксчура (тоеснасць
+  з кананічным файлам гвардзіцца тэстам); `data/selection-outcomes.json` —
+  генераваны, gitignored.
+- `scripts/serve.mjs` — статычны сервер над агульным `tools/serve-static.mjs`;
+  `scripts/prepare-data.mjs` — лічыць вынікі селектара.
+- `test/prototype.test.mjs` — гварды, што валваюцца на адкат (увязаныя ў root
   `npm test`).

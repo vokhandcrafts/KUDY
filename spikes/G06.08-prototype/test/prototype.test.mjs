@@ -5,6 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { runAll, runWalk, runDiscovery, runFeedback } from '../prototype/walkthrough.mjs';
@@ -39,6 +40,7 @@ test('criterion-1 walkthrough keeps the whole chain on the accepted model', () =
   const end = line('12 End');
   assert.ok(end.includes('["story-free-1-base","story-free-3-ext"]'), `missed() must list story units: ${end}`);
   assert.match(line('13 R07'), /R07 quiet hint target: route-free-2 free/);
+  assert.match(line('14 R07 eligibility'), /playing=false, paused=false, suspended=false, idle=true/);
 });
 
 test('discovery walkthrough demonstrates D03/D04/D05 through the real selector', () => {
@@ -85,4 +87,18 @@ test('shared static server contains traversal before touching the disk', () => {
   const ok = resolveStaticFile(rootDir, '/app.js');
   assert.ok(ok && ok.startsWith(rootDir + path.sep) && ok.endsWith('app.js'));
   assert.ok(resolveStaticFile(rootDir, '/').endsWith('index.html'));
+});
+
+test('both byte-compared fixture paths keep the pinned eol=lf (rule 4)', () => {
+  // Reverting the .gitattributes pins must fail here: on a CRLF checkout the
+  // byte-compare guard would otherwise silently mask or falsely report drift.
+  const raw = execFileSync('git', ['check-attr', '-z', 'eol', '--',
+    'fixtures/discovery-contract/index-valid.json',
+    'spikes/G06.08-prototype/data/discovery-index.json'], { cwd: root, encoding: 'utf8' });
+  const fields = raw.split('\0');
+  for (const pinned of ['fixtures/discovery-contract/index-valid.json', 'spikes/G06.08-prototype/data/discovery-index.json']) {
+    const at = fields.indexOf(pinned);
+    assert.ok(at !== -1, `git check-attr reported an entry for ${pinned}`);
+    assert.equal(fields[at + 2], 'lf', `eol must stay lf for ${pinned}`);
+  }
 });
