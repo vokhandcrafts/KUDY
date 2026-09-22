@@ -1,0 +1,11 @@
+{
+  "name": "kudy-g0608-prototype",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "node --experimental-strip-types scripts/prepare-data.mjs",
+    "serve": "node scripts/serve.mjs",
+    "walkthrough": "node --experimental-strip-types prototype/walkthrough.mjs",
+    "test": "node --test --experimental-strip-types --test-reporter=spec test/prototype.test.mjs"
+  }
+}

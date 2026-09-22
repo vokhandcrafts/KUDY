@@ -6,3 +6,9 @@ spikes/G00.02-offline-map/source/** eol=lf
 # touch these paths, otherwise the same checkout produces different sha256
 # values on Windows (core.autocrlf=true) and Linux.
 fixtures/content/** -text
+
+# G06.08: the prototype's test byte-compares the fixture copy against the
+# canonical fixture; both paths must keep identical LF bytes on any checkout,
+# otherwise the guard silently masks or falsely reports drift (rule 4).
+fixtures/discovery-contract/index-valid.json eol=lf
+spikes/G06.08-prototype/data/discovery-index.json eol=lf
