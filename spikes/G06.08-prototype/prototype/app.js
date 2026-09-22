@@ -105,7 +105,7 @@ function startGuide(guide, locale) {
   })), { routeId: guide.route_id, version: guide.version, locale,
     accessibleStopIds: guide.stops.map((st) => st.id), tierAvailable: ['base'] });
   ui.sessionMeta = { guide, locale, startedAt: Date.now(), promised: false };
-  ui.inspected = null; ui.panel = 'peek'; ui.hintShown = new Set(); ui.fbInvited = null;
+  ui.inspected = null; ui.panel = 'peek'; ui.hintShown = new Set(); ui.hintActive = false; ui.fbInvited = null;
   ui.audio.tokenKey = null; ui.momentNoSession = null;
   ui.screen = [{ name: 'explore' }]; // a new session anchors the Run surface
   go('run');
@@ -125,7 +125,6 @@ const current = () => ui.screen.at(-1);
 
 // ── discovery (D01–D07); results come from the real selector via prepare ────
 let sel = { max_minutes: 60, theme_ids: ['theme-history'], season: 'any' };
-const offersOf = () => ui.emptyCity ? [] : index.offers;
 const outcomeFor = () => {
   const key = JSON.stringify([sel.max_minutes, sel.theme_ids, sel.season]);
   if (ui.offline && !(key in outcomes)) return outcomes[JSON.stringify([60, ['theme-history'], 'any'])]; // last valid cache (21 §3.3)
@@ -398,8 +397,8 @@ function viewRun() {
   const upgrade = !s.tierAvailable.includes('extended') &&
     el('button', { onclick: () => send({ type: 'AccessReady', issuer: 'services/download', routeId: s.routeId, version: s.version, locale: s.locale,
       stopIds: guide.stops.filter((st) => st.stories.some((x) => x.tier === 'extended')).map((st) => st.id), tiers: ['extended'] }) }, t('unlock'));
-  const hintEligible = s.state === 'Active' && !s.suspended && !(p && !p.paused)
-    && ui.fix && guide.route_id === 'route-free-1'; // R07: never during sounding audio (11 §15)
+  const hintEligible = s.state === 'Active' && !s.suspended && !p
+    && ui.fix && guide.route_id === 'route-free-1'; // R07: never while the player is busy or paused (11 §15)
   if (hintEligible && !ui.hintShown.has('route-free-2')) { ui.hintShown.add('route-free-2'); ui.hintActive = true; } // R07: one factual show per session
   const hint = ui.hintActive && hintEligible
     ? el('div', { class: 'card hintcard', role: 'note' }, `${t('otherGuide')} «${L(guideById('route-free-2').title)}» — ціхая картка без гуку і вібрацыі (11 §15) `,
