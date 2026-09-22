@@ -7,6 +7,7 @@
 // between runs (implementation rule 11).
 import { start, step, status, missed } from '../../../docs/run-model/run-model.mjs';
 import { selectDiscovery } from '../../../core/discovery/selectDiscovery.ts';
+import { hintEligible } from './ui-rules.mjs';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -37,10 +38,12 @@ export function runWalk() {
     ({ at: t, accuracy: radius / 2, distances: Object.fromEntries(FREE.stops.map((st) => [st.id, st.id === stopId ? radius / 2 : 10_000])) });
   s = step(s, { type: 'LocationAccepted', fix: fix(t0, 'stop-1', 40) }, t0);
   s = step(s, { type: 'DwellCompleted', stopId: 'stop-1', radius: 40 }, t0);
+  const stPlaying = s;
   say(`2 DwellCompleted stop-1: playing={${s.playing.owner},${title(FREE, s.playing.stopId)},playId=${s.playing.playId}}, marker=${status(s, 'stop-1')}, commands=${s.commands.map((c) => c.type).join('|')}`);
 
   const pauseToken = s.commands.find((c) => c.type === 'PlayStory').token;
   s = step(s, { type: 'UserPausedAudio' }, t0 + 1000);
+  const stPaused = s;
   const offsetKept = s.playing.paused === true && s.playing.playId === pauseToken.seq;
   s = step(s, { type: 'ResumeAudio', token: pauseToken }, t0 + 2000);
   say(`3 UserPausedAudio→ResumeAudio: live pause kept token playId=${pauseToken.seq} (${offsetKept}), suspended=${s.suspended}, heard=${s.heard.length}`);
@@ -50,11 +53,13 @@ export function runWalk() {
   say(`4 DwellCompleted stop-2 while playing: queued=${JSON.stringify(s.queued)}, marker stop-2=${status(s, 'stop-2')} (still pending, auto_fired untouched)`);
 
   s = step(s, { type: 'PlayMoment', momentId: 'moment-m1', storyId: 'story-moment-1', token: { kind: 'moment', ref: 'moment-m1', seq: 1 } }, t0 + 3000);
+  const stSuspended = s;
   const queueRetired = s.autoFired.includes('stop-2');
   s = step(s, { type: 'MomentFinished', token: { kind: 'moment', ref: 'moment-m1', seq: 1 } }, t0 + 7000);
   say(`5 PlayMoment moment-m1: guide stopped by command, queue retired to auto_fired (${queueRetired}), suspended=${s.suspended}; MomentFinished: heard=${JSON.stringify(s.heard)} (moment never credits guide)`);
 
   s = step(s, { type: 'GuideResume' }, t0 + 7500);
+  const stIdle = s;
   say(`6 «Працягнуць гід»: suspended=${s.suspended}, playing=${JSON.stringify(s.playing)} (automation back, nothing sounds by itself)`);
 
   s = step(s, { type: 'UserSelectedStop', stopId: 'stop-2' }, t0 + 8000);
@@ -83,9 +88,12 @@ export function runWalk() {
 
   // R07 hint and NAV8 switch dialog are UI-layer rules (11 §15/§16.2); the
   // model intentionally does not cover them — the prototype shows them with
-  // session state read-only. Asserted here as the data facts they consume.
+  // session state read-only. The quiet-hint predicate itself is computed here
+  // from the shared ui-rules module so the exclusion of every busy player
+  // state is checkable (implementation rule 1).
   const other = city.guides[1];
   say(`13 R07 quiet hint target: ${other.route_id} ${other.access}, one factual show per session (UI-tracked), tap opens preview only — model untouched`);
+  say(`14 R07 eligibility predicate (ui-rules): playing=${hintEligible(stPlaying)}, paused=${hintEligible(stPaused)}, suspended=${hintEligible(stSuspended)}, idle=${hintEligible(stIdle)} (false everywhere but idle Active)`);
   return lines;
 }
 

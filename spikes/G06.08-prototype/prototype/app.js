@@ -4,6 +4,7 @@
 // renders that state plus the UI-layer contracts of docs/11 §16 (navigation),
 // §15 (R07 hint) and docs/21 §5 (feedback states).
 import { start, step, status, missed } from '/docs/run-model/run-model.mjs';
+import { hintEligible } from './ui-rules.mjs';
 
 const $ = (sel) => document.querySelector(sel);
 const el = (tag, attrs = {}, ...children) => {
@@ -397,10 +398,9 @@ function viewRun() {
   const upgrade = !s.tierAvailable.includes('extended') &&
     el('button', { onclick: () => send({ type: 'AccessReady', issuer: 'services/download', routeId: s.routeId, version: s.version, locale: s.locale,
       stopIds: guide.stops.filter((st) => st.stories.some((x) => x.tier === 'extended')).map((st) => st.id), tiers: ['extended'] }) }, t('unlock'));
-  const hintEligible = s.state === 'Active' && !s.suspended && !p
-    && ui.fix && guide.route_id === 'route-free-1'; // R07: never while the player is busy or paused (11 §15)
-  if (hintEligible && !ui.hintShown.has('route-free-2')) { ui.hintShown.add('route-free-2'); ui.hintActive = true; } // R07: one factual show per session
-  const hint = ui.hintActive && hintEligible
+  const hintEligibleNow = hintEligible(s) && ui.fix && guide.route_id === 'route-free-1'; // R07, predicate in ui-rules.mjs
+  if (hintEligibleNow && !ui.hintShown.has('route-free-2')) { ui.hintShown.add('route-free-2'); ui.hintActive = true; } // one factual show per session
+  const hint = ui.hintActive && hintEligibleNow
     ? el('div', { class: 'card hintcard', role: 'note' }, `${t('otherGuide')} «${L(guideById('route-free-2').title)}» — ціхая картка без гуку і вібрацыі (11 §15) `,
         el('button', { onclick: () => go('preview', { guide: guideById('route-free-2'), source: 'run' }) }, 'Прэв\'ю'),
         el('button', { onclick: () => { ui.hintActive = false; render(); } }, 'Схаваць'))

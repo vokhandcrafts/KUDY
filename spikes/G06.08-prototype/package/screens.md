@@ -95,8 +95,8 @@ scenarios `docs/20_discovery_and_feedback.md` §11 (D01–D07, F01–F04, L01–
 
 ## Побач (Map, вольная прагулка)
 
-- Moments teasers with **explicit Play only** (P02, ADR G01.02 §3.6.6: no
-  automatic moment cards mid-guide); a Moment without a session plays on the
+- Moments teasers with **explicit Play only** (P02, ADR G01.02 §3.6 point 6:
+  no automatic moment cards mid-guide); a Moment without a session plays on the
   same single player with a moment token and mutates no session state (§3.8).
 - Manual review of places when there is no position; a radius entry never
   starts audio by itself (G07.01).
