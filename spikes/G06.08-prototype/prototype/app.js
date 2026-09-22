@@ -21,7 +21,7 @@ const T = { // chrome strings; UI language is a user choice persisted per L02
   be: { city: 'Горад', guides: 'Гіды', nearby: 'Побач', mykudy: 'My KUDY', walk: 'Прагулка',
     whatToDo: 'Чым заняцца', minutes: 'хв', start: 'Спампаваць і пачаць', paused: 'Прагулка прыпынена',
     pause: 'Прыпыніць прагулку', finish: 'Завяршыць прагулку', nowPlaying: 'Зараз грае', nearbyStop: 'побач',
-    empty: 'Кантэнт яшчэ не апублікаваны', offline: 'Офлайн: паказаны папярэдні валідны кэш',
+    empty: 'Кантэнт яшчэ не апублікаваны', offline: 'Офлайн: паказаны папярэдні валідны кэш', resume: 'Працягнуць',
     otherGuide: 'Побач ёсць гід…', continueGuide: 'Працягнуць гід', more: 'Яшчэ пра гэтае месца',
     step: 'Крок (сімуляцыя хады)', unlock: 'Разблакаваць пашыраныя гісторыі (сімуляцыя пакупкі)',
     canOpen: 'Яшчэ можна адкрыць', rate: 'Ацаніць гід?', send: 'Адправіць', save: 'Захаваць', skip: 'Прапусціць',
@@ -31,7 +31,7 @@ const T = { // chrome strings; UI language is a user choice persisted per L02
   en: { city: 'City', guides: 'Guides', nearby: 'Nearby', mykudy: 'My KUDY', walk: 'Walk', whatToDo: 'What to do',
     minutes: 'min', start: 'Download and start', paused: 'Walk paused', pause: 'Pause walk', finish: 'Finish walk',
     nowPlaying: 'Now playing', nearbyStop: 'nearby', empty: 'No content published yet',
-    offline: 'Offline: showing the last valid cache', otherGuide: 'A guide is nearby…',
+    offline: 'Offline: showing the last valid cache', resume: 'Resume', otherGuide: 'A guide is nearby…',
     continueGuide: 'Continue the guide', more: 'More about this place', step: 'Step (simulated walking)',
     unlock: 'Unlock extended stories (simulated purchase)', canOpen: 'Still open to discover', rate: 'Rate the guide?',
     send: 'Send', save: 'Save', skip: 'Skip', edit: 'edit', del: 'delete', history: 'Walk history',
@@ -128,7 +128,7 @@ let sel = { max_minutes: 60, theme_ids: ['theme-history'], season: 'any' };
 const offersOf = () => ui.emptyCity ? [] : index.offers;
 const outcomeFor = () => {
   const key = JSON.stringify([sel.max_minutes, sel.theme_ids, sel.season]);
-  if (ui.offline && !(key in outcomes)) { ui.offlineUsed = true; return outcomes[JSON.stringify([60, ['theme-history'], 'any'])]; }
+  if (ui.offline && !(key in outcomes)) return outcomes[JSON.stringify([60, ['theme-history'], 'any'])]; // last valid cache (21 §3.3)
   return outcomes[key];
 };
 
@@ -398,7 +398,8 @@ function viewRun() {
   const upgrade = !s.tierAvailable.includes('extended') &&
     el('button', { onclick: () => send({ type: 'AccessReady', issuer: 'services/download', routeId: s.routeId, version: s.version, locale: s.locale,
       stopIds: guide.stops.filter((st) => st.stories.some((x) => x.tier === 'extended')).map((st) => st.id), tiers: ['extended'] }) }, t('unlock'));
-  const hintEligible = s.state === 'Active' && !s.suspended && ui.fix && guide.route_id === 'route-free-1';
+  const hintEligible = s.state === 'Active' && !s.suspended && !(p && !p.paused)
+    && ui.fix && guide.route_id === 'route-free-1'; // R07: never during sounding audio (11 §15)
   if (hintEligible && !ui.hintShown.has('route-free-2')) { ui.hintShown.add('route-free-2'); ui.hintActive = true; } // R07: one factual show per session
   const hint = ui.hintActive && hintEligible
     ? el('div', { class: 'card hintcard', role: 'note' }, `${t('otherGuide')} «${L(guideById('route-free-2').title)}» — ціхая картка без гуку і вібрацыі (11 §15) `,
