@@ -26,4 +26,12 @@ export const be: UiStrings = {
   mapIntro: 'Агляд публічных маршрутаў і кропак. Пазіцыя наведвальніка не вызначаецца і не выкарыстоўваецца.',
   mapRoutesHeading: 'Маршруты на карце',
   mapAttribution: 'Даныя карты © удзельнікі OpenStreetMap (ліцэнзія ODbL)',
+  storyTextHeading: 'Тэкст гісторыі',
+  audioHeading: 'Аўдыё',
+  audioUnavailable: 'Аўдыё-файла няма ў публічным пакеце; тэкст гісторыі ніжэй чытаецца як звычайна.',
+  prevStop: 'Папярэдняя кропка',
+  nextStop: 'Наступная кропка',
+  backToGuide: 'Да старонкі гіда',
+  versionUnavailable: 'Версія недаступная',
+  homeLink: 'На галоўную',
 };
