@@ -1,0 +1,104 @@
+{
+  "_anchor": "Run-side synthetic world for the interactive prototype. Guide/stop/story field names follow the docs/run-model/run-model.mjs stop shorthand ({id, storyBaseId, storyExtendedId}); the paid discovery guide (guide-route-a1) is defined by fixtures/discovery-contract/index-valid.json and appears here only as a preview target. All names, texts and coordinates are synthetic demo material, not published content.",
+  "city": { "city_id": "city-a", "name": { "be": "Гданьск", "en": "Gdańsk" } },
+  "guides": [
+    {
+      "route_id": "route-free-1",
+      "version": "v1",
+      "access": "free",
+      "title": { "be": "Порт і кран", "en": "The Port and the Crane" },
+      "promise": { "be": "Тры гісторыі пра порт: кран, мытня і пакупнікі.", "en": "Three stories about the port: the crane, the customs house and the merchants." },
+      "availability": { "text_locales": ["be", "en", "uk"], "audio_locales": ["be", "en"] },
+      "stops": [
+        {
+          "id": "stop-1",
+          "title": { "be": "Стары кран", "en": "The Old Crane" },
+          "position": { "x": 22, "y": 58 },
+          "radius": 40,
+          "stories": [
+            { "id": "story-free-1-base", "tier": "base", "role": "primary", "seconds": 6, "title": { "be": "Кран, які падымалі людзі", "en": "The crane people lifted" }, "transcript": { "be": "Сінтэтычны транскрыпт: кран круцілі ўзаемна, чацвёра чалавек бгвалі ў станок, і бярэменне ішло ўгору.", "en": "Synthetic transcript: the treadmill crane took four people walking inside it, and the load went up." } },
+            { "id": "story-free-1-ext", "tier": "extended", "role": "additional", "seconds": 5, "title": { "be": "Кранавае братэрства", "en": "The crane brotherhood" }, "transcript": { "be": "Сінтэтычны транскрыпт: дадатковая гісторыя пра братэрства кранаўшчыкаў і іх кнігу штрафоў.", "en": "Synthetic transcript: an additional story about the crane operators' brotherhood and their book of fines." } }
+          ]
+        },
+        {
+          "id": "stop-2",
+          "title": { "be": "Мытны двор", "en": "The Customs Yard" },
+          "position": { "x": 48, "y": 40 },
+          "radius": 40,
+          "stories": [
+            { "id": "story-free-2-base", "tier": "base", "role": "primary", "seconds": 6, "title": { "be": "Грошы на мосце", "en": "Money on the bridge" }, "transcript": { "be": "Сінтэтычны транскрыпт: мыта збіралася doble на мосце, і што рабілі пакупнікі, якія спазніліся.", "en": "Synthetic transcript: the toll was collected twice on the bridge, and what late merchants did about it." } }
+          ]
+        },
+        {
+          "id": "stop-3",
+          "title": { "be": "Пакупніцкая ізба", "en": "The Merchants' Chamber" },
+          "position": { "x": 72, "y": 55 },
+          "radius": 40,
+          "stories": [
+            { "id": "story-free-3-ext", "tier": "extended", "role": "primary", "seconds": 6, "title": { "be": "Сямейныя спрэчкі пра вагу", "en": "Family quarrels about weight" }, "transcript": { "be": "Сінтэтычны транскрыпт: paid-only кропка — адзін пашыраны наратыў без дзяжурнай свабоднай гісторыі.", "en": "Synthetic transcript: a paid-only stop — one extended narration with no synthetic free story." } }
+          ]
+        }
+      ]
+    },
+    {
+      "route_id": "route-free-2",
+      "version": "v1",
+      "access": "free",
+      "title": { "be": "Дворы сукнараў", "en": "The Cloth Merchants' Courtyards" },
+      "promise": { "be": "Дзве кароткія гісторыі ў цішыні двароў.", "en": "Two short stories in the quiet courtyards." },
+      "availability": { "text_locales": ["be", "en"], "audio_locales": ["be"] },
+      "stops": [
+        {
+          "id": "stop-d1",
+          "title": { "be": "Двор сукнараў", "en": "The Cloth Merchants' Courtyard" },
+          "position": { "x": 30, "y": 30 },
+          "radius": 40,
+          "stories": [
+            { "id": "story-free-d1", "tier": "base", "role": "primary", "seconds": 5, "title": { "be": "Сукно і гарадская сцяна", "en": "Cloth and the town wall" }, "transcript": { "be": "Сінтэтычны транскрыпт: кароткая гісторыя двара ля сцены.", "en": "Synthetic transcript: a short story of the courtyard by the wall." } }
+          ]
+        },
+        {
+          "id": "stop-d2",
+          "title": { "be": "Сцежка да порта", "en": "The path to the port" },
+          "position": { "x": 60, "y": 24 },
+          "radius": 40,
+          "stories": [
+            { "id": "story-free-d2", "tier": "base", "role": "primary", "seconds": 5, "title": { "be": "Шлях сукна да порта", "en": "Cloth on its way to the port" }, "transcript": { "be": "Сінтэтычны транскрыпт: як рухалі сукна ад двара да порта.", "en": "Synthetic transcript: how cloth moved from the courtyard to the port." } }
+          ]
+        }
+      ]
+    }
+  ],
+  "preview_only_guides": [
+    {
+      "route_id": "guide-route-a1",
+      "version": "1",
+      "access": "paid",
+      "free_stop_count": 1,
+      "source": "fixtures/discovery-contract/index-valid.json offer-b1-guide",
+      "locked_stop_announcement": {
+        "be": "Пятая кропка: порт на заходзе — анонс; поўны тэкст і аўдыё толькі ў поўным пакеце.",
+        "en": "Fifth stop: the port at sunset — announcement only; full text and audio live in the full package."
+      }
+    }
+  ],
+  "moments": [
+    {
+      "moment_id": "moment-m1",
+      "place_id": "place-a1",
+      "story_id": "story-moment-1",
+      "seconds": 4,
+      "title": { "be": "Цішыня двара", "en": "The quiet of the courtyard" },
+      "transcript": { "be": "Сінтэтычны тэйзер-Moment: дваццаць хвілін цішыні ў дворыку.", "en": "Synthetic moment teaser: twenty minutes of quiet in the courtyard." }
+    }
+  ],
+  "places": [
+    {
+      "place_id": "place-a1",
+      "content_version": "1",
+      "title": { "be": "Двор сукнараў", "en": "The Cloth Merchants' Courtyard" },
+      "summary": { "be": "Ціхі дворык з рэшткай гарадской сцены.", "en": "A quiet courtyard with a remnant of the town wall." },
+      "availability": { "text_locales": ["be", "en"], "audio_locales": [] }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<!-- G06.08 interactive prototype. Synthetic data only; walk-session state is
+     driven by the normative model docs/run-model/run-model.mjs. Serve with
+     `npm run serve` (module imports do not work over file://). -->
+<html lang="be">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KUDY — G06.08 пратотып</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header id="topbar">
+  <button id="btn-back" aria-label="Назад" hidden>‹ Назад</button>
+  <strong id="screen-title">Горад</strong>
+  <span id="topbar-actions">
+    <button id="btn-walk" hidden>Прагулка</button>
+    <button id="btn-mykudy">My KUDY</button>
+  </span>
+</header>
+<main id="screen" aria-live="polite"></main>
+<div id="dialog-root"></div>
+<footer id="demo-note">Сінтэтычны пратотып G06.08 — дадзеныя выдуманыя; стан прагулкі лічыць дакументацыйная мадэль run-model. <button id="btn-lang" title="Мова інтэрфейсу (L02): захоўваецца, не мяняе мову актыўнай сесіі">be</button></footer>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
