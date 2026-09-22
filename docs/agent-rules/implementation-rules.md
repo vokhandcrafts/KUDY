@@ -296,6 +296,30 @@ compressed.
 **Check:** the review diffs the task card's acceptance criteria against the results doc
 line by line; an unticked card item is a finding regardless of code quality.
 
+## 18. Layer boundaries are machine-checked — the gate's own wiring is guarded (extends §1)
+
+**Occurrences:** the AR-finding class in `22` (module-boundary violations that only
+review catches; audit 2026-09-21) and the G18.01 acceptance survey — the brief's
+"zero violations" claim held only for its two surveyed facts, while the full-matrix
+machine scan found 6 cross-zone imports (2 production `web/` → `tools/`), all
+baselined consciously in the same review.
+
+**Rule:** the 09 §6 / 19 §2 layer matrix is enforced by `npm run arch:check`
+(dependency-cruiser, pinned exact in devDependencies; config
+`.dependency-cruiser.cjs` is a verbatim machine projection of the canon — no
+invented rules, §2). New violations fail; existing ones live in the dated
+baseline `tools/arch/baseline.json` with per-entry explanations in
+`tools/arch/README.md`, updated only consciously, in review. The gate is
+configuration-as-code (§1): the config file, the `arch:check`/`arch:baseline`
+scripts and the `tools/arch` npm-test glob are each guarded — removing any turns
+a committed check red (`tools/arch/arch-check.test.mjs`, extended
+`tools/ci/check-required-checks.mjs`). A PR that adds a zone or changes
+cross-zone dependencies updates the config in the same PR.
+
+**Check:** `npm run arch:check` green before push; every new baseline entry has
+its README explanation; the revert experiment (drop the script or the glob, watch
+the guard fail) ran in the shipping session.
+
 ## Environment facts on the primary host — check, don't assume
 
 - Windows with `core.autocrlf=true`: bytes on disk may differ from blobs (rules 2–4).
