@@ -24,6 +24,7 @@ test('guard: npm test enumerates every committed suite outside spikes', () => {
     const wired =
       script.includes(suite) ||
       (script.includes('tools/arch/*.test.mjs') && suite.startsWith('tools/arch/')) ||
+      (script.includes('tools/arch-surface/*.test.mjs') && suite.startsWith('tools/arch-surface/')) ||
       (script.includes('tools/build-bundle/*.test.mjs') && suite.startsWith('tools/build-bundle/')) ||
       (script.includes('tools/validate/*.test.mjs') && suite.startsWith('tools/validate/')) ||
       (script.includes('tools/publish-catalog/*.test.mjs') && suite.startsWith('tools/publish-catalog/')) ||

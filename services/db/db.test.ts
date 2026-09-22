@@ -114,7 +114,7 @@ test('criterion 2: a failing migration rolls back its step, keeps version and ro
     {
       version: 2,
       up: (step: SqlDriver) => {
-        step.exec('CREATE TABLE half_applied (id INTEGER)');
+        step.execSql('CREATE TABLE half_applied (id INTEGER)');
         throw new Error('boom');
       },
     },
@@ -139,7 +139,7 @@ test('criterion 2: a failing migration rolls back its step, keeps version and ro
     {
       version: 2,
       up: (step: SqlDriver) => {
-        step.exec('CREATE TABLE half_applied (id INTEGER)');
+        step.execSql('CREATE TABLE half_applied (id INTEGER)');
       },
     },
   ];
@@ -150,8 +150,8 @@ test('criterion 2: a failing migration rolls back its step, keeps version and ro
 
 test('criterion 2: a store newer than the code fails the open with named diagnostics', () => {
   const driver = nodeSqliteDriver();
-  driver.exec(INITIAL_SCHEMA_DDL);
-  driver.exec('PRAGMA user_version = 5');
+  driver.execSql(INITIAL_SCHEMA_DDL);
+  driver.execSql('PRAGMA user_version = 5');
   assert.throws(
     () => openDatabase(driver),
     (error: unknown) =>

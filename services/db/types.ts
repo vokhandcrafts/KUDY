@@ -25,11 +25,12 @@ export interface SqlStatement {
   all(...params: SqlValue[]): Record<string, SqlValue>[];
 }
 
-// Minimal driver surface (exec + prepared statements). The production adapter
-// (expo-sqlite or whatever the stack baseline pins) implements this; nothing
-// in services/db imports a driver package.
+// Minimal driver surface (execSql + prepared statements). The production
+// adapter (expo-sqlite or whatever the stack baseline pins) implements this;
+// nothing in services/db imports a driver package. The method runs a raw SQL
+// script against the driver's store — SQL only, never a shell.
 export interface SqlDriver {
-  exec(sql: string): void;
+  execSql(sql: string): void;
   prepare(sql: string): SqlStatement;
 }
 
