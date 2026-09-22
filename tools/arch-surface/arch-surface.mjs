@@ -109,7 +109,7 @@ function scanFile(absFile) {
     text = fs.readFileSync(absFile, 'utf8');
   } catch (err) {
     console.error(`arch-surface: cannot read ${absFile}: ${err.message}`);
-    return { exports, imports };
+    return { exports, imports, unreadable: true };
   }
   for (const line of text.split(/\r?\n/)) {
     extractExternalImports(line, imports);
@@ -125,10 +125,10 @@ function render(dirLabel, files, surfaces) {
     return out.join('\n');
   }
   for (const file of files) {
-    const { exports, imports } = surfaces[file];
+    const { exports, imports, unreadable } = surfaces[file];
     out.push(`\n## ${file}`);
-    out.push(`exports: ${[...exports].sort().join(', ') || '(none)'}`);
-    out.push(`imports: ${[...imports].sort().join(', ') || '(none)'}`);
+    out.push(`exports: ${unreadable ? '(unreadable)' : [...exports].sort().join(', ') || '(none)'}`);
+    out.push(`imports: ${unreadable ? '(unreadable)' : [...imports].sort().join(', ') || '(none)'}`);
   }
   return out.join('\n');
 }
@@ -161,4 +161,4 @@ function main(argv) {
   return 0;
 }
 
-process.exit(main(process.argv.slice(2)));
+process.exitCode = main(process.argv.slice(2));
