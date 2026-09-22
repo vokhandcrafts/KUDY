@@ -27,7 +27,7 @@ test('criterion-1 walkthrough keeps the whole chain on the accepted model', () =
   const lines = runWalk();
   const joined = lines.join('\n');
   for (const marker of ['locked', 'playing', 'pending', 'played', 'available'])
-    assert.ok(['marker stop-1=', 'marker stop-2=', 'marker=', 'stop-3 '].some((p) => joined.includes(p + marker) || joined.includes(`${p}${marker}`)),
+    assert.ok(['marker stop-1=', 'marker stop-2=', 'marker=', 'stop-3 '].some((p) => joined.includes(p + marker)),
       `marker ${marker} missing from the walkthrough`);
   const line = (prefix) => lines.find((l) => l.startsWith(prefix));
   assert.match(line('5 PlayMoment'), /guide stopped by command, queue retired to auto_fired \(true\), suspended=true/);
