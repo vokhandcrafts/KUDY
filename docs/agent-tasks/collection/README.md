@@ -24,4 +24,4 @@
 
 > Выканай толькі `docs/agent-tasks/collection/G17.01.a.md`. Прачытай яго ўваходы, правер залежнасці, вынік і доказы захавай паводле файла.
 
-Перад запускам праверыць, што blocker закрыты ў default branch, а не толькі ў WIP-галіне. Вынікі — у `docs/agent-tasks/results/<ID>.md`.
+Перад запускам праверце, што blocker закрыты ў default branch, а не толькі ў WIP-галіне. Вынікі — у `docs/agent-tasks/results/<ID>.md`.

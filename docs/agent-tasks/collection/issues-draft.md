@@ -337,7 +337,7 @@ One complete campaign on real sources (chosen portal + Wikipedia set + 5–10 ma
 
 ## Acceptance criteria
 
-1. [ ] Spec `24` «Пілот» criteria 1–7: each verified in `docs/agent-tasks/results/G17.08.md` with command/log/path evidence.
+1. [ ] Spec `24` «Пілот» criteria 1–7: each verified in `docs/agent-tasks/results/G17.08.md` with command/log/path evidence — an unticked criterion is a finding (implementation rule 17).
 2. [ ] Results file names the tool and rule-package versions actually used.
 3. [ ] Results file answers: second news family readiness; ASR need (`asr-backlog` size); final handoff format to `07`.
 
@@ -354,7 +354,7 @@ Publishing anything, a second city, ASR, changes to `07` or the app.
 The fence audit log of the pilot run shows 0 fetches outside allowed hosts.
 
 ```
-grep -c '"fetched": true, "decision": "denied"' <pilot-run>/fence-audit.jsonl   # prints 0
+grep -c '"decision": "denied", "fetched": true' <pilot-run>/fence-audit.jsonl   # prints 0
 ```
 
 ---
