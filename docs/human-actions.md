@@ -18,7 +18,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 ## Што трэба зрабіць
 
 ### 2026-09-22 — CI-jscpd працуе са збоям на старце ва ўсіх PR
-Што зрабіць: станам на 2026-09-22 усе runs workflow `jscpd.yml` ва ўсіх PR падаюць да старта («workflow file issue», апошнія вядомыя — 8 запускаў 19:26–21:27 UTC на PR #177). Сам файл карэктны (`workflow_call` ёсць і ў KUDY, і ў зпіненым SHA 752dff0 інфраструктурнага рэпазітарыя), таму праверце налады Actions гэтага рэпазітарыя: дазвол выкарыстання reusable workflows з `vokhandcrafts/ai-company-infrastructure` (Settings → Actions → General → Allow all actions and reusable workflows) — і, калі інфраструктурны PR #1 ужо змержаны, перапінце `uses` у `.github/workflows/jscpd.yml` на актуальны main-SHA. Джоб не блакуе required checks, лакальны гейт `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .` працуе.
+Што зрабіць: станам на 2026-09-22 усе runs workflow `jscpd.yml` ва ўсіх PR падаюць да старта («workflow file issue»; за акно 19:26–21:27 UTC — 8 запускі ва ўсіх галінах, з іх 4 на PR #177). Сам файл карэктны (`workflow_call` ёсць і ў KUDY, і ў зпіненым SHA 752dff0 інфраструктурнага рэпазітарыя), таму праверце налады Actions гэтага рэпазітарыя: дазвол выкарыстання reusable workflows з `vokhandcrafts/ai-company-infrastructure` (Settings → Actions → General → Allow all actions and reusable workflows) — і, калі інфраструктурны PR #1 ужо змержаны, перапінце `uses` у `.github/workflows/jscpd.yml` на актуальны main-SHA. Джоб не блакуе required checks, лакальны гейт `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .` працуе.
 Run: https://github.com/vokhandcrafts/KUDY/actions/runs/35786797616
 
 ### 2026-09-21 — спецыфікацыя збору сыравіны з сеткі: рэвю PR #152 і рашэнні заснавальніка (G17)
