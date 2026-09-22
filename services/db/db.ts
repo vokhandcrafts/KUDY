@@ -11,7 +11,6 @@ import {
   ZONE_A_DDL,
   ZONE_A_TABLES,
   type MigrationStep,
-  type ZoneATable,
 } from './schema.ts';
 import type {
   EventInput,
@@ -101,7 +100,7 @@ export function rebuildDerived(driver: SqlDriver): void {
   inTransaction(driver, () => {
     for (const table of ZONE_A_TABLES) {
       driver.exec(`DROP TABLE IF EXISTS ${table}`);
-      driver.exec(ZONE_A_DDL[table as ZoneATable]);
+      driver.exec(ZONE_A_DDL[table]);
     }
   });
 }
@@ -126,8 +125,11 @@ function toSessionRow(row: SessionDbRow): SessionRow {
   };
 }
 
+const SESSION_COLUMNS =
+  'session_id, route_id, version, locale, tier, state, started_at, finished_at, auto_fired, heard, last_stop_id, play_seq';
+
 function getSessionRow(driver: SqlDriver, sessionId: string): SessionDbRow | undefined {
-  return driver.prepare('SELECT * FROM session WHERE session_id = ?').get(sessionId);
+  return driver.prepare(`SELECT ${SESSION_COLUMNS} FROM session WHERE session_id = ?`).get(sessionId);
 }
 
 export function getSession(driver: SqlDriver, sessionId: string): SessionRow | null {
@@ -139,7 +141,7 @@ export function getSession(driver: SqlDriver, sessionId: string): SessionRow | n
 // more than one across the whole app); finished rows are history.
 export function getLiveSession(driver: SqlDriver): SessionRow | null {
   const row = driver
-    .prepare("SELECT * FROM session WHERE state IN ('active', 'paused') LIMIT 1")
+    .prepare(`SELECT ${SESSION_COLUMNS} FROM session WHERE state IN ('active', 'paused') LIMIT 1`)
     .get();
   return row ? toSessionRow(row) : null;
 }
