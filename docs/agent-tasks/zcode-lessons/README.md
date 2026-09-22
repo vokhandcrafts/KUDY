@@ -7,10 +7,10 @@
 
 | Заданне | Issue | Можна пачынаць | Вынік |
 |---|---|---|---|
-| [G18.01](G18.01.md) — машынная праверка межаў слаёў (dependency-cruiser, `npm run arch:check`, базавая лінія) | (даецца спасылкай ніжэй) | адразу, незалежна | [results/G18.01.md](../results/G18.01.md) |
-| [G18.02](G18.02.md) — слоўнік дамена `docs/architecture/25_domain_vocabulary.md` | (даецца спасылкай ніжэй) | адразу, паралельна з G18.01 | [results/G18.02.md](../results/G18.02.md) |
-| [G18.03](G18.03.md) — чытацкі пакунак модуля `tools/arch-surface` | (даецца спасылкай ніжэй) | пасля закрыцця G18.01 і G18.02 (парадак плана) | [results/G18.03.md](../results/G18.03.md) |
-| [G18.04](G18.04.md) — арыенцір памеру ў правілах рэв'ю | (даецца спасылкай ніжэй) | адразу, незалежна | [results/G18.04.md](../results/G18.04.md) |
+| [G18.01](G18.01.md) — машынная праверка межаў слаёў (dependency-cruiser, `npm run arch:check`, базавая лінія) | [#164](https://github.com/vokhandcrafts/KUDY/issues/164) | адразу, незалежна | [results/G18.01.md](../results/G18.01.md) |
+| [G18.02](G18.02.md) — слоўнік дамена `docs/architecture/25_domain_vocabulary.md` | [#165](https://github.com/vokhandcrafts/KUDY/issues/165) | адразу, паралельна з G18.01 | [results/G18.02.md](../results/G18.02.md) |
+| [G18.03](G18.03.md) — чытацкі пакунак модуля `tools/arch-surface` | [#166](https://github.com/vokhandcrafts/KUDY/issues/166) | пасля закрыцця G18.01 і G18.02 (парадак плана) | [results/G18.03.md](../results/G18.03.md) |
+| [G18.04](G18.04.md) — арыенцір памеру ў правілах рэв'ю | [#167](https://github.com/vokhandcrafts/KUDY/issues/167) | адразу, незалежна | [results/G18.04.md](../results/G18.04.md) |
 
 Задача 4 плана («ліміт памеру») свядома без рэфактару `build-bundle.mjs` дзеля
 ліку радкоў — гл. брыф G18.04. Спека вэб-калекцыі заняла нумар дакумента 24
