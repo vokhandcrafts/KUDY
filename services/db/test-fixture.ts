@@ -10,7 +10,7 @@ import type { SqlDriver } from './types.ts';
 export function nodeSqliteDriver(): SqlDriver {
   const db = new DatabaseSync(':memory:');
   return {
-    exec: (sql) => db.exec(sql),
+    execSql: (sql) => db.exec(sql),
     prepare: (sql) => db.prepare(sql),
   };
 }

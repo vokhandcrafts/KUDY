@@ -38,17 +38,17 @@ export class DbError extends Error {
 }
 
 function inTransaction<T>(driver: SqlDriver, body: () => T): T {
-  driver.exec('BEGIN IMMEDIATE');
+  driver.execSql('BEGIN IMMEDIATE');
   try {
     const result = body();
-    driver.exec('COMMIT');
+    driver.execSql('COMMIT');
     return result;
   } catch (error) {
     // The primary error below is what the caller must see; a failing
     // ROLLBACK means the connection is unusable anyway and the caller
     // discards it once open() throws.
     try {
-      driver.exec('ROLLBACK');
+      driver.execSql('ROLLBACK');
     } catch {
       /* secondary — reported through the primary error */
     }
@@ -80,7 +80,7 @@ export function openDatabase(driver: SqlDriver, steps: MigrationStep[] = migrati
     try {
       inTransaction(driver, () => {
         step.up(driver);
-        driver.exec(`PRAGMA user_version = ${step.version}`);
+        driver.execSql(`PRAGMA user_version = ${step.version}`);
       });
     } catch (error) {
       throw new DbError(
@@ -99,8 +99,8 @@ export function openDatabase(driver: SqlDriver, steps: MigrationStep[] = migrati
 export function rebuildDerived(driver: SqlDriver): void {
   inTransaction(driver, () => {
     for (const table of ZONE_A_TABLES) {
-      driver.exec(`DROP TABLE IF EXISTS ${table}`);
-      driver.exec(ZONE_A_DDL[table]);
+      driver.execSql(`DROP TABLE IF EXISTS ${table}`);
+      driver.execSql(ZONE_A_DDL[table]);
     }
   });
 }
