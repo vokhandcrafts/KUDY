@@ -25,7 +25,14 @@ test('root tsconfig excludes web/ (reverting it sweeps Next sources under the Ex
 });
 
 test('generated web output and content trees are gitignored in the same change', () => {
-  const probes = ['web/node_modules/x', 'web/.next/x', 'web/out/x', 'web/content/x', 'web/tsconfig.tsbuildinfo'];
+  const probes = [
+    'web/node_modules/x',
+    'web/.next/x',
+    'web/out/x',
+    'web/content/x',
+    'web/public/content/x',
+    'web/tsconfig.tsbuildinfo',
+  ];
   const out = execFileSync('git', ['check-ignore', '-v', ...probes], { cwd: REPO_ROOT, encoding: 'utf8' });
   for (const probe of probes) {
     assert.ok(out.includes(probe), `${probe} must be gitignored`);
