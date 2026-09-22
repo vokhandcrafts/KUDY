@@ -57,11 +57,14 @@ test('the guide page lists the ordered stops; the locked one is the closed four-
   assert.equal(free.name, 'Двор сукнараў (дэма)');
   assert.equal(free.announce, null);
   const locked = guide.stops[1]!;
-  assert.deepEqual(Object.keys(locked).sort(), ['announce', 'locked', 'name', 'place_id', 'stop_id']);
+  assert.deepEqual(Object.keys(locked).sort(), ['announce', 'href', 'locked', 'name', 'place_id', 'stop_id']);
   assert.equal(locked.locked, true);
   assert.equal(locked.place_id, 'place-2');
   assert.equal(locked.name, 'Млынавая калона (дэма)');
   assert.match(locked.announce!, /млына/);
+  // G10.01.c: both row kinds link to the stable stop-page scheme.
+  assert.equal(free.href, '/guides/demo-route-a1/stops/stop-1');
+  assert.equal(locked.href, '/guides/demo-route-a1/stops/stop-2');
 });
 
 test('the en guide page shows en text for both the place name and the locked preview', () => {

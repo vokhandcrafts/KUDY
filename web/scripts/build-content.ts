@@ -19,4 +19,14 @@ await buildBundle({ inDir: path.join(REPO_ROOT, 'fixtures', 'content', 'demo-rou
 
 const catalog = deriveInterimCatalog(publicDir);
 fs.writeFileSync(path.join(publicDir, 'catalog.json'), `${JSON.stringify(catalog, null, 2)}\n`);
+
+// Serve mirror for the bundle assets pages reference (story audio, covers):
+// the same public tree copied into web/public/content/ so the static export
+// serves the identical bytes at /content/… (single URL mapping point:
+// lib/content/site.ts CONTENT_ASSET_BASE). Generated, never committed — the
+// gitignore pattern lands in the same change (implementation-rules 5).
+const publicMirror = path.join(REPO_ROOT, 'web', 'public', 'content');
+fs.rmSync(publicMirror, { recursive: true, force: true });
+fs.cpSync(publicDir, publicMirror, { recursive: true });
+
 console.log(`content root ready: ${catalog.routes.length} route(s), discovery ${catalog.discovery_index.path}`);
