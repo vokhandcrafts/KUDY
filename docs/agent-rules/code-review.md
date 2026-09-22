@@ -120,6 +120,14 @@ Plus, by hand on the diff:
 - Tests assert behaviour, not implementation details. One passing Node test does not prove a
   platform, a store, or storage works — do not let a test's existence be read as that proof.
 
+### Size orientation — one phrase, not dogma
+
+A file over ~400 lines or a contract with more than ~12 public methods obliges the
+reviewer to write one phrase answering a single question: is there a second owner or
+a contract asking to be extracted? The numbers are orientation, not a gate — no CI
+check enforces them and nothing is refactored for the count's sake; the assessment
+happens on the next real touch of the file.
+
 ### Recurring corpus classes — `docs/agent-rules/lessons-learned.md`
 
 The closed-PR corpus (52 closed PRs → 369 findings, 2026-09-19) ranks the defect classes
