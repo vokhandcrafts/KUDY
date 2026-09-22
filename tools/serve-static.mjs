@@ -19,7 +19,7 @@ export function resolveStaticFile(root, pathname) {
   return file;
 }
 
-export function createStaticServer(root, announce) {
+export function createStaticServer(root) {
   return createServer(async (request, response) => {
     try {
       const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
