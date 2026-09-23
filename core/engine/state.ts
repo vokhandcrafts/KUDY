@@ -1,5 +1,5 @@
-// G05.01.a + G05.01.b — engine state types and derived views
-// (docs/agent-tasks/run/G05.01.a.md, docs/agent-tasks/run/G05.01.b.md).
+// G05.01.a + G05.01.b + G05.01.c — engine state types and derived views
+// (docs/agent-tasks/run/G05.01.a.md, G05.01.b.md, G05.01.c.md).
 //
 // Name boundary, declared once for the whole module (19 §3): the canonical
 // contract names are snake_case in 09 §6.1 and the accepted ADRs
