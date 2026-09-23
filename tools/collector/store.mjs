@@ -140,6 +140,17 @@ export function upsertRawRecord(db, record) {
   return result.changes === 1;
 }
 
+// The raw snapshot's link list (spec: тэкст-анкер + адрас + кантэкстны абзац)
+// lives in `links`, one row per anchor of the record's text.md.
+export function insertLink(db, { rawRecordId, anchorText, url, context }) {
+  db.prepare('INSERT INTO links (raw_record_id, anchor_text, url, context) VALUES (?, ?, ?, ?)').run(
+    rawRecordId,
+    anchorText,
+    url,
+    context
+  );
+}
+
 // run_log is the run loop's progress record: one row per work item of a
 // campaign (kind 'seed' for each seed URL, 'youtube' for each video id).
 // UNIQUE(campaign_id, kind, ref) makes enqueuing idempotent; a row left in
@@ -177,6 +188,13 @@ export function failStep(db, id, error, now) {
 export function countRows(db, table, campaignId) {
   const filter = campaignId ? ' WHERE campaign_id = ?' : '';
   const row = db.prepare(`SELECT COUNT(*) AS n FROM ${table}${filter}`).get(...(campaignId ? [campaignId] : []));
+  return Number(row.n);
+}
+
+// Records whose snapshot exists on disk (snapshot_path set); YouTube shells
+// registered before G17.05 fill them carry no snapshot and are not counted.
+export function countSnapshots(db) {
+  const row = db.prepare('SELECT COUNT(*) AS n FROM raw_records WHERE snapshot_path IS NOT NULL').get();
   return Number(row.n);
 }
 

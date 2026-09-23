@@ -4,12 +4,16 @@
 // already 'done' are never re-executed. A row left 'running' by an interrupted
 // process is claimed again by the next run: resume, not restart.
 //
-// v0 fetches nothing (network collectors are G17.02+). The default youtube
-// handler registers the record shell so the library row exists before
-// G17.05 fills it; rights per docs/24_web_collection.md — YouTube transcripts
-// are research_only. The seed handler records progress only; article
-// discovery is the crawler's job (G17.02).
+// v0 fetches nothing (network collectors are G17.02+). The default seed
+// handler processes only pages a loader hands it: by default file:// seeds are
+// read from disk — the local fixture boundary for the snapshot pipeline
+// (G17.01.b) — and every other scheme answers null, so the seed stays
+// progress-only, exactly as in G17.01.a. The default youtube handler registers
+// the record shell so the library row exists before G17.05 fills it; rights
+// per docs/24_web_collection.md — YouTube transcripts are research_only.
 import { randomUUID } from 'node:crypto';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import {
   claimStep,
   claimableSteps,
@@ -19,10 +23,36 @@ import {
   failStep,
   upsertRawRecord,
 } from './store.mjs';
+import { defaultSnapshotsRoot, processFetchedPage } from './snapshot.mjs';
 
-export function defaultHandlers() {
+// The page-source boundary: tests and demos run the full snapshot pipeline
+// from local fixtures; G17.02 replaces this loader with the real fetcher.
+function defaultLoadPage(url) {
+  if (new URL(url).protocol !== 'file:') return null;
+  return fs.readFileSync(fileURLToPath(url), 'utf8');
+}
+
+export function defaultHandlers({ loadPage = defaultLoadPage } = {}) {
   return {
-    seed() {},
+    seed(ctx, step) {
+      let html;
+      try {
+        html = loadPage(step.ref);
+      } catch (error) {
+        throw new Error(`seed ${step.ref}: ${error.message}`);
+      }
+      if (html === null) return; // no page source for this scheme: progress only
+      try {
+        processFetchedPage(ctx.db, ctx.campaign, ctx.campaignId, {
+          url: step.ref,
+          html,
+          now: ctx.now,
+          snapshotsRoot: ctx.snapshotsRoot,
+        });
+      } catch (error) {
+        throw new Error(`seed ${step.ref}: ${error.message}`);
+      }
+    },
     youtube({ db, campaign, campaignId, now }, step) {
       const url = `https://www.youtube.com/watch?v=${step.ref}`;
       upsertRawRecord(db, {
@@ -44,14 +74,18 @@ export function defaultHandlers() {
   };
 }
 
-export function runCampaign(db, campaign, { sourcePath, contentHash, handlers = defaultHandlers() } = {}) {
+export function runCampaign(
+  db,
+  campaign,
+  { sourcePath, contentHash, handlers = defaultHandlers(), snapshotsRoot = defaultSnapshotsRoot() } = {}
+) {
   const { campaignId } = ensureCampaign(db, { campaign, sourcePath, contentHash });
   const now = new Date().toISOString();
   for (const ref of campaign.youtube) enqueueStep(db, campaignId, 'youtube', ref, now);
   for (const url of campaign.seeds) enqueueStep(db, campaignId, 'seed', url, now);
 
   const counts = { campaignId, done: 0, failed: 0 };
-  const ctx = { db, campaign, campaignId, now };
+  const ctx = { db, campaign, campaignId, now, snapshotsRoot };
   for (const step of claimableSteps(db, campaignId)) {
     const handler = handlers[step.kind];
     claimStep(db, step.id, now);
