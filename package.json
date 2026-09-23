@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p services && tsc --noEmit -p core",
     "arch:check": "node tools/arch/arch-check.mjs --config .dependency-cruiser.cjs --baseline tools/arch/baseline.json core services contracts tools web",
     "arch:baseline": "node tools/arch/arch-baseline.mjs --config .dependency-cruiser.cjs --baseline tools/arch/baseline.json core services contracts tools web",
-    "test": "node --test --experimental-strip-types --test-reporter=spec docs/run-model/run-model.test.mjs \"tools/arch/*.test.mjs\" \"tools/arch-surface/*.test.mjs\" \"tools/build-bundle/*.test.mjs\" \"tools/validate/*.test.mjs\" \"tools/publish-catalog/*.test.mjs\" \"tools/collector/*.test.mjs\" docs/agent-tasks/web/g10-dependency-guards.test.mjs contracts/contracts.test.mjs \"spikes/G06.08-prototype/test/*.test.mjs\" \"services/**/*.test.ts\" \"core/**/*.test.ts\" \"web/**/*.test.ts\""
+    "test": "node --test --experimental-strip-types --test-reporter=spec docs/run-model/run-model.test.mjs \"tools/arch/*.test.mjs\" \"tools/arch-surface/*.test.mjs\" \"tools/build-bundle/*.test.mjs\" \"tools/validate/*.test.mjs\" \"tools/publish-catalog/*.test.mjs\" \"tools/collector/*.test.mjs\" docs/agent-tasks/web/g10-dependency-guards.test.mjs contracts/contracts.test.mjs \"spikes/G06.08-prototype/test/*.test.mjs\" \"services/**/*.test.ts\" \"core/**/*.test.ts\" \"web/**/*.test.ts\" \"supabase/**/*.test.ts\""
   },
   "dependencies": {
     "@maplibre/maplibre-react-native": "11.3.10",
@@ -23,12 +23,14 @@
     "expo-audio": "1.1.1",
     "expo-dev-client": "~6.0.21",
     "expo-location": "19.0.8",
+    "expo-secure-store": "~15.0.8",
     "expo-status-bar": "3.0.9",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-purchases": "10.9.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "@types/geojson": "7946.0.16",
     "@types/react": "19.1.10",
     "dependency-cruiser": "18.4.0",
