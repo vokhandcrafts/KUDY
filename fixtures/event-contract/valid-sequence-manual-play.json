@@ -1,0 +1,7 @@
+{
+  "note": "G01.05.a, крытэрый 3, частка A — ручны запуск гісторыі: сесія існуе, trigger: manual, і stop_reached не ўзнікае (ручны Play яго не стварае).",
+  "events": [
+    { "event_id": "2f1e2d3c-4b5a-4968-8776-000000000001", "type": "session_started", "at": "2026-09-23T12:00:00Z", "schema_version": 1, "session_id": "sess-1", "route_id": "guide-old-town", "version": "1" },
+    { "event_id": "2f1e2d3c-4b5a-4968-8776-000000000002", "type": "story_play_started", "at": "2026-09-23T12:01:00Z", "schema_version": 1, "session_id": "sess-1", "stop_id": "stop-3", "story_id": "story-3-base", "play_id": 1, "trigger": "manual" }
+  ]
+}
