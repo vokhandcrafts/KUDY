@@ -85,6 +85,7 @@
 | `services/entitlement.ts` | клас | RevenueCat SDK + запыт сервернага гранта; не вырашае права сам | сесія пакупкі; restore асобны | G08.03 |
 | `services/contentRepo.ts` | сэрвіс | чытанне правераных пакетаў, каталог, fallback моў, вытворная гатоўнасць з дыска | кэш каталога; нічога не піша ў зоне B | G04.03 |
 | `services/db.ts` | клас | SQLite-адкрыццё (module-level singleton promise), транзакцыі §3.3, міграцыі зоны B | адно злучэнне на працэс; памылка міграцыі не дазваляе дроп базы | G04.01 |
+| `services/device.ts` | функцыі + адаптар `services/device-secure-store.ts` | рэгістрацыя прылады адзін раз: сакрэт → expo-secure-store, `device_id` → зона B праз services/db; crash-window аднаўляецца свежай identity; bearer-кантракт агульны з feedback (`21` §2) | чакае першага спажыўца (G08.03/G09.02/G16.02); без паўторнай рэгістрацыі пры жывой паре | G08.01 |
 | `services/eventLog.ts` | клас | лакальная чарга падзей з захаваннем у `event_queue` (зона B) праз `services/db`, батч, адпраўка толькі са згодай; без каардынат | чарга перажывае restart; згода брамуе толькі адпраўку | G09.01–G09.02 |
 | `services/config.ts` | сэрвіс | remote config + кэш + бяспечны default; адзін дастаўнік лікаў AR-5 | кэш перажывае офлайн | G09.05 |
 | `services/map.ts` | сэрвіс | MapLibre, офлайн-рэгіён, style/glyphs з бандла, атрыбуцыя ODbL | **gated:** рашэнне G00.02.c не прынятае | G06.02 |
