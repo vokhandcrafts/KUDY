@@ -33,6 +33,11 @@ export type RunEvent =
       tier: Tier[];
       accessibleStopIds: StopId[];
       stops: PackageStop[];
+      // ADR G01.02 §3.3/§3.8: Start never stops a sounding moment and never
+      // mints a guide launch for it — the controller injects the actual player
+      // state (the moment variant) into the fresh session; autoplay then waits
+      // for the player to become free.
+      playingNow?: { momentId: MomentId; storyId: StoryId; seq: number };
     }
   | { type: 'Pause' }
   | { type: 'Resume' }
