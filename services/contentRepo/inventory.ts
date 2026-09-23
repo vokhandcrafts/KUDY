@@ -13,6 +13,7 @@ import type {
   BundlesStore,
   InventoryEntry,
   InventoryResult,
+  LockEntry,
   Tier,
 } from './types.ts';
 
@@ -20,8 +21,10 @@ import type {
 // checked as safe path segments (no separators, no '..', no NUL) on input.
 // Catalog-sourced strings are exactly that. Disk-sourced names come from
 // readdir and cannot contain separators, so they are used as listed; the
-// adapter still owns confinement, as for PackageStore.
-function isSafeSegment(value: unknown): value is string {
+// adapter still owns confinement, as for PackageStore. Exported as the shared
+// safe-unit idiom (implementation-rules 3): the download activation
+// (G04.02.a) reuses these instead of a second variant.
+export function isSafeSegment(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0 && !path.isAbsolute(value) &&
     !value.includes('/') && !value.includes('\\') && !value.includes('\0') &&
     value !== '.' && value !== '..';
@@ -29,8 +32,9 @@ function isSafeSegment(value: unknown): value is string {
 
 // A lock path is a multi-segment rel path inside the layer directory:
 // '/'-separated (validate-package idiom — the fs APIs accept '/' everywhere),
-// never absolute, no traversal segments, no NUL.
-function isSafeRel(value: unknown): value is string {
+// never absolute, no traversal segments, no NUL. Exported together with
+// isSafeSegment as the shared safe-unit idiom.
+export function isSafeRel(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0 && !path.isAbsolute(value) &&
     !value.includes('\\') && !value.includes('\0') &&
     value.split('/').every((segment) => segment.length > 0 && segment !== '.' && segment !== '..');
@@ -38,6 +42,27 @@ function isSafeRel(value: unknown): value is string {
 
 function isTier(value: unknown): value is Tier {
   return value === 'base' || value === 'extended';
+}
+
+// One lock.json entry is shape-checked through parseLockEntry (below) against
+// the LockEntry contract in types.ts. Shared by the inventory (G04.04.a) and
+// the download activation (G04.02.a) so the shape rules cannot drift apart
+// (implementation-rules 3, 8).
+export function parseLockEntry(
+  entry: unknown,
+  at: string,
+): { ok: true; entry: LockEntry } | { ok: false; diagnostic: string } {
+  if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) {
+    return { ok: false, diagnostic: `${at}#type` };
+  }
+  const record = entry as Record<string, unknown>;
+  if (typeof record.path !== 'string') return { ok: false, diagnostic: `${at}.path#type` };
+  if (typeof record.bytes !== 'number' || !Number.isInteger(record.bytes) || record.bytes < 0) {
+    return { ok: false, diagnostic: `${at}.bytes#type` };
+  }
+  if (typeof record.sha256 !== 'string') return { ok: false, diagnostic: `${at}.sha256#type` };
+  if (!isSafeRel(record.path)) return { ok: false, diagnostic: `${at}#unsafe-path:${record.path}` };
+  return { ok: true, entry: { path: record.path, bytes: record.bytes, sha256: record.sha256 } };
 }
 
 // Catalog versions are digit strings (catalog.schema.json pattern ^[0-9]+$, up
@@ -173,35 +198,13 @@ async function readLayerFacts(store: BundlesStore, layerRel: string): Promise<La
   let missing = 0;
   for (const [index, entry] of parsed.entries()) {
     const at = `lock.json[${index}]`;
-    if (entry === null || typeof entry !== 'object' || Array.isArray(entry)) {
-      diagnostics.push(`${at}#type`);
+    const checked = parseLockEntry(entry, at);
+    if (!checked.ok) {
+      diagnostics.push(checked.diagnostic);
       missing += 1;
       continue;
     }
-    const record = entry as Record<string, unknown>;
-    // The inventory consumes path and bytes; sha256 is only shape-checked —
-    // hash verification lives on the download/open levels (09 §4), this is
-    // the My KUDY listing.
-    if (typeof record.path !== 'string') {
-      diagnostics.push(`${at}.path#type`);
-      missing += 1;
-      continue;
-    }
-    if (typeof record.bytes !== 'number' || !Number.isInteger(record.bytes) || record.bytes < 0) {
-      diagnostics.push(`${at}.bytes#type`);
-      missing += 1;
-      continue;
-    }
-    if (typeof record.sha256 !== 'string') {
-      diagnostics.push(`${at}.sha256#type`);
-      missing += 1;
-      continue;
-    }
-    if (!isSafeRel(record.path)) {
-      diagnostics.push(`${at}#unsafe-path:${record.path}`);
-      missing += 1;
-      continue;
-    }
+    const record = checked.entry;
     declaredBytes += record.bytes;
     const size = await store.statSize(`${layerRel}/${record.path}`);
     if (size === null || size !== record.bytes) {

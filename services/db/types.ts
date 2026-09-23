@@ -93,3 +93,25 @@ export interface EventInput {
   schemaVersion: number;
   payload: string;
 }
+
+// `09` §7 bundle_asset (zone A): the resume registry of the download channel
+// (G04.02.a). One row per file of a layer, status pending/partial/complete;
+// the registry is derived state, rebuilt by re-hashing what lies on disk.
+// bytes_done is the honest disk fact — staged-but-unverified bytes stay
+// 'partial', never 'complete'.
+export type BundleAssetStatus = 'pending' | 'partial' | 'complete';
+
+export interface AssetKey {
+  routeId: string;
+  version: string;
+  locale: string;
+  tier: string;
+}
+
+export interface BundleAssetRow extends AssetKey {
+  path: string;
+  status: BundleAssetStatus;
+  bytesTotal: number;
+  bytesDone: number;
+  sha256: string;
+}

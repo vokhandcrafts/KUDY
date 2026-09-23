@@ -9,6 +9,16 @@
 
 export type Tier = 'base' | 'extended';
 
+// One lock.json entry, verbatim field set from `09` §4 (`[{path, bytes,
+// sha256}]`, build-bundle README). The layer's lock never lists itself.
+// parseLockEntry (inventory.ts) shape-checks entries against this contract;
+// the download activation (G04.02.a) consumes the same type.
+export interface LockEntry {
+  path: string;
+  bytes: number;
+  sha256: string;
+}
+
 // route.schema.json:13 — access = free_base | paid (verbatim; TR-3: the old
 // 'free' spelling was never in the schema, and the old reader read schema-valid
 // free_base packages as incomplete).
