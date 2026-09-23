@@ -134,6 +134,19 @@ export const storyAccessible = (state: RunSessionState, storyId: StoryId): boole
   );
 };
 
+// «Яшчэ можна адкрыць» (ADR G01.01 §4.6): every accessible story of the route
+// stops that is not heard — locked stories excluded, the unit is story_id, an
+// unheard additional story is listed even when the stop marker already says
+// played. Route-stop order, [base, extended] inside a stop (the executable
+// reference: docs/run-model/run-model.mjs missed()).
+export const missedStories = (state: RunSessionState): StoryId[] => [
+  ...new Set(
+    state.stops
+      .flatMap((stop) => storiesOf(stop))
+      .filter((storyId) => storyAccessible(state, storyId) && !state.heard.includes(storyId)),
+  ),
+];
+
 export type StopStatus = 'locked' | 'playing' | 'played' | 'available' | 'pending';
 
 // Stop status is computed, never stored (ADR G01.01 §4.5, 09 §6.1):
