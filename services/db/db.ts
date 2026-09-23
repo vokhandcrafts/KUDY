@@ -363,3 +363,21 @@ export function getSetting(driver: SqlDriver, key: string): string | null {
   const row = driver.prepare('SELECT value FROM settings WHERE key = ?').get(key);
   return row ? String(row.value) : null;
 }
+
+// `09` §7 zone B: the `device` table holds one row and only the device_id —
+// the secret lives in expo-secure-store (services/device), never here.
+export function setDeviceId(driver: SqlDriver, deviceId: string): void {
+  inTransaction(driver, () => {
+    driver
+      .prepare(
+        `INSERT INTO device (singleton, device_id) VALUES (1, ?)
+         ON CONFLICT(singleton) DO UPDATE SET device_id = excluded.device_id`,
+      )
+      .run(deviceId);
+  });
+}
+
+export function getDeviceId(driver: SqlDriver): string | null {
+  const row = driver.prepare('SELECT device_id FROM device WHERE singleton = 1').get();
+  return row ? String(row.device_id) : null;
+}
