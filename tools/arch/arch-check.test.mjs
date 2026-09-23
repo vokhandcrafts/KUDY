@@ -17,7 +17,9 @@ const REPO_BASELINE = path.join(REPO_ROOT, 'tools', 'arch', 'baseline.json');
 const CHECK_SCRIPT = path.join(REPO_ROOT, 'tools', 'arch', 'arch-check.mjs');
 
 function runChecker({ cwd, baselineFile }) {
-  const dirs = ['core', 'services', 'web'].filter((d) => fs.existsSync(path.join(cwd, d)));
+  const dirs = ['core', 'services', 'contracts', 'tools', 'web', 'app'].filter((d) =>
+    fs.existsSync(path.join(cwd, d)),
+  );
   const run = spawnSync(
     process.execPath,
     [
@@ -54,7 +56,7 @@ test('arch-check wiring is guarded (package.json scripts, npm-test glob, config,
   assert.match(pkg.scripts['arch:check'], /tools\/arch\/arch-check\.mjs/, 'arch:check must invoke tools/arch/arch-check.mjs');
   assert.match(pkg.scripts['arch:check'], /\.dependency-cruiser\.cjs/, 'arch:check must pass the repo config');
   assert.match(pkg.scripts['arch:check'], /tools\/arch\/baseline\.json/, 'arch:check must pass the baseline');
-  assert.match(pkg.scripts['arch:check'], /core services contracts tools web/, 'arch:check must scan the zone list');
+  assert.match(pkg.scripts['arch:check'], /core services contracts tools web app/, 'arch:check must scan the zone list (app included since G06.09.a)');
   assert.match(pkg.scripts['arch:baseline'], /tools\/arch\/arch-baseline\.mjs/, 'arch:baseline must invoke tools/arch/arch-baseline.mjs');
   assert.match(pkg.scripts.test, /"?tools\/arch\/\*\.test\.mjs"?/, 'npm test glob must include tools/arch tests');
 
@@ -116,6 +118,19 @@ test('layer-direction violation (services -> web) fails and names services-zone-
   assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
   assert.match(output, /services-zone-closed/, 'the violated rule must be named');
   assert.match(output, /services\/adapter\.mjs/, 'the violation path must be named');
+});
+
+test('app/ importing services/ directly fails and names app-no-services (19 §4.2 edge rule)', () => {
+  const dir = makeSandbox({
+    files: {
+      'app/bad.mjs': "import { device } from '../services/device.mjs';\nexport const use = device;\n",
+      'services/device.mjs': "export const device = 'device';\n",
+    },
+  });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
+  assert.match(output, /app-no-services/, 'the violated rule must be named');
+  assert.match(output, /app\/bad\.mjs/, 'the violation path must be named');
 });
 
 test('corrupt baseline yields a diagnostic, not a crash', () => {
