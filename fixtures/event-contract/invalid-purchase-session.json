@@ -1,0 +1,5 @@
+{
+  "violates": "session-before-start",
+  "note": "Крытэрыі 2 і 4, цель Proof: пакупка да Start не мае выдуманай сесіі (правіла no-session-before-start; яго выдаленне з табліцы ламае гэты тэст).",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-000000000002", "type": "purchase_started", "at": "2026-09-23T12:01:00Z", "schema_version": 1, "attempt_id": "att-1", "route_id": "guide-old-town", "tier": "extended", "session_id": "sess-1" }
+}

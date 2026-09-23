@@ -1,0 +1,5 @@
+{
+  "violates": "unknown-field:user_id",
+  "note": "Крытэрый 2 (загальная закрытасць слоўніка): полі user_id няма ні ў адным радку табліцы — ніякіх імён (09 §10).",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-00000000000b", "type": "moment_shown", "at": "2026-09-23T12:30:00Z", "schema_version": 1, "kind": "trailer", "user_id": "u-1" }
+}

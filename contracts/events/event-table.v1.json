@@ -1,0 +1,105 @@
+{
+  "table_schema_version": 1,
+  "title": "KUDY — адна табліца падзей і памылак (G01.05)",
+  "status": "decision-required",
+  "adr": "docs/architecture/decisions/G01.05-event-table.md",
+  "description": "Адзіны пералік аналітычных падзей з 09 §10, 09 §20 (guide_nearby_*) і 21 §7 (discovery_offer_*). Ніводнага новага імя падзеі табліца не ўводзіць; назвы палёў, якіх крыніцы не даюць, пазначаны ў ADR як пытанні заснавальніку. Спецыфічнае парушэнне зацняе агульнае: калі поле трапляе пад забаронены клас, дыягностыка называе клас, а не unknown-field.",
+  "defs": {
+    "identifier": { "type": "string", "pattern": "^[a-z0-9._-]{1,64}$", "description": "Патэрн contracts/schemas/identifier.schema.json (21 §3.2): да 64 знакаў з [a-z0-9._-]" },
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", "description": "UUID, генеруе кліент (09 §10)" },
+    "timestamp": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$", "description": "ISO-8601 UTC" },
+    "count": { "type": "integer", "minimum": 0, "description": "Неадмоўны цэлы" },
+    "version_id": { "type": "string", "pattern": "^[0-9]+$", "description": "Патэрн версіі з contracts/schemas/discovery-index.schema.json" }
+  },
+  "common_fields": {
+    "event_id": { "ref": "uuid", "anchor": "09 §10" },
+    "type": { "ref": "identifier", "anchor": "09 §10", "description": "Адзін з events[].type; невядомы type адхіляецца" },
+    "at": { "ref": "timestamp", "anchor": "09 §10" },
+    "schema_version": { "type": "integer", "const": 1, "anchor": "09 §10 «версія схемы»", "description": "Назва поля — прапанова табліцы (ADR G01.05, пытанне 6)" }
+  },
+  "context_fields": {
+    "session_id": { "ref": "identifier", "anchor": "09 §10" },
+    "route_id": { "ref": "identifier", "anchor": "09 §10" },
+    "version": { "ref": "version_id", "anchor": "09 §10" },
+    "locale": { "ref": "identifier", "anchor": "09 §10", "description": "Код мовы з рэестра локаляў; канкрэтны allowlist табліца не зачыняе (09 §8: ui/text/audio локаляў — асобныя рэестры)" },
+    "tier": { "type": "string", "enum": ["base", "extended"], "anchor": "09 §10; ADR G01.03 §3.5" }
+  },
+  "recording_policy": {
+    "local_recording": "always — лакальны запіс не залежыць ад згоды; адмова = лог жыве толькі лакальна",
+    "sending": "consent_gated — серверная адпраўка толькі са згодай, запытанай да першай адпраўкі",
+    "progress_dependence": "none — прагрэс ніколі не залежыць ад падзей",
+    "anchor": "09 §10; 12 (абнаўленні і прыватнасць)"
+  },
+  "events": [
+    { "type": "app_open", "context": "app", "anchor": "09 §10", "fields": {}, "context_required": [], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "explore_option_tap", "context": "app", "anchor": "09 §10", "fields": {}, "context_required": ["route_id"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "route_preview", "context": "app", "anchor": "09 §10; 12 (лейкі); 21 §7 (адкрыццё гіда з падказкі/прапановы ідзе ў route_preview)", "fields": {}, "context_required": ["route_id"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "purchase_started", "context": "app", "anchor": "09 §10 (групавая сігнатура purchase_started/succeeded/failed); offer_id — 09 §10 прозай", "fields": { "attempt_id": { "ref": "identifier", "required": true }, "reason": { "enum": ["user_cancelled", "payment_failed", "verification_unavailable"], "required": false, "decision_required": true }, "offer_id": { "ref": "identifier", "required": false } }, "context_required": ["route_id", "tier"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "purchase_succeeded", "context": "app", "anchor": "09 §10 (групавая сігнатура)", "fields": { "attempt_id": { "ref": "identifier", "required": true }, "reason": { "enum": ["user_cancelled", "payment_failed", "verification_unavailable"], "required": false, "decision_required": true } }, "context_required": ["route_id", "tier"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "purchase_failed", "context": "app", "anchor": "09 §10 (групавая сігнатура); 12 (лейкі): фіксаваць прычыну", "fields": { "attempt_id": { "ref": "identifier", "required": true }, "reason": { "enum": ["user_cancelled", "payment_failed", "verification_unavailable"], "required": false, "decision_required": true } }, "context_required": ["route_id", "tier"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "download_started", "context": "app", "anchor": "09 §10 (групавая сігнатура download_started/completed/failed)", "fields": { "download_id": { "ref": "identifier", "required": true }, "attempt_id": { "ref": "identifier", "required": false }, "bytes": { "ref": "count", "required": true } }, "context_required": ["route_id", "version", "locale", "tier"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "download_completed", "context": "app", "anchor": "09 §10 (групавая сігнатура)", "fields": { "download_id": { "ref": "identifier", "required": true }, "attempt_id": { "ref": "identifier", "required": false }, "bytes": { "ref": "count", "required": true } }, "context_required": ["route_id", "version", "locale", "tier"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "download_failed", "context": "app", "anchor": "09 §10 (групавая сігнатура); 12 (лейкі): фіксаваць прычыну; класы прычын — 16 радок G04.02", "fields": { "download_id": { "ref": "identifier", "required": true }, "attempt_id": { "ref": "identifier", "required": false }, "bytes": { "ref": "count", "required": true }, "reason": { "enum": ["interrupted", "no_space", "hash_mismatch"], "required": false, "decision_required": true } }, "context_required": ["route_id", "version", "locale", "tier"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "session_started", "context": "session", "anchor": "09 §10 (групавая сігнатура session_started/resumed/paused)", "fields": {}, "context_required": ["session_id", "route_id", "version"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "session_resumed", "context": "session", "anchor": "09 §10 (групавая сігнатура)", "fields": {}, "context_required": ["session_id", "route_id", "version"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "session_paused", "context": "session", "anchor": "09 §10 (групавая сігнатура)", "fields": {}, "context_required": ["session_id", "route_id", "version"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "session_ended", "context": "session", "anchor": "09 §10; падпіс reason/heard_stories_count абноўлены G01.01.c; 12: не азначае ўсе кропкі", "fields": { "reason": { "enum": ["user_stop", "switch_walk"], "required": true }, "heard_stories_count": { "ref": "count", "required": true, "description": "Колькасць праслуханых даступных гісторый, адзінка — stories (G01.01.c)" } }, "context_required": ["session_id", "route_id", "version"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "stop_reached", "context": "session", "anchor": "09 §10; 12: ручнае прайграванне не даказвае фізічнага наведвання", "fields": { "stop_id": { "ref": "identifier", "required": true } }, "context_required": ["session_id"], "presence": "pipeline_confirmed_only", "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "story_play_started", "context": "story", "anchor": "09 §10 (групавая сігнатура story_play_started/story_play_failed)", "fields": { "stop_id": { "ref": "identifier", "required": true }, "story_id": { "ref": "identifier", "required": true }, "play_id": { "ref": "count", "required": true }, "trigger": { "enum": ["gps", "manual"], "required": true } }, "context_required": ["session_id"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "story_play_failed", "context": "story", "anchor": "09 §10 (групавая сігнатура); reason — з callback'а ADR G01.02 §3.5; класы прычын — ADR G01.03 §3.7 і 16 радок G04.03", "fields": { "stop_id": { "ref": "identifier", "required": true }, "story_id": { "ref": "identifier", "required": true }, "play_id": { "ref": "count", "required": true }, "trigger": { "enum": ["gps", "manual"], "required": true }, "reason": { "enum": ["file_missing", "media_error"], "required": true, "decision_required": true } }, "context_required": ["session_id"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "story_audio_completed", "context": "story", "anchor": "09 §10", "fields": { "stop_id": { "ref": "identifier", "required": true }, "story_id": { "ref": "identifier", "required": true }, "play_id": { "ref": "count", "required": true } }, "context_required": ["session_id"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "extension_offer_shown", "context": "app", "anchor": "09 §10 (групавая сігнатура extension_offer_shown/accepted); 12: паказ — толькі фактычная бачнасць", "fields": { "offer_id": { "ref": "identifier", "required": true }, "stop_id": { "ref": "identifier", "required": false } }, "context_required": ["route_id"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "extension_offer_accepted", "context": "app", "anchor": "09 §10 (групавая сігнатура); 09 §10 прозай: адно accepted не даказвае аплату", "fields": { "offer_id": { "ref": "identifier", "required": true }, "stop_id": { "ref": "identifier", "required": false } }, "context_required": ["route_id"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "moment_shown", "context": "app", "anchor": "09 §10; ADR G01.02 §3.9 + results G01.02.c: аналітычныя падзеі ручнога кантэнту не ўводзяцца", "fields": { "kind": { "ref": "identifier", "required": true, "description": "Род моманту з кантэнту; у крыніцах закрыты спіс не названы (contracts/schemas/moment.schema.json)" } }, "context_required": [], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "moment_opened", "context": "app", "anchor": "09 §10", "fields": { "kind": { "ref": "identifier", "required": true } }, "context_required": [], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "moment_dismissed", "context": "app", "anchor": "09 §10", "fields": { "kind": { "ref": "identifier", "required": true } }, "context_required": [], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "location_stalled", "context": "app", "anchor": "09 §10; 09 §10 прозай: дыягностыка — бакетаваная, без каардынат", "fields": { "duration_bucket": { "ref": "identifier", "required": true, "decision_required": true, "description": "Бакет працягласці затрымкі; грані бакетаў — пытанне заснавальніку (ADR G01.05, пытанне 5)" } }, "context_required": [], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "autotriggers_unavailable", "context": "app", "anchor": "09 §10; класы прычын — 09 §9.1", "fields": { "reason": { "enum": ["permission_denied", "process_killed", "battery_saver"], "required": true, "decision_required": true } }, "context_required": [], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "guide_nearby_shown", "context": "guide", "anchor": "09 §20", "fields": { "suggestion_id": { "ref": "identifier", "required": true }, "shown_guide_ids": { "type": "array", "items": { "ref": "identifier" }, "minItems": 1, "required": true, "description": "Пералік фактычна паказаных публічных guide_id; назва поля — прапанова табліцы (ADR G01.05, пытанне 6)" }, "context": { "enum": ["idle", "active"], "required": true } }, "context_required": [], "context_optional": ["session_id"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "guide_nearby_opened", "context": "guide", "anchor": "09 §20; 12: guide_nearby_opened → route_preview → session_started, звязаныя suggestion_id", "fields": { "suggestion_id": { "ref": "identifier", "required": true }, "shown_guide_ids": { "type": "array", "items": { "ref": "identifier" }, "minItems": 1, "required": true }, "context": { "enum": ["idle", "active"], "required": true } }, "context_required": [], "context_optional": ["session_id"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "guide_nearby_dismissed", "context": "guide", "anchor": "09 §20; 12: dismissed — адмова, не памылка", "fields": { "suggestion_id": { "ref": "identifier", "required": true }, "shown_guide_ids": { "type": "array", "items": { "ref": "identifier" }, "minItems": 1, "required": true }, "context": { "enum": ["idle", "active"], "required": true } }, "context_required": [], "context_optional": ["session_id"], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "discovery_offer_shown", "context": "app", "anchor": "21 §7; 12 (непублічныя водгукі): паказы толькі фактычна бачныя і са згодай", "fields": { "discovery_revision": { "ref": "identifier", "required": true }, "offer_id": { "ref": "identifier", "required": true }, "kind": { "enum": ["guide", "place"], "required": true }, "content_locale": { "ref": "identifier", "required": true }, "surface": { "enum": ["discovery", "collection"], "required": true }, "time_bucket": { "ref": "identifier", "required": false, "decision_required": true, "description": "Апцыянальны бакет часу (21 §7); назва поля і грані — пытанне заснавальніку (ADR G01.05, пытанні 5–6)" } }, "context_required": [], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } },
+    { "type": "discovery_offer_opened", "context": "app", "anchor": "21 §7; 12: адкрыццё гіда далей ідзе ў route_preview; вынік-place не стварае route_preview", "fields": { "discovery_revision": { "ref": "identifier", "required": true }, "offer_id": { "ref": "identifier", "required": true }, "kind": { "enum": ["guide", "place"], "required": true }, "content_locale": { "ref": "identifier", "required": true }, "surface": { "enum": ["discovery", "collection"], "required": true }, "time_bucket": { "ref": "identifier", "required": false, "decision_required": true } }, "context_required": [], "recording": { "local_recording": "always", "sending": "consent_gated", "progress_dependence": "none" } }
+  ],
+  "rules": [
+    {
+      "id": "no-session-before-start",
+      "statement": "session_id з'яўляецца толькі на падзеях з кантэкстам session/story і на guide_nearby_* пры наяўнасці сесіі; у паслядоўнасці падзей session_id не з'яўляецца раней за першую session_started. Пакупка, загрузка, прэв'ю і рубрыкі да Start не атрымліваюць выдуманай сесіі.",
+      "anchor": "09 §10; 12 (лейкі)",
+      "enforcement": { "field": "session_id", "allowed_contexts": ["session", "story", "guide"], "sequence": "session_id не раней за першую session_started" }
+    },
+    {
+      "id": "stop-reached-pipeline-only",
+      "statement": "stop_reached вызначаны толькі для пацверджанай геалакацыяй прысутнасці; ручны Play яго не стварае. Пара фіксчараў: ручны запуск без stop_reached супраць gps-запуску з stop_reached.",
+      "anchor": "09 §10; 12 (лейкі)",
+      "enforcement": { "row_marker": "presence == pipeline_confirmed_only на радку stop_reached" }
+    },
+    {
+      "id": "forbidden-content",
+      "statement": "Ніякіх каардынат, дакладных адлегласцей, вольнага тэксту, URL/токенаў і ацэнак водгуку: feedback — не падзея (21 §6), дыягностыка — толькі бакетаваная.",
+      "anchor": "09 §10; 09 §20; 21 §6, §7",
+      "enforcement": {
+        "coordinate_fields": ["lat", "lon", "latitude", "longitude", "coords", "coordinates", "distance_m", "distance", "accuracy_m"],
+        "free_text_fields": ["note", "comment", "text", "message", "description", "free_text"],
+        "url_token_fields": ["url", "uri", "link", "token", "secret", "api_key"],
+        "feedback_rating_fields": ["rating", "score", "stars", "feedback"],
+        "url_value_pattern": "(https?:)?//",
+        "coordinate_value_pattern": "^-?\\d{1,3}\\.\\d{4,},\\s*-?\\d{1,3}\\.\\d{4,}$",
+        "whitespace_value_rule": "значэнне радковага поля ідэнтыфікатарнага тыпу з прабелам = вольны тэкст"
+      }
+    },
+    {
+      "id": "exact-discovery-payload",
+      "statement": "Payload discovery_offer_* — роўна {discovery_revision, offer_id, kind, content_locale, surface} плюс апцыянальны time_bucket; ніякіх кантэкстных або іншых палёў.",
+      "anchor": "21 §7",
+      "enforcement": { "applies_to": ["discovery_offer_shown", "discovery_offer_opened"] }
+    }
+  ],
+  "join_rules": [
+    { "statement": "Падзеі злучаюцца праз ідэнтыфікатары спробы пакупкі (attempt_id), прапановы (offer_id), загрузкі (download_id) і сесіі, калі яна існуе.", "anchor": "12 (лейкі)" },
+    { "statement": "purchase_started захоўвае offer_id, калі пакупка прыйшла з прапановы; адно accepted не даказвае аплату.", "anchor": "09 §10" },
+    { "statement": "Пакупка да старту не патрабуе выдуманай сесіі; ланцуг preview → purchase → download → session_started не мае session_id да Start.", "anchor": "12 (лейкі); 09 §10" },
+    { "statement": "guide_nearby_opened → route_preview → session_started звязваюцца suggestion_id, калі пераход прыйшоў з падказкі.", "anchor": "12 (падказкі пра гіды побач)" },
+    { "statement": "discovery_offer_opened → route_preview, калі вынік — гід; вынік-place не стварае route_preview.", "anchor": "12 (непублічныя водгукі); 21 §7" }
+  ]
+}
