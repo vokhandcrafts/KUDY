@@ -44,6 +44,16 @@ if (!/tools\/arch-surface/.test(pkg.scripts?.test ?? '')) {
   failures.push('npm test glob does not include tools/arch-surface');
 }
 
+// G18.05 revert guard — same class again: losing the ledger:check script or
+// the tools/docs-ledger npm-test glob would drop the docs fact ledger
+// silently (implementation-rules 1 and 7).
+if (!pkg.scripts?.['ledger:check']) {
+  failures.push('package.json has no ledger:check script');
+}
+if (!/tools\/docs-ledger/.test(pkg.scripts?.test ?? '')) {
+  failures.push('npm test glob does not include tools/docs-ledger');
+}
+
 // G17.01.a revert guard — same class as the tools/arch-surface glob: losing
 // the tools/collector npm-test glob would drop the collector suites silently
 // (implementation-rules 1 and 7).
