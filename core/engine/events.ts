@@ -37,7 +37,11 @@ export type RunEvent =
   | { type: 'Resume' }
   | { type: 'End' }
   | { type: 'LocationAccepted'; fix: AcceptedFix }
-  | { type: 'DwellCompleted'; stopId: StopId }
+  // The radius is the trigger radius of the confirmed dwell: the queue cell
+  // keeps {stop_id, radius, at} (09 §6.1) and the deferred play re-checks
+  // distance against 2 × radius (11 §5.3). The payload was deferred to this
+  // slice by G05.01.a (results, «Deferred to the slice that owns them»).
+  | { type: 'DwellCompleted'; stopId: StopId; radius: number }
   | { type: 'AudioFinished'; sessionId: SessionId; playId: number; storyId?: StoryId }
   | { type: 'MomentFinished'; token: PlayToken; momentId: MomentId; storyId: StoryId }
   | { type: 'AudioFailed'; token: PlayToken; reason: string }
