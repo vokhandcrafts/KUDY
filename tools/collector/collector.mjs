@@ -27,6 +27,16 @@ function fail(message, code) {
   process.exit(code);
 }
 
+// Corrupt or unusable --db paths (an existing directory, an unwritable
+// location) answer with a diagnostic and exit 2, never a thrown SqliteError.
+function openStoreOrExit(dbPath) {
+  try {
+    return openStore(dbPath);
+  } catch (error) {
+    fail(`cannot open database ${dbPath}: ${error.message}`, 2);
+  }
+}
+
 export function main(argv) {
   let parsed;
   try {
@@ -50,7 +60,7 @@ export function main(argv) {
   const dbPath = path.resolve(parsed.values.db ?? defaultDbPath);
 
   if (command === 'init') {
-    openStore(dbPath);
+    openStoreOrExit(dbPath);
     console.log(`collector: schema ready at ${dbPath}`);
     return;
   }
@@ -72,7 +82,7 @@ export function main(argv) {
       for (const diagnostic of result.diagnostics) console.error(`collector: ${diagnostic}`);
       process.exit(1);
     }
-    const db = openStore(dbPath);
+    const db = openStoreOrExit(dbPath);
     const run = runCampaign(db, result.campaign, {
       sourcePath: file,
       contentHash: sha256Hex(source),
@@ -86,7 +96,10 @@ export function main(argv) {
     return;
   }
 
-  const db = openStore(dbPath);
+  if (!fs.existsSync(dbPath)) {
+    fail(`database file does not exist: ${dbPath} — run init or run first`, 2);
+  }
+  const db = openStoreOrExit(dbPath);
   const steps = stepStatusCounts(db);
   console.log(`collector: db ${dbPath}`);
   console.log(`campaigns: ${countRows(db, 'campaigns')}`);

@@ -20,12 +20,31 @@ test('init creates the schema and reports the database path', () => {
   assert.ok(fs.existsSync(dbPath));
 });
 
-test('status on a fresh database reports zeros and exits 0', () => {
-  const result = runCli(['status', '--db', path.join(makeTempDir(), 'db.sqlite')]);
+test('status on an initialised empty database reports zeros and exits 0', () => {
+  const dbPath = path.join(makeTempDir(), 'db.sqlite');
+  assert.equal(runCli(['init', '--db', dbPath]).status, 0);
+  const result = runCli(['status', '--db', dbPath]);
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /campaigns: 0/);
   assert.match(result.stdout, /raw_records: 0/);
   assert.match(result.stdout, /run_log: done 0, running 0, pending 0, failed 0/);
+});
+
+test('status on a missing database file answers with a diagnostic, exit 2', () => {
+  const dir = makeTempDir();
+  const result = runCli(['status', '--db', path.join(dir, 'absent.sqlite')]);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /database file does not exist/);
+});
+
+test('an unusable --db path answers with a diagnostic, exit 2, for every command', () => {
+  const dir = makeTempDir();
+  const file = writeCampaignFile(dir, campaignYaml());
+  for (const args of [['init'], ['status'], ['run', '--campaign', file]]) {
+    const result = runCli([...args, '--db', dir]);
+    assert.equal(result.status, 2, `${args[0]}: ${result.stderr}`);
+    assert.match(result.stderr, /cannot open database/, `${args[0]}: ${result.stderr}`);
+  }
 });
 
 test('run rejects a campaign missing city with a diagnostic naming the field', () => {

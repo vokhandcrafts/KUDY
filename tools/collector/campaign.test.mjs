@@ -3,6 +3,20 @@ import assert from 'node:assert/strict';
 import { parseCampaign } from './campaign.mjs';
 import { campaignYaml } from './testkit.mjs';
 
+// One assert per case: the campaign must be rejected and at least one
+// diagnostic must name the offending field (prefix match — element-level
+// failures carry a tuple index, e.g. campaign.fence.delay_s.0).
+function expectRejections(cases) {
+  for (const [override, field] of cases) {
+    const parsed = parseCampaign(campaignYaml(override));
+    assert.equal(parsed.ok, false, `expected rejection: ${field}`);
+    assert.ok(
+      parsed.diagnostics.some((line) => line.startsWith(field)),
+      `${field}: ${parsed.diagnostics.join('\n')}`
+    );
+  }
+}
+
 test('valid campaign parses; defaults fill topics, extra_domains, youtube', () => {
   const parsed = parseCampaign(campaignYaml());
   assert.ok(parsed.ok, parsed.diagnostics?.join('\n'));
@@ -22,7 +36,7 @@ test('AC1: missing city is rejected with a diagnostic naming the field', () => {
 });
 
 test('AC1: invalid fence values are rejected naming the offending field', () => {
-  const cases = [
+  expectRejections([
     [{ depth: 'depth: 0' }, 'campaign.fence.depth'],
     [{ depth: 'depth: two' }, 'campaign.fence.depth'],
     [{ delay_s: 'delay_s: [5]' }, 'campaign.fence.delay_s'],
@@ -30,15 +44,26 @@ test('AC1: invalid fence values are rejected naming the offending field', () => 
     // An element-level failure carries the tuple index: campaign.fence.delay_s.0.
     [{ delay_s: 'delay_s: [-1, 5]' }, 'campaign.fence.delay_s'],
     [{ extra_domains: 'extra_domains: wiki.example' }, 'campaign.fence.extra_domains'],
-  ];
-  for (const [override, field] of cases) {
-    const parsed = parseCampaign(campaignYaml(override));
-    assert.equal(parsed.ok, false, `expected rejection: ${field}`);
-    assert.ok(
-      parsed.diagnostics.some((line) => line.startsWith(field)),
-      `${field}: ${parsed.diagnostics.join('\n')}`
-    );
-  }
+    [{ fence: null }, 'campaign.fence'],
+    [{ fence: 'fence:', depth: null, extra_domains: null, delay_s: null }, 'campaign.fence'],
+  ]);
+});
+
+test('invalid seeds are rejected naming the field', () => {
+  expectRejections([
+    [{ seeds: null }, 'campaign.seeds'],
+    [{ seeds: 'seeds: []' }, 'campaign.seeds'],
+    [{ seeds: 'seeds:\n  - not-a-url' }, 'campaign.seeds'],
+    [{ seeds: 'seeds: gdansk.example' }, 'campaign.seeds'],
+  ]);
+});
+
+test('invalid topics are rejected naming the field', () => {
+  expectRejections([
+    [{ topics: 'topics: not-a-list' }, 'campaign.topics'],
+    [{ topics: 'topics: [null]' }, 'campaign.topics'],
+    [{ topics: 'topics: ["a", 3]' }, 'campaign.topics'],
+  ]);
 });
 
 test('youtube ids outside the 11-char video-id shape are rejected naming the field', () => {
