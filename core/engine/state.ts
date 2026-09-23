@@ -1,4 +1,5 @@
-// G05.01.a — engine state types and derived views (docs/agent-tasks/run/G05.01.a.md).
+// G05.01.a + G05.01.b — engine state types and derived views
+// (docs/agent-tasks/run/G05.01.a.md, docs/agent-tasks/run/G05.01.b.md).
 //
 // Name boundary, declared once for the whole module (19 §3): the canonical
 // contract names are snake_case in 09 §6.1 and the accepted ADRs
@@ -133,6 +134,19 @@ export const storyAccessible = (state: RunSessionState, storyId: StoryId): boole
     state.tierAvailable.includes(storyTierOf(stop, storyId))
   );
 };
+
+// «Яшчэ можна адкрыць» (ADR G01.01 §4.6): every accessible story of the route
+// stops that is not heard — locked stories excluded, the unit is story_id, an
+// unheard additional story is listed even when the stop marker already says
+// played. Route-stop order, [base, extended] inside a stop (the executable
+// reference: docs/run-model/run-model.mjs missed()).
+export const missedStories = (state: RunSessionState): StoryId[] => [
+  ...new Set(
+    state.stops
+      .flatMap((stop) => storiesOf(stop))
+      .filter((storyId) => storyAccessible(state, storyId) && !state.heard.includes(storyId)),
+  ),
+];
 
 export type StopStatus = 'locked' | 'playing' | 'played' | 'available' | 'pending';
 

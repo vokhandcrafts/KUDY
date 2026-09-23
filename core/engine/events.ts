@@ -1,7 +1,8 @@
-// G05.01.a — engine event union. Event names are copied verbatim from
-// 09 §6.1 (implementation-rules 2); field shapes follow 19 §3.1 with the
-// moment-variant events 09 §6.1 carries after the G01.02 synchronization.
-// Field spelling is the camelCase mapping declared in state.ts.
+// G05.01.a + G05.01.b — engine event union. Event names are copied verbatim
+// from 09 §6.1 (implementation-rules 2); field shapes follow 19 §3.1 with the
+// moment-variant events 09 §6.1 carries after the G01.02 synchronization (the
+// b-slice adds the DwellCompleted radius payload). Field spelling is the
+// camelCase mapping declared in state.ts.
 
 import type {
   AcceptedFix,
@@ -37,7 +38,11 @@ export type RunEvent =
   | { type: 'Resume' }
   | { type: 'End' }
   | { type: 'LocationAccepted'; fix: AcceptedFix }
-  | { type: 'DwellCompleted'; stopId: StopId }
+  // The radius is the trigger radius of the confirmed dwell: the queue cell
+  // keeps {stop_id, radius, at} (09 §6.1) and the deferred play re-checks
+  // distance against 2 × radius (11 §5.3). The payload was deferred to this
+  // slice by G05.01.a (results, «Deferred to the slice that owns them»).
+  | { type: 'DwellCompleted'; stopId: StopId; radius: number }
   | { type: 'AudioFinished'; sessionId: SessionId; playId: number; storyId?: StoryId }
   | { type: 'MomentFinished'; token: PlayToken; momentId: MomentId; storyId: StoryId }
   | { type: 'AudioFailed'; token: PlayToken; reason: string }

@@ -18,60 +18,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { accessReady, CONFIG, NOW, sessionOf, startEvent, started, withQueued } from './fixtures.ts';
 import { defaultEngineConfig, step } from './reducer.ts';
-import { initialRunState, type RunSessionState, type RunState } from './state.ts';
-import type { RunEvent } from './events.ts';
-
-const CONFIG = defaultEngineConfig;
-const NOW = 1_000_000;
-
-// stop-gate is paid-only: its primary story is the extended one (ADR G01.01 §4.4).
-const STOPS = [
-  { stopId: 'stop-crane', storyBaseId: 'story-crane-base', storyExtendedId: 'story-crane-ext' },
-  { stopId: 'stop-plain', storyBaseId: 'story-plain-base' },
-  { stopId: 'stop-gate', storyExtendedId: 'story-gate-ext' },
-];
-
-const startEvent = (overrides: Partial<Extract<RunEvent, { type: 'Start' }>> = {}): RunEvent => ({
-  type: 'Start',
-  sessionId: 'session-1',
-  routeId: 'route-1',
-  version: 'v3',
-  locale: 'be',
-  tier: ['base'],
-  accessibleStopIds: ['stop-crane', 'stop-plain'],
-  stops: STOPS,
-  ...overrides,
-});
-
-const sessionOf = (result: { state: RunState }): RunSessionState => {
-  assert.ok(result.state.phase !== 'Idle', 'a session must exist after Start');
-  return result.state;
-};
-
-const started = (): RunSessionState => {
-  const result = step(initialRunState, startEvent(), NOW, CONFIG);
-  assert.deepEqual(result.commands, [], 'Start itself emits no effect commands');
-  return sessionOf(result);
-};
-
-const accessReady = (
-  overrides: Partial<Extract<RunEvent, { type: 'AccessReady' }>> = {},
-): RunEvent => ({
-  type: 'AccessReady',
-  routeId: 'route-1',
-  version: 'v3',
-  locale: 'be',
-  tier: 'extended',
-  stopIds: ['stop-crane', 'stop-gate'],
-  issuer: 'services/download',
-  ...overrides,
-});
-
-const withQueued = (state: RunSessionState): RunSessionState => ({
-  ...state,
-  queued: { stopId: 'stop-plain', radius: 30, at: NOW },
-});
+import { initialRunState } from './state.ts';
 
 test('criterion 1: the session state carries the 09 §6.1 Active fields under one mapped spelling', () => {
   const state = started();
