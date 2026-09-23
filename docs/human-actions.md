@@ -63,9 +63,6 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/151 (issue #69, закрыты)
 Што зрабіць: на Windows-машыне замяні сімлінк/junction `~/.zcode/cli/memories` (вёў у `Tool-Lib/ai/zcode/memories`) на звычайную лакальную тэчку — рэпа пасле pull болей не змяшчае памяць, і аўтапуш яе не здымае. Патрэбныя старыя памяці аднойчы аднаві з гісторыі (`git show f950005^:ai/zcode/memories/projects/<праект>/...`). На CachyOS ужо перанесена (лакальная тэчка, 107 файлаў).
 Tool-Lib: https://github.com/vokhandcrafts/Tool-Lib/commit/f950005b0d12936c63cc411e7adb3d81d9659f70
 
-### 2026-09-23 — мерж PR #183 (G17.01.a — каркас калектара)
-Што зрабіць: праверце і змержуйце PR #183 у main — `tools/collector/` (CLI `init`/`run`/`status`, Zod-схема кампаніі, сховішча на `node:sqlite`, ідэмпантэнтны ранаў-цыкл з рэзюмам перапынкавых крокаў). Наборы тэстаў калектара 26/26, поўны `npm test` 443/443, `arch:check` і jscpd чыстыя, showboat-дэма верыфіцыраваная; рэвью-раўнд 1 (2 Medium + 1 Low) выпраўлены ў каміце 059339e. Пасля мержу знімце `agent:running` з issue #155.
-PR: https://github.com/vokhandcrafts/KUDY/pull/183 (issue #155)
 
 
 (пуста — усе астатнія запісаныя дзеянні зроблены)
