@@ -86,3 +86,46 @@ export interface DiscoveryLookup {
 export interface DiscoveryCache {
   read(store: PackageStore): Promise<DiscoveryLookup>;
 }
+
+// G04.04.a — library inventory (09 §7: «Стан загрузкі — 4, і ўсе
+// паказваюцца»). State names verbatim from 09 §7; 'stale' is the only
+// catalog-derived state — a newer catalog never changes a layer's readiness
+// (ADR G01.03 §3.4: the session pins its version, a catalog update replaces
+// no file).
+export type InventoryState = 'not_downloaded' | 'partial' | 'ready' | 'stale';
+
+// Read-only facts port over the device bundles tree (09 §7 layout:
+// bundles/<route_id>/<version>/<locale>/<tier>/ with the per-layer lock.json
+// inside). The adapter owns confinement — the same contract as PackageStore —
+// and the inventory never writes: sizes are derived per call and never stored
+// (G04.04.a criterion 3; zone B untouched). listDir and statSize answer null
+// for "nothing here": an absent subtree is an empty listing, not a fault.
+export interface BundlesStore {
+  listDir(rel: string): Promise<string[] | null>;
+  readFile(rel: string): Promise<FileFacts>;
+  statSize(rel: string): Promise<number | null>;
+}
+
+// One library row. missingCount: for partial, how many lock-declared files
+// are absent, unreadable or at the wrong size; null where the count is
+// unknowable — not_downloaded, or a lock.json that is missing or unparseable
+// (criterion 4: diagnosed, never thrown).
+export interface InventoryEntry {
+  routeId: string;
+  version: string;
+  locale: string;
+  tier: Tier;
+  state: InventoryState;
+  missingCount: number | null;
+  // Criterion 1: bytes from lock.json (declared) and disk facts (onDisk);
+  // null where the source does not exist. Derived per call, never stored.
+  bytes: { declared: number | null; onDisk: number | null };
+  // Corrupt-input diagnostics (criterion 4) in the shared rule vocabulary
+  // (<where>#<rule>): catalog fields, lock entries, size contradictions.
+  diagnostics: string[];
+}
+
+export interface InventoryResult {
+  entries: InventoryEntry[];
+  diagnostics: string[];
+}

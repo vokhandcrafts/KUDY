@@ -32,3 +32,19 @@ test('wiring: the readiness core stays network-free (G04.03 criterion 3)', () =>
   const core = read('services/contentRepo/contentRepo.ts');
   assert.doesNotMatch(core, /\bfetch\s*\(|from ['"](?:node:)?(?:http|https|net)['"]|XMLHttpRequest|WebSocket/);
 });
+
+test('wiring: the inventory derives sizes and never writes (G04.04.a criterion 3)', () => {
+  for (const file of ['services/contentRepo/inventory.ts', 'services/contentRepo/nodeBundlesStore.ts']) {
+    const source = read(file);
+    assert.doesNotMatch(
+      source,
+      /from ['"][^'"]*services\/db/,
+      'the inventory must not touch the database — sizes are derived per call, never stored',
+    );
+    assert.doesNotMatch(
+      source,
+      /\b(?:writeFile|appendFile|mkdir|rmdir|unlink|rename)\b/,
+      'the inventory is read-only — no write API may appear in its source',
+    );
+  }
+});
