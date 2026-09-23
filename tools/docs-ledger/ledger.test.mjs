@@ -242,3 +242,23 @@ test('ledger:baseline refuses to overwrite an existing baseline without --force'
   const forced = runBaseline(dir, ['--force']);
   assert.equal(forced.status, 0, `--force re-baseline must pass:\n${forced.output}`);
 });
+
+// G18.05 criterion b: the ownership map is the single home of the "fact class
+// → owner file" table. Removing the section or letting an owner target rot
+// must fail here (implementation-rules §1), the way size-guideline-guard pins
+// its own single home.
+test('the ownership map in docs/readme.md exists and every owner target resolves', () => {
+  const readme = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'readme.md'), 'utf8');
+  const marker = '## Уласнікі норматыўных фактаў';
+  const at = readme.indexOf(marker);
+  assert.notEqual(at, -1, `the ownership map section is missing from docs/readme.md: "${marker}"`);
+  const section = readme.slice(at);
+
+  const targets = [...section.matchAll(/\]\(([^)\s]+)\)/g)].map((m) => m[1]);
+  assert.ok(targets.length >= 20, `the ownership map has too few owner links: ${targets.length}`);
+  for (const target of targets) {
+    if (/^(https?:|mailto:|\/\/)/i.test(target)) continue;
+    const resolved = path.resolve(REPO_ROOT, 'docs', decodeURIComponent(target.split('#')[0]));
+    assert.ok(fs.existsSync(resolved), `ownership map owner target does not exist: ${target}`);
+  }
+});
