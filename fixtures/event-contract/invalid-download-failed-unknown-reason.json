@@ -1,0 +1,5 @@
+{
+  "violates": "invalid:reason",
+  "note": "Крытэрый 5: download_failed.reason — закрыты прапанаваны спіс (класы з радка G04.02); невядомая прычына адхіляецца.",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-000000000004", "type": "download_failed", "at": "2026-09-23T12:07:30Z", "schema_version": 1, "download_id": "dl-2", "bytes": 1048576, "route_id": "guide-old-town", "version": "1", "locale": "be", "tier": "extended", "reason": "unknown_cause" }
+}

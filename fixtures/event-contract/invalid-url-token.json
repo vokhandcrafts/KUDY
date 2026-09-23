@@ -1,0 +1,5 @@
+{
+  "violates": "forbidden-url-token",
+  "note": "Крытэрый 6, клас «URL/токены»: 09 §10 і 09 §20 — без URL і токенаў; поле url забароненае.",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-000000000008", "type": "extension_offer_shown", "at": "2026-09-23T12:17:00Z", "schema_version": 1, "offer_id": "off-1", "route_id": "guide-old-town", "url": "https://kudy.example/offer/off-1" }
+}
