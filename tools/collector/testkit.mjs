@@ -24,15 +24,19 @@ export function campaignYaml(overrides = {}) {
     city: 'city: gdansk',
     seeds: 'seeds:\n  - https://news.example/gdansk',
     topics: 'topics: [history]',
+    fence: 'fence:',
     depth: 'depth: 3',
     extra_domains: 'extra_domains: []',
     delay_s: 'delay_s: [2, 5]',
     youtube: 'youtube:\n  - dQw4w9WgXcQ',
     ...overrides,
   };
-  const lines = [fields.city, fields.seeds, fields.topics, 'fence:'];
-  for (const key of ['depth', 'extra_domains', 'delay_s']) {
-    if (fields[key] !== null) lines.push(`  ${fields[key]}`);
+  const lines = [fields.city, fields.seeds, fields.topics];
+  if (fields.fence !== null) {
+    lines.push(fields.fence);
+    for (const key of ['depth', 'extra_domains', 'delay_s']) {
+      if (fields[key] !== null) lines.push(`  ${fields[key]}`);
+    }
   }
   lines.push(fields.youtube);
   return lines.filter((line) => line !== null).join('\n') + '\n';
