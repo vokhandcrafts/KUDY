@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { campaignYaml, makeTempDir, writeCampaignFile } from './testkit.mjs';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { articleHtml, campaignYaml, makeTempDir, writeCampaignFile } from './testkit.mjs';
 
 const cliPath = fileURLToPath(new URL('./collector.mjs', import.meta.url));
 
@@ -84,6 +84,34 @@ test('run is idempotent end-to-end: two invocations, no duplicate records', () =
   assert.match(status.stdout, /campaigns: 1/);
   assert.match(status.stdout, /raw_records: 2/);
   assert.match(status.stdout, /run_log: done 3, running 0, pending 0, failed 0/);
+});
+
+test('run with a file:// seed writes the snapshot; status counts it', () => {
+  const dir = makeTempDir();
+  const fixturePath = path.join(dir, 'article.html');
+  fs.writeFileSync(fixturePath, articleHtml(), 'utf8');
+  const file = writeCampaignFile(
+    dir,
+    campaignYaml({ youtube: null, seeds: `seeds:\n  - ${pathToFileURL(fixturePath).href}` })
+  );
+  const dbPath = path.join(dir, 'db.sqlite');
+
+  const result = runCli(['run', '--campaign', file, '--db', dbPath]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /steps done 1, failed 0, running 0, pending 0/);
+  assert.match(result.stdout, /raw_records total 1/);
+  assert.match(result.stdout, new RegExp(`snapshots root ${path.join(dir, 'snapshots').replace(/\\/g, '\\\\')}`));
+
+  const campaignDirs = fs.readdirSync(path.join(dir, 'snapshots'));
+  assert.equal(campaignDirs.length, 1, 'one campaign subdir under the snapshots root');
+  const articleDirs = fs.readdirSync(path.join(dir, 'snapshots', campaignDirs[0]));
+  assert.equal(articleDirs.length, 1);
+  const files = fs.readdirSync(path.join(dir, 'snapshots', campaignDirs[0], articleDirs[0])).sort();
+  assert.deepEqual(files, ['media', 'metadata.json', 'snapshot.html', 'text.md']);
+
+  const status = runCli(['status', '--db', dbPath]);
+  assert.equal(status.status, 0, status.stderr);
+  assert.match(status.stdout, /snapshots: 1/);
 });
 
 test('unknown command and missing --campaign answer with usage, exit 2', () => {
