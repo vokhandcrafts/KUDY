@@ -12,9 +12,16 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-const committedSuites = execFileSync('git', ['ls-files', '*.test.mjs'], { cwd: repoRoot, encoding: 'utf8' })
-  .split('\n')
-  .filter((rel) => rel !== '' && !rel.startsWith('spikes/'));
+const committedSuites = [
+  ...execFileSync('git', ['ls-files', '*.test.mjs'], { cwd: repoRoot, encoding: 'utf8' })
+    .split('\n')
+    .filter((rel) => rel !== '' && !rel.startsWith('spikes/')),
+  // Implementation-rules 7: .ts suites are wired through glob entries too —
+  // G08.01 added supabase/**/*.test.ts, so this guard enumerates them as well.
+  ...execFileSync('git', ['ls-files', '*.test.ts'], { cwd: repoRoot, encoding: 'utf8' })
+    .split('\n')
+    .filter((rel) => rel !== ''),
+];
 
 test('guard: npm test enumerates every committed suite outside spikes', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
@@ -29,7 +36,11 @@ test('guard: npm test enumerates every committed suite outside spikes', () => {
       (script.includes('tools/docs-ledger/*.test.mjs') && suite.startsWith('tools/docs-ledger/')) ||
       (script.includes('tools/validate/*.test.mjs') && suite.startsWith('tools/validate/')) ||
       (script.includes('tools/publish-catalog/*.test.mjs') && suite.startsWith('tools/publish-catalog/')) ||
-      (script.includes('docs/run-model/') && suite.startsWith('docs/run-model/'));
+      (script.includes('docs/run-model/') && suite.startsWith('docs/run-model/')) ||
+      (script.includes('services/**/*.test.ts') && suite.startsWith('services/')) ||
+      (script.includes('core/**/*.test.ts') && suite.startsWith('core/')) ||
+      (script.includes('web/**/*.test.ts') && suite.startsWith('web/')) ||
+      (script.includes('supabase/**/*.test.ts') && suite.startsWith('supabase/'));
     assert.ok(wired, `${suite} is not wired into "npm test" (${script})`);
   }
 });
