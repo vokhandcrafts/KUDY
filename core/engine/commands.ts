@@ -10,12 +10,25 @@ import type { MomentId, PlayToken, SessionId, StoryId, StopId } from './state.ts
 // contract closes.
 export type EventPayload = Record<string, unknown>;
 
+// ADR G01.02 §3.2: every launch command carries the token the controller
+// minted for it (`PlayStory`/`PlayMoment` — «з тым жа токенам у камандзе»),
+// and `StopAudio`/`ResumeAudio` are actions over the current token. The
+// moment teaser path is resolved by the controller — the engine cannot derive
+// the tier of a place-based teaser story (the frozen model emits no path
+// there either), so `PlayMoment.path` stays optional.
 export type RunCommand =
-  | { type: 'PlayStory'; storyId: StoryId; path: string; sessionId: SessionId; playId: number }
-  | { type: 'PlayMoment'; momentId: MomentId; path: string; token: PlayToken }
-  | { type: 'StopAudio' }
+  | {
+      type: 'PlayStory';
+      storyId: StoryId;
+      path: string;
+      sessionId: SessionId;
+      playId: number;
+      token: PlayToken;
+    }
+  | { type: 'PlayMoment'; momentId: MomentId; path?: string; token: PlayToken }
+  | { type: 'StopAudio'; token: PlayToken }
   | { type: 'PauseAudio' }
-  | { type: 'ResumeAudio' }
+  | { type: 'ResumeAudio'; token: PlayToken }
   // The window is rebuilt from the currently eligible stops; services/location
   // owns the ≤ 20-region selection (09 §6.3).
   | { type: 'SetGeofenceWindow'; stopIds: StopId[] }
