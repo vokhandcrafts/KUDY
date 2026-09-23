@@ -69,3 +69,42 @@ export function seedCampaign(db, id = 'c1') {
      VALUES (?, 'gdansk', 'campaign.yaml', 'hash', '[]', '[]', '{}', '[]', '2026-09-23T00:00:00.000Z')`
   ).run(id);
 }
+
+// Fixture page builder for the snapshot suites (G17.01.b): every named field
+// is optional and each corrupt variant differs from the valid page in exactly
+// one declared place (implementation-rules 14). Default body: three
+// paragraphs — an absolute anchor, a relative plus an absolute anchor, and a
+// plain one.
+export const ARTICLE_BODY = [
+  '<p>The <a href="https://gdansk.example/history">shipyard history</a> began in 1844.</p>',
+  '<p>Read the <a href="../museum/main-hall.html">main hall guide</a> and the <a href="https://gdansk.example/cranes">crane list</a>.</p>',
+  '<p>No links in this paragraph at all.</p>',
+];
+
+export function articleHtml({
+  title = 'Gdansk shipyard turns into a museum',
+  lang = 'en',
+  body = ARTICLE_BODY,
+  author = 'Jan Kowalski',
+  published = '2026-09-20',
+  canonical = null,
+} = {}) {
+  const head = [
+    ...(title === null ? [] : [`  <title>${title}</title>`]),
+    `  <meta name="author" content="${author}">`,
+    `  <meta property="article:published_time" content="${published}">`,
+    ...(canonical ? [`  <link rel="canonical" href="${canonical}">`] : []),
+  ];
+  return [
+    '<!DOCTYPE html>',
+    `<html lang="${lang}">`,
+    '<head>',
+    ...head,
+    '</head>',
+    '<body>',
+    ...body.map((paragraph) => `  ${paragraph}`),
+    '</body>',
+    '</html>',
+    '',
+  ].join('\n');
+}

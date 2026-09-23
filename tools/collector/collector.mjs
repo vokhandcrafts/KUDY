@@ -7,7 +7,7 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { parseCampaign } from './campaign.mjs';
-import { countRows, openStore, sha256Hex, stepStatusCounts } from './store.mjs';
+import { countRows, countSnapshots, openStore, sha256Hex, stepStatusCounts } from './store.mjs';
 import { runCampaign } from './runloop.mjs';
 
 const usage = `usage: node tools/collector/collector.mjs <command> [options]
@@ -83,9 +83,12 @@ export function main(argv) {
       process.exit(1);
     }
     const db = openStoreOrExit(dbPath);
+    // Snapshots live next to the database, one campaign subdir per db.
+    const snapshotsRoot = path.join(path.dirname(dbPath), 'snapshots');
     const run = runCampaign(db, result.campaign, {
       sourcePath: file,
       contentHash: sha256Hex(source),
+      snapshotsRoot,
     });
     const steps = stepStatusCounts(db, run.campaignId);
     console.log(
@@ -93,6 +96,7 @@ export function main(argv) {
         `steps done ${run.done}, failed ${run.failed}, running ${steps.running ?? 0}, pending ${steps.pending ?? 0}`
     );
     console.log(`collector: raw_records total ${countRows(db, 'raw_records', run.campaignId)}`);
+    console.log(`collector: snapshots root ${snapshotsRoot}`);
     return;
   }
 
@@ -104,6 +108,7 @@ export function main(argv) {
   console.log(`collector: db ${dbPath}`);
   console.log(`campaigns: ${countRows(db, 'campaigns')}`);
   console.log(`raw_records: ${countRows(db, 'raw_records')}`);
+  console.log(`snapshots: ${countSnapshots(db)}`);
   console.log(
     `run_log: done ${steps.done ?? 0}, running ${steps.running ?? 0}, pending ${steps.pending ?? 0}, failed ${steps.failed ?? 0}`
   );
