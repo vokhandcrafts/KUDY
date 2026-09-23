@@ -1,0 +1,11 @@
+{
+  "note": "G01.05.a, крытэрый 4 — ланцуг preview → purchase → download → Start: да session_started няма ніводнай падзеі з session_id.",
+  "events": [
+    { "event_id": "1f1e2d3c-4b5a-4968-8776-000000000001", "type": "route_preview", "at": "2026-09-23T12:00:00Z", "schema_version": 1, "route_id": "guide-old-town" },
+    { "event_id": "1f1e2d3c-4b5a-4968-8776-000000000002", "type": "purchase_started", "at": "2026-09-23T12:01:00Z", "schema_version": 1, "attempt_id": "att-1", "route_id": "guide-old-town", "tier": "extended", "offer_id": "off-1" },
+    { "event_id": "1f1e2d3c-4b5a-4968-8776-000000000003", "type": "purchase_succeeded", "at": "2026-09-23T12:02:00Z", "schema_version": 1, "attempt_id": "att-1", "route_id": "guide-old-town", "tier": "extended" },
+    { "event_id": "1f1e2d3c-4b5a-4968-8776-000000000004", "type": "download_started", "at": "2026-09-23T12:03:00Z", "schema_version": 1, "download_id": "dl-1", "attempt_id": "att-1", "bytes": 10485760, "route_id": "guide-old-town", "version": "1", "locale": "be", "tier": "extended" },
+    { "event_id": "1f1e2d3c-4b5a-4968-8776-000000000005", "type": "download_completed", "at": "2026-09-23T12:05:00Z", "schema_version": 1, "download_id": "dl-1", "attempt_id": "att-1", "bytes": 10485760, "route_id": "guide-old-town", "version": "1", "locale": "be", "tier": "extended" },
+    { "event_id": "1f1e2d3c-4b5a-4968-8776-000000000006", "type": "session_started", "at": "2026-09-23T12:06:00Z", "schema_version": 1, "session_id": "sess-1", "route_id": "guide-old-town", "version": "1" }
+  ]
+}

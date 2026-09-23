@@ -54,6 +54,13 @@ if (!/tools\/docs-ledger/.test(pkg.scripts?.test ?? '')) {
   failures.push('npm test glob does not include tools/docs-ledger');
 }
 
+// G17.01.a revert guard — same class as the tools/arch-surface glob: losing
+// the tools/collector npm-test glob would drop the collector suites silently
+// (implementation-rules 1 and 7).
+if (!/tools\/collector/.test(pkg.scripts?.test ?? '')) {
+  failures.push('npm test glob does not include tools/collector');
+}
+
 if (failures.length > 0) {
   console.error('guard-required-checks: FAIL');
   for (const failure of failures) console.error(`- ${failure}`);

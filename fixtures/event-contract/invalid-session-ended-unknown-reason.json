@@ -1,0 +1,5 @@
+{
+  "violates": "invalid:reason",
+  "note": "Крытэрый 5: session_ended.reason закрыты спіс user_stop | switch_walk (09 §10); невядомая прычына адхіляецца.",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-000000000003", "type": "session_ended", "at": "2026-09-23T13:00:00Z", "schema_version": 1, "session_id": "sess-1", "route_id": "guide-old-town", "version": "1", "reason": "went_home", "heard_stories_count": 3 }
+}
