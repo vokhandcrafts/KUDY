@@ -12,6 +12,10 @@ dist/
 !.env.example
 *.tsbuildinfo
 
+# G06.09.a: expo prebuild output (AC5), generated per check, never tracked
+/android/
+/ios/
+
 # G02.03: build-bundle output (public/private trees, release artifacts), never tracked
 tools/build-bundle/build/
 

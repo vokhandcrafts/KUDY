@@ -5,7 +5,7 @@
 [19 §2 + §4.2](../../docs/architecture/19_class_and_module_map.md) — пры дапамозе
 dependency-cruiser (пін-точна ў `devDependencies`; канфіг —
 [`.dependency-cruiser.cjs`](../../.dependency-cruiser.cjs)). Спіс зон на скан:
-`core services contracts tools web`. Правілы конфігу:
+`core services contracts tools web app`. Правілы конфігу:
 
 | Правіла | Кананічная крыніца | Сэнс |
 |---|---|---|
@@ -14,12 +14,13 @@ dependency-cruiser (пін-точна ў `devDependencies`; канфіг —
 | `services-zone-closed` | матрыца, радок `services/`; 19 §4.2 | `services/` не імпартуе `web/`, `tools/`, `spikes/`, `app/`, `controllers/` |
 | `contracts-zone-closed` | матрыца, радок `contracts/` | `contracts/` — толькі адносныя імпарты, ніякай зоны дадатку |
 | `web-zone-closed` | матрыца, радок `web/` | `web/` не імпартуе `core/`, `services/`, `tools/`, `spikes/` |
+| `app-no-services` | 19 §4.2 (правіла краю); G06.09.a | `app/` не імпартуе `services/` напрамую — экраны дасягаюць стану і эфектаў толькі праз кантролеры |
 | `tools-zone-closed` | матрыца, радок `tools/`; 19 §2.4 | `tools/` — асобны працэс без агульнага коду з дадаткам; не імпартуе `core/`, `services/`, `web/`, `spikes/` |
 | `no-cycles` | 19 §4.2 | цыклы забароненыя ўсярэдзіне і праз усе правераныя зоны |
 
-Зоны `app/` і `controllers/` правілаў яшчэ не маюць — іх уводзіць той PR, што
-стварае першы экран. Глыбіня імпартаў (`deep imports`) і скан `spikes/` з
-`docs/run-model` — наўмысна па-за межамі.
+Зона `controllers/` правілаў яшчэ не мае — іх уводзіць той PR, што стварае
+першы кантролер (`app/` мае `app-no-services` з G06.09.a). Глыбіня імпартаў
+(`deep imports`) і скан `spikes/` з `docs/run-model` — наўмысна па-за межамі.
 
 ## Базавая лінія
 

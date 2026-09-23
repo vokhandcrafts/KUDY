@@ -2,6 +2,7 @@
   "expo": {
     "name": "KUDY",
     "slug": "kudy",
+    "scheme": "kudy",
     "version": "0.1.0",
     "orientation": "portrait",
     "newArchEnabled": true,
@@ -40,7 +41,8 @@
         }
       ],
       "@maplibre/maplibre-react-native",
-      "expo-asset"
+      "expo-asset",
+      "expo-router"
     ]
   }
 }

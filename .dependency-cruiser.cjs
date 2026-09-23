@@ -71,6 +71,15 @@ module.exports = {
       from: { path: '^tools/' },
       to: { path: '^(core|services|web|spikes)/' },
     },
+    // UI screens reach state and effects only through controllers (19 §4.2
+    // edge rule); introduced with the Expo Router skeleton (G06.09.a).
+    {
+      name: 'app-no-services',
+      comment: 'app/ must not import services/ directly — controllers only (19 §4.2 edge rule)',
+      severity: 'error',
+      from: { path: '^app/' },
+      to: { path: '^services/' },
+    },
     // Cycles are forbidden within and across all checked zones (19 §4.2).
     {
       name: 'no-cycles',

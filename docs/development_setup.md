@@ -27,12 +27,13 @@ npm ci
 | Каманда | Чаканы вынік |
 |---|---|
 | `npm run typecheck` | `tsc --noEmit` без вываду, exit 0 |
-| `npm test` | suite `docs/run-model/run-model.test.mjs`: **67 pass / 0 fail** (лік рухавы: суіта вырасла з 51 пасля змержання G01.02, commit `947d5f2`; звярай з апошнім змержаным кантрактам) |
+| `npm test` | **561 pass / 0 fail**: суіты `node --test` (552) + кампанентныя тэсты маршрутаў `app/` праз jest-expo (9) — лік рухавы, звярай са свежым проганам |
 | `node docs/run-model/check-regressions.mjs` | **21/21 reviewed regressions rejected. Repository model unchanged.** (вырасла з 16 па той самай прычыне) |
+| `npx expo install --check` | **Dependencies are up to date** (піны адпавядаюць чаканым дыяпазонам SDK 54) |
 | `npx expo-doctor` | **18/18 checks passed. No issues detected!** |
 | `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .` | **Found 0 clones** (0.00%) |
 
-`npm test` — адзіны тэставы suite рэпазітара (кантрактная run-model). Ён не правярае натыўны runtime — тое робіць толькі development build на прыладзе.
+`npm test` — два тэставыя рантаймы: `node --test` для кантрактнай мадэлі, інструментарыя і сэрвісаў і jest-expo (`app/**/*.test.tsx`) для кампанентных тэстаў маршрутаў. Ніводзін з іх не правярае натыўны runtime — тое робіць толькі development build на прыладзе.
 
 ## Лакальны запуск без натыўнай зборкі
 
@@ -40,7 +41,7 @@ npm ci
 npx expo start
 ```
 
-Metro bundler; прэв'ю ў Expo Go або эмулятары. **Абмежаванне:** Expo Go не з'яўляецца доказам стэку — background location, background audio і натыўны рэндэр карты патрабуюць development build (ADR §2). Каркас паказвае толькі тэкст-заглушку (`App.tsx`); выклікаў SDK і прадуктовых экранаў у ім няма.
+Metro bundler; прэв'ю ў Expo Go або эмулятары. **Абмежаванне:** Expo Go не з'яўляецца доказам стэку — background location, background audio і натыўны рэндэр карты патрабуюць development build (ADR §2). Дадатак мантуецца праз Expo Router (`app/`): маршруты `19` §2.5 — заглушки з імем экрана і яго params, рэальнага прадуктовага UI яшчэ няма (G06.06–G06.08); выклікаў SDK у ім няма.
 
 ## Натыўныя зборкі (development build)
 
