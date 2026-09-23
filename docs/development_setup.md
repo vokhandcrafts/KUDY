@@ -27,7 +27,7 @@ npm ci
 | Каманда | Чаканы вынік |
 |---|---|
 | `npm run typecheck` | `tsc --noEmit` без вываду, exit 0 |
-| `npm test` | **571 pass / 0 fail**: суіты `node --test` (562) + кампанентныя тэсты маршрутаў `app/` праз jest-expo (9) — лік рухавы, звярай са свежым проганам |
+| `npm test` | **572 pass / 0 fail**: суіты `node --test` (563) + кампанентныя тэсты маршрутаў `app/` праз jest-expo (9) — лік рухавы, звярай са свежым проганам |
 | `node docs/run-model/check-regressions.mjs` | **21/21 reviewed regressions rejected. Repository model unchanged.** (вырасла з 16 па той самай прычыне) |
 | `npx expo install --check` | **Dependencies are up to date** (піны адпавядаюць чаканым дыяпазонам SDK 54) |
 | `npx expo-doctor` | **18/18 checks passed. No issues detected!** |

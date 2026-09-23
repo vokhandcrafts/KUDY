@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { fireEvent, renderRouter, screen } from "expo-router/testing-library";
+import { fireEvent, renderRouter, screen, within } from "expo-router/testing-library";
 
 import Explore from "./(tabs)/explore";
 import My from "./(tabs)/my";
@@ -26,15 +26,17 @@ const routes = {
 
 describe("route placeholders (19 §2.5)", () => {
   test.each([
-    ["/explore", "screen-Explore"],
-    ["/my", "screen-My KUDY"],
-    ["/city/gdansk/guides", "screen-Guides"],
-    ["/route/r1", "screen-Route preview"],
-    ["/run/r1", "screen-Run"],
-    ["/map", "screen-Map"],
-  ])("%s renders its placeholder", async (initialUrl, testID) => {
+    ["/explore", "screen-Explore", null],
+    ["/my", "screen-My KUDY", null],
+    ["/city/gdansk/guides", "screen-Guides", "id: gdansk"],
+    ["/route/r1", "screen-Route preview", "id: r1"],
+    ["/run/r1", "screen-Run", "id: r1"],
+    ["/map", "screen-Map", null],
+  ])("%s renders its placeholder", async (initialUrl, testID, param) => {
     renderRouter(routes, { initialUrl });
-    expect(await screen.findByTestId(testID)).toBeTruthy();
+    const placeholder = await screen.findByTestId(testID);
+    expect(placeholder).toBeTruthy();
+    if (param) expect(within(placeholder).getByText(param)).toBeTruthy();
   });
 
   test("route params are named on the placeholder", async () => {

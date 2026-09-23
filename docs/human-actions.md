@@ -16,6 +16,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 ```
 
 ## Што трэба зрабіць
+### 2026-09-23 — мерж PR #229 (G06.09.a — Expo Router і навігацыйны шкілет)
+Што зрабіць: праверце і змержуйце PR #229 у main — каранаўка `App.tsx` замененая на Expo Router (`app/` — маршруты-заглушки 19 §2.5, тэсты renderRouter: кожны маршрут па URL і хадоба City → Guides → preview → Run з Back, правіла `app-no-services`, дакладныя піны ў ADR G00.04 §6). Код-рэвью і суддзя зялёныя (👍 на каментары рэвью = можна мержыць); issue #208 закрываецца мержам. Development build на прыладзе — `not-run`; калі з'явіцца прылада/SDK: `eas build --profile development --platform android`.
+PR: https://github.com/vokhandcrafts/KUDY/pull/229 (issue #208)
+
 ### 2026-09-23 — мерж PR #228 (G04.04.a — інвентарызацыя бібліятэкі)
 Што зрабіць: праверце і змержуйце PR #228 у main — read-only інвентарызацыя ў `services/contentRepo` (станы `not_downloaded`/`partial`/`ready`/`stale` з per-layer `lock.json` + каталогу, `stale` толькі з каталогу, памеры вытворныя, карупцыя → дыягностыкі). Код-рэвью і суддзя зялёныя (👍 на каментары рэвью = можна мержыць); issue #193 закрываецца мержам.
 PR: https://github.com/vokhandcrafts/KUDY/pull/228 (issue #193)
