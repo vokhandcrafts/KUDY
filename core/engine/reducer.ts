@@ -302,7 +302,13 @@ function startSession(event: Extract<RunEvent, { type: 'Start' }>): RunSessionSt
     heard: [],
     autoFired: [],
     playing: event.playingNow
-      ? { owner: 'moment', ...event.playingNow, paused: false }
+      ? {
+          owner: 'moment',
+          momentId: event.playingNow.momentId,
+          storyId: event.playingNow.storyId,
+          seq: event.playingNow.seq,
+          paused: false,
+        }
       : null,
     queued: null,
     autoplaySuspended: false,
