@@ -21,7 +21,7 @@
     "session_id": { "ref": "identifier", "anchor": "09 §10" },
     "route_id": { "ref": "identifier", "anchor": "09 §10" },
     "version": { "ref": "version_id", "anchor": "09 §10" },
-    "locale": { "ref": "identifier", "anchor": "09 §10", "description": "Код мовы з рэестра локаляў; канкрэтны allowlist табліца не зачыняе (09 §8: ui/text/audio локаляў — асобныя рэестры)" },
+    "locale": { "ref": "identifier", "anchor": "09 §10; 21 §8", "description": "Код мовы з рэестра локаляў; канкрэтны allowlist табліца не зачыняе (21 §8: ui_locales/text_locales/audio_locales — асобныя рэестры)" },
     "tier": { "type": "string", "enum": ["base", "extended"], "anchor": "09 §10; ADR G01.03 §3.5" }
   },
   "recording_policy": {
@@ -76,7 +76,7 @@
     },
     {
       "id": "forbidden-content",
-      "statement": "Ніякіх каардынат, дакладных адлегласцей, вольнага тэксту, URL/токенаў і ацэнак водгуку: feedback — не падзея (21 §6), дыягностыка — толькі бакетаваная.",
+      "statement": "Ніякіх каардынат, дакладных адлегласцей, вольнага тэксту, URL/токенаў і ацэнак водгуку: feedback — не падзея і не дублюецца ў падзеях (21 §7; 12 «непублічныя водгукі»; кароткая фармулёўка крыніцы — 21 §6), дыягностыка — толькі бакетаваная.",
       "anchor": "09 §10; 09 §20; 21 §6, §7",
       "enforcement": {
         "coordinate_fields": ["lat", "lon", "latitude", "longitude", "coords", "coordinates", "distance_m", "distance", "accuracy_m"],
