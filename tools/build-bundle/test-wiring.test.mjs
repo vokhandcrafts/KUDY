@@ -28,6 +28,7 @@ test('guard: npm test enumerates every committed suite outside spikes', () => {
       (script.includes('tools/build-bundle/*.test.mjs') && suite.startsWith('tools/build-bundle/')) ||
       (script.includes('tools/validate/*.test.mjs') && suite.startsWith('tools/validate/')) ||
       (script.includes('tools/publish-catalog/*.test.mjs') && suite.startsWith('tools/publish-catalog/')) ||
+      (script.includes('tools/collector/*.test.mjs') && suite.startsWith('tools/collector/')) ||
       (script.includes('docs/run-model/') && suite.startsWith('docs/run-model/'));
     assert.ok(wired, `${suite} is not wired into "npm test" (${script})`);
   }
