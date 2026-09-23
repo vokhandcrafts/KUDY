@@ -1,0 +1,17 @@
+{
+  "note": "G01.05.a, implementation-rules §14: псуваны ўвод дае дыягностыкі, ніколі не кідак. Кожны case — адзін дэфект формы.",
+  "cases": [
+    { "expect_prefix": "shape:", "payload": null },
+    { "expect_prefix": "shape:", "payload": 42 },
+    { "expect_prefix": "shape:", "payload": "app_open" },
+    { "expect_prefix": "shape:", "payload": [] },
+    { "expect_prefix": "shape:", "payload": {} },
+    { "expect_prefix": "shape:", "payload": { "event_id": "0f1e2d3c-4b5a-4968-8776-0000000000aa", "at": "2026-09-23T12:00:00Z", "schema_version": 1 } },
+    { "expect_prefix": "shape:", "payload": { "type": 42, "event_id": "0f1e2d3c-4b5a-4968-8776-0000000000aa", "at": "2026-09-23T12:00:00Z", "schema_version": 1 } },
+    { "expect_prefix": "invalid:at", "payload": { "type": "app_open", "event_id": "0f1e2d3c-4b5a-4968-8776-0000000000aa", "at": 123, "schema_version": 1 } },
+    { "expect_prefix": "invalid:event_id", "payload": { "type": "app_open", "event_id": "not-a-uuid", "at": "2026-09-23T12:00:00Z", "schema_version": 1 } },
+    { "expect_prefix": "invalid:shown_guide_ids", "payload": { "type": "guide_nearby_shown", "event_id": "0f1e2d3c-4b5a-4968-8776-0000000000aa", "at": "2026-09-23T12:00:00Z", "schema_version": 1, "suggestion_id": "sug-1", "shown_guide_ids": [null], "context": "idle" } },
+    { "expect_prefix": "invalid:schema_version", "payload": { "type": "app_open", "event_id": "0f1e2d3c-4b5a-4968-8776-0000000000aa", "at": "2026-09-23T12:00:00Z", "schema_version": "1" } },
+    { "expect_prefix": "missing:", "payload": { "type": "session_ended", "event_id": "0f1e2d3c-4b5a-4968-8776-0000000000aa", "at": "2026-09-23T13:00:00Z", "schema_version": 1, "session_id": "sess-1", "route_id": "guide-old-town", "version": "1", "reason": "user_stop" } }
+  ]
+}

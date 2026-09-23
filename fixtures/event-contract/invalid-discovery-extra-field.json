@@ -1,0 +1,5 @@
+{
+  "violates": "discovery-payload-not-exact",
+  "note": "Крытэрый 8: payload discovery_offer_* — роўна пяць названых палёў + апцыянальны time_bucket; route_id тут забаронены.",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-00000000000a", "type": "discovery_offer_shown", "at": "2026-09-23T12:55:00Z", "schema_version": 1, "discovery_revision": "r-2026-09-23-1", "offer_id": "off-2", "kind": "guide", "content_locale": "be", "surface": "discovery", "route_id": "guide-old-town" }
+}

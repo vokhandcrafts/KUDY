@@ -1,0 +1,5 @@
+{
+  "violates": "session-before-start",
+  "note": "Крытэрый 2/4: app_open не мае кантэксту сесіі — вынайдзены session_id адхіляецца правілам no-session-before-start.",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-000000000001", "type": "app_open", "at": "2026-09-23T12:00:00Z", "schema_version": 1, "session_id": "sess-1" }
+}

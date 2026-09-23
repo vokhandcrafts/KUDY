@@ -1,0 +1,5 @@
+{
+  "violates": "unknown-type",
+  "note": "21 §6: feedback — не падзея; тыпу feedback_submitted у табліцы няма.",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-00000000000d", "type": "feedback_submitted", "at": "2026-09-23T12:30:00Z", "schema_version": 1 }
+}
