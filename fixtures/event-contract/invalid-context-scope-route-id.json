@@ -1,0 +1,5 @@
+{
+  "violates": "unknown-field:route_id",
+  "note": "Крытэрый 2: кантэкстныя палі з'яўляюцца толькі на падзеях з тым кантэкстам — story-падзеі (09 §10) не нясуць route_id.",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-00000000000c", "type": "story_play_started", "at": "2026-09-23T12:12:00Z", "schema_version": 1, "session_id": "sess-1", "stop_id": "stop-1", "story_id": "story-1-base", "play_id": 1, "trigger": "gps", "route_id": "guide-old-town" }
+}

@@ -1,0 +1,5 @@
+{
+  "violates": "forbidden-coordinates",
+  "note": "Крытэрый 6, клас «каардынаты»: 09 §10 — ніякіх каардынат у падзеях; поле lat забароненае.",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-000000000005", "type": "stop_reached", "at": "2026-09-23T12:11:00Z", "schema_version": 1, "session_id": "sess-1", "stop_id": "stop-1", "lat": 53.9045 }
+}

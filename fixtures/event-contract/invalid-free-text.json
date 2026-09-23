@@ -1,0 +1,5 @@
+{
+  "violates": "forbidden-free-text",
+  "note": "Крытэрый 6, клас «вольны тэкст»: 09 §10 — ніякага вольнага тэксту; поле note забароненае.",
+  "event": { "event_id": "4f1e2d3c-4b5a-4968-8776-000000000007", "type": "story_play_started", "at": "2026-09-23T12:12:00Z", "schema_version": 1, "session_id": "sess-1", "stop_id": "stop-1", "story_id": "story-1-base", "play_id": 1, "trigger": "gps", "note": "карыстальнік папросіў паўтарыць гісторыю" }
+}
