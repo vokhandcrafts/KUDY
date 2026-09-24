@@ -20,29 +20,27 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import { activate, layerPath, rebuildBundleAssets, stagingLayerPath } from './download.ts';
-import { createAccessPort } from './access.ts';
 import { createNodeDownloadStore, nodeSha256 } from './nodeDownloadStore.ts';
-import { lockFrom, crashOnRename } from './test-fixture.ts';
-import { getBundleAssets, getSession, openDatabase, startSession } from '../db/db.ts';
-import { nodeSqliteDriver } from '../db/test-fixture.ts';
-import type { SqlDriver } from '../db/types.ts';
-import type { ActivateDeps, FetchPort, LayerKey } from './types.ts';
+import {
+  AUDIO,
+  crashOnRename,
+  depsFor,
+  GOOD,
+  lockFrom,
+  openFresh,
+  recordingStore,
+  snapshotDir,
+  STOPS,
+  utf8,
+} from './test-fixture.ts';
+import { getBundleAssets, getSession, startSession } from '../db/db.ts';
+import type { LayerKey } from './types.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 const KEY: LayerKey = { routeId: 'route-x', version: '1', locale: 'be', tier: 'base' };
 
-const utf8 = (text: string) => new TextEncoder().encode(text);
 const hex = (bytes: Uint8Array) => Buffer.from(bytes).toString('hex');
-
-// A two-file layer: a JSON file at the root and audio inside a subdirectory —
-// both shapes the lock of a real layer carries (build-bundle README).
-const STOPS = utf8('{"stops":[]}\n');
-const AUDIO = utf8('audio-bytes-0123456789abcdef');
-const GOOD: Record<string, Uint8Array> = {
-  'stops.json': STOPS,
-  'audio/story-1.m4a': AUDIO,
-};
 
 // Same length as AUDIO, one byte flipped — a corrupted transfer the size
 // check cannot see but the hash must.
@@ -54,50 +52,6 @@ const AUDIO_TAMPERED = (() => {
 
 const totalBytes = (sources: Record<string, Uint8Array>) =>
   Object.values(sources).reduce((sum, bytes) => sum + bytes.length, 0);
-
-function openFresh(): SqlDriver {
-  const driver = nodeSqliteDriver();
-  openDatabase(driver);
-  return driver;
-}
-
-interface DepsOptions {
-  driver?: SqlDriver;
-  freeBytes?: number | null;
-  sources?: Record<string, Uint8Array>;
-}
-
-// Test rig: node store over a fresh tmp root, a counting fetch port over the
-// given sources (the port is bound to the layer identity by the caller, as
-// G04.02.b will bind it to the grant), and a fresh in-memory store driver.
-function depsFor(root: string, options: DepsOptions = {}): { deps: ActivateDeps; fetchLog: string[] } {
-  const sources = options.sources ?? GOOD;
-  const store = createNodeDownloadStore(root);
-  if (options.freeBytes !== undefined) store.freeBytes = async () => options.freeBytes ?? null;
-  const fetchLog: string[] = [];
-  const fetch: FetchPort = async (rel) => {
-    fetchLog.push(rel);
-    const bytes = sources[rel];
-    if (!bytes) throw new Error(`no source bytes for ${rel}`);
-    return bytes;
-  };
-  return { fetchLog, deps: { store, fetch, sha256: nodeSha256, driver: options.driver ?? openFresh(), access: createAccessPort() } };
-}
-
-// Recursively reads a directory into rel-path → hex-bytes entries, so
-// byte-identity of a layer before and after an operation is assertable.
-function snapshotDir(root: string, rel: string): Map<string, string> {
-  const out = new Map<string, string>();
-  const walk = (dir: string) => {
-    for (const entry of fs.readdirSync(path.join(root, dir), { withFileTypes: true })) {
-      const child = `${dir}/${entry.name}`;
-      if (entry.isDirectory()) walk(child);
-      else out.set(child, fs.readFileSync(path.join(root, child)).toString('hex'));
-    }
-  };
-  if (fs.existsSync(path.join(root, rel))) walk(rel);
-  return out;
-}
 
 function tmpRoot(): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'g0402a-'));
@@ -332,19 +286,7 @@ test('criterion 4: unsafe segments and lock paths are rejected before any filesy
   const root = tmpRoot();
   try {
     const { deps } = depsFor(root);
-    const calls: string[] = [];
-    const spy = new Proxy(deps.store, {
-      get(target, prop, receiver) {
-        const value = Reflect.get(target, prop, receiver);
-        if (typeof value === 'function') {
-          return (...args: unknown[]) => {
-            calls.push(String(prop));
-            return (value as (...a: unknown[]) => unknown)(...args);
-          };
-        }
-        return value;
-      },
-    }) as ActivateDeps['store'];
+    const { store: spy, calls } = recordingStore(deps.store);
     const unsafeKeys: Array<[LayerKey, string]> = [
       [{ ...KEY, routeId: '../evil' }, 'route_id#unsafe-path:../evil'],
       [{ ...KEY, version: 'a/b' }, 'version#unsafe-path:a/b'],
