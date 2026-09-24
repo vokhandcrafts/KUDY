@@ -13,6 +13,7 @@ import type {
   BundlesStore,
   InventoryEntry,
   InventoryResult,
+  LayerKey,
   LockEntry,
   Tier,
 } from './types.ts';
@@ -42,6 +43,25 @@ export function isSafeRel(value: unknown): value is string {
 
 function isTier(value: unknown): value is Tier {
   return value === 'base' || value === 'extended';
+}
+
+// `09` §7: identifiers reaching the filesystem are untrusted input and are
+// checked as safe units on input, before any filesystem call. Canonical
+// implementation of the layer-key check — the download activation (G04.02.a)
+// re-exports it as validateKey instead of a second variant
+// (implementation-rules 3, 8).
+export function validateLayerKey(key: LayerKey): string[] {
+  const diagnostics: string[] = [];
+  for (const [name, value] of [
+    ['route_id', key.routeId],
+    ['version', key.version],
+    ['locale', key.locale],
+  ] as const) {
+    if (typeof value !== 'string') diagnostics.push(`${name}#type`);
+    else if (!isSafeSegment(value)) diagnostics.push(`${name}#unsafe-path:${value}`);
+  }
+  if (key.tier !== 'base' && key.tier !== 'extended') diagnostics.push('tier#type');
+  return diagnostics;
 }
 
 // One lock.json entry is shape-checked through parseLockEntry (below) against
@@ -157,13 +177,23 @@ function parseCatalog(catalog: unknown): { rows: CatalogRow[]; diagnostics: stri
 // sizes. A file at the wrong size fails the level-2 metadata check (09 §4 —
 // presence and size from lock.json) and counts toward missing with the
 // contradiction as a diagnostic; a plain absent file is the expected partial
-// state, not a diagnostic.
-interface LayerFacts {
+// state, not a diagnostic. Shared by the inventory and the restart presence
+// check (G04.04.c) so the level-2 rule cannot drift between them
+// (implementation-rules 8).
+export interface LayerFacts {
   state: 'partial' | 'ready';
   missingCount: number | null;
   declaredBytes: number | null;
   onDiskBytes: number | null;
   diagnostics: string[];
+  // G04.04.c: lock-relative paths of entries absent or at the wrong size —
+  // the recovery list the presence check turns into a repair request. Entries
+  // that fail the lock shape carry no path (diagnostics only).
+  missingPaths: string[];
+  // Shape-checked entries in lock order — the file set the presence check
+  // verifies beyond size (JSON parse, full re-hash). Empty for an
+  // unverifiable lock.
+  entries: LockEntry[];
 }
 
 const UNVERIFIABLE: LayerFacts = {
@@ -172,9 +202,11 @@ const UNVERIFIABLE: LayerFacts = {
   declaredBytes: null,
   onDiskBytes: null,
   diagnostics: [],
+  missingPaths: [],
+  entries: [],
 };
 
-async function readLayerFacts(store: BundlesStore, layerRel: string): Promise<LayerFacts> {
+export async function readLayerFacts(store: BundlesStore, layerRel: string): Promise<LayerFacts> {
   const lock = await store.readFile(`${layerRel}/lock.json`);
   if (lock.kind !== 'present') {
     // A layer directory without a readable lock cannot be verified: partial
@@ -191,8 +223,16 @@ async function readLayerFacts(store: BundlesStore, layerRel: string): Promise<La
     return { ...UNVERIFIABLE, diagnostics: ['lock.json#invalid-json'] };
   }
   if (!Array.isArray(parsed)) return { ...UNVERIFIABLE, diagnostics: ['lock.json#type'] };
+  // An empty lock declares no layer at all (a real layer carries at least its
+  // stops.json) — the same fault the activation rejects (parseLock), never a
+  // vacuous ready (implementation-rules 6: the documented rule wins). Checked
+  // on the parsed array: a lock whose every entry is corrupt is diagnosed
+  // per entry below, not as "empty".
+  if (parsed.length === 0) return { ...UNVERIFIABLE, diagnostics: ['lock.json#empty'] };
 
   const diagnostics: string[] = [];
+  const missingPaths: string[] = [];
+  const entries: LockEntry[] = [];
   let declaredBytes = 0;
   let onDiskBytes = 0;
   let missing = 0;
@@ -205,10 +245,12 @@ async function readLayerFacts(store: BundlesStore, layerRel: string): Promise<La
       continue;
     }
     const record = checked.entry;
+    entries.push(record);
     declaredBytes += record.bytes;
     const size = await store.statSize(`${layerRel}/${record.path}`);
     if (size === null || size !== record.bytes) {
       missing += 1;
+      missingPaths.push(record.path);
       if (size !== null) diagnostics.push(`${at}#size-mismatch`);
       continue;
     }
@@ -220,6 +262,8 @@ async function readLayerFacts(store: BundlesStore, layerRel: string): Promise<La
     declaredBytes,
     onDiskBytes,
     diagnostics,
+    missingPaths,
+    entries,
   };
 }
 

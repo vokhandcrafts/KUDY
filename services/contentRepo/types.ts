@@ -29,6 +29,23 @@ export interface PackageKey {
   version: string;
 }
 
+// One layer of one bundle: the delivery unit `locale × tier` of
+// route_id@version (`09` §4). Canonical shape lives here; services/download
+// re-exports it as its activation key — one contract, two consumers
+// (implementation-rules 2, 8).
+export interface LayerKey {
+  routeId: string;
+  version: string;
+  locale: string;
+  tier: Tier;
+}
+
+// SHA-256 over raw bytes, hex-encoded. A port because the digest API is a
+// platform facility (node:crypto in the test adapters, expo-crypto on the
+// device — TR-10). Raw bytes only: EOL conversion between checkout and hash
+// is the AR-1 defect class (implementation-rules 4).
+export type Sha256 = (bytes: Uint8Array) => Promise<string>;
+
 // One file lookup. 'absent' and 'unreadable' stay distinct: a declared but
 // missing/empty/unreadable media file is a media error (G04.03 criterion 4,
 // repair offer), while a missing structural file is an incomplete package
@@ -139,3 +156,29 @@ export interface InventoryResult {
   entries: InventoryEntry[];
   diagnostics: string[];
 }
+
+// G04.04.c — the trigger of a presence re-check (`09` §4 level 3). 'restart'
+// is the ordinary open: the cheap level-2 check only. The full re-hash runs
+// solely on the three contract conditions, named verbatim: the app version
+// changed, the player or parser reported a decode error, or the user pressed
+// «праверыць загрузку» in My KUDY.
+export type RecheckTrigger = 'restart' | 'app-version-changed' | 'decode-error' | 'user-requested';
+
+// The per-layer answer of the restart presence check (ADR G01.03 §3.7: an
+// absent file after restart leaves the content honestly unavailable — show
+// the recovery offer, never Play; `09` §7 «Пасля абнаўлення дадатку»).
+// 'needs-recovery' carries `missing` — the layer's lock paths that are
+// absent, short or corrupt: exactly the list a re-download request may name.
+// Diagnostics without a path (a shape-faulted lock entry, a lock that cannot
+// be read at all) leave the file set unknowable, so `missing` can be shorter
+// than the fault count — the layer still never reads as verified.
+export type PresenceVerdict =
+  | { status: 'verified'; layer: LayerKey; checked: 'metadata' | 'full' }
+  | {
+      status: 'needs-recovery';
+      layer: LayerKey;
+      checked: 'metadata' | 'full';
+      missing: string[];
+      diagnostics: string[];
+    }
+  | { status: 'invalid-input'; layer: LayerKey; diagnostics: string[] };

@@ -48,3 +48,22 @@ test('wiring: the inventory derives sizes and never writes (G04.04.a criterion 3
     );
   }
 });
+
+test('wiring: the presence check stays read-only, network-free and database-free (G04.04.c)', () => {
+  const source = read('services/contentRepo/presence.ts');
+  assert.doesNotMatch(
+    source,
+    /\bfetch\s*\(|from ['"](?:node:)?(?:http|https|net)['"]|XMLHttpRequest|WebSocket/,
+    'the presence check is an offline disk derivation',
+  );
+  assert.doesNotMatch(
+    source,
+    /from ['"][^'"]*services\/db/,
+    'the presence check never touches the database — recovery goes through a repair request',
+  );
+  assert.doesNotMatch(
+    source,
+    /\b(?:writeFile|appendFile|mkdir|rmdir|unlink|rename)\b/,
+    'the presence check is read-only — the repair request owns every write',
+  );
+});

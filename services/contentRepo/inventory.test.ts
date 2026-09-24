@@ -386,3 +386,17 @@ test('the listing is deterministic: multi-route output is sorted and repeatable'
   );
   assert.deepEqual(await inventoryPackages(store, { catalog }), result);
 });
+
+// G04.04.c: an empty lock is the activation's fault (parseLock: an empty
+// layer cannot be a real layer), not a vacuous ready — the rule the presence
+// check shares; empty used to read as ready with missing 0.
+test('G04.04.c: an empty lock.json is partial with an unknowable count and the empty fault', async (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'g0404a-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  writeFlatLayer(root, 'bundles/route-x/1/be/base', {}, []);
+  const result = await inventoryPackages(createNodeBundlesStore(root), { catalog: catalogOf([]) });
+  const entry = result.entries.find((row) => row.routeId === 'route-x');
+  assert.equal(entry?.state, 'partial');
+  assert.equal(entry?.missingCount, null);
+  assert.deepEqual(entry?.diagnostics, ['lock.json#empty']);
+});
