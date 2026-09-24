@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-25 — jscpd CI (#241): вырашыць, хто правіць workflow
+Што зрабіць: вырашыце лёс #241 — jscpd-workflow падае на старце (0s, без джобаў) на кожным PR, капі-пэйст гейт у CI не працуе. Фікс патрабуе праўкі `.github/workflows/jscpd.yml` (піна reusable workflow) або самага reusable workflow у ai-company-infrastructure; па `issue-workflow.md` §7 agentам праўка `.github/` забароненая, таму зрабіце праўку самі або яўна дазвольце яе агентам. Пасля фіксу дадайце радок `key: jscpd-workflow-startup-failure` у `docs/review-must-flag.md`.
+Issue: https://github.com/vokhandcrafts/KUDY/issues/241
+
 ### 2026-09-25 — G05.02.c: прыладавыя праверкі адаптара лакацыі
 Што зрабіць: калі з'явіцца Android-тэлефон — прайсці дзевяць клетак матрыцы G00.01.b, якія абслугоўвае адаптар лакацыі (foreground+dwell, заблакаваны экран, фон, адмова/адкліканне дазволу, GPS-прабел, зняцце з recent apps, force-stop, перазагрузка, battery saver) па кроках з табліцы ў выніковым файле `docs/agent-tasks/results/G05.02.c.md` і запоўніць фактычныя вынікі. Да таго ўсе клеткі застаюцца `not-run` (blocked-external); да мержу нічога рабіць не трэба.
 PR: https://github.com/vokhandcrafts/KUDY/pull/253 (issue #212)
