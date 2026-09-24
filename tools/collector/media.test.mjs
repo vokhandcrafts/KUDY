@@ -110,7 +110,7 @@ test('AC2: every saved image has a complete media row and a slug filename; a sec
   runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
 
   const [row] = mediaRows(fx.db);
-  const record = fx.db.prepare("SELECT id, rights, media_dir, snapshot_path FROM raw_records WHERE source_type = 'web'").get();
+  const record = fx.db.prepare("SELECT id, rights, media_dir, snapshot_path, content_hash FROM raw_records WHERE source_type = 'web'").get();
   assert.match(row.file, /^gdansk-shipyard-turns-into-a-museum-img-\d{2}\.png$/, 'spec filename: slug + img-NN + extension');
   assert.equal(row.raw_record_id, record.id);
   assert.equal(typeof row.position, 'number');
@@ -122,6 +122,15 @@ test('AC2: every saved image has a complete media row and a slug filename; a sec
   const onDisk = fs.readFileSync(path.join(record.media_dir, row.file));
   assert.equal(row.content_hash, sha256Hex(onDisk), 'the hash is over the stored bytes');
   assert.deepEqual([row.width_px, row.height_px], [800, 600]);
+  // content_hash pins the extracted TEXT at snapshot time (the dedup key of
+  // G17.01.b) — text.md gains media blocks afterwards, so the hash over the
+  // image-free blocks stays the record's identity.
+  const textBlocks = fs
+    .readFileSync(record.snapshot_path + '/text.md', 'utf8')
+    .replace(/\n$/, '')
+    .split('\n\n')
+    .filter((block) => !block.startsWith('!['));
+  assert.equal(record.content_hash, sha256Hex(textBlocks.join('\n\n') + '\n'), 'the record hash is over the snapshot-time text, media blocks excluded');
 
   const textBefore = fs.readFileSync(path.join(record.snapshot_path, 'text.md'), 'utf8');
   const filesBefore = fs.readdirSync(record.media_dir).sort();
@@ -262,6 +271,8 @@ test('probeImage reads exact dimensions from container headers and rejects anyth
   assert.deepEqual(probeImage(pngBytes(200, 120)), { format: 'png', width: 200, height: 120 });
   assert.deepEqual(probeImage(gifBytes(150, 150)), { format: 'gif', width: 150, height: 150 });
   assert.deepEqual(probeImage(jpegBytes(640, 480)), { format: 'jpeg', width: 640, height: 480 });
+  const jpegWithFill = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xff, 0xff]), jpegBytes(64, 48).subarray(2)]);
+  assert.deepEqual(probeImage(jpegWithFill), { format: 'jpeg', width: 64, height: 48 }, '0xFF fill bytes are skipped, not read as markers');
   assert.equal(probeImage(Buffer.from('plain text, not an image')), null);
   assert.equal(probeImage(pngBytes(10, 10).subarray(0, 20)), null, 'a truncated PNG header is not probed');
   assert.equal(probeImage('not bytes'), null);

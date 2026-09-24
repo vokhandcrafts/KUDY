@@ -48,6 +48,12 @@ export function probeImage(bytes) {
     while (pos + 4 <= bytes.length) {
       if (bytes[pos] !== 0xff) return null;
       const marker = bytes[pos + 1];
+      // 0xFF fill bytes pad segments before the next marker — each is its own
+      // byte, not a marker with a length field.
+      if (marker === 0xff) {
+        pos += 1;
+        continue;
+      }
       if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
         pos += 2;
         continue;

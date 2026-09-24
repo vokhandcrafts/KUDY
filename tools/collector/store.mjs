@@ -64,9 +64,9 @@ export function createSchema(db) {
       width_px INTEGER,
       height_px INTEGER,
       rights TEXT,
-      collected_at TEXT,
-      UNIQUE (raw_record_id, file)
+      collected_at TEXT
     );
+    CREATE UNIQUE INDEX IF NOT EXISTS media_record_file ON media (raw_record_id, file);
     CREATE TABLE IF NOT EXISTS run_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       campaign_id TEXT NOT NULL REFERENCES campaigns(id),
@@ -82,6 +82,15 @@ export function createSchema(db) {
       UNIQUE (campaign_id, kind, ref)
     );
   `);
+  // Databases created before G17.03 keep working: their media table lacks the
+  // uniqueness the image steps rely on (carried by the named index above,
+  // CREATE IF NOT EXISTS) and their run_log lacks the detail work-order
+  // column. CREATE TABLE IF NOT EXISTS never alters an existing table, so the
+  // missing column is added here, once, by a schema check.
+  const columns = db.prepare('PRAGMA table_info(run_log)').all().map((column) => column.name);
+  if (!columns.includes('detail')) {
+    db.exec('ALTER TABLE run_log ADD COLUMN detail TEXT');
+  }
 }
 
 export function openStore(dbPath) {
