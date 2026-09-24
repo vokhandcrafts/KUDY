@@ -48,6 +48,33 @@ function declaredCanonical(html, baseUrl) {
   return baseUrl;
 }
 
+// Attribute order inside an <img> tag varies, so each attribute is matched
+// against the whole tag string (the metaContent idiom). An img without a src
+// is markup garbage, not a fetchable image — skipped entirely; a src that
+// cannot resolve against the page URL is kept raw and fails later at load
+// time with a diagnostic (the «broken image URL» case).
+function extractImgTags(fragment, baseUrl) {
+  const images = [];
+  for (const tag of fragment.match(/<img\b[^>]*>/gi) ?? []) {
+    const src = tag.match(/\bsrc\s*=\s*"([^"]*)"/i)?.[1];
+    if (src === undefined || src.trim() === '') continue;
+    const alt = tag.match(/\balt\s*=\s*"([^"]*)"/i)?.[1];
+    const title = tag.match(/\btitle\s*=\s*"([^"]*)"/i)?.[1];
+    let url;
+    try {
+      url = new URL(decodeEntities(src), baseUrl).href;
+    } catch {
+      url = decodeEntities(src);
+    }
+    images.push({
+      url,
+      alt: alt === undefined ? null : collapse(decodeEntities(alt)),
+      caption: title === undefined ? null : collapse(decodeEntities(title)),
+    });
+  }
+  return images;
+}
+
 export function extractPage(html, baseUrl) {
   if (typeof html !== 'string' || html.trim() === '') {
     throw new Error('empty document — nothing to extract');
@@ -58,9 +85,31 @@ export function extractPage(html, baseUrl) {
     throw new Error('missing <title> — the page cannot be identified');
   }
 
+  // One document-order walk over paragraphs and standalone <figure> blocks.
+  // Images carry the index of the text.md block they are placed before
+  // (media.position, docs/24_web_collection.md «Фота»): an image inside a
+  // text paragraph renders after that paragraph's text, a figure between
+  // paragraphs renders exactly where it stood. v0 regex boundary: <p> inside
+  // <figure> is not extracted — the DOM parser arrives with G17.02.
   const paragraphs = [];
-  for (const raw of html.match(/<p\b[^>]*>([\s\S]*?)<\/p>/gi) ?? []) {
-    const inner = raw.slice(raw.indexOf('>') + 1, raw.lastIndexOf('<'));
+  const images = [];
+  for (const block of html.match(/<p\b[^>]*>[\s\S]*?<\/p>|<figure\b[^>]*>[\s\S]*?<\/figure>/gi) ?? []) {
+    const inner = block.slice(block.indexOf('>') + 1, block.lastIndexOf('<'));
+    const isFigure = /^<figure/i.test(block);
+    const blockImages = extractImgTags(inner, baseUrl);
+    if (isFigure) {
+      const caption = collapse(
+        decodeEntities(
+          (inner.match(/<figcaption\b[^>]*>([\s\S]*?)<\/figcaption>/i)?.[1] ?? '').replace(/<[^>]+>/g, '')
+        )
+      );
+      for (const image of blockImages) {
+        if (caption !== '') image.caption = caption;
+        image.position = paragraphs.length;
+        images.push(image);
+      }
+      continue;
+    }
     const links = [];
     const text = collapse(
       decodeEntities(
@@ -80,6 +129,12 @@ export function extractPage(html, baseUrl) {
           .replace(/<[^>]+>/g, '')
       )
     );
+    for (const image of blockImages) {
+      // Inside a text paragraph the image renders after its text — one block
+      // further; an image-only paragraph renders where it stands.
+      image.position = text === '' ? paragraphs.length : paragraphs.length + 1;
+      images.push(image);
+    }
     if (text !== '') {
       for (const link of links) link.context = text;
       paragraphs.push({ text, links });
@@ -100,5 +155,6 @@ export function extractPage(html, baseUrl) {
     },
     text: paragraphs.map((paragraph) => paragraph.text).join('\n\n') + '\n',
     links: paragraphs.flatMap((paragraph) => paragraph.links),
+    images,
   };
 }
