@@ -117,7 +117,11 @@ export function insertImageMarkdown(snapshotPath, image) {
     seen += 1;
   }
   blocks.splice(at, 0, buildImageMarkdown(image));
-  fs.writeFileSync(mdPath, `${blocks.join('\n\n')}\n`);
+  // text.md is the archive — the rewrite is atomic (temp file + rename), so a
+  // crash mid-write can never leave a truncated snapshot behind.
+  const tmpPath = `${mdPath}.tmp`;
+  fs.writeFileSync(tmpPath, `${blocks.join('\n\n')}\n`);
+  fs.renameSync(tmpPath, mdPath);
   return true;
 }
 
