@@ -17,7 +17,7 @@ const REPO_BASELINE = path.join(REPO_ROOT, 'tools', 'arch', 'baseline.json');
 const CHECK_SCRIPT = path.join(REPO_ROOT, 'tools', 'arch', 'arch-check.mjs');
 
 function runChecker({ cwd, baselineFile }) {
-  const dirs = ['core', 'services', 'contracts', 'tools', 'web', 'app'].filter((d) =>
+  const dirs = ['core', 'services', 'contracts', 'tools', 'web', 'app', 'controllers'].filter((d) =>
     fs.existsSync(path.join(cwd, d)),
   );
   const run = spawnSync(
@@ -51,12 +51,23 @@ function makeSandbox({ files, baselineContent }) {
   return dir;
 }
 
+// Plants one violating import in a sandbox and asserts the real checker
+// rejects it naming the rule and the violating path (implementation-rules 14:
+// one isolating negative fixture per direction).
+function expectZoneRuleFailure({ files, rule, fromPath }) {
+  const dir = makeSandbox({ files });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
+  assert.match(output, new RegExp(rule), 'the violated rule must be named');
+  assert.match(output, new RegExp(fromPath), 'the violation path must be named');
+}
+
 test('arch-check wiring is guarded (package.json scripts, npm-test glob, config, baseline)', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8'));
   assert.match(pkg.scripts['arch:check'], /tools\/arch\/arch-check\.mjs/, 'arch:check must invoke tools/arch/arch-check.mjs');
   assert.match(pkg.scripts['arch:check'], /\.dependency-cruiser\.cjs/, 'arch:check must pass the repo config');
   assert.match(pkg.scripts['arch:check'], /tools\/arch\/baseline\.json/, 'arch:check must pass the baseline');
-  assert.match(pkg.scripts['arch:check'], /core services contracts tools web app/, 'arch:check must scan the zone list (app included since G06.09.a)');
+  assert.match(pkg.scripts['arch:check'], /core services contracts tools web app controllers/, 'arch:check must scan the zone list (controllers included since G06.09.b)');
   assert.match(pkg.scripts['arch:baseline'], /tools\/arch\/arch-baseline\.mjs/, 'arch:baseline must invoke tools/arch/arch-baseline.mjs');
   assert.match(pkg.scripts.test, /"?tools\/arch\/\*\.test\.mjs"?/, 'npm test glob must include tools/arch tests');
 
@@ -131,6 +142,133 @@ test('app/ importing services/ directly fails and names app-no-services (19 §4.
   assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
   assert.match(output, /app-no-services/, 'the violated rule must be named');
   assert.match(output, /app\/bad\.mjs/, 'the violation path must be named');
+});
+
+test('app/ importing core/ directly fails and names app-no-core (G06.09.b)', () => {
+  expectZoneRuleFailure({
+    files: {
+      'app/bad.mjs': "import { step } from '../core/engine.mjs';\nexport const use = step;\n",
+      'core/engine.mjs': "export const step = (x) => x;\n",
+    },
+    rule: 'app-no-core',
+    fromPath: 'app/bad\\.mjs',
+  });
+});
+
+test('a controller value-importing services/ fails and names controllers-services-type-only (issue #209 AC1)', () => {
+  expectZoneRuleFailure({
+    files: {
+      'controllers/bad.mjs': "import { evaluate } from '../services/repo.mjs';\nexport const use = evaluate;\n",
+      'services/repo.mjs': "export const evaluate = (x) => x;\n",
+    },
+    rule: 'controllers-services-type-only',
+    fromPath: 'controllers/bad\\.mjs',
+  });
+});
+
+test('controllers that follow the port rules pass: type-only services import, root value import, core import (issue #209 AC1–AC2)', () => {
+  const dir = makeSandbox({
+    files: {
+      'controllers/createServices.ts':
+        "import { evaluate } from '../services/repo.mjs';\nexport const createServices = () => evaluate;\n",
+      'controllers/sample.ts':
+        "import type { Readiness } from '../services/types.ts';\nimport { step } from '../core/engine.mjs';\nexport const use = (r) => Boolean(r) && Boolean(step);\n",
+      'services/repo.mjs': "export const evaluate = (x) => x;\n",
+      'services/types.ts': "export type Readiness = string;\n",
+      'core/engine.mjs': "export const step = (x) => x;\n",
+    },
+  });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.equal(status, 0, `expected exit 0:\n${output}`);
+  assert.match(output, /arch:check: OK/);
+});
+
+test('services/ importing controllers/ fails and names services-zone-closed', () => {
+  expectZoneRuleFailure({
+    files: {
+      'services/repo.mjs': "import { controller } from '../controllers/sample.mjs';\nexport const use = controller;\n",
+      'controllers/sample.mjs': "export const controller = () => 'c';\n",
+    },
+    rule: 'services-zone-closed',
+    fromPath: 'services/repo\\.mjs',
+  });
+});
+
+test('core/ importing controllers/ fails and names core-zone-closed', () => {
+  expectZoneRuleFailure({
+    files: {
+      'core/engine.mjs': "import { controller } from '../controllers/sample.mjs';\nexport const step = controller;\n",
+      'controllers/sample.mjs': "export const controller = () => 'c';\n",
+    },
+    rule: 'core-zone-closed',
+    fromPath: 'core/engine\\.mjs',
+  });
+});
+
+test('contracts/ importing controllers/ fails and names contracts-zone-closed (review round 1)', () => {
+  expectZoneRuleFailure({
+    files: {
+      'contracts/schema.mjs': "import { controller } from '../controllers/sample.mjs';\nexport const use = controller;\n",
+      'controllers/sample.mjs': "export const controller = () => 'c';\n",
+    },
+    rule: 'contracts-zone-closed',
+    fromPath: 'contracts/schema\\.mjs',
+  });
+});
+
+test('web/ importing controllers/ fails and names web-zone-closed (review round 1)', () => {
+  expectZoneRuleFailure({
+    files: {
+      'web/page.mjs': "import { controller } from '../controllers/sample.mjs';\nexport const use = controller;\n",
+      'controllers/sample.mjs': "export const controller = () => 'c';\n",
+    },
+    rule: 'web-zone-closed',
+    fromPath: 'web/page\\.mjs',
+  });
+});
+
+test('tools/ importing controllers/ fails and names tools-zone-closed (review round 1)', () => {
+  expectZoneRuleFailure({
+    files: {
+      'tools/build.mjs': "import { controller } from '../controllers/sample.mjs';\nexport const use = controller;\n",
+      'controllers/sample.mjs': "export const controller = () => 'c';\n",
+    },
+    rule: 'tools-zone-closed',
+    fromPath: 'tools/build\\.mjs',
+  });
+});
+
+test('contracts/ importing app/ fails and names contracts-zone-closed (app direction, review round 1)', () => {
+  expectZoneRuleFailure({
+    files: {
+      'contracts/schema.mjs': "import { screen } from '../app/screen.mjs';\nexport const use = screen;\n",
+      'app/screen.mjs': "export const screen = () => 's';\n",
+    },
+    rule: 'contracts-zone-closed',
+    fromPath: 'contracts/schema\\.mjs',
+  });
+});
+
+test('web/ importing app/ fails and names web-zone-closed (app direction, review round 1)', () => {
+  expectZoneRuleFailure({
+    files: {
+      'web/page.mjs': "import { screen } from '../app/screen.mjs';\nexport const use = screen;\n",
+      'app/screen.mjs': "export const screen = () => 's';\n",
+    },
+    rule: 'web-zone-closed',
+    fromPath: 'web/page\\.mjs',
+  });
+});
+
+test('tools/ importing app/ fails and names tools-zone-closed (app direction, review round 1)', () => {
+  expectZoneRuleFailure({
+    files: {
+      'tools/build.mjs': "import { screen } from '../app/screen.mjs';\nexport const use = screen;\n",
+      'app/screen.mjs': "export const screen = () => 's';\n",
+    },
+    rule: 'tools-zone-closed',
+    fromPath: 'tools/build\\.mjs',
+  });
 });
 
 test('corrupt baseline yields a diagnostic, not a crash', () => {

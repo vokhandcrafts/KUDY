@@ -21,6 +21,7 @@ import test from 'node:test';
 
 import { activate, layerPath, rebuildBundleAssets, stagingLayerPath } from './download.ts';
 import { createNodeDownloadStore, nodeSha256 } from './nodeDownloadStore.ts';
+import { lockFrom } from './test-fixture.ts';
 import { getBundleAssets, getSession, openDatabase, startSession } from '../db/db.ts';
 import { nodeSqliteDriver } from '../db/test-fixture.ts';
 import type { SqlDriver } from '../db/types.ts';
@@ -52,14 +53,6 @@ const AUDIO_TAMPERED = (() => {
 
 const totalBytes = (sources: Record<string, Uint8Array>) =>
   Object.values(sources).reduce((sum, bytes) => sum + bytes.length, 0);
-
-async function lockFrom(sources: Record<string, Uint8Array>): Promise<unknown> {
-  const lock: Array<{ path: string; bytes: number; sha256: string }> = [];
-  for (const [lockPath, bytes] of Object.entries(sources)) {
-    lock.push({ path: lockPath, bytes: bytes.length, sha256: await nodeSha256(bytes) });
-  }
-  return lock;
-}
 
 function openFresh(): SqlDriver {
   const driver = nodeSqliteDriver();
@@ -143,7 +136,7 @@ test('criterion 1: an interrupted transfer stays partial, never ready, and resum
     assert.equal(failed.status, 'partial');
     const partial = failed as Extract<typeof failed, { status: 'partial' }>;
     assert.deepEqual(partial.missing, ['audio/story-1.m4a']);
-    assert.deepEqual(partial.diagnostics, ['audio/story-1.m4a#fetch-failed']);
+    assert.deepEqual(partial.diagnostics, ['audio/story-1.m4a#fetch-failed', 'connection lost']);
     // Partial never counts as ready: no final layer appeared.
     assert.equal(fs.existsSync(path.join(root, layerPath(KEY))), false);
 

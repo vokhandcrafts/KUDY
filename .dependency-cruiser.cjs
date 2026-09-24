@@ -49,27 +49,28 @@ module.exports = {
     // contracts/ is the shared schema zone: relative imports only, no app zone.
     {
       name: 'contracts-zone-closed',
-      comment: 'contracts/ must not import any app zone: core/, services/, web/, tools/, spikes/',
+      comment:
+        'contracts/ must not import any app zone: core/, services/, web/, tools/, spikes/, app/, controllers/',
       severity: 'error',
       from: { path: '^contracts/' },
-      to: { path: '^(core|services|web|tools|spikes)/' },
+      to: { path: '^(core|services|web|tools|spikes|app|controllers)/' },
     },
     // web/ reads its own packages and contracts/; the app zones are off limits.
     {
       name: 'web-zone-closed',
-      comment: 'web/ must not import core/, services/, tools/, spikes/ (matrix web row)',
+      comment: 'web/ must not import core/, services/, tools/, spikes/, app/, controllers/ (matrix web row)',
       severity: 'error',
       from: { path: '^web/' },
-      to: { path: '^(core|services|tools|spikes)/' },
+      to: { path: '^(core|services|tools|spikes|app|controllers)/' },
     },
     // tools/ is a separate process with no shared code from the app (19 §2.4):
     // node:* and contracts/ only.
     {
       name: 'tools-zone-closed',
-      comment: 'tools/ must not import core/, services/, web/, spikes/ (matrix tools row, 19 §2.4)',
+      comment: 'tools/ must not import core/, services/, web/, spikes/, app/, controllers/ (matrix tools row, 19 §2.4)',
       severity: 'error',
       from: { path: '^tools/' },
-      to: { path: '^(core|services|web|spikes)/' },
+      to: { path: '^(core|services|web|spikes|app|controllers)/' },
     },
     // UI screens reach state and effects only through controllers (19 §4.2
     // edge rule); introduced with the Expo Router skeleton (G06.09.a).
@@ -79,6 +80,30 @@ module.exports = {
       severity: 'error',
       from: { path: '^app/' },
       to: { path: '^services/' },
+    },
+    // G06.09.b completes the app-side edge: screens import controllers/ only
+    // (plus React/Expo) — core/ is reached through controllers as well.
+    {
+      name: 'app-no-core',
+      comment: 'app/ must not import core/ directly — controllers only (19 §4.2 edge rule)',
+      severity: 'error',
+      from: { path: '^app/' },
+      to: { path: '^core/' },
+    },
+    // Controllers consume services/ through explicit ports (issue #209 AC1):
+    // the composition root (controllers/createServices.ts) is the only module
+    // that value-imports and constructs them; every other controller takes
+    // types only. Tests are exempt — they wire fakes.
+    {
+      name: 'controllers-services-type-only',
+      comment:
+        'controllers/ value-imports services/ only in the composition root; elsewhere type-only (19 §2.2, issue #209 AC1)',
+      severity: 'error',
+      from: {
+        path: '^controllers/',
+        pathNot: ['^controllers/createServices\\.ts$', '\\.test\\.[cm]?[jt]sx?$'],
+      },
+      to: { path: '^services/', dependencyTypesNot: ['type-only'] },
     },
     // Cycles are forbidden within and across all checked zones (19 §4.2).
     {

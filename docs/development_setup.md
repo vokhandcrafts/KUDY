@@ -27,10 +27,10 @@ npm ci
 | Каманда | Чаканы вынік |
 |---|---|
 | `npm run typecheck` | `tsc --noEmit` без вываду, exit 0 |
-| `npm test` | **572 pass / 0 fail**: суіты `node --test` (563) + кампанентныя тэсты маршрутаў `app/` праз jest-expo (9) — лік рухавы, звярай са свежым проганам |
-| `node docs/run-model/check-regressions.mjs` | **21/21 reviewed regressions rejected. Repository model unchanged.** (вырасла з 16 па той самай прычыне) |
+| `npm test` | **зялёны прагон**: суіты `node --test` + кампанентныя тэсты маршрутаў `app/` праз jest-expo; поўны лік тестаў дае сама каманда — ён рухавы, звярай са свежым проганам, а не з гэтай табліцы |
+| `node docs/run-model/check-regressions.mjs` | **усе зарэгістрыраваныя мутацыі адхілены. Repository model unchanged.** (лік расце разам з мутацыямі — гл. вывод каманды) |
 | `npx expo install --check` | **Dependencies are up to date** (піны адпавядаюць чаканым дыяпазонам SDK 54) |
-| `npx expo-doctor` | **18/18 checks passed. No issues detected!** |
+| `npx expo-doctor` | **No issues detected!** — усе праверкі пройдуць; іх лік расце з SDK |
 | `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .` | **Found 0 clones** (0.00%) |
 
 `npm test` — два тэставыя рантаймы: `node --test` для кантрактнай мадэлі, інструментарыя і сэрвісаў і jest-expo (`app/**/*.test.tsx`) для кампанентных тэстаў маршрутаў. Ніводзін з іх не правярае натыўны runtime — тое робіць толькі development build на прыладзе.
