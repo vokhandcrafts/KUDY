@@ -19,7 +19,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ### 2026-09-24 — G05.03.b: прыладавыя праверкі аўдыё-адаптара
 Што зрабіць: калі з'явіцца Android-тэлефон і development build — прайсці шэсць клетак матрыцы G00.01.b, якія абслугоўвае аўдыё-адаптар (заблакаваны экран, фон, званок/іншае аўдыё, Pause/End/яўны Resume, хуткія Play/Stop і паўтор файла, battery saver) па кроках з табліцы ў выніковым файле `docs/agent-tasks/results/G05.03.b.md` і запоўніць фактычныя вынікі ў матрыцы. Да таго ўсе клеткі застаюцца `not-run` (blocked-external).
-Issue: https://github.com/vokhandcrafts/KUDY/issues/214 (PR: дадаецца пасля адкрыцця)
+PR: https://github.com/vokhandcrafts/KUDY/pull/242 (issue #214)
 
 ### 2026-09-24 — мабільнае асяроддзе: сістэмны npm і бясплатны Expo акаўнт
 Што зрабіць: выканайце на дэв-хосце `sudo pacman -S --needed npm` — сістэмнага npm-бінарніка няма (толькі інтэрактыўныя аліязы), а expo-doctor, eas-cli і agent-скрыпты спаўняюць npm унутрана; праверка `npm -v`. Затым зарэгіструйцеся на https://expo.dev/signup (бясплатны план: 15 EAS-зборак/месяц на кожную платформу) і выканайце `npx eas-cli login` у тэчцы KUDY. Платныя крокі (Apple Developer $99/год, Google Play Console $25, RevenueCat) свядома адкладзеныя — да G08.
