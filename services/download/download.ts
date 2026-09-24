@@ -205,13 +205,18 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
     let bytes: Uint8Array;
     try {
       bytes = await deps.fetch(entry.path);
-    } catch {
+    } catch (error) {
       return {
         status: 'partial',
         key,
         missing: remainingMissing(entries, index, kept),
         fetched,
-        diagnostics: [`${entry.path}#fetch-failed`],
+        diagnostics: [
+          `${entry.path}#fetch-failed`,
+          // The port's message is diagnostic-safe by contract (types.ts) and
+          // names the grant-level reason; surfaced, never swallowed.
+          error instanceof Error && error.message !== '' ? error.message : 'fetch#unknown-error',
+        ],
       };
     }
     fetched += 1;

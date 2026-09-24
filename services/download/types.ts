@@ -51,9 +51,11 @@ export interface DownloadStore {
 // is the AR-1 defect class (implementation-rules 4).
 export type Sha256 = (bytes: Uint8Array) => Promise<string>;
 
-// The byte source of the transfer (HTTP in G04.02.b — here an injected port,
-// so the core stays network-free and the resume test can count fetches).
+// The byte source of the transfer (the grant-backed source of G04.02.b, or a
+// plain test fake; the production HTTP adapter is out of scope — TR-10).
 // Resolves with the full file bytes; a rejection is an interrupted transfer.
+// A rejection message is surfaced in the activation diagnostics, so a source
+// over signed URLs keeps it named and redacted — never a URL or a credential.
 export type FetchPort = (path: string) => Promise<Uint8Array>;
 
 // One activation request: the layer key plus the parsed lock.json of the
