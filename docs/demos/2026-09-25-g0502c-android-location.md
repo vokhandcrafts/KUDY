@@ -95,8 +95,8 @@ node --test --experimental-strip-types "services/location/**/*.test.ts" 2>/dev/n
 ```
 
 ```output
-ℹ tests 43
-ℹ pass 43
+ℹ tests 44
+ℹ pass 44
 ℹ fail 0
 ```
 

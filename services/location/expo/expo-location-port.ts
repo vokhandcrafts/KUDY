@@ -127,9 +127,15 @@ export class ExpoLocationOsPort implements LocationOsPort {
     this.currentSub = null;
     this.removeWatch?.();
     this.removeWatch = null;
+    // The stop tail is asynchronous while the service's next startFixes is
+    // synchronous (the watchdog's recoveryStep stops the old subscription and
+    // starts a fresh one back to back): without the generation check the
+    // trailing stop would land after the new start and kill the fresh
+    // background stream — the same task name, one process. A subscription
+    // that took over owns the task; only a genuinely stopped one stops it.
     void Location.hasStartedLocationUpdatesAsync(LOCATION_UPDATES_TASK)
       .then(async (started) => {
-        if (started) await Location.stopLocationUpdatesAsync(LOCATION_UPDATES_TASK);
+        if (started && this.currentSub === null) await Location.stopLocationUpdatesAsync(LOCATION_UPDATES_TASK);
       })
       .catch((error: unknown) => console.warn(`location adapter: stopping background updates failed: ${String(error)}`));
   }

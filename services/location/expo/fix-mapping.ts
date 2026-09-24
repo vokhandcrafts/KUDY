@@ -31,6 +31,20 @@ export type FixMappingResult =
   | { ok: false; reason: FixRejectionReason };
 
 export function mapOsLocationToFix(os: OsLocationObject): FixMappingResult {
+  // The input is the OS boundary and is not trusted at any depth: a batch
+  // entry without readable coords is answered with a named reason, never a
+  // thrown TypeError (implementation-rules 14) — a throw here would skip the
+  // rest of a TaskManager batch or escape into the native watch emitter.
+  if (
+    os === null ||
+    typeof os !== 'object' ||
+    os.coords === null ||
+    typeof os.coords !== 'object' ||
+    typeof os.coords.latitude !== 'number' ||
+    typeof os.coords.longitude !== 'number'
+  ) {
+    return { ok: false, reason: 'non-finite-coordinate' };
+  }
   // The draft feeds the shape checks only; null/NaN fields reach them as
   // non-numbers and get their named reason.
   const draft = {

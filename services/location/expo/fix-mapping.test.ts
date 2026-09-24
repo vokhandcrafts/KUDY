@@ -71,3 +71,16 @@ test('AC1: a rejected fix carries no fix field at all — nothing is passed on',
   const result = mapOsLocationToFix(osFix({ coords: { latitude: 54.4, longitude: 18.65, accuracy: null } }));
   assert.equal('fix' in result, false);
 });
+
+test('AC1: an OS entry without readable coords answers with a named reason, never a throw', () => {
+  // A batch entry the OS mangled: the mapping is the boundary and must not
+  // throw into the TaskManager callback or the native watch emitter.
+  assert.deepEqual(mapOsLocationToFix({ coords: null, timestamp: 1_000 } as unknown as OsLocationObject), {
+    ok: false,
+    reason: 'non-finite-coordinate',
+  });
+  assert.deepEqual(
+    mapOsLocationToFix({ coords: { longitude: 18.65, accuracy: 5 }, timestamp: 1_000 } as unknown as OsLocationObject),
+    { ok: false, reason: 'non-finite-coordinate' },
+  );
+});
