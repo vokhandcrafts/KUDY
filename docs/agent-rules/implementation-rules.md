@@ -210,8 +210,9 @@ Ortho convention for Belarusian prose: «ў» only after a vowel, «у» after p
 
 ## 13. Counts and statuses in docs and PR text are regenerated, never hand-typed
 
-**Occurrences (×57 / 25 PRs):** PR #120 "218/218" vs actual 221; PR #116 "151 pass/0
-fail" vs 150/1 and "24 tests" vs 23; PR #98 link-check "36 resolved" vs embedded 18;
+**Occurrences (×57 / 25 PRs):** PR #120 "218/218" vs actual 221; PR #116 claimed a
+green suite vs actual 150/1 and "24 tests" vs 23; PR #98 link-check "36 resolved" vs
+embedded 18;
 PR #101 728 vs ~723 packages; PR #47 "15/15" vs 20/20; PR #45 "12 mutations" vs 16;
 PR #46 "seven tests" vs 8; blocked/unblocked statuses contradicting the board
 (`lessons-learned.md` §2).
@@ -222,9 +223,18 @@ is copied from the output of the command run against final HEAD in the pushing s
 re-run at push time, the claim carries a date and the exact command instead of a bare
 number.
 
+**G18.05 extension (issue #200, step c):** outside results files and captured demo
+output, docs carry no test/module/rule counts at all — the reader runs the producing
+command (`npm test`, `npm run arch:check`) instead of a number that rots at the next
+merge. A count inside a results file or a captured `output` block of a demo is a dated
+historical record and stays. The prose half of the gate is machine-checked:
+`tools/docs-ledger/counts-guard.test.mjs` scans non-results docs for
+`[0-9]+ (pass|modules)` outside `output` fences and fails naming file and line.
+
 **Check:** re-run the suite and each check the diff reports on; every count and status
 in the diff must match the fresh output. A stale claim is a finding even when the code
-is perfect.
+is perfect. Run the counts guard (it is part of `npm test`); every bare count the diff
+adds must sit in a results file or a captured `output` block.
 
 ## 14. Every rule ships with an isolating negative test; corrupt input yields diagnostics, not crashes
 
