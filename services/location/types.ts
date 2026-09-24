@@ -55,11 +55,23 @@ export interface GeofenceStop {
   radius: number;
 }
 
+// The two OS permission questions (09 §9: the background one is asked at
+// route start, with the explanation; the city surface needs only the
+// foreground one). `requestPermission` carries which question plus the
+// app-config explanation string — the string a UI flow shows before the ask;
+// the OS dialog text itself comes from the manifest strings the expo-location
+// plugin writes from app.json.
+export type LocationPermissionScope = 'foreground' | 'background';
+
 // The injected OS boundary (the expo-location adapter is G05.02.c; tests use
 // the fake in fake-port.ts). One process-level port; the service arms and
 // disarms the single subscription through it and never touches an OS API.
 export interface LocationOsPort {
   permission(): PermissionState;
+  // The permission question for the mode being armed (AC2 of G05.02.c): the
+  // answer arrives later as a `permission` port event, never as a return
+  // value. Asking an already-granted scope resolves without a dialog.
+  requestPermission(scope: LocationPermissionScope, explanation: string): void;
   // One OS subscription per call; `sub` is the service-minted generation
   // number and every fix the port delivers later must carry it.
   startFixes(sub: number): void;
@@ -82,12 +94,15 @@ export interface LocationClock {
   schedule(delayMs: number, fn: () => void): () => void;
 }
 
-// Everything the service needs from outside — the port, the clock and an
-// optional diagnostic sink that must never receive fix values (criterion 6 is
-// test-guarded).
+// Everything the service needs from outside — the port, the clock, the two
+// app-config explanation strings its permission requests carry (AC2 of
+// G05.02.c: the composition root reads them from app.json extras) and an
+// optional diagnostic sink that must never receive fix values (criterion 6
+// of G05.02.b is test-guarded).
 export interface LocationServiceDeps {
   port: LocationOsPort;
   clock: LocationClock;
+  permissions: { foreground: string; background: string };
   log?: (message: string) => void;
 }
 

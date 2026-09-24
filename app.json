@@ -6,6 +6,16 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "newArchEnabled": true,
+    "extra": {
+      "locationExplanations": {
+        "foreground": "KUDY uses your location on this device to show where you are and to play the right story when you reach a stop.",
+        "background": "During an active walk KUDY needs location in the background so stories trigger while your phone stays in your pocket. Coordinates never leave this device."
+      },
+      "locationForegroundService": {
+        "notificationTitle": "KUDY walk in progress",
+        "notificationBody": "Location stays on so guide stories play at the right places."
+      }
+    },
     "ios": {
       "bundleIdentifier": "by.kudy.app",
       "infoPlist": {

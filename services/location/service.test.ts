@@ -20,17 +20,31 @@
 //    is npm run arch:check).
 // 6. No coordinates are logged (the captured diagnostic sink) — while fixes
 //    flow, every captured line is coordinate-free.
+// G05.02.c AC2 (the permission split): every transition into an armed mode
+// asks exactly one question — city-surface → foreground, active-guide →
+// background (also on the carry-over Start path), disarmed modes and
+// repeated modes ask nothing, a denied arm refuses without asking; each
+// request carries the app-config explanation string, read from the real
+// app.json so config and contract cannot drift apart.
 // Proof: removing the `event.sub !== this.currentSub` check in service.ts
 // fails «criterion 3 proof: a fix of a previous generation after a
 // resubscribe is dropped whole».
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 
 import { assertNoEngineImports } from '../engine-zone-guard.ts';
 import { FakeLocationOsPort } from './fake-port.ts';
 import { LocationService } from './service.ts';
 import type { FixInput, GeofenceStop, LocationStatus } from './types.ts';
 import { GEOFENCE_WINDOW_MAX, WATCHDOG_GAP_MS } from './types.ts';
+
+// The explanation strings of AC2 come from the real app config: if the
+// extras keys move or vanish, these tests fail naming the drift.
+const appConfig = JSON.parse(readFileSync(new URL('../../app.json', import.meta.url), 'utf8')) as {
+  expo: { extra: { locationExplanations: { foreground: string; background: string } } };
+};
+const EXPLANATIONS = appConfig.expo.extra.locationExplanations;
 
 // The injected clock of criterion 3: time moves only when a test advances it,
 // and every scheduled callback fires exactly once, in due order — the
@@ -111,7 +125,12 @@ function makeService(permission: 'granted' | 'denied' | 'undetermined' = 'grante
   const clock = new ManualClock();
   const fixes: FixInput[] = [];
   const lines: string[] = [];
-  const service = new LocationService({ port, clock, log: (message) => lines.push(message) });
+  const service = new LocationService({
+    port,
+    clock,
+    permissions: EXPLANATIONS,
+    log: (message) => lines.push(message),
+  });
   service.onFix((fix) => fixes.push(fix));
   const currentSub = (): number => {
     const starts = port.commands.filter((command) => command.startsWith('start '));
@@ -429,5 +448,74 @@ test('criterion 6: while fixes flow, the captured log carries no coordinate valu
     assert.equal(line.includes('54.4'), false, `latitude leaked into the log: ${line}`);
     assert.equal(line.includes('18.65'), false, `longitude leaked into the log: ${line}`);
   }
+  h.assertClean();
+});
+
+// --- G05.02.c AC2: the foreground/background permission split -----------------
+
+test('G05.02.c AC2: arming the city surface asks exactly the foreground question with the app-config explanation', () => {
+  const h = makeService('undetermined');
+  h.service.setMode('city-surface');
+  assert.deepEqual(h.port.permissionRequests, [{ scope: 'foreground', explanation: EXPLANATIONS.foreground }]);
+  // Undetermined waits — no subscription before the answer arrives.
+  assert.deepEqual(h.port.commands, []);
+  assert.deepEqual(h.service.status(), { state: 'acquiring' });
+  h.assertClean();
+});
+
+test('G05.02.c AC2: the Start path from idle asks the background question', () => {
+  const h = makeService('undetermined');
+  h.arm(); // setMode('active-guide')
+  assert.deepEqual(h.port.permissionRequests, [{ scope: 'background', explanation: EXPLANATIONS.background }]);
+  h.assertClean();
+});
+
+test('G05.02.c AC2: the carry-over Start path asks background without a second subscription', () => {
+  const h = makeService(); // granted
+  h.service.setMode('city-surface');
+  assert.deepEqual(h.port.permissionRequests, [{ scope: 'foreground', explanation: EXPLANATIONS.foreground }]);
+  assert.deepEqual(h.port.commands, ['start 1']);
+  h.service.setMode('active-guide');
+  assert.deepEqual(h.port.permissionRequests, [
+    { scope: 'foreground', explanation: EXPLANATIONS.foreground },
+    { scope: 'background', explanation: EXPLANATIONS.background },
+  ]);
+  // The subscription carries over — the background question rides the same
+  // subscription, it never restarts it (criterion 1 of G05.02.b holds).
+  assert.deepEqual(h.port.commands, ['start 1']);
+  assert.equal(h.port.activeSubscriptions(), 1);
+  h.assertClean();
+});
+
+test('G05.02.c AC2: disarmed transitions and repeated modes ask nothing new', () => {
+  const h = makeService();
+  h.arm(); // one background ask on arming
+  h.service.setMode('active-guide'); // repeated mode — no-op
+  h.service.setMode('paused'); // disarm
+  h.service.setMode('idle');
+  h.service.setMode('paused');
+  assert.deepEqual(h.port.permissionRequests, [{ scope: 'background', explanation: EXPLANATIONS.background }]);
+  h.assertClean();
+});
+
+test('G05.02.c AC2: a denied arm refuses without asking', () => {
+  const h = makeService('denied');
+  h.service.setMode('active-guide');
+  assert.deepEqual(h.port.permissionRequests, []);
+  assert.deepEqual(h.service.status(), { state: 'permission-denied', reason: 'denied' });
+  assert.equal(h.port.activeSubscriptions(), 0);
+  h.assertClean();
+});
+
+test('G05.02.c AC2: a foreground grant does not skip the background ask on the granted path', () => {
+  const h = makeService('undetermined');
+  h.service.setMode('city-surface');
+  h.port.reportPermission('granted'); // foreground answered — subscription arms
+  assert.deepEqual(h.port.commands, ['start 1']);
+  h.service.setMode('active-guide'); // Start: background must still be asked
+  assert.deepEqual(h.port.permissionRequests, [
+    { scope: 'foreground', explanation: EXPLANATIONS.foreground },
+    { scope: 'background', explanation: EXPLANATIONS.background },
+  ]);
   h.assertClean();
 });
