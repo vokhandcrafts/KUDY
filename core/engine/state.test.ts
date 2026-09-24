@@ -64,14 +64,26 @@ test('criterion 6: available — fired, primary not heard; played — primary he
 test('criterion 6: playing wins over played while the guide launch is live', () => {
   const playing = state({
     heard: ['story-plain-base'],
-    playing: { owner: 'guide', stopId: 'stop-plain', storyId: 'story-plain-base', playId: 1 },
+    playing: { owner: 'guide', stopId: 'stop-plain', storyId: 'story-plain-base', playId: 1, paused: false },
   });
   assert.equal(stopStatus(playing, 'stop-plain'), 'playing');
 });
 
+test('criterion 6: a live pause keeps the launch but the marker follows the audible state', () => {
+  const paused = state({
+    heard: ['story-plain-base'],
+    playing: { owner: 'guide', stopId: 'stop-plain', storyId: 'story-plain-base', playId: 1, paused: true },
+  });
+  assert.equal(
+    stopStatus(paused, 'stop-plain'),
+    'played',
+    'a paused replay of an already heard story stays played (ADR G01.02 §3.4)',
+  );
+});
+
 test('criterion 6: a moment launch never marks its teaser stop as playing', () => {
   const moment = state({
-    playing: { owner: 'moment', momentId: 'moment-9', storyId: 'story-plain-base', seq: 3 },
+    playing: { owner: 'moment', momentId: 'moment-9', storyId: 'story-plain-base', seq: 3, paused: false },
   });
   assert.equal(stopStatus(moment, 'stop-plain'), 'pending');
 });

@@ -1,8 +1,9 @@
-// G05.01.a + G05.01.b — engine event union. Event names are copied verbatim
-// from 09 §6.1 (implementation-rules 2); field shapes follow 19 §3.1 with the
-// moment-variant events 09 §6.1 carries after the G01.02 synchronization (the
-// b-slice adds the DwellCompleted radius payload). Field spelling is the
-// camelCase mapping declared in state.ts.
+// G05.01.a + G05.01.b + G05.01.c — engine event union. Event names are copied
+// verbatim from 09 §6.1 (implementation-rules 2); field shapes follow 19 §3.1
+// with the moment-variant events 09 §6.1 carries after the G01.02
+// synchronization (b adds the DwellCompleted radius payload, c adds
+// Start.playingNow). Field spelling is the camelCase mapping declared in
+// state.ts.
 
 import type {
   AcceptedFix,
@@ -33,6 +34,11 @@ export type RunEvent =
       tier: Tier[];
       accessibleStopIds: StopId[];
       stops: PackageStop[];
+      // ADR G01.02 §3.3/§3.8: Start never stops a sounding moment and never
+      // mints a guide launch for it — the controller injects the actual player
+      // state (the moment variant) into the fresh session; autoplay then waits
+      // for the player to become free.
+      playingNow?: { momentId: MomentId; storyId: StoryId; seq: number };
     }
   | { type: 'Pause' }
   | { type: 'Resume' }

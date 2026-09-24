@@ -13,6 +13,9 @@ import {
   type MigrationStep,
 } from './schema.ts';
 import type {
+  AssetKey,
+  BundleAssetRow,
+  BundleAssetStatus,
   EventInput,
   SessionProgress,
   SessionRow,
@@ -380,4 +383,87 @@ export function setDeviceId(driver: SqlDriver, deviceId: string): void {
 export function getDeviceId(driver: SqlDriver): string | null {
   const row = driver.prepare('SELECT device_id FROM device WHERE singleton = 1').get();
   return row ? String(row.device_id) : null;
+}
+
+// `09` §7 bundle_asset (zone A): the download channel's resume registry
+// (G04.02.a). Rows are derived state — rebuilt by re-hashing what lies on
+// disk; no zone B table is ever touched here.
+export function upsertBundleAsset(driver: SqlDriver, row: BundleAssetRow): void {
+  inTransaction(driver, () => {
+    driver
+      .prepare(
+        `INSERT INTO bundle_asset (route_id, version, locale, tier, path, status, bytes_total, bytes_done, sha256)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(route_id, version, locale, tier, path) DO UPDATE SET
+           status = excluded.status,
+           bytes_total = excluded.bytes_total,
+           bytes_done = excluded.bytes_done,
+           sha256 = excluded.sha256`,
+      )
+      .run(
+        row.routeId,
+        row.version,
+        row.locale,
+        row.tier,
+        row.path,
+        row.status,
+        row.bytesTotal,
+        row.bytesDone,
+        row.sha256,
+      );
+  });
+}
+
+// Rebuild write (G04.02.a criterion 5): one transaction drops the key's rows
+// and inserts the re-hashed ones, so a rebuild never shows half the registry.
+export function replaceBundleAssets(driver: SqlDriver, key: AssetKey, rows: BundleAssetRow[]): void {
+  inTransaction(driver, () => {
+    driver
+      .prepare('DELETE FROM bundle_asset WHERE route_id = ? AND version = ? AND locale = ? AND tier = ?')
+      .run(key.routeId, key.version, key.locale, key.tier);
+    for (const row of rows) {
+      driver
+        .prepare(
+          `INSERT INTO bundle_asset (route_id, version, locale, tier, path, status, bytes_total, bytes_done, sha256)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .run(
+          row.routeId,
+          row.version,
+          row.locale,
+          row.tier,
+          row.path,
+          row.status,
+          row.bytesTotal,
+          row.bytesDone,
+          row.sha256,
+        );
+    }
+  });
+}
+
+function toBundleAssetRow(row: Record<string, SqlValue>): BundleAssetRow {
+  return {
+    routeId: String(row.route_id),
+    version: String(row.version),
+    locale: String(row.locale),
+    tier: String(row.tier),
+    path: String(row.path),
+    status: String(row.status) as BundleAssetStatus,
+    bytesTotal: Number(row.bytes_total),
+    bytesDone: Number(row.bytes_done),
+    sha256: String(row.sha256),
+  };
+}
+
+export function getBundleAssets(driver: SqlDriver, key: AssetKey): BundleAssetRow[] {
+  return driver
+    .prepare(
+      `SELECT route_id, version, locale, tier, path, status, bytes_total, bytes_done, sha256
+       FROM bundle_asset
+       WHERE route_id = ? AND version = ? AND locale = ? AND tier = ?
+       ORDER BY path`,
+    )
+    .all(key.routeId, key.version, key.locale, key.tier)
+    .map(toBundleAssetRow);
 }

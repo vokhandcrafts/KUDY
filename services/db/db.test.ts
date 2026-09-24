@@ -19,16 +19,19 @@ import {
   checkpointProgress,
   DbError,
   finishSession,
+  getBundleAssets,
   getSession,
   getLiveSession,
   getSetting,
   openDatabase,
   pauseSession,
   rebuildDerived,
+  replaceBundleAssets,
   resumeSession,
   setSetting,
   startSession,
   switchSession,
+  upsertBundleAsset,
 } from './db.ts';
 import { INITIAL_SCHEMA_DDL, migrationSteps, ZONE_A_DDL, ZONE_A_TABLES, ZONE_B_DDL, ZONE_B_TABLES } from './schema.ts';
 import { nodeSqliteDriver } from './test-fixture.ts';
@@ -381,4 +384,60 @@ test('zone guards: the two zone lists cannot drift, and rebuildDerived names no 
     assert.ok(step.version > previous, 'migration versions must strictly increase');
     previous = step.version;
   }
+});
+
+// G04.02.a — the bundle_asset public API the download channel drives (zone A
+// only; the activation semantics live in services/download/download.test.ts,
+// these pin the store contract itself).
+const ASSET_KEY = { routeId: 'route-x', version: '1', locale: 'be', tier: 'base' };
+
+test('bundle_asset: upsert writes one row per path and updates it on conflict', () => {
+  const driver = openFresh();
+  upsertBundleAsset(driver, { ...ASSET_KEY, path: 'stops.json', status: 'pending', bytesTotal: 10, bytesDone: 0, sha256: 'aa' });
+  upsertBundleAsset(driver, { ...ASSET_KEY, path: 'stops.json', status: 'complete', bytesTotal: 10, bytesDone: 10, sha256: 'bb' });
+  const rows = getBundleAssets(driver, ASSET_KEY);
+  assert.equal(rows.length, 1);
+  assert.deepEqual(rows[0], {
+    routeId: 'route-x',
+    version: '1',
+    locale: 'be',
+    tier: 'base',
+    path: 'stops.json',
+    status: 'complete',
+    bytesTotal: 10,
+    bytesDone: 10,
+    sha256: 'bb',
+  });
+});
+
+test('bundle_asset: replaceBundleAssets rewrites exactly one key and leaves the rest', () => {
+  const driver = openFresh();
+  upsertBundleAsset(driver, { ...ASSET_KEY, path: 'stops.json', status: 'complete', bytesTotal: 5, bytesDone: 5, sha256: 'aa' });
+  upsertBundleAsset(driver, { ...ASSET_KEY, path: 'audio/s.m4a', status: 'partial', bytesTotal: 9, bytesDone: 3, sha256: 'bb' });
+  const otherKey = { ...ASSET_KEY, tier: 'extended' };
+  upsertBundleAsset(driver, { ...otherKey, path: 'stops.json', status: 'complete', bytesTotal: 7, bytesDone: 7, sha256: 'cc' });
+
+  replaceBundleAssets(driver, ASSET_KEY, [
+    { ...ASSET_KEY, path: 'stops.json', status: 'complete', bytesTotal: 5, bytesDone: 5, sha256: 'dd' },
+  ]);
+  assert.deepEqual(
+    getBundleAssets(driver, ASSET_KEY).map((row) => [row.path, row.status, row.sha256]),
+    [['stops.json', 'complete', 'dd']],
+  );
+  assert.equal(getBundleAssets(driver, otherKey).length, 1);
+  // The bundle_asset API stays inside the derived zone: the rebuild drops
+  // every zone A row, and the durable session row survives it untouched.
+  startSession(driver, {
+    sessionId: '22222222-2222-4222-8222-222222222222',
+    routeId: 'route-x',
+    version: '1',
+    locale: 'be',
+    startedAt: 1_700_000_000_001,
+  });
+  assert.notEqual(getLiveSession(driver), null);
+  rebuildDerived(driver);
+  assert.deepEqual(getBundleAssets(driver, otherKey).map((row) => [row.path, row.status]), []);
+  const live = getLiveSession(driver);
+  assert.notEqual(live, null);
+  assert.equal(live?.sessionId, '22222222-2222-4222-8222-222222222222');
 });

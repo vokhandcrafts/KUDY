@@ -12,3 +12,9 @@ fixtures/content/** -text
 # otherwise the guard silently masks or falsely reports drift (rule 4).
 fixtures/discovery-contract/index-valid.json eol=lf
 spikes/G06.08-prototype/data/discovery-index.json eol=lf
+
+# G04.02.a: the download suite hashes committed fixture bytes and compares
+# against sha256 values fixed in the test; no EOL conversion may touch these
+# paths, otherwise a CRLF checkout produces different hashes and the raw-byte
+# hashing guard cannot hold (implementation-rules 4, AR-1).
+services/download/fixtures/** -text

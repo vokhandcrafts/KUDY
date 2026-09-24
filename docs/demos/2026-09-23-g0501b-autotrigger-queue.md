@@ -1,9 +1,9 @@
 # G05.01.b — autotrigger, one-cell queue and P01 progress
 
-*2026-09-23T21:57:11Z by Showboat 0.6.1*
-<!-- showboat-id: 74147f6e-42bd-4f8c-9ffc-2273b3a0bee0 -->
+*2026-09-23T23:21:22Z by Showboat 0.6.1*
+<!-- showboat-id: 1f746ab2-cbc2-4940-960f-1a4f0d8dba9d -->
 
-Issue #198: the reducer slice that makes the city talk — the six §4.8 autotrigger conditions with the three distinct not-played outcomes (11 §5.1.1), the one-cell queue with its inclusive deferred re-check (freshness ≤ 30 000 ms, accuracy ≤ radius, distance ≤ 2 × radius), the (session_id, play_id, story_id?) AudioFinished gate with the write-through play_seq, and the P01 progress rules (base/extended/locked). New in core/engine: dwell/audioFinished handling in reducer.ts, the radius payload on DwellCompleted, the missedStories view («Яшчэ можна адкрыць»).
+Issue #198: the reducer slice that makes the city talk — the six §4.8 autotrigger conditions with the three distinct not-played outcomes (11 §5.1.1), the one-cell queue with its inclusive deferred re-check (freshness ≤ 30 000 ms, accuracy ≤ radius, distance ≤ 2 × radius), the (session_id, play_id, story_id?) AudioFinished gate with the write-through play_seq, and the P01 progress rules (base/extended/locked). New in core/engine: dwell/audioFinished handling in reducer.ts, the radius payload on DwellCompleted, the missedStories view («Яшчэ можна адкрыць»). Re-captured 2026-09-24 in the G05.01.c slice: launch commands now carry the play token and the live-pause flag (rule 11 — the captured output changed with the command shape).
 
 ```python
 import subprocess
@@ -66,7 +66,7 @@ subprocess.run(['node', '--no-warnings', '--experimental-strip-types', '--input-
 manual launch of stop-s1 -> play_seq: 1 | auto_fired untouched: []
 trigger while busy -> queued: {"stopId":"stop-s2","radius":30,"at":100000}
 newest trigger wins -> queued: {"stopId":"stop-s3","radius":30,"at":100000} | displaced stop-s2 -> auto_fired: ["stop-s2"]
-after the completion the queued stop plays: {"type":"PlayStory","storyId":"story-s3","path":"be/base/audio/story-s3.m4a","sessionId":"session-1","playId":2}
+after the completion the queued stop plays: {"type":"PlayStory","storyId":"story-s3","path":"be/base/audio/story-s3.m4a","sessionId":"session-1","playId":2,"token":{"kind":"guide","ref":"session-1","seq":2}}
 stop-s4 queued: {"stopId":"stop-s4","radius":30,"at":100000}
 61 m past 2 x 30 m -> nothing plays, stop-s4 retires: queued null | auto_fired: ["stop-s2","stop-s3","stop-s4"]
 statuses: s1 played | s2 available | s3 played | s4 available
@@ -128,7 +128,7 @@ primary heard by hand -> dwell: [] | auto_fired: []
 locked stop: dwell -> [] | manual play -> [] | auto_fired: []
 missed so far: ["story-crane-base"]
 same-version unlock: commands [{"type":"SetGeofenceWindow","stopIds":["stop-crane","stop-plain"]}] | heard untouched: ["story-plain-base"] | missed: ["story-crane-base","story-crane-ext"]
-dwell after unlock plays the primary base story: {"type":"PlayStory","storyId":"story-crane-base","path":"be/base/audio/story-crane-base.m4a","sessionId":"session-1","playId":2}
+dwell after unlock plays the primary base story: {"type":"PlayStory","storyId":"story-crane-base","path":"be/base/audio/story-crane-base.m4a","sessionId":"session-1","playId":2,"token":{"kind":"guide","ref":"session-1","seq":2}}
 late callback of walk 1: heard [] | launch kept: playId 1
 the pair of walk 2 is accepted: heard ["story-plain-base"] | playing: null
 ```
