@@ -197,7 +197,9 @@ export type DeleteResult =
 // fail closed, nothing outside the lock is ever fetched (criterion 4: a
 // pinned version is never filled from another version's files). 'cancelled'
 // is the shared deletion gate's named outcome (G04.04.b): the package was
-// deleted while the repair ran, and nothing was written.
+// deleted while the repair ran — writes and zone-A rows stop at the first
+// boundary that saw the deletion, and `repaired` lists the files already
+// verified and written before it (a later deletion sweep removes them).
 export type RepairResult =
   | { status: 'repaired'; key: LayerKey; repaired: string[] }
   | {

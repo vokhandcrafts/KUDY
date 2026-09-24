@@ -9,9 +9,9 @@
 //    bound to that grant's sources, and a newer version on disk stays
 //    byte-identical.
 // Failure paths (fetch rejects, size/hash mismatch, lack of space, a request
-// naming a path outside the lock) each leave the old layer byte-identical,
-// and no AccessReady is emitted — the activation commit stays the single
-// emission site.
+// naming a path outside the lock) each stop the run: verified files are kept,
+// nothing unverified is ever written, and no AccessReady is emitted — the
+// activation commit stays the single emission site.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
