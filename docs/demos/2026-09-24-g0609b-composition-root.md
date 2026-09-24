@@ -70,11 +70,14 @@ print(out.strip())
 ✔ contracts/ importing controllers/ fails and names contracts-zone-closed (review round 1)
 ✔ web/ importing controllers/ fails and names web-zone-closed (review round 1)
 ✔ tools/ importing controllers/ fails and names tools-zone-closed (review round 1)
+✔ contracts/ importing app/ fails and names contracts-zone-closed (app direction, review round 1)
+✔ web/ importing app/ fails and names web-zone-closed (app direction, review round 1)
+✔ tools/ importing app/ fails and names tools-zone-closed (app direction, review round 1)
 ✔ corrupt baseline yields a diagnostic, not a crash
 ✔ a baselined violation passes; the same violation without the baseline fails
-ℹ tests 16
+ℹ tests 19
 ℹ suites 0
-ℹ pass 16
+ℹ pass 19
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
@@ -82,4 +85,4 @@ print(out.strip())
 ℹ duration_ms <stripped>
 ```
 
-Criteria 1 and 3: every boundary of Allowed outputs has a planted fixture violation that npm run arch:check rejects, naming the rule — app/ → services/ (app-no-services, the issue's Proof: a screen importing a service constructor), app/ → core/ (app-no-core), a controller value-importing services/ (controllers-services-type-only; the composition root and tests are exempt, a type-only import plus a core import pass), services/ → controllers/ and core/ → controllers/ (zone-closed rules), plus the app-zone closure of contracts/, web/ and tools/ from review round 1 (contracts-zone-closed, web-zone-closed, tools-zone-closed). All of it runs against sandboxes through the real checker entrypoint (issue #209 AC1/AC3).
+Criteria 1 and 3: every boundary of Allowed outputs has a planted fixture violation that npm run arch:check rejects, naming the rule — app/ → services/ (app-no-services, the issue's Proof: a screen importing a service constructor), app/ → core/ (app-no-core), a controller value-importing services/ (controllers-services-type-only; the composition root and tests are exempt, a type-only import plus a core import pass), services/ → controllers/ and core/ → controllers/ (zone-closed rules), plus the review-round-1 closure of contracts/, web/ and tools/ against both app zones — controllers/ and app/ (contracts-zone-closed, web-zone-closed, tools-zone-closed, one fixture per direction). All of it runs against sandboxes through the real checker entrypoint (issue #209 AC1/AC3).
