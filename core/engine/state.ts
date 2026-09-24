@@ -1,5 +1,5 @@
-// G05.01.a + G05.01.b — engine state types and derived views
-// (docs/agent-tasks/run/G05.01.a.md, docs/agent-tasks/run/G05.01.b.md).
+// G05.01.a + G05.01.b + G05.01.c — engine state types and derived views
+// (docs/agent-tasks/run/G05.01.a.md, G05.01.b.md, G05.01.c.md).
 //
 // Name boundary, declared once for the whole module (19 §3): the canonical
 // contract names are snake_case in 09 §6.1 and the accepted ADRs
@@ -52,11 +52,13 @@ export interface PlayToken {
 }
 
 // Mirror of the physical player inside the session (09 §6.1, ADR G01.02 §3.3):
-// the only source of player occupancy for autoplay, queue and cards. G05.01.c
-// owns the transitions; nothing in G05.01.a sets it.
+// the only source of player occupancy for autoplay, queue and cards. The
+// live-pause flag (`paused`, ADR G01.02 §3.4/§3.7) belongs to the launch, not
+// to the session — a manual pause or a focus loss keeps the same token and
+// offset, and only the marker nuance of stopStatus reads it.
 export type Playing =
-  | { owner: 'guide'; stopId: StopId; storyId: StoryId; playId: number }
-  | { owner: 'moment'; momentId: MomentId; storyId: StoryId; seq: number };
+  | { owner: 'guide'; stopId: StopId; storyId: StoryId; playId: number; paused: boolean }
+  | { owner: 'moment'; momentId: MomentId; storyId: StoryId; seq: number; paused: boolean };
 
 // One-cell queue of the newest trigger (09 §6.1); filled by G05.01.b.
 export interface QueuedTrigger {
@@ -152,8 +154,8 @@ export type StopStatus = 'locked' | 'playing' | 'played' | 'available' | 'pendin
 
 // Stop status is computed, never stored (ADR G01.01 §4.5, 09 §6.1):
 // locked → playing → played → available → pending, first match wins. The
-// playing marker requires the audible guide launch; a live-pause nuance lands
-// with G05.01.c together with the paused field of the launch.
+// playing marker requires the audible guide launch: a live pause keeps the
+// launch but the marker follows the audible state (ADR G01.02 §3.4).
 export const stopStatus = (state: RunSessionState, stopId: StopId): StopStatus => {
   const stop = findStop(state, stopId);
   const primary = primaryStoryOf(stop);
@@ -161,6 +163,7 @@ export const stopStatus = (state: RunSessionState, stopId: StopId): StopStatus =
   if (
     state.playing &&
     state.playing.owner === 'guide' &&
+    !state.playing.paused &&
     state.playing.stopId === stopId
   ) {
     return 'playing';
