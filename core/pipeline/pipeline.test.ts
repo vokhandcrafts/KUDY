@@ -284,33 +284,58 @@ test('criterion 4: the accumulator resets when the stop leaves the radius and re
   // point trails the raw walk, so leaving takes the mean of 40/50/65 = 51.7 m
   // (radius 50), and every step stays at a walking pace. dwell_ms 25 000 is
   // higher than any accumulator value the exit walk can reach (22 000 before
-  // the reset fix), so a KEPT accumulator would fire on the reset fix itself;
-  // the restarted one reaches 25 000 only nine steps after re-entry.
+  // the reset fix), so a KEPT accumulator would fire on the reset fix itself
+  // (22 000 + the 5 000 ms exit step); the restarted one — crediting nothing
+  // on entry (implementation-rules review fix: entry credits no dt) — needs
+  // twenty-five full 1 000 ms steps after re-entry.
   const candidates = new Map([candidate('stop-a', BASE)]);
   const config = { dwellMs: 25_000 };
   const T = NOW;
+  const fixes: FixInput[] = [
+    fix({ at: T }), // inside; fresh accumulator: 0 (dt 0 anyway)
+    fix({ at: T + 1000 }), // 1000
+    fix({ at: T + 2000 }), // 2000
+    fix({ ...north(BASE, 10), at: T + 6000 }), // smoothed 3.3 → inside; 6000
+    fix({ ...north(BASE, 20), at: T + 10_000 }), // 10 → inside; 10 000
+    fix({ ...north(BASE, 30), at: T + 14_000 }), // 20 → inside; 14 000
+    fix({ ...north(BASE, 40), at: T + 18_000 }), // 30 → inside; 18 000
+    fix({ ...north(BASE, 50), at: T + 22_000 }), // 40 → inside; 22 000
+    fix({ ...north(BASE, 65), at: T + 27_000 }), // 51.7 → OUTSIDE → reset
+    fix({ ...north(BASE, 65), at: T + 28_000 }), // 60 → outside
+    fix({ ...north(BASE, 15), at: T + 44_000 }), // 48.3 → inside; entry credits 0
+  ];
+  for (let i = 0; i < 25; i += 1) {
+    fixes.push(fix({ ...north(BASE, 15), at: T + 45_000 + i * 1000 })); // 1000 … 25 000
+  }
+  const results = walk(fixes, candidates, config);
+  const fires = results
+    .map((r, i) => (r.accepted && r.events.some((e) => e.type === 'DwellCompleted') ? i : -1))
+    .filter((i) => i >= 0);
+  assert.deepEqual(fires, [35], 'a kept accumulator would fire on the reset fix itself (index 8)');
+});
+
+test('criterion 4: the fix that (re-)enters a radius credits no dwell time', () => {
+  // The stop was never dwelling: the smoothed point sits at 100 m, then
+  // 80 m — outside the 50 m radius. The entry fix lands after a 25 s legal
+  // step (11.5 km/h) and its dt spans that outside time — a code path
+  // crediting dt to a fresh accumulator (the review's dwell-entry-credit
+  // finding) would complete the dwell on entry itself. With the fix the
+  // accumulator starts at 0 and completes six steps later; reverting the
+  // fix moves the fire to the entry fix (index 2).
+  const candidates = new Map([candidate('stop-a', BASE)]);
+  const config = { dwellMs: 6000 };
   const results = walk(
     [
-      fix({ at: T }), // inside; acc 0 (dt 0)
-      fix({ at: T + 1000 }), // 1000
-      fix({ at: T + 2000 }), // 2000
-      fix({ ...north(BASE, 10), at: T + 6000 }), // smoothed 3.3 → inside; 6000
-      fix({ ...north(BASE, 20), at: T + 10_000 }), // 10 → inside; 10 000
-      fix({ ...north(BASE, 30), at: T + 14_000 }), // 20 → inside; 14 000
-      fix({ ...north(BASE, 40), at: T + 18_000 }), // 30 → inside; 18 000
-      fix({ ...north(BASE, 50), at: T + 22_000 }), // 40 → inside; 22 000
-      fix({ ...north(BASE, 65), at: T + 27_000 }), // 51.7 → OUTSIDE → reset
-      fix({ ...north(BASE, 65), at: T + 28_000 }), // 60 → outside
-      fix({ ...north(BASE, 15), at: T + 44_000 }), // 48.3 → inside; restarts: 16 000
-      fix({ ...north(BASE, 15), at: T + 45_000 }), // 17 000
-      fix({ ...north(BASE, 15), at: T + 46_000 }), // 18 000
-      fix({ ...north(BASE, 15), at: T + 47_000 }), // 19 000
-      fix({ ...north(BASE, 15), at: T + 48_000 }), // 20 000
-      fix({ ...north(BASE, 15), at: T + 49_000 }), // 21 000
-      fix({ ...north(BASE, 15), at: T + 50_000 }), // 22 000
-      fix({ ...north(BASE, 15), at: T + 51_000 }), // 23 000
-      fix({ ...north(BASE, 15), at: T + 52_000 }), // 24 000
-      fix({ ...north(BASE, 15), at: T + 53_000 }), // 25 000 → fires
+      fix({ ...north(BASE, 100), at: NOW }), // smoothed 100 → outside
+      fix({ ...north(BASE, 60), at: NOW + 31_000 }), // 40 m in 31 s; smoothed 80 → outside
+      fix({ ...south(BASE, 20), at: NOW + 56_000 }), // 80 m in 25 s = 11.5 km/h;
+      // window mean (100+60−20)/3 = 46.7 → INSIDE; entry credits none of the 25 000 ms
+      fix({ ...south(BASE, 20), at: NOW + 57_000 }),
+      fix({ ...south(BASE, 20), at: NOW + 58_000 }),
+      fix({ ...south(BASE, 20), at: NOW + 59_000 }),
+      fix({ ...south(BASE, 20), at: NOW + 60_000 }),
+      fix({ ...south(BASE, 20), at: NOW + 61_000 }),
+      fix({ ...south(BASE, 20), at: NOW + 62_000 }), // 6000 accumulated after entry → fires
     ],
     candidates,
     config,
@@ -318,7 +343,7 @@ test('criterion 4: the accumulator resets when the stop leaves the radius and re
   const fires = results
     .map((r, i) => (r.accepted && r.events.some((e) => e.type === 'DwellCompleted') ? i : -1))
     .filter((i) => i >= 0);
-  assert.deepEqual(fires, [19], 'a kept accumulator would fire on the reset fix itself (index 8)');
+  assert.deepEqual(fires, [8], 'the entry fix (index 2) must not complete the dwell with its 25 000 ms dt');
 });
 
 test('criterion 4: dwell judges the smoothed point, not the raw fix', () => {

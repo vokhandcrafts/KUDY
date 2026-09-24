@@ -130,7 +130,12 @@ export function acceptFix(
   for (const { stopId, radius, distance } of dwelling) {
     // Copy-on-write: the accumulator may belong to the previous state.
     const acc = { ...(dwell.get(stopId) ?? { accumulatedMs: 0, emitted: false }) };
-    acc.accumulatedMs += dtMs;
+    // The dwell grows only while the stop STAYS a candidate (09 §6.2 stage
+    // 4): a fresh accumulator — the stop just (re-)entered its radius —
+    // credits none of the dt that elapsed before entry (it spans the time
+    // the smoothed point spent outside, possibly seconds of Doze or
+    // accuracy-rejected fixes).
+    if (previous.dwell.has(stopId)) acc.accumulatedMs += dtMs;
     if (!acc.emitted && acc.accumulatedMs >= config.dwellMs) {
       acc.emitted = true;
       completed.push({ stopId, radius, distance });
