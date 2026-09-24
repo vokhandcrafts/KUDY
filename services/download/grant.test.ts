@@ -24,6 +24,7 @@ import path from 'node:path';
 import test from 'node:test';
 
 import { activate, layerPath, parseLock } from './download.ts';
+import { createAccessPort } from './access.ts';
 import {
   createGrantFetchSource,
   DEFAULT_GRANT_RETRY,
@@ -343,7 +344,7 @@ test('criterion 3: a URL expiring mid-download re-grants the remaining portion a
     const store = createNodeDownloadStore(root);
     const fetch = createGrantFetchSource({ key: KEY, entries: parseLock(lock).entries }, sourceDeps);
 
-    const result = await activate({ ...KEY, lock }, { store, fetch, sha256: nodeSha256, driver: openFresh() });
+    const result = await activate({ ...KEY, lock }, { store, fetch, sha256: nodeSha256, driver: openFresh(), access: createAccessPort() });
 
     assert.equal(result.status, 'complete');
     // Two grant rounds: the initial portion, then the re-grant of the
@@ -410,6 +411,7 @@ test('criterion 4: offline mid-download keeps the partial state; a retry complet
         fetch: createGrantFetchSource({ key: KEY, entries: parseLock(lock).entries }, sourceRig(transport, fetchBytes).deps),
         sha256: nodeSha256,
         driver,
+        access: createAccessPort(),
       },
     );
     // The grant is unobtainable offline: the activation returns partial with
@@ -432,6 +434,7 @@ test('criterion 4: offline mid-download keeps the partial state; a retry complet
         fetch: createGrantFetchSource({ key: KEY, entries: parseLock(lock).entries }, sourceRig(transport, fetchBytes).deps),
         sha256: nodeSha256,
         driver,
+        access: createAccessPort(),
       },
     );
     assert.equal(second.status, 'complete');
@@ -563,6 +566,7 @@ test('criterion 5: no secret, token or signed URL reaches diagnostics, errors or
           }).deps),
           sha256: nodeSha256,
           driver,
+          access: createAccessPort(),
         },
       );
 

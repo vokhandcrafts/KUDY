@@ -20,8 +20,9 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import { activate, layerPath, rebuildBundleAssets, stagingLayerPath } from './download.ts';
+import { createAccessPort } from './access.ts';
 import { createNodeDownloadStore, nodeSha256 } from './nodeDownloadStore.ts';
-import { lockFrom } from './test-fixture.ts';
+import { lockFrom, crashOnRename } from './test-fixture.ts';
 import { getBundleAssets, getSession, openDatabase, startSession } from '../db/db.ts';
 import { nodeSqliteDriver } from '../db/test-fixture.ts';
 import type { SqlDriver } from '../db/types.ts';
@@ -80,23 +81,7 @@ function depsFor(root: string, options: DepsOptions = {}): { deps: ActivateDeps;
     if (!bytes) throw new Error(`no source bytes for ${rel}`);
     return bytes;
   };
-  return { fetchLog, deps: { store, fetch, sha256: nodeSha256, driver: options.driver ?? openFresh() } };
-}
-
-// Simulates process death at a chosen rename: the wrapped store throws
-// instead of performing it (a real rename is atomic — it either happened or
-// it did not, and the injected crash is the "did not" side).
-function crashOnRename(
-  store: ActivateDeps['store'],
-  target: (from: string, to: string) => boolean,
-): ActivateDeps['store'] {
-  return {
-    ...store,
-    rename: async (fromRel: string, toRel: string) => {
-      if (target(fromRel, toRel)) throw new Error('injected crash');
-      return store.rename(fromRel, toRel);
-    },
-  };
+  return { fetchLog, deps: { store, fetch, sha256: nodeSha256, driver: options.driver ?? openFresh(), access: createAccessPort() } };
 }
 
 // Recursively reads a directory into rel-path → hex-bytes entries, so
