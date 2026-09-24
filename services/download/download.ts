@@ -164,8 +164,11 @@ export async function verifyFetched(bytes: Uint8Array, entry: LockEntry, sha256:
 
 // The .part + rename idiom (ADR G01.03 §3.7): a crash mid-write leaves an
 // ambiguous .part that the next run discards and re-fetches — never a
-// truncated file that looks complete. Activation renames inside staging;
-// repair renames onto the final file — both same-volume, hence atomic.
+// truncated file that looks complete. Both the .part's parent in staging and
+// the rename target's parent are ensured first — activation renames inside
+// staging, repair renames onto the final file, and an orphaned final
+// subdirectory (the 09 §7 scenario repair exists for) must not turn the
+// rename into an ENOENT throw. Both same-volume, hence atomic.
 export async function stageAndRename(
   store: DownloadStore,
   stagingLayer: string,
@@ -175,6 +178,8 @@ export async function stageAndRename(
 ): Promise<void> {
   const slash = entryPath.lastIndexOf('/');
   if (slash !== -1) await store.ensureDir(`${stagingLayer}/${entryPath.slice(0, slash)}`);
+  const targetSlash = targetRel.lastIndexOf('/');
+  if (targetSlash !== -1) await store.ensureDir(targetRel.slice(0, targetSlash));
   await store.writeFile(`${stagingLayer}/${entryPath}.part`, bytes);
   await store.rename(`${stagingLayer}/${entryPath}.part`, targetRel);
 }

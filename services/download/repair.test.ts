@@ -19,13 +19,15 @@ import path from 'node:path';
 import test from 'node:test';
 
 import { repairLayer } from './repair.ts';
+import { createDeletionGate } from './delete.ts';
 import { checkPresence } from '../contentRepo/presence.ts';
 import { createNodeBundlesStore } from '../contentRepo/nodeBundlesStore.ts';
 import { writeFlatLayer } from '../contentRepo/test-fixture.ts';
 import { depsFor, snapshotDir } from './test-fixture.ts';
 import { getBundleAssets } from '../db/db.ts';
 import { nodeSha256 } from './nodeDownloadStore.ts';
-import type { LayerKey } from './types.ts';
+import type { ActivateDeps, LayerKey } from './types.ts';
+import type { PresenceVerdict } from '../contentRepo/types.ts';
 
 const KEY: LayerKey = { routeId: 'route-x', version: '1', locale: 'be', tier: 'base' };
 const LAYER = 'bundles/route-x/1/be/base';
@@ -51,33 +53,102 @@ function installedLayer(root: string, files: Record<string, string>): unknown {
   return JSON.parse(fs.readFileSync(path.join(root, LAYER, 'lock.json'), 'utf8'));
 }
 
-test('criterion 3: the presence verdict drives a repair that fetches exactly the missing paths', async () => {
+// The common arrange of the damage tests: install the intact layer, apply the
+// damage, build the rig with the grant-bound sources. tmpRoot comes back for
+// the caller's try/finally.
+function damagedLayer(remove: (layerDir: string) => void): {
+  root: string;
+  lock: unknown;
+  deps: ActivateDeps;
+  fetchLog: string[];
+} {
   const root = tmpRoot();
+  const lock = installedLayer(root, { 'stops.json': STOPS, 'audio/story-1.m4a': AUDIO });
+  remove(path.join(root, LAYER));
+  const { deps, fetchLog } = depsFor(root, { sources: SOURCES });
+  return { root, lock, deps, fetchLog };
+}
+
+// The composition under test (criterion 3): a metadata presence check names
+// the recovery list, the repair fetches exactly it, a fresh presence check
+// verifies the layer again.
+async function checkRepairCheck(
+  root: string,
+  lock: unknown,
+  deps: ActivateDeps,
+  requested?: readonly string[],
+): Promise<{ missing: string[]; result: Awaited<ReturnType<typeof repairLayer>>; verified: PresenceVerdict }> {
+  const digest = async (bytes: Uint8Array) => nodeSha256(bytes);
+  const damaged = await checkPresence(createNodeBundlesStore(root), {
+    layers: [KEY],
+    trigger: 'restart',
+    sha256: digest,
+  });
+  assert.equal(damaged[0].status, 'needs-recovery');
+  const missing = (damaged[0] as Extract<PresenceVerdict, { status: 'needs-recovery' }>).missing;
+  const result = await repairLayer({ ...KEY, lock }, deps, requested ?? missing);
+  const [verified] = await checkPresence(createNodeBundlesStore(root), {
+    layers: [KEY],
+    trigger: 'restart',
+    sha256: digest,
+  });
+  return { missing, result, verified };
+}
+
+// The orphaned-subdirectory scenario of 09 §7: the whole audio/ subtree is
+// gone from the final layer — the rename target's parent must be created,
+// not turned into an ENOENT throw.
+test('criterion 3: a repair restores a whole orphaned subdirectory of the final layer', async () => {
+  const { root, lock, deps, fetchLog } = damagedLayer((dir) =>
+    fs.rmSync(path.join(dir, 'audio'), { recursive: true, force: true }));
   try {
-    const lock = installedLayer(root, { 'stops.json': STOPS, 'audio/story-1.m4a': AUDIO });
-    fs.rmSync(path.join(root, LAYER, 'audio/story-1.m4a'));
-    const { deps, fetchLog } = depsFor(root, { sources: SOURCES });
-    const digest = async (bytes: Uint8Array) => nodeSha256(bytes);
-
-    const damaged = await checkPresence(createNodeBundlesStore(root), {
-      layers: [KEY],
-      trigger: 'restart',
-      sha256: digest,
-    });
-    assert.equal(damaged[0].status, 'needs-recovery');
-    const missing = (damaged[0] as Extract<typeof damaged[0], { status: 'needs-recovery' }>).missing;
+    const { missing, result, verified } = await checkRepairCheck(root, lock, deps);
     assert.deepEqual(missing, ['audio/story-1.m4a']);
+    assert.deepEqual(result, { status: 'repaired', key: KEY, repaired: missing });
+    assert.equal(verified.status, 'verified');
+    assert.deepEqual(fetchLog, ['audio/story-1.m4a']);
+    assert.equal(fs.readFileSync(path.join(root, LAYER, 'audio/story-1.m4a'), 'utf8'), AUDIO);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
 
-    const repaired = await repairLayer({ ...KEY, lock }, deps, missing);
-    assert.deepEqual(repaired, { status: 'repaired', key: KEY, repaired: missing });
+// The shared deletion gate (G04.04.b): a package marked deleted while the
+// repair is in flight stops named — writing files or zone-A rows would
+// resurrect it. (A repair that STARTS after the delete takes the new epoch
+// and runs like a fresh download — the same rule activate() follows.)
+test('criterion 3: a package deleted mid-repair stops the repair as cancelled, writing nothing', async () => {
+  const { root, lock, deps, fetchLog } = damagedLayer((dir) => fs.rmSync(path.join(dir, 'audio/story-1.m4a')));
+  try {
+    const gate = createDeletionGate();
+    deps.cancel = gate;
+    const realFetch = deps.fetch;
+    deps.fetch = async (rel) => {
+      gate.markCancelled({ routeId: KEY.routeId, version: KEY.version });
+      return realFetch(rel);
+    };
+
+    const result = await repairLayer({ ...KEY, lock }, deps, ['audio/story-1.m4a']);
+    assert.deepEqual(result, { status: 'cancelled', key: KEY, repaired: [] });
+    assert.deepEqual(fetchLog, ['audio/story-1.m4a'], 'the fetch raced the delete; the write did not happen');
+    assert.equal(fs.existsSync(path.join(root, LAYER, 'audio/story-1.m4a')), false);
+    // The staging layer the pre-loop ensureDir created holds no leftovers —
+    // a cancelled repair writes nothing and leaves no .part to mistake for
+    // progress (the empty directory chain itself stays, as in activate()).
+    assert.deepEqual(fs.readdirSync(path.join(root, 'bundles/route-x/staging/1/be/base')), []);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('criterion 3: the presence verdict drives a repair that fetches exactly the missing paths', async () => {
+  const { root, lock, deps, fetchLog } = damagedLayer((dir) => fs.rmSync(path.join(dir, 'audio/story-1.m4a')));
+  try {
+    const { missing, result, verified } = await checkRepairCheck(root, lock, deps);
+    assert.deepEqual(missing, ['audio/story-1.m4a']);
+    assert.deepEqual(result, { status: 'repaired', key: KEY, repaired: missing });
     assert.deepEqual(fetchLog, ['audio/story-1.m4a'], 'only the missing path crosses the wire');
-
-    const verified = await checkPresence(createNodeBundlesStore(root), {
-      layers: [KEY],
-      trigger: 'restart',
-      sha256: digest,
-    });
-    assert.equal(verified[0].status, 'verified');
+    assert.equal(verified.status, 'verified');
 
     // The registry reflects the restored file (zone A, derived from disk).
     const rows = getBundleAssets(deps.driver, KEY);

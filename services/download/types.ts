@@ -195,7 +195,9 @@ export type DeleteResult =
 // must be confirmed by a fresh presence check. 'invalid-input' covers a
 // corrupt key or lock and any requested path the lock does not declare —
 // fail closed, nothing outside the lock is ever fetched (criterion 4: a
-// pinned version is never filled from another version's files).
+// pinned version is never filled from another version's files). 'cancelled'
+// is the shared deletion gate's named outcome (G04.04.b): the package was
+// deleted while the repair ran, and nothing was written.
 export type RepairResult =
   | { status: 'repaired'; key: LayerKey; repaired: string[] }
   | {
@@ -214,4 +216,5 @@ export type RepairResult =
       diagnostics: string[];
     }
   | { status: 'insufficient-space'; key: LayerKey; needed: number; free: number | null }
-  | { status: 'invalid-input'; key: LayerKey; diagnostics: string[] };
+  | { status: 'invalid-input'; key: LayerKey; diagnostics: string[] }
+  | { status: 'cancelled'; key: LayerKey; repaired: string[] };
