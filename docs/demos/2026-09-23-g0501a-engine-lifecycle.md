@@ -12,8 +12,9 @@ subprocess.run(['node', '--test', '--experimental-strip-types', '--test-reporter
 
 ```output
 ....................
-.........
+..........
 ```
+<!-- re-captured 2026-09-24: +1 state.test.ts test (live-pause marker nuance, G05.01.c) -->
 
 ```python
 import subprocess
