@@ -39,6 +39,7 @@ test('guard: npm test enumerates every committed suite outside spikes', () => {
       (script.includes('tools/collector/*.test.mjs') && suite.startsWith('tools/collector/')) ||
       (script.includes('docs/run-model/') && suite.startsWith('docs/run-model/')) ||
       (script.includes('services/**/*.test.ts') && suite.startsWith('services/')) ||
+      (script.includes('controllers/**/*.test.ts') && suite.startsWith('controllers/')) ||
       (script.includes('core/**/*.test.ts') && suite.startsWith('core/')) ||
       (script.includes('web/**/*.test.ts') && suite.startsWith('web/')) ||
       (script.includes('supabase/**/*.test.ts') && suite.startsWith('supabase/'));

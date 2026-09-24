@@ -80,6 +80,30 @@ module.exports = {
       from: { path: '^app/' },
       to: { path: '^services/' },
     },
+    // G06.09.b completes the app-side edge: screens import controllers/ only
+    // (plus React/Expo) — core/ is reached through controllers as well.
+    {
+      name: 'app-no-core',
+      comment: 'app/ must not import core/ directly — controllers only (19 §4.2 edge rule)',
+      severity: 'error',
+      from: { path: '^app/' },
+      to: { path: '^core/' },
+    },
+    // Controllers consume services/ through explicit ports (issue #209 AC1):
+    // the composition root (controllers/createServices.ts) is the only module
+    // that value-imports and constructs them; every other controller takes
+    // types only. Tests are exempt — they wire fakes.
+    {
+      name: 'controllers-services-type-only',
+      comment:
+        'controllers/ value-imports services/ only in the composition root; elsewhere type-only (19 §2.2, issue #209 AC1)',
+      severity: 'error',
+      from: {
+        path: '^controllers/',
+        pathNot: ['^controllers/createServices\\.ts$', '\\.test\\.[cm]?[jt]sx?$'],
+      },
+      to: { path: '^services/', dependencyTypesNot: ['type-only'] },
+    },
     // Cycles are forbidden within and across all checked zones (19 §4.2).
     {
       name: 'no-cycles',
