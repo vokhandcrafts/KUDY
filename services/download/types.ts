@@ -14,23 +14,15 @@
 // the library UI (G06.04) — package deletion itself is G04.04.b (delete.ts),
 // guarded by the session table through services/db.
 //
-// The package identity a deletion targets (G04.04.b) — route_id@version, the
-// G04.03 facts key of services/contentRepo/types.ts — comes from its single
-// owner (one spelling, no second declaration) and is re-exported below.
-import type { LockEntry, PackageKey, Tier } from '../contentRepo/types.ts';
+// The package identity a deletion targets (G04.04.b) — route_id@version — and
+// the layer key plus the digest port are canonical in services/contentRepo
+// (one contract, two consumers — implementation-rules 2, 8); download
+// re-exports them under the names its activation surface always used.
+import type { LayerKey, LockEntry, PackageKey, Sha256, Tier } from '../contentRepo/types.ts';
 import type { BundleAssetRow, SqlDriver } from '../db/types.ts';
 import type { DownloadAccessPort } from './access.ts';
 
-export type { LockEntry, PackageKey, Tier };
-
-// One layer of one bundle: the delivery unit `locale × tier` of
-// route_id@version (`09` §4).
-export interface LayerKey {
-  routeId: string;
-  version: string;
-  locale: string;
-  tier: Tier;
-}
+export type { LayerKey, LockEntry, PackageKey, Sha256, Tier };
 
 // The injected filesystem port over the bundles root (`09` §7 layout). All
 // rel paths are '/'-separated (validate-package idiom — the fs APIs accept
@@ -51,11 +43,9 @@ export interface DownloadStore {
   freeBytes(): Promise<number | null>;
 }
 
-// SHA-256 over raw bytes, hex-encoded. A port because the digest API is a
-// platform facility (node:crypto in the test adapter here, expo-crypto on the
-// device — TR-10). Raw bytes only: EOL conversion between checkout and hash
-// is the AR-1 defect class (implementation-rules 4).
-export type Sha256 = (bytes: Uint8Array) => Promise<string>;
+// SHA-256 over raw bytes, hex-encoded — the port is canonical in
+// services/contentRepo/types.ts (platform facility: node:crypto in the test
+// adapters, expo-crypto on the device — TR-10).
 
 // The byte source of the transfer (the grant-backed source of G04.02.b, or a
 // plain test fake; the production HTTP adapter is out of scope — TR-10).
@@ -196,3 +186,37 @@ export type DeleteResult =
   | { status: 'deleted'; key: PackageKey; removedAssetRows: number }
   | { status: 'refused'; key: PackageKey; reason: 'pinned-by-unfinished-session'; sessionIds: string[] }
   | { status: 'invalid-input'; key: PackageKey; diagnostics: string[] };
+
+// The result of a repair request (G04.04.c criterion 3): 'repaired' when
+// every requested path was fetched, hash-verified and written back into the
+// final layer; 'partial' when the transfer stopped; 'hash-mismatch' when a
+// fetched file failed verification. `repaired` and `missing` are exhaustive
+// over the request (missing includes the failing file); a 'repaired' result
+// must be confirmed by a fresh presence check. 'invalid-input' covers a
+// corrupt key or lock and any requested path the lock does not declare —
+// fail closed, nothing outside the lock is ever fetched (criterion 4: a
+// pinned version is never filled from another version's files). 'cancelled'
+// is the shared deletion gate's named outcome (G04.04.b): the package was
+// deleted while the repair ran — writes and zone-A rows stop at the first
+// boundary that saw the deletion, and `repaired` lists the files already
+// verified and written before it (a later deletion sweep removes them).
+export type RepairResult =
+  | { status: 'repaired'; key: LayerKey; repaired: string[] }
+  | {
+      status: 'partial';
+      key: LayerKey;
+      repaired: string[];
+      missing: string[];
+      diagnostics: string[];
+    }
+  | {
+      status: 'hash-mismatch';
+      key: LayerKey;
+      repaired: string[];
+      paths: string[];
+      missing: string[];
+      diagnostics: string[];
+    }
+  | { status: 'insufficient-space'; key: LayerKey; needed: number; free: number | null }
+  | { status: 'invalid-input'; key: LayerKey; diagnostics: string[] }
+  | { status: 'cancelled'; key: LayerKey; repaired: string[] };
