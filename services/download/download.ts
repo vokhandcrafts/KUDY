@@ -11,6 +11,7 @@ import { isSafeSegment, parseLockEntry } from '../contentRepo/inventory.ts';
 import type { Tier } from '../contentRepo/types.ts';
 import { replaceBundleAssets, upsertBundleAsset } from '../db/db.ts';
 import type { BundleAssetRow } from '../db/types.ts';
+import { emitAccessReady } from './access.ts';
 import type {
   ActivateDeps,
   ActivateInput,
@@ -20,6 +21,7 @@ import type {
   LockEntry,
   RebuildDeps,
   RebuildResult,
+  RecoveryResult,
 } from './types.ts';
 
 // `09` §7: the staging directory sits beside the final layout under the
@@ -30,6 +32,13 @@ export const STAGING = 'staging';
 
 export function layerPath(key: LayerKey): string {
   return `bundles/${key.routeId}/${key.version}/${key.locale}/${key.tier}`;
+}
+
+// The package root the layer belongs to: the shared package files
+// (route.json) sit beside the locale directories (09 §7 layout). Used by the
+// emission reader in both complete paths of activate().
+function packagePath(key: LayerKey): string {
+  return `bundles/${key.routeId}/${key.version}`;
 }
 
 export function stagingLayerPath(key: LayerKey): string {
@@ -168,7 +177,12 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
   if (await layerComplete(deps, finalLayer, entries)) {
     await replaceBundleAssets(deps.driver, key, entries.map((entry) => completeRow(key, entry)));
     await deps.store.remove(stagingLayer);
-    return { status: 'complete', key, verified: entries.length, bytes: totalBytes, fetched: 0, diagnostics: [] };
+    // The repeated request commits the complete state again (a no-op for an
+    // already complete layer); the emission dedupes the identity per run.
+    const accessDiagnostics = await emitAccessReady(deps.access, key, (rel) =>
+      deps.store.readFile(`${packagePath(key)}/${rel}`),
+    );
+    return { status: 'complete', key, verified: entries.length, bytes: totalBytes, fetched: 0, diagnostics: accessDiagnostics };
   }
 
   // Resume pass (criterion 2): staging files that hash-verify are kept and
@@ -258,7 +272,13 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
   await deps.store.rename(stagingLayer, finalLayer);
   await deps.store.remove(`${stagingLayer}.old`);
 
-  return { status: 'complete', key, verified: entries.length, bytes: totalBytes, fetched, diagnostics: [] };
+  // The commit is done — only now does the AccessReady event exist
+  // (ADR G01.03 §3.7: rename → only then AccessReady; 19 §3.5: successful
+  // activation is the single emission site). A crash above this line leaves
+  // the layer on disk with no event — recovery on open derives readiness
+  // from the disk, no flag to lag behind.
+  const accessDiagnostics = await emitAccessReady(deps.access, key, (rel) => deps.store.readFile(`${packagePath(key)}/${rel}`));
+  return { status: 'complete', key, verified: entries.length, bytes: totalBytes, fetched, diagnostics: accessDiagnostics };
 }
 
 /**
@@ -296,4 +316,22 @@ export async function rebuildBundleAssets(input: ActivateInput, deps: RebuildDep
   }
   await replaceBundleAssets(deps.driver, key, rows);
   return { status: 'rebuilt', key, rows };
+}
+
+/**
+ * Recovery on open (G04.02.c, ADR G01.03 §3.7): after a restart the layer's
+ * readiness is derived from the disk — the bundle_asset registry is rebuilt
+ * by re-hashing the final layer, and the disk facts alone answer whether the
+ * layer is ready. Nothing is emitted here: the activation commit is the
+ * single emission site (19 §3.5), and zone B holds no ready column or flag
+ * that could go stale (ADR G01.03 §3.2, §3.6) — the crash row "between
+ * rename and AccessReady" self-heals through this derivation.
+ */
+export async function recoverOnOpen(input: ActivateInput, deps: RebuildDeps): Promise<RecoveryResult> {
+  const rebuilt = await rebuildBundleAssets(input, deps);
+  if (rebuilt.status === 'invalid-input') return rebuilt;
+  return {
+    status: rebuilt.rows.every((row) => row.status === 'complete') ? 'ready' : 'not-ready',
+    key: rebuilt.key,
+  };
 }

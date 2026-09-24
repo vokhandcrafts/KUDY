@@ -5,15 +5,16 @@
 // bundles/<route_id>/<version>/<locale>/<tier>/ with staging/ beside it, safe
 // path segments checked on input, bundle_asset states pending/partial/
 // complete), ADR G01.03 §3.5–§3.7 (download is the only AccessReady issuer —
-// the emission itself is G04.02.c; staging → per-file hash → atomic rename →
-// only then AccessReady; resume by hash, never by offset; partial never
-// counts as ready; a failed upgrade never deletes the old layer), `19` §3.5
-// (activate() and the local activation result categories). Non-goals: the
-// grant and HTTP transfer (G04.02.b), AccessReady emission (G04.02.c), the
-// expo-file-system adapter (TR-10 — no driver is pinned), the library UI and
-// deletion (G04.04).
+// emitted through the typed channel of access.ts after the activation commit;
+// staging → per-file hash → atomic rename → only then AccessReady; resume by
+// hash, never by offset; partial never counts as ready; a failed upgrade
+// never deletes the old layer), `19` §3.5 (activate() and the local
+// activation result categories). Non-goals: the grant and HTTP transfer
+// (G04.02.b), the expo-file-system adapter (TR-10 — no driver is pinned),
+// the library UI and deletion (G04.04).
 import type { LockEntry, Tier } from '../contentRepo/types.ts';
 import type { BundleAssetRow, SqlDriver } from '../db/types.ts';
+import type { DownloadAccessPort } from './access.ts';
 
 export type { LockEntry, Tier };
 
@@ -71,6 +72,11 @@ export interface ActivateDeps {
   sha256: Sha256;
   // bundle_asset goes through the services/db public API (zone A only).
   driver: SqlDriver;
+  // The AccessReady channel (19 §3.2): activate() delivers the event after
+  // the commit through this port; the composition root passes the same
+  // instance the controller subscribes to. Required — a silent absence would
+  // drop the notification of every commit instead of failing loudly.
+  access: DownloadAccessPort;
 }
 
 // The local activation result of `19` §3.5: поўны / частковы / хэш-
@@ -123,6 +129,14 @@ export interface RebuildDeps {
   sha256: Sha256;
   driver: SqlDriver;
 }
+
+// The disk-derived answer of recoverOnOpen (G04.02.c): readiness computed
+// from the disk facts on every open, never persisted — no ready column or
+// flag exists in zone B (ADR G01.03 §3.2, §3.6).
+export type RecoveryResult =
+  | { status: 'ready'; key: LayerKey }
+  | { status: 'not-ready'; key: LayerKey }
+  | { status: 'invalid-input'; key: LayerKey; diagnostics: string[] };
 
 // `09` §7: bundle_asset can be rebuilt by re-hashing the disk. A corrupt key
 // or lock is diagnosed the same way as in activate().
