@@ -35,8 +35,9 @@ export function layerPath(key: LayerKey): string {
 }
 
 // The package root the layer belongs to: the shared package files
-// (route.json) sit beside the locale directories (09 §7 layout).
-export function packagePath(key: LayerKey): string {
+// (route.json) sit beside the locale directories (09 §7 layout). Used by the
+// emission reader in both complete paths of activate().
+function packagePath(key: LayerKey): string {
   return `bundles/${key.routeId}/${key.version}`;
 }
 

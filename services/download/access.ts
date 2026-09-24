@@ -7,7 +7,7 @@
 // Emission happens only in activate() after the commit (19 §3.5: successful
 // activation is the single emission site); recovery on open emits nothing.
 import type { RunEvent } from '../../core/engine/events.ts';
-import type { LayerKey, Tier } from './types.ts';
+import type { LayerKey } from './types.ts';
 
 // The full launch identity, copied from the 19 §3.2 handler type: the
 // camelCase machine shape of core/engine/events.ts (ADR G01.03 §3.5 defines
@@ -34,8 +34,10 @@ interface AccessChannel {
 const channels = new WeakMap<object, AccessChannel>();
 
 // The dedupe identity of ADR G01.03 §3.5: route_id, version, locale, tier.
+// JSON-joined so distinct field combinations can never collide on a
+// separator character the safe-path idiom happens to allow.
 function identityOf(key: LayerKey): string {
-  return `${key.routeId}|${key.version}|${key.locale}|${key.tier}`;
+  return JSON.stringify([key.routeId, key.version, key.locale, key.tier]);
 }
 
 export function createAccessPort(): DownloadAccessPort {
@@ -51,16 +53,19 @@ export function createAccessPort(): DownloadAccessPort {
 
 // The unlock payload of the activated layer: the ids of the route stops
 // whose access_tier names this tier. The route's stops live in route.json at
-// the package root (09 §7 layout: {stops: [{id, position, place_id,
-// access_tier}]}; the per-layer stops.json carries stories, not stops).
-// A stop without a string id cannot name content and is skipped; an
-// unreadable or invalid file yields an empty list plus a diagnostic
-// (implementation-rules 14: diagnostics, not a crash) — the reducer widens
-// the tier for an empty payload and re-checks every id against the pinned
-// package (ADR G01.03 §3.5 check 5).
+// the package root — the RouteStop of 09 §3 ({id, position, place_id,
+// access_tier}, contracts/schemas/route.schema.json + stop.schema.json; the
+// per-layer stops.json carries stories, not stops). A stop without a string
+// id cannot name content and is skipped; the document identity is checked
+// against the activation key (the sibling idiom of
+// services/contentRepo/contentRepo.ts route.json#identity-mismatch) — an
+// unreadable, invalid or foreign document yields an empty list plus a named
+// diagnostic (implementation-rules 14: diagnostics, not a crash) — the
+// reducer widens the tier for an empty payload and re-checks every id
+// against the pinned package (ADR G01.03 §3.5 check 5).
 export function parseRouteStops(
   bytes: Uint8Array,
-  tier: Tier,
+  key: LayerKey,
 ): { stopIds: string[]; diagnostic?: string } {
   let doc: unknown;
   try {
@@ -68,15 +73,18 @@ export function parseRouteStops(
   } catch {
     return { stopIds: [], diagnostic: 'access#route-json-invalid' };
   }
-  const stops = (doc as { stops?: unknown } | null)?.stops;
-  if (!Array.isArray(stops)) return { stopIds: [], diagnostic: 'access#route-json-invalid' };
-  const stopIds = stops
+  const routeDoc = doc as { route_id?: unknown; version?: unknown; stops?: unknown } | null;
+  if (routeDoc?.route_id !== key.routeId || routeDoc?.version !== key.version) {
+    return { stopIds: [], diagnostic: 'access#route-json-identity' };
+  }
+  if (!Array.isArray(routeDoc.stops)) return { stopIds: [], diagnostic: 'access#route-json-invalid' };
+  const stopIds = routeDoc.stops
     .filter(
       (stop): stop is { id: string } =>
         stop !== null &&
         typeof stop === 'object' &&
         typeof (stop as { id?: unknown }).id === 'string' &&
-        (stop as { access_tier?: unknown }).access_tier === tier,
+        (stop as { access_tier?: unknown }).access_tier === key.tier,
     )
     .map((stop) => stop.id);
   return { stopIds };
@@ -103,9 +111,22 @@ export async function emitAccessReady(
   const identity = identityOf(key);
   if (channel.emitted.has(identity)) return [];
 
-  const bytes = await readPackageFile('route.json');
-  const parsed =
-    bytes === null ? { stopIds: [], diagnostic: 'access#route-json-missing' as const } : parseRouteStops(bytes, key.tier);
+  // The read is isolated like the handlers below: the commit already
+  // happened, so a rejecting store port (a device IO fault, not an absent
+  // file) must degrade to an empty payload with a diagnostic, never wedge
+  // the activation after its own commit.
+  let bytes: Uint8Array | null = null;
+  let readFailed = false;
+  try {
+    bytes = await readPackageFile('route.json');
+  } catch {
+    readFailed = true;
+  }
+  const parsed = readFailed
+    ? { stopIds: [], diagnostic: 'access#route-json-unreadable' as const }
+    : bytes === null
+      ? { stopIds: [], diagnostic: 'access#route-json-missing' as const }
+      : parseRouteStops(bytes, key);
   const event: AccessReadyEvent = {
     type: 'AccessReady',
     routeId: key.routeId,

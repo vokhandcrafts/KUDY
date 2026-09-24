@@ -193,14 +193,53 @@ test('criterion 2: a missing or corrupt route.json yields an empty payload with 
   }
 });
 
+test('criterion 2: a foreign route.json yields the identity diagnostic and an empty payload', async () => {
+  const root = tmpRoot();
+  try {
+    const foreign = rig(root, { routeJson: JSON.stringify({ route_id: 'route-y', version: '1', stops: [{ id: 's', access_tier: 'base' }] }) });
+    const result = await activate({ ...KEY, lock: await lockFrom(LAYER_BASE) }, foreign.deps);
+    assert.equal(result.status, 'complete');
+    assert.deepEqual(foreign.events[0]?.stopIds, []);
+    assert.deepEqual(result.diagnostics, ['access#route-json-identity']);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('criterion 1: a rejecting package read degrades to a diagnostic after the commit, never wedges activation', async () => {
+  const root = tmpRoot();
+  try {
+    const { access, events, deps } = rig(root);
+    const failingRead = {
+      ...deps.store,
+      readFile: async (rel: string) => {
+        if (rel === 'bundles/route-x/1/route.json') throw new Error('device io fault');
+        return deps.store.readFile(rel);
+      },
+    };
+    const result = await activate({ ...KEY, lock: await lockFrom(LAYER_BASE) }, { ...deps, store: failingRead });
+    assert.equal(result.status, 'complete');
+    assert.deepEqual(events[0]?.stopIds, []);
+    assert.deepEqual(result.diagnostics, ['access#route-json-unreadable']);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('parseRouteStops: unnamed stops and foreign tiers are skipped, corrupt input is diagnosed', () => {
-  const corrupt = parseRouteStops(utf8('nope{'), 'base');
+  const corrupt = parseRouteStops(utf8('nope{'), KEY);
   assert.deepEqual(corrupt, { stopIds: [], diagnostic: 'access#route-json-invalid' });
-  const noStops = parseRouteStops(utf8('{"route_id":"route-x"}'), 'base');
+  const noStops = parseRouteStops(utf8('{"route_id":"route-x","version":"1"}'), KEY);
   assert.deepEqual(noStops, { stopIds: [], diagnostic: 'access#route-json-invalid' });
+  const foreign = parseRouteStops(utf8(JSON.stringify({ route_id: 'route-y', version: '1', stops: [] })), KEY);
+  assert.deepEqual(foreign, { stopIds: [], diagnostic: 'access#route-json-identity' });
+  const foreignVersion = parseRouteStops(utf8(JSON.stringify({ route_id: 'route-x', version: '2', stops: [] })), KEY);
+  assert.deepEqual(foreignVersion, { stopIds: [], diagnostic: 'access#route-json-identity' });
   const mixed = parseRouteStops(
     utf8(
       JSON.stringify({
+        route_id: 'route-x',
+        version: '1',
         stops: [
           null,
           42,
@@ -210,7 +249,7 @@ test('parseRouteStops: unnamed stops and foreign tiers are skipped, corrupt inpu
         ],
       }),
     ),
-    'base',
+    KEY,
   );
   assert.deepEqual(mixed, { stopIds: ['good'] });
 });
