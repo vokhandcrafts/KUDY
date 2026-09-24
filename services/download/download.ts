@@ -36,9 +36,17 @@ export function layerPath(key: LayerKey): string {
 
 // The package root the layer belongs to: the shared package files
 // (route.json) sit beside the locale directories (09 §7 layout). Used by the
-// emission reader in both complete paths of activate().
-function packagePath(key: LayerKey): string {
-  return `bundles/${key.routeId}/${key.version}`;
+// emission reader in both complete paths of activate() and by the deletion of
+// the whole package (G04.04.b delete.ts).
+export function packagePath(routeId: string, version: string): string {
+  return `bundles/${routeId}/${version}`;
+}
+
+// The staging tree of one package version: every layer's staging directory
+// and its rename trash live inside it, so the deletion of a package removes
+// the whole tree in one remove() (G04.04.b criterion 4 — staging cancelled).
+export function stagingVersionPath(routeId: string, version: string): string {
+  return `bundles/${routeId}/${STAGING}/${version}`;
 }
 
 export function stagingLayerPath(key: LayerKey): string {
@@ -164,6 +172,17 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
   const { key, entries, diagnostics, invalid } = parseActivationInput(input);
   if (invalid) return { status: 'invalid-input', key, diagnostics };
 
+  // The shared deletion gate (G04.04.b criterion 4): with a gate present the
+  // activation takes the package's current epoch and stops named the moment
+  // a deletePackage() of the same package has bumped it — checked after
+  // every await boundary below, so a deletion racing the download leaves
+  // neither files nor rows behind. Without the optional dep this is exactly
+  // the pre-G04.04.b behavior.
+  const gate = deps.cancel ?? null;
+  const activation = gate?.beginActivation(key) ?? null;
+  const cancelled = (): boolean =>
+    gate !== null && activation !== null && !gate.isActive(key, activation);
+
   const finalLayer = layerPath(key);
   const stagingLayer = stagingLayerPath(key);
   const totalBytes = entries.reduce((sum, entry) => sum + entry.bytes, 0);
@@ -172,15 +191,19 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
   // garbage, removed before anything else reads the layout.
   await deps.store.remove(`${stagingLayer}.old`);
 
-  await replaceBundleAssets(deps.driver, key, await initialRows(key, entries, deps));
+  const initial = await initialRows(key, entries, deps);
+  if (cancelled()) return { status: 'cancelled', key, fetched: 0 };
+  await replaceBundleAssets(deps.driver, key, initial);
 
-  if (await layerComplete(deps, finalLayer, entries)) {
+  const alreadyComplete = await layerComplete(deps, finalLayer, entries);
+  if (cancelled()) return { status: 'cancelled', key, fetched: 0 };
+  if (alreadyComplete) {
     await replaceBundleAssets(deps.driver, key, entries.map((entry) => completeRow(key, entry)));
     await deps.store.remove(stagingLayer);
     // The repeated request commits the complete state again (a no-op for an
     // already complete layer); the emission dedupes the identity per run.
     const accessDiagnostics = await emitAccessReady(deps.access, key, (rel) =>
-      deps.store.readFile(`${packagePath(key)}/${rel}`),
+      deps.store.readFile(`${packagePath(key.routeId, key.version)}/${rel}`),
     );
     return { status: 'complete', key, verified: entries.length, bytes: totalBytes, fetched: 0, diagnostics: accessDiagnostics };
   }
@@ -212,6 +235,7 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
 
   let fetched = 0;
   for (const [index, entry] of entries.entries()) {
+    if (cancelled()) return { status: 'cancelled', key, fetched };
     if (kept.has(entry.path)) {
       await upsertBundleAsset(deps.driver, completeRow(key, entry));
       continue;
@@ -233,6 +257,10 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
         ],
       };
     }
+    // The fetch was the await boundary: a deletion that completed while the
+    // transfer was parked stops the download here, before any write could
+    // recreate staging the user has already deleted (criterion 4).
+    if (cancelled()) return { status: 'cancelled', key, fetched };
     fetched += 1;
     if (bytes.length !== entry.bytes) {
       return {
@@ -266,6 +294,7 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
   // exists here failed the level-2 check above (a damaged install being
   // repaired): it moves into staging trash first, so a crash between the two
   // renames leaves the layer old or new, never a mix (criterion 3).
+  if (cancelled()) return { status: 'cancelled', key, fetched };
   if (await deps.store.exists(finalLayer)) {
     await deps.store.rename(finalLayer, `${stagingLayer}.old`);
   }
@@ -277,7 +306,11 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
   // activation is the single emission site). A crash above this line leaves
   // the layer on disk with no event — recovery on open derives readiness
   // from the disk, no flag to lag behind.
-  const accessDiagnostics = await emitAccessReady(deps.access, key, (rel) => deps.store.readFile(`${packagePath(key)}/${rel}`));
+  const accessDiagnostics = await emitAccessReady(
+    deps.access,
+    key,
+    (rel) => deps.store.readFile(`${packagePath(key.routeId, key.version)}/${rel}`),
+  );
   return { status: 'complete', key, verified: entries.length, bytes: totalBytes, fetched, diagnostics: accessDiagnostics };
 }
 

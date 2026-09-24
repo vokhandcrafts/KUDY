@@ -11,7 +11,8 @@
 // never deletes the old layer), `19` §3.5 (activate() and the local
 // activation result categories). Non-goals: the grant and HTTP transfer
 // (G04.02.b), the expo-file-system adapter (TR-10 — no driver is pinned),
-// the library UI and deletion (G04.04).
+// the library UI (G06.04) — package deletion itself is G04.04.b (delete.ts),
+// guarded by the session table through services/db.
 import type { LockEntry, Tier } from '../contentRepo/types.ts';
 import type { BundleAssetRow, SqlDriver } from '../db/types.ts';
 import type { DownloadAccessPort } from './access.ts';
@@ -77,6 +78,10 @@ export interface ActivateDeps {
   // instance the controller subscribes to. Required — a silent absence would
   // drop the notification of every commit instead of failing loudly.
   access: DownloadAccessPort;
+  // The shared deletion gate (criterion 4, G04.04.b): optional so the
+  // activation contract is unchanged for callers that never delete; when
+  // present, the same instance the composition root handed to deletePackage().
+  cancel?: DeletionGate;
 }
 
 // The local activation result of `19` §3.5: поўны / частковы / хэш-
@@ -122,7 +127,14 @@ export type ActivationResult =
       status: 'invalid-input';
       key: LayerKey;
       diagnostics: string[];
-    };
+    }
+  // G04.04.b criterion 4: a deletion of the same package raced this
+  // activation (the shared DeletionGate is marked). No rename happened, so
+  // nothing on disk claims ready for a package the user has deleted; the
+  // next activate() for the layer starts a fresh download. Recorded here as
+  // the second deliberate extension of the §3.5 four categories (the first
+  // is 'invalid-input' above).
+  | { status: 'cancelled'; key: LayerKey; fetched: number };
 
 export interface RebuildDeps {
   store: DownloadStore;
@@ -138,8 +150,53 @@ export type RecoveryResult =
   | { status: 'not-ready'; key: LayerKey }
   | { status: 'invalid-input'; key: LayerKey; diagnostics: string[] };
 
-// `09` §7: bundle_asset can be rebuilt by re-hashing the disk. A corrupt key
+//  `09` §7: bundle_asset can be rebuilt by re-hashing the disk. A corrupt key
 // or lock is diagnosed the same way as in activate().
 export type RebuildResult =
   | { status: 'rebuilt'; key: LayerKey; rows: BundleAssetRow[] }
   | { status: 'invalid-input'; key: LayerKey; diagnostics: string[] };
+
+// The package identity a deletion targets (G04.04.b): route_id@version —
+// every locale/tier layer of the bundle is removed at once, so the key is
+// deliberately narrower than LayerKey (no locale, no tier).
+export interface PackageKey {
+  routeId: string;
+  version: string;
+}
+
+// The in-memory cancellation flag shared by activate() and deletePackage()
+// (criterion 4). The composition root creates one instance (createDeletionGate())
+// and hands the same object to both deps. An activation begins by taking the
+// package's current epoch (beginActivation); deletePackage bumps it
+// (markCancelled) before removing anything, so every activation already in
+// flight turns inactive at its next gate check and stops named instead of
+// resurrecting a deleted package. An activation that starts after the delete
+// takes the new epoch and runs as a normal fresh download — re-downloading a
+// deleted package must work (criterion 3). Purely process-local: nothing is
+// persisted, and a run without the optional cancel dep behaves exactly as
+// before.
+export interface DeletionGate {
+  beginActivation(key: PackageKey): number;
+  isActive(key: PackageKey, activation: number): boolean;
+  markCancelled(key: PackageKey): void;
+}
+
+export interface DeleteDeps {
+  store: DownloadStore;
+  // The pinned-version guard reads zone B through the services/db public API.
+  driver: SqlDriver;
+  // Required: a deletion that skipped the mark could let a concurrent
+  // activation re-create files the caller believes deleted (criterion 4).
+  gate: DeletionGate;
+}
+
+// The named outcomes of deletePackage(): 'refused' is the pinned-version
+// guard of ADR G01.03 §3.4 with its reason carried verbatim in `reason`;
+// 'invalid-input' rejects unsafe ids before any filesystem or db call
+// (criterion 5). A deleted package that had nothing on disk is still
+// 'deleted' — remove() is idempotent, and the already-desired state is not a
+// fault.
+export type DeleteResult =
+  | { status: 'deleted'; key: PackageKey; removedAssetRows: number }
+  | { status: 'refused'; key: PackageKey; reason: 'pinned-by-unfinished-session'; sessionIds: string[] }
+  | { status: 'invalid-input'; key: PackageKey; diagnostics: string[] };
