@@ -5,11 +5,13 @@
 // stopped subscription (the generation check, criterion 3) and a mid-session
 // permission flip (criterion 4). Reverting the service's generation check,
 // its single-subscription discipline or the window cap turns these tests red
-// (implementation-rules 1).
+// (implementation-rules 1). G05.02.c adds the recorded permission requests
+// (separate from `commands`, so the subscription assertions stay untouched).
 import type {
   FixInput,
   GeofenceStop,
   LocationOsPort,
+  LocationPermissionScope,
   LocationPortEvent,
   PermissionState,
 } from './types.ts';
@@ -19,6 +21,9 @@ export class FakeLocationOsPort implements LocationOsPort {
   readonly commands: string[] = [];
   readonly violations: string[] = [];
   permissionState: PermissionState = 'granted';
+  // Every requestPermission the service issued, in order (AC2 of G05.02.c):
+  // scope and the app-config explanation string the request carried.
+  readonly permissionRequests: Array<{ scope: LocationPermissionScope; explanation: string }> = [];
   // The last pushed window, for the cap-and-choice assertions of criterion 2.
   regions: ReadonlyArray<GeofenceStop> = [];
   regionPushes = 0;
@@ -29,6 +34,10 @@ export class FakeLocationOsPort implements LocationOsPort {
 
   permission(): PermissionState {
     return this.permissionState;
+  }
+
+  requestPermission(scope: LocationPermissionScope, explanation: string): void {
+    this.permissionRequests.push({ scope, explanation });
   }
 
   startFixes(sub: number): void {

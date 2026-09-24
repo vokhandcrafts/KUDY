@@ -44,12 +44,23 @@ export const defaultPipelineConfig: PipelineConfig = { dwellMs: 6000 };
 // прымаюцца»): every corrupt shape answers with its own named reason before
 // any gate runs — the accuracy gate cannot see a NaN, and a rejected fix
 // never reaches the window or the dwell accumulators.
-function corruptReason(fix: FixInput, now: number): FixRejectionReason | null {
+//
+// The clock-free shape half is exported: the device adapters (G05.02.c) map
+// OS objects onto FixInput at the boundary and reuse exactly these checks,
+// so a malformed OS fix is rejected there with the same named reason the
+// pipeline would answer — one spelling, no restated validation.
+export function fixShapeReason(fix: FixInput): FixRejectionReason | null {
   if (!Number.isFinite(fix.lat) || !Number.isFinite(fix.lng)) return 'non-finite-coordinate';
   if (fix.lat < -90 || fix.lat > 90) return 'latitude-out-of-range';
   if (typeof fix.accuracy !== 'number' || !Number.isFinite(fix.accuracy)) return 'missing-accuracy';
   if (fix.accuracy < 0) return 'negative-accuracy';
   if (typeof fix.at !== 'number' || !Number.isFinite(fix.at)) return 'non-finite-timestamp';
+  return null;
+}
+
+function corruptReason(fix: FixInput, now: number): FixRejectionReason | null {
+  const shape = fixShapeReason(fix);
+  if (shape !== null) return shape;
   if (fix.at > now) return 'future-timestamp';
   return null;
 }

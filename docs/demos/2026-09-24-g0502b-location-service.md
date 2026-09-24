@@ -19,7 +19,10 @@ const makeStops = (count) => Array.from({ length: count }, (_, i) => ({
 const fix = { lat: 54.4, lng: 18.65, accuracy: 5, at: 1000 };
 const clock = { now: () => 0, schedule: () => () => {} };
 const port = new FakeLocationOsPort();
-const service = new LocationService({ port, clock });
+// G05.02.c made the app-config explanation strings a required dep; this
+// demo passes stand-ins its assertions never print.
+const permissions = { foreground: "fg", background: "bg" };
+const service = new LocationService({ port, clock, permissions });
 service.setMode("active-guide");
 service.setMode("active-guide");
 service.setMode("active-guide");
@@ -81,7 +84,8 @@ const advance = (ms) => {
   now = limit;
 };
 const port = new FakeLocationOsPort();
-const service = new LocationService({ port, clock });
+const permissions = { foreground: "fg", background: "bg" }; // G05.02.c: required dep
+const service = new LocationService({ port, clock, permissions });
 const fixes = [];
 service.onFix((fix) => fixes.push(fix));
 service.setMode("active-guide");
@@ -122,7 +126,9 @@ node --test --experimental-strip-types --test-reporter=spec "services/location/*
 ```
 
 ```output
-ℹ tests 23
-ℹ pass 23
+ℹ tests 29
+ℹ pass 29
 ℹ fail 0
 ```
+
+*(Re-captured 2026-09-25, G05.02.c: the same glob now also runs the six AC2 permission-split tests appended to `service.test.ts` — the count moved from 23 to 29 with zero failures; rule 11.)*
