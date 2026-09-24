@@ -261,10 +261,13 @@ test('criterion 5: dispose with no player and a second dispose are no-ops', () =
 test('criterion 6: the services/audio sources import nothing from core/engine', async () => {
   for (const file of ['types.ts', 'service.ts', 'fake-port.ts', 'service.test.ts']) {
     const source = await readFile(new URL(`./${file}`, import.meta.url), 'utf8');
-    // Import syntax only: prose may name the boundary it guards.
+    // Import syntax only, static and dynamic: prose may name the boundary it
+    // guards.
     for (const quote of ['"', "'"]) {
-      const importPattern = new RegExp(`from ${quote}[^${quote}]*core/engine`);
-      assert.equal(importPattern.test(source), false, `${file} imports core/engine`);
+      for (const form of ['from ', 'import\\(']) {
+        const importPattern = new RegExp(`${form}${quote}[^${quote}]*core/engine`);
+        assert.equal(importPattern.test(source), false, `${file} imports core/engine`);
+      }
     }
   }
 });
