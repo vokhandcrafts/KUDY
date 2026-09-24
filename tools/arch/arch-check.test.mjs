@@ -202,6 +202,45 @@ test('core/ importing controllers/ fails and names core-zone-closed', () => {
   assert.match(output, /core\/engine\.mjs/, 'the violation path must be named');
 });
 
+test('contracts/ importing controllers/ fails and names contracts-zone-closed (review round 1)', () => {
+  const dir = makeSandbox({
+    files: {
+      'contracts/schema.mjs': "import { controller } from '../controllers/sample.mjs';\nexport const use = controller;\n",
+      'controllers/sample.mjs': "export const controller = () => 'c';\n",
+    },
+  });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
+  assert.match(output, /contracts-zone-closed/, 'the violated rule must be named');
+  assert.match(output, /contracts\/schema\.mjs/, 'the violation path must be named');
+});
+
+test('web/ importing controllers/ fails and names web-zone-closed (review round 1)', () => {
+  const dir = makeSandbox({
+    files: {
+      'web/page.mjs': "import { controller } from '../controllers/sample.mjs';\nexport const use = controller;\n",
+      'controllers/sample.mjs': "export const controller = () => 'c';\n",
+    },
+  });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
+  assert.match(output, /web-zone-closed/, 'the violated rule must be named');
+  assert.match(output, /web\/page\.mjs/, 'the violation path must be named');
+});
+
+test('tools/ importing controllers/ fails and names tools-zone-closed (review round 1)', () => {
+  const dir = makeSandbox({
+    files: {
+      'tools/build.mjs': "import { controller } from '../controllers/sample.mjs';\nexport const use = controller;\n",
+      'controllers/sample.mjs': "export const controller = () => 'c';\n",
+    },
+  });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
+  assert.match(output, /tools-zone-closed/, 'the violated rule must be named');
+  assert.match(output, /tools\/build\.mjs/, 'the violation path must be named');
+});
+
 test('corrupt baseline yields a diagnostic, not a crash', () => {
   const dir = makeSandbox({
     files: { 'core/pure.mjs': "export const step = (x) => x;\n" },

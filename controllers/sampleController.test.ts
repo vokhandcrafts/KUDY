@@ -8,6 +8,7 @@ import { test } from 'node:test';
 import { createServices } from './createServices.ts';
 import { createSampleController } from './sampleController.ts';
 import { KEY, storeAt, tempPackage } from '../services/contentRepo/test-fixture.ts';
+import type { PackageStore } from '../services/contentRepo/types.ts';
 
 test('criterion 2: the root with a fake port drives the sample controller end to end', async () => {
   const { root, remove } = tempPackage();
@@ -54,4 +55,43 @@ test('criterion 2: a failing port surfaces as a readiness card, not a crash', as
   assert.equal(loading, false);
   assert.equal(readiness?.status, 'incomplete');
   assert.ok(readiness?.status === 'incomplete' && readiness.missing.length > 0);
+});
+
+test('criterion 2: a superseded refresh never overwrites the newer result', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    // The first refresh is gated on a read that only resolves after the second
+    // refresh has completed; when it finally lands it must be discarded.
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let gated = true;
+    const base = storeAt(root);
+    const gatedStore: PackageStore = {
+      key: KEY,
+      exists: (rel) => base.exists(rel),
+      readFile: (rel) => {
+        if (!gated) return base.readFile(rel);
+        gated = false;
+        return gate.then(() => Promise.reject(new Error('superseded read')));
+      },
+    };
+    const services = createServices({ packageStore: gatedStore });
+    assert.ok(services.contentRepo);
+    const controller = createSampleController(services.contentRepo);
+
+    const first = controller.getState().refresh({ locale: 'be', tier: 'base' });
+    const second = controller.getState().refresh({ locale: 'be', tier: 'base' });
+    await second;
+    assert.equal(controller.getState().readiness?.status, 'ready');
+
+    release();
+    await first;
+    assert.equal(controller.getState().readiness?.status, 'ready');
+    assert.equal(controller.getState().error, null);
+    assert.equal(controller.getState().loading, false);
+  } finally {
+    remove();
+  }
 });
