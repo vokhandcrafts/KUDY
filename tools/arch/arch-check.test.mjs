@@ -17,7 +17,7 @@ const REPO_BASELINE = path.join(REPO_ROOT, 'tools', 'arch', 'baseline.json');
 const CHECK_SCRIPT = path.join(REPO_ROOT, 'tools', 'arch', 'arch-check.mjs');
 
 function runChecker({ cwd, baselineFile }) {
-  const dirs = ['core', 'services', 'contracts', 'tools', 'web', 'app'].filter((d) =>
+  const dirs = ['core', 'services', 'contracts', 'tools', 'web', 'app', 'controllers'].filter((d) =>
     fs.existsSync(path.join(cwd, d)),
   );
   const run = spawnSync(
@@ -56,7 +56,7 @@ test('arch-check wiring is guarded (package.json scripts, npm-test glob, config,
   assert.match(pkg.scripts['arch:check'], /tools\/arch\/arch-check\.mjs/, 'arch:check must invoke tools/arch/arch-check.mjs');
   assert.match(pkg.scripts['arch:check'], /\.dependency-cruiser\.cjs/, 'arch:check must pass the repo config');
   assert.match(pkg.scripts['arch:check'], /tools\/arch\/baseline\.json/, 'arch:check must pass the baseline');
-  assert.match(pkg.scripts['arch:check'], /core services contracts tools web app/, 'arch:check must scan the zone list (app included since G06.09.a)');
+  assert.match(pkg.scripts['arch:check'], /core services contracts tools web app controllers/, 'arch:check must scan the zone list (controllers included since G06.09.b)');
   assert.match(pkg.scripts['arch:baseline'], /tools\/arch\/arch-baseline\.mjs/, 'arch:baseline must invoke tools/arch/arch-baseline.mjs');
   assert.match(pkg.scripts.test, /"?tools\/arch\/\*\.test\.mjs"?/, 'npm test glob must include tools/arch tests');
 
@@ -131,6 +131,75 @@ test('app/ importing services/ directly fails and names app-no-services (19 §4.
   assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
   assert.match(output, /app-no-services/, 'the violated rule must be named');
   assert.match(output, /app\/bad\.mjs/, 'the violation path must be named');
+});
+
+test('app/ importing core/ directly fails and names app-no-core (G06.09.b)', () => {
+  const dir = makeSandbox({
+    files: {
+      'app/bad.mjs': "import { step } from '../core/engine.mjs';\nexport const use = step;\n",
+      'core/engine.mjs': "export const step = (x) => x;\n",
+    },
+  });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
+  assert.match(output, /app-no-core/, 'the violated rule must be named');
+  assert.match(output, /app\/bad\.mjs/, 'the violation path must be named');
+});
+
+test('a controller value-importing services/ fails and names controllers-services-type-only (issue #209 AC1)', () => {
+  const dir = makeSandbox({
+    files: {
+      'controllers/bad.mjs': "import { evaluate } from '../services/repo.mjs';\nexport const use = evaluate;\n",
+      'services/repo.mjs': "export const evaluate = (x) => x;\n",
+    },
+  });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
+  assert.match(output, /controllers-services-type-only/, 'the violated rule must be named');
+  assert.match(output, /controllers\/bad\.mjs/, 'the violation path must be named');
+});
+
+test('controllers that follow the port rules pass: type-only services import, root value import, core import (issue #209 AC1–AC2)', () => {
+  const dir = makeSandbox({
+    files: {
+      'controllers/createServices.ts':
+        "import { evaluate } from '../services/repo.mjs';\nexport const createServices = () => evaluate;\n",
+      'controllers/sample.ts':
+        "import type { Readiness } from '../services/types.ts';\nimport { step } from '../core/engine.mjs';\nexport const use = (r) => Boolean(r) && Boolean(step);\n",
+      'services/repo.mjs': "export const evaluate = (x) => x;\n",
+      'services/types.ts': "export type Readiness = string;\n",
+      'core/engine.mjs': "export const step = (x) => x;\n",
+    },
+  });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.equal(status, 0, `expected exit 0:\n${output}`);
+  assert.match(output, /arch:check: OK/);
+});
+
+test('services/ importing controllers/ fails and names services-zone-closed', () => {
+  const dir = makeSandbox({
+    files: {
+      'services/repo.mjs': "import { controller } from '../controllers/sample.mjs';\nexport const use = controller;\n",
+      'controllers/sample.mjs': "export const controller = () => 'c';\n",
+    },
+  });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
+  assert.match(output, /services-zone-closed/, 'the violated rule must be named');
+  assert.match(output, /services\/repo\.mjs/, 'the violation path must be named');
+});
+
+test('core/ importing controllers/ fails and names core-zone-closed', () => {
+  const dir = makeSandbox({
+    files: {
+      'core/engine.mjs': "import { controller } from '../controllers/sample.mjs';\nexport const step = controller;\n",
+      'controllers/sample.mjs': "export const controller = () => 'c';\n",
+    },
+  });
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'baseline.json') });
+  assert.notEqual(status, 0, `expected nonzero exit:\n${output}`);
+  assert.match(output, /core-zone-closed/, 'the violated rule must be named');
+  assert.match(output, /core\/engine\.mjs/, 'the violation path must be named');
 });
 
 test('corrupt baseline yields a diagnostic, not a crash', () => {
