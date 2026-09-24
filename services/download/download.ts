@@ -1,0 +1,299 @@
+// G04.02.a — services/download activation core: staging → per-file sha256 →
+// atomic rename. The crash chain is ADR G01.03 §3.7: staging sits beside the
+// final directory on the same volume, every file is hash-verified on the fly,
+// the layer becomes final through one rename, and only a complete layer can
+// yield ready — partial never does, and a failed upgrade never deletes the
+// old layer. Readiness is derived from the disk, so no separate ready flag
+// exists to lag behind (§3.2, §3.6). The core is platform-neutral: the
+// filesystem, the byte source and the digest enter as ports (TR-10), and
+// bundle_asset goes through the services/db public API (zone A only).
+import { isSafeSegment, parseLockEntry } from '../contentRepo/inventory.ts';
+import type { Tier } from '../contentRepo/types.ts';
+import { replaceBundleAssets, upsertBundleAsset } from '../db/db.ts';
+import type { BundleAssetRow } from '../db/types.ts';
+import type {
+  ActivateDeps,
+  ActivateInput,
+  ActivationResult,
+  DownloadStore,
+  LayerKey,
+  LockEntry,
+  RebuildDeps,
+  RebuildResult,
+} from './types.ts';
+
+// `09` §7: the staging directory sits beside the final layout under the
+// route, as a sibling of the versions — the library inventory (G04.04.a)
+// already skips it there as "not a version". Same volume as the final layer,
+// so the activation rename is atomic.
+export const STAGING = 'staging';
+
+export function layerPath(key: LayerKey): string {
+  return `bundles/${key.routeId}/${key.version}/${key.locale}/${key.tier}`;
+}
+
+export function stagingLayerPath(key: LayerKey): string {
+  return `bundles/${key.routeId}/${STAGING}/${key.version}/${key.locale}/${key.tier}`;
+}
+
+// `09` §7: identifiers reaching the filesystem are untrusted input and are
+// checked as safe units on input, before any filesystem call (criterion 4).
+export function validateKey(key: LayerKey): string[] {
+  const diagnostics: string[] = [];
+  for (const [name, value] of [
+    ['route_id', key.routeId],
+    ['version', key.version],
+    ['locale', key.locale],
+  ] as const) {
+    if (typeof value !== 'string') diagnostics.push(`${name}#type`);
+    else if (!isSafeSegment(value)) diagnostics.push(`${name}#unsafe-path:${value}`);
+  }
+  if (key.tier !== 'base' && key.tier !== 'extended') diagnostics.push('tier#type');
+  return diagnostics;
+}
+
+// The parsed lock.json — every entry through the shared shape guard. An empty
+// layer cannot be a real layer (a layer carries at least its stops.json), so
+// an empty lock is a fault, not a vacuous success.
+export function parseLock(lock: unknown): { entries: LockEntry[]; diagnostics: string[] } {
+  if (!Array.isArray(lock)) return { entries: [], diagnostics: ['lock.json#type'] };
+  const diagnostics: string[] = [];
+  const entries: LockEntry[] = [];
+  const seen = new Set<string>();
+  lock.forEach((entry, index) => {
+    const checked = parseLockEntry(entry, `lock.json[${index}]`);
+    if (!checked.ok) {
+      diagnostics.push(checked.diagnostic);
+      return;
+    }
+    if (seen.has(checked.entry.path)) {
+      diagnostics.push(`lock.json[${index}]#duplicate:${checked.entry.path}`);
+      return;
+    }
+    seen.add(checked.entry.path);
+    entries.push(checked.entry);
+  });
+  if (diagnostics.length === 0 && entries.length === 0) diagnostics.push('lock.json#empty');
+  return { entries, diagnostics };
+}
+
+function completeRow(key: LayerKey, entry: LockEntry): BundleAssetRow {
+  return {
+    routeId: key.routeId,
+    version: key.version,
+    locale: key.locale,
+    tier: key.tier,
+    path: entry.path,
+    status: 'complete',
+    bytesTotal: entry.bytes,
+    bytesDone: entry.bytes,
+    sha256: entry.sha256,
+  };
+}
+
+// The registry starts from disk presence: a staged file of this layer is
+// 'partial' with its honest size, an absent one is 'pending' (09 §7 — the
+// registry is rebuilt from the disk, it never invents progress).
+async function initialRows(key: LayerKey, entries: LockEntry[], deps: ActivateDeps): Promise<BundleAssetRow[]> {
+  const stagingLayer = stagingLayerPath(key);
+  const rows: BundleAssetRow[] = [];
+  for (const entry of entries) {
+    const size = await deps.store.statSize(`${stagingLayer}/${entry.path}`);
+    rows.push({
+      routeId: key.routeId,
+      version: key.version,
+      locale: key.locale,
+      tier: key.tier,
+      path: entry.path,
+      status: size === null ? 'pending' : 'partial',
+      bytesTotal: entry.bytes,
+      bytesDone: size ?? 0,
+      sha256: entry.sha256,
+    });
+  }
+  return rows;
+}
+
+// Level-2 metadata check (09 §4 — presence and size from lock.json): the
+// repeated-request fast path. The full per-file hash already happened when
+// this layer was first activated; a deeper re-hash on demand is the open/
+// verify level (09 §4), not an activation concern.
+async function layerComplete(deps: ActivateDeps, finalLayer: string, entries: LockEntry[]): Promise<boolean> {
+  for (const entry of entries) {
+    if ((await deps.store.statSize(`${finalLayer}/${entry.path}`)) !== entry.bytes) return false;
+  }
+  return true;
+}
+
+function remainingMissing(entries: LockEntry[], from: number, kept: Set<string>): string[] {
+  return entries.slice(from).map((entry) => entry.path).filter((path) => !kept.has(path));
+}
+
+// The shared request prologue: build the layer key and validate every input
+// unit — segments and lock entries — before either entry point touches the
+// filesystem (criterion 4).
+function parseActivationInput(input: ActivateInput): {
+  key: LayerKey;
+  entries: LockEntry[];
+  diagnostics: string[];
+  invalid: boolean;
+} {
+  const key: LayerKey = { routeId: input.routeId, version: input.version, locale: input.locale, tier: input.tier };
+  const diagnostics = validateKey(key);
+  const lock = parseLock(input.lock);
+  diagnostics.push(...lock.diagnostics);
+  return { key, entries: lock.entries, diagnostics, invalid: diagnostics.length > 0 };
+}
+
+/**
+ * Verify and activate one layer (19 §3.5 activate()). Idempotent: a repeated
+ * request for a complete layer returns complete with zero fetches; every
+ * failure category leaves the old layer untouched and partial never counts as
+ * ready (ADR G01.03 §3.7).
+ */
+export async function activate(input: ActivateInput, deps: ActivateDeps): Promise<ActivationResult> {
+  const { key, entries, diagnostics, invalid } = parseActivationInput(input);
+  if (invalid) return { status: 'invalid-input', key, diagnostics };
+
+  const finalLayer = layerPath(key);
+  const stagingLayer = stagingLayerPath(key);
+  const totalBytes = entries.reduce((sum, entry) => sum + entry.bytes, 0);
+
+  // Trash of a replace that crashed between its two renames — unambiguous
+  // garbage, removed before anything else reads the layout.
+  await deps.store.remove(`${stagingLayer}.old`);
+
+  await replaceBundleAssets(deps.driver, key, await initialRows(key, entries, deps));
+
+  if (await layerComplete(deps, finalLayer, entries)) {
+    await replaceBundleAssets(deps.driver, key, entries.map((entry) => completeRow(key, entry)));
+    await deps.store.remove(stagingLayer);
+    return { status: 'complete', key, verified: entries.length, bytes: totalBytes, fetched: 0, diagnostics: [] };
+  }
+
+  // Resume pass (criterion 2): staging files that hash-verify are kept and
+  // never re-fetched; a stale or .part leftover is ambiguous (ADR G01.03
+  // §3.7) and is re-fetched below.
+  const kept = new Set<string>();
+  let keptBytes = 0;
+  for (const entry of entries) {
+    const bytes = await deps.store.readFile(`${stagingLayer}/${entry.path}`);
+    if (bytes === null || bytes.length !== entry.bytes) continue;
+    if ((await deps.sha256(bytes)) !== entry.sha256) continue;
+    kept.add(entry.path);
+    keptBytes += entry.bytes;
+  }
+
+  const needed = totalBytes - keptBytes;
+  const free = await deps.store.freeBytes();
+  if (free !== null && free < needed) {
+    return { status: 'insufficient-space', key, needed, free };
+  }
+
+  // The staged layer and the final layer's parent exist before any write:
+  // the per-file writes land inside staging, and the activation rename needs
+  // the destination parent in place (rename moves, it does not create).
+  await deps.store.ensureDir(stagingLayer);
+  await deps.store.ensureDir(finalLayer.slice(0, finalLayer.lastIndexOf('/')));
+
+  let fetched = 0;
+  for (const [index, entry] of entries.entries()) {
+    if (kept.has(entry.path)) {
+      await upsertBundleAsset(deps.driver, completeRow(key, entry));
+      continue;
+    }
+    let bytes: Uint8Array;
+    try {
+      bytes = await deps.fetch(entry.path);
+    } catch (error) {
+      return {
+        status: 'partial',
+        key,
+        missing: remainingMissing(entries, index, kept),
+        fetched,
+        diagnostics: [
+          `${entry.path}#fetch-failed`,
+          // The port's message is diagnostic-safe by contract (types.ts) and
+          // names the grant-level reason; surfaced, never swallowed.
+          error instanceof Error && error.message !== '' ? error.message : 'fetch#unknown-error',
+        ],
+      };
+    }
+    fetched += 1;
+    if (bytes.length !== entry.bytes) {
+      return {
+        status: 'hash-mismatch',
+        key,
+        paths: [entry.path],
+        fetched,
+        diagnostics: [`${entry.path}#size-mismatch`],
+      };
+    }
+    if ((await deps.sha256(bytes)) !== entry.sha256) {
+      return {
+        status: 'hash-mismatch',
+        key,
+        paths: [entry.path],
+        fetched,
+        diagnostics: [`${entry.path}#sha256-mismatch`],
+      };
+    }
+    // Write through the .part + rename idiom (ADR G01.03 §3.7): a crash
+    // mid-write leaves an ambiguous .part that the next run discards and
+    // re-fetches — never a truncated file that looks complete.
+    const slash = entry.path.lastIndexOf('/');
+    if (slash !== -1) await deps.store.ensureDir(`${stagingLayer}/${entry.path.slice(0, slash)}`);
+    await deps.store.writeFile(`${stagingLayer}/${entry.path}.part`, bytes);
+    await deps.store.rename(`${stagingLayer}/${entry.path}.part`, `${stagingLayer}/${entry.path}`);
+    await upsertBundleAsset(deps.driver, completeRow(key, entry));
+  }
+
+  // Every file verified — activation is one rename. A final layer that
+  // exists here failed the level-2 check above (a damaged install being
+  // repaired): it moves into staging trash first, so a crash between the two
+  // renames leaves the layer old or new, never a mix (criterion 3).
+  if (await deps.store.exists(finalLayer)) {
+    await deps.store.rename(finalLayer, `${stagingLayer}.old`);
+  }
+  await deps.store.rename(stagingLayer, finalLayer);
+  await deps.store.remove(`${stagingLayer}.old`);
+
+  return { status: 'complete', key, verified: entries.length, bytes: totalBytes, fetched, diagnostics: [] };
+}
+
+/**
+ * Rebuild the bundle_asset registry of a layer by re-hashing the final layer
+ * on disk (09 §7: the registry is derived state). Verified files read as
+ * complete, present-but-wrong bytes as partial with their honest size,
+ * absent files as pending.
+ */
+export async function rebuildBundleAssets(input: ActivateInput, deps: RebuildDeps): Promise<RebuildResult> {
+  const { key, entries, diagnostics, invalid } = parseActivationInput(input);
+  if (invalid) return { status: 'invalid-input', key, diagnostics };
+
+  const finalLayer = layerPath(key);
+  const rows: BundleAssetRow[] = [];
+  for (const entry of entries) {
+    const bytes = await deps.store.readFile(`${finalLayer}/${entry.path}`);
+    let status: BundleAssetRow['status'] = 'pending';
+    let bytesDone = 0;
+    if (bytes !== null) {
+      bytesDone = bytes.length;
+      status =
+        bytes.length === entry.bytes && (await deps.sha256(bytes)) === entry.sha256 ? 'complete' : 'partial';
+    }
+    rows.push({
+      routeId: key.routeId,
+      version: key.version,
+      locale: key.locale,
+      tier: key.tier,
+      path: entry.path,
+      status,
+      bytesTotal: entry.bytes,
+      bytesDone,
+      sha256: entry.sha256,
+    });
+  }
+  await replaceBundleAssets(deps.driver, key, rows);
+  return { status: 'rebuilt', key, rows };
+}

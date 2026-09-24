@@ -1,16 +1,19 @@
-// G05.01.a + G05.01.b — the pure reducer: session lifecycle and the
-// AccessReady trust boundary (docs/agent-tasks/run/G05.01.a.md), then the
+// G05.01.a + G05.01.b + G05.01.c — the pure reducer: session lifecycle and the
+// AccessReady trust boundary (docs/agent-tasks/run/G05.01.a.md), the
 // autotrigger conditions, the one-cell queue and the P01 progress rules
-// (docs/agent-tasks/run/G05.01.b.md).
+// (docs/agent-tasks/run/G05.01.b.md), then the audio-ownership transitions —
+// guide/moment playing variants, tagged callbacks, live pause and the 10-minute
+// focus threshold (docs/agent-tasks/run/G05.01.c.md, ADR G01.02 §3).
 //
 // Pure by contract (09 §6.1): the clock is injected (`now`), there is no I/O
 // and no React Native import — the same input always gives the same state and
 // the same commands. Effects exist only as commands for the controller.
 //
-// Slice boundary: audio ownership (guide/moment transitions, tagged
-// callbacks, focus) arrives with G05.01.c. Those union members are accepted
-// by the type but ignored here without mutating a field; in particular a
-// session Pause/End does not stop the launch yet — G05.01.c criterion 5.
+// Slice boundary: the real player is G05.03; the engine only mirrors it and
+// proposes commands. Moment tokens are minted by the controller (ADR G01.02
+// §3.2) — the engine validates their shape and echo, it never mints one. In
+// Idle the moment playback lives in the controller's single player, so the
+// engine has no mirror for it there (ADR §3.8).
 //
 // The executable reference for the accepted semantics is the documentation
 // model docs/run-model/run-model.mjs (frozen; see its README) — this file
@@ -24,6 +27,7 @@ import {
   storyAccessible,
   storyTierOf,
   storiesOf,
+  type PlayToken,
   type RunSessionState,
   type RunState,
   type StoryId,
@@ -32,9 +36,9 @@ import {
 
 // Only values from services/config (19 §3.1) — no functions, no clock. The
 // accepted numbers live in 09 invariants 5 and 8 and the queue paragraph;
-// G05.01.b consumes the freshness window and the queue distance multiplier
-// (the immediate trigger sits in the radius itself, multiplier 1 — 11 §5.1.5),
-// G05.01.c will consume the focus window.
+// G05.01.b consumed the freshness window and the queue distance multiplier,
+// G05.01.c consumes the focus window (09 invariant 5 — the single 10-minute
+// threshold for every launch owner, ADR G01.02 §3.7).
 export interface EngineConfig {
   fixFreshnessMs: number;
   queueDistanceMultiplier: number;
@@ -66,10 +70,21 @@ export function step(
   }
   if (s.phase === 'Ended') {
     // Ended never returns to Active (09 invariant 9); a repeat walk is a fresh
-    // session from the initial state. Guide-launch completions cannot exist
-    // here — Pause/End stop guide audio from G05.01.c on, and in this slice
-    // every event is still ignored without mutating a field.
-    return { state: s, commands: [] };
+    // session from the initial state. Session-lifecycle events have no live
+    // addressee here — but the physical player outlives the session (ADR
+    // G01.02 §3.4/§3.8): a moment launch keeps sounding, so its tagged
+    // callbacks still reach the engine, while every late guide callback is
+    // rejected by the token rules.
+    const playerEvent =
+      event.type === 'AudioFinished' ||
+      event.type === 'AudioFailed' ||
+      event.type === 'MomentFinished' ||
+      event.type === 'UserPausedAudio' ||
+      event.type === 'UserStoppedAudio' ||
+      event.type === 'FocusLoss' ||
+      event.type === 'FocusRegain' ||
+      event.type === 'ResumeAudio';
+    if (!playerEvent) return { state: s, commands: [] };
   }
 
   const commands: RunCommand[] = [];
@@ -81,8 +96,11 @@ export function step(
     case 'Pause':
     case 'End': {
       // Invariant 9: Pause and End clear queued — the displaced stop keeps
-      // only manual access — and release the geofences. Stopping guide audio
-      // (and the moment-owner exception) is G05.01.c.
+      // only manual access — and release the geofences. Only the guide launch
+      // is session property and stops (ADR G01.02 §3.4/§3.8): a moment keeps
+      // sounding through Pause and End, and its resume never restores the
+      // session.
+      if (s.playing && s.playing.owner === 'guide') stopAudio(s, commands);
       retireQueue(s);
       s.autoplaySuspended = true;
       s.phase = event.type === 'End' ? 'Ended' : 'Paused';
@@ -138,6 +156,104 @@ export function step(
       }
       break;
     }
+    case 'PlayMoment': {
+      // ADR G01.02 §3.6 (P02): an explicit Moment play takes the single
+      // player, stops the guide by command (never finished), retires the
+      // queue to auto_fired and suspends automation until «Працягнуць гід».
+      // The controller mints the moment token (§3.2); a malformed launch is
+      // refused, not guessed. The case is reachable from Active and Paused
+      // only — Idle has no engine mirror (§3.8), and after End the event is
+      // not a live player callback.
+      const launch = momentLaunchOf(event);
+      if (launch) {
+        stopAudio(s, commands);
+        retireQueue(s);
+        s.autoplaySuspended = true;
+        s.playing = { owner: 'moment', ...launch, paused: false };
+        commands.push({
+          type: 'PlayMoment',
+          momentId: launch.momentId,
+          token: tokenOf(s, s.playing),
+        });
+      }
+      break;
+    }
+    case 'MomentFinished': {
+      // ADR G01.02 §3.5: accepting the current moment token only frees the
+      // player — a moment launch never credits guide history, never starts
+      // the queue and never restores guide automation.
+      if (s.playing?.owner !== 'moment' || !tokenMatches(s, event.token)) break;
+      s.playing = null;
+      break;
+    }
+    case 'AudioFailed': {
+      // ADR G01.02 §3.5 (story_play_failed): a launch that never sounded is
+      // not heard and does not start the queue; automation suspends — the
+      // next sound never starts by itself after a failure.
+      if (!tokenMatches(s, event.token)) break;
+      s.playing = null;
+      s.focusLostAt = null;
+      s.autoplaySuspended = true;
+      break;
+    }
+    case 'UserPausedAudio': {
+      // ADR G01.02 §3.4/§3.7: a manual pause is a live pause — the same token
+      // and offset live on with no threshold; automation stays suspended
+      // until an explicit human action.
+      if (s.playing) s.playing.paused = true;
+      s.autoplaySuspended = true;
+      break;
+    }
+    case 'UserStoppedAudio': {
+      // ADR G01.02 §3.4: a manual stop closes the launch; the stop returns to
+      // its computed status and automation stays suspended.
+      stopAudio(s, commands);
+      s.autoplaySuspended = true;
+      break;
+    }
+    case 'FocusLoss': {
+      // ADR G01.02 §3.4: a focus loss is a physical interruption, not
+      // finished — the launch of any owner survives as a live pause and
+      // focus_lost_at arms the single 10-minute threshold. The event is a
+      // physical player event: it carries no token and is never rejected.
+      if (s.playing) s.playing.paused = true;
+      s.focusLostAt = now;
+      s.autoplaySuspended = true;
+      break;
+    }
+    case 'FocusRegain': {
+      // ADR G01.02 §3.4/§3.7: nothing sounds by itself. Within the window the
+      // launch stays a live pause (ResumeAudio continues it); past the
+      // threshold the launch is closed — a later listen is a fresh launch
+      // with a new token (09 invariant 5).
+      if (
+        s.playing &&
+        s.focusLostAt !== null &&
+        now - s.focusLostAt > config.focusRegainWindowMs
+      ) {
+        s.playing = null;
+      }
+      s.focusLostAt = null;
+      break;
+    }
+    case 'ResumeAudio': {
+      // ADR G01.02 §3.5: accepted only for the live pause of the current
+      // token; a stale or closed token is a refused command, not a resume.
+      // A guide resume lifts the suspension; a moment resume never touches
+      // the session flag that only «Працягнуць гід» clears after Play Moment.
+      if (!s.playing || !s.playing.paused || !tokenMatches(s, event.token)) break;
+      s.playing.paused = false;
+      if (s.playing.owner === 'guide') s.autoplaySuspended = false;
+      commands.push({ type: 'ResumeAudio', token: tokenOf(s, s.playing) });
+      break;
+    }
+    case 'GuideResume': {
+      // ADR G01.02 §3.6.4: «Працягнуць гід» is the single way back to guide
+      // automation; it sounds nothing by itself — the next trigger runs the
+      // general conditions, and the displaced stop is already in auto_fired.
+      s.autoplaySuspended = false;
+      break;
+    }
     default:
       break;
   }
@@ -162,6 +278,17 @@ function startSession(event: Extract<RunEvent, { type: 'Start' }>): RunSessionSt
   if (accessible.length !== event.accessibleStopIds.length) {
     throw new RangeError('accessibleStopIds must reference stops of the pinned package');
   }
+  // ADR G01.02 §3.3/§3.8: Start never stops a sounding moment and never mints
+  // a guide launch for it — the controller injects the actual player state
+  // (the moment variant) into the fresh session; autoplay then waits for the
+  // player to become free (the occupancy check of the autotrigger). Only a
+  // moment can hold the player here: guide playback without a live session is
+  // exactly the moment owner.
+  if (event.playingNow !== undefined && !isMomentLaunch(event.playingNow)) {
+    throw new RangeError(
+      'playingNow must be a moment launch: { momentId, storyId, seq: positive integer }',
+    );
+  }
   return {
     phase: 'Active',
     sessionId: event.sessionId,
@@ -174,7 +301,15 @@ function startSession(event: Extract<RunEvent, { type: 'Start' }>): RunSessionSt
     tierAvailable: [...event.tier],
     heard: [],
     autoFired: [],
-    playing: null,
+    playing: event.playingNow
+      ? {
+          owner: 'moment',
+          momentId: event.playingNow.momentId,
+          storyId: event.playingNow.storyId,
+          seq: event.playingNow.seq,
+          paused: false,
+        }
+      : null,
     queued: null,
     autoplaySuspended: false,
     lastFix: null,
@@ -183,10 +318,63 @@ function startSession(event: Extract<RunEvent, { type: 'Start' }>): RunSessionSt
   };
 }
 
+// ADR G01.02 §3.2: a moment launch needs no session and no durable zone — the
+// process-wide monotonic counter lives in the controller that mints moment
+// tokens; the engine only validates the shape it is handed.
+function isMomentLaunch(launch: {
+  momentId: string;
+  storyId: string;
+  seq: number;
+}): boolean {
+  if (!launch) return false;
+  if (typeof launch.momentId !== 'string' || launch.momentId.length === 0) return false;
+  if (typeof launch.storyId !== 'string' || launch.storyId.length === 0) return false;
+  return Number.isInteger(launch.seq) && launch.seq > 0;
+}
+
 // Add-only semantics of the monotonic sets (ADR G01.01 §4.2): an element is
 // never removed and a repeat adds nothing.
 function addOnce<T>(list: T[], id: T): void {
   if (!list.includes(id)) list.push(id);
+}
+
+// ADR G01.02 §3.2: the guide token IS the accepted (session_id, play_id) pair;
+// the moment token carries the controller's moment_id and its process-wide
+// counter. The engine echoes tokens, it never mints one.
+function tokenOf(s: RunSessionState, launch: NonNullable<RunSessionState['playing']>): PlayToken {
+  return launch.owner === 'guide'
+    ? { kind: 'guide', ref: s.sessionId, seq: launch.playId }
+    : { kind: 'moment', ref: launch.momentId, seq: launch.seq };
+}
+
+// Single rejection rule (ADR G01.02 §3.5): a callback tagged with a token
+// that does not match the current physical launch is ignored entirely — no
+// heard credit, no stop, no queue start.
+function tokenMatches(s: RunSessionState, token: PlayToken | undefined): boolean {
+  if (!s.playing || !token) return false;
+  const current = tokenOf(s, s.playing);
+  return token.kind === current.kind && token.ref === current.ref && token.seq === current.seq;
+}
+
+// Stopping is a command over the current token (ADR G01.02 §3.2); the token
+// of a stopped launch is dead from here on — its late callbacks are rejected
+// by the token rules.
+function stopAudio(s: RunSessionState, commands: RunCommand[]): void {
+  if (s.playing) commands.push({ type: 'StopAudio', token: tokenOf(s, s.playing) });
+  s.playing = null;
+  s.focusLostAt = null;
+}
+
+// The moment launch of a PlayMoment event: the minted token must be a moment
+// token of exactly this moment (ADR G01.02 §3.2), and the launch shape must
+// be complete. Anything else is a refusal — the engine never guesses.
+function momentLaunchOf(
+  event: Extract<RunEvent, { type: 'PlayMoment' }>,
+): { momentId: string; storyId: string; seq: number } | null {
+  const token = event.token;
+  if (!token || token.kind !== 'moment' || token.ref !== event.momentId) return null;
+  const launch = { momentId: event.momentId, storyId: event.storyId, seq: token.seq };
+  return isMomentLaunch(launch) ? launch : null;
 }
 
 // Invariant 9: the queued stop leaves the queue into auto_fired — the
@@ -297,16 +485,17 @@ function playGuide(
 ): void {
   const stop = findStop(s, stopId);
   if (!stop) return; // unreachable: every caller resolved the stop first
-  if (s.playing) commands.push({ type: 'StopAudio' });
+  stopAudio(s, commands);
   if (automatic) addOnce(s.autoFired, stopId);
   s.playSeq += 1;
-  s.playing = { owner: 'guide', stopId, storyId, playId: s.playSeq };
+  s.playing = { owner: 'guide', stopId, storyId, playId: s.playSeq, paused: false };
   commands.push({
     type: 'PlayStory',
     storyId,
     path: `${s.locale}/${storyTierOf(stop, storyId)}/audio/${storyId}.m4a`,
     sessionId: s.sessionId,
     playId: s.playSeq,
+    token: tokenOf(s, s.playing),
   });
 }
 
