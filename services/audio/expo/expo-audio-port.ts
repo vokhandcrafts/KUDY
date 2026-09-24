@@ -77,8 +77,14 @@ export function createExpoAudioPlayerPort(options?: ExpoAudioPlayerPortOptions):
   return {
     play(source: AudioSource): void {
       // The previous physical player is removed whole — a replaced source
-      // has no status left to report.
+      // has no status left to report. The fields drop before creation, so
+      // a synchronous throw from createAudioPlayer leaves the port with no
+      // player: pause()/resume() no-op and snapshot() reads an idle state
+      // instead of touching the removed player's methods.
       player?.remove();
+      player = null;
+      sourceKey = null;
+      latest = null;
       const created = createAudioPlayer({ uri: source.path }, { updateInterval: updateIntervalMs });
       created.addListener('playbackStatusUpdate', (status: AudioStatus) => {
         latest = status;
