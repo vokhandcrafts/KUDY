@@ -252,9 +252,15 @@ test('criterion 2: 503 entitlement_unavailable retries honouring Retry-After, th
 });
 
 test('criterion 2: when the bounded retries are spent the outcome stays retryable, never a refusal', async () => {
-  const { transport, calls } = recordingTransport(() =>
-    errResponse(503, 'entitlement_unavailable', { 'retry-after': '3' }),
-  );
+  let call = 0;
+  const { transport, calls } = recordingTransport(() => {
+    call += 1;
+    // Distinct headers: the final 503's own Retry-After must be the one the
+    // spent outcome carries (the reviewer's probe caught the masked case).
+    if (call === 1) return errResponse(503, 'entitlement_unavailable', { 'retry-after': '5' });
+    if (call === 2) return errResponse(503, 'entitlement_unavailable', { 'retry-after': '40' });
+    return errResponse(503, 'entitlement_unavailable', { 'retry-after': '99' });
+  });
   const { deps, delays } = rig(transport, { policy: { maxRetries: 2 } });
 
   const outcome = await requestGrant({ ...KEY, lock: lockFor(['stops.json']) }, deps);
@@ -263,8 +269,8 @@ test('criterion 2: when the bounded retries are spent the outcome stays retryabl
   const unavailable = outcome as Extract<GrantOutcome, { kind: 'unavailable' }>;
   assert.equal(unavailable.retriesUsed, 2);
   // The final answer's own Retry-After is honoured for the next wait.
-  assert.equal(unavailable.retryAfterMs, 3000);
-  assert.deepEqual(delays, [3000, 3000]);
+  assert.equal(unavailable.retryAfterMs, 99_000);
+  assert.deepEqual(delays, [5000, 40_000]);
   assert.equal(calls.length, 3);
 });
 
@@ -432,6 +438,50 @@ test('criterion 4: offline mid-download keeps the partial state; a retry complet
     assert.equal(getBundleAssets(driver, KEY).every((row) => row.status === 'complete'), true);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('criterion 4: a local credential failure is a named unknown outcome, not a masked offline', async () => {
+  const { transport, calls } = recordingTransport(() => okResponse(['stops.json']));
+  const { deps, delays } = rig(transport, {
+    credential: async () => {
+      throw new Error('secure-store locked');
+    },
+  });
+  const outcome = await requestGrant({ ...KEY, lock: lockFor(['stops.json']) }, deps);
+  assert.deepEqual(outcome, { kind: 'unknown', diagnostics: ['grant-credential#unavailable'] });
+  // No transport call, no retry wait: the local failure answered before both.
+  assert.deepEqual(calls, []);
+  assert.deepEqual(delays, []);
+});
+
+test('criterion 1: a grant that silently answers a subset of the requested portion fails closed', async () => {
+  const { transport, calls } = recordingTransport((call) =>
+    okResponse(call.body.paths.slice(1), 600_000, (p) => `/private/${p}`),
+  );
+  const { deps } = rig(transport);
+  const outcome = await requestGrant({ ...KEY, lock: lockFor(['stops.json', 'audio/a.m4a']) }, deps);
+  assert.equal(outcome.kind, 'unknown');
+  assert.deepEqual((outcome as Extract<GrantOutcome, { kind: 'unknown' }>).diagnostics, [
+    'grant-response#coverage:1/2',
+  ]);
+  assert.equal(calls.length, 1);
+});
+
+test('criterion 5: a rejecting byte transfer is answered by the named redacted line, never the adapter message', async () => {
+  const { transport } = recordingTransport((call) => okResponse(call.body.paths, 600_000, (p) => `/private/${p}`));
+  const fetchBytes: GrantFetchDeps['fetchBytes'] = async (url) => {
+    throw new Error(`request to ${url}?sig=SECRET failed: socket hang up`);
+  };
+  const { deps } = sourceRig(transport, fetchBytes);
+  const fetch = createGrantFetchSource({ key: KEY, entries: parseLock(lockFor(['stops.json'])).entries }, deps);
+  try {
+    await fetch('stops.json');
+    assert.fail('the fetch must reject');
+  } catch (error) {
+    // The adapter message carried the signed URL and a secret-like query —
+    // the port replaces it with the named line (criterion 5).
+    assert.equal((error as Error).message, 'grant-fetch#transfer-failed');
   }
 });
 

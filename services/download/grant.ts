@@ -242,12 +242,12 @@ export function parseGrantSuccess(body: unknown): { urls: GrantUrls } | { diagno
   return { urls: { lockUrl, urls } };
 }
 
-// Retry-After arrives in seconds on this endpoint; an absent or unparsable
-// header falls back to the policy default — the wait is honoured either way
-// (criterion 2).
+// Retry-After arrives in seconds on this endpoint; an absent, empty or
+// unparsable header falls back to the policy default — the wait is honoured
+// either way (criterion 2).
 function parseRetryAfter(headers: Record<string, string>, fallbackMs: number): number {
   const raw = headers['retry-after'];
-  if (raw === undefined) return fallbackMs;
+  if (raw === undefined || raw.trim() === '') return fallbackMs;
   const seconds = Number(raw);
   return Number.isFinite(seconds) && seconds >= 0 ? seconds * 1000 : fallbackMs;
 }
@@ -318,25 +318,48 @@ async function grantOnce(key: LayerKey, paths: string[], deps: ResolvedDeps): Pr
   let retriesUsed = 0;
   let retryAfterMs = deps.policy.defaultRetryAfterMs;
   for (;;) {
+    let bearer: string;
+    try {
+      bearer = await deps.credential();
+    } catch {
+      // A local credential failure is not a network answer: named and fail
+      // closed, still without an exception to the caller (criterion 4).
+      deps.diagnostic('grant:credential-unavailable');
+      return { kind: 'unknown', diagnostics: ['grant-credential#unavailable'] };
+    }
     let response: GrantHttpResponse;
     try {
-      response = await deps.transport({ body, bearer: await deps.credential() });
+      response = await deps.transport({ body, bearer });
     } catch {
       deps.diagnostic('grant:offline');
       return { kind: 'offline' };
     }
-    if (
-      response.status === 503 &&
-      responseCode(response.body) === 'entitlement_unavailable' &&
-      retriesUsed < deps.policy.maxRetries
-    ) {
+    if (response.status === 503 && responseCode(response.body) === 'entitlement_unavailable') {
+      // The header of every 503 is parsed — including the final one, so the
+      // spent outcome carries its own wait for the next attempt.
       retryAfterMs = parseRetryAfter(response.headers, deps.policy.defaultRetryAfterMs);
-      retriesUsed += 1;
-      deps.diagnostic(`grant:retry entitlement_unavailable delay_ms=${retryAfterMs}`);
-      await deps.delay(retryAfterMs);
-      continue;
+      if (retriesUsed < deps.policy.maxRetries) {
+        retriesUsed += 1;
+        deps.diagnostic(`grant:retry entitlement_unavailable delay_ms=${retryAfterMs}`);
+        await deps.delay(retryAfterMs);
+        continue;
+      }
     }
-    return mapGrantAnswer(response, { retryAfterMs, retriesUsed }, deps);
+    const outcome = mapGrantAnswer(response, { retryAfterMs, retriesUsed }, deps);
+    if (outcome.kind === 'granted') {
+      // The grant mirrors the requested portion (09 §5); a silent subset is
+      // outside the contract — fail closed here, not mid-activation.
+      const covered = new Set(outcome.urls.urls.map((granted) => granted.path));
+      const missing = paths.filter((p) => !covered.has(p)).length;
+      if (missing > 0) {
+        deps.diagnostic('grant:partial-coverage');
+        return {
+          kind: 'unknown',
+          diagnostics: [`grant-response#coverage:${paths.length - missing}/${paths.length}`],
+        };
+      }
+    }
+    return outcome;
   }
 }
 
@@ -447,7 +470,14 @@ export function createGrantFetchSource(
   async function fetchOnce(path: string): Promise<Uint8Array | 'url_expired'> {
     const granted = urlOf(path);
     if (granted === undefined) throw new Error('grant-fetch#grant-missing-url');
-    const response = await deps.fetchBytes(granted.url);
+    let response: { status: number; body: Uint8Array | null };
+    try {
+      response = await deps.fetchBytes(granted.url);
+    } catch {
+      // Fetch adapters typically put the URL into rejection messages —
+      // replace it with the named redacted line (criterion 5).
+      throw new Error('grant-fetch#transfer-failed');
+    }
     if (response.status === 200 && response.body !== null) return response.body;
     const code = responseCode(decodeJsonBody(response.body));
     if (response.status === 403 && code === 'url_expired') return 'url_expired';
