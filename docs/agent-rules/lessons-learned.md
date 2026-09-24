@@ -76,7 +76,7 @@ restating. A "verbatim" claim is a testable claim, and tests fail.
 Half the repo's PRs shipped a hand-typed number or status that was already wrong.
 
 - PR #120: Checks line "218/218" while the delta made it 221; PR body repeated it.
-- PR #116: results doc "151 pass/0 fail" against actual 150/1; one doc said 24 tests,
+- PR #116: results doc claimed a green suite against actual 150/1; one doc said 24 tests,
   the file had 23, HEAD had 29.
 - PR #118: results doc said 6 tests after the guard test made it 7.
 - PR #98: link-check table claimed "36 resolved" while the embedded output said 18.
