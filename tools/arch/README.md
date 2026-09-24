@@ -5,7 +5,7 @@
 [19 §2 + §4.2](../../docs/architecture/19_class_and_module_map.md) — пры дапамозе
 dependency-cruiser (пін-точна ў `devDependencies`; канфіг —
 [`.dependency-cruiser.cjs`](../../.dependency-cruiser.cjs)). Спіс зон на скан:
-`core services contracts tools web app`. Правілы конфігу:
+`core services contracts tools web app controllers`. Правілы конфігу:
 
 | Правіла | Кананічная крыніца | Сэнс |
 |---|---|---|
@@ -13,14 +13,17 @@ dependency-cruiser (пін-точна ў `devDependencies`; канфіг —
 | `core-test-no-npm`, `core-test-no-zones` | матрыца, радок `core/` | тэсты ў `core/` выключаныя толькі для `node:*` (`node:test`, `node:assert`, чытанне фікстур); npm і іншыя зоны — таксама не |
 | `services-zone-closed` | матрыца, радок `services/`; 19 §4.2 | `services/` не імпартуе `web/`, `tools/`, `spikes/`, `app/`, `controllers/` |
 | `contracts-zone-closed` | матрыца, радок `contracts/` | `contracts/` — толькі адносныя імпарты, ніякай зоны дадатку |
-| `web-zone-closed` | матрыца, радок `web/` | `web/` не імпартуе `core/`, `services/`, `tools/`, `spikes/` |
+| `web-zone-closed` | матрыца, радок `web/` | `web/` не імпартуе `core/`, `services/`, `tools/`, `spikes/`, `app/`, `controllers/` |
 | `app-no-services` | 19 §4.2 (правіла краю); G06.09.a | `app/` не імпартуе `services/` напрамую — экраны дасягаюць стану і эфектаў толькі праз кантролеры |
-| `tools-zone-closed` | матрыца, радок `tools/`; 19 §2.4 | `tools/` — асобны працэс без агульнага коду з дадаткам; не імпартуе `core/`, `services/`, `web/`, `spikes/` |
+| `app-no-core` | 19 §4.2 (правіла краю); G06.09.b | `app/` не імпартуе `core/` напрамую — разам з `app-no-services` гэта край «экраны імпартуюць толькі `controllers/` (плюс React/Expo)» |
+| `controllers-services-type-only` | 19 §2.2, §2.6; issue #209 AC1 | `controllers/` бярэ `services/` тыпамі (`import type`) — value-імпарт і канструяванне дазволеныя толькі кампазіцыйнаму кораню `controllers/createServices.ts` і тэстам (яны падключаюць фэйкі). type-only імпарты не ўваходзяць у граф пакуль `tsPreCompilationDeps` выключаны (яго ўключэнне давала б 2 новыя no-cycles запісы ў `web/lib/i18n` — свядома не ўключалася); дазвол `dependencyTypesNot: ['type-only']` трымае правіла карэктным, калі гэта зменіцца |
+| `tools-zone-closed` | матрыца, радок `tools/`; 19 §2.4 | `tools/` — асобны працэс без агульнага коду з дадаткам; не імпартуе `core/`, `services/`, `web/`, `spikes/`, `app/`, `controllers/` |
 | `no-cycles` | 19 §4.2 | цыклы забароненыя ўсярэдзіне і праз усе правераныя зоны |
 
-Зона `controllers/` правілаў яшчэ не мае — іх уводзіць той PR, што стварае
-першы кантролер (`app/` мае `app-no-services` з G06.09.a). Глыбіня імпартаў
-(`deep imports`) і скан `spikes/` з `docs/run-model` — наўмысна па-за межамі.
+Правілы зоны `controllers/` (`app-no-core`, `controllers-services-type-only`)
+увайшлі разам з першым кантролерам-узорам і кампазіцыйным коранем G06.09.b;
+`app/` мае `app-no-services` з G06.09.a. Глыбіня імпартаў (`deep imports`) і
+скан `spikes/` з `docs/run-model` — наўмысна па-за межамі.
 
 ## Базавая лінія
 
