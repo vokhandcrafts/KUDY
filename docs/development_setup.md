@@ -6,11 +6,11 @@
 
 | Інструмент | Версія | Заўвага |
 |---|---|---|
-| Node.js | 22 LTS (пін — ADR [G00.04-stack-baseline](architecture/decisions/G00.04-stack-baseline.md) §6; афіцыйная падлога стэку — Node `>= 20.19.4`, поле `engines` react-native `0.81.5`) | `engines` у `package.json`: `>=22.12.0 <23`; Node 24 / npm 11 правераныя практыкай (чысты `npm ci`, doctor 18/18), на іх npm паказвае папярэджанне EBADENGINE, не памылку |
-| npm | `10.9.8` | `engines`: `>=10.9.8 <11` |
+| Node.js | дыяпазон `engines` `>=22.12.0 <27` (афіцыйная падлога стэку — Node `>= 20.19.4`, поле `engines` react-native `0.81.5`; пін 22 LTS пашыраны 2026-09-24 — ADR [G00.04-stack-baseline](architecture/decisions/G00.04-stack-baseline.md) §6) | правераныя практыкай лініі: 22.23 (спайк), 24.13 (сесіі `.b`/`.c` — чысты `npm ci`, doctor 18/18), 26.8 — дэв-хост CachyOS, на ім першы лакальны натыўны build; EBADENGINE не з'яўляецца |
+| npm | `>= 10.9.8 < 12` | лініі 10.9.8 і 11.x правераныя практыкай |
 | EAS CLI | `>= 16.0.0` | толькі для натыўных зборак; праверка `npx eas-cli --version` |
-| Android-зборка | JDK + Android SDK альбо EAS build | на хостах G00.04.b/.c адсутныя (на .c з'явіўся JDK 25 без Android SDK — `adb`/`ANDROID_HOME` няма) — зборкі not-run |
-| iOS-зборка | macOS + Xcode альбо EAS build | на хостах G00.04.b/.c адсутныя — not-run |
+| Android-зборка | JDK + Android SDK альбо EAS build | 2026-09-24: дэв-хост CachyOS мае поўны набор — JDK 21, Android SDK (cmdline-tools 23.0.0, platform android-36, build-tools 36.0.0, emulator, platform-tools, NDK 27.1 пацягнуты gradle'ам) у `~/Android/Sdk`, `ANDROID_HOME` у `~/.zshenv`; першы лакальны development build (`expo run:android` на эмулятары) — **BUILD SUCCESSFUL in 21m 26s** на Node 26.8.2, дадатак `by.kudy.app` устаноўлены і запушчаны (expo-dev-client), манифест мае ўсе 5 дазволаў лакацыі + `RECORD_AUDIO`. На хостах G00.04.b/.c SDK па-за гэтым няма |
+| iOS-зборка | macOS + Xcode альбо EAS build | натыўна немагчыма на Linux-хасце — толькі EAS build (облак) ці Mac; Expo Go на рэальным iPhone не раўназначна development build |
 
 ## Устаноўка
 
