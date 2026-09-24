@@ -175,9 +175,10 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
   // The shared deletion gate (G04.04.b criterion 4): with a gate present the
   // activation takes the package's current epoch and stops named the moment
   // a deletePackage() of the same package has bumped it — checked after
-  // every await boundary below, so a deletion racing the download leaves
-  // neither files nor rows behind. Without the optional dep this is exactly
-  // the pre-G04.04.b behavior.
+  // every await boundary below, with the rename tail re-read against the
+  // gate (a deletion racing the final rename is the named cancelled outcome,
+  // not a raw store error). Without the optional dep this is exactly the
+  // pre-G04.04.b behavior.
   const gate = deps.cancel ?? null;
   const activation = gate?.beginActivation(key) ?? null;
   const cancelled = (): boolean =>
@@ -200,6 +201,7 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
   if (alreadyComplete) {
     await replaceBundleAssets(deps.driver, key, entries.map((entry) => completeRow(key, entry)));
     await deps.store.remove(stagingLayer);
+    if (cancelled()) return { status: 'cancelled', key, fetched: 0 };
     // The repeated request commits the complete state again (a no-op for an
     // already complete layer); the emission dedupes the identity per run.
     const accessDiagnostics = await emitAccessReady(deps.access, key, (rel) =>
@@ -295,17 +297,32 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
   // repaired): it moves into staging trash first, so a crash between the two
   // renames leaves the layer old or new, never a mix (criterion 3).
   if (cancelled()) return { status: 'cancelled', key, fetched };
-  if (await deps.store.exists(finalLayer)) {
-    await deps.store.rename(finalLayer, `${stagingLayer}.old`);
+  // The rename tail is the one window the per-await checks cannot split
+  // further: a deletion may sweep the staging tree while a rename is in
+  // flight. A failure here is re-read against the gate — a marked deletion
+  // is the named cancelled outcome (the package is already gone, so there is
+  // nothing to commit), any other store failure keeps propagating.
+  try {
+    if (await deps.store.exists(finalLayer)) {
+      await deps.store.rename(finalLayer, `${stagingLayer}.old`);
+    }
+    await deps.store.rename(stagingLayer, finalLayer);
+    await deps.store.remove(`${stagingLayer}.old`);
+  } catch (error) {
+    if (cancelled()) return { status: 'cancelled', key, fetched };
+    throw error;
   }
-  await deps.store.rename(stagingLayer, finalLayer);
-  await deps.store.remove(`${stagingLayer}.old`);
+  if (cancelled()) return { status: 'cancelled', key, fetched };
 
   // The commit is done — only now does the AccessReady event exist
   // (ADR G01.03 §3.7: rename → only then AccessReady; 19 §3.5: successful
   // activation is the single emission site). A crash above this line leaves
   // the layer on disk with no event — recovery on open derives readiness
-  // from the disk, no flag to lag behind.
+  // from the disk, no flag to lag behind. A deletion marked between the
+  // check above and the emission resolves the read against a swept package
+  // (null route.json → empty payload + diagnostic) — the disk truth wins on
+  // the next readiness derivation, and the accepted window ends with the
+  // emission itself.
   const accessDiagnostics = await emitAccessReady(
     deps.access,
     key,

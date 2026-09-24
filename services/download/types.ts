@@ -13,11 +13,15 @@
 // (G04.02.b), the expo-file-system adapter (TR-10 — no driver is pinned),
 // the library UI (G06.04) — package deletion itself is G04.04.b (delete.ts),
 // guarded by the session table through services/db.
-import type { LockEntry, Tier } from '../contentRepo/types.ts';
+//
+// The package identity a deletion targets (G04.04.b) — route_id@version, the
+// G04.03 facts key of services/contentRepo/types.ts — comes from its single
+// owner (one spelling, no second declaration) and is re-exported below.
+import type { LockEntry, PackageKey, Tier } from '../contentRepo/types.ts';
 import type { BundleAssetRow, SqlDriver } from '../db/types.ts';
 import type { DownloadAccessPort } from './access.ts';
 
-export type { LockEntry, Tier };
+export type { LockEntry, PackageKey, Tier };
 
 // One layer of one bundle: the delivery unit `locale × tier` of
 // route_id@version (`09` §4).
@@ -150,19 +154,11 @@ export type RecoveryResult =
   | { status: 'not-ready'; key: LayerKey }
   | { status: 'invalid-input'; key: LayerKey; diagnostics: string[] };
 
-//  `09` §7: bundle_asset can be rebuilt by re-hashing the disk. A corrupt key
+// `09` §7: bundle_asset can be rebuilt by re-hashing the disk. A corrupt key
 // or lock is diagnosed the same way as in activate().
 export type RebuildResult =
   | { status: 'rebuilt'; key: LayerKey; rows: BundleAssetRow[] }
   | { status: 'invalid-input'; key: LayerKey; diagnostics: string[] };
-
-// The package identity a deletion targets (G04.04.b): route_id@version —
-// every locale/tier layer of the bundle is removed at once, so the key is
-// deliberately narrower than LayerKey (no locale, no tier).
-export interface PackageKey {
-  routeId: string;
-  version: string;
-}
 
 // The in-memory cancellation flag shared by activate() and deletePackage()
 // (criterion 4). The composition root creates one instance (createDeletionGate())

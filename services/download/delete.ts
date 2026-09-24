@@ -3,7 +3,7 @@
 // (implementation-rules 2): ADR G01.03 §3.4 (the version is immutable for its
 // session's lifetime: «ачыстка пакета ў My KUDY адмаўляе выдаленне, пакуль
 // існуе не-`finished` сесія з гэтай версіяй» — the named refusal below),
-// §3.6 walkthrough («Выдаленне выкарыстоўванага пакета»), `09` §7 (zone A vs
+// §4 walkthrough («Выдаленне выкарыстоўванага пакета»), `09` §7 (zone A vs
 // zone B: a deletion removes the package files and its bundle_asset rows —
 // derived, rebuildable — and never touches session, settings, events, hints
 // or feedback), `09` §17 (no automatic cleanup or storage budgets — deletion
