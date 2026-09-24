@@ -18,6 +18,7 @@
   слухача ў remove(), а не на ledger мэпара — новы play скідвае ledger).
   Выпраўлена: docs/agent-tasks/results/G05.03.b.md, клетка «Rapid Play/Stop
   and file repeat» — issue #246.
+
 - key: incomplete-grep-claim — калі results або клетка сцвярджае «пошук знаходзіць
   толькі гэтыя файлы», пералік мусіць паўтараць даслоўны вывад каманды: перад
   запісам выканаць той самы grep і ўпісаць кожны файл з яго — у тым ліку
