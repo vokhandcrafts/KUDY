@@ -149,6 +149,22 @@ export function getLiveSession(driver: SqlDriver): SessionRow | null {
   return row ? toSessionRow(row) : null;
 }
 
+// The deletion-guard read (G04.04.b, ADR G01.03 §3.4): every non-finished
+// walk of this exact package version pins it against local deletion — a
+// paused session from yesterday counts exactly like the live one, and
+// finished rows are history that never blocks. Read-only: the guard never
+// mutates zone B.
+export function listUnfinishedSessions(driver: SqlDriver, routeId: string, version: string): SessionRow[] {
+  return driver
+    .prepare(
+      `SELECT ${SESSION_COLUMNS} FROM session
+       WHERE route_id = ? AND version = ? AND state <> 'finished'
+       ORDER BY started_at`,
+    )
+    .all(routeId, version)
+    .map(toSessionRow);
+}
+
 function insertSessionRow(driver: SqlDriver, input: SessionStartInput): void {
   driver
     .prepare(
@@ -466,4 +482,15 @@ export function getBundleAssets(driver: SqlDriver, key: AssetKey): BundleAssetRo
     )
     .all(key.routeId, key.version, key.locale, key.tier)
     .map(toBundleAssetRow);
+}
+
+// The whole package's registry rows (G04.04.b): a deletion removes every
+// layer of route_id@version at once, so the key here is the package identity
+// — locale and tier stay open. Zone A only; returns the removed row count.
+export function deletePackageAssets(driver: SqlDriver, routeId: string, version: string): number {
+  return inTransaction(driver, () => {
+    const statement = driver.prepare('DELETE FROM bundle_asset WHERE route_id = ? AND version = ?');
+    const result = statement.run(routeId, version);
+    return Number(result.changes);
+  });
 }
