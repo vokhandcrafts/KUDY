@@ -17,6 +17,11 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-25 — jscpd CI (#241): стартавы збой ва ўсіх PR (замяняе запіс ад 2026-09-22)
+Што зрабіць: спачатку праверце налады Actions гэтага рэпазітарыя — дазвол reusable workflows з `vokhandcrafts/ai-company-infrastructure` (Settings → Actions → General → Allow all actions and reusable workflows); runs `jscpd.yml` падаюць на старце (0s, без джобаў) на кожным PR, а дакладная прычына ў #241 яшчэ не дыягнаставаная. Калі налады ў парадку — найпраўдападобней патрабуецца праўка `.github/workflows/jscpd.yml` (пін reusable workflow на `@752dff0` састарэлы пасля мержу інфраструктурнага PR #1): зрабіце яе самі або яўна дазвольце яе агентам (issue-workflow §7 забараняе ім праўку `.github/`). Пасля фіксу дадайце радок `key: jscpd-workflow-startup-failure` у `docs/review-must-flag.md`.
+Issue: https://github.com/vokhandcrafts/KUDY/issues/241
+Run: https://github.com/vokhandcrafts/KUDY/actions/runs/35786797616
+
 ### 2026-09-25 — G05.02.c: прыладавыя праверкі адаптара лакацыі
 Што зрабіць: калі з'явіцца Android-тэлефон — прайсці дзевяць клетак матрыцы G00.01.b, якія абслугоўвае адаптар лакацыі (foreground+dwell, заблакаваны экран, фон, адмова/адкліканне дазволу, GPS-прабел, зняцце з recent apps, force-stop, перазагрузка, battery saver) па кроках з табліцы ў выніковым файле `docs/agent-tasks/results/G05.02.c.md` і запоўніць фактычныя вынікі. Да таго ўсе клеткі застаюцца `not-run` (blocked-external); да мержу нічога рабіць не трэба.
 PR: https://github.com/vokhandcrafts/KUDY/pull/253 (issue #212)
@@ -38,10 +43,6 @@ Issue: https://github.com/vokhandcrafts/KUDY/issues/187 (эпікі #185, #188, 
 Праглядзіце пратотып у `spikes/G06.08-prototype/` (запуск: `npm run prepare` і `npm run serve` у тэчцы спайка; сцэнары — у `package/screens.md`) і ў рэвю PR скажыце, ці зацвярджаеце пратотып для задач G06.01+. Без вашага зацвярджэння крытэрый 3 застаецца адкрытым; заўвагі па зрэзе дызайну запішыце ў рэвю — G06.06/G06.07 іх павінны ўлічыць.
 PR: https://github.com/vokhandcrafts/KUDY/pull/175 (issue #61)
 
-
-### 2026-09-22 — CI-jscpd працуе са збоям на старце ва ўсіх PR
-Што зрабіць: станам на 2026-09-22 усе runs workflow `jscpd.yml` ва ўсіх PR падаюць да старта («workflow file issue»; за акно 19:26–21:27 UTC — 8 запускі ва ўсіх галінах, з іх 4 на PR #177). Сам файл карэктны (`workflow_call` ёсць у зпіненым SHA 752dff0 інфраструктурнага рэпазітарыя; у KUDY-файле толькі `pull_request`), таму праверце налады Actions гэтага рэпазітарыя: дазвол выкарыстання reusable workflows з `vokhandcrafts/ai-company-infrastructure` (Settings → Actions → General → Allow all actions and reusable workflows) — і, калі інфраструктурны PR #1 ужо змержаны, перапінце `uses` у `.github/workflows/jscpd.yml` на актуальны main-SHA. Джоб не блакуе required checks, лакальны гейт `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .` працуе.
-Run: https://github.com/vokhandcrafts/KUDY/actions/runs/35786797616
 
 ### 2026-09-21 — спецыфікацыя збору сыравіны з сеткі: рэвю PR #152 і рашэнні заснавальніка (G17)
 Што зрабіць: PR #152 змержаны — засталося адказаць у tracking-ісью #153 на пяць рашэнняў заснавальніка: зацвярджэнне спецыфікацыі, пілотны навінны партал, патрэба ў распазнанні голасу, слоўнік тэм, крыніцы фота для гайдаў — без іх пілот G17.08 не стартуе. Каб запусціць распрацоўку, паставьце на эпік #154 пазнаку `epic`, а на задачах #155–#163 — `agent:ready`/`prio:*` (пазнакі ставіць толькі аператар).
