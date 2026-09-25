@@ -71,6 +71,9 @@ function fixtureLoader(responses) {
 
 function wikiYaml({ articles = [], categories = [], depth, topics = 'topics: [architektura, historia]', api = API }) {
   return campaignYaml({
+    // G17.02: http(s) seeds go through the crawler — the wiki suites use an
+    // unserved scheme so the seed stays a progress-only step with no page source.
+    seeds: 'seeds:\n  - ftp://news.example/gdansk',
     topics,
     youtube: null,
     wiki: [

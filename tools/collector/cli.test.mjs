@@ -65,24 +65,31 @@ test('run reports a missing campaign file as a file error, not a crash', () => {
 test('run is idempotent end-to-end: two invocations, no duplicate records', () => {
   const dir = makeTempDir();
   const dbPath = path.join(dir, 'db.sqlite');
+  // A file:// seed: G17.02 made https seeds live network crawls, and this test
+  // pins the offline CLI path (the crawler suites cover the network side).
+  const fixturePath = path.join(dir, 'seed-page.html');
+  fs.writeFileSync(fixturePath, articleHtml(), 'utf8');
   const file = writeCampaignFile(
     dir,
-    campaignYaml({ youtube: 'youtube:\n  - dQw4w9WgXcQ\n  - aQw4w9WgXcQ' })
+    campaignYaml({
+      youtube: 'youtube:\n  - dQw4w9WgXcQ\n  - aQw4w9WgXcQ',
+      seeds: `seeds:\n  - ${pathToFileURL(fixturePath).href}`,
+    })
   );
 
   const first = runCli(['run', '--campaign', file, '--db', dbPath]);
   assert.equal(first.status, 0, first.stderr);
   assert.match(first.stdout, /steps done 3, failed 0, running 0, pending 0/);
-  assert.match(first.stdout, /raw_records total 2/);
+  assert.match(first.stdout, /raw_records total 3/);
 
   const second = runCli(['run', '--campaign', file, '--db', dbPath]);
   assert.equal(second.status, 0, second.stderr);
   assert.match(second.stdout, /steps done 0, failed 0, running 0, pending 0/);
-  assert.match(second.stdout, /raw_records total 2/);
+  assert.match(second.stdout, /raw_records total 3/);
 
   const status = runCli(['status', '--db', dbPath]);
   assert.match(status.stdout, /campaigns: 1/);
-  assert.match(status.stdout, /raw_records: 2/);
+  assert.match(status.stdout, /raw_records: 3/);
   assert.match(status.stdout, /run_log: done 3, running 0, pending 0, failed 0/);
 });
 

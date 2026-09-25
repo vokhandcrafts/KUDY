@@ -26,7 +26,7 @@ function setup({ fixtures = { 'article.html': articleHtml() }, seedOrder, seedLi
   return { dir, db, file, source, campaign: parsed.campaign, seedUrl, snapshotsRoot: path.join(dir, 'snapshots') };
 }
 
-function runThroughLoop(s) {
+async function runThroughLoop(s) {
   return runCampaign(s.db, s.campaign, {
     sourcePath: s.file,
     contentHash: sha256Hex(s.source),
@@ -183,8 +183,10 @@ test('AC4: content_hash is the sha256 of the stored text.md bytes re-read from d
   assert.ok(!stored.includes(13), 'no CR bytes — the hash pins the LF bytes as written');
 });
 
-test('a seed with no local page source stays progress-only (fetching is G17.02+)', async () => {
-  const s = setup({ seedLines: '  - https://news.example/gdansk' });
+test('a seed with a scheme neither the loader nor the crawl pipeline serves stays progress-only', async () => {
+  // G17.02: file:// seeds snapshot, http(s) seeds crawl — everything else
+  // (ftp:// here) completes as a progress step without any page source.
+  const s = setup({ seedLines: '  - ftp://news.example/gdansk' });
   const run = await runThroughLoop(s);
   assert.equal(run.done, 1, 'the step still completes, as in G17.01.a');
   assert.equal(countRows(s.db, 'raw_records'), 0, 'no record without a page source');

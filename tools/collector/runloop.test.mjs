@@ -2,14 +2,22 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { runCampaign } from './runloop.mjs';
 import { countRows, enqueueStep, ensureCampaign, openStore, sha256Hex, stepStatusCounts } from './store.mjs';
 import { parseCampaign } from './campaign.mjs';
-import { campaignYaml, makeTempDir, writeCampaignFile } from './testkit.mjs';
+import { articleHtml, campaignYaml, makeTempDir, writeCampaignFile } from './testkit.mjs';
 
+// The seed is a file:// fixture page: G17.02 made https seeds live crawls, so
+// these loop-mechanics tests pin the offline snapshot path instead.
 function setup(overrides = {}) {
   const dir = makeTempDir();
-  const file = writeCampaignFile(dir, campaignYaml(overrides));
+  const page = path.join(dir, 'seed-page.html');
+  fs.writeFileSync(page, articleHtml(), 'utf8');
+  const file = writeCampaignFile(
+    dir,
+    campaignYaml({ seeds: `seeds:\n  - ${pathToFileURL(page).href}`, ...overrides })
+  );
   const source = fs.readFileSync(file, 'utf8');
   const parsed = parseCampaign(source);
   assert.ok(parsed.ok, parsed.diagnostics?.join('\n'));
@@ -22,13 +30,13 @@ test('AC2: first run registers campaign and records; second run inserts nothing 
   const first = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source) });
   assert.equal(first.done, 2, 'one seed + one youtube step');
   assert.equal(countRows(db, 'campaigns'), 1);
-  assert.equal(countRows(db, 'raw_records'), 1);
+  assert.equal(countRows(db, 'raw_records'), 2);
   assert.equal(countRows(db, 'run_log'), 2);
 
   const recordIds = db.prepare('SELECT id FROM raw_records ORDER BY id').all().map((row) => row.id);
   await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source) });
   assert.equal(countRows(db, 'campaigns'), 1, 'campaign row not duplicated');
-  assert.equal(countRows(db, 'raw_records'), 1, 'raw_records not duplicated');
+  assert.equal(countRows(db, 'raw_records'), 2, 'raw_records not duplicated');
   assert.equal(countRows(db, 'run_log'), 2, 'steps not duplicated');
   assert.deepEqual(
     db.prepare('SELECT id FROM raw_records ORDER BY id').all().map((row) => row.id),
@@ -46,7 +54,7 @@ test('AC3: a step left running by an interrupted run is resumed, not duplicated'
 
   const second = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source) });
   assert.equal(second.done, 1, 'only the interrupted step is re-claimed');
-  assert.equal(countRows(db, 'raw_records'), 1);
+  assert.equal(countRows(db, 'raw_records'), 2);
   const youtube = db.prepare("SELECT status, attempts FROM run_log WHERE kind = 'youtube'").get();
   assert.equal(youtube.status, 'done');
   assert.equal(youtube.attempts, 2, 'resumed step counts its second attempt');
@@ -66,7 +74,7 @@ test('AC3: a run interrupted after enqueue resumes on the next invocation', asyn
   const run = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source) });
   assert.equal(run.done, 2);
   assert.deepEqual(stepStatusCounts(db, campaignId), { done: 2 });
-  assert.equal(countRows(db, 'raw_records'), 1);
+  assert.equal(countRows(db, 'raw_records'), 2);
   assert.equal(countRows(db, 'run_log'), 2, 'no duplicate step rows after resume');
 });
 

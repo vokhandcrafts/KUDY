@@ -3,6 +3,7 @@
 // these helpers only build fixtures and temporary locations.
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
+import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -147,4 +148,42 @@ export function jpegBytes(width, height) {
   bytes[11] = 0xff;
   bytes[12] = 0xd9;
   return bytes;
+}
+
+// Local fixture HTTP server for the crawler suites (G17.02): the tests' only
+// network is 127.0.0.1. `routes` maps request path → { status, headers, body }
+// (or a plain string body); an unknown path answers a plain 404 page. The
+// `requests` log records { path, at } arrival moments — the politeness test
+// asserts the gaps between them. The campaign fence sees the server's
+// hostname, so a second server on another port of the same host is the same
+// fence host.
+export async function startFixtureServer(routes = {}) {
+  const requests = [];
+  const server = http.createServer((req, res) => {
+    requests.push({ path: req.url, at: Date.now() });
+    const route = routes[req.url];
+    const { status = 200, headers = {}, body = '' } =
+      typeof route === 'string' ? { body: route } : (route ?? { status: 404, body: '<html><head><title>404</title></head><body>not found</body></html>' });
+    res.writeHead(status, { 'content-type': 'text/html; charset=utf-8', ...headers });
+    res.end(body);
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const { port } = server.address();
+  return {
+    port,
+    url: (pathName) => `http://127.0.0.1:${port}${pathName}`,
+    requests,
+    close: () => new Promise((resolve) => server.close(resolve)),
+  };
+}
+
+// The crawl suites' injected fetchPage: a plain GET over the global fetch,
+// following redirects exactly like the browser fetcher does (finalUrl is the
+// last response's URL). HTTP ≥ 400 rejects — a fetch failure for the error
+// series. This is the test-side stand-in for netfetch.mjs, not the production
+// path; every crawler suite drives the production pipeline through it.
+export async function httpFetchPage(url) {
+  const response = await fetch(url, { redirect: 'follow' });
+  if (response.status >= 400) throw new Error(`HTTP ${response.status}`);
+  return { html: await response.text(), finalUrl: response.url };
 }

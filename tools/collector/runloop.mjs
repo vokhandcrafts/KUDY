@@ -4,20 +4,27 @@
 // already 'done' are never re-executed. A row left 'running' by an interrupted
 // process is claimed again by the next run: resume, not restart.
 //
-// v0 fetches nothing for seeds (network crawling is G17.02). The default seed
-// handler processes only pages a loader hands it: by default file:// seeds are
-// read from disk — the local fixture boundary for the snapshot pipeline
-// (G17.01.b) — and every other scheme answers null, so the seed stays
-// progress-only, exactly as in G17.01.a. The default youtube handler registers
-// the record shell so the library row exists before G17.05 fills it; rights
-// per docs/24_web_collection.md — YouTube transcripts are research_only.
+// G17.02 turns the loop async (the crawl pipeline politeness-delays between
+// requests) and adds the network crawl: http(s) seeds and every discovered
+// 'crawl' step walk through the fence-audited crawler (crawler.mjs) into the
+// G17.01.b snapshot writer. file:// seeds keep the G17.01.b fixture boundary —
+// read from disk by the default loader, no fence, no network — and every other
+// scheme stays progress-only, exactly as in G17.01.a. The default youtube
+// handler registers the record shell so the library row exists before G17.05
+// fills it; rights per docs/24_web_collection.md — YouTube transcripts are
+// research_only.
+//
+// A CrawlStopError (error series, crawler.mjs) stops the whole run: the step
+// is marked failed with the diagnostic, the remaining queue stays untouched,
+// and runCampaign reports `stopped` so the CLI can surface it.
 //
 // Wiki steps (G17.04) fetch for real: the loadApi boundary performs the
-// https call to the campaign's MediaWiki api.php endpoint — live runs are
+// http(s) call to the campaign's MediaWiki api.php endpoint — live runs are
 // manual, tests inject recorded fixtures and never touch the network. The
 // loop awaits handlers, so the run loop is async.
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   claimStep,
@@ -30,6 +37,8 @@ import {
 } from './store.mjs';
 import { processImageStep } from './media.mjs';
 import { defaultSnapshotsRoot, processFetchedPage } from './snapshot.mjs';
+import { CrawlStopError, createCrawler, parseCrawlDetail } from './crawler.mjs';
+import { createBrowserFetchPage } from './netfetch.mjs';
 import {
   WIKI_RIGHTS,
   parseArticleResponse,
@@ -43,15 +52,16 @@ import {
 } from './wiki.mjs';
 
 // The page-source boundary: tests and demos run the full snapshot pipeline
-// from local fixtures; G17.02 replaces this loader with the real fetcher.
+// from local fixtures; the network crawl (G17.02) plugs in below it.
 function defaultLoadPage(url) {
   if (new URL(url).protocol !== 'file:') return null;
   return fs.readFileSync(fileURLToPath(url), 'utf8');
 }
 
-// The image-source boundary (G17.03): same rule as the page loader — file://
-// fixtures only, every other scheme answers null (the image step turns that
-// into a failed-step diagnostic). Returns bytes, not text.
+// The image-source boundary (G17.03): file:// fixtures only, every other
+// scheme answers null (the image step turns that into a failed-step
+// diagnostic). Returns bytes, not text. Network image transport stays out of
+// G17.02's scope — live crawls mark image steps failed with this diagnostic.
 function defaultLoadImage(url) {
   if (new URL(url).protocol !== 'file:') return null;
   return fs.readFileSync(fileURLToPath(url));
@@ -70,11 +80,43 @@ async function defaultLoadApi(url) {
   return response.text();
 }
 
-export function defaultHandlers({ loadPage = defaultLoadPage, loadImage = defaultLoadImage, loadApi = defaultLoadApi } = {}) {
-  return {
+export function defaultHandlers({
+  loadPage = defaultLoadPage,
+  loadImage = defaultLoadImage,
+  fetchPage = null,
+  loadApi = defaultLoadApi,
+} = {}) {
+  // One crawler per handlers instance — one campaign per runCampaign call, so
+  // the politeness gate and the error-series counter span exactly one run. The
+  // audit log lives in the campaign's run dir next to its snapshots.
+  let crawler = null;
+  let browser = null;
+  function crawlerFor(ctx) {
+    if (crawler) return crawler;
+    crawler = createCrawler({
+      auditPath: path.join(ctx.snapshotsRoot, ctx.campaignId.slice(0, 12), 'fence-audit.jsonl'),
+      delayRange: ctx.campaign.fence.delay_s,
+      fetchPage:
+        fetchPage ??
+        ((url) => {
+          // The production fetcher is created on the first network URL and
+          // closed when the run ends; file://-only runs never create it.
+          if (!browser) {
+            browser = createBrowserFetchPage({ userDataDir: ctx.campaign.browser_user_data_dir ?? null });
+          }
+          return browser.then((fetcher) => fetcher.fetchPage(url));
+        }),
+    });
+    return crawler;
+  }
+  const handlers = {
     loadImage,
     loadApi,
     seed(ctx, step) {
+      const protocol = new URL(step.ref).protocol;
+      if (protocol === 'http:' || protocol === 'https:') {
+        return crawlerFor(ctx).crawl(ctx, step.ref, 0);
+      }
       let html;
       try {
         html = loadPage(step.ref);
@@ -92,6 +134,10 @@ export function defaultHandlers({ loadPage = defaultLoadPage, loadImage = defaul
       } catch (error) {
         throw new Error(`seed ${step.ref}: ${error.message}`);
       }
+    },
+    crawl(ctx, step) {
+      const { depth } = parseCrawlDetail(step);
+      return crawlerFor(ctx).crawl(ctx, step.ref, depth);
     },
     image(ctx, step) {
       // The diagnostic already names the source URL and the reason.
@@ -208,7 +254,15 @@ export function defaultHandlers({ loadPage = defaultLoadPage, loadImage = defaul
       if (notes.length === 0) return;
       return notes.join('; ');
     },
+    async close() {
+      if (!browser) return;
+      // A failed launch already reported its diagnostic on the step that
+      // triggered it; close() only reaps a fetcher that actually started.
+      const fetcher = await Promise.resolve(browser).catch(() => null);
+      await fetcher?.close();
+    },
   };
+  return handlers;
 }
 
 export async function runCampaign(
@@ -229,13 +283,14 @@ export async function runCampaign(
   for (const ref of campaign.youtube) enqueueStep(db, campaignId, 'youtube', ref, now);
   for (const url of campaign.seeds) enqueueStep(db, campaignId, 'seed', url, now);
 
-  const counts = { campaignId, done: 0, failed: 0 };
+  const counts = { campaignId, done: 0, failed: 0, stopped: null };
   const ctx = { db, campaign, campaignId, now, snapshotsRoot, loadImage: handlers.loadImage, loadApi: handlers.loadApi };
-  // The loop drains: a handler enqueues new steps mid-run (a category lists
-  // its articles), so the claimable list is re-read until nothing is left —
-  // one invocation finishes the whole campaign. Every processed step ends
-  // 'done' or 'failed', so the drain terminates.
-  for (;;) {
+  // The loop drains: a seed, crawl or wiki-category handler enqueues new steps
+  // mid-run, so the claimable list is re-read until nothing is left — one
+  // invocation finishes the whole campaign. Every processed step ends 'done'
+  // or 'failed', so the drain terminates — unless a CrawlStopError stops the
+  // run on purpose, leaving the unclaimed steps queued for resume.
+  outer: for (;;) {
     const steps = claimableSteps(db, campaignId);
     if (steps.length === 0) break;
     for (const step of steps) {
@@ -247,9 +302,9 @@ export async function runCampaign(
         continue;
       }
       try {
-        // A step may answer an outcome note (the image step's skip message,
-        // the category step's expansion notes). It is appended to the
-        // work-order detail, never replaces it — the detail is what a
+        // A step may answer an outcome note (the image step's skip message, a
+        // crawl skip, the category step's expansion notes). It is appended to
+        // the work-order detail, never replaces it — the detail is what a
         // resumed process re-reads.
         const note = await handler(ctx, step);
         completeStep(
@@ -260,10 +315,16 @@ export async function runCampaign(
         );
         counts.done += 1;
       } catch (error) {
-        failStep(db, step.id, error instanceof Error ? error.message : String(error), now);
+        const message = error instanceof Error ? error.message : String(error);
+        failStep(db, step.id, message, now);
         counts.failed += 1;
+        if (error instanceof CrawlStopError) {
+          counts.stopped = message;
+          break outer;
+        }
       }
     }
   }
+  await handlers.close?.();
   return counts;
 }

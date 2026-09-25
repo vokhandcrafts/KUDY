@@ -1,12 +1,23 @@
-// HTML extraction for the raw snapshot (G17.01.b). v0 parses with tolerant
-// regexes — the real DOM parser arrives with the crawler (G17.02, Playwright).
-// Everything here is deterministic: the same HTML must always produce the same
-// text.md bytes, because content_hash dedup compares those bytes across pages
-// (docs/24_web_collection.md «Пашпарт запісу (RawRecord)»: content_hash —
-// дэдуплікацыя зместу).
+// HTML extraction for the raw snapshot (G17.01.b). Parsing is tolerant
+// regexes; the crawler (G17.02) reuses this same extraction unchanged — both
+// for its article heuristic (paragraphCount) and through the snapshot writer —
+// so a crawled page and a file:// fixture of the same HTML always produce the
+// same text.md bytes. Everything here is deterministic: the same HTML must
+// always produce the same text.md bytes, because content_hash dedup compares
+// those bytes across pages (docs/24_web_collection.md «Пашпарт запісу
+// (RawRecord)»: content_hash — дэдуплікацыя зместу).
 //
 // Corrupt input (empty document, missing <title>, no paragraph text) throws a
-// named diagnostic; the run loop records it in run_log and moves on.
+// named diagnostic with a stable `code`; the run loop records it in run_log
+// and moves on. The crawler's heuristic treats `no-article-text` as a
+// classification (the page is a menu or catalog — skipped), the rest as
+// corrupt fetches (step failed).
+
+function extractError(code, message) {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
 
 const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
 
@@ -77,20 +88,20 @@ function extractImgTags(fragment, baseUrl) {
 
 export function extractPage(html, baseUrl) {
   if (typeof html !== 'string' || html.trim() === '') {
-    throw new Error('empty document — nothing to extract');
+    throw extractError('empty-document', 'empty document — nothing to extract');
   }
   const rawTitle = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1];
   const title = rawTitle === undefined ? null : collapse(decodeEntities(rawTitle));
   if (!title) {
-    throw new Error('missing <title> — the page cannot be identified');
+    throw extractError('missing-title', 'missing <title> — the page cannot be identified');
   }
 
   // One document-order walk over paragraphs and standalone <figure> blocks.
   // Images carry the index of the text.md block they are placed before
   // (media.position, docs/24_web_collection.md «Фота»): an image inside a
   // text paragraph renders after that paragraph's text, a figure between
-  // paragraphs renders exactly where it stood. v0 regex boundary: <p> inside
-  // <figure> is not extracted — the DOM parser arrives with G17.02.
+  // paragraphs renders exactly where it stood. Known regex limitation,
+  // unchanged by G17.02: <p> inside <figure> is not extracted.
   const paragraphs = [];
   const images = [];
   for (const block of html.match(/<p\b[^>]*>[\s\S]*?<\/p>|<figure\b[^>]*>[\s\S]*?<\/figure>/gi) ?? []) {
@@ -141,7 +152,7 @@ export function extractPage(html, baseUrl) {
     }
   }
   if (paragraphs.length === 0) {
-    throw new Error('no paragraph text found — not an article page');
+    throw extractError('no-article-text', 'no paragraph text found — not an article page');
   }
 
   return {
@@ -153,6 +164,7 @@ export function extractPage(html, baseUrl) {
       author: metaContent(html, 'author'),
       language: html.match(/<html\b[^>]*\blang\s*=\s*"([^"]*)"/i)?.[1] ?? null,
     },
+    paragraphCount: paragraphs.length,
     text: paragraphs.map((paragraph) => paragraph.text).join('\n\n') + '\n',
     links: paragraphs.flatMap((paragraph) => paragraph.links),
     images,

@@ -21,7 +21,7 @@ fs.mkdirSync(dir, { recursive: true });
 const yaml = [
   "city: gdansk",
   "seeds:",
-  "  - https://news.example/gdansk",
+  "  - ftp://news.example/gdansk",
   "topics: [architektura, historia]",
   "fence:",
   "  depth: 3",
@@ -92,7 +92,7 @@ const dir = "/tmp/kudy-g1704-demo";
 const yaml = [
   "city: gdansk",
   "seeds:",
-  "  - https://news.example/gdansk",
+  "  - ftp://news.example/gdansk",
   "topics: [architektura, historia]",
   "fence:",
   "  depth: 3",
@@ -140,7 +140,7 @@ node --test --test-reporter=spec "tools/collector/*.test.mjs" 2>/dev/null | grep
 ```
 
 ```output
-ℹ tests 61
-ℹ pass 61
+ℹ tests 81
+ℹ pass 81
 ℹ fail 0
 ```
