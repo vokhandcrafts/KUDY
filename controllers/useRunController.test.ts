@@ -16,7 +16,11 @@ import path from 'node:path';
 import {
   createRunController,
   type RunControllerState,
+  type RunRecovery,
+  type RunRecoveryLayer,
+  type RunRecoveryPayload,
   type RunStartResult,
+  type RunWakelock,
 } from './useRunController.ts';
 import type { ControllerStore } from './createControllerStore.ts';
 import type { RunStop } from './run/runOrchestrator.ts';
@@ -29,10 +33,13 @@ import { FakeAudioPlayerPort } from '../services/audio/fake-port.ts';
 import {
   DbError,
   checkpointProgress,
-  openDatabase,
+  finishSession,
+  getLiveSession,
   getSession,
-  startSession,
+  openDatabase,
   pauseSession,
+  resumeSession,
+  startSession,
 } from '../services/db/db.ts';
 import { nodeSqliteDriver } from '../services/db/test-fixture.ts';
 import type { SqlDriver } from '../services/db/types.ts';
@@ -80,6 +87,7 @@ interface World {
   packageStore: PackageStore;
   granted: Tier[];
   store: ControllerStore<RunControllerState>;
+  wakelockCalls: string[];
   discardPackage: () => void;
 }
 
@@ -87,15 +95,94 @@ interface WorldOptions {
   // A scenario may subclass the audio service (the write-through ordering and
   // crash-between probes do); the default is the real one over the fake port.
   audio?: (port: FakeAudioPlayerPort, driver: SqlDriver) => AudioService;
-  // A scenario may serve a different package view (the not-ready refusals).
+  // A scenario may serve a different package view (the not-ready refusals and
+  // the damaged-pinned-package recovery).
   packageStore?: PackageStore;
   // A scenario may decorate the real stops port to inject a fault at the
   // boundary the composition root owns (the vanished-after-readiness refusal).
   packageStops?: (base: RunPackageStops) => RunPackageStops;
 }
 
+const isTierValue = (value: string): value is Tier => value === 'base' || value === 'extended';
+
+// The store port over the real services/db public API — what the composition
+// root of the app build implements (issue #209 AC1).
+function sessionStoreOver(driver: SqlDriver): RunSessionStore {
+  return {
+    start(input) {
+      try {
+        startSession(driver, input);
+        return { ok: true };
+      } catch (error) {
+        if (error instanceof DbError && error.rule === 'live-session-exists') {
+          return { ok: false, reason: 'live-session-exists' };
+        }
+        throw error;
+      }
+    },
+    checkpoint: (sessionId, progress) => checkpointProgress(driver, sessionId, progress),
+    pause: (sessionId, progress) => pauseSession(driver, sessionId, progress),
+    resume: (sessionId) => resumeSession(driver, sessionId),
+    finish: (sessionId, input) => finishSession(driver, sessionId, input),
+    live: () => getLiveSession(driver),
+  };
+}
+
+// The real-path recovery read (09 §9.1): the live row over the real db plus
+// the pinned package's per-layer verdicts — the file-level truth through the
+// real evaluatePackage, the stop records through the real route.json parse
+// and the world's stop arrangement (story ids and geometry), exactly what
+// the composition root assembles from route.json + places.json.
+function recoveryPortOver(
+  driver: SqlDriver,
+  packageStore: PackageStore,
+  granted: readonly Tier[],
+): RunRecovery {
+  return {
+    read: async (routeId) => {
+      const liveRow = getLiveSession(driver);
+      if (!liveRow || liveRow.routeId !== routeId) return null;
+      const layers: RunRecoveryLayer[] = [];
+      for (const tier of liveRow.tier.filter(isTierValue)) {
+        const verdict = await evaluatePackage(packageStore, {
+          locale: liveRow.locale,
+          tier,
+          grantedTiers: granted,
+        });
+        if (verdict.status !== 'ready') {
+          layers.push({ tier, status: verdict.status });
+          continue;
+        }
+        const file = await packageStore.readFile('route.json');
+        const parsed =
+          file.kind === 'present'
+            ? parseRouteStops(file.bytes, {
+                routeId: liveRow.routeId,
+                version: liveRow.version,
+                locale: liveRow.locale,
+                tier,
+              })
+            : undefined;
+        const ids = parsed && parsed.diagnostic === undefined ? parsed.stopIds : [];
+        layers.push({
+          tier,
+          status: 'ready',
+          stops: STOPS.filter((stop) => ids.includes(stop.stopId)),
+        });
+      }
+      const payload: RunRecoveryPayload = {
+        row: liveRow,
+        routeId: packageStore.key.routeId,
+        version: packageStore.key.version,
+        layers,
+      };
+      return payload;
+    },
+  };
+}
+
 // The full stack of one walk: real db (migrated), real services over fake OS
-// ports, real orchestrator, the controller over them. The controller's three
+// ports, real orchestrator, the controller over them. The controller's
 // service ports are wired over the real public APIs here — exactly what the
 // composition root of the app build will implement (issue #209 AC1).
 function world(options: WorldOptions = {}): World {
@@ -111,19 +198,10 @@ function world(options: WorldOptions = {}): World {
   const audioService = options.audio
     ? options.audio(audioPort, driver)
     : new AudioService({ createPort: () => audioPort });
-  const sessionStore: RunSessionStore = {
-    start(input) {
-      try {
-        startSession(driver, input);
-        return { ok: true };
-      } catch (error) {
-        if (error instanceof DbError && error.rule === 'live-session-exists') {
-          return { ok: false, reason: 'live-session-exists' };
-        }
-        throw error;
-      }
-    },
-    checkpoint: (sessionId, progress) => checkpointProgress(driver, sessionId, progress),
+  const wakelockCalls: string[] = [];
+  const wakelock: RunWakelock = {
+    acquire: () => wakelockCalls.push('acquire'),
+    release: () => wakelockCalls.push('release'),
   };
   const readiness: RunReadiness = {
     evaluate: (input) => evaluatePackage(packageStore, input),
@@ -154,7 +232,7 @@ function world(options: WorldOptions = {}): World {
     pipelineConfig: { dwellMs: 0 },
     route: ROUTE,
     stops: STOPS,
-    sessionStore,
+    sessionStore: sessionStoreOver(driver),
     readiness,
     packageStops: effectivePackageStops,
     access,
@@ -163,6 +241,8 @@ function world(options: WorldOptions = {}): World {
       return () => `walk-${String(++n)}`;
     })(),
     grantedTiers: () => granted,
+    wakelock,
+    recovery: recoveryPortOver(driver, packageStore, granted),
   });
   return {
     clock,
@@ -174,8 +254,58 @@ function world(options: WorldOptions = {}): World {
     packageStore,
     granted,
     store,
+    wakelockCalls,
     discardPackage: pkg.remove,
   };
+}
+
+// A second controller over the same world — the process-restart arrangement
+// of 09 §9.1: fresh controller state and a fresh session-id mint, the same
+// OS ports, driver and package. The new services re-register on the ports,
+// so the old process's subscriptions go deaf exactly as a killed app's do.
+function restart(
+  w: World,
+  decorateRecovery?: (base: RunRecovery) => RunRecovery,
+): ControllerStore<RunControllerState> {
+  const baseRecovery = recoveryPortOver(w.driver, w.packageStore, w.granted);
+  return createRunController({
+    location: new LocationService({
+      port: w.locationPort,
+      clock: w.clock,
+      permissions: { foreground: 'fg', background: 'bg' },
+    }),
+    audio: new AudioService({ createPort: () => w.audioPort }),
+    clock: w.clock,
+    engineConfig: defaultEngineConfig,
+    pipelineConfig: { dwellMs: 0 },
+    route: ROUTE,
+    stops: STOPS,
+    sessionStore: sessionStoreOver(w.driver),
+    readiness: { evaluate: (input) => evaluatePackage(w.packageStore, input) },
+    packageStops: {
+      stopsOfLayer: async (tier) => {
+        const file = await w.packageStore.readFile('route.json');
+        if (file.kind !== 'present') return null;
+        const parsed = parseRouteStops(file.bytes, {
+          routeId: ROUTE.routeId,
+          version: ROUTE.version,
+          locale: ROUTE.locale,
+          tier,
+        });
+        return parsed.diagnostic !== undefined ? null : parsed.stopIds;
+      },
+    },
+    access: w.access,
+    newSessionId: (() => {
+      let n = 1;
+      return () => `again-${String(++n)}`;
+    })(),
+    grantedTiers: () => w.granted,
+    // A new process holds no wakelock; the recovery never touches the port,
+    // so the calls stay empty and no test reads them through the world.
+    wakelock: { acquire: () => {}, release: () => {} },
+    recovery: decorateRecovery ? decorateRecovery(baseRecovery) : baseRecovery,
+  });
 }
 
 // The subscription the location service currently holds (every arm mints the
@@ -189,6 +319,23 @@ const subscription = (w: World): number => {
 
 const fix = (w: World, lat: number, lng: number): void => {
   w.locationPort.emitFix(subscription(w), { lat, lng, accuracy: 5, at: w.clock.now() });
+};
+
+const liveFrom = (store: ControllerStore<RunControllerState>): RunSessionState => {
+  const state = store.getState().run;
+  if (state.phase === 'Idle') throw new Error('no live session in the store');
+  return state;
+};
+
+
+// Three consecutive fixes at one point: the smoothing window then averages to
+// that point, so the pipeline confirms its dwell (dwellMs = 0 confirms at
+// once) — the same idiom the orchestrator suite uses for a second stop.
+const dwellAt = (w: World, lat: number, lng: number, startMs: number): void => {
+  for (const offset of [0, 1_000, 2_000]) {
+    w.clock.set(startMs + offset);
+    fix(w, lat, lng);
+  }
 };
 
 const live = (w: World): RunSessionState => {
@@ -554,4 +701,336 @@ test('criterion 5: a look-alike emission on a foreign port never reaches the eng
     ['stop-1'],
   );
   assert.deepEqual(row(w, 'walk-1')?.tier, ['base']);
+});
+test('criterion 1: Pause persists the row paused, retires the queue in the same write and releases the walk resources', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  w.granted.push('extended'); // both stops eligible: the queue needs a live trigger
+  const sessionId = okStart(await w.store.getState().start({ tier: 'extended' }));
+  assert.deepEqual(w.wakelockCalls, ['acquire']); // ADR §3.3 Start effects: wakelock after the commit
+  fix(w, 0, 0); // stop-1: the guide plays, the automatic attempt is spent
+  dwellAt(w, 0.0009, 0, 60_000); // a minute later at stop-2: the queue takes it
+
+  w.store.getState().pauseSession();
+
+  const written = row(w, sessionId);
+  assert.equal(written?.state, 'paused');
+  // The queue retired into the SAME transaction that set the row paused
+  // (ADR §3.3 Pause): the read after the pause already carries the stop.
+  assert.deepEqual(written?.autoFired, ['stop-1', 'stop-2']);
+  const paused = live(w);
+  assert.equal(paused.phase, 'Paused');
+  assert.equal(paused.queued, null);
+  assert.equal(paused.playing, null); // the guide launch stopped
+  // The physical effects: the guide audio stopped, the subscription and the
+  // window are gone, the wakelock released (11 §4.2). The proof of this
+  // block is the subscription count — skipping the mode change turns it red.
+  assert.deepEqual(w.audioPort.commands, ['play 1:be/base/audio/story-b.m4a', 'stop']);
+  assert.equal(w.locationPort.activeSubscriptions(), 0);
+  assert.deepEqual(w.locationPort.regions, []);
+  assert.deepEqual(w.wakelockCalls, ['acquire', 'release']);
+});
+
+test('criterion 1: a session pause keeps a playing Moment sounding and touches only the walk', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  okStart(await w.store.getState().start());
+  fix(w, 0, 0); // the guide plays (source 1)
+  w.store.getState().playMoment('moment-1', 'story-b'); // the moment takes the player (source 2)
+  const commandsAtMoment = w.audioPort.commands.length;
+
+  w.store.getState().pauseSession();
+
+  // ADR G01.02 §3.8 / parity §4.9: the pause touches only the walk — the
+  // moment launch is not session property, no stop command goes out.
+  assert.equal(w.audioPort.commands.length, commandsAtMoment);
+  const paused = live(w);
+  assert.equal(paused.phase, 'Paused');
+  assert.ok(paused.playing && paused.playing.owner === 'moment');
+  assert.equal(paused.playing.paused, false);
+  assert.equal(w.locationPort.activeSubscriptions(), 0);
+});
+
+test('criterion 2: Resume re-arms the row, GPS and the window from a fresh fix without starting audio itself', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  const sessionId = okStart(await w.store.getState().start());
+  w.store.getState().pauseSession(); // paused before anything triggered
+  const playsBefore = w.audioPort.commands.filter((command) => command.startsWith('play')).length;
+
+  w.store.getState().resumeSession();
+
+  assert.equal(row(w, sessionId)?.state, 'active');
+  assert.equal(live(w).phase, 'Active');
+  assert.deepEqual(w.wakelockCalls, ['acquire', 'release', 'acquire']);
+  assert.equal(w.locationPort.activeSubscriptions(), 1); // the GPS mode re-armed
+  assert.equal(w.locationPort.regions.length, 0); // the window set waits for a fresh fix
+  assert.equal(w.audioPort.commands.filter((command) => command.startsWith('play')).length, playsBefore);
+  // 09 invariant 7 / 11 §5.2: the Resume tap IS the explicit human action
+  // that lifts the suspension — nothing sounded as a mechanical effect of
+  // the dispatch itself, and the automation now runs the general conditions
+  // again. (The issue criterion's «autoplay_suspended = true» parenthetical
+  // restates ADR §3.3's pre-G01.02 wording; the canon sources agree here.)
+  assert.equal(live(w).autoplaySuspended, false);
+
+  fix(w, 0, 0); // the fresh fix ranks the re-armed window and drives the trigger
+  assert.deepEqual(
+    w.locationPort.regions.map((stop) => stop.stopId),
+    ['stop-1'],
+  );
+  assert.equal(live(w).playing?.owner, 'guide'); // the trigger played after the explicit resume
+  assert.deepEqual(row(w, sessionId)?.autoFired, ['stop-1']);
+});
+
+test('criterion 3: End mid-audio finishes the row with the final checkpoint and releases everything', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  w.granted.push('extended'); // both stops eligible: the queue needs a live trigger
+  const sessionId = okStart(await w.store.getState().start({ tier: 'extended' }));
+  w.clock.set(1000);
+  fix(w, 0, 0); // the guide sounds
+  dwellAt(w, 0.0009, 0, 61_000); // a minute of walking, then stop-2 queues
+  w.clock.set(64_000);
+
+  w.store.getState().end();
+
+  const written = row(w, sessionId);
+  assert.equal(written?.state, 'finished');
+  assert.equal(written?.finishedAt, 64_000); // the injected clock, not a wall clock
+  assert.deepEqual(written?.autoFired, ['stop-1', 'stop-2']); // the final checkpoint retired the queue
+  assert.equal(live(w).phase, 'Ended');
+  assert.deepEqual(w.audioPort.commands, ['play 1:be/base/audio/story-b.m4a', 'stop']);
+  assert.equal(w.locationPort.activeSubscriptions(), 0);
+  assert.deepEqual(w.locationPort.regions, []);
+  assert.deepEqual(w.wakelockCalls, ['acquire', 'release']);
+
+  // A repeat End is a stray tap: nothing writes, nothing releases twice.
+  const before = w.driver.prepare('SELECT * FROM session WHERE session_id = ?').get(sessionId);
+  w.store.getState().end();
+  assert.deepEqual(w.driver.prepare('SELECT * FROM session WHERE session_id = ?').get(sessionId), before);
+  assert.deepEqual(w.wakelockCalls, ['acquire', 'release']);
+});
+
+test('criterion 3: End from Paused and after one story finish the same row', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  w.clock.set(10);
+  const pausedId = okStart(await w.store.getState().start());
+  w.store.getState().pauseSession();
+  w.store.getState().end();
+  assert.equal(row(w, pausedId)?.state, 'finished');
+  assert.equal(row(w, pausedId)?.finishedAt, 10);
+
+  const toldId = okStart(await w.store.getState().start());
+  fix(w, 0, 0);
+  w.audioPort.finish(1); // one full story, then the person ends the walk
+  w.store.getState().end();
+  assert.equal(row(w, toldId)?.state, 'finished');
+  assert.deepEqual(row(w, toldId)?.heard, ['story-b']);
+  assert.equal(live(w).phase, 'Ended');
+});
+
+test('criterion 3: the next Start after End opens a new row and the ended one never reactivates', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  const first = okStart(await w.store.getState().start());
+  fix(w, 0, 0);
+  w.audioPort.finish(1);
+  w.store.getState().end();
+
+  const second = okStart(await w.store.getState().start());
+  assert.notEqual(second, first);
+  assert.equal(sessionCount(w), 2);
+  assert.equal(row(w, first)?.state, 'finished');
+  assert.equal(row(w, second)?.state, 'active');
+  assert.deepEqual(row(w, second)?.heard, []); // a repeat walk is a fresh session
+  assert.equal(live(w).sessionId, second);
+
+  w.store.getState().resumeSession(); // no Paused addressee — a no-op, not a revival
+  assert.equal(row(w, first)?.state, 'finished');
+  assert.equal(live(w).sessionId, second);
+});
+
+test('criterion 4: a process restart restores the live row as a state and starts nothing', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  w.granted.push('extended');
+  const sessionId = okStart(await w.store.getState().start({ tier: 'extended' }));
+  fix(w, 0, 0); // stop-1 plays and keeps sounding (play_seq 1)
+  dwellAt(w, 0.0009, 0, 60_000); // stop-2 queues behind the sounding guide
+  const commandsBefore = w.audioPort.commands.length;
+  assert.equal(live(w).queued?.stopId, 'stop-2'); // the queue is really held
+
+  const second = restart(w);
+  assert.equal(second.getState().run.phase, 'Idle'); // the state comes from recover(), not from the constructor
+  await second.getState().recover();
+
+  const restored = liveFrom(second);
+  assert.equal(restored.sessionId, sessionId);
+  assert.equal(restored.phase, 'Active');
+  assert.equal(restored.version, '1'); // the pinned version, not the catalog's current one
+  assert.equal(restored.locale, 'be');
+  assert.deepEqual(restored.heard, []); // the launch never finished — no heard credit
+  assert.deepEqual(restored.autoFired, ['stop-1']);
+  assert.equal(restored.playSeq, 1);
+  assert.deepEqual(restored.tierAvailable, ['base', 'extended']);
+  assert.deepEqual(restored.accessibleStopIds, ['stop-1', 'stop-2']);
+  assert.equal(restored.playing, null); // §3.2: the player mirror is transient
+  assert.equal(restored.queued, null); // §3.2: the queue never survives a restart
+  assert.equal(restored.autoplaySuspended, true); // §3.2: nothing sounds by itself
+  assert.deepEqual(second.getState().recovery, { status: 'restored', sessionId, unavailableTiers: [] });
+  assert.equal(w.audioPort.commands.length, commandsBefore); // no audio starts
+
+  // 09 §9.1: the return re-armed the window of the live active session; the
+  // restored flag suspends the trigger, so the attempt retires into
+  // auto_fired and checkpoints into the restored row — the next sound waits
+  // for an explicit action (11 §5.1.1 outcome 2).
+  fix(w, 0.0009, 0);
+  assert.deepEqual(getSession(w.driver, sessionId)?.autoFired, ['stop-1', 'stop-2']);
+  assert.equal(w.audioPort.commands.length, commandsBefore);
+  assert.equal(liveFrom(second).playing, null);
+});
+
+test('criterion 4: a paused row restores without arming the location, and resumes explicitly', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  const sessionId = okStart(await w.store.getState().start());
+  fix(w, 0, 0);
+  w.audioPort.finish(1);
+  w.store.getState().pauseSession();
+  assert.equal(w.locationPort.activeSubscriptions(), 0);
+
+  const second = restart(w);
+  const commandsBefore = w.audioPort.commands.length;
+  await second.getState().recover();
+
+  assert.equal(liveFrom(second).phase, 'Paused');
+  assert.equal(liveFrom(second).sessionId, sessionId);
+  assert.deepEqual(second.getState().recovery, { status: 'restored', sessionId, unavailableTiers: [] });
+  // 11 §4.2: a paused row holds no subscription — the window re-arms only
+  // through the explicit «Працягнуць».
+  assert.equal(w.locationPort.activeSubscriptions(), 0);
+  assert.equal(w.audioPort.commands.length, commandsBefore);
+
+  second.getState().resumeSession();
+  assert.equal(liveFrom(second).phase, 'Active');
+  assert.equal(row(w, sessionId)?.state, 'active');
+  assert.equal(w.locationPort.activeSubscriptions(), 1);
+});
+
+test('criterion 4: no live row or an owned session — recover changes nothing', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  await w.store.getState().recover();
+  assert.equal(w.store.getState().run.phase, 'Idle');
+  assert.deepEqual(w.store.getState().recovery, { status: 'none' });
+
+  const sessionId = okStart(await w.store.getState().start());
+  await w.store.getState().recover(); // the controller owns a live session already
+  assert.equal(live(w).sessionId, sessionId);
+  assert.equal(sessionCount(w), 1);
+});
+
+test('criterion 5: a newer catalog package never enters the restored session', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  const sessionId = okStart(await w.store.getState().start());
+  const commandsBefore = w.audioPort.commands.length;
+
+  // The composition root of a moved-on catalog bound the version-2 view:
+  // complete, granted — but not the row's pinned version. The controller
+  // must refuse the whole payload instead of swapping the content (ADR §3.4).
+  const newerCatalog: RunRecovery = {
+    read: async (routeId: string): Promise<RunRecoveryPayload | null> => {
+      const payload = await recoveryPortOver(w.driver, w.packageStore, w.granted).read(routeId);
+      if (!payload) return null;
+      return {
+        ...payload,
+        routeId: 'route-x',
+        version: '2',
+        layers: [
+          {
+            tier: 'base' as const,
+            status: 'ready' as const,
+            stops: [{ stopId: 'stop-9', lat: 9, lng: 9, radius: 20, storyBaseId: 'story-new' }],
+          },
+        ],
+      };
+    },
+  };
+  const second = restart(w, () => newerCatalog);
+  await second.getState().recover();
+
+  const restored = liveFrom(second);
+  assert.equal(restored.version, '1'); // the pin survives
+  assert.equal(restored.locale, 'be');
+  assert.deepEqual(restored.tierAvailable, []); // no foreign layer entered
+  assert.deepEqual(restored.accessibleStopIds, []);
+  assert.deepEqual(second.getState().recovery, { status: 'restored', sessionId, unavailableTiers: ['base'] });
+  // The restored-active row re-arms the location, but the window holds
+  // nothing: a fix at the version-2 stop's point can not even rank it.
+  fix(w, 9, 9);
+  assert.deepEqual(w.locationPort.regions, []);
+  assert.equal(w.audioPort.commands.length, commandsBefore);
+});
+
+test('criterion 5: the pinned package files are still required — a damaged layer restores honestly unavailable', async (t) => {
+  const brokenRoot = tempPackage();
+  t.after(brokenRoot.remove);
+  const w = world({
+    packageStore: stubWithUnreadable(storeAt(brokenRoot.root), 'be/base/audio/story-b.m4a'),
+  });
+  t.after(w.discardPackage);
+  // Yesterday's row, arranged through the db's own public API: the files
+  // verified at Start, the media reads as unreadable today.
+  startSession(w.driver, {
+    sessionId: 'pinned',
+    routeId: 'route-x',
+    version: '1',
+    locale: 'be',
+    tier: ['base'],
+    startedAt: 5,
+  });
+  checkpointProgress(w.driver, 'pinned', { heard: ['story-b'], playSeq: 2 });
+
+  const second = restart(w);
+  await second.getState().recover();
+
+  // §3.7: the session restores AS STATE, the content is honestly
+  // unavailable — no play, no swap, the layer reported on the recovery view.
+  const restored = liveFrom(second);
+  assert.equal(restored.phase, 'Active');
+  assert.equal(restored.version, '1');
+  assert.deepEqual(restored.heard, ['story-b']);
+  assert.deepEqual(restored.tierAvailable, []);
+  assert.deepEqual(restored.accessibleStopIds, []);
+  assert.equal(restored.playing, null);
+  assert.equal(restored.autoplaySuspended, true);
+  assert.deepEqual(second.getState().recovery, {
+    status: 'restored',
+    sessionId: 'pinned',
+    unavailableTiers: ['base'],
+  });
+  assert.deepEqual(w.audioPort.commands, []);
+});
+
+test('criterion 6: a callback, a fix and an AccessReady after End change nothing in the session', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  const sessionId = okStart(await w.store.getState().start());
+  fix(w, 0, 0); // the guide plays (source 1)
+  w.store.getState().playMoment('moment-1', 'story-b'); // the moment takes the player (source 2)
+  w.store.getState().end(); // End mid-moment: the moment keeps sounding (ADR G01.02 §3.8)
+  const snapshot = w.driver.prepare('SELECT * FROM session WHERE session_id = ?').get(sessionId);
+
+  w.audioPort.finish(2); // the late moment callback
+  fix(w, 0, 0); // a fix wanders in
+  const diagnostics = await emitAccessReady(w.access, EXT_LAYER, readPackage(w)); // the download lands after End
+  assert.deepEqual(diagnostics, []);
+
+  // Not a single durable byte moved; the finished row stays history and the
+  // downloads stay disk-only (ADR §3.5: no live session of that version).
+  assert.deepEqual(w.driver.prepare('SELECT * FROM session WHERE session_id = ?').get(sessionId), snapshot);
+  assert.equal(sessionCount(w), 1);
+  assert.equal(live(w).phase, 'Ended');
 });
