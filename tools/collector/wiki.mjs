@@ -79,7 +79,9 @@ export function parseArticleResponse(payload, title) {
     throw new Error(`wiki api response for '${parse.title}': missing article HTML (parse.text)`);
   }
   const revision = Array.isArray(parse.revisions) ? parse.revisions[0] : undefined;
-  if (!revision || revision.revid === undefined) {
+  // == null: a null revid (not just an absent one) is corrupt input too — the
+  // attribution record must never carry revision_id null silently.
+  if (!revision || revision.revid == null) {
     throw new Error(`wiki api response for '${parse.title}': missing revision metadata (parse.revisions)`);
   }
   return {

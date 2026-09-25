@@ -266,14 +266,15 @@ test('corrupt api payloads fail their own steps with diagnostics, never a crash'
     {
       'parse:Bad JSON': 'not json at all {',
       'parse:No revisions': JSON.stringify({ parse: { title: 'X', text: '<p>Text.</p>' } }),
+      'parse:Null revid': JSON.stringify({ parse: { title: 'X', text: '<p>Text.</p>', revisions: [{ revid: null }] } }),
       'parse:No HTML': JSON.stringify({ parse: { title: 'X', revisions: [{ revid: 1 }] } }),
       'members:Category:Bad': JSON.stringify({ query: {} }),
       'members:Category:Broken member': JSON.stringify({ query: { categorymembers: [{ ns: 0 }] } }),
     },
-    { articles: ['Bad JSON', 'No revisions', 'No HTML'], categories: ['Category:Bad', 'Category:Broken member'], depth: 2, topics: 'topics: [bad, broken]' }
+    { articles: ['Bad JSON', 'No revisions', 'Null revid', 'No HTML'], categories: ['Category:Bad', 'Category:Broken member'], depth: 2, topics: 'topics: [bad, broken]' }
   );
   const run = await runThrough(s);
-  assert.equal(run.failed, 5);
+  assert.equal(run.failed, 6);
   const errors = s.db.prepare("SELECT error FROM run_log WHERE status = 'failed'").all().map((row) => row.error).join('\n');
   assert.match(errors, /not valid JSON/);
   assert.match(errors, /missing revision metadata \(parse\.revisions\)/);
