@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-25 — G06.07: зацвердзіць канон візуальнага кірунку (human gate)
+Што зрабіце: праглядзіце структуру і значэнні токенаў у `docs/design/visual-language.md` падчас рэв'ю PR — гэта крок ухвалення заснавальніка (крытэрый 6 issue #180). Зверце ўвагу на перазапісы супраць draft-палітры прататыпа: колеры маркераў `locked/available/pending`, фон карткі-падказкі, буйны тэкст 20px (≥ 1.2× паводле a11y-плашкі); ухваленыя значэнні стануць абавязковымі для экранаў G06.01+.
+PR: https://github.com/vokhandcrafts/KUDY/pull/266 (issue #180)
+
 ### 2026-09-25 — Чыстка гісторыі: падтрымка GitHub і git config на Windows
 Што зрабіце: 1) дашліце запыт у GitHub Support (https://support.github.com/request, «Remove data from GitHub») на вычышчанне недасяжных камітаў — у закрытых PR трох рэпаў старыя каміты з viktar.kamylevich@seranking.com застаюцца даступнымі праз refs/pull/* і кэш, пакуль GitHub іх не счасце. 2) На Windows-машыне заменіце `git config --global user.email` на `293595955+vokhandcrafts@users.noreply.github.com` — seranking-адрас прыехаў у гісторыю адтуль; на гэтай машыне лакальныя канфігі ўжо выстаўлены. Бэкап старой гісторыі да перапісу: /home/viktar/backups/repo-rewrite-2026-09-25/.
 PR: няма (пераюз гісторыі: KUDY main 3f85707, ai-company-infrastructure main 9558bda, vok-handcrafts main c6ef4b0)

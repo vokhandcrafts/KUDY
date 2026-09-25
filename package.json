@@ -18,7 +18,7 @@
     "engine:regressions": "node tools/engine-regressions/check-regressions.mjs",
     "ledger:baseline": "node tools/docs-ledger/ledger-baseline.mjs",
     "ledger:check": "node tools/docs-ledger/ledger-check.mjs",
-    "test": "node --test --experimental-strip-types --test-reporter=spec docs/run-model/run-model.test.mjs test/screen-schemes.test.mjs test/app-jest-wiring.test.mjs \"tools/arch/*.test.mjs\" \"tools/arch-surface/*.test.mjs\" \"tools/docs-ledger/*.test.mjs\" \"tools/build-bundle/*.test.mjs\" \"tools/validate/*.test.mjs\" \"tools/publish-catalog/*.test.mjs\" \"tools/collector/*.test.mjs\" docs/agent-tasks/web/g10-dependency-guards.test.mjs contracts/contracts.test.mjs contracts/events/event-contract.test.mjs \"spikes/G06.08-prototype/test/*.test.mjs\" \"services/**/*.test.ts\" \"controllers/**/*.test.ts\" \"core/**/*.test.ts\" \"web/**/*.test.ts\" \"supabase/**/*.test.ts\" && jest --config jest.config.js"
+    "test": "node --test --experimental-strip-types --test-reporter=spec docs/run-model/run-model.test.mjs test/screen-schemes.test.mjs test/design-tokens.test.mjs test/app-jest-wiring.test.mjs \"tools/arch/*.test.mjs\" \"tools/arch-surface/*.test.mjs\" \"tools/docs-ledger/*.test.mjs\" \"tools/build-bundle/*.test.mjs\" \"tools/validate/*.test.mjs\" \"tools/publish-catalog/*.test.mjs\" \"tools/collector/*.test.mjs\" docs/agent-tasks/web/g10-dependency-guards.test.mjs contracts/contracts.test.mjs contracts/events/event-contract.test.mjs \"spikes/G06.08-prototype/test/*.test.mjs\" \"services/**/*.test.ts\" \"controllers/**/*.test.ts\" \"core/**/*.test.ts\" \"web/**/*.test.ts\" \"supabase/**/*.test.ts\" && jest --config jest.config.js"
   },
   "dependencies": {
     "@maplibre/maplibre-react-native": "11.3.10",
