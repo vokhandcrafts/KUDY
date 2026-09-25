@@ -322,3 +322,17 @@ test('criterion 6: a Start after End inherits a still-sounding moment into the f
   assert.equal(queuedStop(live(h)), 'b'); // the trigger queues behind the moment
   assert.equal(playingStopId(live(h)), null);
 });
+
+test('criterion 6: a paused moment launch is not inherited by the fresh session', () => {
+  const h = harness();
+  deliver(h, 0, 0);
+  h.orchestrator.playMoment('moment-9', 'story-m9');
+  h.orchestrator.pauseAudio(); // the moment is paused, not sounding
+  h.orchestrator.end();
+  h.orchestrator.start('walk-2');
+  const state = h.orchestrator.state;
+  if (state.phase === 'Idle') throw new Error('no session after Start');
+  assert.equal(state.playing, null); // a paused launch is not «sounding» — nothing inherited
+  dwellAt(h, 0.0009, 0, 35_000);
+  assert.equal(playingStopId(live(h)), 'b'); // the next launch frees the source and plays
+});

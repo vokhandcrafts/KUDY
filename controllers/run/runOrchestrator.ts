@@ -125,7 +125,11 @@ export class RunOrchestrator {
     let playingNow: { momentId: string; storyId: string; seq: number } | undefined;
     if (this.engineState.phase === 'Ended') {
       const ended = this.engineState;
-      if (ended.playing?.owner === 'moment') {
+      // A paused launch is not «sounding»: Start's playingNow has no pause
+      // flag, so inheriting one would present a paused source as playing
+      // (and a later resume of the token would be refused). The next launch
+      // frees the source by the one-player rule instead.
+      if (ended.playing?.owner === 'moment' && !ended.playing.paused) {
         playingNow = {
           momentId: ended.playing.momentId,
           storyId: ended.playing.storyId,
