@@ -29,6 +29,9 @@ export function campaignYaml(overrides = {}) {
     extra_domains: 'extra_domains: []',
     delay_s: 'delay_s: [2, 5]',
     youtube: 'youtube:\n  - dQw4w9WgXcQ',
+    // G17.04 wiki block: omitted by default (null), so the existing suites'
+    // step counts stay untouched; wiki suites pass their YAML verbatim.
+    wiki: null,
     ...overrides,
   };
   const lines = [fields.city, fields.seeds, fields.topics];
@@ -39,6 +42,7 @@ export function campaignYaml(overrides = {}) {
     }
   }
   lines.push(fields.youtube);
+  if (fields.wiki !== null) lines.push(fields.wiki);
   return lines.filter((line) => line !== null).join('\n') + '\n';
 }
 

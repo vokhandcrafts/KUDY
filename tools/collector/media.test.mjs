@@ -55,7 +55,7 @@ function imageSteps(db) {
 
 const P = (text) => `<p>${text}</p>`;
 
-test('AC1: only images of at least 150 px on the longest side are saved; the skip note names the rule', () => {
+test('AC1: only images of at least 150 px on the longest side are saved; the skip note names the rule', async () => {
   const dir = makeTempDir();
   const fx = imageFixture(
     dir,
@@ -73,7 +73,7 @@ test('AC1: only images of at least 150 px on the longest side are saved; the ski
       },
     }
   );
-  const run = runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
+  const run = await runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
   assert.equal(run.failed, 0, 'nothing crashes, the icon is a rule case, not an error');
 
   const rows = mediaRows(fx.db);
@@ -91,13 +91,13 @@ test('AC1: only images of at least 150 px on the longest side are saved; the ski
   assert.match(skipped.detail, /icon-100x90\.png/);
 });
 
-test('AC1 negative probe: a 149 px image is excluded, 150 px is kept (the rule is >= 150)', () => {
+test('AC1 negative probe: a 149 px image is excluded, 150 px is kept (the rule is >= 150)', async () => {
   assert.equal(probeImage(pngBytes(149, 100))?.width, 149);
   assert.ok(Math.max(149, 100) < MIN_CONTENT_IMAGE_PX);
   assert.ok(Math.max(150, 150) >= MIN_CONTENT_IMAGE_PX);
 });
 
-test('AC2: every saved image has a complete media row and a slug filename; a second run changes nothing', () => {
+test('AC2: every saved image has a complete media row and a slug filename; a second run changes nothing', async () => {
   const dir = makeTempDir();
   const fx = imageFixture(
     dir,
@@ -107,7 +107,7 @@ test('AC2: every saved image has a complete media row and a slug filename; a sec
     ],
     { imageFiles: { 'photo-800x600.png': pngBytes(800, 600) }, title: 'Gdansk shipyard turns into a museum' }
   );
-  runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
+  await runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
 
   const [row] = mediaRows(fx.db);
   const record = fx.db.prepare("SELECT id, rights, media_dir, snapshot_path, content_hash FROM raw_records WHERE source_type = 'web'").get();
@@ -136,7 +136,7 @@ test('AC2: every saved image has a complete media row and a slug filename; a sec
   const filesBefore = fs.readdirSync(record.media_dir).sort();
   const stepsBefore = imageSteps(fx.db).map((step) => [step.ref, step.status]);
 
-  runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
+  await runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
 
   assert.equal(mediaRows(fx.db).length, 1, 'no duplicate media rows');
   assert.deepEqual(fs.readdirSync(record.media_dir).sort(), filesBefore, 'no -img-1-1 duplicates');
@@ -144,12 +144,12 @@ test('AC2: every saved image has a complete media row and a slug filename; a sec
   assert.deepEqual(imageSteps(fx.db).map((step) => [step.ref, step.status]), stepsBefore);
 });
 
-test('AC2: numbering follows the image occurrence, stable and gap-tolerant', () => {
+test('AC2: numbering follows the image occurrence, stable and gap-tolerant', async () => {
   assert.equal(mediaFileName('gdansk-stocznia', 0, 'png'), 'gdansk-stocznia-img-01.png');
   assert.equal(mediaFileName('gdansk-stocznia', 4, 'jpeg'), 'gdansk-stocznia-img-05.jpg');
 });
 
-test('AC3: the markdown image sits at the paragraph index where it appeared', () => {
+test('AC3: the markdown image sits at the paragraph index where it appeared', async () => {
   const dir = makeTempDir();
   const fx = imageFixture(
     dir,
@@ -161,7 +161,7 @@ test('AC3: the markdown image sits at the paragraph index where it appeared', ()
     ].map((block) => block.replace('IMG_URL', pathToFileURL(path.join(dir, 'gate-300x200.png')).href)),
     { imageFiles: { 'gate-300x200.png': pngBytes(300, 200) } }
   );
-  runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
+  await runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
 
   const [row] = mediaRows(fx.db);
   const blocks = fs.readFileSync(path.join(fx.db.prepare("SELECT snapshot_path FROM raw_records WHERE source_type = 'web'").get().snapshot_path, 'text.md'), 'utf8')
@@ -173,7 +173,7 @@ test('AC3: the markdown image sits at the paragraph index where it appeared', ()
   assert.ok(blocks[1].startsWith('Paragraph one'), 'paragraph one stays block 1');
 });
 
-test('AC4: the same image on two articles → equal hashes, each article keeps its own copy', () => {
+test('AC4: the same image on two articles → equal hashes, each article keeps its own copy', async () => {
   const dir = makeTempDir();
   const photo = pngBytes(640, 480);
   fs.writeFileSync(path.join(dir, 'shared-640x480.png'), photo);
@@ -190,7 +190,7 @@ test('AC4: the same image on two articles → equal hashes, each article keeps i
   const parsed = parseCampaign(source);
   assert.ok(parsed.ok, parsed.diagnostics?.join('\n'));
   const db = openStore(path.join(dir, 'db.sqlite'));
-  runCampaign(db, parsed.campaign, { sourcePath: file, contentHash: sha256Hex(source), snapshotsRoot: path.join(dir, 'snapshots') });
+  await runCampaign(db, parsed.campaign, { sourcePath: file, contentHash: sha256Hex(source), snapshotsRoot: path.join(dir, 'snapshots') });
 
   const rows = mediaRows(db);
   assert.equal(rows.length, 2, 'one row per article');
@@ -201,7 +201,7 @@ test('AC4: the same image on two articles → equal hashes, each article keeps i
   }
 });
 
-test('AC5: broken image URLs fail their own step with a diagnostic; the run continues', () => {
+test('AC5: broken image URLs fail their own step with a diagnostic; the run continues', async () => {
   const dir = makeTempDir();
   fs.writeFileSync(path.join(dir, 'corrupt.png'), 'this is not an image at all');
   const fx = imageFixture(
@@ -213,7 +213,7 @@ test('AC5: broken image URLs fail their own step with a diagnostic; the run cont
     ],
     {}
   );
-  const run = runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
+  const run = await runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
   assert.equal(run.failed, 3, 'each broken image fails its own step');
   assert.ok(run.done >= 1, 'the seed step itself completed — the run continues');
 
@@ -229,14 +229,14 @@ test('AC5: broken image URLs fail their own step with a diagnostic; the run cont
   assert.ok(!text.includes('](media/'), 'no dangling markdown references');
 });
 
-test('AC2 resume: a step re-run after a mid-step crash converges — no duplicate rows, no lost markdown', () => {
+test('AC2 resume: a step re-run after a mid-step crash converges — no duplicate rows, no lost markdown', async () => {
   const dir = makeTempDir();
   const fx = imageFixture(
     dir,
     [P(`Photo <img src="${pathToFileURL(path.join(dir, 'snap-500x400.png')).href}" alt="Snap" title="Yard"> here.`)],
     { imageFiles: { 'snap-500x400.png': pngBytes(500, 400) } }
   );
-  runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
+  await runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
   const record = fx.db.prepare("SELECT snapshot_path FROM raw_records WHERE source_type = 'web'").get();
   const mdPath = path.join(record.snapshot_path, 'text.md');
 
@@ -260,14 +260,14 @@ test('AC2 resume: a step re-run after a mid-step crash converges — no duplicat
     );
   fs.writeFileSync(mdPath, fs.readFileSync(mdPath, 'utf8').split('\n\n').filter((block) => !block.startsWith('![')).join('\n\n'));
 
-  const run = runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
+  const run = await runCampaign(fx.db, fx.campaign, { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot });
   assert.equal(run.done, 1, 'the interrupted image step is re-claimed and completes');
   assert.equal(mediaRows(fx.db).length, 1, 'exactly one media row');
   const blocks = fs.readFileSync(mdPath, 'utf8').trim().split('\n\n');
   assert.equal(blocks.filter((block) => block.startsWith('![')).length, 1, 'exactly one markdown image');
 });
 
-test('probeImage reads exact dimensions from container headers and rejects anything else', () => {
+test('probeImage reads exact dimensions from container headers and rejects anything else', async () => {
   assert.deepEqual(probeImage(pngBytes(200, 120)), { format: 'png', width: 200, height: 120 });
   assert.deepEqual(probeImage(gifBytes(150, 150)), { format: 'gif', width: 150, height: 150 });
   assert.deepEqual(probeImage(jpegBytes(640, 480)), { format: 'jpeg', width: 640, height: 480 });
@@ -278,7 +278,7 @@ test('probeImage reads exact dimensions from container headers and rejects anyth
   assert.equal(probeImage('not bytes'), null);
 });
 
-test('extractPage: image sources resolve against the page, captions come from figcaption, srcless tags are skipped', () => {
+test('extractPage: image sources resolve against the page, captions come from figcaption, srcless tags are skipped', async () => {
   const base = 'https://news.example/gdansk/yard.html';
   const page = extractPage(
     [

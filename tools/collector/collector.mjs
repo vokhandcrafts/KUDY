@@ -37,7 +37,10 @@ function openStoreOrExit(dbPath) {
   }
 }
 
-export function main(argv) {
+// export function main(argv) → async: the wiki handlers (G17.04) await their
+// transport, so the run command awaits the campaign loop. The CLI guard below
+// converts a rejected run into the exit-2 diagnostic path.
+export async function main(argv) {
   let parsed;
   try {
     parsed = parseArgs({
@@ -85,7 +88,7 @@ export function main(argv) {
     const db = openStoreOrExit(dbPath);
     // Snapshots live next to the database, one campaign subdir per db.
     const snapshotsRoot = path.join(path.dirname(dbPath), 'snapshots');
-    const run = runCampaign(db, result.campaign, {
+    const run = await runCampaign(db, result.campaign, {
       sourcePath: file,
       contentHash: sha256Hex(source),
       snapshotsRoot,
@@ -115,5 +118,5 @@ export function main(argv) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main(process.argv.slice(2));
+  main(process.argv.slice(2)).catch((error) => fail(error.message, 2));
 }

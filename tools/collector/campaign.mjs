@@ -4,6 +4,11 @@
 // values are the crawler fence (G17.02 consumes them unchanged): depth counts
 // hops from a seed, extra_domains widens the same-domain rule, delay_s is the
 // [min, max] politeness delay in seconds.
+//
+// The optional wiki block (G17.04, spec «Энцыклапедыі і вікі») carries the
+// MediaWiki api.php endpoint, the article/category lists and the category
+// expansion depth (levels: 1 — listed categories only, 2 — plus their
+// in-topic subcategories). The topic filter itself is the campaign's topics.
 import { z } from 'zod';
 import { parse as parseYaml } from 'yaml';
 
@@ -19,6 +24,17 @@ export const campaignSchema = z.strictObject({
       .refine(([min, max]) => min <= max, { message: 'delay_s must be [min, max] with min <= max' }),
   }),
   youtube: z.array(z.string().regex(/^[A-Za-z0-9_-]{11}$/)).default([]),
+  wiki: z
+    .strictObject({
+      api: z.url(),
+      articles: z.array(z.string().min(1)).default([]),
+      categories: z.array(z.string().min(1)).default([]),
+      depth: z.number().int().min(1),
+    })
+    .refine((wiki) => wiki.articles.length > 0 || wiki.categories.length > 0, {
+      message: 'list at least one article or category',
+    })
+    .optional(),
 });
 
 // One diagnostic per issue, each naming the offending field ("campaign.fence.depth: …"),

@@ -72,6 +72,42 @@ test('youtube ids outside the 11-char video-id shape are rejected naming the fie
   assert.ok(parsed.diagnostics.some((line) => line.startsWith('campaign.youtube.')));
 });
 
+// G17.04: the optional wiki block — MediaWiki api.php endpoint, article and
+// category lists, category-expansion depth in levels.
+const wikiYaml = [
+  'wiki:',
+  '  api: https://pl.wikipedia.org/w/api.php',
+  '  depth: 2',
+  '  articles:',
+  '    - Gdańsk',
+  '  categories:',
+  '    - Category:Historia Gdańska',
+].join('\n');
+
+test('the wiki block parses with its defaults; a campaign without wiki keeps parsing', () => {
+  const parsed = parseCampaign(campaignYaml({ wiki: wikiYaml }));
+  assert.ok(parsed.ok, parsed.diagnostics?.join('\n'));
+  assert.deepEqual(parsed.campaign.wiki, {
+    api: 'https://pl.wikipedia.org/w/api.php',
+    articles: ['Gdańsk'],
+    categories: ['Category:Historia Gdańska'],
+    depth: 2,
+  });
+  const plain = parseCampaign(campaignYaml());
+  assert.ok(plain.ok, plain.diagnostics?.join('\n'));
+  assert.equal(plain.campaign.wiki, undefined, 'no wiki block → no wiki steps');
+});
+
+test('invalid wiki blocks are rejected naming the field', () => {
+  expectRejections([
+    // Neither articles nor categories: nothing to collect.
+    [{ wiki: 'wiki:\n  api: https://pl.wikipedia.org/w/api.php\n  depth: 1' }, 'campaign.wiki'],
+    [{ wiki: 'wiki:\n  api: https://pl.wikipedia.org/w/api.php\n  articles:\n    - Gdańsk\n  depth: 0' }, 'campaign.wiki.depth'],
+    [{ wiki: 'wiki:\n  api: not-a-url\n  articles:\n    - Gdańsk\n  depth: 1' }, 'campaign.wiki.api'],
+    [{ wiki: 'wiki:\n  api: https://pl.wikipedia.org/w/api.php\n  articles:\n    - Gdańsk\n  depth: 1\n  extra: 1' }, 'campaign.wiki'],
+  ]);
+});
+
 test('unknown keys are rejected naming the field (typo protection)', () => {
   const parsed = parseCampaign(campaignYaml() + 'cit: gdansk\n');
   assert.equal(parsed.ok, false);
