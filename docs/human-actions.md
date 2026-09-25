@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-25 — Чыстка гісторыі: падтрымка GitHub і git config на Windows
+Што зрабіце: 1) дашліце запыт у GitHub Support (https://support.github.com/request, «Remove data from GitHub») на вычышчанне недасяжных камітаў — у закрытых PR трох рэпаў старыя каміты з viktar.kamylevich@seranking.com застаюцца даступнымі праз refs/pull/* і кэш, пакуль GitHub іх не счасце. 2) На Windows-машыне заменіце `git config --global user.email` на `293595955+vokhandcrafts@users.noreply.github.com` — seranking-адрас прыехаў у гісторыю адтуль; на гэтай машыне лакальныя канфігі ўжо выстаўлены. Бэкап старой гісторыі да перапісу: /home/viktar/backups/repo-rewrite-2026-09-25/.
+PR: няма (пераюз гісторыі: KUDY main 3f85707, ai-company-infrastructure main 9558bda, vok-handcrafts main c6ef4b0)
+
 ### 2026-09-25 — CI: аднавіць білінг GitHub Actions
 Што зрабіце: адкрыйце «Billing & plans» у наладах акаўнта GitHub і ўхваліце правальны платзеж або падыміце spending limit — усё CI падае на старце без ніводнага кроку з анатацыяй «The job was not started because recent account payments have failed or your spending limit needs to be increased», таму мержы ўсіх адкрытых PR заблакаваны (лакальныя гейты на галінках пры гэтым зялёныя).
 PR: https://github.com/vokhandcrafts/KUDY/pull/258 (блакуе таксама астатнія адкрытыя PR)
