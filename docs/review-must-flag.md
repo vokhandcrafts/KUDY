@@ -36,3 +36,10 @@
   Выпраўлена: tools/collector/youtube.test.mjs, negative-тэсты
   YouTube-калектара (cue-less VTT праз пайплайн, runJson без JSON, parseVtt) —
   issue #264.
+
+- key: missing-cli-stop-test — паводзіны, што праяўляюцца на ўзроўні CLI
+  (радок на stderr, код выхаду), маюць уласны кейс у cli-тэсце, а не толькі
+  тэст бібліятэчнага ўзроўню: калі радок вываду або код выхаду адкаціць,
+  сутыкавы тэст павінен упасці.
+  Выпраўлена: tools/collector/cli.test.mjs, тэст stopped-рану на серыі
+  памылак — issue #259.

@@ -6,18 +6,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { chromium } from 'playwright';
 import { createBrowserFetchPage } from './netfetch.mjs';
-import { articleHtml, makeTempDir, startFixtureServer } from './testkit.mjs';
-
-async function skipWithoutBrowser(t) {
-  const executable = chromium.executablePath();
-  if (!fs.existsSync(executable)) {
-    t.skip(`chromium binary is not installed (${executable}) — run: npx playwright install chromium`);
-    return false;
-  }
-  return true;
-}
+import { articleHtml, makeTempDir, skipWithoutBrowser, startFixtureServer } from './testkit.mjs';
 
 test('live: the browser fetcher downloads a fixture page through chromium', async (t) => {
   if (!(await skipWithoutBrowser(t))) return;

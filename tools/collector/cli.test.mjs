@@ -1,15 +1,38 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { articleHtml, campaignYaml, makeTempDir, writeCampaignFile } from './testkit.mjs';
+import { ERROR_SERIES_LIMIT } from './crawler.mjs';
+import { articleHtml, articlePage, campaignYaml, makeTempDir, skipWithoutBrowser, startFixtureServer, writeCampaignFile } from './testkit.mjs';
 
 const cliPath = fileURLToPath(new URL('./collector.mjs', import.meta.url));
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], { encoding: 'utf8' });
+}
+
+// Async CLI run for tests that keep a live fixture server in this process:
+// spawnSync would block this event loop and the server could never answer the
+// browser's requests from the CLI's child process. Chunks are collected as
+// buffers and decoded once at close — `encoding` is a spawnSync-only option,
+// and per-chunk decoding would split a multibyte character at a chunk boundary.
+function runCliAsync(args) {
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, [cliPath, ...args]);
+    const stdout = [];
+    const stderr = [];
+    child.stdout.on('data', (chunk) => { stdout.push(chunk); });
+    child.stderr.on('data', (chunk) => { stderr.push(chunk); });
+    child.on('close', (status) =>
+      resolve({
+        status,
+        stdout: Buffer.concat(stdout).toString('utf8'),
+        stderr: Buffer.concat(stderr).toString('utf8'),
+      })
+    );
+  });
 }
 
 test('init creates the schema and reports the database path', () => {
@@ -140,6 +163,33 @@ test('a rejected run converts to the exit-2 diagnostic path (the main().catch gu
   } finally {
     fs.chmodSync(dbDir, 0o755);
   }
+});
+
+test('run on an error series prints the stopped diagnostic on stderr and still exits 0', async (t) => {
+  if (!(await skipWithoutBrowser(t))) return;
+  const dir = makeTempDir();
+  const server = await startFixtureServer({
+    // Seed and /d exist; /a, /b, /c are absent → three consecutive 404s stop
+    // the run inside runCampaign while /d stays queued (pending, not drained).
+    '/start': articlePage('Start', [['/a', 'first'], ['/b', 'second'], ['/c', 'third'], ['/d', 'fourth']]),
+    '/d': articlePage('Fourth', []),
+  });
+  t.after(() => server.close());
+  const file = writeCampaignFile(
+    dir,
+    campaignYaml({ seeds: `seeds:\n  - ${server.url('/start')}`, delay_s: 'delay_s: [0.05, 0.1]' })
+  );
+
+  const result = await runCliAsync(['run', '--campaign', file, '--db', path.join(dir, 'db.sqlite')]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(
+    result.stderr,
+    new RegExp(
+      `collector: run stopped — error series: ${ERROR_SERIES_LIMIT} consecutive fetch failures, ` +
+        `last at ${server.url('/c')} \\(HTTP 404\\)`
+    )
+  );
+  assert.match(result.stdout, /steps done 1, failed 3, running 0, pending 1/);
 });
 
 test('unknown command and missing --campaign answer with usage, exit 2', () => {

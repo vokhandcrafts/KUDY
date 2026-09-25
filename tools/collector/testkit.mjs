@@ -116,6 +116,23 @@ export function articleHtml({
   ].join('\n');
 }
 
+// Filler paragraphs padding a fixture page past the article heuristic's
+// minimum (crawler and CLI suites).
+const FILLERS = [
+  '<p>First filler paragraph with plain text.</p>',
+  '<p>Second filler paragraph with plain text.</p>',
+  '<p>Third filler paragraph with plain text.</p>',
+];
+
+// An article-shaped fixture page: every link gets its own paragraph, padded
+// past the article heuristic's minimum so classification never misfires.
+export function articlePage(title, hrefs = []) {
+  return articleHtml({
+    title,
+    body: [...hrefs.map(([href, text]) => `<p>Read the <a href="${href}">${text}</a> page.</p>`), ...FILLERS],
+  });
+}
+
 // Minimal container headers with exact pixel dimensions — the media probe
 // reads only these bytes, so no real image data is needed. G17.03 fixtures.
 export function pngBytes(width, height) {
@@ -188,6 +205,26 @@ export async function httpFetchPage(url) {
   const response = await fetch(url, { redirect: 'follow' });
   if (response.status >= 400) throw new Error(`HTTP ${response.status}`);
   return { html: await response.text(), finalUrl: response.url };
+}
+
+// Skip guard for suites that drive real chromium (the netfetch live suite,
+// the CLI run test): CI installs the playwright npm package but not the
+// browser binary (implementation-rules 7). Returns true when the test may
+// proceed; otherwise the test is skipped with a visible reason.
+export async function skipWithoutBrowser(t) {
+  let executable;
+  try {
+    const { chromium } = await import('playwright');
+    executable = chromium.executablePath();
+  } catch {
+    t.skip('playwright is not installed — run: npx playwright install chromium');
+    return false;
+  }
+  if (!fs.existsSync(executable)) {
+    t.skip(`chromium binary is not installed (${executable}) — run: npx playwright install chromium`);
+    return false;
+  }
+  return true;
 }
 
 // Bundled subtitle fixtures for the YouTube suites (G17.05): no network — the

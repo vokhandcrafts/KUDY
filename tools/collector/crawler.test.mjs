@@ -15,22 +15,7 @@ import { ERROR_SERIES_LIMIT, MIN_ARTICLE_PARAGRAPHS, createPoliteness, parseCraw
 import { createAuditWriter, fenceHosts, hostAllowed, serializeAuditLine } from './fence.mjs';
 import { defaultHandlers, runCampaign } from './runloop.mjs';
 import { countRows, enqueueStep, ensureCampaign, openStore, sha256Hex, stepStatusCounts } from './store.mjs';
-import { articleHtml, campaignYaml, httpFetchPage, makeTempDir, openCampaignFixture, startFixtureServer, writeCampaignFile } from './testkit.mjs';
-
-const FILLERS = [
-  '<p>First filler paragraph with plain text.</p>',
-  '<p>Second filler paragraph with plain text.</p>',
-  '<p>Third filler paragraph with plain text.</p>',
-];
-
-// An article-shaped fixture page: every link gets its own paragraph, padded
-// past the article heuristic's minimum so classification never misfires.
-function articlePage(title, hrefs = []) {
-  return articleHtml({
-    title,
-    body: [...hrefs.map(([href, text]) => `<p>Read the <a href="${href}">${text}</a> page.</p>`), ...FILLERS],
-  });
-}
+import { articleHtml, articlePage, campaignYaml, httpFetchPage, makeTempDir, openCampaignFixture, startFixtureServer, writeCampaignFile } from './testkit.mjs';
 
 // Shared arrangement: fixture server + campaign on it + a run() bound to the
 // production pipeline with the test fetchPage. Default politeness is fast;
