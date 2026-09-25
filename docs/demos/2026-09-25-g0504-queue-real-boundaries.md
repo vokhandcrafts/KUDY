@@ -11,15 +11,15 @@ scenario suite and then the proof the task demands: making the deferred-play
 check read the fix that triggered the queue instead of the latest accepted fix
 must turn the walked-away test red.
 
-The full scenario suite (the six acceptance criteria, 9 tests):
+The full scenario suite (the six acceptance criteria, 10 tests):
 
 ```sh
 node --test --experimental-strip-types --test-reporter=spec controllers/run/runOrchestrator.test.ts 2>/dev/null | grep -E "^ℹ (tests|pass|fail)"
 ```
 
 ```output
-ℹ tests 9
-ℹ pass 9
+ℹ tests 10
+ℹ pass 10
 ℹ fail 0
 ```
 

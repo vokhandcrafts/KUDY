@@ -116,10 +116,22 @@ export class RunOrchestrator {
   // 19 §4.3: a repeated Start after End opens a fresh session (new session
   // row, new session_id) — the reducer accepts Start only from Idle, so the
   // Ended mirror and the pipeline's smoothing window are reset here first. A
-  // Start while a session is live stays the reducer's no-op (one live session,
-  // ADR G01.03 §3.1).
+  // moment launch survives End (ADR G01.02 §3.8): the fresh session inherits
+  // the occupied player through Start's playingNow, or the first guide launch
+  // would stop a sounding moment by command — the Start contract forbids that
+  // (ADR §3.3). A Start while a session is live stays the reducer's no-op
+  // (one live session, ADR G01.03 §3.1).
   start(sessionId: string, accessibleStopIds?: ReadonlyArray<string>): void {
+    let playingNow: { momentId: string; storyId: string; seq: number } | undefined;
     if (this.engineState.phase === 'Ended') {
+      const ended = this.engineState;
+      if (ended.playing?.owner === 'moment') {
+        playingNow = {
+          momentId: ended.playing.momentId,
+          storyId: ended.playing.storyId,
+          seq: ended.playing.seq,
+        };
+      }
       this.engineState = initialRunState;
       this.pipelineState = initialPipelineState;
     }
@@ -132,6 +144,7 @@ export class RunOrchestrator {
       locale: this.route.locale,
       tier: this.route.tier,
       accessibleStopIds: [...ids],
+      ...(playingNow ? { playingNow } : {}),
       stops: this.stops.map(({ stopId, storyBaseId, storyExtendedId }) => ({
         stopId,
         storyBaseId,

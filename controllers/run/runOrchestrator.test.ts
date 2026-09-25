@@ -86,9 +86,19 @@ const queuedStop = (s: RunSessionState): string | null => s.queued?.stopId ?? nu
 const playingStopId = (s: RunSessionState): string | null =>
   s.playing && s.playing.owner === 'guide' ? s.playing.stopId : null;
 
+// The subscription the service currently holds: every arm mints the next
+// generation, so a scenario that re-Starts the session must deliver on the
+// fresh one (a fix of a stopped subscription is dropped by the service).
+const currentSub = (h: Harness): number => {
+  const starts = h.locationPort.commands.filter((command) => command.startsWith('start '));
+  const last = starts[starts.length - 1];
+  if (last === undefined) throw new Error('the location service never armed');
+  return Number(last.slice('start '.length));
+};
+
 const deliver = (h: Harness, lat: number, lng: number): void => {
   const raw: FixInput = { lat, lng, accuracy: 5, at: h.clock.now() };
-  h.locationPort.emitFix(1, raw);
+  h.locationPort.emitFix(currentSub(h), raw);
 };
 
 // Three consecutive fixes at one point: the smoothing window then averages to
@@ -288,4 +298,27 @@ test('criterion 6: a late audio callback from before a Pause, an End or a new St
   assert.equal(state.sessionId, 'walk-2');
   assert.deepEqual([...state.heard], []);
   assert.equal(state.queued, null);
+});
+
+test('criterion 6: a Start after End inherits a still-sounding moment into the fresh session', () => {
+  const h = harness();
+  deliver(h, 0, 0); // A plays (guide, key 1)
+  h.orchestrator.playMoment('moment-9', 'story-m9'); // the moment takes the player (key 2)
+  h.orchestrator.end(); // the moment keeps sounding through End (ADR G01.02 §3.8)
+  h.orchestrator.start('walk-2');
+  const state = h.orchestrator.state;
+  if (state.phase === 'Idle') throw new Error('no session after Start');
+  assert.equal(state.phase, 'Active');
+  // The occupied player is injected as playingNow — the fresh session waits
+  // for it instead of stealing it with a guide launch.
+  assert.deepEqual(state.playing, {
+    owner: 'moment',
+    momentId: 'moment-9',
+    storyId: 'story-m9',
+    seq: 1,
+    paused: false,
+  });
+  dwellAt(h, 0.0009, 0, 35_000);
+  assert.equal(queuedStop(live(h)), 'b'); // the trigger queues behind the moment
+  assert.equal(playingStopId(live(h)), null);
 });
