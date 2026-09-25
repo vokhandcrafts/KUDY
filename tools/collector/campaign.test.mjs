@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCampaign } from './campaign.mjs';
+import { readFileSync } from 'node:fs';
+import { parse as parseYaml } from 'yaml';
+import { campaignSchema, parseCampaign } from './campaign.mjs';
 import { campaignYaml } from './testkit.mjs';
 
 // One assert per case: the campaign must be rejected and at least one
@@ -142,4 +144,26 @@ test('empty and non-mapping inputs are rejected with diagnostics', () => {
     assert.equal(parsed.ok, false);
     assert.ok(parsed.diagnostics.length > 0);
   }
+});
+
+// Issue #260: the canonical «Кампанія» block in docs/24 is the template an
+// author copies into a campaign file — it must carry every key the schema
+// accepts for the copy flow, and never invent keys the strictObject schema
+// rejects. Removing a key from the block (or adding an unknown one) fails here.
+test('the canonical campaign YAML block in docs/24 stays in sync with the schema', () => {
+  const doc = readFileSync(new URL('../../docs/24_web_collection.md', import.meta.url), 'utf8');
+  const section = doc.slice(doc.indexOf('## Кампанія'));
+  const block = section.match(/```yaml\n([\s\S]*?)```/)?.[1];
+  assert.ok(block, 'the «Кампанія» section carries a yaml block');
+  const keys = Object.keys(parseYaml(block));
+  assert.ok(
+    keys.includes('browser_user_data_dir'),
+    'docs/24 canonical block omits browser_user_data_dir'
+  );
+  const schemaKeys = Object.keys(campaignSchema.shape);
+  assert.deepEqual(
+    keys.filter((key) => !schemaKeys.includes(key)),
+    [],
+    'docs/24 canonical block invents keys the schema rejects'
+  );
 });

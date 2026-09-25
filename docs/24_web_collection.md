@@ -35,6 +35,7 @@ seeds:
 topics: [architecture, history]
 fence: { depth: 3, extra_domains: [], delay_s: [2, 5] }
 youtube: [<ідэнтыфікатары відэа>]
+browser_user_data_dir: <шлях да профілю браўзера>  # неабавязкова: профіль з сесіяй лагіну для сайтаў з уваходам
 ```
 
 ## Пашпарт запісу (RawRecord)
