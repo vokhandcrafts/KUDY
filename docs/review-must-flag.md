@@ -36,10 +36,10 @@
   Выпраўлена: tools/collector/youtube.test.mjs, negative-тэсты
   YouTube-калектара (cue-less VTT праз пайплайн, runJson без JSON, parseVtt) —
   issue #264; tools/collector/clean.test.mjs — пашкоджаны metadata.json
-  (абарваны JSON і валидны не-аб'ект) і ахова «rules drop every block»
+  (абарваны JSON і валідны не-аб'ект) і ахова «rules drop every block»
   праз cleanCampaign — PR #271.
 
-- key: stale-skip-count — лічыльнік пропушчанага ў зводцы мае раіць
+- key: stale-skip-count — лічыльнік пропушчанага ў зводцы мае адлюстроўваць
   актуальны стан, а не гістарычны: пасля ўдачнай паўторнай спробы запіс
   больш не лічыцца пропушчаным. Лічыць па апошнім кроку запісу (напрыклад,
   MAX(id) па recordId), не ўсе fail-радкі ўвогуле.

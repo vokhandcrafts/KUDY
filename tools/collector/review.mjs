@@ -47,14 +47,17 @@ function citationBlock({ record, title }) {
 
 export function exportReviewBundle(db, campaignId, { reviewDir } = {}) {
   const records = cleanedRecordsForReview(db, campaignId);
+  // Read every cleaned text before touching the directory: an export that
+  // fails midway (a cleaned file the row knows is missing on disk) must
+  // leave the previous bundle intact, not half-destroy it.
+  const documents = records.map((record) => ({ record, cleanedText: fs.readFileSync(record.path, 'utf8') }));
   // The bundle is the tool's own derived output: a re-export starts from an
   // empty directory, so the files of superseded versions never linger beside
   // the ones the index lists. Nothing outside review/ is ever touched.
   fs.rmSync(reviewDir, { recursive: true, force: true });
   fs.mkdirSync(reviewDir, { recursive: true });
   const entries = [];
-  for (const record of records) {
-    const cleanedText = fs.readFileSync(record.path, 'utf8');
+  for (const { record, cleanedText } of documents) {
     const title = cleanedText.match(/^title: (.*)$/m)?.[1] ?? record.url;
     const file = `${slugify(title)}-${record.id.slice(0, 8)}-v${record.version}.md`;
     const document = citationBlock({ record, title })
