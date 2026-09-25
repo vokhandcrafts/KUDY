@@ -218,6 +218,17 @@ test('criterion 4: after a manual pause, a call or an explicit Moment play a tri
   assert.equal(live(moment).queued, null);
 });
 
+test('criterion 4: a finished Moment frees the player — after GuideResume the next GPS trigger plays, not queues', () => {
+  const h = harness();
+  deliver(h, 0, 0); // A plays (guide, key 1)
+  h.orchestrator.playMoment('moment-9', 'story-m9'); // takes the player (key 2)
+  h.audioPort.finish(2); // the moment finishes end to end
+  assert.equal(live(h).playing, null); // the mirror freed — MomentFinished was dispatched
+  h.orchestrator.guideResume(); // «Працягнуць гід» — the single way back to automation
+  dwellAt(h, 0.0009, 0, 35_000); // the next GPS trigger
+  assert.equal(playingStopId(live(h)), 'b'); // plays — not queued behind a dead launch
+});
+
 test('criterion 5: a manual tap and a GPS trigger enter step() through the same path — identical command streams', () => {
   const byGps = harness();
   deliver(byGps, 0, 0);
@@ -264,14 +275,17 @@ test('criterion 6: a late audio callback from before a Pause, an End or a new St
   replay.audioPort.finish(2); // the live source credits
   assert.deepEqual([...live(replay).heard], ['a']);
 
-  // After End and a new Start the old tag belongs to a dead session.
+  // After End and a new Start the old tag belongs to a dead session — and the
+  // new Start really opens one (19 §4.3: a fresh session_id, not a no-op).
   const afterEnd = harness();
   deliver(afterEnd, 0, 0);
   afterEnd.orchestrator.end();
   afterEnd.orchestrator.start('walk-2');
   afterEnd.audioPort.finish(1);
   const state = afterEnd.orchestrator.state;
-  assert.ok(state.phase !== 'Idle');
+  if (state.phase === 'Idle') throw new Error('no session after Start');
+  assert.equal(state.phase, 'Active');
+  assert.equal(state.sessionId, 'walk-2');
   assert.deepEqual([...state.heard], []);
   assert.equal(state.queued, null);
 });

@@ -8,10 +8,12 @@
 // would have to decide is a gap to fix in step() with its own test.
 //
 // Deliberate wiring decisions, recorded once:
-// 1. The audio service's `paused`/`resumed` events are echoes of commands this
-//    orchestrator itself issued (pause()/resume()): the engine state already
-//    committed at the intent (UserPausedAudio/ResumeAudio), so the echo is
-//    never dispatched — a second dispatch would double-apply the transition.
+// 1. The audio service's `paused`/`resumed` events reach nobody here: the
+//    orchestrator issues them itself (pause()/resume()) and the engine state
+//    already committed at the intent (UserPausedAudio/ResumeAudio) — a second
+//    dispatch would double-apply the transition. A physical pause WITHOUT a
+//    focus loss (the adapter's own source event, G05.03.b) has no engine event
+//    yet; its mapping is that adapter's contract decision, out of scope here.
 // 2. A rejected fix dispatches nothing: the pipeline returns the previous
 //    state and no events, so the engine's last_fix keeps the last ACCEPTED
 //    position (criterion 3 — a spike fix cannot unlock a deferred play).
@@ -23,7 +25,8 @@
 //    engine's own SetGeofenceWindow commands (AccessReady, Resume) — the
 //    orchestrator never recomputes eligibility itself.
 // 5. The moment token is minted here (ADR G01.02 §3.2 — the controller mints,
-//    the engine validates the echo) with a process-wide monotonic seq.
+//    the engine validates the echo) with an instance-scoped monotonic seq
+//    (the composition root holds one controller per process).
 // 6. Commands with no consumer in this layer (ScheduleTimer, CancelTimer,
 //    PersistProgress, EmitEvent, ShowArrivalCard) are G05.05's persistence,
 //    telemetry and UI surface — deliberately dropped here, not silently lost:
@@ -110,8 +113,16 @@ export class RunOrchestrator {
     return this.engineState;
   }
 
-  // 19 §4.3: the session opens, then the location arms and the window seeds.
+  // 19 §4.3: a repeated Start after End opens a fresh session (new session
+  // row, new session_id) — the reducer accepts Start only from Idle, so the
+  // Ended mirror and the pipeline's smoothing window are reset here first. A
+  // Start while a session is live stays the reducer's no-op (one live session,
+  // ADR G01.03 §3.1).
   start(sessionId: string, accessibleStopIds?: ReadonlyArray<string>): void {
+    if (this.engineState.phase === 'Ended') {
+      this.engineState = initialRunState;
+      this.pipelineState = initialPipelineState;
+    }
     const ids = accessibleStopIds ?? this.stops.map((stop) => stop.stopId);
     this.dispatch({
       type: 'Start',
@@ -192,10 +203,27 @@ export class RunOrchestrator {
 
   // The physical channel: tagged audio callbacks map onto the engine's event
   // names. The guide token IS the accepted (session_id, play_id) pair
-  // (ADR G01.02 §3.2), so `finished` unpacks it verbatim.
+  // (ADR G01.02 §3.2), so `finished` unpacks it verbatim; a moment launch's
+  // finish is the engine's MomentFinished — dispatching AudioFinished for it
+  // would be rejected by the owner rules and leave a dead launch in the
+  // mirror, silencing the guide automation until a manual tap.
   private onAudioEvent(event: AudioServiceEvent): void {
     switch (event.type) {
       case 'finished':
+        if (event.token.kind === 'moment') {
+          // The event's storyId is payload the engine's rejection rule never
+          // reads; the mirror supplies it when the launch is still there.
+          const session = this.engineState;
+          const storyId =
+            session.phase !== 'Idle' && session.playing?.owner === 'moment' ? session.playing.storyId : '';
+          this.dispatch({
+            type: 'MomentFinished',
+            token: event.token,
+            momentId: event.token.ref,
+            storyId,
+          });
+          return;
+        }
         this.dispatch({ type: 'AudioFinished', sessionId: event.token.ref, playId: event.token.seq });
         return;
       case 'story_play_failed':
@@ -227,8 +255,10 @@ export class RunOrchestrator {
           void this.audio.play({ token: command.token, path: command.path });
           break;
         case 'PlayMoment':
-          // The moment path is a content-resolution concern (G05.05); the
-          // command carries it when the caller knows it.
+          // The moment path is a content-resolution concern (G05.05): until a
+          // resolver is injected the launch goes out with an empty path, so a
+          // real adapter fails it (story_play_failed suspends automation) —
+          // the safe failure, never a silently successful fake.
           void this.audio.play({ token: command.token, path: command.path ?? '' });
           break;
         case 'StopAudio':
@@ -254,6 +284,12 @@ export class RunOrchestrator {
         case 'EmitEvent':
         case 'ShowArrivalCard':
           break; // G05.05: persistence, telemetry and UI surface — see header note 6
+        default: {
+          // The compile-visible guard note 6 promises: a new RunCommand variant
+          // must be decided here, not silently dropped.
+          const unhandled: never = command;
+          throw new Error(`unhandled run command: ${JSON.stringify(unhandled)}`);
+        }
       }
     }
   }
