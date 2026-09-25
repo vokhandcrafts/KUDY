@@ -449,6 +449,24 @@ test('a re-export after a new cleaned version leaves no stale bundle files', () 
   assert.ok(entries[0].file.includes('-v2.md'), `the bundle lists the latest version: ${entries[0].file}`);
 });
 
+test('a failing export leaves the previous bundle intact (the read-before-refresh order)', () => {
+  const dir = makeTempDir();
+  const { db, snapshotDir } = arrangeCollectedRecord(dir);
+  const reviewDir = path.join(dir, 'review');
+  cleanCampaign(db, 'c1');
+  exportReviewBundle(db, 'c1', { reviewDir });
+  const bundleBefore = fs.readdirSync(reviewDir).sort().map((file) => [file, sha256Hex(fs.readFileSync(path.join(reviewDir, file)))]);
+
+  // The cleaned document vanishes from disk (the DB row still names it): the
+  // export must fail with a diagnostic AND leave the old bundle untouched —
+  // reverting the read-before-refresh order (wipe first, read after) fails
+  // this test with an emptied review/ directory.
+  fs.rmSync(path.join(snapshotDir, 'cleaned'), { recursive: true, force: true });
+  assert.throws(() => exportReviewBundle(db, 'c1', { reviewDir }), /no such file or directory/);
+  const bundleAfter = fs.readdirSync(reviewDir).sort().map((file) => [file, sha256Hex(fs.readFileSync(path.join(reviewDir, file)))]);
+  assert.deepEqual(bundleAfter, bundleBefore, 'the previous bundle survived the failed export');
+});
+
 test('CLI: clean and export-review on a never-run campaign answer with a diagnostic, exit 1', () => {
   const dir = makeTempDir();
   const campaignFile = writeCampaignFile(dir, campaignYaml({ youtube: null }));
