@@ -6,8 +6,9 @@
 // review/index.md lists every record's latest cleaned version, and each
 // document file opens with the visible citation (source URL + collection
 // date) the acceptance pass quotes. The bundle is derived output: re-running
-// the export rewrites it deterministically and never touches raw or cleaned
-// files.
+// the export regenerates it from an empty directory (the files of superseded
+// versions never linger), deterministically, and never touches raw or
+// cleaned files.
 import fs from 'node:fs';
 import path from 'node:path';
 import { slugify } from './snapshot.mjs';
@@ -46,6 +47,10 @@ function citationBlock({ record, title }) {
 
 export function exportReviewBundle(db, campaignId, { reviewDir } = {}) {
   const records = cleanedRecordsForReview(db, campaignId);
+  // The bundle is the tool's own derived output: a re-export starts from an
+  // empty directory, so the files of superseded versions never linger beside
+  // the ones the index lists. Nothing outside review/ is ever touched.
+  fs.rmSync(reviewDir, { recursive: true, force: true });
   fs.mkdirSync(reviewDir, { recursive: true });
   const entries = [];
   for (const record of records) {

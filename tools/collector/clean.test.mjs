@@ -322,16 +322,16 @@ test('export-review over a campaign with nothing cleaned writes the empty index,
 });
 
 // Arranges one collected web record through the production snapshot writer
-// over an articleHtml fixture; returns the store and the snapshot dir.
-function arrangeCollectedRecord(dir) {
+// over an articleHtml fixture (or a caller's html/url); returns the store and
+// the snapshot dir.
+function arrangeCollectedRecord(dir, { html = articleHtml(), url } = {}) {
   const campaign = parseCampaign(campaignYaml()).campaign;
   const db = openStore(path.join(dir, 'db.sqlite'));
   seedCampaign(db);
-  const html = articleHtml();
   const pagePath = path.join(dir, 'seed-page.html');
   fs.writeFileSync(pagePath, html, 'utf8');
   const { snapshotDir } = processFetchedPage(db, campaign, 'c1', {
-    url: pathToFileURL(pagePath).href,
+    url: url ?? pathToFileURL(pagePath).href,
     html,
     now: '2026-09-25T00:00:00.000Z',
     snapshotsRoot: path.join(dir, 'snapshots'),
@@ -385,7 +385,7 @@ test('corrupt metadata.json fails the step with a named diagnostic, not a crash 
 test('a failed clean step is not retried by a re-run; the skip stays visible (rule 14)', () => {
   const dir = makeTempDir();
   const { db } = arrangeCollectedRecord(dir);
-  arrangeBrokenRecord(dir, db);
+  const brokenDir = arrangeBrokenRecord(dir, db);
 
   const first = cleanCampaign(db, 'c1');
   assert.equal(first.failed, 1, JSON.stringify(first));
@@ -397,6 +397,56 @@ test('a failed clean step is not retried by a re-run; the skip stays visible (ru
   assert.deepEqual(retry, { eligible: 2, written: 0, unchanged: 0, failed: 0, skippedFailed: 1 });
   const failedRows = db.prepare("SELECT COUNT(*) AS n FROM run_log WHERE kind = 'clean' AND status = 'failed'").get();
   assert.equal(Number(failedRows.n), 1, 'no second failed row, no silent re-run');
+
+  // Recovery: fix the cause, then a new package version enqueues a fresh
+  // attempt — the new step supersedes the failed one, so the skip count is
+  // zero and both records clean from the untouched raw.
+  fs.writeFileSync(path.join(brokenDir, 'text.md'), 'Repaired paragraph.\n', 'utf8');
+  fs.writeFileSync(path.join(brokenDir, 'metadata.json'), JSON.stringify({ title: 'Repaired page' }), 'utf8');
+  const newsV2 = { ...PACKAGES.news, version: 2 };
+  const recovery = cleanCampaign(db, 'c1', { packages: { news: newsV2, wiki: PACKAGES.wiki, youtube: PACKAGES.youtube } });
+  assert.equal(recovery.skippedFailed, 0, 'the fresh attempt supersedes the failed step');
+  assert.equal(recovery.written, 2, 'both records clean from raw');
+  const after = cleanCampaign(db, 'c1', { packages: { news: newsV2, wiki: PACKAGES.wiki, youtube: PACKAGES.youtube } });
+  assert.deepEqual(after, { eligible: 2, written: 0, unchanged: 0, failed: 0, skippedFailed: 0 });
+});
+
+test('rules that drop every block refuse to write an empty document (rule 14)', () => {
+  const dir = makeTempDir();
+  const onlyAd = [
+    '<!DOCTYPE html>',
+    '<html lang="pl">',
+    '<head><title>Only an ad</title></head>',
+    '<body>',
+    '  <p>Рэклама: толькі сёння зніжка.</p>',
+    '</body>',
+    '</html>',
+    '',
+  ].join('\n');
+  const { db, snapshotDir } = arrangeCollectedRecord(dir, { html: onlyAd, url: 'https://news.example/only-ad' });
+
+  // The production news-v1 package matches the only paragraph — the engine
+  // must refuse the empty document instead of writing a husk.
+  const result = cleanCampaign(db, 'c1');
+  assert.equal(result.failed, 1, JSON.stringify(result));
+  const failedRow = db.prepare("SELECT error FROM run_log WHERE kind = 'clean' AND status = 'failed'").get();
+  assert.match(failedRow.error, /drop every block/);
+  assert.equal(fs.existsSync(path.join(snapshotDir, 'cleaned')), false, 'no version is written for an empty document');
+});
+
+test('a re-export after a new cleaned version leaves no stale bundle files', () => {
+  const dir = makeTempDir();
+  const { db } = arrangeCollectedRecord(dir);
+  const reviewDir = path.join(dir, 'review');
+  cleanCampaign(db, 'c1');
+  exportReviewBundle(db, 'c1', { reviewDir });
+
+  const newsV2 = { ...PACKAGES.news, version: 2 };
+  cleanCampaign(db, 'c1', { packages: { news: newsV2, wiki: PACKAGES.wiki, youtube: PACKAGES.youtube } });
+  const { entries } = exportReviewBundle(db, 'c1', { reviewDir });
+
+  assert.deepEqual(fs.readdirSync(reviewDir).sort(), ['index.md', ...entries.map((entry) => entry.file)].sort());
+  assert.ok(entries[0].file.includes('-v2.md'), `the bundle lists the latest version: ${entries[0].file}`);
 });
 
 test('CLI: clean and export-review on a never-run campaign answer with a diagnostic, exit 1', () => {

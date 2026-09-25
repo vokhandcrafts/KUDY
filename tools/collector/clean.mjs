@@ -193,14 +193,21 @@ export function cleanCampaign(db, campaignId, { now = new Date().toISOString(), 
   }
   const counts = { eligible: records.length, written: 0, unchanged: 0, failed: 0, skippedFailed: 0 };
   // A failed clean step is terminal, like every collection step: a re-run
-  // enqueues nothing for it (same ref conflicts) and claimableSteps only
-  // serves pending/running. The count keeps that skip visible instead of
-  // printing a misleading `failed 0`; the recovery path is a new package
-  // version (a new step ref) after fixing the cause.
-  const skipped = db.prepare(
-    "SELECT COUNT(*) AS n FROM run_log WHERE campaign_id = ? AND kind = 'clean' AND status = 'failed'"
-  ).get(campaignId);
-  counts.skippedFailed = Number(skipped.n);
+  // enqueues nothing for it (the same ref conflicts) and claimableSteps only
+  // serves pending/running. Records whose LATEST clean step is failed are
+  // counted after the enqueuing, so the skip stays visible (`skipped (failed
+  // earlier)`) — while a record that just got a fresh attempt (the recovery
+  // path: a new package version after fixing the cause) is superseded by its
+  // new step and is not counted.
+  counts.skippedFailed = Number(
+    db.prepare(
+      `SELECT COUNT(*) AS n FROM run_log r
+       WHERE r.campaign_id = ? AND r.kind = 'clean' AND r.status = 'failed'
+         AND r.id = (SELECT MAX(l.id) FROM run_log l
+                     WHERE l.campaign_id = r.campaign_id AND l.kind = 'clean'
+                       AND substr(l.ref, 1, instr(l.ref, ':') - 1) = substr(r.ref, 1, instr(r.ref, ':') - 1))`
+    ).get(campaignId).n
+  );
   for (const step of claimableSteps(db, campaignId)) {
     if (step.kind !== 'clean') continue;
     claimStep(db, step.id, now);

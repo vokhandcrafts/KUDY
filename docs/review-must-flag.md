@@ -35,7 +35,22 @@
   выглядае правільным: рэгрэсія такой галінкі не ўпадзе на CI.
   Выпраўлена: tools/collector/youtube.test.mjs, negative-тэсты
   YouTube-калектара (cue-less VTT праз пайплайн, runJson без JSON, parseVtt) —
-  issue #264.
+  issue #264; tools/collector/clean.test.mjs — пашкоджаны metadata.json
+  (абарваны JSON і валидны не-аб'ект) і ахова «rules drop every block»
+  праз cleanCampaign — PR #271.
+
+- key: stale-skip-count — лічыльнік пропушчанага ў зводцы мае раіць
+  актуальны стан, а не гістарычны: пасля ўдачнай паўторнай спробы запіс
+  больш не лічыцца пропушчаным. Лічыць па апошнім кроку запісу (напрыклад,
+  MAX(id) па recordId), не ўсе fail-радкі ўвогуле.
+  Выпраўлена: tools/collector/clean.mjs, skippedFailed у cleanCampaign —
+  PR #271.
+
+- key: stale-review-files — перагенерацыя вытворнага выхаду (бандл, экспарт)
+  выдаляе свае папярэднія файлы ці пачынае з пустой тэчкі: файлы
+  састарэлых версій побач з пералічанымі ў індэксе — знаходка.
+  Выпраўлена: tools/collector/review.mjs, exportReviewBundle чысціць
+  review/ перад запісам — PR #271.
 
 - key: missing-cli-stop-test — паводзіны, што праяўляюцца на ўзроўні CLI
   (радок на stderr, код выхаду), маюць уласны кейс у cli-тэсце, а не толькі
