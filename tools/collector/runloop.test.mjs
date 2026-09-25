@@ -3,38 +3,45 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { runCampaign } from './runloop.mjs';
+import { defaultHandlers, runCampaign } from './runloop.mjs';
 import { countRows, enqueueStep, ensureCampaign, openStore, sha256Hex, stepStatusCounts } from './store.mjs';
 import { parseCampaign } from './campaign.mjs';
-import { articleHtml, campaignYaml, makeTempDir, writeCampaignFile } from './testkit.mjs';
+import { articleHtml, campaignYaml, makeTempDir, writeCampaignFile, youtubeBacklogFetch } from './testkit.mjs';
 
 // The seed is a file:// fixture page: G17.02 made https seeds live crawls, so
-// these loop-mechanics tests pin the offline snapshot path instead.
+// these loop-mechanics tests pin the offline snapshot path instead. The
+// youtube step completes through the in-process backlog fetch (G17.05 made
+// the production default spawn the real yt-dlp binary).
 function setup(overrides = {}) {
   const dir = makeTempDir();
   const page = path.join(dir, 'seed-page.html');
   fs.writeFileSync(page, articleHtml(), 'utf8');
   const file = writeCampaignFile(
     dir,
-    campaignYaml({ seeds: `seeds:\n  - ${pathToFileURL(page).href}`, ...overrides })
+    campaignYaml({
+      seeds: `seeds:\n  - ${pathToFileURL(page).href}`,
+      youtube: 'youtube:\n  - dQw4w9WgXcQ',
+      ...overrides,
+    })
   );
   const source = fs.readFileSync(file, 'utf8');
   const parsed = parseCampaign(source);
   assert.ok(parsed.ok, parsed.diagnostics?.join('\n'));
   const db = openStore(path.join(dir, 'db.sqlite'));
-  return { db, file, source, campaign: parsed.campaign };
+  const handlers = defaultHandlers({ youtubeFetch: youtubeBacklogFetch() });
+  return { db, file, source, campaign: parsed.campaign, handlers };
 }
 
 test('AC2: first run registers campaign and records; second run inserts nothing new', async () => {
-  const { db, file, source, campaign } = setup();
-  const first = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source) });
+  const { db, file, source, campaign, handlers } = setup();
+  const first = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source), handlers });
   assert.equal(first.done, 2, 'one seed + one youtube step');
   assert.equal(countRows(db, 'campaigns'), 1);
   assert.equal(countRows(db, 'raw_records'), 2);
   assert.equal(countRows(db, 'run_log'), 2);
 
   const recordIds = db.prepare('SELECT id FROM raw_records ORDER BY id').all().map((row) => row.id);
-  await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source) });
+  await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source), handlers });
   assert.equal(countRows(db, 'campaigns'), 1, 'campaign row not duplicated');
   assert.equal(countRows(db, 'raw_records'), 2, 'raw_records not duplicated');
   assert.equal(countRows(db, 'run_log'), 2, 'steps not duplicated');
@@ -45,14 +52,14 @@ test('AC2: first run registers campaign and records; second run inserts nothing 
 });
 
 test('AC3: a step left running by an interrupted run is resumed, not duplicated', async () => {
-  const { db, file, source, campaign } = setup();
-  await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source) });
+  const { db, file, source, campaign, handlers } = setup();
+  await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source), handlers });
 
   // Simulate a process killed between claim and completion: the row stays
   // 'running' on disk, exactly as the first run would have left it.
   db.prepare("UPDATE run_log SET status = 'running', finished_at = NULL WHERE kind = 'youtube'").run();
 
-  const second = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source) });
+  const second = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source), handlers });
   assert.equal(second.done, 1, 'only the interrupted step is re-claimed');
   assert.equal(countRows(db, 'raw_records'), 2);
   const youtube = db.prepare("SELECT status, attempts FROM run_log WHERE kind = 'youtube'").get();
@@ -63,7 +70,7 @@ test('AC3: a step left running by an interrupted run is resumed, not duplicated'
 });
 
 test('AC3: a run interrupted after enqueue resumes on the next invocation', async () => {
-  const { db, file, source, campaign } = setup();
+  const { db, file, source, campaign, handlers } = setup();
   // State of a run killed right after enqueue: campaign registered, steps
   // pending, no processing yet.
   const { campaignId } = ensureCampaign(db, { campaign, sourcePath: file, contentHash: sha256Hex(source) });
@@ -71,7 +78,7 @@ test('AC3: a run interrupted after enqueue resumes on the next invocation', asyn
   enqueueStep(db, campaignId, 'seed', campaign.seeds[0], new Date().toISOString());
   assert.deepEqual(stepStatusCounts(db, campaignId), { pending: 2 });
 
-  const run = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source) });
+  const run = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source), handlers });
   assert.equal(run.done, 2);
   assert.deepEqual(stepStatusCounts(db, campaignId), { done: 2 });
   assert.equal(countRows(db, 'raw_records'), 2);
@@ -79,7 +86,7 @@ test('AC3: a run interrupted after enqueue resumes on the next invocation', asyn
 });
 
 test('a handler failure marks the step failed with the error and is not re-run', async () => {
-  const { db, file, source, campaign } = setup();
+  const { db, file, source, campaign, handlers } = setup();
   let calls = 0;
   const throwing = {
     seed() {},
@@ -102,7 +109,7 @@ test('a handler failure marks the step failed with the error and is not re-run',
 });
 
 test('a step kind without a handler fails with a diagnostic, not a crash', async () => {
-  const { db, file, source, campaign } = setup();
+  const { db, file, source, campaign, handlers } = setup();
   const run = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source), handlers: {} });
   assert.equal(run.failed, 2);
   const errors = db.prepare("SELECT error FROM run_log WHERE status = 'failed'").all().map((row) => row.error);

@@ -23,7 +23,9 @@ test('valid campaign parses; defaults fill topics, extra_domains, youtube', () =
   assert.equal(parsed.campaign.city, 'gdansk');
   assert.deepEqual(parsed.campaign.fence, { depth: 3, extra_domains: [], delay_s: [2, 5] });
   assert.deepEqual(parsed.campaign.topics, ['history']);
-  assert.deepEqual(parsed.campaign.youtube, ['dQw4w9WgXcQ']);
+  // G17.05: the shared fixture campaign carries no video ids — the suites
+  // that exercise the youtube pipeline pass them explicitly.
+  assert.deepEqual(parsed.campaign.youtube, []);
 });
 
 test('AC1: missing city is rejected with a diagnostic naming the field', () => {
