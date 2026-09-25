@@ -66,6 +66,7 @@ export function createSchema(db) {
       rights TEXT,
       collected_at TEXT
     );
+    CREATE UNIQUE INDEX IF NOT EXISTS media_record_file ON media (raw_record_id, file);
     CREATE TABLE IF NOT EXISTS run_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       campaign_id TEXT NOT NULL REFERENCES campaigns(id),
@@ -81,6 +82,15 @@ export function createSchema(db) {
       UNIQUE (campaign_id, kind, ref)
     );
   `);
+  // Databases created before G17.03 keep working: their media table lacks the
+  // uniqueness the image steps rely on (carried by the named index above,
+  // CREATE IF NOT EXISTS) and their run_log lacks the detail work-order
+  // column. CREATE TABLE IF NOT EXISTS never alters an existing table, so the
+  // missing column is added here, once, by a schema check.
+  const columns = db.prepare('PRAGMA table_info(run_log)').all().map((column) => column.name);
+  if (!columns.includes('detail')) {
+    db.exec('ALTER TABLE run_log ADD COLUMN detail TEXT');
+  }
 }
 
 export function openStore(dbPath) {
@@ -151,22 +161,51 @@ export function insertLink(db, { rawRecordId, anchorText, url, context }) {
   );
 }
 
-// run_log is the run loop's progress record: one row per work item of a
-// campaign (kind 'seed' for each seed URL, 'youtube' for each video id).
-// UNIQUE(campaign_id, kind, ref) makes enqueuing idempotent; a row left in
-// 'running' by an interrupted process is claimable again by the next run —
-// resume, not restart.
-export function enqueueStep(db, campaignId, kind, ref, now) {
+// The snapshot's image inventory (docs/24_web_collection.md «Фота»: артыкул,
+// нумар абзаца, alt, подпіс, сапраўдны URL, файл, хэш, памер у пікселях,
+// rights, дата збору). UNIQUE(raw_record_id, file) makes a resumed image step
+// a no-op instead of a duplicate row — the filename is derived from the
+// step's own occurrence, so a re-run converges on the same row.
+export function insertMedia(db, media) {
   const result = db.prepare(
-    `INSERT INTO run_log (campaign_id, kind, ref, status, attempts, created_at)
-     VALUES (?, ?, ?, 'pending', 0, ?) ON CONFLICT(campaign_id, kind, ref) DO NOTHING`
-  ).run(campaignId, kind, ref, now);
+    `INSERT INTO media (raw_record_id, position, alt, caption, source_url, file, content_hash,
+                        width_px, height_px, rights, collected_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(raw_record_id, file) DO NOTHING`
+  ).run(
+    media.rawRecordId,
+    media.position,
+    media.alt,
+    media.caption,
+    media.sourceUrl,
+    media.file,
+    media.contentHash,
+    media.widthPx,
+    media.heightPx,
+    media.rights,
+    media.collectedAt
+  );
+  return result.changes === 1;
+}
+
+// run_log is the run loop's progress record: one row per work item of a
+// campaign (kind 'seed' for each seed URL, 'youtube' for each video id,
+// 'image' for each image occurrence of a snapshot — G17.03). UNIQUE(campaign_id,
+// kind, ref) makes enqueuing idempotent; a row left in 'running' by an
+// interrupted process is claimable again by the next run — resume, not
+// restart. `detail` carries the kind's work order: the image step stores its
+// descriptor JSON there, so a resumed process re-derives nothing.
+export function enqueueStep(db, campaignId, kind, ref, now, detail = null) {
+  const result = db.prepare(
+    `INSERT INTO run_log (campaign_id, kind, ref, status, attempts, detail, created_at)
+     VALUES (?, ?, ?, 'pending', 0, ?, ?) ON CONFLICT(campaign_id, kind, ref) DO NOTHING`
+  ).run(campaignId, kind, ref, detail, now);
   return result.changes === 1;
 }
 
 export function claimableSteps(db, campaignId) {
   return db.prepare(
-    `SELECT id, kind, ref, status, attempts FROM run_log
+    `SELECT id, kind, ref, status, attempts, detail FROM run_log
      WHERE campaign_id = ? AND status IN ('pending', 'running') ORDER BY id`
   ).all(campaignId);
 }
@@ -177,8 +216,10 @@ export function claimStep(db, id, now) {
   ).run(now, id);
 }
 
-export function completeStep(db, id, now) {
-  db.prepare(`UPDATE run_log SET status = 'done', finished_at = ? WHERE id = ?`).run(now, id);
+export function completeStep(db, id, now, detail = null) {
+  db.prepare(
+    `UPDATE run_log SET status = 'done', finished_at = ?, detail = COALESCE(?, detail) WHERE id = ?`
+  ).run(now, detail, id);
 }
 
 export function failStep(db, id, error, now) {

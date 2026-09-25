@@ -15,7 +15,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { extractPage } from './extract.mjs';
-import { insertLink, sha256Hex, upsertRawRecord } from './store.mjs';
+import { enqueueStep, insertLink, sha256Hex, upsertRawRecord } from './store.mjs';
 
 // Default location alongside the collector's default runtime database; the CLI
 // passes <db-dir>/snapshots explicitly, so this only covers direct runCampaign
@@ -85,5 +85,29 @@ export function processFetchedPage(db, campaign, campaignId, { url, html, now, s
   for (const link of page.links) {
     insertLink(db, { rawRecordId: recordId, anchorText: link.anchor, url: link.url, context: link.context });
   }
+  // Each image occurrence of the page becomes its own run_log step (G17.03):
+  // the descriptor JSON in `detail` carries everything the step needs — the
+  // source URL, the text.md block the image belongs before, alt/caption and
+  // the article slug for the spec filename. A source the loader cannot serve
+  // (or bytes that probe as corrupt) fails that one step with a diagnostic;
+  // the record and the run continue.
+  page.images.forEach((image, occurrence) => {
+    enqueueStep(
+      db,
+      campaignId,
+      'image',
+      `${recordId}:${String(occurrence)}`,
+      now,
+      JSON.stringify({
+        recordId,
+        occurrence,
+        url: image.url,
+        position: image.position,
+        alt: image.alt,
+        caption: image.caption,
+        slug: slugify(page.title),
+      })
+    );
+  });
   return { outcome: original ? 'duplicate-text' : 'recorded', recordId, snapshotDir, contentHash };
 }
