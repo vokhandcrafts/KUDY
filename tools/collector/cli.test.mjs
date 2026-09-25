@@ -15,15 +15,23 @@ function runCli(args) {
 
 // Async CLI run for tests that keep a live fixture server in this process:
 // spawnSync would block this event loop and the server could never answer the
-// browser's requests from the CLI's child process.
+// browser's requests from the CLI's child process. Chunks are collected as
+// buffers and decoded once at close — `encoding` is a spawnSync-only option,
+// and per-chunk decoding would split a multibyte character at a chunk boundary.
 function runCliAsync(args) {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, [cliPath, ...args], { encoding: 'utf8' });
-    let stdout = '';
-    let stderr = '';
-    child.stdout.on('data', (chunk) => { stdout += chunk; });
-    child.stderr.on('data', (chunk) => { stderr += chunk; });
-    child.on('close', (status) => resolve({ status, stdout, stderr }));
+    const child = spawn(process.execPath, [cliPath, ...args]);
+    const stdout = [];
+    const stderr = [];
+    child.stdout.on('data', (chunk) => { stdout.push(chunk); });
+    child.stderr.on('data', (chunk) => { stderr.push(chunk); });
+    child.on('close', (status) =>
+      resolve({
+        status,
+        stdout: Buffer.concat(stdout).toString('utf8'),
+        stderr: Buffer.concat(stderr).toString('utf8'),
+      })
+    );
   });
 }
 
