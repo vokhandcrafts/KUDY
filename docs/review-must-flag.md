@@ -43,3 +43,9 @@
   сутыкавы тэст павінен упасці.
   Выпраўлена: tools/collector/cli.test.mjs, тэст stopped-рану на серыі
   памылак — issue #259.
+
+- key: cover-fetched-for-backlog — сеткавы запыт вокладкі (thumbnail) робіцца
+  толькі для відэа, якое сапраўды збіраецца: калі выбар субтытраў не адбыўся
+  (відэа трапляе ў asr-backlog), запыт вокладкі ў дыфе — лішні трафік,
+  знаходка.
+  Выпраўлена: tools/collector/youtube.mjs, youtubeFetch — issue #265.
