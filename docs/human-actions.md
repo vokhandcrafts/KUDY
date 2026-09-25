@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-25 — CI: аднавіць білінг GitHub Actions
+Што зрабіце: адкрыйце «Billing & plans» у наладах акаўнта GitHub і ўхваліце правальны платзеж або падыміце spending limit — усё CI падае на старце без ніводнага кроку з анатацыяй «The job was not started because recent account payments have failed or your spending limit needs to be increased», таму мержы ўсіх адкрытых PR заблакаваны (лакальныя гейты на галінках пры гэтым зялёныя).
+PR: https://github.com/vokhandcrafts/KUDY/pull/258 (блакуе таксама астатнія адкрытыя PR)
+
 ### 2026-09-25 — G17.05: устанавіць yt-dlp для жывых запускаў
 Што зрабіце: устанавіце `yt-dlp` на гэтай машыне (напрыклад, `pip install yt-dlp` або pacman-сборку) — без яго `run` кампаніі з YouTube-ідэнтыфікатарамі адказвае дыягностыкай «binary not found» і крокі ідуць у `failed` (транскрыпты не губляюцца, крокі можна паўтарыць новым `run` толькі для pending; ужо failed-крокі не перазапускаюцца). Пасля ўстаноўкі запішыце запінаваную версію ў `docs/agent-tasks/results/G17.05.md` (раздзел Decisions) — патрабаванне брыфа G17.05.
 PR: https://github.com/vokhandcrafts/KUDY/pull/263 (issue #160)
