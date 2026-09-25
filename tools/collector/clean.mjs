@@ -191,7 +191,16 @@ export function cleanCampaign(db, campaignId, { now = new Date().toISOString(), 
       target_version: target,
     }));
   }
-  const counts = { eligible: records.length, written: 0, unchanged: 0, failed: 0 };
+  const counts = { eligible: records.length, written: 0, unchanged: 0, failed: 0, skippedFailed: 0 };
+  // A failed clean step is terminal, like every collection step: a re-run
+  // enqueues nothing for it (same ref conflicts) and claimableSteps only
+  // serves pending/running. The count keeps that skip visible instead of
+  // printing a misleading `failed 0`; the recovery path is a new package
+  // version (a new step ref) after fixing the cause.
+  const skipped = db.prepare(
+    "SELECT COUNT(*) AS n FROM run_log WHERE campaign_id = ? AND kind = 'clean' AND status = 'failed'"
+  ).get(campaignId);
+  counts.skippedFailed = Number(skipped.n);
   for (const step of claimableSteps(db, campaignId)) {
     if (step.kind !== 'clean') continue;
     claimStep(db, step.id, now);

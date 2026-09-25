@@ -145,7 +145,8 @@ export async function main(argv) {
       const counts = cleanCampaign(db, campaignId);
       console.log(
         `collector: clean ${campaign.city} (${campaignId.slice(0, 12)}) — ` +
-          `eligible ${counts.eligible}, versions written ${counts.written}, unchanged ${counts.unchanged}, failed ${counts.failed}`
+          `eligible ${counts.eligible}, versions written ${counts.written}, unchanged ${counts.unchanged}, ` +
+          `failed ${counts.failed}, skipped (failed earlier) ${counts.skippedFailed}`
       );
       return;
     }

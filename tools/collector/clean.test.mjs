@@ -128,7 +128,7 @@ test('a rule change re-runs into version 2, both versions retained, run log name
   });
 
   const first = cleanCampaign(db, 'c1');
-  assert.deepEqual(first, { eligible: 1, written: 1, unchanged: 0, failed: 0 });
+  assert.deepEqual(first, { eligible: 1, written: 1, unchanged: 0, failed: 0, skippedFailed: 0 });
   // Same package version again: the record's latest version already carries
   // it, so nothing is enqueued — the run converges without a new version.
   const repeat = cleanCampaign(db, 'c1');
@@ -282,7 +282,7 @@ test('a cleaning step left running by an interrupted process converges instead o
   cleanRecord(db, getRawRecord(db, recordId), newsV2, { now });
 
   const result = cleanCampaign(db, 'c1', { packages: { news: newsV2, wiki: PACKAGES.wiki, youtube: PACKAGES.youtube } });
-  assert.deepEqual(result, { eligible: 1, written: 0, unchanged: 1, failed: 0 });
+  assert.deepEqual(result, { eligible: 1, written: 0, unchanged: 1, failed: 0, skippedFailed: 0 });
   assert.deepEqual(fs.readdirSync(path.join(snapshotDir, 'cleaned')).sort(), ['v1.md', 'v2.md'], 'no duplicate version file');
   const staleRow = db.prepare('SELECT status FROM run_log WHERE id = ?').get(stale.id);
   assert.equal(staleRow.status, 'done', 'the stale step is completed, not re-run');
@@ -339,14 +339,19 @@ function arrangeCollectedRecord(dir) {
   return { db, snapshotDir };
 }
 
-test('a record without its snapshot file fails its own step with a diagnostic; the rest still clean (rule 14)', () => {
-  const dir = makeTempDir();
-  const { db } = arrangeCollectedRecord(dir);
-  // A registered record whose snapshot dir holds nothing — the raw text.md is
-  // gone (truncated snapshot).
+// Arranges the truncated-snapshot record: registered, but its snapshot dir
+// holds nothing (the raw text.md is gone).
+function arrangeBrokenRecord(dir, db) {
   const brokenDir = path.join(dir, 'snapshots', 'broken');
   fs.mkdirSync(brokenDir, { recursive: true });
   upsertRawRecord(db, rawRecord({ campaignId: 'c1', url: 'https://news.example/broken', snapshot_path: brokenDir, media_dir: path.join(brokenDir, 'media') }));
+  return brokenDir;
+}
+
+test('a record without its snapshot file fails its own step with a diagnostic; the rest still clean (rule 14)', () => {
+  const dir = makeTempDir();
+  const { db } = arrangeCollectedRecord(dir);
+  arrangeBrokenRecord(dir, db);
 
   const result = cleanCampaign(db, 'c1');
   assert.equal(result.failed, 1, JSON.stringify(result));
@@ -356,16 +361,42 @@ test('a record without its snapshot file fails its own step with a diagnostic; t
   assert.match(failedRow.error, /cannot read text\.md/);
 });
 
+// Two corrupt-metadata cases, each on a fresh record: truncated JSON and
+// valid JSON that is not an object (rule 14's wrong-type case) — each answers
+// its own diagnostic, no version is written for a failed step.
 test('corrupt metadata.json fails the step with a named diagnostic, not a crash (rule 14)', () => {
-  const dir = makeTempDir();
-  const { db, snapshotDir } = arrangeCollectedRecord(dir);
-  fs.writeFileSync(path.join(snapshotDir, 'metadata.json'), '{not json', 'utf8');
+  const cases = [
+    ['{not json', /cannot read metadata\.json/],
+    ['null', /metadata\.json must hold an object/],
+  ];
+  for (const [content, diagnostic] of cases) {
+    const dir = makeTempDir();
+    const { db, snapshotDir } = arrangeCollectedRecord(dir);
+    fs.writeFileSync(path.join(snapshotDir, 'metadata.json'), content, 'utf8');
 
-  const result = cleanCampaign(db, 'c1');
-  assert.equal(result.failed, 1, JSON.stringify(result));
-  const failedRow = db.prepare("SELECT error FROM run_log WHERE kind = 'clean' AND status = 'failed'").get();
-  assert.match(failedRow.error, /cannot read metadata\.json/);
-  assert.equal(fs.existsSync(path.join(snapshotDir, 'cleaned')), false, 'no version is written for a failed step');
+    const result = cleanCampaign(db, 'c1');
+    assert.equal(result.failed, 1, `${content}: ${JSON.stringify(result)}`);
+    const failedRow = db.prepare("SELECT error FROM run_log WHERE kind = 'clean' AND status = 'failed'").get();
+    assert.match(failedRow.error, diagnostic);
+    assert.equal(fs.existsSync(path.join(snapshotDir, 'cleaned')), false, 'no version is written for a failed step');
+  }
+});
+
+test('a failed clean step is not retried by a re-run; the skip stays visible (rule 14)', () => {
+  const dir = makeTempDir();
+  const { db } = arrangeCollectedRecord(dir);
+  arrangeBrokenRecord(dir, db);
+
+  const first = cleanCampaign(db, 'c1');
+  assert.equal(first.failed, 1, JSON.stringify(first));
+
+  // Same package version again: the failed step stays terminal (the ref
+  // conflicts, claimableSteps serves pending/running only) — the re-run
+  // reports the skip instead of a misleading `failed 0`.
+  const retry = cleanCampaign(db, 'c1');
+  assert.deepEqual(retry, { eligible: 2, written: 0, unchanged: 0, failed: 0, skippedFailed: 1 });
+  const failedRows = db.prepare("SELECT COUNT(*) AS n FROM run_log WHERE kind = 'clean' AND status = 'failed'").get();
+  assert.equal(Number(failedRows.n), 1, 'no second failed row, no silent re-run');
 });
 
 test('CLI: clean and export-review on a never-run campaign answer with a diagnostic, exit 1', () => {

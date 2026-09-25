@@ -64,7 +64,7 @@ fixture ready
 collector: campaign gdansk (826c12db73bc) — steps done 2, failed 0, running 0, pending 0
 collector: raw_records total 1
 collector: snapshots root /tmp/kudy-g1706-demo/snapshots
-collector: clean gdansk (826c12db73bc) — eligible 1, versions written 1, unchanged 0, failed 0
+collector: clean gdansk (826c12db73bc) — eligible 1, versions written 1, unchanged 0, failed 0, skipped (failed earlier) 0
 ---
 url: file:///tmp/kudy-g1706-demo/seed-page.html
 type: web
@@ -104,7 +104,7 @@ for (const row of db.prepare("SELECT detail FROM run_log WHERE kind = \u0027clea
 ```
 
 ```output
-collector: clean gdansk (826c12db73bc) — eligible 1, versions written 0, unchanged 0, failed 0
+collector: clean gdansk (826c12db73bc) — eligible 1, versions written 0, unchanged 0, failed 0, skipped (failed earlier) 0
 clean with news-v2: versions written 1, unchanged 0, failed 0
 versions on disk: v1.md, v2.md
 run log: package news-v1: wrote version 1
@@ -194,7 +194,7 @@ for (const row of db.prepare("SELECT error FROM run_log WHERE kind = \u0027clean
 
 ```output
 metadata.json corrupted
-collector: clean gdansk (b73073a334c4) — eligible 1, versions written 0, unchanged 0, failed 1
+collector: clean gdansk (b73073a334c4) — eligible 1, versions written 0, unchanged 0, failed 1, skipped (failed earlier) 0
 failed step: clean file:///tmp/kudy-g1706-demo/seed-broken.html: cannot read metadata.json — Expected property name or '}' in JSON at position 1 (line 1 column 2)
 ```
 
@@ -205,7 +205,7 @@ node --test --test-reporter=spec "tools/collector/*.test.mjs" 2>/dev/null | grep
 ```
 
 ```output
-ℹ tests 109
-ℹ pass 109
+ℹ tests 110
+ℹ pass 110
 ℹ fail 0
 ```
