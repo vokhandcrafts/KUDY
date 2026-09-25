@@ -122,5 +122,5 @@ export async function main(argv) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main(process.argv.slice(2)).catch((error) => fail(error.message, 2));
+  main(process.argv.slice(2)).catch((error) => fail(String(error?.message ?? error), 2));
 }

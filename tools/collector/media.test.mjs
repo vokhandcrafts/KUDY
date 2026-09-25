@@ -91,7 +91,7 @@ test('AC1: only images of at least 150 px on the longest side are saved; the ski
   assert.match(skipped.detail, /icon-100x90\.png/);
 });
 
-test('AC1 negative probe: a 149 px image is excluded, 150 px is kept (the rule is >= 150)', async () => {
+test('AC1 negative probe: a 149 px image is excluded, 150 px is kept (the rule is >= 150)', () => {
   assert.equal(probeImage(pngBytes(149, 100))?.width, 149);
   assert.ok(Math.max(149, 100) < MIN_CONTENT_IMAGE_PX);
   assert.ok(Math.max(150, 150) >= MIN_CONTENT_IMAGE_PX);
@@ -144,7 +144,7 @@ test('AC2: every saved image has a complete media row and a slug filename; a sec
   assert.deepEqual(imageSteps(fx.db).map((step) => [step.ref, step.status]), stepsBefore);
 });
 
-test('AC2: numbering follows the image occurrence, stable and gap-tolerant', async () => {
+test('AC2: numbering follows the image occurrence, stable and gap-tolerant', () => {
   assert.equal(mediaFileName('gdansk-stocznia', 0, 'png'), 'gdansk-stocznia-img-01.png');
   assert.equal(mediaFileName('gdansk-stocznia', 4, 'jpeg'), 'gdansk-stocznia-img-05.jpg');
 });
@@ -267,7 +267,7 @@ test('AC2 resume: a step re-run after a mid-step crash converges — no duplicat
   assert.equal(blocks.filter((block) => block.startsWith('![')).length, 1, 'exactly one markdown image');
 });
 
-test('probeImage reads exact dimensions from container headers and rejects anything else', async () => {
+test('probeImage reads exact dimensions from container headers and rejects anything else', () => {
   assert.deepEqual(probeImage(pngBytes(200, 120)), { format: 'png', width: 200, height: 120 });
   assert.deepEqual(probeImage(gifBytes(150, 150)), { format: 'gif', width: 150, height: 150 });
   assert.deepEqual(probeImage(jpegBytes(640, 480)), { format: 'jpeg', width: 640, height: 480 });
@@ -278,7 +278,7 @@ test('probeImage reads exact dimensions from container headers and rejects anyth
   assert.equal(probeImage('not bytes'), null);
 });
 
-test('extractPage: image sources resolve against the page, captions come from figcaption, srcless tags are skipped', async () => {
+test('extractPage: image sources resolve against the page, captions come from figcaption, srcless tags are skipped', () => {
   const base = 'https://news.example/gdansk/yard.html';
   const page = extractPage(
     [
