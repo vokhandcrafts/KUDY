@@ -17,7 +17,6 @@
 // A CrawlStopError (error series, crawler.mjs) stops the whole run: the step
 // is marked failed with the diagnostic, the remaining queue stays untouched,
 // and runCampaign reports `stopped` so the CLI can surface it.
-import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,12 +27,12 @@ import {
   enqueueStep,
   ensureCampaign,
   failStep,
-  upsertRawRecord,
 } from './store.mjs';
 import { processImageStep } from './media.mjs';
 import { defaultSnapshotsRoot, processFetchedPage } from './snapshot.mjs';
 import { CrawlStopError, createCrawler, parseCrawlDetail } from './crawler.mjs';
 import { createBrowserFetchPage } from './netfetch.mjs';
+import { createBacklogWriter, createYoutubeFetch, processYoutubeStep } from './youtube.mjs';
 
 // The page-source boundary: tests and demos run the full snapshot pipeline
 // from local fixtures; the network crawl (G17.02) plugs in below it.
@@ -51,12 +50,18 @@ function defaultLoadImage(url) {
   return fs.readFileSync(fileURLToPath(url));
 }
 
-export function defaultHandlers({ loadPage = defaultLoadPage, loadImage = defaultLoadImage, fetchPage = null } = {}) {
+export function defaultHandlers({
+  loadPage = defaultLoadPage,
+  loadImage = defaultLoadImage,
+  fetchPage = null,
+  youtubeFetch = createYoutubeFetch(),
+} = {}) {
   // One crawler per handlers instance — one campaign per runCampaign call, so
   // the politeness gate and the error-series counter span exactly one run. The
   // audit log lives in the campaign's run dir next to its snapshots.
   let crawler = null;
   let browser = null;
+  let backlog = null;
   function crawlerFor(ctx) {
     if (crawler) return crawler;
     crawler = createCrawler({
@@ -108,23 +113,15 @@ export function defaultHandlers({ loadPage = defaultLoadPage, loadImage = defaul
       // The diagnostic already names the source URL and the reason.
       return processImageStep(ctx.db, { now: ctx.now, loadImage: ctx.loadImage }, step);
     },
-    youtube({ db, campaign, campaignId, now }, step) {
-      const url = `https://www.youtube.com/watch?v=${step.ref}`;
-      upsertRawRecord(db, {
-        id: randomUUID(),
-        campaign_id: campaignId,
-        source_type: 'youtube',
-        url,
-        canonical_url: url,
-        collected_at: now,
-        city: campaign.city,
-        topics: JSON.stringify(campaign.topics),
-        rights: 'research_only',
-        content_hash: null,
-        status: 'raw',
-        snapshot_path: null,
-        media_dir: null,
-      });
+    youtube(ctx, step) {
+      // G17.05: the shell row exists first (G17.01.a contract), then the
+      // yt-dlp pipeline fills it — transcript, metadata, cover — or defers
+      // the video to asr-backlog. The binary lives behind youtubeFetch;
+      // live runs are manual, tests spawn a stub command.
+      if (!backlog) {
+        backlog = createBacklogWriter(path.join(ctx.snapshotsRoot, ctx.campaignId.slice(0, 12), 'asr-backlog.jsonl'));
+      }
+      return processYoutubeStep({ ...ctx, youtubeFetch, backlog }, step);
     },
     async close() {
       if (!browser) return;

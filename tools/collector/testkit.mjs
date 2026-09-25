@@ -6,6 +6,8 @@ import fs from 'node:fs';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
+import { parseCampaign } from './campaign.mjs';
+import { openStore } from './store.mjs';
 
 export function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'collector-test-'));
@@ -29,7 +31,7 @@ export function campaignYaml(overrides = {}) {
     depth: 'depth: 3',
     extra_domains: 'extra_domains: []',
     delay_s: 'delay_s: [2, 5]',
-    youtube: 'youtube:\n  - dQw4w9WgXcQ',
+    youtube: 'youtube: []',
     ...overrides,
   };
   const lines = [fields.city, fields.seeds, fields.topics];
@@ -182,4 +184,103 @@ export async function httpFetchPage(url) {
   const response = await fetch(url, { redirect: 'follow' });
   if (response.status >= 400) throw new Error(`HTTP ${response.status}`);
   return { html: await response.text(), finalUrl: response.url };
+}
+
+// Bundled subtitle fixtures for the YouTube suites (G17.05): no network — the
+// stub yt-dlp command serves them to the production spawn/parse pipeline.
+export function openCampaignFixture(dir, yamlText) {
+  const file = writeCampaignFile(dir, yamlText);
+  const source = fs.readFileSync(file, 'utf8');
+  const parsed = parseCampaign(source);
+  if (!parsed.ok) throw new Error(`fixture campaign invalid: ${parsed.diagnostics.join('; ')}`);
+  const db = openStore(path.join(dir, 'db.sqlite'));
+  return { file, source, parsed, db };
+}
+
+export const MANUAL_VTT = [
+  'WEBVTT',
+  '',
+  '1',
+  '00:00:01.000 --> 00:00:04.500',
+  'Witajcie w Gdańsku.',
+  '',
+  '2',
+  '00:00:05.000 --> 00:00:09.250',
+  'Stocznia <c>Gdańska</c> zaczęła',
+  'strajk w sierpniu 1980.',
+  '',
+  '3',
+  '00:00:10.000 --> 00:00:14.000',
+  'To początek Solidarności.',
+  '',
+].join('\n') + '\n';
+
+export const AUTO_VTT = [
+  'WEBVTT',
+  '',
+  '00:00:02.000 --> 00:00:05.000',
+  'witajcie w  gdansku',
+  '',
+  '00:00:06.000 --> 00:00:08.000',
+  'witajcie w  gdansku',
+  '',
+  '00:00:09.000 --> 00:00:12.500',
+  'stocznia zaczela strajk',
+  '',
+].join('\n') + '\n';
+
+// Default fixture video info: manual English subtitles + automatic ones + a
+// cover URL (tests point it at the local fixture server).
+export function youtubeInfo({ id = 'dQw4w9WgXcQ', thumbnail = null, subtitles = null, automatic = null } = {}) {
+  return {
+    id,
+    title: 'Gdansk shipyard — the August story',
+    channel: 'History of the Coast',
+    uploader: 'History of the Coast',
+    upload_date: '20240815',
+    duration: 217.4,
+    language: 'en',
+    thumbnail,
+    subtitles: subtitles === null ? { en: [{ ext: 'vtt', url: 'https://example/sub.en.vtt' }] } : subtitles,
+    automatic_captions:
+      automatic === null ? { en: [{ ext: 'vtt', url: 'https://example/auto.en.vtt' }] } : automatic,
+  };
+}
+
+// A deterministic in-process youtubeFetch for loop-mechanics suites: every
+// video lands in asr-backlog (the step completes with a note, the shell row
+// stays empty) — no spawn, no network, no snapshot files. The full pipeline
+// (real spawn path, VTT fixtures, covers) is exercised by youtube.test.mjs.
+export function youtubeBacklogFetch() {
+  return async ({ videoId }) => ({ info: { id: videoId }, selected: null, cover: null });
+}
+
+// A stub yt-dlp command for the suites: phase 1 (--dump-json) prints the
+// fixture JSON, phase 2 (-o template + --sub-langs) writes the fixture VTT for
+// the requested language. The pipeline under test spawns it exactly like the
+// real binary; the command is [node, stubPath] — cross-platform, no chmod.
+// `playlist` maps video id → { info, vtt: { en: text, ... } } so one stub
+// serves several videos of a campaign.
+export function writeYtDlpStub(dir, playlist) {
+  const stubPath = path.join(dir, 'yt-dlp-stub.mjs');
+  fs.writeFileSync(
+    stubPath,
+    `import fs from 'node:fs';
+const args = process.argv.slice(2);
+const playlist = ${JSON.stringify(playlist)};
+const id = args.find((a) => a.includes('watch?v=')).split('watch?v=')[1];
+const entry = playlist[id];
+if (!entry) { console.error('stub: no fixture for ' + id); process.exit(1); }
+const outIdx = args.indexOf('-o');
+if (outIdx === -1) {
+  console.log(JSON.stringify(entry.info));
+  process.exit(0);
+}
+const lang = args[args.indexOf('--sub-langs') + 1];
+const vtt = entry.vtt[lang];
+if (!vtt) { console.error('stub: no vtt for ' + id + '/' + lang); process.exit(1); }
+fs.writeFileSync(args[outIdx + 1] + '.' + lang + '.vtt', vtt);
+`
+  );
+  return [process.execPath, stubPath];
 }
