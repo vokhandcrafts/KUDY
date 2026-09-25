@@ -12,15 +12,15 @@ restores the pinned version and progress without starting any audio. The demo
 runs the acceptance suite and then the proof the task demands: skipping the
 location release on Pause must turn the subscription-count test red.
 
-The full acceptance suite (criteria 1–6, 27 tests):
+The full acceptance suite (criteria 1–6 and the concurrent-recover race guard, 28 tests):
 
 ```sh
 node --test --experimental-strip-types --test-reporter=spec controllers/useRunController.test.ts 2>/dev/null | grep -E "^ℹ (tests|pass|fail)"
 ```
 
 ```output
-ℹ tests 27
-ℹ pass 27
+ℹ tests 28
+ℹ pass 28
 ℹ fail 0
 ```
 

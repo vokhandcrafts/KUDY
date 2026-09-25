@@ -72,17 +72,14 @@ import { initialRunState, type PlayToken, type RunSessionState, type RunState } 
 export interface RunSessionStore {
   start(input: SessionStartInput): { ok: true } | { ok: false; reason: 'live-session-exists' };
   checkpoint(sessionId: string, progress: SessionProgress): void;
-  // G05.05.b — the lifecycle transactions of ADR G01.03 §3.3, one store call
-  // each: Pause carries the sets checkpoint in the same transaction, Resume
-  // is the plain UPDATE, End adds finished_at and the final checkpoint. The
-  // shapes mirror services/db's public API (pauseSession/resumeSession/
+  // The lifecycle transactions of ADR G01.03 §3.3, one store call each:
+  // Pause carries the sets checkpoint in the same transaction, Resume is the
+  // plain UPDATE, End adds finished_at and the final checkpoint. The shapes
+  // mirror services/db's public API (pauseSession/resumeSession/
   // finishSession) verbatim; the composition root implements over it.
   pause(sessionId: string, progress?: SessionProgress): void;
   resume(sessionId: string): void;
   finish(sessionId: string, input: { finishedAt: number; progress?: SessionProgress }): void;
-  // The app-wide live row (ADR §3.1: no more than one active/paused row) or
-  // null — the restart-recovery read of 09 §9.1.
-  live(): SessionRow | null;
 }
 
 // 09 §9, 11 §6: the wakelock belongs to the live Active walk — Paused and
@@ -320,6 +317,10 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
   const recover = async (): Promise<void> => {
     if (sessionId !== null) return; // this controller already owns a live session
     const payload = await deps.recovery.read(deps.route.routeId);
+    // Ownership is re-checked after the await: a Start may have committed
+    // while the package read ran — that session owns the controller now —
+    // and two concurrent recover() calls deduplicate here.
+    if (sessionId !== null) return;
     if (!payload) return;
     const row = payload.row;
     if (row.routeId !== deps.route.routeId) return;
@@ -334,8 +335,11 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
     if (state.phase === 'Active') {
       // 09 §9.1: the return re-arms the window of the live active session —
       // the set waits here, the first fresh fix ranks it. A paused row holds
-      // no subscription (11 §4.2); its window re-arms through Resume.
+      // no subscription (11 §4.2); its window re-arms through Resume. The
+      // restored Active walk takes the wakelock back (11 §6: held in Active;
+      // recover runs when the run surface opens).
       deps.location.setMode('active-guide');
+      deps.wakelock.acquire();
       const permitted = new Set(state.accessibleStopIds);
       deps.location.setGeofenceWindow(stops.filter((stop) => permitted.has(stop.stopId)));
     }

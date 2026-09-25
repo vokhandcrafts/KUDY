@@ -101,6 +101,9 @@ interface WorldOptions {
   // A scenario may decorate the real stops port to inject a fault at the
   // boundary the composition root owns (the vanished-after-readiness refusal).
   packageStops?: (base: RunPackageStops) => RunPackageStops;
+  // A scenario may decorate the recovery port of the world's own controller
+  // (the concurrent-recover race gates the read).
+  recovery?: (base: RunRecovery) => RunRecovery;
 }
 
 const isTierValue = (value: string): value is Tier => value === 'base' || value === 'extended';
@@ -124,7 +127,6 @@ function sessionStoreOver(driver: SqlDriver): RunSessionStore {
     pause: (sessionId, progress) => pauseSession(driver, sessionId, progress),
     resume: (sessionId) => resumeSession(driver, sessionId),
     finish: (sessionId, input) => finishSession(driver, sessionId, input),
-    live: () => getLiveSession(driver),
   };
 }
 
@@ -242,7 +244,9 @@ function world(options: WorldOptions = {}): World {
     })(),
     grantedTiers: () => granted,
     wakelock,
-    recovery: recoveryPortOver(driver, packageStore, granted),
+    recovery: options.recovery
+      ? options.recovery(recoveryPortOver(driver, packageStore, granted))
+      : recoveryPortOver(driver, packageStore, granted),
   });
   return {
     clock,
@@ -266,6 +270,7 @@ function world(options: WorldOptions = {}): World {
 function restart(
   w: World,
   decorateRecovery?: (base: RunRecovery) => RunRecovery,
+  wakelockCalls?: string[],
 ): ControllerStore<RunControllerState> {
   const baseRecovery = recoveryPortOver(w.driver, w.packageStore, w.granted);
   return createRunController({
@@ -301,9 +306,10 @@ function restart(
       return () => `again-${String(++n)}`;
     })(),
     grantedTiers: () => w.granted,
-    // A new process holds no wakelock; the recovery never touches the port,
-    // so the calls stay empty and no test reads them through the world.
-    wakelock: { acquire: () => {}, release: () => {} },
+    wakelock: {
+      acquire: () => wakelockCalls?.push('acquire'),
+      release: () => wakelockCalls?.push('release'),
+    },
     recovery: decorateRecovery ? decorateRecovery(baseRecovery) : baseRecovery,
   });
 }
@@ -861,7 +867,8 @@ test('criterion 4: a process restart restores the live row as a state and starts
   const commandsBefore = w.audioPort.commands.length;
   assert.equal(live(w).queued?.stopId, 'stop-2'); // the queue is really held
 
-  const second = restart(w);
+  const secondWakelock: string[] = [];
+  const second = restart(w, undefined, secondWakelock);
   assert.equal(second.getState().run.phase, 'Idle'); // the state comes from recover(), not from the constructor
   await second.getState().recover();
 
@@ -880,6 +887,7 @@ test('criterion 4: a process restart restores the live row as a state and starts
   assert.equal(restored.autoplaySuspended, true); // §3.2: nothing sounds by itself
   assert.deepEqual(second.getState().recovery, { status: 'restored', sessionId, unavailableTiers: [] });
   assert.equal(w.audioPort.commands.length, commandsBefore); // no audio starts
+  assert.deepEqual(secondWakelock, ['acquire']); // 11 §6: the restored Active walk holds the wakelock
 
   // 09 §9.1: the return re-armed the window of the live active session; the
   // restored flag suspends the trigger, so the attempt retires into
@@ -900,7 +908,8 @@ test('criterion 4: a paused row restores without arming the location, and resume
   w.store.getState().pauseSession();
   assert.equal(w.locationPort.activeSubscriptions(), 0);
 
-  const second = restart(w);
+  const secondWakelock: string[] = [];
+  const second = restart(w, undefined, secondWakelock);
   const commandsBefore = w.audioPort.commands.length;
   await second.getState().recover();
 
@@ -911,11 +920,13 @@ test('criterion 4: a paused row restores without arming the location, and resume
   // through the explicit «Працягнуць».
   assert.equal(w.locationPort.activeSubscriptions(), 0);
   assert.equal(w.audioPort.commands.length, commandsBefore);
+  assert.deepEqual(secondWakelock, []); // a paused walk holds no wakelock until the explicit resume
 
   second.getState().resumeSession();
   assert.equal(liveFrom(second).phase, 'Active');
   assert.equal(row(w, sessionId)?.state, 'active');
   assert.equal(w.locationPort.activeSubscriptions(), 1);
+  assert.deepEqual(secondWakelock, ['acquire']); // the explicit resume took the wakelock back
 });
 
 test('criterion 4: no live row or an owned session — recover changes nothing', async (t) => {
@@ -1033,4 +1044,44 @@ test('criterion 6: a callback, a fix and an AccessReady after End change nothing
   assert.deepEqual(w.driver.prepare('SELECT * FROM session WHERE session_id = ?').get(sessionId), snapshot);
   assert.equal(sessionCount(w), 1);
   assert.equal(live(w).phase, 'Ended');
+});
+test('criterion 4: concurrent recover() calls deduplicate after the read', async (t) => {
+  // The race the reviewer named: both calls pass the ownership check before
+  // the await, the read parks, and only the post-await re-check keeps the
+  // second call from re-restoring over the first one. Without that re-check
+  // this test sees two wakelock acquires and two window re-arms.
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const w = world({
+    recovery: (base) => ({
+      read: async (routeId: string) => {
+        await gate;
+        return base.read(routeId);
+      },
+    }),
+  });
+  t.after(w.discardPackage);
+  startSession(w.driver, {
+    sessionId: 'yesterday',
+    routeId: 'route-x',
+    version: '1',
+    locale: 'be',
+    tier: ['base'],
+    startedAt: 0,
+  });
+
+  const first = w.store.getState().recover();
+  const second = w.store.getState().recover();
+  release();
+  await Promise.all([first, second]);
+
+  assert.equal(live(w).sessionId, 'yesterday');
+  assert.deepEqual(w.store.getState().recovery, {
+    status: 'restored',
+    sessionId: 'yesterday',
+    unavailableTiers: [],
+  });
+  assert.deepEqual(w.wakelockCalls, ['acquire']); // one restore, not two
 });
