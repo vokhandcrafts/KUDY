@@ -150,6 +150,23 @@ export function upsertRawRecord(db, record) {
   return result.changes === 1;
 }
 
+// The YouTube pipeline (G17.05) fills the shell row registered by
+// registerShell (upsertRawRecord stays DO NOTHING — the shell contract):
+// transcript hash + snapshot/media locations. The passport columns themselves
+// keep their G17.01.a meaning; metadata.json carries the video's title,
+// channel, upload date, duration and language.
+export function fillYoutubeRecord(db, { campaignId, url, contentHash, snapshotPath, mediaDir }) {
+  const result = db
+    .prepare(
+      `UPDATE raw_records SET content_hash = ?, snapshot_path = ?, media_dir = ?
+       WHERE campaign_id = ? AND url = ?`
+    )
+    .run(contentHash, snapshotPath, mediaDir, campaignId, url);
+  if (result.changes !== 1) {
+    throw new Error(`youtube record ${url}: shell row not found for campaign ${campaignId.slice(0, 12)}`);
+  }
+}
+
 // The raw snapshot's link list (spec: тэкст-анкер + адрас + кантэкстны абзац)
 // lives in `links`, one row per anchor of the record's text.md.
 export function insertLink(db, { rawRecordId, anchorText, url, context }) {

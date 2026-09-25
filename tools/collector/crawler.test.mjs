@@ -15,7 +15,7 @@ import { ERROR_SERIES_LIMIT, MIN_ARTICLE_PARAGRAPHS, createPoliteness, parseCraw
 import { createAuditWriter, fenceHosts, hostAllowed, serializeAuditLine } from './fence.mjs';
 import { defaultHandlers, runCampaign } from './runloop.mjs';
 import { countRows, enqueueStep, ensureCampaign, openStore, sha256Hex, stepStatusCounts } from './store.mjs';
-import { articleHtml, campaignYaml, httpFetchPage, makeTempDir, startFixtureServer, writeCampaignFile } from './testkit.mjs';
+import { articleHtml, campaignYaml, httpFetchPage, makeTempDir, openCampaignFixture, startFixtureServer, writeCampaignFile } from './testkit.mjs';
 
 const FILLERS = [
   '<p>First filler paragraph with plain text.</p>',
@@ -38,7 +38,7 @@ function articlePage(title, hrefs = []) {
 async function crawlSetup(routes, { overrides = {}, fetchPage = httpFetchPage } = {}) {
   const server = await startFixtureServer(routes);
   const dir = makeTempDir();
-  const file = writeCampaignFile(
+  const { file, source, parsed, db } = openCampaignFixture(
     dir,
     campaignYaml({
       seeds: `seeds:\n  - ${server.url('/start')}`,
@@ -47,10 +47,6 @@ async function crawlSetup(routes, { overrides = {}, fetchPage = httpFetchPage } 
       ...overrides,
     })
   );
-  const source = fs.readFileSync(file, 'utf8');
-  const parsed = parseCampaign(source);
-  assert.ok(parsed.ok, parsed.diagnostics?.join('\n'));
-  const db = openStore(path.join(dir, 'db.sqlite'));
   const snapshotsRoot = path.join(dir, 'snapshots');
   const handlers = defaultHandlers({ fetchPage });
   const fx = {

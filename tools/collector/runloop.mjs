@@ -9,10 +9,7 @@
 // 'crawl' step walk through the fence-audited crawler (crawler.mjs) into the
 // G17.01.b snapshot writer. file:// seeds keep the G17.01.b fixture boundary —
 // read from disk by the default loader, no fence, no network — and every other
-// scheme stays progress-only, exactly as in G17.01.a. The default youtube
-// handler registers the record shell so the library row exists before G17.05
-// fills it; rights per docs/24_web_collection.md — YouTube transcripts are
-// research_only.
+// scheme stays progress-only, exactly as in G17.01.a.
 //
 // A CrawlStopError (error series, crawler.mjs) stops the whole run: the step
 // is marked failed with the diagnostic, the remaining queue stays untouched,
@@ -22,7 +19,6 @@
 // http(s) call to the campaign's MediaWiki api.php endpoint — live runs are
 // manual, tests inject recorded fixtures and never touch the network. The
 // loop awaits handlers, so the run loop is async.
-import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,12 +29,12 @@ import {
   enqueueStep,
   ensureCampaign,
   failStep,
-  upsertRawRecord,
 } from './store.mjs';
 import { processImageStep } from './media.mjs';
 import { defaultSnapshotsRoot, processFetchedPage } from './snapshot.mjs';
 import { CrawlStopError, createCrawler, parseCrawlDetail } from './crawler.mjs';
 import { createBrowserFetchPage } from './netfetch.mjs';
+import { createBacklogWriter, createYoutubeFetch, processYoutubeStep } from './youtube.mjs';
 import {
   WIKI_RIGHTS,
   parseArticleResponse,
@@ -84,6 +80,7 @@ export function defaultHandlers({
   loadPage = defaultLoadPage,
   loadImage = defaultLoadImage,
   fetchPage = null,
+  youtubeFetch = createYoutubeFetch(),
   loadApi = defaultLoadApi,
 } = {}) {
   // One crawler per handlers instance — one campaign per runCampaign call, so
@@ -91,6 +88,7 @@ export function defaultHandlers({
   // audit log lives in the campaign's run dir next to its snapshots.
   let crawler = null;
   let browser = null;
+  let backlog = null;
   function crawlerFor(ctx) {
     if (crawler) return crawler;
     crawler = createCrawler({
@@ -143,23 +141,15 @@ export function defaultHandlers({
       // The diagnostic already names the source URL and the reason.
       return processImageStep(ctx.db, { now: ctx.now, loadImage: ctx.loadImage }, step);
     },
-    youtube({ db, campaign, campaignId, now }, step) {
-      const url = `https://www.youtube.com/watch?v=${step.ref}`;
-      upsertRawRecord(db, {
-        id: randomUUID(),
-        campaign_id: campaignId,
-        source_type: 'youtube',
-        url,
-        canonical_url: url,
-        collected_at: now,
-        city: campaign.city,
-        topics: JSON.stringify(campaign.topics),
-        rights: 'research_only',
-        content_hash: null,
-        status: 'raw',
-        snapshot_path: null,
-        media_dir: null,
-      });
+    youtube(ctx, step) {
+      // G17.05: the shell row exists first (G17.01.a contract), then the
+      // yt-dlp pipeline fills it — transcript, metadata, cover — or defers
+      // the video to asr-backlog. The binary lives behind youtubeFetch;
+      // live runs are manual, tests spawn a stub command.
+      if (!backlog) {
+        backlog = createBacklogWriter(path.join(ctx.snapshotsRoot, ctx.campaignId.slice(0, 12), 'asr-backlog.jsonl'));
+      }
+      return processYoutubeStep({ ...ctx, youtubeFetch, backlog }, step);
     },
     // Wiki article step: the work order (detail JSON) carries the api
     // endpoint; the ref is the requested title. A response the transport or

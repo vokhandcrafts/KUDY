@@ -140,7 +140,7 @@ node --test --test-reporter=spec "tools/collector/*.test.mjs" 2>/dev/null | grep
 ```
 
 ```output
-ℹ tests 82
-ℹ pass 82
+ℹ tests 91
+ℹ pass 91
 ℹ fail 0
 ```

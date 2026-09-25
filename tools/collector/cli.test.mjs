@@ -72,25 +72,25 @@ test('run is idempotent end-to-end: two invocations, no duplicate records', () =
   const file = writeCampaignFile(
     dir,
     campaignYaml({
-      youtube: 'youtube:\n  - dQw4w9WgXcQ\n  - aQw4w9WgXcQ',
+      youtube: 'youtube: []',
       seeds: `seeds:\n  - ${pathToFileURL(fixturePath).href}`,
     })
   );
 
   const first = runCli(['run', '--campaign', file, '--db', dbPath]);
   assert.equal(first.status, 0, first.stderr);
-  assert.match(first.stdout, /steps done 3, failed 0, running 0, pending 0/);
-  assert.match(first.stdout, /raw_records total 3/);
+  assert.match(first.stdout, /steps done 1, failed 0, running 0, pending 0/);
+  assert.match(first.stdout, /raw_records total 1/);
 
   const second = runCli(['run', '--campaign', file, '--db', dbPath]);
   assert.equal(second.status, 0, second.stderr);
   assert.match(second.stdout, /steps done 0, failed 0, running 0, pending 0/);
-  assert.match(second.stdout, /raw_records total 3/);
+  assert.match(second.stdout, /raw_records total 1/);
 
   const status = runCli(['status', '--db', dbPath]);
   assert.match(status.stdout, /campaigns: 1/);
-  assert.match(status.stdout, /raw_records: 3/);
-  assert.match(status.stdout, /run_log: done 3, running 0, pending 0, failed 0/);
+  assert.match(status.stdout, /raw_records: 1/);
+  assert.match(status.stdout, /run_log: done 1, running 0, pending 0, failed 0/);
 });
 
 test('run with a file:// seed writes the snapshot; status counts it', () => {
