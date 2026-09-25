@@ -21,9 +21,9 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 Што зрабіць: смержыць PR `zcode/159` (squash) — ён закрывае issue #159 (вікі-калектар: MediaWiki API, разгортванне катэгорый па тэмах і глыбіні, `rights=licensed` з атрыбуцыяй). Пасля мержу выдаліце гэты запіс.
 Issue: https://github.com/vokhandcrafts/KUDY/issues/159 (спасылку на PR дададзена ў каментар задачы пасля стварэння)
 
-### 2026-09-25 — G17.03: смержыць PR #254
-Што зрабіць: смержыць PR #254 (squash) — ён закрывае issue #158 (media-канвеер калектара: 150px-правіла зместу, радкі `media`, markdown-выявы на сваіх пазіцыях). Пасля мержу выдаліце гэты запіс.
-PR: https://github.com/vokhandcrafts/KUDY/pull/254 (issue #158)
+### 2026-09-25 — G05.01.d: рашэнне пра замарозку run-model
+Што зрабіць: вырашыце, ці замарожваць `docs/run-model/` як гістарычную даведку — парытэт даказаны (67/67 сцэнарыяў праз прадакшн `step()`, інварыянты 1–9, 21/21 мутацый), таму README называе гэты перанос выкананым. Калі так — гэта асобная задача ўласніка дакумента (адзіны дазволены спосаб мець run-model файлы).
+PR: https://github.com/vokhandcrafts/KUDY/pull/256 (issue #201)
 
 ### 2026-09-25 — jscpd CI (#241): стартавы збой ва ўсіх PR (замяняе запіс ад 2026-09-22)
 Што зрабіць: спачатку праверце налады Actions гэтага рэпазітарыя — дазвол reusable workflows з `vokhandcrafts/ai-company-infrastructure` (Settings → Actions → General → Allow all actions and reusable workflows); runs `jscpd.yml` падаюць на старце (0s, без джобаў) на кожным PR, а дакладная прычына ў #241 яшчэ не дыягнаставаная. Калі налады ў парадку — найпраўдападобней патрабуецца праўка `.github/workflows/jscpd.yml` (пін reusable workflow на `@752dff0` састарэлы пасля мержу інфраструктурнага PR #1): зрабіце яе самі або яўна дазвольце яе агентам (issue-workflow §7 забараняе ім праўку `.github/`). Пасля фіксу дадайце радок `key: jscpd-workflow-startup-failure` у `docs/review-must-flag.md`.
