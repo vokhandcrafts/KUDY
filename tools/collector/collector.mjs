@@ -1,7 +1,10 @@
 #!/usr/bin/env node
-// Collector CLI (G17.01.a): init / run --campaign <file> / status.
-// Local, manual, offline — no network fetching happens in v0. Exit codes:
+// Collector CLI (G17.01.a; network crawl — G17.02): init / run --campaign
+// <file> / status. Local, manual. A `run` over http(s) seeds crawls live
+// through the fence; file:// seeds stay the offline fixture path. Exit codes:
 // 0 ok; 1 invalid campaign (diagnostics on stderr); 2 usage or file errors.
+// A run stopped by the crawler's error series reports the diagnostic on
+// stderr and still exits 0 — the queue state in run_log is the resume point.
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -37,7 +40,7 @@ function openStoreOrExit(dbPath) {
   }
 }
 
-export function main(argv) {
+export async function main(argv) {
   let parsed;
   try {
     parsed = parseArgs({
@@ -85,11 +88,12 @@ export function main(argv) {
     const db = openStoreOrExit(dbPath);
     // Snapshots live next to the database, one campaign subdir per db.
     const snapshotsRoot = path.join(path.dirname(dbPath), 'snapshots');
-    const run = runCampaign(db, result.campaign, {
+    const run = await runCampaign(db, result.campaign, {
       sourcePath: file,
       contentHash: sha256Hex(source),
       snapshotsRoot,
     });
+    if (run.stopped) console.error(`collector: run stopped — ${run.stopped}`);
     const steps = stepStatusCounts(db, run.campaignId);
     console.log(
       `collector: campaign ${result.campaign.city} (${run.campaignId.slice(0, 12)}) — ` +
