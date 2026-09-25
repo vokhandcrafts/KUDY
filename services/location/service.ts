@@ -13,6 +13,7 @@ import type {
   LocationClock,
   LocationMode,
   LocationOsPort,
+  LocationPermissionScope,
   LocationPortEvent,
   LocationServiceDeps,
   LocationStatus,
@@ -27,11 +28,20 @@ function isArmed(mode: LocationMode): boolean {
   return mode === 'city-surface' || mode === 'active-guide';
 }
 
+// The permission question each armed transition asks (AC2 of G05.02.c):
+// the city surface needs only the foreground answer, the Start path
+// (active-guide, 09 §9: the background permission is asked at route start,
+// with the explanation) asks background. Only called for armed modes.
+function armedPermissionScope(mode: LocationMode): LocationPermissionScope {
+  return mode === 'active-guide' ? 'background' : 'foreground';
+}
+
 type WatchdogState = 'idle' | 'acquiring' | 'live' | 'recovering' | 'stalled';
 
 export class LocationService {
   private readonly port: LocationOsPort;
   private readonly clock: LocationClock;
+  private readonly permissions: { foreground: string; background: string };
   private readonly log: (message: string) => void;
 
   private mode: LocationMode = 'idle';
@@ -58,6 +68,7 @@ export class LocationService {
   constructor(deps: LocationServiceDeps) {
     this.port = deps.port;
     this.clock = deps.clock;
+    this.permissions = deps.permissions;
     this.log = deps.log ?? (() => {});
     this.permission = deps.port.permission();
     this.port.onPortEvent((event) => this.onPortEvent(event));
@@ -66,7 +77,12 @@ export class LocationService {
   // 19 §3.3: arming/disarming the subscription and the geofences. Repeating
   // the current mode is a no-op, and a change between the two armed modes
   // carries the one subscription over — never a second startFixes
-  // (criterion 1).
+  // (criterion 1). Every transition INTO an armed mode asks exactly one
+  // permission question (AC2 of G05.02.c): the carry-over Start path
+  // (city-surface → active-guide) asks background even though the
+  // subscription persists — 09 §9 puts the background question at route
+  // start, and a subscription inherited from the city surface has never
+  // asked it.
   setMode(mode: LocationMode): void {
     if (mode === this.mode) return;
     const wasArmed = isArmed(this.mode);
@@ -77,9 +93,11 @@ export class LocationService {
     } else if (!wasArmed && isArmed(mode)) {
       this.log(`mode → ${mode}: arming`);
       this.arm();
-    } else {
+    } else if (isArmed(mode)) {
       this.log(`mode → ${mode}: the one subscription carries over`);
+      this.requestPermissionFor(mode);
     }
+    // disarmed → disarmed (paused ↔ idle): nothing is held, nothing is asked.
   }
 
   // 19 §3.3: the controller's selected (eligible) stop set. Recomputes the
@@ -116,10 +134,16 @@ export class LocationService {
       this.log('arming refused by the OS permission — status() reports it, no exception');
       return;
     }
+    // The question goes out on every armed transition — even granted, where
+    // the OS answers without a dialog: a foreground grant does not answer
+    // the background question, and the port's single PermissionState cannot
+    // tell them apart (the adapter's request is what resolves it).
+    this.requestPermissionFor(this.mode);
     if (this.permission === 'undetermined') {
       // The permission question belongs to the UI (09 §9: asked at route
       // start, with the explanation); until it is answered the watchdog is
-      // honestly 'acquiring' — waiting, not subscribed.
+      // honestly 'acquiring' — waiting, not subscribed. The grant event
+      // re-enters through onPermission.
       this.watchdog = 'acquiring';
       this.log('arming while the permission is undetermined — waiting for the grant');
       return;
@@ -127,6 +151,16 @@ export class LocationService {
     this.watchdog = 'acquiring';
     this.startSubscription();
     this.scheduleGapWatch();
+  }
+
+  // One request per armed transition, carrying the mode's scope and the
+  // app-config explanation string (AC2); the answer returns as a permission
+  // port event.
+  private requestPermissionFor(mode: LocationMode): void {
+    const scope = armedPermissionScope(mode);
+    const explanation = scope === 'background' ? this.permissions.background : this.permissions.foreground;
+    this.log(`requesting ${scope} location permission`);
+    this.port.requestPermission(scope, explanation);
   }
 
   // Pause/End and a mid-session revocation land here: the subscription is

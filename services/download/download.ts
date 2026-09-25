@@ -7,7 +7,7 @@
 // exists to lag behind (§3.2, §3.6). The core is platform-neutral: the
 // filesystem, the byte source and the digest enter as ports (TR-10), and
 // bundle_asset goes through the services/db public API (zone A only).
-import { isSafeSegment, parseLockEntry } from '../contentRepo/inventory.ts';
+import { parseLockEntry, validateLayerKey } from '../contentRepo/inventory.ts';
 import type { Tier } from '../contentRepo/types.ts';
 import { replaceBundleAssets, upsertBundleAsset } from '../db/db.ts';
 import type { BundleAssetRow } from '../db/types.ts';
@@ -22,7 +22,13 @@ import type {
   RebuildDeps,
   RebuildResult,
   RecoveryResult,
+  Sha256,
 } from './types.ts';
+
+// The canonical layer-key check lives in contentRepo/inventory.ts (shared
+// with the restart presence check); re-exported under the historical name so
+// the activation surface and grant.ts keep their import path.
+export { validateLayerKey as validateKey } from '../contentRepo/inventory.ts';
 
 // `09` §7: the staging directory sits beside the final layout under the
 // route, as a sibling of the versions — the library inventory (G04.04.a)
@@ -53,22 +59,6 @@ export function stagingLayerPath(key: LayerKey): string {
   return `bundles/${key.routeId}/${STAGING}/${key.version}/${key.locale}/${key.tier}`;
 }
 
-// `09` §7: identifiers reaching the filesystem are untrusted input and are
-// checked as safe units on input, before any filesystem call (criterion 4).
-export function validateKey(key: LayerKey): string[] {
-  const diagnostics: string[] = [];
-  for (const [name, value] of [
-    ['route_id', key.routeId],
-    ['version', key.version],
-    ['locale', key.locale],
-  ] as const) {
-    if (typeof value !== 'string') diagnostics.push(`${name}#type`);
-    else if (!isSafeSegment(value)) diagnostics.push(`${name}#unsafe-path:${value}`);
-  }
-  if (key.tier !== 'base' && key.tier !== 'extended') diagnostics.push('tier#type');
-  return diagnostics;
-}
-
 // The parsed lock.json — every entry through the shared shape guard. An empty
 // layer cannot be a real layer (a layer carries at least its stops.json), so
 // an empty lock is a fault, not a vacuous success.
@@ -94,7 +84,7 @@ export function parseLock(lock: unknown): { entries: LockEntry[]; diagnostics: s
   return { entries, diagnostics };
 }
 
-function completeRow(key: LayerKey, entry: LockEntry): BundleAssetRow {
+export function completeRow(key: LayerKey, entry: LockEntry): BundleAssetRow {
   return {
     routeId: key.routeId,
     version: key.version,
@@ -148,18 +138,50 @@ function remainingMissing(entries: LockEntry[], from: number, kept: Set<string>)
 
 // The shared request prologue: build the layer key and validate every input
 // unit — segments and lock entries — before either entry point touches the
-// filesystem (criterion 4).
-function parseActivationInput(input: ActivateInput): {
+// filesystem (criterion 4). Also the prologue of the repair request
+// (repair.ts): one input contract for both.
+export function parseActivationInput(input: ActivateInput): {
   key: LayerKey;
   entries: LockEntry[];
   diagnostics: string[];
   invalid: boolean;
 } {
   const key: LayerKey = { routeId: input.routeId, version: input.version, locale: input.locale, tier: input.tier };
-  const diagnostics = validateKey(key);
+  const diagnostics = validateLayerKey(key);
   const lock = parseLock(input.lock);
   diagnostics.push(...lock.diagnostics);
   return { key, entries: lock.entries, diagnostics, invalid: diagnostics.length > 0 };
+}
+
+// The size-then-sha256 ladder one transferred file must climb (`09` §4):
+// the named fault, or null when the bytes verify. Shared by the activation
+// and the repair request so the verification order cannot drift.
+export async function verifyFetched(bytes: Uint8Array, entry: LockEntry, sha256: Sha256): Promise<string | null> {
+  if (bytes.length !== entry.bytes) return `${entry.path}#size-mismatch`;
+  if ((await sha256(bytes)) !== entry.sha256) return `${entry.path}#sha256-mismatch`;
+  return null;
+}
+
+// The .part + rename idiom (ADR G01.03 §3.7): a crash mid-write leaves an
+// ambiguous .part that the next run discards and re-fetches — never a
+// truncated file that looks complete. Both the .part's parent in staging and
+// the rename target's parent are ensured first — activation renames inside
+// staging, repair renames onto the final file, and an orphaned final
+// subdirectory (the 09 §7 scenario repair exists for) must not turn the
+// rename into an ENOENT throw. Both same-volume, hence atomic.
+export async function stageAndRename(
+  store: DownloadStore,
+  stagingLayer: string,
+  entryPath: string,
+  bytes: Uint8Array,
+  targetRel: string,
+): Promise<void> {
+  const slash = entryPath.lastIndexOf('/');
+  if (slash !== -1) await store.ensureDir(`${stagingLayer}/${entryPath.slice(0, slash)}`);
+  const targetSlash = targetRel.lastIndexOf('/');
+  if (targetSlash !== -1) await store.ensureDir(targetRel.slice(0, targetSlash));
+  await store.writeFile(`${stagingLayer}/${entryPath}.part`, bytes);
+  await store.rename(`${stagingLayer}/${entryPath}.part`, targetRel);
 }
 
 /**
@@ -264,31 +286,11 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
     // recreate staging the user has already deleted (criterion 4).
     if (cancelled()) return { status: 'cancelled', key, fetched };
     fetched += 1;
-    if (bytes.length !== entry.bytes) {
-      return {
-        status: 'hash-mismatch',
-        key,
-        paths: [entry.path],
-        fetched,
-        diagnostics: [`${entry.path}#size-mismatch`],
-      };
+    const fault = await verifyFetched(bytes, entry, deps.sha256);
+    if (fault !== null) {
+      return { status: 'hash-mismatch', key, paths: [entry.path], fetched, diagnostics: [fault] };
     }
-    if ((await deps.sha256(bytes)) !== entry.sha256) {
-      return {
-        status: 'hash-mismatch',
-        key,
-        paths: [entry.path],
-        fetched,
-        diagnostics: [`${entry.path}#sha256-mismatch`],
-      };
-    }
-    // Write through the .part + rename idiom (ADR G01.03 §3.7): a crash
-    // mid-write leaves an ambiguous .part that the next run discards and
-    // re-fetches — never a truncated file that looks complete.
-    const slash = entry.path.lastIndexOf('/');
-    if (slash !== -1) await deps.store.ensureDir(`${stagingLayer}/${entry.path.slice(0, slash)}`);
-    await deps.store.writeFile(`${stagingLayer}/${entry.path}.part`, bytes);
-    await deps.store.rename(`${stagingLayer}/${entry.path}.part`, `${stagingLayer}/${entry.path}`);
+    await stageAndRename(deps.store, stagingLayer, entry.path, bytes, `${stagingLayer}/${entry.path}`);
     await upsertBundleAsset(deps.driver, completeRow(key, entry));
   }
 
