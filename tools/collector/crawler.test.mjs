@@ -34,12 +34,20 @@ async function crawlSetup(routes, { overrides = {}, fetchPage = httpFetchPage } 
   );
   const snapshotsRoot = path.join(dir, 'snapshots');
   const handlers = defaultHandlers({ fetchPage });
+  // The campaign row is created eagerly (runCampaign's own ensureCampaign is
+  // idempotent), so tests can queue extra steps before the first run.
+  const { campaignId } = ensureCampaign(db, {
+    campaign: parsed.campaign,
+    sourcePath: file,
+    contentHash: sha256Hex(source),
+  });
   const fx = {
     server,
     dir,
     db,
     handlers,
     snapshotsRoot,
+    campaignId,
     run: (campaign = parsed.campaign) =>
       runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source), snapshotsRoot, handlers }),
     auditPath: (campaignId) => path.join(snapshotsRoot, campaignId.slice(0, 12), 'fence-audit.jsonl'),
@@ -47,6 +55,32 @@ async function crawlSetup(routes, { overrides = {}, fetchPage = httpFetchPage } 
     recordUrls: () => db.prepare('SELECT url FROM raw_records ORDER BY url').all().map((row) => row.url),
   };
   return fx;
+}
+
+// The AC4 series scenarios share their shape: the run stops at the third
+// consecutive failure with the series diagnostic, and a resumed run processes
+// the still-pending page. `reason` is the bare failure diagnostic the stop
+// message quotes in parentheses.
+async function assertSeriesStops(fx, stoppedAt, reason, { resume = true } = {}) {
+  const first = await fx.run();
+  assert.equal(first.done, 1, 'only the seed completed');
+  assert.equal(first.failed, ERROR_SERIES_LIMIT);
+  assert.match(
+    first.stopped,
+    new RegExp(
+      `error series: ${ERROR_SERIES_LIMIT} consecutive crawl failures, ` +
+        `last at ${stoppedAt} \\(${reason}\\)`
+    )
+  );
+  assert.deepEqual(stepStatusCounts(fx.db, first.campaignId), { done: 1, failed: 3, pending: 1 });
+  if (!resume) return;
+  // Resume, not restart: completed steps are not re-executed, failed steps are
+  // not re-claimed, the one still pending is processed.
+  const second = await fx.run();
+  assert.equal(second.done, 1);
+  assert.equal(second.failed, 0);
+  assert.equal(second.stopped, null);
+  assert.deepEqual(stepStatusCounts(fx.db, first.campaignId), { done: 2, failed: 3 });
 }
 
 test('AC1: the audit log shows 0 fetches outside allowed hosts; denied URLs are logged, never fetched', async (t) => {
@@ -152,20 +186,78 @@ test('AC4: N consecutive fetch failures stop the run with a diagnostic; the queu
   });
   t.after(() => fx.server.close());
 
-  const first = await fx.run();
-  assert.equal(first.done, 1, 'only the seed completed');
-  assert.equal(first.failed, ERROR_SERIES_LIMIT);
-  assert.match(first.stopped, new RegExp(`error series: ${ERROR_SERIES_LIMIT} consecutive fetch failures, last at ${fx.server.url('/c')} \\(HTTP 404\\)`));
-  assert.deepEqual(stepStatusCounts(fx.db, first.campaignId), { done: 1, failed: 3, pending: 1 });
-
-  // Resume, not restart: completed steps are not re-executed, failed steps are
-  // not re-claimed, the one still pending is processed.
-  const second = await fx.run();
-  assert.equal(second.done, 1);
-  assert.equal(second.failed, 0);
-  assert.equal(second.stopped, null);
-  assert.deepEqual(stepStatusCounts(fx.db, first.campaignId), { done: 2, failed: 3 });
+  await assertSeriesStops(fx, fx.server.url('/c'), 'HTTP 404');
   assert.deepEqual(fx.recordUrls(), [fx.server.url('/d'), fx.server.url('/start')].sort());
+});
+
+test('a series of unidentifiable pages — missing <title> — stops the run like fetch failures do', async (t) => {
+  const fx = await crawlSetup({
+    '/start': articlePage('Start', [
+      ['/a', 'first'],
+      ['/b', 'second'],
+      ['/c', 'third'],
+      ['/d', 'fourth'],
+    ]),
+    // /a, /b, /c serve paragraphs without a <title>: the fetch itself
+    // succeeds, the extract step fails — the series counter must see these
+    // non-fetch failures too, or the run never stops. /d exists.
+    '/a': articleHtml({ title: null }),
+    '/b': articleHtml({ title: null }),
+    '/c': articleHtml({ title: null }),
+    '/d': articlePage('Fourth', []),
+  });
+  t.after(() => fx.server.close());
+
+  await assertSeriesStops(fx, fx.server.url('/c'), 'missing <title> — the page cannot be identified');
+  assert.deepEqual(fx.recordUrls(), [fx.server.url('/d'), fx.server.url('/start')].sort());
+});
+
+test('the series mixes failure kinds — a fetch failure then two unidentifiable pages stop the run', async (t) => {
+  const fx = await crawlSetup({
+    '/start': articlePage('Start', [
+      ['/a', 'first'],
+      ['/b', 'second'],
+      ['/c', 'third'],
+      ['/d', 'fourth'],
+    ]),
+    // /a is absent → 404 (fetch failure); /b, /c have no <title>. All three
+    // feed one series: a fetch success on /b, /c must not reset it — only a
+    // completed step does.
+    '/b': articleHtml({ title: null }),
+    '/c': articleHtml({ title: null }),
+    '/d': articlePage('Fourth', []),
+  });
+  t.after(() => fx.server.close());
+
+  await assertSeriesStops(fx, fx.server.url('/c'), 'missing <title> — the page cannot be identified', { resume: false });
+});
+
+test('a series of redirects outside the fence stops the run', async (t) => {
+  // The fetcher plays a browser that follows every redirect off-site: the
+  // seed and the two queued crawl steps all fail after downloading their
+  // bytes — each breach must stay in the audit log for the pilot criterion's
+  // grep (three redirects = three denied lines with fetched:true).
+  const fx = await crawlSetup(
+    { '/start': articlePage('Start', []) },
+    { fetchPage: async () => ({ html: articleHtml(), finalUrl: 'https://portal.example/redirected' }) }
+  );
+  t.after(() => fx.server.close());
+  const now = new Date().toISOString();
+  enqueueStep(fx.db, fx.campaignId, 'crawl', fx.server.url('/a'), now, JSON.stringify({ depth: 1 }));
+  enqueueStep(fx.db, fx.campaignId, 'crawl', fx.server.url('/b'), now, JSON.stringify({ depth: 1 }));
+
+  const run = await fx.run();
+  assert.equal(run.done, 0);
+  assert.equal(run.failed, 3);
+  assert.match(
+    run.stopped,
+    new RegExp(
+      `error series: 3 consecutive crawl failures, ` +
+        `last at ${fx.server.url('/start')} \\(redirected outside the fence to https://portal\\.example/redirected — content discarded\\)`
+    )
+  );
+  const audit = fx.auditText(run.campaignId).trimEnd().split('\n').map((line) => JSON.parse(line));
+  assert.equal(audit.filter((line) => line.decision === 'denied' && line.fetched === true).length, 3);
 });
 
 test('AC5: timestamps of two consecutive requests to the same host differ by at least the minimum delay', async (t) => {
