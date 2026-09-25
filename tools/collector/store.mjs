@@ -67,6 +67,22 @@ export function createSchema(db) {
       collected_at TEXT
     );
     CREATE UNIQUE INDEX IF NOT EXISTS media_record_file ON media (raw_record_id, file);
+    -- Cleaning versions (G17.06): one row per written cleaned document. The
+    -- raw record is never rewritten — each cleaning run whose package version
+    -- differs from the latest writes the next version file (v1, v2, …) and
+    -- records the package that produced it here. UNIQUE(raw_record_id, version)
+    -- pins a version number to exactly one deterministic document.
+    CREATE TABLE IF NOT EXISTS cleaned_versions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      raw_record_id TEXT NOT NULL REFERENCES raw_records(id),
+      version INTEGER NOT NULL,
+      package TEXT NOT NULL,
+      package_version INTEGER NOT NULL,
+      content_hash TEXT NOT NULL,
+      path TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      UNIQUE (raw_record_id, version)
+    );
     CREATE TABLE IF NOT EXISTS run_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       campaign_id TEXT NOT NULL REFERENCES campaigns(id),
@@ -261,4 +277,47 @@ export function stepStatusCounts(db, campaignId) {
     `SELECT status, COUNT(*) AS n FROM run_log${campaignId ? ' WHERE campaign_id = ?' : ''} GROUP BY status`
   ).all(...(campaignId ? [campaignId] : []));
   return Object.fromEntries(rows.map((row) => [row.status, Number(row.n)]));
+}
+
+// --- Cleaning (G17.06) ---
+
+// The clean/export commands look the campaign up by its identity (the
+// resolved campaign file's path — the same key ensureCampaign hashes). Unlike
+// ensureCampaign this never inserts: cleaning or exporting a campaign that was
+// never run answers "not registered" instead of creating a phantom row.
+export function registeredCampaignId(db, sourcePath) {
+  const row = db.prepare('SELECT id FROM campaigns WHERE source_path = ?').get(sourcePath);
+  return row ? row.id : null;
+}
+
+// Records a cleaning run may touch: a snapshot must exist on disk (YouTube
+// shells registered before their pipeline filled them carry none) and the
+// record must not be consumed by export yet ('used' — G17.07's contract).
+export function recordsToClean(db, campaignId) {
+  return db.prepare(
+    `SELECT id, source_type, url, collected_at, status, snapshot_path FROM raw_records
+     WHERE campaign_id = ? AND snapshot_path IS NOT NULL AND status IN ('raw', 'cleaned')
+     ORDER BY url`
+  ).all(campaignId);
+}
+
+export function getRawRecord(db, recordId) {
+  return db.prepare('SELECT * FROM raw_records WHERE id = ?').get(recordId);
+}
+
+export function latestCleanedVersion(db, recordId) {
+  return db.prepare(
+    'SELECT version, package, package_version, content_hash, path FROM cleaned_versions WHERE raw_record_id = ? ORDER BY version DESC LIMIT 1'
+  ).get(recordId);
+}
+
+export function insertCleanedVersion(db, { rawRecordId, version, package: pkg, packageVersion, contentHash, path: filePath, createdAt }) {
+  db.prepare(
+    `INSERT INTO cleaned_versions (raw_record_id, version, package, package_version, content_hash, path, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  ).run(rawRecordId, version, pkg, packageVersion, contentHash, filePath, createdAt);
+}
+
+export function markRecordCleaned(db, recordId) {
+  db.prepare(`UPDATE raw_records SET status = 'cleaned' WHERE id = ? AND status = 'raw'`).run(recordId);
 }
