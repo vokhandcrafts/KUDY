@@ -227,6 +227,60 @@ test('a failing yt-dlp run (non-zero exit) is a named diagnostic; nothing is wri
   assert.equal(failedRow.content_hash, null);
 });
 
+test('negative: a cue-less VTT (header only) reaches the asr-backlog through the full pipeline', async (t) => {
+  const fx = await youtubeSetup({
+    dQw4w9WgXcQ: { info: youtubeInfo(), vtt: { en: 'WEBVTT\n' } },
+  });
+  t.after(() => fx.server.close());
+  const run = await fx.run();
+  assert.equal(run.done, 2, 'seed + the video step complete');
+  assert.equal(run.failed, 0, 'cue-less subtitles do not fail the run');
+  const backlogFile = path.join(fx.snapshotsRoot, run.campaignId.slice(0, 12), 'asr-backlog.jsonl');
+  const lines = fs.readFileSync(backlogFile, 'utf8').trimEnd().split('\n').map((line) => JSON.parse(line));
+  assert.equal(lines.length, 1);
+  assert.equal(lines[0].video_id, 'dQw4w9WgXcQ');
+  assert.match(lines[0].reason, /subtitles file is empty/);
+  const step = fx.db.prepare("SELECT status, detail FROM run_log WHERE kind = 'youtube'").get();
+  assert.equal(step.status, 'done');
+  assert.match(step.detail, /asr-backlog/);
+  const row = fx.db.prepare("SELECT snapshot_path, content_hash FROM raw_records WHERE source_type = 'youtube'").get();
+  assert.equal(row.snapshot_path, null, 'no snapshot without cues');
+  assert.equal(row.content_hash, null);
+});
+
+test('negative: yt-dlp stdout without any JSON line is a named diagnostic and writes nothing', async (t) => {
+  const dir = makeTempDir();
+  const garbage = path.join(dir, 'yt-dlp-garbage-stub.mjs');
+  fs.writeFileSync(garbage, "console.log('WARNING: [youtube] something odd');\nconsole.log('no json line here');\n");
+  const fx = await youtubeSetup(
+    { dQw4w9WgXcQ: { info: youtubeInfo(), vtt: { en: MANUAL_VTT } } },
+    { command: [process.execPath, garbage] }
+  );
+  t.after(() => fx.server.close());
+  const run = await fx.run();
+  assert.equal(run.done, 1, 'only the seed completes');
+  assert.equal(run.failed, 1);
+  const step = fx.db.prepare("SELECT error FROM run_log WHERE kind = 'youtube'").get();
+  assert.match(step.error, /yt-dlp produced no JSON on stdout/);
+  const row = fx.db.prepare("SELECT snapshot_path, content_hash FROM raw_records WHERE source_type = 'youtube'").get();
+  assert.equal(row.snapshot_path, null);
+  assert.equal(row.content_hash, null);
+  assert.equal(fs.existsSync(path.join(fx.snapshotsRoot, run.campaignId.slice(0, 12), 'asr-backlog.jsonl')), false);
+});
+
+test('negative: parseVtt rejects a whitespace-only VTT with a named error', () => {
+  assert.throws(() => parseVtt('  \n'), /empty VTT — nothing to parse/);
+});
+
+test('negative: hourless MM:SS.mmm cue timings are dropped without a diagnostic (known gap, issue #264)', () => {
+  // WebVTT allows hourless MM:SS.mmm cue timings; the cue regex requires
+  // hours, so such cues fall out silently. The pin makes the drop visible;
+  // teaching the parser the hourless form is a deliberate behaviour change
+  // that updates this test and the must-flag record.
+  const hourless = ['WEBVTT', '', '00:05.000 --> 00:08.000', 'Witajcie w Gdańsku.', ''].join('\n') + '\n';
+  assert.deepEqual(parseVtt(hourless), []);
+});
+
 test('asr-backlog writer appends one JSONL line per deferred video', () => {
   const file = path.join(makeTempDir(), 'nested', 'asr-backlog.jsonl');
   const backlog = createBacklogWriter(file);
