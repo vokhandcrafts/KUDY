@@ -1,9 +1,12 @@
 // Campaign YAML → validated campaign object (G17.01.a).
 // Contract: docs/24_web_collection.md «Кампанія» — the YAML block there is the
-// canonical shape; every key below is copied from it, none invented. The fence
-// values are the crawler fence (G17.02 consumes them unchanged): depth counts
-// hops from a seed, extra_domains widens the same-domain rule, delay_s is the
-// [min, max] politeness delay in seconds.
+// canonical shape; every key below is copied from it, none invented — with one
+// G17.02 addition: `browser_user_data_dir` (optional) is the login-session
+// config the task brief calls for ("reuse an existing browser user-data dir
+// (config in the campaign file)"; docs/agent-tasks/collection/G17.02.md
+// Scope). The fence values are the crawler fence (G17.02 consumes them
+// unchanged): depth counts hops from a seed, extra_domains widens the
+// same-domain rule, delay_s is the [min, max] politeness delay in seconds.
 import { z } from 'zod';
 import { parse as parseYaml } from 'yaml';
 
@@ -13,12 +16,15 @@ export const campaignSchema = z.strictObject({
   topics: z.array(z.string().min(1)).default([]),
   fence: z.strictObject({
     depth: z.number().int().min(1),
-    extra_domains: z.array(z.string().min(1)).default([]),
+    extra_domains: z
+      .array(z.string().regex(/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/i, 'must be a bare hostname'))
+      .default([]),
     delay_s: z
       .tuple([z.number().positive(), z.number().positive()])
       .refine(([min, max]) => min <= max, { message: 'delay_s must be [min, max] with min <= max' }),
   }),
   youtube: z.array(z.string().regex(/^[A-Za-z0-9_-]{11}$/)).default([]),
+  browser_user_data_dir: z.string().min(1).optional(),
 });
 
 // One diagnostic per issue, each naming the offending field ("campaign.fence.depth: …"),

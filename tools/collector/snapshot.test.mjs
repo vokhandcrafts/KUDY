@@ -26,7 +26,7 @@ function setup({ fixtures = { 'article.html': articleHtml() }, seedOrder, seedLi
   return { dir, db, file, source, campaign: parsed.campaign, seedUrl, snapshotsRoot: path.join(dir, 'snapshots') };
 }
 
-function runThroughLoop(s) {
+async function runThroughLoop(s) {
   return runCampaign(s.db, s.campaign, {
     sourcePath: s.file,
     contentHash: sha256Hex(s.source),
@@ -42,9 +42,9 @@ function snapshotBytes(snapshotDir) {
   };
 }
 
-test('AC1: the fixture page becomes a snapshot dir; every anchor keeps its target URL', () => {
+test('AC1: the fixture page becomes a snapshot dir; every anchor keeps its target URL', async () => {
   const s = setup();
-  const run = runThroughLoop(s);
+  const run = await runThroughLoop(s);
   assert.equal(run.done, 1);
   const record = s.db.prepare('SELECT * FROM raw_records').get();
   for (const name of ['snapshot.html', 'text.md', 'metadata.json']) {
@@ -83,14 +83,14 @@ test('AC1: the fixture page becomes a snapshot dir; every anchor keeps its targe
   });
 });
 
-test('AC2: the same fixture twice is one record; snapshots are never rewritten', () => {
+test('AC2: the same fixture twice is one record; snapshots are never rewritten', async () => {
   const s = setup();
-  const first = runThroughLoop(s);
+  const first = await runThroughLoop(s);
   assert.equal(first.done, 1);
   const record = s.db.prepare('SELECT * FROM raw_records').get();
   const before = snapshotBytes(record.snapshot_path);
 
-  const second = runThroughLoop(s);
+  const second = await runThroughLoop(s);
   assert.equal(second.done, 0, 'resume: the processed seed step is not re-executed');
   assert.equal(countRows(s.db, 'raw_records'), 1);
   assert.deepEqual(snapshotBytes(record.snapshot_path), before, 'file bytes unchanged');
@@ -107,14 +107,14 @@ test('AC2: the same fixture twice is one record; snapshots are never rewritten',
   assert.deepEqual(snapshotBytes(record.snapshot_path), before, 're-delivery rewrites nothing');
 });
 
-test('AC2: same text under a different URL is a second row linked to the original', () => {
+test('AC2: same text under a different URL is a second row linked to the original', async () => {
   const s = setup({
     fixtures: {
       'article.html': articleHtml(),
       'twin.html': articleHtml({ title: 'Old shipyard museum opens its main hall' }),
     },
   });
-  const run = runThroughLoop(s);
+  const run = await runThroughLoop(s);
   assert.equal(run.done, 2);
   const rows = s.db.prepare('SELECT url, canonical_url, content_hash FROM raw_records ORDER BY rowid').all();
   assert.equal(rows.length, 2);
@@ -126,19 +126,19 @@ test('AC2: same text under a different URL is a second row linked to the origina
   assert.equal(new Set(rows.map((row) => row.content_hash)).size, 1, 'no duplicated text: one hash pair');
 });
 
-test('a declared rel=canonical becomes the original record canonical_url', () => {
+test('a declared rel=canonical becomes the original record canonical_url', async () => {
   const s = setup({
     fixtures: { 'article.html': articleHtml({ canonical: 'https://news.example/the-real-article' }) },
   });
-  runThroughLoop(s);
+  await runThroughLoop(s);
   const record = s.db.prepare('SELECT canonical_url FROM raw_records').get();
   assert.equal(record.canonical_url, 'https://news.example/the-real-article');
 });
 
-test('AC3: an empty fixture fails its step with a diagnostic and writes no files', () => {
+test('AC3: an empty fixture fails its step with a diagnostic and writes no files', async () => {
   for (const empty of ['', '   \n  ']) {
     const s = setup({ fixtures: { 'article.html': empty } });
-    const run = runThroughLoop(s);
+    const run = await runThroughLoop(s);
     assert.equal(run.failed, 1);
     assert.equal(run.done, 0);
     const step = s.db.prepare("SELECT status, error FROM run_log WHERE kind = 'seed'").get();
@@ -150,9 +150,9 @@ test('AC3: an empty fixture fails its step with a diagnostic and writes no files
   }
 });
 
-test('AC3: a page without <title> fails with a named diagnostic', () => {
+test('AC3: a page without <title> fails with a named diagnostic', async () => {
   const s = setup({ fixtures: { 'article.html': articleHtml({ title: null }) } });
-  const run = runThroughLoop(s);
+  const run = await runThroughLoop(s);
   assert.equal(run.failed, 1);
   const step = s.db.prepare("SELECT error FROM run_log WHERE status = 'failed'").get();
   assert.ok(step.error.startsWith(`seed ${s.seedUrl('article.html')}: `), step.error);
@@ -161,12 +161,12 @@ test('AC3: a page without <title> fails with a named diagnostic', () => {
   assert.ok(!fs.existsSync(s.snapshotsRoot));
 });
 
-test('AC3: a missing seed file fails its step; the other steps still run', () => {
+test('AC3: a missing seed file fails its step; the other steps still run', async () => {
   const s = setup({
     fixtures: { 'absent.html': null, 'article.html': articleHtml() },
     seedOrder: ['absent.html', 'article.html'],
   });
-  const run = runThroughLoop(s);
+  const run = await runThroughLoop(s);
   assert.equal(run.failed, 1);
   assert.equal(run.done, 1, 'the valid seed is unaffected by the failed one');
   assert.equal(countRows(s.db, 'raw_records'), 1);
@@ -174,18 +174,20 @@ test('AC3: a missing seed file fails its step; the other steps still run', () =>
   assert.ok(failed.error.startsWith(`seed ${s.seedUrl('absent.html')}: `), failed.error);
 });
 
-test('AC4: content_hash is the sha256 of the stored text.md bytes re-read from disk', () => {
+test('AC4: content_hash is the sha256 of the stored text.md bytes re-read from disk', async () => {
   const s = setup();
-  runThroughLoop(s);
+  await runThroughLoop(s);
   const record = s.db.prepare('SELECT content_hash, snapshot_path FROM raw_records').get();
   const stored = fs.readFileSync(path.join(record.snapshot_path, 'text.md'));
   assert.equal(record.content_hash, sha256Hex(stored), 'hash matches the file as stored');
   assert.ok(!stored.includes(13), 'no CR bytes — the hash pins the LF bytes as written');
 });
 
-test('a seed with no local page source stays progress-only (fetching is G17.02+)', () => {
-  const s = setup({ seedLines: '  - https://news.example/gdansk' });
-  const run = runThroughLoop(s);
+test('a seed with a scheme neither the loader nor the crawl pipeline serves stays progress-only', async () => {
+  // G17.02: file:// seeds snapshot, http(s) seeds crawl — everything else
+  // (ftp:// here) completes as a progress step without any page source.
+  const s = setup({ seedLines: '  - ftp://news.example/gdansk' });
+  const run = await runThroughLoop(s);
   assert.equal(run.done, 1, 'the step still completes, as in G17.01.a');
   assert.equal(countRows(s.db, 'raw_records'), 0, 'no record without a page source');
   assert.ok(!fs.existsSync(s.snapshotsRoot), 'no snapshot written');

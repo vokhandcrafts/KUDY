@@ -44,9 +44,19 @@ test('AC1: invalid fence values are rejected naming the offending field', () => 
     // An element-level failure carries the tuple index: campaign.fence.delay_s.0.
     [{ delay_s: 'delay_s: [-1, 5]' }, 'campaign.fence.delay_s'],
     [{ extra_domains: 'extra_domains: wiki.example' }, 'campaign.fence.extra_domains'],
+    // A bare hostname is the shape the fence compares; a URL or a path would
+    // silently never match, so the boundary rejects it with a reason.
+    [{ extra_domains: 'extra_domains: ["https://wiki.example/"]' }, 'campaign.fence.extra_domains'],
+    [{ extra_domains: 'extra_domains: ["wiki.example/wiki"]' }, 'campaign.fence.extra_domains'],
     [{ fence: null }, 'campaign.fence'],
     [{ fence: 'fence:', depth: null, extra_domains: null, delay_s: null }, 'campaign.fence'],
   ]);
+});
+
+test('extra_domains accept bare hostnames (the shape the fence compares)', () => {
+  const parsed = parseCampaign(campaignYaml({ extra_domains: 'extra_domains: ["commons.wikimedia.org", "wiki.example"]' }));
+  assert.ok(parsed.ok, parsed.diagnostics?.join('\n'));
+  assert.deepEqual(parsed.campaign.fence.extra_domains, ['commons.wikimedia.org', 'wiki.example']);
 });
 
 test('invalid seeds are rejected naming the field', () => {
