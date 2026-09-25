@@ -187,6 +187,30 @@ test('AC4: a subtitle-less video lands in asr-backlog and the run continues', as
   assert.equal(snapshotRows.length, 1);
 });
 
+// Issue #265: the cover is fetched for the collected video only — a video
+// deferred to asr-backlog must not cost a network request. The fixture
+// server's request log is the counter: reverting the `selected` guard on the
+// loadThumbnail call makes the backlog video fetch its cover and fails this
+// test (the collected-video side of the counter is AC3's stored cover bytes).
+test('the cover is not fetched for a video that lands in asr-backlog (issue #265)', async (t) => {
+  const fx = await youtubeSetup({
+    aQw4w9WgXcQ: {
+      info: youtubeInfo({ id: 'aQw4w9WgXcQ', subtitles: {}, automatic: {} }),
+      vtt: {},
+    },
+  }, { ids: ['aQw4w9WgXcQ'] });
+  t.after(() => fx.server.close());
+  const run = await fx.run();
+  assert.equal(run.done, 2, 'seed + the video processed');
+  assert.equal(run.failed, 0);
+  const backlogFile = path.join(fx.snapshotsRoot, run.campaignId.slice(0, 12), 'asr-backlog.jsonl');
+  const lines = fs.readFileSync(backlogFile, 'utf8').trimEnd().split('\n').map((line) => JSON.parse(line));
+  assert.equal(lines.length, 1, 'the video landed in the backlog');
+  assert.equal(lines[0].video_id, 'aQw4w9WgXcQ');
+  const coverRequests = fx.server.requests.filter((request) => request.path === '/cover.jpg');
+  assert.equal(coverRequests.length, 0, 'no cover request for the backlog video');
+});
+
 test('AC5: a missing yt-dlp binary answers with an explicit diagnostic and no partial records', async (t) => {
   const dir = makeTempDir();
   const absent = path.join(dir, 'no-such-yt-dlp');

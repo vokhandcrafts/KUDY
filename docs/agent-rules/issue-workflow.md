@@ -119,8 +119,11 @@ same defect there as a missing one. Work happens on a branch named `<tool>/<issu
 
    `Closes #N` is mandatory: the issue closes when the PR merges, and the merge is
    the completion signal both the operator and the automation understand.
-5. Never merge, never approve your own PR, never change GitHub checks or branch
-   protection, never read or invent tokens (`dispatcher-loop.md` applies to you).
+5. Merging is authorized (owner decision, 2026-09-26): once the code review and
+   the judge verdicts are both green, the pipeline may squash-merge its own PR
+   to `main` and delete the branch. Never merge without both green verdicts,
+   never change GitHub checks or branch protection, never read or invent tokens
+   (`dispatcher-loop.md` applies to you).
 6. After the merge: remove `agent:running` from the (now closed) issue. Nothing else
    is needed. If the PR was closed without merging, hand the task back (§6).
 

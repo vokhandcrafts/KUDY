@@ -142,7 +142,9 @@ export function createYoutubeFetch({ command = ['yt-dlp'], loadThumbnail = defau
       if (fs.existsSync(file)) selected = { ...chosen, path: file };
     }
     let cover = null;
-    if (info.thumbnail) {
+    // Only a collected video stores its cover — a video without usable
+    // subtitles goes to the asr-backlog and would throw the fetch away.
+    if (selected && info.thumbnail) {
       cover = await loadThumbnail(info.thumbnail);
     }
     return { info, url, selected, cover };
