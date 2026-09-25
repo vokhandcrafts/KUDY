@@ -23,6 +23,7 @@ import {
   failStep,
   upsertRawRecord,
 } from './store.mjs';
+import { processImageStep } from './media.mjs';
 import { defaultSnapshotsRoot, processFetchedPage } from './snapshot.mjs';
 
 // The page-source boundary: tests and demos run the full snapshot pipeline
@@ -32,8 +33,17 @@ function defaultLoadPage(url) {
   return fs.readFileSync(fileURLToPath(url), 'utf8');
 }
 
-export function defaultHandlers({ loadPage = defaultLoadPage } = {}) {
+// The image-source boundary (G17.03): same rule as the page loader — file://
+// fixtures only, every other scheme answers null (the image step turns that
+// into a failed-step diagnostic). Returns bytes, not text.
+function defaultLoadImage(url) {
+  if (new URL(url).protocol !== 'file:') return null;
+  return fs.readFileSync(fileURLToPath(url));
+}
+
+export function defaultHandlers({ loadPage = defaultLoadPage, loadImage = defaultLoadImage } = {}) {
   return {
+    loadImage,
     seed(ctx, step) {
       let html;
       try {
@@ -52,6 +62,10 @@ export function defaultHandlers({ loadPage = defaultLoadPage } = {}) {
       } catch (error) {
         throw new Error(`seed ${step.ref}: ${error.message}`);
       }
+    },
+    image(ctx, step) {
+      // The diagnostic already names the source URL and the reason.
+      return processImageStep(ctx.db, { now: ctx.now, loadImage: ctx.loadImage }, step);
     },
     youtube({ db, campaign, campaignId, now }, step) {
       const url = `https://www.youtube.com/watch?v=${step.ref}`;
@@ -85,22 +99,38 @@ export function runCampaign(
   for (const url of campaign.seeds) enqueueStep(db, campaignId, 'seed', url, now);
 
   const counts = { campaignId, done: 0, failed: 0 };
-  const ctx = { db, campaign, campaignId, now, snapshotsRoot };
-  for (const step of claimableSteps(db, campaignId)) {
-    const handler = handlers[step.kind];
-    claimStep(db, step.id, now);
-    if (!handler) {
-      failStep(db, step.id, `no handler for step kind '${step.kind}'`, now);
-      counts.failed += 1;
-      continue;
-    }
-    try {
-      handler(ctx, step);
-      completeStep(db, step.id, now);
-      counts.done += 1;
-    } catch (error) {
-      failStep(db, step.id, error instanceof Error ? error.message : String(error), now);
-      counts.failed += 1;
+  const ctx = { db, campaign, campaignId, now, snapshotsRoot, loadImage: handlers.loadImage };
+  // The loop drains: a seed handler enqueues its image steps mid-run, so the
+  // claimable list is re-read until nothing is left — one invocation finishes
+  // the whole campaign. Every processed step ends 'done' or 'failed', so the
+  // drain terminates.
+  for (;;) {
+    const steps = claimableSteps(db, campaignId);
+    if (steps.length === 0) break;
+    for (const step of steps) {
+      const handler = handlers[step.kind];
+      claimStep(db, step.id, now);
+      if (!handler) {
+        failStep(db, step.id, `no handler for step kind '${step.kind}'`, now);
+        counts.failed += 1;
+        continue;
+      }
+      try {
+        // A step may answer an outcome note (the image step's skip message).
+        // It is appended to the work-order detail, never replaces it — the
+        // detail is what a resumed process re-reads.
+        const note = handler(ctx, step);
+        completeStep(
+          db,
+          step.id,
+          now,
+          typeof note === 'string' && note !== '' ? (step.detail ? `${step.detail} | ${note}` : note) : null
+        );
+        counts.done += 1;
+      } catch (error) {
+        failStep(db, step.id, error instanceof Error ? error.message : String(error), now);
+        counts.failed += 1;
+      }
     }
   }
   return counts;

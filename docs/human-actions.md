@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-25 — G17.03: смержыць PR #254
+Што зрабіць: смержыць PR #254 (squash) — ён закрывае issue #158 (media-канвеер калектара: 150px-правіла зместу, радкі `media`, markdown-выявы на сваіх пазіцыях). Пасля мержу выдаліце гэты запіс.
+PR: https://github.com/vokhandcrafts/KUDY/pull/254 (issue #158)
+
 ### 2026-09-25 — jscpd CI (#241): стартавы збой ва ўсіх PR (замяняе запіс ад 2026-09-22)
 Што зрабіць: спачатку праверце налады Actions гэтага рэпазітарыя — дазвол reusable workflows з `vokhandcrafts/ai-company-infrastructure` (Settings → Actions → General → Allow all actions and reusable workflows); runs `jscpd.yml` падаюць на старце (0s, без джобаў) на кожным PR, а дакладная прычына ў #241 яшчэ не дыягнаставаная. Калі налады ў парадку — найпраўдападобней патрабуецца праўка `.github/workflows/jscpd.yml` (пін reusable workflow на `@752dff0` састарэлы пасля мержу інфраструктурнага PR #1): зрабіце яе самі або яўна дазвольце яе агентам (issue-workflow §7 забараняе ім праўку `.github/`). Пасля фіксу дадайце радок `key: jscpd-workflow-startup-failure` у `docs/review-must-flag.md`.
 Issue: https://github.com/vokhandcrafts/KUDY/issues/241

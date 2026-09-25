@@ -108,3 +108,39 @@ export function articleHtml({
     '',
   ].join('\n');
 }
+
+// Minimal container headers with exact pixel dimensions — the media probe
+// reads only these bytes, so no real image data is needed. G17.03 fixtures.
+export function pngBytes(width, height) {
+  const bytes = Buffer.alloc(33);
+  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(bytes, 0);
+  bytes.writeUInt32BE(13, 8);
+  bytes.write('IHDR', 12, 'ascii');
+  bytes.writeUInt32BE(width, 16);
+  bytes.writeUInt32BE(height, 20);
+  bytes[24] = 8; // bit depth
+  return bytes;
+}
+
+export function gifBytes(width, height) {
+  const bytes = Buffer.alloc(13);
+  bytes.write('GIF89a', 0, 'ascii');
+  bytes.writeUInt16LE(width, 6);
+  bytes.writeUInt16LE(height, 8);
+  return bytes;
+}
+
+export function jpegBytes(width, height) {
+  const bytes = Buffer.alloc(25);
+  bytes[0] = 0xff;
+  bytes[1] = 0xd8;
+  bytes[2] = 0xff;
+  bytes[3] = 0xc0; // SOF0: baseline frame header carries the dimensions
+  bytes.writeUInt16BE(17, 4); // segment length
+  bytes[6] = 8; // precision
+  bytes.writeUInt16BE(height, 7);
+  bytes.writeUInt16BE(width, 9);
+  bytes[11] = 0xff;
+  bytes[12] = 0xd9;
+  return bytes;
+}
