@@ -301,6 +301,35 @@ test('the transport boundary serves only http(s): an unservable url fails the st
   assert.equal(countRows(s.db, 'raw_records'), 0);
 });
 
+test('a category member outside ns 0/14 is skipped with a note; the category itself still collects', async () => {
+  const s = setup(
+    {
+      'members:Category:Architektura Gdańska': membersResponse({
+        articles: ['Stocznia Gdańska'],
+        subcategories: ['Category:Historia Gdańska'],
+      }),
+      'parse:Stocznia Gdańska': articleResponse({ title: 'Stocznia Gdańska', html: MINIMAL_HTML }),
+    },
+    { categories: ['Category:Architektura Gdańska'], depth: 1, topics: 'topics: [architektura]' }
+  );
+  // Inject the unexpected-namespace member into the recorded response.
+  const raw = JSON.parse(s.responses['members:Category:Architektura Gdańska']);
+  raw.query.categorymembers.push({ ns: 10, title: 'Template:Stub banner', pageid: 500 });
+  s.responses['members:Category:Architektura Gdańska'] = JSON.stringify(raw);
+
+  const run = await runThrough(s);
+  assert.equal(run.failed, 0, 'a template member is not a failed step');
+  assert.equal(
+    s.db.prepare("SELECT COUNT(*) AS n FROM run_log WHERE kind = 'wiki-article' AND ref = 'Template:Stub banner'").get().n,
+    0,
+    'the non-content member is never fetched'
+  );
+  const urls = s.db.prepare('SELECT url FROM raw_records ORDER BY url').all().map((row) => row.url);
+  assert.deepEqual(urls, ['https://pl.wikipedia.org/wiki/Stocznia_Gda%C5%84ska'], 'the article is still collected');
+  const step = s.db.prepare("SELECT detail FROM run_log WHERE kind = 'wiki-category'").get();
+  assert.match(step.detail, /'Template:Stub banner' skipped: namespace 10 is not article content/);
+});
+
 test('a non-http api endpoint in the campaign fails through the default transport, with no network attempt', async () => {
   const s = setup({}, { articles: ['Gdańsk'], depth: 1, api: 'ftp://files.example/w/api.php' });
   const run = await runCampaign(s.db, s.campaign, {

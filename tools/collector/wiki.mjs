@@ -109,17 +109,21 @@ export function parseCategoryMembersResponse(payload, title) {
   }
   const articles = [];
   const subcategories = [];
+  const skipped = [];
   for (const member of members) {
     if (!member || typeof member.title !== 'string' || typeof member.ns !== 'number') {
       throw new Error(`wiki api response for category '${title}': member without ns/title`);
     }
     if (member.ns === 0) articles.push(member.title);
     else if (member.ns === 14) subcategories.push(member.title);
-    else throw new Error(`wiki api response for category '${title}': unexpected namespace ${member.ns} on '${member.title}'`);
+    // cmtype=page|subcat still lists non-content pages (templates, stub
+    // banners, …) as type "page" — a legitimate API answer the collector does
+    // not consume: skipped with a note, never a failed category.
+    else skipped.push({ title: member.title, ns: member.ns });
   }
   // A follow-up batch exists (json.continue): reported, not silently dropped —
   // G17.04 collects one batch per category step.
-  return { articles, subcategories, hasMore: Boolean(json.continue) };
+  return { articles, subcategories, skipped, hasMore: Boolean(json.continue) };
 }
 
 // «пераход па вікі-спасылках — у межах зададзеных тэм і глыбіні» — the

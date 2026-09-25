@@ -180,8 +180,11 @@ export function defaultHandlers({ loadPage = defaultLoadPage, loadImage = defaul
       if (payload === null) {
         throw new Error(`wiki-category '${step.ref}': no transport for ${requestUrl} (http/https only)`);
       }
-      const { articles, subcategories, hasMore } = parseCategoryMembersResponse(payload, step.ref);
+      const { articles, subcategories, skipped, hasMore } = parseCategoryMembersResponse(payload, step.ref);
       const notes = [];
+      for (const { title, ns } of skipped) {
+        notes.push(`'${title}' skipped: namespace ${ns} is not article content`);
+      }
       for (const title of articles) {
         enqueueStep(ctx.db, ctx.campaignId, 'wiki-article', title, ctx.now, JSON.stringify({ api: order.api }));
       }

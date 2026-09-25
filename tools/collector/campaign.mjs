@@ -26,7 +26,20 @@ export const campaignSchema = z.strictObject({
   youtube: z.array(z.string().regex(/^[A-Za-z0-9_-]{11}$/)).default([]),
   wiki: z
     .strictObject({
-      api: z.url(),
+      // The api.php script is what wikiHistoryUrl rewrites to index.php for
+      // the contributors page — the path shape is pinned here at the boundary,
+      // so the rewrite always has a match.
+      api: z
+        .url()
+        .refine((value) => {
+          try {
+            return new URL(value).pathname.endsWith('api.php');
+          } catch {
+            return false;
+          }
+        }, {
+          message: 'must be the URL of the MediaWiki api.php script',
+        }),
       articles: z.array(z.string().min(1)).default([]),
       categories: z.array(z.string().min(1)).default([]),
       depth: z.number().int().min(1),

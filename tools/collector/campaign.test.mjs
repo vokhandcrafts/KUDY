@@ -104,6 +104,7 @@ test('invalid wiki blocks are rejected naming the field', () => {
     [{ wiki: 'wiki:\n  api: https://pl.wikipedia.org/w/api.php\n  depth: 1' }, 'campaign.wiki'],
     [{ wiki: 'wiki:\n  api: https://pl.wikipedia.org/w/api.php\n  articles:\n    - Gdańsk\n  depth: 0' }, 'campaign.wiki.depth'],
     [{ wiki: 'wiki:\n  api: not-a-url\n  articles:\n    - Gdańsk\n  depth: 1' }, 'campaign.wiki.api'],
+    [{ wiki: 'wiki:\n  api: https://pl.wikipedia.org/w/\n  articles:\n    - Gdańsk\n  depth: 1' }, 'campaign.wiki.api'],
     [{ wiki: 'wiki:\n  api: https://pl.wikipedia.org/w/api.php\n  articles:\n    - Gdańsk\n  depth: 1\n  extra: 1' }, 'campaign.wiki'],
   ]);
 });
