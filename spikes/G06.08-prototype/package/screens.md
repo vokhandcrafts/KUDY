@@ -7,6 +7,10 @@ deliberately NOT specified here: the design-token source does not exist until
 G06.06/G06.07 finish, so the prototype's `styles.css` carries a marked-draft
 palette that those tasks supersede.
 
+> 2026-09-25: the design-token source now exists — `docs/design/visual-language.md`
+> (G06.07, #180) supersedes the draft palette; the guard is
+> `test/design-tokens.test.mjs`.
+
 Screen inventory follows `docs/architecture/09_technical_architecture.md` §6.5
 (`Explore`, `RouteDetail` preview, `Run` panel, `Map` = Побач, `MyKUDY`) plus
 the navigation contract `docs/11_run_interaction.md` §16 and the acceptance

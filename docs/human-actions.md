@@ -21,6 +21,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 Што зрабіць: смержыць PR #258 (squash) — ён закрывае issue #159 (вікі-калектар: MediaWiki API, разгортванне катэгорый па тэмах і глыбіні, `rights=licensed` з атрыбуцыяй). Пасля мержу выдаліце гэты запіс.
 PR: https://github.com/vokhandcrafts/KUDY/pull/258 (issue #159)
 
+### 2026-09-25 — Чыстка гісторыі: падтрымка GitHub і git config на Windows
+Што зрабіце: 1) дашліце запыт у GitHub Support (https://support.github.com/request, «Remove data from GitHub») на вычышчанне недасяжных камітаў — у закрытых PR трох рэпаў старыя каміты з viktar.kamylevich@seranking.com застаюцца даступнымі праз refs/pull/* і кэш, пакуль GitHub іх не счасце. 2) На Windows-машыне заменіце `git config --global user.email` на `293595955+vokhandcrafts@users.noreply.github.com` — seranking-адрас прыехаў у гісторыю адтуль; на гэтай машыне лакальныя канфігі ўжо выстаўлены. Бэкап старой гісторыі да перапісу: /home/viktar/backups/repo-rewrite-2026-09-25/.
+PR: няма (пераюз гісторыі: KUDY main 3f85707, ai-company-infrastructure main 9558bda, vok-handcrafts main c6ef4b0)
+
 ### 2026-09-25 — G17.05: устанавіць yt-dlp для жывых запускаў
 Што зрабіце: устанавіце `yt-dlp` на гэтай машыне (напрыклад, `pip install yt-dlp` або pacman-сборку) — без яго `run` кампаніі з YouTube-ідэнтыфікатарамі адказвае дыягностыкай «binary not found» і крокі ідуць у `failed` (транскрыпты не губляюцца, крокі можна паўтарыць новым `run` толькі для pending; ужо failed-крокі не перазапускаюцца). Пасля ўстаноўкі запішыце запінаваную версію ў `docs/agent-tasks/results/G17.05.md` (раздзел Decisions) — патрабаванне брыфа G17.05.
 PR: https://github.com/vokhandcrafts/KUDY/pull/263 (issue #160)

@@ -1,21 +1,37 @@
-/* DRAFT design tokens — the single source of visual values does not exist yet
-   (G06.06/G06.07 have no results); everything here is a placeholder palette
-   explicitly superseded by those tasks. Do not copy these values into
-   production UI. */
+/* Visual values are governed by the canon: docs/design/visual-language.md
+   (G06.07). Every :root custom property maps to a canon token — the mapping
+   and any overrides live in the canon's supersession section; the guard is
+   test/design-tokens.test.mjs. Do not add visual values here. */
 :root {
   --kudy-paper: #faf7f2;
   --kudy-ink: #22262b;
   --kudy-muted: #6b7280;
   --kudy-accent: #1d6b4f;
   --kudy-accent-ink: #ffffff;
-  --kudy-locked: #9aa2ab;
+  --kudy-locked: #67707a;
   --kudy-played: #1d6b4f;
-  --kudy-available: #b07d1f;
-  --kudy-pending: #7c8691;
+  --kudy-available: #8a610e;
+  --kudy-pending: #646c77;
   --kudy-playing: #b3331f;
   --kudy-warn: #b3331f;
   --kudy-line: #d8d2c6;
   --kudy-card: #ffffff;
+  --kudy-note: #fffbe8;
+  --kudy-map: #eef3ee;
+  --kudy-street: #dfe7df;
+  --kudy-person: #1f5aa8;
+  --kudy-hint-bg: #f6faff;
+  --kudy-hint-border: #bcd2f0;
+  --kudy-moment-bg: #fff7ec;
+  --kudy-moment-border: #ecd9b0;
+  --kudy-notice-bg: #fdf1d7;
+  --kudy-notice-border: #e6c98c;
+  --kudy-error-bg: #fdeaea;
+  --kudy-error-border: #e0a2a2;
+  --kudy-badge-paid: #fdf1d7;
+  --kudy-badge-free: #e7f2ec;
+  --kudy-badge-mixed: #ece7f8;
+  --kudy-badge-lock: #eceff1;
   --radius: 10px;
 }
 * { box-sizing: border-box; }
@@ -27,32 +43,32 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--kudy-a
 header#topbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--kudy-line); background: var(--kudy-card); position: sticky; top: 0; }
 header#topbar strong { flex: 1; font-size: 18px; }
 main#screen { padding: 12px; max-width: 720px; margin: 0 auto; padding-bottom: 70px; }
-footer#demo-note { position: fixed; bottom: 0; left: 0; right: 0; background: #fffbe8; border-top: 1px solid var(--kudy-line); font-size: 12px; padding: 4px 10px; color: var(--kudy-muted); }
+footer#demo-note { position: fixed; bottom: 0; left: 0; right: 0; background: var(--kudy-note); border-top: 1px solid var(--kudy-line); font-size: 12px; padding: 4px 10px; color: var(--kudy-muted); }
 .card { background: var(--kudy-card); border: 1px solid var(--kudy-line); border-radius: var(--radius); padding: 12px; margin: 8px 0; }
 .card h3 { margin: 0 0 4px; }
 .muted { color: var(--kudy-muted); }
 .badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--kudy-line); margin-right: 4px; }
-.badge.paid { background: #fdf1d7; }
-.badge.free { background: #e7f2ec; }
-.badge.mixed { background: #ece7f8; }
-.badge.lock { background: #eceff1; }
+.badge.paid { background: var(--kudy-badge-paid); }
+.badge.free { background: var(--kudy-badge-free); }
+.badge.mixed { background: var(--kudy-badge-mixed); }
+.badge.lock { background: var(--kudy-badge-lock); }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .chip { border: 1px solid var(--kudy-line); border-radius: 99px; padding: 4px 10px; background: var(--kudy-card); cursor: pointer; }
 .chip[aria-pressed="true"] { background: var(--kudy-accent); color: var(--kudy-accent-ink); border-color: var(--kudy-accent); }
 .hidden { display: none !important; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.big-text { font-size: 19px; }
+.big-text { font-size: 20px; }
 
 /* map */
-#map { position: relative; background: #eef3ee; border: 1px solid var(--kudy-line); border-radius: var(--radius); height: 300px; overflow: hidden; }
-#map .street { position: absolute; background: #dfe7df; }
+#map { position: relative; background: var(--kudy-map); border: 1px solid var(--kudy-line); border-radius: var(--radius); height: 300px; overflow: hidden; }
+#map .street { position: absolute; background: var(--kudy-street); }
 #map .marker { position: absolute; width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; cursor: pointer; transform: translate(-50%, -50%); }
 #map .marker.locked { background: var(--kudy-locked); }
 #map .marker.playing { background: var(--kudy-playing); }
 #map .marker.played { background: var(--kudy-played); }
 #map .marker.available { background: var(--kudy-available); }
 #map .marker.pending { background: var(--kudy-pending); }
-#map .person { position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #1f5aa8; border: 3px solid #fff; transform: translate(-50%, -50%); transition: left .6s ease, top .6s ease; }
+#map .person { position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--kudy-person); border: 3px solid #fff; transform: translate(-50%, -50%); transition: left .6s ease, top .6s ease; }
 
 /* run panel */
 #panel { background: var(--kudy-card); border: 1px solid var(--kudy-line); border-radius: var(--radius); margin-top: 8px; }
@@ -60,12 +76,12 @@ footer#demo-note { position: fixed; bottom: 0; left: 0; right: 0; background: #f
 #peek .now { flex: 1; min-width: 0; }
 #peek .now .line2 { font-size: 13px; color: var(--kudy-muted); }
 #panel .panel-body { padding: 10px 12px; border-top: 1px solid var(--kudy-line); max-height: 320px; overflow: auto; }
-.hintcard { background: #f2f7ff; border: 1px solid #bcd2f0; }
-.momentcard { background: #fff7ec; border: 1px solid #ecd9b0; }
+.hintcard { background: var(--kudy-hint-bg); border: 1px solid var(--kudy-hint-border); }
+.momentcard { background: var(--kudy-moment-bg); border: 1px solid var(--kudy-moment-border); }
 .progress { height: 6px; background: var(--kudy-line); border-radius: 3px; overflow: hidden; margin: 6px 0; }
 .progress > div { height: 100%; background: var(--kudy-accent); width: 0; }
-.notice { background: #fdf1d7; border: 1px solid #e6c98c; border-radius: var(--radius); padding: 8px 12px; margin: 8px 0; }
-.error { background: #fdeaea; border: 1px solid #e0a2a2; }
+.notice { background: var(--kudy-notice-bg); border: 1px solid var(--kudy-notice-border); border-radius: var(--radius); padding: 8px 12px; margin: 8px 0; }
+.error { background: var(--kudy-error-bg); border: 1px solid var(--kudy-error-border); }
 dialog { border: 1px solid var(--kudy-line); border-radius: var(--radius); max-width: 400px; width: 90%; }
 dialog::backdrop { background: rgba(0,0,0,.35); }
 .fb-scale { display: flex; gap: 6px; }

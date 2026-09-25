@@ -57,3 +57,6 @@ MapLibre surface (G00.02 owns the map spike).
   at prepare time (`scripts/prepare-data.mjs`), never re-implemented in the UI.
 - Design tokens in `prototype/styles.css` are marked DRAFT and are superseded
   by G06.06 (screen schemes) and G06.07 (visual direction).
+  - 2026-09-25: superseded — the visual canon is `docs/design/visual-language.md`
+    (G06.07, #180); every draft `:root` token maps to a canon token there, the
+    guard is `test/design-tokens.test.mjs`.
