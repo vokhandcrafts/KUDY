@@ -2,6 +2,7 @@
   "name": "kudy",
   "version": "0.1.0",
   "private": true,
+  "license": "PolyForm-Noncommercial-1.0.0",
   "main": "expo-router/entry",
   "engines": {
     "node": ">=22.12.0 <27",
