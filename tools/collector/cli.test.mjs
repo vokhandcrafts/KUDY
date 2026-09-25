@@ -144,6 +144,27 @@ test('run with a file:// seed writes the snapshot; status counts it', () => {
   assert.match(status.stdout, /snapshots: 1/);
 });
 
+test('a rejected run converts to the exit-2 diagnostic path (the main().catch guard)', () => {
+  // A read-only db *directory* passes openStore (the file opens) but fails the
+  // first INSERT mid-run — runCampaign rejects, and the CLI guard must turn
+  // the rejection into `collector: <reason>` with exit 2. Reverting the guard
+  // ends the process on an unhandled rejection (exit 1, no prefix) instead.
+  const dir = makeTempDir();
+  const dbPath = path.join(dir, 'db.sqlite');
+  assert.equal(runCli(['init', '--db', dbPath]).status, 0);
+  const file = writeCampaignFile(dir, campaignYaml({ youtube: null }));
+  const dbDir = path.dirname(dbPath);
+  fs.chmodSync(dbDir, 0o555);
+  try {
+    const result = runCli(['run', '--campaign', file, '--db', dbPath]);
+    assert.equal(result.status, 2, result.stderr);
+    assert.match(result.stderr, /collector: /);
+    assert.doesNotMatch(result.stderr, /cannot open database/, 'open succeeded — the failure is the mid-run rejection');
+  } finally {
+    fs.chmodSync(dbDir, 0o755);
+  }
+});
+
 test('run on an error series prints the stopped diagnostic on stderr and still exits 0', async (t) => {
   if (!(await skipWithoutBrowser(t))) return;
   const dir = makeTempDir();

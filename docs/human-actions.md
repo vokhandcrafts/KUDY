@@ -18,20 +18,16 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 ## Што трэба зрабіць
 
 ### 2026-09-25 — Суддзёвы доўг #259: тэст stopped-рану CLI — смарг PR
-Што зрабіце: смаргніце PR пасля рэвью — ён закрывае суддзёвую знаходку з PR #257: дыягностыка stopped-рану на ўзроўні CLI больш мае ўласны тэст (паведамленне на stderr + код выхаду 0), лакальныя гейты зялёныя (node --test 961, jest 9, arch:check, jscpd 0 клонаў). Пасля мержу задача #259 закроецца аўтаматычна.
+Што зрабіце: смаргніце PR пасля рэвью — ён закрывае суддзёвую знаходку з PR #257: дыягностыка stopped-рану на ўзроўні CLI больш мае ўласны тэст (паведамленне на stderr + код выхаду 0). Пасля мержу задача #259 закроецца аўтаматычна.
 PR: https://github.com/vokhandcrafts/KUDY/pull/269 (issue #259)
 
-### 2026-09-25 — G06.07: зацвердзіць канон візуальнага кірунку (human gate)
-Што зрабіце: праглядзіце структуру і значэнні токенаў у `docs/design/visual-language.md` падчас рэв'ю PR — гэта крок ухвалення заснавальніка (крытэрый 6 issue #180). Зверце ўвагу на перазапісы супраць draft-палітры прататыпа: колеры маркераў `locked/available/pending`, фон карткі-падказкі, буйны тэкст 20px (≥ 1.2× паводле a11y-плашкі); ухваленыя значэнні стануць абавязковымі для экранаў G06.01+.
-PR: https://github.com/vokhandcrafts/KUDY/pull/266 (issue #180)
+### 2026-09-25 — G17.04: смержыць PR #258
+Што зрабіць: смержыць PR #258 (squash) — ён закрывае issue #159 (вікі-калектар: MediaWiki API, разгортванне катэгорый па тэмах і глыбіні, `rights=licensed` з атрыбуцыяй). Пасля мержу выдаліце гэты запіс.
+PR: https://github.com/vokhandcrafts/KUDY/pull/258 (issue #159)
 
 ### 2026-09-25 — Чыстка гісторыі: падтрымка GitHub і git config на Windows
 Што зрабіце: 1) дашліце запыт у GitHub Support (https://support.github.com/request, «Remove data from GitHub») на вычышчанне недасяжных камітаў — у закрытых PR трох рэпаў старыя каміты з viktar.kamylevich@seranking.com застаюцца даступнымі праз refs/pull/* і кэш, пакуль GitHub іх не счасце. 2) На Windows-машыне заменіце `git config --global user.email` на `293595955+vokhandcrafts@users.noreply.github.com` — seranking-адрас прыехаў у гісторыю адтуль; на гэтай машыне лакальныя канфігі ўжо выстаўлены. Бэкап старой гісторыі да перапісу: /home/viktar/backups/repo-rewrite-2026-09-25/.
 PR: няма (пераюз гісторыі: KUDY main 3f85707, ai-company-infrastructure main 9558bda, vok-handcrafts main c6ef4b0)
-
-### 2026-09-25 — CI: аднавіць білінг GitHub Actions
-Што зрабіце: адкрыйце «Billing & plans» у наладах акаўнта GitHub і ўхваліце правальны платзеж або падыміце spending limit — усё CI падае на старце без ніводнага кроку з анатацыяй «The job was not started because recent account payments have failed or your spending limit needs to be increased», таму мержы ўсіх адкрытых PR заблакаваны (лакальныя гейты на галінках пры гэтым зялёныя).
-PR: https://github.com/vokhandcrafts/KUDY/pull/258 (блакуе таксама астатнія адкрытыя PR)
 
 ### 2026-09-25 — G17.05: устанавіць yt-dlp для жывых запускаў
 Што зрабіце: устанавіце `yt-dlp` на гэтай машыне (напрыклад, `pip install yt-dlp` або pacman-сборку) — без яго `run` кампаніі з YouTube-ідэнтыфікатарамі адказвае дыягностыкай «binary not found» і крокі ідуць у `failed` (транскрыпты не губляюцца, крокі можна паўтарыць новым `run` толькі для pending; ужо failed-крокі не перазапускаюцца). Пасля ўстаноўкі запішыце запінаваную версію ў `docs/agent-tasks/results/G17.05.md` (раздзел Decisions) — патрабаванне брыфа G17.05.

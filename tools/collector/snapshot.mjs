@@ -38,7 +38,16 @@ export function slugify(title) {
   return slug === '' ? 'article' : slug;
 }
 
-export function processFetchedPage(db, campaign, campaignId, { url, html, now, snapshotsRoot }) {
+// sourceType/rights/attribution/enqueueImages parameterize the same pipeline
+// for the wiki collector (G17.04): wiki records carry source_type=wiki,
+// rights=licensed and an attribution object merged into metadata.json, and
+// photos are out of scope there — no image steps are enqueued.
+export function processFetchedPage(
+  db,
+  campaign,
+  campaignId,
+  { url, html, now, snapshotsRoot, sourceType = 'web', rights = 'research_only', attribution = null, metadataOverrides = null, enqueueImages = true }
+) {
   const registered = db
     .prepare('SELECT id FROM raw_records WHERE campaign_id = ? AND url = ?')
     .get(campaignId, url);
@@ -64,19 +73,20 @@ export function processFetchedPage(db, campaign, campaignId, { url, html, now, s
   fs.mkdirSync(mediaDir, { recursive: true });
   fs.writeFileSync(path.join(snapshotDir, 'snapshot.html'), Buffer.from(html, 'utf8'));
   fs.writeFileSync(path.join(snapshotDir, 'text.md'), textBytes);
-  fs.writeFileSync(path.join(snapshotDir, 'metadata.json'), `${JSON.stringify(page.metadata, null, 2)}\n`);
+  const metadata = { ...page.metadata, ...(metadataOverrides ?? {}), ...(attribution ? { attribution } : {}) };
+  fs.writeFileSync(path.join(snapshotDir, 'metadata.json'), `${JSON.stringify(metadata, null, 2)}\n`);
 
   const recordId = randomUUID();
   upsertRawRecord(db, {
     id: recordId,
     campaign_id: campaignId,
-    source_type: 'web',
+    source_type: sourceType,
     url,
     canonical_url: canonicalUrl,
     collected_at: now,
     city: campaign.city,
     topics: JSON.stringify(campaign.topics),
-    rights: 'research_only',
+    rights,
     content_hash: contentHash,
     status: 'raw',
     snapshot_path: snapshotDir,
@@ -85,6 +95,7 @@ export function processFetchedPage(db, campaign, campaignId, { url, html, now, s
   for (const link of page.links) {
     insertLink(db, { rawRecordId: recordId, anchorText: link.anchor, url: link.url, context: link.context });
   }
+  if (!enqueueImages) return { outcome: original ? 'duplicate-text' : 'recorded', recordId, snapshotDir, contentHash };
   // Each image occurrence of the page becomes its own run_log step (G17.03):
   // the descriptor JSON in `detail` carries everything the step needs — the
   // source URL, the text.md block the image belongs before, alt/caption and

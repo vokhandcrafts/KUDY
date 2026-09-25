@@ -40,6 +40,9 @@ function openStoreOrExit(dbPath) {
   }
 }
 
+// main is async: the crawl (G17.02) and wiki (G17.04) handlers await their
+// transports, so the run command awaits the campaign loop. The CLI guard below
+// converts a rejected run into the exit-2 diagnostic path.
 export async function main(argv) {
   let parsed;
   try {
@@ -119,5 +122,5 @@ export async function main(argv) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main(process.argv.slice(2));
+  main(process.argv.slice(2)).catch((error) => fail(String(error?.message ?? error), 2));
 }

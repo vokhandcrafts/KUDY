@@ -29,6 +29,14 @@
   Выпраўлена: docs/agent-tasks/results/G05.03.b.md, абзац «Reachability» —
   issue #247.
 
+- key: missing-corrupt-input-test — галінка парсара ці пайплайна для
+  пашкоджанага ўводу (пусты файл, не-JSON stdout, таймстэмпы без гадзін) без
+  уласнага negative-тэсту праз production-шлях — знаходка, нават калі код
+  выглядае правільным: рэгрэсія такой галінкі не ўпадзе на CI.
+  Выпраўлена: tools/collector/youtube.test.mjs, negative-тэсты
+  YouTube-калектара (cue-less VTT праз пайплайн, runJson без JSON, parseVtt) —
+  issue #264.
+
 - key: missing-cli-stop-test — паводзіны, што праяўляюцца на ўзроўні CLI
   (радок на stderr, код выхаду), маюць уласны кейс у cli-тэсце, а не толькі
   тэст бібліятэчнага ўзроўню: калі радок вываду або код выхаду адкаціць,

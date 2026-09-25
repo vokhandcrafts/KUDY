@@ -167,7 +167,7 @@ node --test "tools/collector/*.test.mjs" 2>/dev/null | grep -E "^ℹ (tests|pass
 ```
 
 ```output
-ℹ tests 76
-ℹ pass 76
+ℹ tests 91
+ℹ pass 91
 ℹ fail 0
 ```
