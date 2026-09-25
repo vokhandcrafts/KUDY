@@ -31,6 +31,15 @@
 //    PersistProgress, EmitEvent, ShowArrivalCard) are G05.05's persistence,
 //    telemetry and UI surface — deliberately dropped here, not silently lost:
 //    the exhaustive switch makes adding a command a compile-visible decision.
+// 7. G05.05 (issue #216) adds two optional durability deps. The services/
+//    download capability port is the only AccessReady delivery path into the
+//    engine (ADR G01.03 §3.5): its handler is registered here, where dispatch
+//    is private, so no public method accepts an AccessReady-shaped event and
+//    a look-alike from any other source has no route into step(). The
+//    onCommitted hook runs after step() committed an event and before its
+//    effects fire — the durability point where useRunController checkpoints
+//    the durable sets and write-throughs play_seq (ADR §3.1/§3.3); a failing
+//    hook aborts the pending effects (effects only after commit).
 import { acceptFix } from '../../core/pipeline/pipeline.ts';
 import {
   initialPipelineState,
@@ -47,6 +56,7 @@ import type { LocationService } from '../../services/location/service.ts';
 import type { GeofenceStop } from '../../services/location/types.ts';
 import type { AudioService } from '../../services/audio/service.ts';
 import type { AudioServiceEvent } from '../../services/audio/types.ts';
+import type { DownloadAccessPort } from '../../services/download/access.ts';
 
 // One selected stop of the route: the engine's package identity plus the
 // geometry the pipeline candidates and the geofence window both need.
@@ -76,6 +86,12 @@ export interface RunOrchestratorDeps {
   pipelineConfig: PipelineConfig;
   route: RunRoute;
   stops: ReadonlyArray<RunStop>;
+  // Header note 7: optional for the G05.04 scenarios, always passed by
+  // useRunController.
+  access?: DownloadAccessPort;
+  // Header note 7: the durability point — after the engine committed an
+  // event, before its effects fire.
+  onCommitted?: (before: RunState, after: RunState) => void;
 }
 
 export class RunOrchestrator {
@@ -87,6 +103,7 @@ export class RunOrchestrator {
   private readonly route: RunRoute;
   private readonly stops: ReadonlyArray<RunStop>;
   private readonly candidates: ReadonlyMap<string, PipelineCandidate>;
+  private readonly onCommitted: ((before: RunState, after: RunState) => void) | undefined;
 
   private engineState: RunState = initialRunState;
   private pipelineState: PipelineState = initialPipelineState;
@@ -100,11 +117,13 @@ export class RunOrchestrator {
     this.pipelineConfig = deps.pipelineConfig;
     this.route = deps.route;
     this.stops = deps.stops;
+    this.onCommitted = deps.onCommitted;
     this.candidates = new Map(
       deps.stops.map((stop) => [stop.stopId, { lat: stop.lat, lng: stop.lng, radius: stop.radius }]),
     );
     deps.location.onFix((fix) => this.onFix(fix));
     deps.audio.onEvent((event) => this.onAudioEvent(event));
+    deps.access?.onAccessReady((event) => this.dispatch(event));
   }
 
   // Read-only engine view for the UI layer (G05.05) and the scenario tests:
@@ -121,7 +140,11 @@ export class RunOrchestrator {
   // would stop a sounding moment by command — the Start contract forbids that
   // (ADR §3.3). A Start while a session is live stays the reducer's no-op
   // (one live session, ADR G01.03 §3.1).
-  start(sessionId: string, accessibleStopIds?: ReadonlyArray<string>): void {
+  // `verifiedTiers` (G05.05.a) is the readiness-verified layer list of this
+  // start (ADR G01.03 §3.1: the row's tier records what Start verified) —
+  // a paid walk re-entered after both layers were activated starts with both;
+  // without it the route's default selection applies.
+  start(sessionId: string, accessibleStopIds?: ReadonlyArray<string>, verifiedTiers?: Tier[]): void {
     let playingNow: { momentId: string; storyId: string; seq: number } | undefined;
     if (this.engineState.phase === 'Ended') {
       const ended = this.engineState;
@@ -146,7 +169,7 @@ export class RunOrchestrator {
       routeId: this.route.routeId,
       version: this.route.version,
       locale: this.route.locale,
-      tier: this.route.tier,
+      tier: verifiedTiers ?? this.route.tier,
       accessibleStopIds: [...ids],
       ...(playingNow ? { playingNow } : {}),
       stops: this.stops.map(({ stopId, storyBaseId, storyExtendedId }) => ({
@@ -258,10 +281,15 @@ export class RunOrchestrator {
     }
   }
 
-  // The one input path: commit the state, then apply the proposed effects.
+  // The one input path: commit the state, hand the durability point its
+  // before/after views (header note 7 — the checkpoints and the play_seq
+  // write-through of ADR G01.03 §3.1/§3.3 happen here, before any effect),
+  // then apply the proposed effects.
   private dispatch(event: RunEvent): void {
+    const before = this.engineState;
     const result = step(this.engineState, event, this.clock.now(), this.engineConfig);
     this.engineState = result.state;
+    this.onCommitted?.(before, result.state);
     this.applyEffects(result.commands);
   }
 

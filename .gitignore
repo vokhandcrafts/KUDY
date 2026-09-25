@@ -25,3 +25,8 @@ tools/build-bundle/build/
 # G17.01.a: collector runtime database (default --db location), never tracked
 tools/collector/runtime/
 
+
+# G05.05.a: the showboat demo's temporary mutation copy of the source trees,
+# created and removed inside the demo block (implementation-rules 5: a source
+# mirror ships with its ignore entry in the same change)
+.tmp-g0505a-proof/
