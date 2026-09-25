@@ -252,7 +252,7 @@ test('a series of redirects outside the fence stops the run', async (t) => {
   assert.match(
     run.stopped,
     new RegExp(
-      `error series: 3 consecutive crawl failures, ` +
+      `error series: ${ERROR_SERIES_LIMIT} consecutive crawl failures, ` +
         `last at ${fx.server.url('/start')} \\(redirected outside the fence to https://portal\\.example/redirected — content discarded\\)`
     )
   );
