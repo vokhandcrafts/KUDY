@@ -1,0 +1,10 @@
+[
+  {
+    "id": "place-1",
+    "content_version": "1",
+    "lat": 54.3487,
+    "lng": 18.6534,
+    "trigger_radius_m": 30,
+    "kind": "sight"
+  }
+]

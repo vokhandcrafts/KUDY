@@ -1,0 +1,30 @@
+{
+  "route_id": "g0304-demo",
+  "version": "1",
+  "city_id": "demo-city",
+  "access": "paid",
+  "distance_m": 500,
+  "duration_min": 10,
+  "free_stop_count": 1,
+  "published": false,
+  "stops": [
+    {
+      "id": "stop-1",
+      "position": 0,
+      "place_id": "place-1",
+      "access_tier": "base",
+      "story_base_id": "story-1-base"
+    },
+    {
+      "id": "stop-2",
+      "position": 1,
+      "place_id": "place-1",
+      "access_tier": "extended",
+      "story_extended_id": "story-2-ext",
+      "preview": {
+        "name": { "be": "Вяртун млына (заблакавана)" },
+        "announce": { "be": "Платная гісторыя пра вяртуна млына: восьмы токен, дзявяты токен, дзясяты токен, адзінаццаты токен канавай фразы." }
+      }
+    }
+  ]
+}

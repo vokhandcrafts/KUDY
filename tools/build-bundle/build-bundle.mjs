@@ -11,6 +11,10 @@
 //   21 §3  index shape, detail_ref path safety, availability/access
 //   21 §5.2 registry export: prepared status, guide/place revisions
 //   21 §9  builder rejects invalid index constructs (row 1)
+//   G03.04 media.json/moments.json manifests ride public with the bundle
+//          root; the base layer never carries a story whose tier contradicts
+//          the layer, and a locked stop's preview never contains the full
+//          text of the stop's own story
 //
 // Separate process from the app and from spikes (19 §2.4): no shared code.
 // Determinism: byte hashing over pinned-LF inputs (.gitattributes), sorted
@@ -166,7 +170,7 @@ async function readAuthorTree(inAbs) {
   const tierFiles = { base: [], extended: [] };
   const projectionRels = [];
   for (const rel of await listFiles(inAbs)) {
-    if (['route.json', 'places.json', 'voices.json', 'discovery.json'].includes(rel)) continue;
+    if (['route.json', 'places.json', 'voices.json', 'discovery.json', 'media.json', 'moments.json'].includes(rel)) continue;
     const segments = rel.split('/');
     const locale = segments[0];
     if (LOCALE_ALLOWLIST.includes(locale)) {
@@ -441,10 +445,21 @@ export async function buildBundle({ inDir, outDir }) {
     kinds.set(`public/${relOut}`, 'public_bundle');
   }
 
+  // G03.04 manifests ride with the bundle root when the author ships them:
+  // license/credit must stay visible wherever the media they describe is
+  // served, and moments are public teasers.
+  for (const rel of ['media.json', 'moments.json']) {
+    if (!fs.existsSync(path.join(inAbs, rel))) continue;
+    const relOut = `${bundleRoot}/${rel}`;
+    publicFiles.set(relOut, await readBytes(inAbs, rel));
+    kinds.set(`public/${relOut}`, 'public_bundle');
+  }
+
   // 09 §3/§4: base layer = public (free), extended layer = private (paid).
   const lockedStops = route.stops.filter((stop) => stop.access_tier === 'extended');
   const textLocales = [];
   const audioLocales = [];
+  const extendedStories = new Map(); // locale -> story objects of the extended layer
   for (const locale of tree.locales) {
     for (const tier of ['base', 'extended']) {
       const files = tree.tierFiles[tier].filter((rel) => rel.startsWith(`${locale}/${tier}/`));
@@ -452,8 +467,27 @@ export async function buildBundle({ inDir, outDir }) {
       const target = tier === 'base' ? publicFiles : privateFiles;
       for (const rel of files) {
         const relOut = `${bundleRoot}/${locale}/${tier}/${rel.slice(locale.length + tier.length + 2)}`;
-        target.set(relOut, await readBytes(inAbs, rel));
+        const buf = await readBytes(inAbs, rel);
+        target.set(relOut, buf);
         kinds.set(`${tier === 'base' ? 'public' : 'private'}/${relOut}`, tier === 'base' ? 'public_bundle' : 'private_bundle');
+        // G03.04 criterion 2: a story whose tier contradicts the layer it
+        // ships in would lay paid full text into the public base layer — the
+        // preview must stay a locked stop's only public representation
+        // (09 §3 invariant 3). G02.02 flags the same drift at authoring time;
+        // the packer is the last line (09 §11).
+        if (rel.endsWith('/stops.json')) {
+          const stories = parseJsonBuffer(buf, rel);
+          if (!Array.isArray(stories)) continue;
+          for (const story of stories) {
+            if (story && typeof story === 'object' && story.tier !== undefined && story.tier !== tier) {
+              fail('story-tier-mismatch', { path: rel, story_id: String(story.story_id ?? '') });
+            }
+          }
+          if (tier === 'extended') {
+            if (!extendedStories.has(locale)) extendedStories.set(locale, []);
+            extendedStories.get(locale).push(...stories.filter((story) => story && typeof story === 'object'));
+          }
+        }
       }
       if (tier === 'base') {
         if (files.some((rel) => rel === `${locale}/base/stops.json`)) textLocales.push(locale);
@@ -480,6 +514,32 @@ export async function buildBundle({ inDir, outDir }) {
         const relOut = `${bundleRoot}/${locale}/base/previews.json`;
         publicFiles.set(relOut, Buffer.from(canonicalJson(previews), 'utf8'));
         kinds.set(`public/${relOut}`, 'public_bundle');
+      }
+    }
+  }
+
+  // G03.04 criterion 2: a locked stop's preview (name/announce, 09 §3
+  // RouteStop) must not carry the full text of the stop's own story. The
+  // 8-gram scan below covers copies of shipped private text; the containment
+  // check names the violation directly and closes the sub-8-word story gap.
+  for (const stop of lockedStops) {
+    const preview = stop?.preview;
+    if (preview === null || preview === undefined || typeof preview !== 'object') continue;
+    for (const [locale, stories] of extendedStories) {
+      for (const story of stories) {
+        if (story.story_id !== stop.story_extended_id) continue;
+        for (const field of ['name', 'announce']) {
+          const text = preview[field];
+          if (text === null || typeof text !== 'object' || typeof text[locale] !== 'string') continue;
+          const haystack = normalizeText(text[locale]);
+          for (const candidate of [story.text, story.transcript]) {
+            if (typeof candidate !== 'string') continue;
+            const needle = normalizeText(candidate);
+            if (needle !== '' && haystack.includes(needle)) {
+              fail('preview-reveals-full-text', { stop_id: stop.id, locale, field });
+            }
+          }
+        }
       }
     }
   }

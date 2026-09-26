@@ -2,15 +2,20 @@
 // Consumes contracts/reader.mjs as the single schema interpretation source
 // (09 §4: the format is a public contract — validate shares one source with
 // the app and the web) and validates the whole author tree of 09 §3:
-// route.json, places.json, voices.json, discovery.json, per-locale
+// route.json, places.json, voices.json, discovery.json, the optional G03.04
+// media.json/moments.json manifests, per-locale
 // <locale>/{base,extended}/stops.json + audio/, and public projections.
 // What a single-document schema cannot express lives here: cross-file
 // references, duplicate ids, approval status, media presence, path safety,
 // radius-overlap warnings and RouteStop.id stability across published
-// versions (09 §3 invariants 1/3/5/6/10; 21 §3.2). Diagnostics carry stable
+// versions (09 §3 invariants 1/3/5/6/10; 21 §3.2) — plus the G03.04 rights
+// manifest (every media file covered by a license/credit record, sha256
+// matched), the manual-only moment manifest and the audio-without-text
+// availability guard (invariant 1). Diagnostics carry stable
 // rules and entity paths, never file content — the same leak boundary the
 // G02.03 packager keeps.
 
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -221,6 +226,70 @@ export function validatePackage(dir, options = {}) {
     diag(errors, 'error', 'type', 'discovery.json#$');
   }
 
+  // G03.04: media.json is the rights manifest of the tree — one Media record
+  // (media.schema.json, license/credit required) per media file, matched by
+  // sha256. moment.schema.json records are the manual-only teaser manifest:
+  // additionalProperties:false already rejects any auto-trigger field, so a
+  // package cannot encode a moment that opens itself (ADR G01.02 §3.1).
+  const mediaDoc = fs.existsSync(path.join(rootAbs, 'media.json'))
+    ? readJson(rootAbs, 'media.json', errors)
+    : null;
+  const media = asArray(mediaDoc, 'media.json', errors);
+  media.forEach((record, i) => schemaCheck('media.schema.json', record, `media.json[${i}]`, errors));
+  const mediaIds = checkUniqueId(media, 'media_id', 'media.json', errors);
+  const moments = fs.existsSync(path.join(rootAbs, 'moments.json'))
+    ? asArray(readJson(rootAbs, 'moments.json', errors), 'moments.json', errors)
+    : [];
+  moments.forEach((moment, i) => schemaCheck('moment.schema.json', moment, `moments.json[${i}]`, errors));
+  checkUniqueId(moments, 'id', 'moments.json', errors);
+
+  // sha256 + size of every media file in the tree (the two mimes
+  // media.schema.json allows); a Media record must match exactly one of
+  // them, and a tree that ships media files must manifest every one of them.
+  const MEDIA_EXTENSIONS = new Set(['.m4a', '.webp']);
+  const MEDIA_LOCALES = new Set(['be', 'en', 'uk']); // media.schema.json locale enum
+  const mediaFiles = new Map(); // rel -> { sha, bytes }
+  for (const rel of files) {
+    if (!MEDIA_EXTENSIONS.has(path.extname(rel))) continue;
+    try {
+      const buf = fs.readFileSync(`${rootAbs}/${rel}`);
+      mediaFiles.set(rel, { sha: createHash('sha256').update(buf).digest('hex'), bytes: buf.length });
+    } catch {
+      diag(errors, 'error', 'unreadable-media', rel);
+    }
+  }
+  const pathsBySha = new Map();
+  for (const [rel, meta] of mediaFiles) {
+    if (!pathsBySha.has(meta.sha)) pathsBySha.set(meta.sha, []);
+    pathsBySha.get(meta.sha).push(rel);
+  }
+  media.forEach((record, i) => {
+    const sha = record?.sha256;
+    if (typeof sha !== 'string') return;
+    const rels = pathsBySha.get(sha);
+    if (!rels) {
+      diag(errors, 'error', 'media-sha-unmatched', `media.json[${i}]#${sha}`);
+      return;
+    }
+    // A record describes the file it covers: its bytes and locale must not
+    // drift from the matched file's own facts.
+    if (record.bytes !== undefined && record.bytes !== mediaFiles.get(rels[0]).bytes) {
+      diag(errors, 'error', 'media-bytes-mismatch', `media.json[${i}]`);
+    }
+    const foreign = rels.some((rel) => {
+      const top = rel.split('/')[0];
+      return MEDIA_LOCALES.has(top) && top !== record.locale;
+    });
+    if (record.locale !== undefined && foreign) {
+      diag(errors, 'error', 'media-locale-mismatch', `media.json[${i}]`);
+    }
+  });
+  for (const [sha, rels] of pathsBySha) {
+    if (!media.some((record) => record?.sha256 === sha)) {
+      for (const rel of rels) diag(errors, 'error', 'unlicensed-media', rel);
+    }
+  }
+
   const locales = new Map(); // locale -> { base?, extended? } layer = { stories, ids }
   for (const rel of files) {
     const m = rel.match(/^([^/]+)\/(base|extended)\/stops\.json$/);
@@ -245,6 +314,36 @@ export function validatePackage(dir, options = {}) {
     placeVersions.get(p.id).add(p.content_version);
   });
   const voiceIds = checkUniqueId(voices, 'id', 'voices.json', errors);
+  // G03.04: a place's name-audio refs point at Media records; a Media
+  // record's voice must exist and speak the record's own locale.
+  places.forEach((p, i) => {
+    const refs = p?.name_audio_refs;
+    if (refs === null || typeof refs !== 'object' || Array.isArray(refs)) return;
+    for (const [locale, mediaId] of Object.entries(refs)) {
+      if (!mediaIds.has(mediaId)) diag(errors, 'error', 'unknown-ref', `places.json[${i}].name_audio_refs.${locale}#${mediaId}`);
+    }
+  });
+  media.forEach((record, i) => {
+    if (record?.voice_id === undefined) return;
+    if (!voiceIds.has(record.voice_id)) diag(errors, 'error', 'unknown-ref', `media.json[${i}]#voice_id#${record.voice_id}`);
+    const voice = voices.find((v) => v.id === record.voice_id);
+    if (voice && voice.locale !== record.locale) diag(errors, 'error', 'voice-locale-mismatch', `media.json[${i}]`);
+  });
+  // A moment is a teaser of an existing story at an existing place; its
+  // manifest cannot invent either (ADR G01.02 §3.1 anchors the manual-only
+  // playback, the schema anchors the field set).
+  const storyIds = new Set();
+  for (const layers of locales.values()) {
+    for (const layer of Object.values(layers)) for (const id of layer.ids) storyIds.add(id);
+  }
+  moments.forEach((moment, i) => {
+    if (moment?.place_id !== undefined && !placeVersions.has(moment.place_id)) {
+      diag(errors, 'error', 'unknown-ref', `moments.json[${i}]#place_id#${moment.place_id}`);
+    }
+    if (moment?.story_id !== undefined && !storyIds.has(moment.story_id)) {
+      diag(errors, 'error', 'unknown-ref', `moments.json[${i}]#story_id#${moment.story_id}`);
+    }
+  });
   const themeIds = checkUniqueId(asArray(discovery?.themes, 'discovery.json#themes', errors), 'id', 'discovery.json#themes', errors);
   const collectionVersions = new Map();
   asArray(discovery?.collections, 'discovery.json#collections', errors).forEach((c, i) => {
@@ -406,6 +505,15 @@ export function validateDiscoveryIndex(index) {
     }
     if (offer.detail_ref?.path && !safeRelPath(offer.detail_ref.path)) {
       diag(errors, 'error', 'unsafe-path', `${at}.detail_ref.path`);
+    }
+    // G03.04 criterion 4: audio claimed in a locale that has no text claims
+    // a recording without a transcript (09 §3 invariant 1).
+    const availability = offer.availability;
+    if (availability !== null && typeof availability === 'object' && !Array.isArray(availability)) {
+      const text = new Set(asArray(availability.text_locales, `${at}.availability.text_locales`, errors));
+      asArray(availability.audio_locales, `${at}.availability.audio_locales`, errors).forEach((locale) => {
+        if (!text.has(locale)) diag(errors, 'error', 'audio-without-text', `${at}.availability.audio_locales#${locale}`);
+      });
     }
   });
   return { ok: errors.length === 0, errors };

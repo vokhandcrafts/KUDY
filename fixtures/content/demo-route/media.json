@@ -1,0 +1,42 @@
+[
+  {
+    "media_id": "media-story-1-base-be",
+    "sha256": "833db8a6661be709189e7aec5199c34b54db580c8119f011d46311cfad158911",
+    "bytes": 85,
+    "mime": "audio/mp4",
+    "locale": "be",
+    "voice_id": "voice-be-1",
+    "license": "CC0 1.0, дэма-запіс аўтара KUDY",
+    "credit": "Сінтэтычны дэма-голас, 2026"
+  },
+  {
+    "media_id": "media-story-2-ext-be",
+    "sha256": "98a6c4fb2c2e1b69c759dbd41ba0fd2287ddb1142e6b310285fe514db8c785dd",
+    "bytes": 88,
+    "mime": "audio/mp4",
+    "locale": "be",
+    "voice_id": "voice-be-1",
+    "license": "CC0 1.0, дэма-запіс аўтара KUDY",
+    "credit": "Сінтэтычны дэма-голас, 2026"
+  },
+  {
+    "media_id": "media-story-1-base-en",
+    "sha256": "f2cc6b02cac069e9d1aec1cb535d4656130f1705276f9bfc0177e57811a51f93",
+    "bytes": 85,
+    "mime": "audio/mp4",
+    "locale": "en",
+    "voice_id": "voice-en-1",
+    "license": "CC0 1.0, demo recording by the KUDY author",
+    "credit": "Synthetic demo voice, 2026"
+  },
+  {
+    "media_id": "media-story-2-ext-en",
+    "sha256": "c5f45c410894b3c067e44a5a40468c2a2029c7f4998cd5512aa624dad3a4726b",
+    "bytes": 88,
+    "mime": "audio/mp4",
+    "locale": "en",
+    "voice_id": "voice-en-1",
+    "license": "CC0 1.0, demo recording by the KUDY author",
+    "credit": "Synthetic demo voice, 2026"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "media_id": "media-story-1-base-be",
+    "sha256": "b7b8fb13500f34839b733454e445717421fe2f25dd07f7bd07dc5b47efc08c56",
+    "bytes": 31,
+    "mime": "audio/mp4",
+    "locale": "be",
+    "voice_id": "voice-be-1",
+    "license": "CC0 1.0, дэма-запіс",
+    "credit": "Дэма-голас, 2026"
+  }
+]

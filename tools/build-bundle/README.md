@@ -21,6 +21,7 @@ node tools/build-bundle/build-bundle.mjs --in <аўтарская-тэчка> --
 
 ```
 route.json places.json voices.json discovery.json
+media.json moments.json                 # маніфесты G03.04: правы на медыя і moments (опцыянальныя)
 places/<place_id>/public.json           # публічныя праекцыі месцаў
 collections/<collection_id>/public.json # публічныя праекцыі падборак
 <locale>/base/{stops.json, audio/*.m4a}
@@ -33,6 +34,7 @@ collections/<collection_id>/public.json # публічныя праекцыі п
 
 ```
 public/bundle/<route_id>/<version>/…   # base-пласт: stops, audio, previews.json, lock.json
+public/bundle/<route_id>/<version>/{media.json,moments.json}   # калі аўтар іх даў
 public/places/<place_id>/public.json   # detail_ref-мэты месцаў
 public/collections/<collection_id>/public.json # detail_ref-мэты падборак
 public/discovery/<city_id>/<revision>/index.json
@@ -63,12 +65,20 @@ release/release-manifest.json          # поўны спіс артэфакта�
    адсартаванымі ключамі, без часовых адзнак. Дзве зборкі аднаго дрэва
    байт-у-байт супадаюць.
 2. **Мяжа public.** Публічным трапляе толькі base-пласт і дазволеныя прэв'ю.
+   Гісторыя, чый `tier` супярэчыць свайму пласту, рве зборку
+   (`story-tier-mismatch`, G03.04): платны поўны тэкст не едзе ў base пад
+   чужой пазнакай.
 3. **Без уцечак.** Перад запісам увесь public-дрэва скануецца: 8-грамы прыватных
    тэкстаў, сегменты `private/extended/../` у шляхападобных радках, забарона
-   `*.map`. Памылка `private-text-leak`/`private-path-in-public`/`source-map-in-public`
-   спыняе зборку да запісу дрэва. Канава свядомая: public-рэдакцыйны тэкст не
-   павінен дзяліць 8+ паслядоўных токенаў з платнай наррацыяй — пры такой
-   супадзенасці фраза перафразіроўваецца ў аўтара, гвард не паслабляецца.
+   `*.map`, і — G03.04 — поўны тэкст гісторыі locked-кропкі ў яе прэв'ю
+   (`preview-reveals-full-text`: прэв'ю не мусіць змяшчаць увесь `text` альбо
+   `transcript` сваёй гісторыі ні ў адной локалі; гэта ловіць і кароткія
+   гісторыі, дзе акно 8-грам дапамагчы не можа). Памылка
+   `private-text-leak`/`private-path-in-public`/`source-map-in-public`/
+   `preview-reveals-full-text` спыняе зборку да запісу дрэва. Канава свядомая:
+   public-рэдакцыйны тэкст не павінен дзяліць 8+ паслядоўных токенаў з платнай
+   наррацыяй — пры такой супадзенасці фраза перафразіроўваецца ў аўтара, гвард
+   не паслабляецца.
 4. **Адхіленне неваліднага індэкса** (`21`, разд. 9, радок 1): дублі refs,
    укладзеныя collections, чужы горад, небяспечныя шляхі, невядомыя локалі/сезоны,
    парушаны дыяпазон хвілін, адсутны `overlap_note`.

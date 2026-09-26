@@ -1,0 +1,14 @@
+[
+  {
+    "story_id": "story-1-base",
+    "place_id": "place-1",
+    "tier": "base",
+    "duration_s": 60,
+    "voice_id": "voice-be-1",
+    "tone": "standard",
+    "text": "Дэма-тэкст базавай гісторыі пра стары млын і яго вяртуна.",
+    "transcript": "Дэма-транскрыпт базавай гісторыі пра стары млын.",
+    "sources": ["Дэма-крыніца: сінтэтычны архіў"],
+    "review": { "by": "аўтар дэма", "at": "2026-09-26", "decision": "approved" }
+  }
+]
