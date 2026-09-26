@@ -1,0 +1,74 @@
+{
+  "trace": "fast-walk.json",
+  "exit": 0,
+  "mustFire": [
+    "stop-1"
+  ],
+  "mustNotFire": [
+    "stop-2",
+    "stop-3",
+    "stop-4",
+    "stop-5"
+  ],
+  "report": {
+    "simulator": "g05.06.a",
+    "trace": {
+      "name": "traces/fast-walk.json",
+      "events": 19,
+      "firstAtMs": 0,
+      "lastAtMs": 435215
+    },
+    "route": {
+      "routeId": "sim-street-five",
+      "version": "1.0.0",
+      "locale": "be",
+      "tier": [
+        "base"
+      ],
+      "stops": 5
+    },
+    "session": {
+      "startedAtMs": 0,
+      "endedAtMs": 435215,
+      "finalPhase": "Ended",
+      "heard": [
+        "story-1"
+      ],
+      "autoFired": [
+        "stop-1"
+      ]
+    },
+    "firedStops": [
+      {
+        "stopId": "stop-1",
+        "storyId": "story-1",
+        "at": 55953,
+        "origin": "auto",
+        "latencyMs": 26150
+      }
+    ],
+    "manualPlays": [],
+    "commandStream": [
+      {
+        "at": 0,
+        "action": "Start",
+        "outcome": "applied"
+      },
+      {
+        "at": 435215,
+        "action": "End",
+        "outcome": "applied"
+      }
+    ],
+    "timersNeverFired": [],
+    "stuckPlaying": null,
+    "counters": {
+      "fixesDelivered": 17,
+      "fixesDroppedBySignalGap": 0,
+      "fixesWithoutSubscription": 0,
+      "backgroundEvents": 0,
+      "startCount": 1
+    },
+    "diagnostics": []
+  }
+}

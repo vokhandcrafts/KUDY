@@ -1,0 +1,83 @@
+{
+  "trace": "gps-gap.json",
+  "exit": 0,
+  "mustFire": [
+    "stop-1",
+    "stop-2"
+  ],
+  "mustNotFire": [
+    "stop-3",
+    "stop-4",
+    "stop-5"
+  ],
+  "report": {
+    "simulator": "g05.06.a",
+    "trace": {
+      "name": "traces/gps-gap.json",
+      "events": 47,
+      "firstAtMs": 0,
+      "lastAtMs": 244762
+    },
+    "route": {
+      "routeId": "sim-street-five",
+      "version": "1.0.0",
+      "locale": "be",
+      "tier": [
+        "base"
+      ],
+      "stops": 5
+    },
+    "session": {
+      "startedAtMs": 0,
+      "endedAtMs": 244762,
+      "finalPhase": "Ended",
+      "heard": [
+        "story-1",
+        "story-2"
+      ],
+      "autoFired": [
+        "stop-1",
+        "stop-2"
+      ]
+    },
+    "firedStops": [
+      {
+        "stopId": "stop-1",
+        "storyId": "story-1",
+        "at": 39917,
+        "origin": "auto",
+        "latencyMs": 10117
+      },
+      {
+        "stopId": "stop-2",
+        "storyId": "story-2",
+        "at": 199905,
+        "origin": "auto",
+        "latencyMs": 9761
+      }
+    ],
+    "manualPlays": [],
+    "commandStream": [
+      {
+        "at": 0,
+        "action": "Start",
+        "outcome": "applied"
+      },
+      {
+        "at": 244762,
+        "action": "End",
+        "outcome": "applied"
+      }
+    ],
+    "timersNeverFired": [],
+    "stuckPlaying": null,
+    "counters": {
+      "fixesDelivered": 40,
+      "fixesDroppedBySignalGap": 4,
+      "fixesWithoutSubscription": 0,
+      "backgroundEvents": 0,
+      "startCount": 1
+    },
+    "diagnostics": []
+  }
+}

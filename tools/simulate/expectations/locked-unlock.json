@@ -1,0 +1,92 @@
+{
+  "trace": "locked-unlock.json",
+  "exit": 0,
+  "mustFire": [
+    "stop-1",
+    "stop-2",
+    "stop-3"
+  ],
+  "mustNotFire": [
+    "stop-4",
+    "stop-5"
+  ],
+  "report": {
+    "simulator": "g05.06.a",
+    "trace": {
+      "name": "traces/locked-unlock.json",
+      "events": 100,
+      "firstAtMs": 0,
+      "lastAtMs": 515060
+    },
+    "route": {
+      "routeId": "sim-street-five",
+      "version": "1.0.0",
+      "locale": "be",
+      "tier": [
+        "base"
+      ],
+      "stops": 5
+    },
+    "session": {
+      "startedAtMs": 0,
+      "endedAtMs": 515060,
+      "finalPhase": "Ended",
+      "heard": [
+        "story-1",
+        "story-2",
+        "story-3-ext"
+      ],
+      "autoFired": [
+        "stop-1",
+        "stop-2",
+        "stop-3"
+      ]
+    },
+    "firedStops": [
+      {
+        "stopId": "stop-1",
+        "storyId": "story-1",
+        "at": 40242,
+        "origin": "auto",
+        "latencyMs": 10336
+      },
+      {
+        "stopId": "stop-2",
+        "storyId": "story-2",
+        "at": 185014,
+        "origin": "auto",
+        "latencyMs": 10250
+      },
+      {
+        "stopId": "stop-3",
+        "storyId": "story-3-ext",
+        "at": 450214,
+        "origin": "auto",
+        "latencyMs": 9966
+      }
+    ],
+    "manualPlays": [],
+    "commandStream": [
+      {
+        "at": 0,
+        "action": "Start",
+        "outcome": "applied"
+      },
+      {
+        "at": 515060,
+        "action": "End",
+        "outcome": "applied"
+      }
+    ],
+    "timersNeverFired": [],
+    "stuckPlaying": null,
+    "counters": {
+      "fixesDelivered": 97,
+      "fixesDroppedBySignalGap": 0,
+      "fixesWithoutSubscription": 0,
+      "backgroundEvents": 0,
+      "startCount": 1
+    },
+    "diagnostics": []
+  }
+}

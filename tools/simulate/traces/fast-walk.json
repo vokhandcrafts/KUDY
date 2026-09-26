@@ -1,0 +1,188 @@
+{
+  "route": {
+    "routeId": "sim-street-five",
+    "version": "1.0.0",
+    "locale": "be",
+    "tier": [
+      "base"
+    ]
+  },
+  "stops": [
+    {
+      "stopId": "stop-1",
+      "lat": 54.4,
+      "lng": 18.65,
+      "radius": 30,
+      "storyBaseId": "story-1"
+    },
+    {
+      "stopId": "stop-2",
+      "lat": 54.4018,
+      "lng": 18.65,
+      "radius": 30,
+      "storyBaseId": "story-2"
+    },
+    {
+      "stopId": "stop-3",
+      "lat": 54.4036,
+      "lng": 18.65,
+      "radius": 30,
+      "storyBaseId": "story-3"
+    },
+    {
+      "stopId": "stop-4",
+      "lat": 54.4054,
+      "lng": 18.65,
+      "radius": 30,
+      "storyBaseId": "story-4"
+    },
+    {
+      "stopId": "stop-5",
+      "lat": 54.407199999999996,
+      "lng": 18.65,
+      "radius": 30,
+      "storyBaseId": "story-5"
+    }
+  ],
+  "config": {
+    "dwellMs": 6000,
+    "audio": {
+      "defaultDurationMs": 20000
+    }
+  },
+  "events": [
+    {
+      "type": "UserCommand",
+      "at": 0,
+      "command": {
+        "action": "Start"
+      }
+    },
+    {
+      "type": "GpsFix",
+      "at": 5000,
+      "lat": 54.399504504504506,
+      "lng": 18.65001701356625,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 29803,
+      "lat": 54.39998667241209,
+      "lng": 18.64999685222067,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 55953,
+      "lat": 54.40048059221198,
+      "lng": 18.649996661359946,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 80032,
+      "lat": 54.40100658246705,
+      "lng": 18.649991793156918,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 104375,
+      "lat": 54.4015019405014,
+      "lng": 18.650003979711673,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 129865,
+      "lat": 54.401985823544095,
+      "lng": 18.65001514951111,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 155443,
+      "lat": 54.402470023966465,
+      "lng": 18.650012274253733,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 180270,
+      "lat": 54.40297047943516,
+      "lng": 18.64998618695706,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 205062,
+      "lat": 54.40345481253399,
+      "lng": 18.649983828116458,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 230074,
+      "lat": 54.40396353293246,
+      "lng": 18.64998520630233,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 255279,
+      "lat": 54.40447251227355,
+      "lng": 18.65001738085325,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 280998,
+      "lat": 54.40494142236323,
+      "lng": 18.649982093432204,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 304489,
+      "lat": 54.40546482016753,
+      "lng": 18.65000682903046,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 330859,
+      "lat": 54.40593413294048,
+      "lng": 18.64998504124669,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 355876,
+      "lat": 54.406428259374835,
+      "lng": 18.64999022759253,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 380989,
+      "lat": 54.406920829219374,
+      "lng": 18.65000845340812,
+      "accuracy": 5
+    },
+    {
+      "type": "GpsFix",
+      "at": 405215,
+      "lat": 54.407416343370016,
+      "lng": 18.649984438879827,
+      "accuracy": 5
+    },
+    {
+      "type": "UserCommand",
+      "at": 435215,
+      "command": {
+        "action": "End"
+      }
+    }
+  ]
+}
