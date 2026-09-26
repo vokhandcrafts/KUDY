@@ -51,7 +51,7 @@ import {
 import { step, type EngineConfig } from '../../core/engine/reducer.ts';
 import type { RunCommand } from '../../core/engine/commands.ts';
 import type { RunEvent } from '../../core/engine/events.ts';
-import { initialRunState, type RunState, type Tier } from '../../core/engine/state.ts';
+import { initialRunState, type RunSessionState, type RunState, type Tier } from '../../core/engine/state.ts';
 import type { LocationService } from '../../services/location/service.ts';
 import type { GeofenceStop } from '../../services/location/types.ts';
 import type { AudioService } from '../../services/audio/service.ts';
@@ -101,8 +101,11 @@ export class RunOrchestrator {
   private readonly engineConfig: EngineConfig;
   private readonly pipelineConfig: PipelineConfig;
   private readonly route: RunRoute;
-  private readonly stops: ReadonlyArray<RunStop>;
-  private readonly candidates: ReadonlyMap<string, PipelineCandidate>;
+  // Not readonly: restore() swaps the set to the pinned package's records
+  // (ADR G01.03 §3.4 — a newer catalog never substitutes its geometry).
+  private stops: ReadonlyArray<RunStop>;
+  // Not readonly either: restore() rebuilds it with the swapped stop set.
+  private candidates: ReadonlyMap<string, PipelineCandidate>;
   private readonly onCommitted: ((before: RunState, after: RunState) => void) | undefined;
 
   private engineState: RunState = initialRunState;
@@ -184,18 +187,46 @@ export class RunOrchestrator {
   }
 
   // The user intents of the Run screen. Each is one dispatch — the manual tap
-  // and the GPS trigger share the path (09 §6.4).
-  pauseSession(): void {
+  // and the GPS trigger share the path (09 §6.4). The session intents return
+  // whether a live transition happened, so the controller fires its own phase
+  // effects (the wakelock, 11 §6) only on a real change; the location mode is
+  // this file's effect (the parity suite anchors the wakelock and the
+  // unsubscription to the controller, ADR G01.03 §3). A stray tap in Idle or
+  // Ended dispatches nothing.
+  pauseSession(): boolean {
+    if (this.engineState.phase !== 'Active' && this.engineState.phase !== 'Paused') return false;
     this.dispatch({ type: 'Pause' });
+    this.location.setMode('paused'); // 11 §4.2: the subscription goes with the geofences
+    return true;
   }
 
-  resumeSession(): void {
+  resumeSession(): boolean {
+    if (this.engineState.phase !== 'Paused') return false; // Resume exists only from Paused (ADR G01.03 §3.3)
     this.dispatch({ type: 'Resume' });
+    this.location.setMode('active-guide');
+    return true;
   }
 
-  end(): void {
+  end(): boolean {
+    if (this.engineState.phase !== 'Active' && this.engineState.phase !== 'Paused') return false;
     this.dispatch({ type: 'End' });
     this.location.setMode('idle'); // 19 §4.3: End releases the GPS subscription
+    return true;
+  }
+
+  // G05.05.b restart recovery (09 §9.1, ADR G01.03 §3.2): the restored
+  // session is INJECTED, not dispatched — no event runs, so no effect, no
+  // audio and no location arming happens here; the controller exposes the
+  // state and owns the screen-level arming. The stop set is swapped to the
+  // records the recovery read for the pinned version (ADR §3.4): the
+  // pipeline candidates and the window geometry follow the row's package,
+  // never the catalog's current one.
+  restore(state: RunSessionState, stops: ReadonlyArray<RunStop>): void {
+    this.engineState = state;
+    this.stops = stops;
+    this.candidates = new Map(
+      stops.map((stop) => [stop.stopId, { lat: stop.lat, lng: stop.lng, radius: stop.radius }]),
+    );
   }
 
   selectStop(stopId: string): void {
