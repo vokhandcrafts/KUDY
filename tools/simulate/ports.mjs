@@ -141,6 +141,19 @@ export class SimAudioPort {
     if (kind !== 'focus-loss' && kind !== 'focus-regain') {
       throw new Error(`sim audio port: unknown focus event '${String(kind)}'`);
     }
+    // The OS owns the physical player during a focus interruption (ADR G01.02
+    // §3.4): the call freezes the running source exactly as a device would,
+    // and the regain resumes nothing — only the explicit ResumeAudio chain
+    // re-arms the remaining time. Without the freeze the completion timer
+    // kept running through the call, and the story "finished" while muted.
+    if (kind === 'focus-loss') {
+      const source = this.currentSource();
+      if (source !== null && this.stateByKey.get(this.currentKey) === 'playing') {
+        source.positionBaseMs += this.clock.now() - source.baseAtMs;
+        source.finishCancel();
+        this.stateByKey.set(this.currentKey, 'paused');
+      }
+    }
     this.handler?.({ type: kind });
   }
 

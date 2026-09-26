@@ -16,6 +16,10 @@
 //     SignalGap            { at, untilAt }
 //     IncomingCall         { at }
 //     CallEnded            { at }
+//     AccessReady          { at, tier, stopIds }  (G05.06.b — the entitlement
+//                           unlock arrives through the download capability
+//                           channel; routeId/version/locale come from the trace
+//                           route, the engine re-checks the identity itself)
 //
 // The injectors are trace directives, not engine facts: they corrupt what the
 // OS boundary reports (worse accuracy, shifted timestamps, a fix outage) or
@@ -45,6 +49,7 @@ const EVENT_TYPES = new Set([
   'SignalGap',
   'IncomingCall',
   'CallEnded',
+  'AccessReady',
 ]);
 
 const PER_EVENT_FIELDS = {
@@ -53,6 +58,7 @@ const PER_EVENT_FIELDS = {
   TimestampJump: ['deltaMs'],
   SignalGap: ['untilAt'],
   UserCommand: ['command'],
+  AccessReady: ['tier', 'stopIds'],
 };
 
 // Named diagnostics with the offending index — one per violation, the whole
@@ -220,6 +226,26 @@ export function parseTrace(doc) {
       }
       if (event.type === 'TimestampJump' && event.deltaMs !== undefined && Number.isFinite(event.deltaMs) && event.deltaMs === 0) {
         bad('bad-value', `${where}.deltaMs must not be zero`, index);
+      }
+      if (event.type === 'AccessReady') {
+        if (event.tier !== undefined && event.tier !== 'base' && event.tier !== 'extended') {
+          bad('bad-value', `${where}.tier accepts only "base" and "extended"`, index);
+        }
+        if (event.stopIds !== undefined) {
+          if (!Array.isArray(event.stopIds) || event.stopIds.length === 0) {
+            bad('bad-value', `${where}.stopIds must be a non-empty array`, index);
+          } else {
+            for (const stopId of event.stopIds) {
+              if (typeof stopId !== 'string' || stopId.length === 0) {
+                bad('bad-value', `${where}.stopIds must carry non-empty stop ids`, index);
+              } else if (!stopIds.has(stopId)) {
+                // The unlock payload stays inside the pinned package: an
+                // unknown stop id opens nothing (ADR G01.03 §3.5 check 5).
+                bad('bad-value', `${where}.stopIds names stop '${stopId}' that the trace route does not define`, index);
+              }
+            }
+          }
+        }
       }
     }
   }

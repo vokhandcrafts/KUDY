@@ -61,6 +61,11 @@ export function simulate(doc, { name }) {
   });
   const audioPort = new SimAudioPort(clock, durationFor);
   const audio = new AudioService({ createPort: () => audioPort });
+  // The download capability channel (ADR G01.03 §3.5): the only AccessReady
+  // delivery path into the orchestrator. The replay hands the trace's
+  // AccessReady events to it exactly as the device adapter would.
+  let deliverAccessReady = null;
+  const accessPort = { onAccessReady: (callback) => { deliverAccessReady = callback; } };
   const observer = new SimulationObserver(clock, radiusByStopId);
   const orchestrator = new RunOrchestrator({
     location,
@@ -70,6 +75,7 @@ export function simulate(doc, { name }) {
     pipelineConfig: { dwellMs },
     route,
     stops,
+    access: accessPort,
     onCommitted: (before, after) => observer.onCommitted(before, after),
   });
 
@@ -186,6 +192,19 @@ export function simulate(doc, { name }) {
         case 'CallEnded':
           observer.source = 'deferred';
           audioPort.emitFocus('focus-regain');
+          break;
+        case 'AccessReady':
+          // The unlock widens availability and rebuilds the geofence window;
+          // it plays nothing by itself — the next in-radius dwell does.
+          deliverAccessReady?.({
+            type: 'AccessReady',
+            routeId: doc.route.routeId,
+            version: doc.route.version,
+            locale: doc.route.locale,
+            tier: event.tier,
+            stopIds: [...event.stopIds],
+            issuer: 'services/download',
+          });
           break;
         case 'AppBackground':
         case 'AppForeground':

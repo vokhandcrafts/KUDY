@@ -1,0 +1,92 @@
+{
+  "trace": "mid-route-start.json",
+  "exit": 0,
+  "mustFire": [
+    "stop-3",
+    "stop-4",
+    "stop-5"
+  ],
+  "mustNotFire": [
+    "stop-1",
+    "stop-2"
+  ],
+  "report": {
+    "simulator": "g05.06.a",
+    "trace": {
+      "name": "traces/mid-route-start.json",
+      "events": 73,
+      "firstAtMs": 0,
+      "lastAtMs": 359966
+    },
+    "route": {
+      "routeId": "sim-street-five",
+      "version": "1.0.0",
+      "locale": "be",
+      "tier": [
+        "base"
+      ],
+      "stops": 5
+    },
+    "session": {
+      "startedAtMs": 0,
+      "endedAtMs": null,
+      "finalPhase": "Active",
+      "heard": [
+        "story-3",
+        "story-4",
+        "story-5"
+      ],
+      "autoFired": [
+        "stop-3",
+        "stop-4",
+        "stop-5"
+      ]
+    },
+    "firedStops": [
+      {
+        "stopId": "stop-3",
+        "storyId": "story-3",
+        "at": 40206,
+        "origin": "auto",
+        "latencyMs": 9994
+      },
+      {
+        "stopId": "stop-4",
+        "storyId": "story-4",
+        "at": 184934,
+        "origin": "auto",
+        "latencyMs": 9818
+      },
+      {
+        "stopId": "stop-5",
+        "storyId": "story-5",
+        "at": 325107,
+        "origin": "auto",
+        "latencyMs": 10173
+      }
+    ],
+    "manualPlays": [],
+    "commandStream": [
+      {
+        "at": 0,
+        "action": "Start",
+        "outcome": "applied"
+      }
+    ],
+    "timersNeverFired": [
+      {
+        "id": "timer-75",
+        "dueMs": 374966
+      }
+    ],
+    "stuckPlaying": null,
+    "counters": {
+      "fixesDelivered": 72,
+      "fixesDroppedBySignalGap": 0,
+      "fixesWithoutSubscription": 0,
+      "backgroundEvents": 0,
+      "startCount": 1
+    },
+    "diagnostics": []
+  }
+}

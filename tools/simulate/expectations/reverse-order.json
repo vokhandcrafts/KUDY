@@ -1,0 +1,109 @@
+{
+  "trace": "reverse-order.json",
+  "exit": 0,
+  "mustFire": [
+    "stop-5",
+    "stop-4",
+    "stop-3",
+    "stop-2",
+    "stop-1"
+  ],
+  "mustNotFire": [],
+  "report": {
+    "simulator": "g05.06.a",
+    "trace": {
+      "name": "traces/reverse-order.json",
+      "events": 131,
+      "firstAtMs": 0,
+      "lastAtMs": 669828
+    },
+    "route": {
+      "routeId": "sim-street-five",
+      "version": "1.0.0",
+      "locale": "be",
+      "tier": [
+        "base"
+      ],
+      "stops": 5
+    },
+    "session": {
+      "startedAtMs": 0,
+      "endedAtMs": 669828,
+      "finalPhase": "Ended",
+      "heard": [
+        "story-5",
+        "story-4",
+        "story-3",
+        "story-2",
+        "story-1"
+      ],
+      "autoFired": [
+        "stop-5",
+        "stop-4",
+        "stop-3",
+        "stop-2",
+        "stop-1"
+      ]
+    },
+    "firedStops": [
+      {
+        "stopId": "stop-5",
+        "storyId": "story-5",
+        "at": 40012,
+        "origin": "auto",
+        "latencyMs": 10201
+      },
+      {
+        "stopId": "stop-4",
+        "storyId": "story-4",
+        "at": 184796,
+        "origin": "auto",
+        "latencyMs": 9888
+      },
+      {
+        "stopId": "stop-3",
+        "storyId": "story-3",
+        "at": 325151,
+        "origin": "auto",
+        "latencyMs": 10032
+      },
+      {
+        "stopId": "stop-2",
+        "storyId": "story-2",
+        "at": 469904,
+        "origin": "auto",
+        "latencyMs": 9919
+      },
+      {
+        "stopId": "stop-1",
+        "storyId": "story-1",
+        "at": 610095,
+        "origin": "auto",
+        "latencyMs": 10007
+      }
+    ],
+    "manualPlays": [],
+    "commandStream": [
+      {
+        "at": 0,
+        "action": "Start",
+        "outcome": "applied"
+      },
+      {
+        "at": 669828,
+        "action": "End",
+        "outcome": "applied"
+      }
+    ],
+    "timersNeverFired": [],
+    "stuckPlaying": null,
+    "counters": {
+      "fixesDelivered": 129,
+      "fixesDroppedBySignalGap": 0,
+      "fixesWithoutSubscription": 0,
+      "backgroundEvents": 0,
+      "startCount": 1
+    },
+    "diagnostics": []
+  }
+}
