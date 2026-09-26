@@ -5,7 +5,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ERROR_SERIES_LIMIT } from './crawler.mjs';
-import { articleHtml, articlePage, campaignYaml, makeTempDir, skipWithoutBrowser, startFixtureServer, writeCampaignFile } from './testkit.mjs';
+import {
+  articleHtml,
+  articlePage,
+  campaignYaml,
+  collectAndClean,
+  makeTempDir,
+  rawRecord,
+  seedCampaign,
+  skipWithoutBrowser,
+  startFixtureServer,
+  writeCampaignFile,
+} from './testkit.mjs';
+import { getRawRecord, openStore, upsertRawRecord } from './store.mjs';
 
 const cliPath = fileURLToPath(new URL('./collector.mjs', import.meta.url));
 
@@ -200,4 +212,76 @@ test('unknown command and missing --campaign answer with usage, exit 2', () => {
   const noCampaign = runCli(['run', '--db', path.join(makeTempDir(), 'db.sqlite')]);
   assert.equal(noCampaign.status, 2);
   assert.match(noCampaign.stderr, /run requires --campaign/);
+});
+
+test('search, basket and export-draft drive the draft handoff through the real CLI (criteria 1-3)', () => {
+  const dir = makeTempDir();
+  const { dbPath } = collectAndClean(dir);
+  const db = openStore(dbPath);
+  const record = db.prepare('SELECT id, url, collected_at FROM raw_records').get();
+  db.close();
+
+  const hit = runCli(['search', '--query', 'shipyard history', '--db', dbPath]);
+  assert.equal(hit.status, 0, hit.stderr);
+  assert.match(hit.stdout, new RegExp(`${record.id}  gdansk  web  cleaned  Gdansk shipyard turns into a museum — ${record.url}`));
+  assert.match(hit.stdout, /collector: 1 record\(s\)/);
+
+  // Filter correctness through the CLI: wrong type and wrong city find nothing.
+  const noType = runCli(['search', '--city', 'gdansk', '--type', 'news', '--db', dbPath]);
+  assert.equal(noType.status, 0, noType.stderr);
+  assert.match(noType.stdout, /collector: 0 record\(s\)/);
+  const noCity = runCli(['search', '--city', 'krakow', '--query', 'shipyard', '--db', dbPath]);
+  assert.match(noCity.stdout, /collector: 0 record\(s\)/);
+
+  const add = runCli(['basket', 'add', '--record', record.id, '--db', dbPath]);
+  assert.equal(add.status, 0, add.stderr);
+  assert.match(add.stdout, /collector: basket — added 1, already in basket 0/);
+  const again = runCli(['basket', 'add', '--record', record.id, '--db', dbPath]);
+  assert.match(again.stdout, /collector: basket — added 0, already in basket 1/);
+
+  const outPath = path.join(dir, 'draft.md');
+  const draft = runCli(['export-draft', '--out', outPath, '--db', dbPath]);
+  assert.equal(draft.status, 0, draft.stderr);
+  assert.match(draft.stdout, new RegExp(`draft at ${outPath.replace(/([.*+?^${}()|[\]\\])/g, '\\$1')} — 1 fragment\\(s\\), 1 moved to used`));
+  const body = fs.readFileSync(outPath, 'utf8');
+  assert.match(body, new RegExp(`Крыніца: ${record.url}\\nЗабрана: ${record.collected_at} · Запіс: ${record.id}`));
+  assert.match(body, /## Gdansk shipyard turns into a museum/);
+  assert.equal(getRawRecord(openStore(dbPath), record.id).status, 'used');
+
+  const repeat = runCli(['export-draft', '--out', outPath, '--db', dbPath]);
+  assert.match(repeat.stdout, /— 1 fragment\(s\), 0 moved to used/);
+  assert.equal(fs.readFileSync(outPath, 'utf8').split(`Запіс: ${record.id}`).length - 1, 1, 'a repeat export keeps one fragment');
+});
+
+test('basket and draft answer with boundary diagnostics (criterion 4)', () => {
+  const dir = makeTempDir();
+  const dbPath = path.join(dir, 'db.sqlite');
+  const empty = runCli(['init', '--db', dbPath]);
+  assert.equal(empty.status, 0, empty.stderr);
+
+  const outPath = path.join(dir, 'draft.md');
+  const noBasket = runCli(['export-draft', '--out', outPath, '--db', dbPath]);
+  assert.equal(noBasket.status, 1);
+  assert.match(noBasket.stderr, /basket is empty — add fragments with `basket add` first/);
+  assert.equal(fs.existsSync(outPath), false, 'no empty draft file');
+
+  const db = openStore(dbPath);
+  seedCampaign(db);
+  const record = rawRecord({ campaignId: 'c1' });
+  upsertRawRecord(db, record);
+  db.close();
+  const uncleaned = runCli(['basket', 'add', '--record', record.id, '--db', dbPath]);
+  assert.equal(uncleaned.status, 1);
+  assert.match(uncleaned.stderr, /has no cleaned document — run clean first/);
+  const unknown = runCli(['basket', 'add', '--record', 'nope', '--db', dbPath]);
+  assert.equal(unknown.status, 1);
+  assert.match(unknown.stderr, /no such record: nope/);
+
+  const list = runCli(['basket', 'list', '--db', dbPath]);
+  assert.equal(list.status, 0, list.stderr);
+  assert.match(list.stdout, /collector: basket holds 0 record\(s\)/);
+
+  const missing = runCli(['search', '--city', 'gdansk', '--db', path.join(dir, 'absent.sqlite')]);
+  assert.equal(missing.status, 2);
+  assert.match(missing.stderr, /database file does not exist/);
 });
