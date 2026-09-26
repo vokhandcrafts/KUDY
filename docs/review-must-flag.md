@@ -87,3 +87,17 @@
   знаходка.
   Выпраўлена: docs/demos/2026-09-26-g0506a-simulator.md, блок «The full
   acceptance suite» — issue #277.
+
+- key: dead-informational-checklist-row — набор правілаў для зводнага
+  чэк-ліста збіраецца з усіх масіваў справаздачы (errors, warnings, infos),
+  не толькі блакавальных: дыягностыка з infos павінна даходзіць да свайго
+  радка (outcome з note), інакш радок заўсёды паказвае чысты pass, а
+  адхіленне ад гайдліна бачнае толькі ў масіве дыягностык.
+  Выпраўлена: tools/validate/verify-audio.mjs, machineRow duration-guideline —
+  issue #316.
+
+- key: warning-shown-as-fail-in-checklist — северыты радка зводнага чэк-ліста
+  паўтарае рэальны масіў дыягностык (error → fail, warning → warn, info →
+  pass з note), не бинарны мапінг: неблакавальнае папярэджанне не павінна
+  паказвацца як fail, калі report.ok = true.
+  Выпраўлена: tools/validate/verify-audio.mjs, machineRow — issue #316.
