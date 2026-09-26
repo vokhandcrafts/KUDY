@@ -70,6 +70,16 @@ test('criterion 1+2: the committed positive package passes with measurements rec
   assert.ok(report.checklist.every((row) => row.outcome !== 'fail'), JSON.stringify(report.checklist));
 });
 
+test('checklist: the duration-guideline breach reaches its own row as pass with a note', { skip: skipReason }, async () => {
+  // The fixture recordings are 2 s and 3 s, both outside 60–120 s, so the
+  // informational row must surface the breach — a plain pass without the
+  // note means the fired set missed the infos array again (issue #316).
+  const report = await verifyAudio(FIXTURE);
+  const row = report.checklist.find((r) => r.item === 'duration inside the 60–120 s guideline');
+  assert.equal(row.outcome, 'pass');
+  assert.match(row.note, /outside the 60–120 s guideline; recorded, non-blocking/);
+});
+
 test('criterion 4: the report carries one independent file per story, no shared bytes', { skip: skipReason }, async () => {
   const report = await verifyAudio(FIXTURE);
   assert.deepEqual(
@@ -118,6 +128,11 @@ test('negative: loudness far from −16 LUFS fails the target band only', { skip
   const dir = tempPackage([readFixtureStories()[0]], { 'story-1-base.m4a': path.join(CASES, 'loud.m4a') });
   const report = await verifyAudio(dir);
   assert.deepEqual(ruleNames(report.errors), ['loudness-target-deviation']);
+  // An error rule keeps the fail outcome in the summary checklist row.
+  assert.equal(
+    report.checklist.find((r) => r.item === 'loudness within ±2 LU of the −16 LUFS target').outcome,
+    'fail',
+  );
 });
 
 test('negative: two consistent-looking files 3 LU apart fail the spread only', { skip: skipReason }, async () => {
@@ -159,6 +174,13 @@ test('negative: an ad call in the transcript is flagged per 13 §3', { skip: ski
   const dir = tempPackage(stories, bothFiles);
   const report = await verifyAudio(dir);
   assert.deepEqual(ruleNames(report.warnings), ['ad-call-in-transcript']);
+  // A warning is non-blocking (ok stays true) and the summary row must show
+  // warn, not fail — severity authority lives in the arrays (issue #316).
+  assert.equal(report.ok, true);
+  assert.equal(
+    report.checklist.find((r) => r.item === 'no ad call to buy the extension in the narration').outcome,
+    'warn',
+  );
 });
 
 test('negative: narration requiring the previous file is flagged per 13 §2', { skip: skipReason }, async () => {

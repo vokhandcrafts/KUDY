@@ -230,17 +230,34 @@ export async function verifyAudio(dir, options = {}) {
     }
   }
 
-  const fired = new Set([...errors, ...warnings].map((d) => d.rule));
+  // The checklist mirrors the report's own severity arrays (error → fail,
+  // warning → warn, info → the pass-with-note row) — a summary row must never
+  // outstate a diagnostic it summarizes: ok stays true over a warn row.
+  const fired = new Set([...errors, ...warnings, ...infos].map((d) => d.rule));
+  const failed = new Set(errors.map((d) => d.rule));
+  const warned = new Set(warnings.map((d) => d.rule));
   const hasAudio = measurements.length > 0;
-  const machineRow = (rule, source, item, informational = false) => ({
-    kind: 'machine',
-    source,
-    item,
-    outcome: fired.has(rule) ? (informational ? 'pass' : 'fail') : hasAudio ? 'pass' : 'n/a',
-    ...(informational && fired.has(rule)
-      ? { note: 'outside the 60–120 s guideline; recorded, non-blocking (09 §3 invariant 7)' }
-      : {}),
-  });
+  const machineRow = (rule, source, item, informational = false) => {
+    const hit = fired.has(rule);
+    const outcome = !hit
+      ? hasAudio
+        ? 'pass'
+        : 'n/a'
+      : failed.has(rule)
+        ? 'fail'
+        : warned.has(rule)
+          ? 'warn'
+          : 'pass';
+    return {
+      kind: 'machine',
+      source,
+      item,
+      outcome,
+      ...(informational && hit
+        ? { note: 'outside the 60–120 s guideline; recorded, non-blocking (09 §3 invariant 7)' }
+        : {}),
+    };
+  };
   const checklist = [
     machineRow('missing-transcript', '09 §3 invariant 1', 'every audio file has a transcript'),
     machineRow('duration-mismatch', 'issue #300 criterion 1', 'recording duration matches the declared duration_s'),

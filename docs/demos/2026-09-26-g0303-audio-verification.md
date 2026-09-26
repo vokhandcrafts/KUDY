@@ -68,7 +68,7 @@ node --test tools/validate/verify-audio.test.mjs 2>/dev/null | grep -E "^ℹ (te
 ```
 
 ```output
-ℹ tests 16
-ℹ pass 16
+ℹ tests 17
+ℹ pass 17
 ℹ fail 0
 ```
