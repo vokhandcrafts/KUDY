@@ -2,21 +2,21 @@
 
 Дзве часткі радка G06.01 з [16](../../16_delivery_backlog.md) (разбіўка — 🕴🏻Планавальнік 2026-09-26, разблакаваная ўхваленым дызайнам G06.06–G06.08 і кляймам аператара на issue #62). Крыніцы: [11 раздзел 16](../../11_run_interaction.md), [21 §3–§4](../../architecture/21_discovery_feedback_architecture.md), [09 §4, §6.5](../../architecture/09_technical_architecture.md), ухваленыя каноны [screens-and-transitions](../../design/screens-and-transitions.md) і [visual-language](../../design/visual-language.md).
 
-| Заданне | Вынік | Пасля | Issue |
-|---|---|---|---|
-| [G06.01.a](G06.01.a.md) | Горад і рубрыка «Гіды» на рэальным каталогу: каталожны сэрвіс, карткі без выдумак, станы і парадак | G06.09.a+b, канон G06.06–G06.08 | #313 |
-| [G06.01.b](G06.01.b.md) | Прэв'ю гіда: метаданыя і адзіная галоўная кнопка Download→Start | G06.01.a | #314 |
+| Заданне | Вынік | Пасля | Issue | Статус |
+|---|---|---|---|---|
+| [G06.01.a](G06.01.a.md) | Горад і рубрыка «Гіды» на рэальным каталогу: каталожны сэрвіс, карткі без выдумак, станы і парадак | G06.09.a+b, канон G06.06–G06.08 | #313 | выканана → закрыта #313 (вынікі: [G06.01.a](../results/G06.01.a.md)) |
+| [G06.01.b](G06.01.b.md) | Прэв'ю гіда: метаданыя і адзіная галоўная кнопка Download→Start | G06.01.a | #314 | у працы (#314, agent:running) |
 
 # Заданні каркаса дадатку G06.09
 
-Дзве часткі новага радка G06.09 з [16](../../16_delivery_backlog.md) (радок і разбіўка — 2026-09-23). Крыніцы: [09 §6](../../architecture/09_technical_architecture.md), [11 §16](../../11_run_interaction.md), [19 §2.2, §2.5–§2.6, §4.2](../../architecture/19_class_and_module_map.md), [ADR G00.04](../../architecture/decisions/G00.04-stack-baseline.md). Абедзве — не пачатыя, абедзве — сярэдняй мадэлі.
+Дзве часткі новага радка G06.09 з [16](../../16_delivery_backlog.md) (радок і разбіўка — 2026-09-23). Крыніцы: [09 §6](../../architecture/09_technical_architecture.md), [11 §16](../../11_run_interaction.md), [19 §2.2, §2.5–§2.6, §4.2](../../architecture/19_class_and_module_map.md), [ADR G00.04](../../architecture/decisions/G00.04-stack-baseline.md). Абедзве — выкананыя і закрытыя, абедзве — сярэдняй мадэлі.
 
 Каркас дае дадатак, у які потым мантуюцца сэрвісы і экраны: маршруты-заглушкі, корань кампазіцыі і машынна правераныя межы слаёў. Візуальнага дызайну тут няма — ён за G06.06–G06.08.
 
-| Заданне | Вынік | Пасля | Issue |
-|---|---|---|---|
-| [G06.09.a](G06.09.a.md) | Expo Router і ўсе маршруты `19` §2.5 як заглушкі; тэст з рэндэрам праходзіць навігацыю `11` §16 | G00.04 (#10), G01.04 (#109) | [#208](https://github.com/vokhandcrafts/KUDY/issues/208) |
-| [G06.09.b](G06.09.b.md) | Корань кампазіцыі, Zustand, правілы app → controllers → services/core | G06.09.a | [#209](https://github.com/vokhandcrafts/KUDY/issues/209) |
+| Заданне | Вынік | Пасля | Issue | Статус |
+|---|---|---|---|---|
+| [G06.09.a](G06.09.a.md) | Expo Router і ўсе маршруты `19` §2.5 як заглушкі; тэст з рэндэрам праходзіць навігацыю `11` §16 | G00.04 (#10), G01.04 (#109) | [#208](https://github.com/vokhandcrafts/KUDY/issues/208) | выканана → закрыта #208 (вынікі: [G06.09.a](../results/G06.09.a.md)) |
+| [G06.09.b](G06.09.b.md) | Корань кампазіцыі, Zustand, правілы app → controllers → services/core | G06.09.a | [#209](https://github.com/vokhandcrafts/KUDY/issues/209) | выканана → закрыта #209 (вынікі: [G06.09.b](../results/G06.09.b.md)) |
 
 **Без прылады (рашэнне заснавальніка 2026-09-23).** Доказ — на камп'ютары: тэсты, `tsc`, `expo-doctor`, `expo prebuild --platform android --no-install`. Development build на тэлефоне пазначаецца `not-run`.
 
