@@ -20,8 +20,10 @@ import { cleanedBody } from './review.mjs';
 // Brings the FTS index in line with the latest cleaned versions: indexes a
 // record that is missing, re-indexes one whose latest version moved, drops one
 // whose cleaned versions disappeared. The index is derived state — a search
-// after any cleaning run converges on it, nothing else maintains it.
-export function syncSearchIndex(db) {
+// after any cleaning run converges on it, nothing else maintains it. The
+// operation name lands in the diagnostic: the sync also serves the basket
+// commands, not only search.
+export function syncSearchIndex(db, { operation = 'search' } = {}) {
   const rows = latestCleanedRecords(db);
   const indexed = new Map(
     db.prepare('SELECT raw_record_id, version FROM cleaned_fts').all().map((row) => [row.raw_record_id, row.version])
@@ -39,7 +41,7 @@ export function syncSearchIndex(db) {
     try {
       document = fs.readFileSync(row.path, 'utf8');
     } catch (error) {
-      throw new Error(`search: cannot read cleaned document ${row.path} — ${error.message}`);
+      throw new Error(`${operation}: cannot read cleaned document ${row.path} — ${error.message}`);
     }
     db.prepare('DELETE FROM cleaned_fts WHERE raw_record_id = ?').run(row.id);
     db.prepare('INSERT INTO cleaned_fts (raw_record_id, version, title, body) VALUES (?, ?, ?, ?)').run(
@@ -127,7 +129,7 @@ export function exportDraft(db, { outPath }) {
 // the search index (synced first — derived state stays coherent wherever it
 // is read) and the added_at the basket row carries.
 export function basketRows(db) {
-  syncSearchIndex(db);
+  syncSearchIndex(db, { operation: 'basket' });
   const added = new Map(basketIds(db).map((row) => [row.raw_record_id, row.added_at]));
   const titles = new Map(
     db.prepare('SELECT raw_record_id, title FROM cleaned_fts').all().map((row) => [row.raw_record_id, row.title])

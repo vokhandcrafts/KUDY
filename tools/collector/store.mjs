@@ -379,14 +379,21 @@ export function basketIds(db) {
 }
 
 // The basket's exportable rows: every basket record that has a latest cleaned
-// version, in the stable url order the draft renders. `basket add` only
-// accepts records with a cleaned document, so an empty join means the cleaned
-// versions disappeared — the export answers that, not a silent gap.
+// version, in the stable url order the draft renders. A basket id whose
+// cleaned versions disappeared is a named diagnostic — a silent filter would
+// shrink the draft without a word, while the same record's missing FILE fails
+// the export loudly.
 export function basketRecords(db) {
   const ids = basketIds(db);
   if (ids.length === 0) return [];
   const added = new Map(ids.map((row) => [row.raw_record_id, row.added_at]));
-  return latestCleanedRecords(db).filter((row) => added.has(row.id));
+  const rows = latestCleanedRecords(db).filter((row) => added.has(row.id));
+  if (rows.length !== ids.length) {
+    const known = new Set(rows.map((row) => row.id));
+    const lost = ids.find((row) => !known.has(row.raw_record_id));
+    throw new Error(`basket record ${lost.raw_record_id} has no cleaned version anymore — clean the record again or clear the basket`);
+  }
+  return rows;
 }
 
 export function basketClear(db) {

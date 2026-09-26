@@ -255,6 +255,31 @@ test('a draft export that cannot read a cleaned file leaves the previous draft i
   assert.equal(fs.readFileSync(outPath, 'utf8'), intact);
 });
 
+test('a basket record without cleaned versions anymore is a named diagnostic, not a silent gap', () => {
+  const dir = makeTempDir();
+  const db = openStore(path.join(dir, 'db.sqlite'));
+  seedCampaign(db);
+  const { history } = buildLibrary(db, dir);
+  basketAdd(db, history.id, '2026-09-26T02:00:00.000Z');
+  const outPath = path.join(dir, 'draft.md');
+  assert.ok(basketRows(db).length === 1, 'the basket holds the record while its cleaned version exists');
+  db.prepare('DELETE FROM cleaned_versions WHERE raw_record_id = ?').run(history.id);
+  fs.rmSync(path.join(history.snapshot_path, 'cleaned'), { recursive: true, force: true });
+  assert.throws(() => basketRows(db), /no cleaned version anymore/);
+  assert.throws(() => exportDraft(db, { outPath }), /no cleaned version anymore/);
+  assert.equal(fs.existsSync(outPath), false, 'no draft is written from a shrunken basket');
+});
+
+test('a basket list with an unreadable cleaned document names the basket operation', () => {
+  const dir = makeTempDir();
+  const db = openStore(path.join(dir, 'db.sqlite'));
+  seedCampaign(db);
+  const { history } = buildLibrary(db, dir);
+  basketAdd(db, history.id, '2026-09-26T02:00:00.000Z');
+  fs.rmSync(path.join(history.snapshot_path, 'cleaned', 'v1.md'), { force: true });
+  assert.throws(() => basketRows(db), /basket: cannot read cleaned document/);
+});
+
 test('basket rows carry the fragment title and the added stamp; adds are idempotent', () => {
   const dir = makeTempDir();
   const db = openStore(path.join(dir, 'db.sqlite'));

@@ -21,7 +21,7 @@ node tools/collector/collector.mjs init                          # ствары�
 node tools/collector/collector.mjs run --campaign campaigns/gdansk-2026-09.yaml
 node tools/collector/collector.mjs clean --campaign campaigns/gdansk-2026-09.yaml
 node tools/collector/collector.mjs export-review --campaign campaigns/gdansk-2026-09.yaml
-node tools/collector/collector.mjs search --city Гданьск --topic гісторыя --type web --query «верф»
+node tools/collector/collector.mjs search --city gdansk --topic history --type web --query 'shipyard history'
 node tools/collector/collector.mjs basket add --record <id> [--record <id> …] | basket list | basket clear
 node tools/collector/collector.mjs export-draft --out гайд-чарнавік.md
 node tools/collector/collector.mjs status                        # лічбы па сховішчы
