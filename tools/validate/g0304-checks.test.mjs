@@ -107,6 +107,57 @@ test('criterion 3: an auto-trigger field cannot pass the moment schema', () => {
   );
 });
 
+test('criterion 1: a record must not drift from the covered file bytes or locale', () => {
+  const staleBytes = validatePackage(copiedTree((d) => {
+    const media = readJson(d, 'media.json');
+    media[0].bytes += 1;
+    writeJson(d, 'media.json', media);
+  }));
+  assert.ok(
+    rules(staleBytes, 'media-bytes-mismatch').some((e) => e.path === 'media.json[0]'),
+    JSON.stringify(staleBytes.errors),
+  );
+  const media = readJson(DEMO, 'media.json');
+  const enIndex = media.findIndex((record) => record.media_id === 'media-story-1-base-en');
+  const foreignLocale = validatePackage(copiedTree((d) => {
+    const records = readJson(d, 'media.json');
+    records[enIndex].locale = 'be';
+    delete records[enIndex].voice_id;
+    writeJson(d, 'media.json', records);
+  }));
+  assert.ok(
+    rules(foreignLocale, 'media-locale-mismatch').some((e) => e.path === `media.json[${enIndex}]`),
+    JSON.stringify(foreignLocale.errors),
+  );
+});
+
+test('committed bad packages fail with exactly their named diagnostic', async () => {
+  // The crafted fixtures are committed data, not test-time constructs: the
+  // suite guards them directly so a silent edit cannot rot the demo.
+  const validatorCases = [
+    ['g0304-unlicensed-media', 'unlicensed-media'],
+    ['g0304-moment-auto', 'additionalProperties'],
+  ];
+  for (const [dir, rule] of validatorCases) {
+    const result = validatePackage(path.resolve(DEMO, '..', dir));
+    assert.equal(result.ok, false, dir);
+    assert.deepEqual(
+      result.errors.map((e) => e.rule),
+      [rule],
+      dir,
+    );
+  }
+  // The preview-leak package passes the validator on purpose — the packer is
+  // the last line for that criterion.
+  const leak = path.resolve(DEMO, '..', 'g0304-preview-leak');
+  assert.deepEqual(validatePackage(leak), { ok: true, errors: [], warnings: [] });
+  const out = await fsp.mkdtemp(path.join(os.tmpdir(), 'g0304-fixture-'));
+  await assert.rejects(
+    buildBundle({ inDir: leak, outDir: out }),
+    (error) => error instanceof BuildError && error.code === 'preview-reveals-full-text',
+  );
+});
+
 test('criterion 3: moment refs, duplicate ids and corrupt manifests are diagnostics', () => {
   const ghostRefs = validatePackage(copiedTree((d) => {
     const moments = readJson(d, 'moments.json');

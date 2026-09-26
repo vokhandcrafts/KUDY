@@ -243,27 +243,45 @@ export function validatePackage(dir, options = {}) {
   moments.forEach((moment, i) => schemaCheck('moment.schema.json', moment, `moments.json[${i}]`, errors));
   checkUniqueId(moments, 'id', 'moments.json', errors);
 
-  // sha256 of every media file in the tree (the two mimes media.schema.json
-  // allows); a Media record must match exactly one of them, and a tree that
-  // ships media files must manifest every one of them.
+  // sha256 + size of every media file in the tree (the two mimes
+  // media.schema.json allows); a Media record must match exactly one of
+  // them, and a tree that ships media files must manifest every one of them.
   const MEDIA_EXTENSIONS = new Set(['.m4a', '.webp']);
-  const pathsBySha = new Map();
+  const MEDIA_LOCALES = new Set(['be', 'en', 'uk']); // media.schema.json locale enum
+  const mediaFiles = new Map(); // rel -> { sha, bytes }
   for (const rel of files) {
     if (!MEDIA_EXTENSIONS.has(path.extname(rel))) continue;
-    let sha;
     try {
-      sha = createHash('sha256').update(fs.readFileSync(`${rootAbs}/${rel}`)).digest('hex');
+      const buf = fs.readFileSync(`${rootAbs}/${rel}`);
+      mediaFiles.set(rel, { sha: createHash('sha256').update(buf).digest('hex'), bytes: buf.length });
     } catch {
       diag(errors, 'error', 'unreadable-media', rel);
-      continue;
     }
-    if (!pathsBySha.has(sha)) pathsBySha.set(sha, new Set());
-    pathsBySha.get(sha).add(rel);
+  }
+  const pathsBySha = new Map();
+  for (const [rel, meta] of mediaFiles) {
+    if (!pathsBySha.has(meta.sha)) pathsBySha.set(meta.sha, []);
+    pathsBySha.get(meta.sha).push(rel);
   }
   media.forEach((record, i) => {
     const sha = record?.sha256;
-    if (typeof sha === 'string' && !pathsBySha.has(sha)) {
+    if (typeof sha !== 'string') return;
+    const rels = pathsBySha.get(sha);
+    if (!rels) {
       diag(errors, 'error', 'media-sha-unmatched', `media.json[${i}]#${sha}`);
+      return;
+    }
+    // A record describes the file it covers: its bytes and locale must not
+    // drift from the matched file's own facts.
+    if (record.bytes !== undefined && record.bytes !== mediaFiles.get(rels[0]).bytes) {
+      diag(errors, 'error', 'media-bytes-mismatch', `media.json[${i}]`);
+    }
+    const foreign = rels.some((rel) => {
+      const top = rel.split('/')[0];
+      return MEDIA_LOCALES.has(top) && top !== record.locale;
+    });
+    if (record.locale !== undefined && foreign) {
+      diag(errors, 'error', 'media-locale-mismatch', `media.json[${i}]`);
     }
   });
   for (const [sha, rels] of pathsBySha) {

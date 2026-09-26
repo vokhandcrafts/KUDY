@@ -60,8 +60,10 @@ test('guard: no 43-char base64url literal (32-byte secret shape) is committed', 
   // fixtures/discovery-contract/ holds schema-boundary fixtures whose long
   // strings (oversized fields, repeated filler, content hashes) are the
   // G01.06 contract's own test data — not credentials (fixed in G01.06,
-  // verified by its contract suite).
-  const allowlistedPrefixes = ['fixtures/discovery-contract/'];
+  // verified by its contract suite). fixtures/content/ media.json records
+  // carry sha256 hex over fixture content bytes — the media.schema.json
+  // contract's own file-hash data (G03.04), not credentials.
+  const allowlistedPrefixes = ['fixtures/discovery-contract/', 'fixtures/content/'];
   const secretShape = /[A-Za-z0-9_-]{43}(?![A-Za-z0-9_-])/g;
   for (const rel of committedFiles) {
     if (rel.endsWith('.svg')) continue;
