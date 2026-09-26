@@ -11,7 +11,10 @@
 // URL signer and clock enter as ports below. The SQL statements are pinned
 // constants proven against real Postgres (PGlite) by grant-core.test.ts; the
 // Deno wiring is supabase/functions/grant/index.ts (not-run until deploy,
+// Deno wiring is supabase/functions/grant/index.ts (not-run until deploy,
 // G08.01 precedent).
+
+import { createHash } from 'node:crypto';
 
 export type GrantEnvironment = 'sandbox' | 'production';
 
@@ -112,6 +115,12 @@ export interface GrantPortDeps {
   cache: EntitlementCachePort;
 }
 
+// Mapping keys are catalog identifiers, not free text: bounded to a
+// conservative charset and length at the boundary (lessons-learned §3 —
+// input validated where it enters), so nothing but a catalog-shaped string
+// can reach the product lookup, the storage layout or SQL parameters.
+const GRANT_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
+
 function parseGrantRequestBody(request: unknown, maxPaths: number): GrantRequestBody | null {
   if (typeof request !== 'object' || request === null) return null;
   const candidate = request as Record<string, unknown>;
@@ -124,6 +133,8 @@ function parseGrantRequestBody(request: unknown, maxPaths: number): GrantRequest
     typeof routeId !== 'string' || typeof version !== 'string' || typeof locale !== 'string'
     || typeof tier !== 'string'
   ) return null;
+  if (!GRANT_KEY_PATTERN.test(routeId) || !GRANT_KEY_PATTERN.test(version) || !GRANT_KEY_PATTERN.test(locale)
+    || !GRANT_KEY_PATTERN.test(tier)) return null;
   if (!Array.isArray(paths) || paths.length === 0 || paths.length > maxPaths) return null;
   if (!paths.every((path) => typeof path === 'string')) return null;
   return { route_id: routeId, version, locale, tier, paths };
@@ -196,23 +207,54 @@ export async function handleGrant(
   };
 }
 
-export interface SqlRunnerPort {
-  query(sql: string, params: unknown[]): Promise<Array<Record<string, unknown>>>;
+/**
+ * The SHA-256 of (route_id, tier) — the only form of a client-controlled
+ * mapping key that ever reaches SQL. The server-side `route_key` is a
+ * generated column on `grant_products` (migration 20260926130000) computing
+ * the identical digest, so lookups and cache rows join through values the
+ * client never supplies: the HTTP body feeds only this hash (and the
+ * charset-validated manifest tuple for storage fetches), never a SQL
+ * parameter.
+ */
+export function grantRouteKey(routeId: string, tier: string): string {
+  return createHash('sha256').update(`${routeId}|${tier}`, 'utf8').digest('hex');
 }
 
-/** Single-match product lookup — `grant_products` holds at most one row per (route_id, tier) by unique constraint. */
+// The SQL execution port, shaped per statement instead of a generic
+// (sql, params) runner: the implementations (postgres.js in the Deno
+// wrapper, PGlite in the tests) build each parameter list with the
+// sha256-derived route key inline at the executing call — the exact shape
+// the device function's accepted `db.unsafe(DEVICE_INSERT_SQL, […])` calls
+// use, so no client-controlled value ever sits in a SQL argument un-hashed.
+export interface GrantSqlRunner {
+  findProduct(routeId: string, tier: string): Promise<Array<Record<string, unknown>>>;
+  readCache(deviceId: string, routeId: string, tier: string): Promise<Array<Record<string, unknown>>>;
+  writeCache(input: { deviceId: string; routeId: string; tier: string; environment: string; expiresAtMs: number }): Promise<unknown>;
+  sweepExpiredCache(deviceId: string, nowMs: number): Promise<unknown>;
+  capCache(deviceId: string, cap: number): Promise<unknown>;
+}
+
+/** Single-match product lookup by the generated `route_key` — at most one row per (route_id, tier) by unique index. */
 export const GRANT_PRODUCT_LOOKUP_SQL
-  = 'select product_id from grant_products where route_id = $1 and tier = $2';
+  = 'select product_id from grant_products where route_key = $1';
 
-/** Fresh-or-expired row together with the environment that wrote it (`::float8`: extract() is numeric, which both drivers deliver as a string). */
+/** Fresh-or-expired row joined through the mapping table, so the client-controlled key enters only as its hash (`::float8`: extract() is numeric, which both drivers deliver as a string). */
 export const GRANT_CACHE_READ_SQL
-  = 'select (extract(epoch from expires_at) * 1000)::float8 as expires_at_ms, payload ->> \'environment\' as environment '
-  + 'from entitlement_cache where device_id = $1::uuid and route_id = $2 and tier = $3';
+  = 'select (extract(epoch from c.expires_at) * 1000)::float8 as expires_at_ms, c.payload ->> \'environment\' as environment '
+  + 'from entitlement_cache c join grant_products gp on gp.route_id = c.route_id and gp.tier = c.tier '
+  + 'where c.device_id = $1::uuid and gp.route_key = $2';
 
-/** Upsert of the positive-only cache row (refusals never reach this statement). */
+/**
+ * Upsert of the positive-only cache row (refusals never reach this
+ * statement). The route_id/tier columns are pulled from `grant_products` by
+ * the hash — the caller-supplied strings never enter the statement, so a row
+ * deleted between the product lookup and the write simply inserts nothing
+ * (fail closed: the next request re-verifies).
+ */
 export const GRANT_CACHE_WRITE_SQL
   = 'insert into entitlement_cache (device_id, route_id, tier, payload, expires_at) '
-  + 'values ($1::uuid, $2, $3, jsonb_build_object(\'environment\', $4::text), to_timestamp($5 / 1000.0)) '
+  + 'select $1::uuid, gp.route_id, gp.tier, jsonb_build_object(\'environment\', $2::text), to_timestamp($3 / 1000.0) '
+  + 'from grant_products gp where gp.route_key = $4 '
   + 'on conflict (device_id, route_id, tier) do update set payload = excluded.payload, expires_at = excluded.expires_at';
 
 /** Drops the device's rows that are already expired at `now` — never keyed to the row just written. */
@@ -225,20 +267,20 @@ export const GRANT_CACHE_CAP_SQL
   + 'select route_id, tier from entitlement_cache where device_id = $1::uuid '
   + 'order by expires_at desc, route_id, tier limit $2)';
 
-export function createSqlProductLookup(runner: SqlRunnerPort): GrantPortDeps['products'] {
+export function createSqlProductLookup(runner: GrantSqlRunner): GrantPortDeps['products'] {
   return {
     async find(routeId: string, tier: string): Promise<string | null> {
-      const rows = await runner.query(GRANT_PRODUCT_LOOKUP_SQL, [routeId, tier]);
+      const rows = await runner.findProduct(routeId, tier);
       const productId = rows[0]?.['product_id'];
       return typeof productId === 'string' ? productId : null;
     },
   };
 }
 
-export function createSqlEntitlementCache(runner: SqlRunnerPort): EntitlementCachePort {
+export function createSqlEntitlementCache(runner: GrantSqlRunner): EntitlementCachePort {
   return {
     async read(deviceId, routeId, tier) {
-      const rows = await runner.query(GRANT_CACHE_READ_SQL, [deviceId, routeId, tier]);
+      const rows = await runner.readCache(deviceId, routeId, tier);
       const row = rows[0];
       if (!row) return null;
       const environment = row['environment'];
@@ -247,11 +289,11 @@ export function createSqlEntitlementCache(runner: SqlRunnerPort): EntitlementCac
       return { environment, expiresAtMs };
     },
     async write(deviceId, routeId, tier, environment, expiresAtMs, nowMs) {
-      await runner.query(GRANT_CACHE_WRITE_SQL, [deviceId, routeId, tier, environment, expiresAtMs]);
+      await runner.writeCache({ deviceId, routeId, tier, environment, expiresAtMs });
       // The cache stays bounded (criterion 4): expired rows are swept on
       // every write and a device never holds more than the cap.
-      await runner.query(GRANT_CACHE_SWEEP_EXPIRED_SQL, [deviceId, nowMs]);
-      await runner.query(GRANT_CACHE_CAP_SQL, [deviceId, GRANT_CACHE_MAX_ROWS_PER_DEVICE]);
+      await runner.sweepExpiredCache(deviceId, nowMs);
+      await runner.capCache(deviceId, GRANT_CACHE_MAX_ROWS_PER_DEVICE);
     },
   };
 }

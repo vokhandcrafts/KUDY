@@ -6,6 +6,16 @@
 // supabase/migrations/*.sql files (no second copy anywhere).
 import { PGlite } from '@electric-sql/pglite';
 
+import {
+  grantRouteKey,
+  GRANT_CACHE_CAP_SQL,
+  GRANT_CACHE_READ_SQL,
+  GRANT_CACHE_SWEEP_EXPIRED_SQL,
+  GRANT_CACHE_WRITE_SQL,
+  GRANT_PRODUCT_LOOKUP_SQL,
+  type GrantSqlRunner,
+} from './grant-core.ts';
+
 export interface StepRunner {
   query(sql: string, params?: unknown[]): Promise<unknown>;
 }
@@ -44,9 +54,16 @@ export const GRANT_MIGRATION_STEPS: MigrationStep[] = [
   (db) => db.query('grant select, insert, update, delete on grant_products to service_role'),
 ];
 
+export const GRANT_ROUTE_KEY_MIGRATION_STEPS: MigrationStep[] = [
+  (db) => db.query("create function grant_route_key(route_id text, tier text) returns text immutable language sql as $$ select encode(sha256(convert_to(route_id || '|' || tier, 'UTF8')), 'hex') $$"),
+  (db) => db.query('alter table grant_products add column route_key text generated always as (grant_route_key(route_id, tier)) stored'),
+  (db) => db.query('create unique index grant_products_route_key_idx on grant_products (route_key)'),
+];
+
 export const MIGRATIONS: Array<{ file: string; steps: MigrationStep[] }> = [
   { file: '20260922120000_device_tables_rls.sql', steps: DEVICE_MIGRATION_STEPS },
   { file: '20260926120000_grant_products.sql', steps: GRANT_MIGRATION_STEPS },
+  { file: '20260926130000_grant_products_route_key.sql', steps: GRANT_ROUTE_KEY_MIGRATION_STEPS },
 ];
 
 export async function freshMigratedDatabase(): Promise<PGlite> {
@@ -58,18 +75,30 @@ export async function freshMigratedDatabase(): Promise<PGlite> {
   return db;
 }
 
-// The parameterized runner the grant core's SQL ports run against in tests:
-// every statement reaches Postgres with its parameters as an array, the same
-// shape the Deno wrapper feeds postgres.js with.
-export interface SqlRowsRunner {
-  query(sql: string, params: unknown[]): Promise<Array<Record<string, unknown>>>;
-}
-
-export function pgliteRowsRunner(db: PGlite): SqlRowsRunner {
+// The SQL runner the grant core's ports run against in tests: PGlite instead
+// of postgres.js, the same pinned statements with the same sha256 route key
+// built inline — proving the statements and the JS/SQL hash agreement.
+export function pgliteGrantRunner(db: PGlite): GrantSqlRunner {
   return {
-    async query(sql: string, params: unknown[]) {
-      const result = await db.query(sql, params);
+    async findProduct(routeId, tier) {
+      const result = await db.query(GRANT_PRODUCT_LOOKUP_SQL, [grantRouteKey(routeId, tier)]);
       return result.rows as Array<Record<string, unknown>>;
+    },
+    async readCache(deviceId, routeId, tier) {
+      const result = await db.query(GRANT_CACHE_READ_SQL, [deviceId, grantRouteKey(routeId, tier)]);
+      return result.rows as Array<Record<string, unknown>>;
+    },
+    async writeCache(input) {
+      await db.query(
+        GRANT_CACHE_WRITE_SQL,
+        [input.deviceId, input.environment, input.expiresAtMs, grantRouteKey(input.routeId, input.tier)],
+      );
+    },
+    async sweepExpiredCache(deviceId, nowMs) {
+      await db.query(GRANT_CACHE_SWEEP_EXPIRED_SQL, [deviceId, nowMs]);
+    },
+    async capCache(deviceId, cap) {
+      await db.query(GRANT_CACHE_CAP_SQL, [deviceId, cap]);
     },
   };
 }

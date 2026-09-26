@@ -14,10 +14,10 @@ import {
   type EntitlementVerdict,
   type GrantPortDeps,
 } from './grant-core.ts';
-import { freshMigratedDatabase, pgliteRowsRunner } from './test-db.ts';
+import { freshMigratedDatabase, pgliteGrantRunner } from './test-db.ts';
 
 const db = await freshMigratedDatabase();
-const runner = pgliteRowsRunner(db);
+const runner = pgliteGrantRunner(db);
 const device = registerDevice();
 await db.query('insert into devices (device_id, secret_hash) values ($1, $2)', [device.deviceId, device.secretHash]);
 await db.query(
