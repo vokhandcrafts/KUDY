@@ -105,8 +105,9 @@ export interface GrantPortDeps {
     load(routeId: string, version: string, locale: string, tier: string): Promise<{ paths: string[]; lockUrl: string } | null>;
   };
   provider: { verifyEntitlement(input: { deviceId: string; productId: string }): Promise<EntitlementVerdict> };
+  /** Async by contract: the production signer (Storage signed URLs) is a network call. */
   signer: {
-    mint(input: { path: string; deviceId: string; ttlSeconds: number; nowMs: number }): { url: string; expiresAtMs: number };
+    mint(input: { path: string; deviceId: string; ttlSeconds: number; nowMs: number }): Promise<{ url: string; expiresAtMs: number }>;
   };
   cache: EntitlementCachePort;
 }
@@ -184,15 +185,14 @@ export async function handleGrant(
   }
 
   const ttlSeconds = config.urlTtlSeconds ?? GRANT_URL_TTL_SECONDS;
+  const urls: Array<{ path: string; url: string; expires_at: number }> = [];
+  for (const path of body.paths) {
+    const minted = await deps.signer.mint({ path, deviceId, ttlSeconds, nowMs });
+    urls.push({ path, url: minted.url, expires_at: minted.expiresAtMs });
+  }
   return {
     status: 200,
-    body: {
-      lock_url: manifest.lockUrl,
-      urls: body.paths.map((path) => {
-        const minted = deps.signer.mint({ path, deviceId, ttlSeconds, nowMs });
-        return { path, url: minted.url, expires_at: minted.expiresAtMs };
-      }),
-    },
+    body: { lock_url: manifest.lockUrl, urls },
   };
 }
 

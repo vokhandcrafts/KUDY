@@ -43,7 +43,7 @@ const deps: GrantPortDeps = {
     },
   },
   signer: {
-    mint: (input) => ({ url: `https://files.test/granted/${input.path}`, expiresAtMs: input.nowMs + input.ttlSeconds * 1000 }),
+    mint: async (input) => ({ url: `https://files.test/granted/${input.path}`, expiresAtMs: input.nowMs + input.ttlSeconds * 1000 }),
   },
   cache: createSqlEntitlementCache(runner),
 };

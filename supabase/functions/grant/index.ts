@@ -190,13 +190,15 @@ export async function handleGrantRequest(req: Request, db: postgres.Sql, config:
     return errors(403, 'device_auth_failed');
   }
 
-  const text = await req.text();
-  if (text.length > GRANT_MAX_BODY_BYTES) {
+  // The 64 KiB contract limit is measured in bytes, not UTF-16 code units
+  // (the review round 1 note): the raw body is bounded before decoding.
+  const raw = await req.arrayBuffer();
+  if (raw.byteLength > GRANT_MAX_BODY_BYTES) {
     return errors(400, 'invalid_request');
   }
   let body: unknown;
   try {
-    body = JSON.parse(text);
+    body = JSON.parse(new TextDecoder().decode(raw));
   } catch {
     return errors(400, 'invalid_request');
   }
@@ -249,10 +251,16 @@ function resolveConfig(): ResolvedConfig {
   if (environment !== 'sandbox' && environment !== 'production') {
     throw new Error('GRANT_ENVIRONMENT must be sandbox or production');
   }
+  const revenueCatBase = Deno.env.get('REVENUECAT_BASE_URL') ?? REVENUECAT_DEFAULT_BASE;
+  // The Secret API key travels in the Authorization header: a cleartext base
+  // would ship it in the open — the spike's https guard (review round 1).
+  if (!/^https:\/\//.test(revenueCatBase)) {
+    throw new Error('REVENUECAT_BASE_URL must use https');
+  }
   return {
     environment,
     revenueCatSecret: requireEnv('REVENUECAT_SECRET_API_KEY'),
-    revenueCatBase: Deno.env.get('REVENUECAT_BASE_URL') ?? REVENUECAT_DEFAULT_BASE,
+    revenueCatBase,
     supabaseUrl: requireEnv('SUPABASE_URL'),
     serviceRoleKey: requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
     bucket: requireEnv('GRANT_STORAGE_BUCKET'),
@@ -265,13 +273,10 @@ Deno.serve(async (req) => {
   try {
     const config = resolveConfig();
     return await handleGrantRequest(req, database(), config);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : '';
-    if (message.includes('is required') || message.startsWith('GRANT_ENVIRONMENT')) {
-      return errors(500, 'server_configuration_error');
-    }
-    // Keep even the internal fault inside the documented closed list: the
-    // client retries it like any other provider outage (spike idiom).
+  } catch {
+    // Every fault of this function — a misconfigured environment included —
+    // stays inside the documented closed list: the client retries it like any
+    // other provider outage (spike idiom; 19 §3.6 forbids codes outside it).
     return errors(503, 'entitlement_unavailable', { 'retry-after': String(GRANT_RETRY_AFTER_SECONDS) });
   }
 });

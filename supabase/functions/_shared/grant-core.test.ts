@@ -157,12 +157,14 @@ async function wiredDeps(): Promise<Harness> {
         return verdict;
       },
     },
-    signer: {
-      mint(input) {
-        minted.push({ ...input });
-        return { url: `https://files.test/granted/${input.path}`, expiresAtMs: input.nowMs + input.ttlSeconds * 1000 };
-      },
+  signer: {
+    // Async on purpose: the production signer is a network call (Storage
+    // signed URLs); the port must be awaited by the core (review round 1).
+    mint: async (input) => {
+      minted.push({ ...input });
+      return { url: `https://files.test/granted/${input.path}`, expiresAtMs: input.nowMs + input.ttlSeconds * 1000 };
     },
+  },
     cache: createSqlEntitlementCache(runner),
   };
 
