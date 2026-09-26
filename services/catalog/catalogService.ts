@@ -123,6 +123,7 @@ export function projectGuides(
   offers: readonly CatalogOfferFacts[],
 ): CatalogGuideCard[] {
   const routeIds = new Set(envelope.routes.map((route) => route.route_id));
+  const seenRoutes = new Set<string>();
   const publishedOffers = offers
     .filter((offer) => routeIds.has(offer.route_id))
     .sort((a, b) =>
@@ -132,6 +133,14 @@ export function projectGuides(
           ? -1
           : 1,
     )
+    // A malformed publication may pin several offers to one route (issue
+    // #324): each guide renders exactly once (21 §4) — the sorted-first
+    // offer wins, the duplicates are dropped, not echoed.
+    .filter((offer) => {
+      if (seenRoutes.has(offer.route_id)) return false;
+      seenRoutes.add(offer.route_id);
+      return true;
+    })
     .map<CatalogGuideCard>((offer) => ({
       routeId: offer.route_id,
       version: envelope.routes.find((route) => route.route_id === offer.route_id)?.version ?? '',
