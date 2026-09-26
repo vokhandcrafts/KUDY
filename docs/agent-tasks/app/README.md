@@ -1,3 +1,12 @@
+# Заданні экранаў Горад → Гіды → прэв'ю G06.01
+
+Дзве часткі радка G06.01 з [16](../../16_delivery_backlog.md) (разбіўка — 🕴🏻Планавальнік 2026-09-26, разблакаваная ўхваленым дызайнам G06.06–G06.08 і кляймам аператара на issue #62). Крыніцы: [11 раздзел 16](../../11_run_interaction.md), [21 §3–§4](../../architecture/21_discovery_feedback_architecture.md), [09 §4, §6.5](../../architecture/09_technical_architecture.md), ухваленыя каноны [screens-and-transitions](../../design/screens-and-transitions.md) і [visual-language](../../design/visual-language.md).
+
+| Заданне | Вынік | Пасля | Issue |
+|---|---|---|---|
+| [G06.01.a](G06.01.a.md) | Горад і рубрыка «Гіды» на рэальным каталогу: каталожны сэрвіс, карткі без выдумак, станы і парадак | G06.09.a+b, канон G06.06–G06.08 | #313 |
+| [G06.01.b](G06.01.b.md) | Прэв'ю гіда: метаданыя і адзіная галоўная кнопка Download→Start | G06.01.a | #314 |
+
 # Заданні каркаса дадатку G06.09
 
 Дзве часткі новага радка G06.09 з [16](../../16_delivery_backlog.md) (радок і разбіўка — 2026-09-23). Крыніцы: [09 §6](../../architecture/09_technical_architecture.md), [11 §16](../../11_run_interaction.md), [19 §2.2, §2.5–§2.6, §4.2](../../architecture/19_class_and_module_map.md), [ADR G00.04](../../architecture/decisions/G00.04-stack-baseline.md). Абедзве — не пачатыя, абедзве — сярэдняй мадэлі.

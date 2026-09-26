@@ -27,14 +27,21 @@ import { bearerSecretHash, DEVICE_LOOKUP_SQL } from '../_shared/device-core.ts';
 import {
   createSqlEntitlementCache,
   createSqlProductLookup,
+  grantRouteKey,
+  GRANT_CACHE_CAP_SQL,
+  GRANT_CACHE_READ_SQL,
+  GRANT_CACHE_SWEEP_EXPIRED_SQL,
   GRANT_CACHE_TTL_SECONDS,
+  GRANT_CACHE_WRITE_SQL,
   GRANT_MAX_BODY_BYTES,
+  GRANT_PRODUCT_LOOKUP_SQL,
   GRANT_RETRY_AFTER_SECONDS,
   GRANT_URL_TTL_SECONDS,
   handleGrant,
   type GrantAnswer,
   type GrantConfig,
   type GrantPortDeps,
+  type GrantSqlRunner,
 } from '../_shared/grant-core.ts';
 import { database } from '../_shared/postgres-connection.ts';
 
@@ -147,9 +154,30 @@ function serialize(answer: GrantAnswer): Response {
 // signer — the core always loads the manifest before minting, so the base is
 // the loaded layer's; per-request ports keep requests from sharing it.
 function requestDeps(db: postgres.Sql, storage: StorageConfig, config: GrantConfig): GrantPortDeps {
-  const runner = {
-    query: (statement: string, params: unknown[]) =>
-      db.unsafe(statement, params) as Promise<Array<Record<string, unknown>>>,
+  // Each statement is one of the pinned constants exported by grant-core,
+  // executed with its parameters built in place — the client-controlled
+  // mapping key only ever appears as the inline sha256 digest
+  // (grantRouteKey), the same accepted shape as the device function's
+  // db.unsafe calls (no HTTP value enters SQL un-hashed).
+  const runner: GrantSqlRunner = {
+    async findProduct(routeId, tier) {
+      return db.unsafe(GRANT_PRODUCT_LOOKUP_SQL, [grantRouteKey(routeId, tier)]) as Promise<Array<Record<string, unknown>>>;
+    },
+    async readCache(deviceId, routeId, tier) {
+      return db.unsafe(GRANT_CACHE_READ_SQL, [deviceId, grantRouteKey(routeId, tier)]) as Promise<Array<Record<string, unknown>>>;
+    },
+    async writeCache(input) {
+      await db.unsafe(
+        GRANT_CACHE_WRITE_SQL,
+        [input.deviceId, input.environment, input.expiresAtMs, grantRouteKey(input.routeId, input.tier)],
+      );
+    },
+    async sweepExpiredCache(deviceId, nowMs) {
+      await db.unsafe(GRANT_CACHE_SWEEP_EXPIRED_SQL, [deviceId, nowMs]);
+    },
+    async capCache(deviceId, cap) {
+      await db.unsafe(GRANT_CACHE_CAP_SQL, [deviceId, cap]);
+    },
   };
   let manifestBase = '';
   return {
@@ -273,7 +301,17 @@ Deno.serve(async (req) => {
   try {
     const config = resolveConfig();
     return await handleGrantRequest(req, database(), config);
-  } catch {
+  } catch (error) {
+    // The client gets the closed-list 503; the operator gets the reason in
+    // stderr — URLs are redacted because connection strings can carry
+    // secrets (issue #311).
+    console.error(
+      'grant: internal fault → 503 entitlement_unavailable:',
+      // DATABASE_URL is postgres:// — connection schemes are redacted too.
+      error instanceof Error
+        ? error.message.replace(/(?:https?|postgres(?:ql)?):\/\/\S+/g, '<redacted-url>')
+        : 'unknown',
+    );
     // Every fault of this function — a misconfigured environment included —
     // stays inside the documented closed list: the client retries it like any
     // other provider outage (spike idiom; 19 §3.6 forbids codes outside it).

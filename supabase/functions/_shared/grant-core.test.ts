@@ -27,7 +27,7 @@ import {
   type EntitlementVerdict,
   type GrantPortDeps,
 } from './grant-core.ts';
-import { freshMigratedDatabase, pgliteRowsRunner, type SqlRowsRunner } from './test-db.ts';
+import { freshMigratedDatabase, pgliteGrantRunner, type GrantSqlRunner } from './test-db.ts';
 
 const ROUTE = 'g00-03-spike';
 const VERSION = '2026-09-15.1';
@@ -77,6 +77,13 @@ test('shape gate: malformed bodies are 400 invalid_request before any port runs'
     { route_id: ROUTE, version: VERSION, locale: LOCALE, tier: TIER, paths: ['ok', 7] },
     { route_id: ROUTE, version: VERSION, locale: LOCALE, tier: TIER, paths: Array.from({ length: 21 }, () => 'a.mp3') },
     { route_id: 7, version: VERSION, locale: LOCALE, tier: TIER, paths: ['a.mp3'] },
+    // Mapping keys are catalog identifiers: a charset outside the boundary
+    // pattern never reaches the product lookup or SQL parameters.
+    { route_id: 'g00 03', version: VERSION, locale: LOCALE, tier: TIER, paths: ['a.mp3'] },
+    { route_id: "route'; drop", version: VERSION, locale: LOCALE, tier: TIER, paths: ['a.mp3'] },
+    { route_id: ROUTE, version: 'v1/..', locale: LOCALE, tier: TIER, paths: ['a.mp3'] },
+    { route_id: ROUTE, version: VERSION, locale: '', tier: TIER, paths: ['a.mp3'] },
+    { route_id: ROUTE, version: VERSION, locale: LOCALE, tier: 'пашыраны', paths: ['a.mp3'] },
   ];
   for (const body of bodies) {
     const answer = await handleGrant(body, '00000000-0000-4000-8000-000000000000', environment(), deps);
@@ -115,7 +122,7 @@ test('cross-check: every 4xx/5xx code the client knows is either a grant-endpoin
 
 interface Harness {
   db: Awaited<ReturnType<typeof freshMigratedDatabase>>;
-  runner: SqlRowsRunner;
+  runner: GrantSqlRunner;
   deps: GrantPortDeps;
   deviceId: string;
   manifestLoads: string[];
@@ -129,7 +136,7 @@ interface Harness {
 
 async function wiredDeps(): Promise<Harness> {
   const db = await freshMigratedDatabase();
-  const runner = pgliteRowsRunner(db);
+  const runner = pgliteGrantRunner(db);
   const registration = registerDevice();
   await db.query('insert into devices (device_id, secret_hash) values ($1, $2)', [registration.deviceId, registration.secretHash]);
   await db.query('insert into grant_products (product_id, route_id, tier) values ($1, $2, $3)', [PRODUCT_ID, ROUTE, TIER]);
