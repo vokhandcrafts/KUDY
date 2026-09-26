@@ -31,7 +31,8 @@ export function diag(list, severity, rule, where) {
 
 // Iterative walk with forward-slash relative paths; the fs APIs accept '/'
 // on Windows, so the rest of the module stays platform-neutral.
-function listFiles(rootAbs) {
+// Exported for verify-audio (G03.03), which walks the same package tree.
+export function listFiles(rootAbs) {
   const found = [];
   const queue = [''];
   while (queue.length > 0) {
@@ -77,7 +78,8 @@ function safeRelPath(rel) {
 
 // A package file that should hold an array but does not is a diagnostic, not
 // a crash: every downstream loop walks a guaranteed array.
-function asArray(doc, rel, errors) {
+// Exported for verify-audio (G03.03), which reads the same stops.json files.
+export function asArray(doc, rel, errors) {
   if (doc === null || doc === undefined) return [];
   if (!Array.isArray(doc)) {
     diag(errors, 'error', 'type', `${rel}#$`);

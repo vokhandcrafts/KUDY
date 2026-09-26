@@ -1,0 +1,38 @@
+[
+  {
+    "story_id": "story-1-base",
+    "place_id": "place-1",
+    "tier": "base",
+    "duration_s": 2,
+    "voice_id": "voice-be-1",
+    "tone": "standard",
+    "text": "Фікстура гуку для інструмента праверкі: дзве секунды цішага тону.",
+    "transcript": "Ціхі тон фікстуры для праверкі інструмента: дзве секунды.",
+    "sources": [
+      "Сінтэтычная фікстура, згенераваная ffmpeg loudnorm I=-16"
+    ],
+    "review": {
+      "by": "агент G03.03",
+      "at": "2026-09-26",
+      "decision": "approved"
+    }
+  },
+  {
+    "story_id": "story-2-base",
+    "place_id": "place-1",
+    "tier": "base",
+    "duration_s": 3,
+    "voice_id": "voice-be-1",
+    "tone": "standard",
+    "text": "Другая фікстура таго ж узроўню гучнасці: тры секунды, іншая частата.",
+    "transcript": "Другая фікстура: тры секунды той жа гучнасці, іншая частата.",
+    "sources": [
+      "Сінтэтычная фікстура, згенераваная ffmpeg loudnorm I=-16"
+    ],
+    "review": {
+      "by": "агент G03.03",
+      "at": "2026-09-26",
+      "decision": "approved"
+    }
+  }
+]
