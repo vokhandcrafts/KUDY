@@ -8,6 +8,7 @@
 // mistakes; the SEEDED list below mirrors the README table — keep them in sync.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -76,10 +77,19 @@ test('criterion 2: texts and media swap without any code change', () => {
   stories[0].text = 'Зусім іншы тэкст базавай гісторыі, напісаны аўтарам замест шаблоннага.';
   stories[0].transcript = 'Зусім іншы транскрыпт той самай гісторыі.';
   fs.writeFileSync(path.join(dir, 'be/base/stops.json'), JSON.stringify(stories, null, 2));
-  fs.writeFileSync(
-    path.join(dir, 'be/base/audio/story-1-base.m4a'),
-    Buffer.from('replacement audio bytes written by the author', 'utf8'),
+  // Media swap is a data edit too: the new bytes invalidate the old record's
+  // sha256, and the author updates media.json — still no code change.
+  const audio = Buffer.from('replacement audio bytes written by the author', 'utf8');
+  fs.writeFileSync(path.join(dir, 'be/base/audio/story-1-base.m4a'), audio);
+  const staleRecord = validatePackage(dir);
+  assert.ok(
+    staleRecord.errors.some((e) => e.rule === 'media-sha-unmatched' && e.path.startsWith('media.json[0]#')),
+    JSON.stringify(staleRecord.errors),
   );
+  const media = readJson(dir, 'media.json');
+  media[0].sha256 = createHash('sha256').update(audio).digest('hex');
+  media[0].bytes = audio.length;
+  fs.writeFileSync(path.join(dir, 'media.json'), JSON.stringify(media, null, 2));
   assert.deepEqual(validatePackage(dir), { ok: true, errors: [], warnings: [] });
 });
 
