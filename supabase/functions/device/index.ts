@@ -15,6 +15,7 @@
 // Non-POST requests and missing env never reach the database.
 import postgres from 'npm:postgres@3.4.9';
 
+import { database } from '../_shared/postgres-connection.ts';
 import {
   checkRateLimit,
   DEVICE_INSERT_SQL,
@@ -79,19 +80,6 @@ export async function handleDeviceRequest(req: RequestLike, db: postgres.Sql): P
     status: 201,
     headers: { 'content-type': 'application/json' },
   });
-}
-
-let sql: postgres.Sql | null = null;
-
-function database(): postgres.Sql {
-  if (sql === null) {
-    const url = Deno.env.get('DATABASE_URL');
-    if (typeof url !== 'string' || url === '') {
-      throw new Error('DATABASE_URL is required (fail-closed env gate, ADR G00.03 §2.1 idiom)');
-    }
-    sql = postgres(url, { prepare: false, max: 1 });
-  }
-  return sql;
 }
 
 Deno.serve(async (req) => {

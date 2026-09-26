@@ -6,63 +6,27 @@
 // per (ip_hash, window_start). Reverting the migration's RLS/REVOKE lines
 // fails the guards and the behavior tests (implementation-rules 1).
 //
-// Shape notes: every executed statement is a literal without placeholders —
-// Postgres generates all values itself (gen_random_uuid, md5(random()),
-// jsonb_build_object, make_interval), so no JS-side value ever reaches SQL.
-// The event_log row reuses the seeded device's own columns for its text and
-// jsonb fields: these tests prove FK/RLS/cascade semantics, not content.
-// MIGRATION_STEPS is the single copy of the statements; the sync guard
-// replays it into a recording runner and compares against the committed
-// supabase/migrations/20260922120000_device_tables_rls.sql file.
+// G08.02 — the same guards now cover `grant_products` (the product →
+// route/tier mapping of /v1/grant): a rights table the client must never
+// touch.
+//
+// Shape notes: the migration literals live once in test-db.ts and the sync
+// guard compares them against the committed supabase/migrations/*.sql files.
+// The statement-shape guards parse the replayed statements; they never build
+// SQL from table names. Behavior tests seed rows with values generated inside
+// Postgres (gen_random_uuid, md5(random()), jsonb_build_object, make_interval),
+// so no JS-side value reaches the server.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import test from 'node:test';
 
-import { PGlite } from '@electric-sql/pglite';
+import { freshMigratedDatabase, MIGRATIONS } from './test-db.ts';
 
-const migrationFile = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '..', '..', 'migrations', '20260922120000_device_tables_rls.sql',
-);
+const migrationsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'migrations');
 
-interface MinimalSqlRunner {
-  query(sql: string): Promise<unknown>;
-}
-
-const ROLE_STEPS: Array<(db: MinimalSqlRunner) => Promise<unknown>> = [
-  (db) => db.query('create role anon nologin'),
-  (db) => db.query('create role authenticated nologin'),
-  (db) => db.query('create role service_role nologin bypassrls'),
-];
-
-const MIGRATION_STEPS: Array<(db: MinimalSqlRunner) => Promise<unknown>> = [
-  (db) => db.query('create table devices ( device_id uuid primary key, secret_hash text not null unique, created_at timestamptz not null default now() )'),
-  (db) => db.query('create table entitlement_cache ( device_id uuid not null references devices (device_id) on delete cascade, route_id text not null, tier text not null, payload jsonb not null, expires_at timestamptz not null, primary key (device_id, route_id, tier) )'),
-  (db) => db.query('create table event_log ( event_id uuid primary key, device_id uuid not null references devices (device_id) on delete cascade, type text not null, at timestamptz not null, payload jsonb not null )'),
-  (db) => db.query('create table device_registration_rate ( ip_hash text not null, window_start timestamptz not null, attempts integer not null default 0, primary key (ip_hash, window_start) )'),
-  (db) => db.query('alter table devices enable row level security'),
-  (db) => db.query('alter table entitlement_cache enable row level security'),
-  (db) => db.query('alter table event_log enable row level security'),
-  (db) => db.query('alter table device_registration_rate enable row level security'),
-  (db) => db.query('revoke all on devices from anon, authenticated'),
-  (db) => db.query('revoke all on entitlement_cache from anon, authenticated'),
-  (db) => db.query('revoke all on event_log from anon, authenticated'),
-  (db) => db.query('revoke all on device_registration_rate from anon, authenticated'),
-  (db) => db.query('grant select, insert, update, delete on devices to service_role'),
-  (db) => db.query('grant select, insert, update, delete on entitlement_cache to service_role'),
-  (db) => db.query('grant select, insert, update, delete on event_log to service_role'),
-  (db) => db.query('grant select, insert, update, delete on device_registration_rate to service_role'),
-];
-
-class RecordingRunner implements MinimalSqlRunner {
-  readonly statements: string[] = [];
-  query(sql: string): Promise<unknown> {
-    this.statements.push(sql);
-    return Promise.resolve([]);
-  }
-}
+const SERVER_TABLES = ['devices', 'entitlement_cache', 'event_log', 'device_registration_rate', 'grant_products'];
 
 function normalize(sql: string): string {
   return sql
@@ -72,43 +36,64 @@ function normalize(sql: string): string {
     .replace(/;\s*$/, '');
 }
 
-async function applyMigration(db: MinimalSqlRunner): Promise<void> {
-  for (const step of ROLE_STEPS) await step(db);
-  for (const step of MIGRATION_STEPS) await step(db);
+// The migration steps replayed into a recorder yield their literal statements
+// — the raw material for the statement-shape guards below.
+function replayedStatements(): string[] {
+  const recorded: string[] = [];
+  const recorder = {
+    query(sql: string): Promise<unknown> {
+      recorded.push(sql);
+      return Promise.resolve([]);
+    },
+  };
+  for (const migration of MIGRATIONS) {
+    for (const step of migration.steps) void step(recorder);
+  }
+  return recorded;
 }
 
-test('guard: migration steps stay in sync with the committed migration file', async () => {
-  const recording = new RecordingRunner();
-  for (const step of MIGRATION_STEPS) await step(recording);
-  const fileSql = normalize(readFileSync(migrationFile, 'utf8'));
-  const stepsSql = normalize(recording.statements.join(';\n'));
-  assert.equal(stepsSql, fileSql, 'MIGRATION_STEPS must mirror supabase/migrations/*.sql');
-});
-
-test('guard: every server table is RLS-enabled, revoked from clients, granted to service_role', () => {
-  const recording = new RecordingRunner();
-  for (const step of MIGRATION_STEPS) void step(recording);
-  for (const table of ['devices', 'entitlement_cache', 'event_log', 'device_registration_rate']) {
-    assert.ok(
-      recording.statements.some((s) => s === `alter table ${table} enable row level security`),
-      `${table} must enable row level security`,
-    );
-    assert.ok(
-      recording.statements.some((s) => s === `revoke all on ${table} from anon, authenticated`),
-      `${table} must be revoked from anon/authenticated`,
-    );
-    assert.ok(
-      recording.statements.some((s) => s === `grant select, insert, update, delete on ${table} to service_role`),
-      `${table} must be granted to service_role`,
-    );
+test('guard: replayed steps stay in sync with the committed migration files', async () => {
+  for (const migration of MIGRATIONS) {
+    const recorded: string[] = [];
+    const recorder = {
+      query(sql: string): Promise<unknown> {
+        recorded.push(sql);
+        return Promise.resolve([]);
+      },
+    };
+    for (const step of migration.steps) await step(recorder);
+    const fileSql = normalize(readFileSync(path.join(migrationsDir, migration.file), 'utf8'));
+    const stepsSql = normalize(recorded.join(';\n'));
+    assert.equal(stepsSql, fileSql, `${migration.file} must match the replayed steps`);
   }
 });
 
+// Statement shapes, parsed from the replayed steps: `alter table T enable row
+// level security`, `revoke all on T from anon, authenticated`,
+// `grant select, insert, update, delete on T to service_role` — the word
+// position is fixed for each shape.
+function tableOf(step: string, position: number): string | null {
+  const words = step.split(' ');
+  return words.length > position ? words[position]! : null;
+}
+
+test('guard: every server table is RLS-enabled, revoked from clients, granted to service_role', () => {
+  const steps = replayedStatements();
+  const enabled = steps.filter((s) => s.startsWith('alter table ') && s.endsWith(' enable row level security'))
+    .map((s) => tableOf(s, 2));
+  const revoked = steps.filter((s) => s.startsWith('revoke all on ') && s.endsWith(' from anon, authenticated'))
+    .map((s) => tableOf(s, 3));
+  const granted = steps.filter((s) => s.startsWith('grant select, insert, update, delete on ') && s.endsWith(' to service_role'))
+    .map((s) => tableOf(s, 6));
+  assert.deepEqual(enabled.sort(), [...SERVER_TABLES].sort(), 'each table must enable row level security');
+  assert.deepEqual(revoked.sort(), [...SERVER_TABLES].sort(), 'each table must be revoked from anon/authenticated');
+  assert.deepEqual(granted.sort(), [...SERVER_TABLES].sort(), 'each table must be granted to service_role');
+});
+
 test('guard: cascade deletes are declared on both device-owned tables', () => {
-  const recording = new RecordingRunner();
-  for (const step of MIGRATION_STEPS) void step(recording);
+  const steps = replayedStatements();
   for (const table of ['entitlement_cache', 'event_log']) {
-    const create = recording.statements.find((s) => s.startsWith(`create table ${table} `));
+    const create = steps.find((s) => s.startsWith('create table ') && tableOf(s, 2) === table);
     assert.ok(create, `${table} must exist in the migration`);
     assert.match(
       create!,
@@ -118,28 +103,26 @@ test('guard: cascade deletes are declared on both device-owned tables', () => {
   }
 });
 
-test('guard: nothing is granted to anon or authenticated anywhere in the migration', () => {
-  const recording = new RecordingRunner();
-  for (const step of MIGRATION_STEPS) void step(recording);
-  const granting = recording.statements.filter((s) => /grant\b/i.test(s) && /\b(anon|authenticated)\b/i.test(s));
+test('guard: nothing is granted to anon or authenticated anywhere in the migrations', () => {
+  const granting = replayedStatements().filter((s) => /grant\b/i.test(s) && /\b(anon|authenticated)\b/i.test(s));
   assert.deepEqual(granting, [], 'no table may be granted to anon/authenticated (deny-by-default)');
 });
 
-async function freshDatabase(): Promise<PGlite> {
-  const db = new PGlite();
-  await applyMigration(db);
-  return db;
-}
+test('guard: grant_products admits at most one product per (route_id, tier)', () => {
+  const create = replayedStatements().find((s) => s.startsWith('create table ') && tableOf(s, 2) === 'grant_products');
+  assert.ok(create, 'grant_products must exist in the migration');
+  assert.match(create!, /unique \(route_id, tier\)/, 'the single-match rule must be a schema constraint (09 §5)');
+});
 
 test('anon is denied outright without grants (REVOKE layer)', async () => {
-  const db = await freshDatabase();
+  const db = await freshMigratedDatabase();
   await db.query('set role anon');
   await assert.rejects(db.query('select * from devices'), /permission denied/i);
   await assert.rejects(db.query('select * from event_log'), /permission denied/i);
 });
 
 test('RLS hides devices from anon even when a grant is re-added', async () => {
-  const db = await freshDatabase();
+  const db = await freshMigratedDatabase();
   await db.query('set role service_role');
   await db.query('insert into devices (device_id, secret_hash) values (gen_random_uuid(), md5(random()::text))');
   await db.query('reset role');
@@ -155,7 +138,7 @@ test('RLS hides devices from anon even when a grant is re-added', async () => {
 });
 
 test('authenticated cannot read the rate counter or write the event log', async () => {
-  const db = await freshDatabase();
+  const db = await freshMigratedDatabase();
   await db.query('set role authenticated');
   await assert.rejects(db.query('select * from device_registration_rate'), /permission denied/i);
   await assert.rejects(
@@ -164,8 +147,35 @@ test('authenticated cannot read the rate counter or write the event log', async 
   );
 });
 
+test('grant_products is invisible to anon and writable only by the service role', async () => {
+  const db = await freshMigratedDatabase();
+  await db.query('set role service_role');
+  await db.query("insert into grant_products (product_id, route_id, tier) values ('kudy.spike.g00_03.story_01', 'g00-03-spike', 'extended')");
+  await db.query('reset role');
+
+  // anon: no grants at all first, then the RLS layer with a grant re-added.
+  await db.query('set role anon');
+  await assert.rejects(db.query('select * from grant_products'), /permission denied/i);
+  await db.query('reset role');
+  await db.query('grant select on grant_products to anon');
+  await db.query('set role anon');
+  const visible = await db.query('select count(*)::int as count from grant_products');
+  assert.equal(visible.rows[0]?.count, 0, 'product rows must stay invisible under RLS with no policy');
+  await db.query('reset role');
+
+  // The unique constraint is the schema-level single-match rule: a second
+  // product for the same route × tier is a database error, not a guess.
+  await db.query('set role service_role');
+  await assert.rejects(
+    db.query("insert into grant_products (product_id, route_id, tier) values ('kudy.spike.other', 'g00-03-spike', 'extended')"),
+    /unique/i,
+  );
+  const readable = await db.query('select product_id from grant_products');
+  assert.equal(readable.rows.length, 1);
+});
+
 test('service role writes through; device delete cascades to cache and events', async () => {
-  const db = await freshDatabase();
+  const db = await freshMigratedDatabase();
   await db.query('set role service_role');
   await db.query('insert into devices (device_id, secret_hash) values (gen_random_uuid(), md5(random()::text))');
   // event_log.type and payload reuse the seeded row's own columns (or an
@@ -184,7 +194,7 @@ test('service role writes through; device delete cascades to cache and events', 
 });
 
 test('rate counter table bumps attempts per (ip_hash, window_start)', async () => {
-  const db = await freshDatabase();
+  const db = await freshMigratedDatabase();
   await db.query('insert into device_registration_rate (ip_hash, window_start, attempts) values (md5(random()::text), to_timestamp(1700000000), 1)');
   await db.query('update device_registration_rate set attempts = attempts + 1');
   const attempts = await db.query('select attempts from device_registration_rate');
