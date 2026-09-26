@@ -17,11 +17,12 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
-### 2026-09-25 — Суддзёвая знаходка #260: смержыць PR #273
-Што зрабіць: смержыць PR — кананічны YAML-блок «Кампанія» у docs/24 дапоўнены
-`browser_user_data_dir` з каментаром, дададзены must-flag радок і тэст-гард
-сінхранізацыі блока са схемай. Пасля мержу issue #260 закрыецца само.
-PR: https://github.com/vokhandcrafts/KUDY/pull/273 (issue #260)
+### 2026-09-26 — G18.05.d: ухваліць спіс страт перад мержам
+Што зрабіць: праглядзець і ўхваліць спіс страт `tools/docs-ledger/dropped.json`
+(1183 запісы; кожны мае reason і каміт з поўным арыгіналам — нічога не страчана,
+`ledger:check` зелёны) у PR і толькі пасля гэтага смержыць яго. Мерж іначай
+наўмысна не робіць пайплайн.
+PR: https://github.com/vokhandcrafts/KUDY/pull/308 (issue #200)
 
 ### 2026-09-25 — Чыстка гісторыі: падтрымка GitHub і git config на Windows
 Што зрабіце: 1) дашліце запыт у GitHub Support (https://support.github.com/request, «Remove data from GitHub») на вычышчанне недасяжных камітаў — у закрытых PR трох рэпаў старыя каміты з viktar.kamylevich@seranking.com застаюцца даступнымі праз refs/pull/* і кэш, пакуль GitHub іх не счасце. 2) На Windows-машыне заменіце `git config --global user.email` на `293595955+vokhandcrafts@users.noreply.github.com` — seranking-адрас прыехаў у гісторыю адтуль; на гэтай машыне лакальныя канфігі ўжо выстаўлены. Бэкап старой гісторыі да перапісу: /home/viktar/backups/repo-rewrite-2026-09-25/.
