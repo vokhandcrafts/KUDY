@@ -1,8 +1,8 @@
 # KUDY — план прадукту (MVP, Гданьск)
 
-**Новыя патрабаванні 2026-09-13:** [20 — падборкі, водгукі і мовы](20_discovery_and_feedback.md) · [21 — тэхнічны кантракт](architecture/21_discovery_feedback_architecture.md) · [план](plans/2026-09-13-discovery-feedback.md) · [новыя задачы](agent-tasks/discovery/README.md).
+**Новыя патрабаванні 2026-09-13:** [20 — падборкі, водгукі і мовы](20_discovery_and_feedback.md) · [21 — тэхнічны кантракт](architecture/21_discovery_feedback_architecture.md) · план (history: docs/plans/2026-09-13-discovery-feedback.md @ 76ffa5a58728c263ab5bc9db2717623b7aa58f24) · [новыя задачы](agent-tasks/discovery/README.md).
 
-**Вэб-трэк 2026-09-16:** [план вэб-аўдыёверсіі](plans/2026-09-16-web-audio-version.md) · [заданні вэб-каналу G10](agent-tasks/web/README.md).
+**Вэб-трэк 2026-09-16:** план вэб-аўдыёверсіі (history: docs/plans/2026-09-16-web-audio-version.md @ f9f6aa3d1956a73110d7e8a839a45d8bd19ea909) · [заданні вэб-каналу G10](agent-tasks/web/README.md).
 
 **Збор сыравіны 2026-09-21:** [24 — збор з сеткі: кампаніі, паўзук, фота, субтытры YouTube](24_web_collection.md) (чарнавік, на абмеркаванне) · [заданні G17](agent-tasks/collection/README.md).
 

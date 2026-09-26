@@ -8,7 +8,7 @@
 | Сіла гэтага файла | вызначае склад і межы будучага ўкраінскага рэлізу; нічога з апісанага тут не рэалізавана і не апублікавана; BE/EN дамоўленасці (`04`, `09` разд. 8) застаюцца дзеючымі без зменаў |
 | Што не робіць | не перакладае, не публікуе, не выбірае дату, не пачынае дзеці-заданні, не закрывае бацькоўскі G14.04 |
 
-Крыніцы: [`20` §10](../20_discovery_and_feedback.md), [`21` §8 і §9](../architecture/21_discovery_feedback_architecture.md), [`04` «Мультымоўнасць», «Вузкае месца»](../04_scope_and_roadmap.md), [`09` разд. 8](../architecture/09_technical_architecture.md), [R10 у `15`](../15_guide_decisions.md), [план 2026-09-13 §2, §6](../plans/2026-09-13-discovery-feedback.md), [G14.04 у `16`](../16_delivery_backlog.md).
+Крыніцы: [`20` §10](../20_discovery_and_feedback.md), [`21` §8 і §9](../architecture/21_discovery_feedback_architecture.md), [`04` «Мультымоўнасць», «Вузкае месца»](../04_scope_and_roadmap.md), [`09` разд. 8](../architecture/09_technical_architecture.md), [R10 у `15`](../15_guide_decisions.md), план 2026-09-13 §2, §6 (history: docs/plans/2026-09-13-discovery-feedback.md @ 76ffa5a58728c263ab5bc9db2717623b7aa58f24), [G14.04 у `16`](../16_delivery_backlog.md).
 
 ---
 

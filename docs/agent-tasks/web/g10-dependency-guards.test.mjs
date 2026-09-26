@@ -3,6 +3,16 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
+
+// G18.05.d moved the web plan out of the working tree (history file): the two
+// guards below read its pinned original straight from git — the assertions
+// themselves are unchanged.
+const readPinnedPlan = () =>
+  execFileSync('git', ['show', '61125a21f44c09a93cf4ef4e0499f61a1acc29d4'], {
+    encoding: 'utf8',
+    cwd: repoRoot,
+  });
 
 // Implementation-rules 1: PR #107 review round 1. Each assertion fails when its
 // fixed line reverts to the pre-review wording — G03.05 blanket-gating all G10
@@ -37,13 +47,12 @@ test('guard: G10.01.a leak guard stays content-input only', () => {
 });
 
 test('guard: the web plan cites R08 at its canonical home (15)', () => {
-  const plan = read('docs/plans/2026-09-16-web-audio-version.md');
+  const plan = readPinnedPlan();
   assert.match(plan, /\(15, R08\)/, 'R08 must be cited via 15, its canonical home');
   assert.doesNotMatch(plan, /\(01, R08\)/, 'the (01, R08) citation returned');
 });
 
 test('guard: closed G02.03 is not described as WIP in the G10 docs', () => {
-  for (const rel of ['docs/plans/2026-09-16-web-audio-version.md', 'docs/agent-tasks/web/README.md']) {
-    assert.doesNotMatch(read(rel), /WIP on branch `zcode\/55`|WIP на `zcode\/55`/, `${rel} still describes #55 as WIP (closed by PR #105)`);
-  }
+  assert.doesNotMatch(readPinnedPlan(), /WIP on branch `zcode\/55`|WIP на `zcode\/55`/, 'the pinned web plan still describes #55 as WIP (closed by PR #105)');
+  assert.doesNotMatch(read('docs/agent-tasks/web/README.md'), /WIP on branch `zcode\/55`|WIP на `zcode\/55`/, 'docs/agent-tasks/web/README.md still describes #55 as WIP (closed by PR #105)');
 });
