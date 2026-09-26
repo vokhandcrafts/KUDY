@@ -153,6 +153,8 @@ test('AC3: a corrupt trace yields named diagnostics, not a crash', () => {
       { type: 'GpsFix', at: 2000, lat: 54.4, lng: 18.65 },
       { type: 'GpsFix', at: 1500, lat: 54.4, lng: 18.65, accuracy: 5 },
       { type: 'UserCommand', at: 3000, command: { action: 'Teleport' } },
+      { type: 'UserCommand', at: 4000, command: null },
+      { type: 'UserCommand', at: 5000, command: 42 },
     ],
   });
   assert.equal(parsed.ok, false);
@@ -161,6 +163,7 @@ test('AC3: a corrupt trace yields named diagnostics, not a crash', () => {
   assert.ok(codes.includes('missing-field'), 'missing accuracy');
   assert.ok(codes.includes('non-monotonic-time'), 'time goes backwards');
   assert.ok(codes.includes('unknown-action'), 'unknown user command');
+  assert.equal(parsed.diagnostics.filter((d) => d.code === 'bad-value').length, 2, 'null and non-object command payloads');
   assert.equal(parsed.diagnostics.filter((d) => d.code === 'non-monotonic-time').length, 1);
 });
 
