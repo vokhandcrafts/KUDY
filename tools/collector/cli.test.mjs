@@ -185,7 +185,7 @@ test('run on an error series prints the stopped diagnostic on stderr and still e
   assert.match(
     result.stderr,
     new RegExp(
-      `collector: run stopped — error series: ${ERROR_SERIES_LIMIT} consecutive fetch failures, ` +
+      `collector: run stopped — error series: ${ERROR_SERIES_LIMIT} consecutive crawl failures, ` +
         `last at ${server.url('/c')} \\(HTTP 404\\)`
     )
   );

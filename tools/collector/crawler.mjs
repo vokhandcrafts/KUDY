@@ -16,8 +16,11 @@ import { createAuditWriter, fenceHosts, hostnameOf, hostAllowed } from './fence.
 import { enqueueStep } from './store.mjs';
 import { processFetchedPage } from './snapshot.mjs';
 
-// «Ветлівасць: спыненне па серыі памылак» — N consecutive fetch failures stop
-// the run with a diagnostic; unclaimed steps stay queued for the next run.
+// «Ветлівасць: спыненне па серыі памылак» — N consecutive failed crawl steps
+// stop the run with a diagnostic: fetch failures count, and so does every
+// non-fetch step failure (unidentifiable page, redirect outside the fence,
+// snapshot error). A completed step — snapshot or skip — resets the series;
+// unclaimed steps stay queued for the next run.
 export const ERROR_SERIES_LIMIT = 3;
 
 // «Бяром старонкі, якія выглядаюць як артыкул: загаловак + дастаткова абзацаў
@@ -88,7 +91,31 @@ export function createCrawler({ fetchPage, auditPath, delayRange }) {
     enqueueStep(ctx.db, ctx.campaignId, 'crawl', url, ctx.now, JSON.stringify({ depth }));
   }
 
+  // The series counter wraps the whole step, not only the fetch (issue #261):
+  // docs/24 stops a run on «спыненне па серыі памылак», so any failing crawl
+  // step counts and a completed step — snapshot or skip — resets the series.
+  // crawlStep throws the bare reason; the single `crawl <url>: ` prefix lands
+  // here, keeping single-failure diagnostics byte-identical with the
+  // fetch-only counter they replace.
   async function crawl(ctx, url, depth) {
+    try {
+      const outcome = await crawlStep(ctx, url, depth);
+      consecutiveErrors = 0;
+      return outcome;
+    } catch (error) {
+      if (error instanceof CrawlStopError) throw error;
+      consecutiveErrors += 1;
+      if (consecutiveErrors >= ERROR_SERIES_LIMIT) {
+        throw new CrawlStopError(
+          `error series: ${ERROR_SERIES_LIMIT} consecutive crawl failures, last at ${url} (${error.message}) — ` +
+            'run stopped, queued steps resume on the next run'
+        );
+      }
+      throw new Error(`crawl ${url}: ${error.message}`);
+    }
+  }
+
+  async function crawlStep(ctx, url, depth) {
     const { db, campaign, campaignId, now, snapshotsRoot } = ctx;
     const allowed = fenceHosts(campaign);
 
@@ -97,10 +124,10 @@ export function createCrawler({ fetchPage, auditPath, delayRange }) {
     // with a diagnostic, never fetch.
     if (!hostAllowed(url, allowed)) {
       audit({ url, decision: 'denied', fetched: false });
-      throw new Error(`crawl ${url}: host is outside the campaign fence — refusing to fetch`);
+      throw new Error('host is outside the campaign fence — refusing to fetch');
     }
     if (depth > campaign.fence.depth) {
-      throw new Error(`crawl ${url}: depth ${depth} exceeds the fence depth ${campaign.fence.depth}`);
+      throw new Error(`depth ${depth} exceeds the fence depth ${campaign.fence.depth}`);
     }
 
     // A URL already in the library (the seed page linked back from an article)
@@ -121,16 +148,8 @@ export function createCrawler({ fetchPage, auditPath, delayRange }) {
       ({ html, finalUrl = url } = await fetchPage(url));
     } catch (error) {
       audit({ url, decision: 'allowed', fetched: false });
-      consecutiveErrors += 1;
-      if (consecutiveErrors >= ERROR_SERIES_LIMIT) {
-        throw new CrawlStopError(
-          `error series: ${ERROR_SERIES_LIMIT} consecutive fetch failures, last at ${url} (${error.message}) — ` +
-            'run stopped, queued steps resume on the next run'
-        );
-      }
-      throw new Error(`crawl ${url}: ${error.message}`);
+      throw error;
     }
-    consecutiveErrors = 0;
     audit({ url, decision: 'allowed', fetched: true });
 
     // A redirect can leave the fence without discovery seeing it: the browser
@@ -138,7 +157,7 @@ export function createCrawler({ fetchPage, auditPath, delayRange }) {
     // and the content is discarded — the pilot criterion must see the breach.
     if (!hostAllowed(finalUrl, allowed)) {
       audit({ url: finalUrl, decision: 'denied', fetched: true });
-      throw new Error(`crawl ${url}: redirected outside the fence to ${finalUrl} — content discarded`);
+      throw new Error(`redirected outside the fence to ${finalUrl} — content discarded`);
     }
 
     // The heuristic classifies before the snapshot writer runs: a page that
@@ -149,7 +168,7 @@ export function createCrawler({ fetchPage, auditPath, delayRange }) {
       page = extractPage(html, url);
     } catch (error) {
       if (error.code === 'no-article-text') return 'skipped: nav-only page — no paragraph text';
-      throw new Error(`crawl ${url}: ${error.message}`);
+      throw error;
     }
     if (page.paragraphCount < MIN_ARTICLE_PARAGRAPHS) {
       return `skipped: ${page.paragraphCount} paragraph(s) < ${MIN_ARTICLE_PARAGRAPHS} — not an article page`;
