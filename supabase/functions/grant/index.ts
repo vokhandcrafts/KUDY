@@ -307,7 +307,10 @@ Deno.serve(async (req) => {
     // secrets (issue #311).
     console.error(
       'grant: internal fault → 503 entitlement_unavailable:',
-      error instanceof Error ? error.message.replace(/https?:\/\/\S+/g, '<redacted-url>') : 'unknown',
+      // DATABASE_URL is postgres:// — connection schemes are redacted too.
+      error instanceof Error
+        ? error.message.replace(/(?:https?|postgres(?:ql)?):\/\/\S+/g, '<redacted-url>')
+        : 'unknown',
     );
     // Every fault of this function — a misconfigured environment included —
     // stays inside the documented closed list: the client retries it like any

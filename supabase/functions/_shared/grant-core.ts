@@ -11,7 +11,6 @@
 // URL signer and clock enter as ports below. The SQL statements are pinned
 // constants proven against real Postgres (PGlite) by grant-core.test.ts; the
 // Deno wiring is supabase/functions/grant/index.ts (not-run until deploy,
-// Deno wiring is supabase/functions/grant/index.ts (not-run until deploy,
 // G08.01 precedent).
 
 import { createHash } from 'node:crypto';
