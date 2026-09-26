@@ -12,22 +12,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { slugify } from './snapshot.mjs';
+import { latestCleanedRecords } from './store.mjs';
 
-// The latest cleaned version of every record that has one, in stable url order.
+// The latest cleaned version of every record that has one, in stable url order
+// (the shared query lives in store.mjs).
 export function cleanedRecordsForReview(db, campaignId) {
-  return db.prepare(
-    `SELECT r.id, r.url, r.collected_at, v.version, v.package, v.package_version, v.path
-     FROM raw_records r
-     JOIN cleaned_versions v ON v.raw_record_id = r.id AND v.version = (
-       SELECT MAX(version) FROM cleaned_versions WHERE raw_record_id = r.id)
-     WHERE r.campaign_id = ?
-     ORDER BY r.url`
-  ).all(campaignId);
+  return latestCleanedRecords(db, campaignId);
 }
 
 // The cleaned document opens with its front matter fence; the review copy
-// shows the body under its own citation header.
-function cleanedBody(cleanedText) {
+// shows the body under its own citation header. The draft export (G17.07)
+// shows the same body per fragment.
+export function cleanedBody(cleanedText) {
   const match = cleanedText.match(/^---\n[\s\S]*?\n---\n\n/);
   return match ? cleanedText.slice(match[0].length) : cleanedText;
 }

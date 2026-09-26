@@ -2,12 +2,14 @@
 // production entrypoints (parseCampaign / openStore / runCampaign / the CLI);
 // these helpers only build fixtures and temporary locations.
 import { randomUUID } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseCampaign } from './campaign.mjs';
-import { openStore } from './store.mjs';
+import { openStore, sha256Hex } from './store.mjs';
 
 export function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'collector-test-'));
@@ -324,4 +326,49 @@ fs.writeFileSync(args[outIdx + 1] + '.' + lang + '.vtt', vtt);
 `
   );
   return [process.execPath, stubPath];
+}
+
+// The news fixture's raw page: three non-content marker paragraphs (each one
+// matches exactly one drop rule of news-v1 — implementation-rules 14) around
+// three content paragraphs, one of them carrying a figure with a caption.
+export const NEWS_BODY = [
+  '<p>Меню: Галоўная | Гарады | Кантакты</p>',
+  '<p>The <a href="https://gdansk.example/history">shipyard history</a> began in 1844.</p>',
+  '<p>Рэклама: толькі сёння зніжка на гіды.</p>',
+  '<figure><img src="photo.jpg" alt="Stocznia"><figcaption>Stocznia Gdańska, 1980</figcaption></figure>',
+  '<p>Read the <a href="../museum/main-hall.html">main hall guide</a> and the <a href="https://gdansk.example/cranes">crane list</a>.</p>',
+  '<p>Чытайце таксама: гісторыя верфі ў Гданьску.</p>',
+  '<p>No links in this paragraph at all.</p>',
+];
+
+// Runs the collection (file:// seed — the offline fixture boundary) and the
+// cleaning pass over it through the real CLI, and returns the snapshot dir
+// plus the paths the follow-up commands need. Shared by the cleaning suite
+// and the library suites (search/basket/draft work on a cleaned library).
+const cliPath = fileURLToPath(new URL('./collector.mjs', import.meta.url));
+
+export function collectAndClean(dir, { body = NEWS_BODY } = {}) {
+  const photoPath = path.join(dir, 'photo.jpg');
+  fs.writeFileSync(photoPath, pngBytes(640, 400));
+  const pagePath = path.join(dir, 'seed-page.html');
+  fs.writeFileSync(pagePath, articleHtml({ lang: 'pl', body }), 'utf8');
+  const campaignFile = writeCampaignFile(
+    dir,
+    campaignYaml({ youtube: null, seeds: `seeds:\n  - ${pathToFileURL(pagePath).href}` })
+  );
+  const dbPath = path.join(dir, 'db.sqlite');
+  const run = spawnSync(process.execPath, [cliPath, 'run', '--campaign', campaignFile, '--db', dbPath], { encoding: 'utf8' });
+  if (run.status !== 0) throw new Error(`collectAndClean: run failed — ${run.stderr}`);
+  const snapshotsRoot = path.join(dir, 'snapshots');
+  const [campaignDir] = fs.readdirSync(snapshotsRoot);
+  const [snapshotDir] = fs.readdirSync(path.join(snapshotsRoot, campaignDir));
+  const snapshot = path.join(snapshotsRoot, campaignDir, snapshotDir);
+  if (!fs.readFileSync(path.join(snapshot, 'text.md'), 'utf8').includes('Меню:')) {
+    throw new Error('collectAndClean: the raw snapshot lost the markers the cleaner must drop');
+  }
+
+  const hashes = ['text.md', 'snapshot.html', 'metadata.json'].map((name) => sha256Hex(fs.readFileSync(path.join(snapshot, name))));
+  const clean = spawnSync(process.execPath, [cliPath, 'clean', '--campaign', campaignFile, '--db', dbPath], { encoding: 'utf8' });
+  if (clean.status !== 0) throw new Error(`collectAndClean: clean failed — ${clean.stderr}`);
+  return { campaignFile, dbPath, snapshot, hashes };
 }
