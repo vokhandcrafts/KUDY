@@ -2,7 +2,7 @@
 
 Created from this file 2026-09-22 via [issue-workflow](../../agent-rules/issue-workflow.md);
 criteria are copied verbatim from the briefs — do not edit an issue body without
-going back to the [plan](../../plans/2026-09-21-zcode-lessons-adoption.md) and the
+going back to the plan (history: docs/plans/2026-09-21-zcode-lessons-adoption.md @ 38693eea11954c31d18a4470dce870c456a5ecab) and the
 brief. Real numbers and links are filled in below after creation.
 
 ## G18.01 — Machine-checked layer boundaries (#164)

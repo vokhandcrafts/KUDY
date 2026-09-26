@@ -1,6 +1,6 @@
 # Новая хваля: падборкі, водгукі і ўкраінская
 
-Дзесяць самадастатковых заданняў да [спецыфікацыі 20](../../20_discovery_and_feedback.md), [тэхнічнага кантракту 21](../../architecture/21_discovery_feedback_architecture.md) і [плана](../../plans/2026-09-13-discovery-feedback.md). Усе — не пачатыя. Існуючыя [22 атамарныя заданні](../atomic/README.md) і іх вынікі захоўваюцца.
+Дзесяць самадастатковых заданняў да [спецыфікацыі 20](../../20_discovery_and_feedback.md), [тэхнічнага кантракту 21](../../architecture/21_discovery_feedback_architecture.md) і плана (history: docs/plans/2026-09-13-discovery-feedback.md @ 76ffa5a58728c263ab5bc9db2717623b7aa58f24). Усе — не пачатыя. Існуючыя [22 атамарныя заданні](../atomic/README.md) і іх вынікі захоўваюцца.
 
 | Заданне | Вынік | Пасля | Issue |
 |---|---|---|---|

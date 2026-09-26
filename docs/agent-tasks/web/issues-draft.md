@@ -24,7 +24,7 @@ The accepted web audio channel (docs/04 §«Паралельны трэк — в
 - G10.01 — #<G10.01> (scaffold/readers, catalog+guide pages, stop pages/player)
 - G10.02 — #<G10.02> (app transition, SEO+publication)
 
-Plan: docs/plans/2026-09-16-web-audio-version.md · Briefs: docs/agent-tasks/web/README.md
+Plan: docs/plans/2026-09-16-web-audio-version.md (history: docs/plans/2026-09-16-web-audio-version.md @ f9f6aa3d1956a73110d7e8a839a45d8bd19ea909) · Briefs: docs/agent-tasks/web/README.md
 
 ## Acceptance
 
