@@ -64,13 +64,51 @@ module.exports = {
       to: { path: '^(core|services|tools|spikes|app|controllers)/' },
     },
     // tools/ is a separate process with no shared code from the app (19 §2.4):
-    // node:* and contracts/ only.
+    // node:* and contracts/ only. The deliberate exception is tools/simulate
+    // (G05.06.a): 09 §11 requires the simulator to import the production
+    // functions it exercises — acceptFix, step, the run orchestrator and the
+    // services they compose — so a simulator that re-implements logic tests
+    // nothing. What simulate may import is pinned by its own rules below.
     {
       name: 'tools-zone-closed',
-      comment: 'tools/ must not import core/, services/, web/, spikes/, app/, controllers/ (matrix tools row, 19 §2.4)',
+      comment: 'tools/ must not import core/, services/, web/, spikes/, app/, controllers/ (matrix tools row, 19 §2.4); tools/simulate is exempt — 09 §11 imports production modules',
       severity: 'error',
-      from: { path: '^tools/' },
+      from: { path: '^tools/', pathNot: '^tools/simulate/' },
       to: { path: '^(core|services|web|spikes|app|controllers)/' },
+    },
+    // tools/simulate (G05.06.a): the allowlist behind the tools-zone-closed
+    // exemption. The simulator reaches only the run stack — core/, services/
+    // and the run orchestrator — never the UI zones, never npm packages
+    // (node:* builtins only), and never the frozen executable reference
+    // docs/run-model (19 §7.2): a simulator that imports the documentation
+    // model tests the model, not the app.
+    {
+      name: 'simulate-no-other-zones',
+      comment: 'tools/simulate must not import web/, spikes/, app/ (09 §11: the simulator imports the run stack only, G05.06.a AC1)',
+      severity: 'error',
+      from: { path: '^tools/simulate/' },
+      to: { path: '^(web|spikes|app)/' },
+    },
+    {
+      name: 'simulate-run-controllers-only',
+      comment: 'tools/simulate reaches controllers/run/ only — no other controllers (09 §11, G05.06.a AC1)',
+      severity: 'error',
+      from: { path: '^tools/simulate/' },
+      to: { path: '^controllers/', pathNot: '^controllers/run/' },
+    },
+    {
+      name: 'simulate-no-npm',
+      comment: 'tools/simulate takes no npm packages — node:* builtins and the production modules only (09 §11 determinism, G05.06.a AC1)',
+      severity: 'error',
+      from: { path: '^tools/simulate/' },
+      to: { dependencyTypes: ['npm'] },
+    },
+    {
+      name: 'simulate-no-run-model',
+      comment: 'tools/simulate must not import the frozen docs/run-model reference — it imports production modules (19 §7.2, G05.06.a AC1)',
+      severity: 'error',
+      from: { path: '^tools/simulate/' },
+      to: { path: '^docs/run-model/' },
     },
     // UI screens reach state and effects only through controllers (19 §4.2
     // edge rule); introduced with the Expo Router skeleton (G06.09.a).
