@@ -34,4 +34,9 @@ export const be: UiStrings = {
   backToGuide: 'Да старонкі гіда',
   versionUnavailable: 'Версія недаступная',
   homeLink: 'На галоўную',
+  appPageTitle: 'Поўная версія — у дадатку KUDY',
+  appBenefitGps: 'GPS-аўтазапуск гісторый на месцы',
+  appBenefitOffline: 'Офлайн: маршруты пад рукой без інтэрнэту',
+  appBenefitFullRoutes: 'Поўныя маршруты: усе кропкі і ўсё аўдыё',
+  appPageStores: 'Знайсці дадатак:',
 };

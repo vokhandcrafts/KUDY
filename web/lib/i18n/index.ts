@@ -8,6 +8,11 @@ import { en } from './en.ts';
 
 export type UiLocale = 'be' | 'en';
 
+// The UI locales of the web channel (plan §4): be is the default at the root,
+// en is the prefixed fallback — the one list the QR builder and the language
+// switch derive from.
+export const uiLocales: UiLocale[] = ['be', 'en'];
+
 export interface UiStrings {
   brand: string;
   langSwitchName: string;
@@ -39,6 +44,11 @@ export interface UiStrings {
   backToGuide: string;
   versionUnavailable: string;
   homeLink: string;
+  appPageTitle: string;
+  appBenefitGps: string;
+  appBenefitOffline: string;
+  appBenefitFullRoutes: string;
+  appPageStores: string;
 }
 
 const STRINGS: Record<UiLocale, UiStrings> = { be, en };

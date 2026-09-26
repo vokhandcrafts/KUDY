@@ -5,7 +5,7 @@
   "license": "PolyForm-Noncommercial-1.0.0",
   "type": "module",
   "scripts": {
-    "prebuild": "node --experimental-strip-types scripts/build-content.ts",
+    "prebuild": "node --experimental-strip-types scripts/build-content.ts && node --experimental-strip-types scripts/build-qr.ts",
     "build": "next build && node --experimental-strip-types scripts/scan-rendered.ts"
   },
   "dependencies": {
@@ -16,8 +16,13 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@types/pngjs": "^6.0.5",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0",
+    "qrcode": "^1.5.4",
     "typescript": "5.9.2"
   },
   "overrides": {

@@ -275,6 +275,10 @@ export interface StopNeighbor {
 interface StopPageBase {
   route_id: string;
   route_title: string;
+  // Public route facts the card metadata and the page reuse (G10.02.a):
+  // the discovery summary and the cover reference, verbatim from the offer.
+  route_summary: string;
+  route_cover: string | null;
   guide_href: string;
   stop_id: string;
   name: string;
@@ -314,6 +318,8 @@ export function readSiteStopPage(root: string, locale: UiLocale, routeId: string
   const base = {
     route_id: route.route_id,
     route_title: pickText(offer.localized.title, locale, `discovery:offers:${routeId}:${locale}`),
+    route_summary: pickText(offer.localized.summary, locale, `discovery:offers:${routeId}:${locale}`),
+    route_cover: route.cover ?? null,
     guide_href: localePath(locale, `/guides/${routeId}`),
     stop_id: row.stop_id,
     name: row.name,
