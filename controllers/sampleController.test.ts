@@ -34,7 +34,10 @@ test('criterion 2: the root with a fake port drives the sample controller end to
 
 test('criterion 2: without the port the root constructs no contentRepo (the app build today)', () => {
   const services = createServices({});
-  assert.deepEqual(services, { contentRepo: undefined });
+  // The root constructs a member only when its port is provided; with no
+  // ports at all every member stays undefined (the catalog joined as the
+  // second member with G06.01.a).
+  assert.deepEqual(services, { contentRepo: undefined, catalog: undefined });
 });
 
 test('criterion 2: a failing port surfaces as a readiness card, not a crash', async () => {

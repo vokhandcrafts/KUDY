@@ -199,6 +199,26 @@ test('component-level CSS overrides resolve to canon tokens', () => {
   }
 });
 
+test('production surface tokens stay verbatim with the canon (G06.01.a)', () => {
+  const source = readFileSync(join(root, 'app/design-tokens.ts'), 'utf8');
+  // Each entry is anchored to its canon token by name in the trailing
+  // comment; the guard fails when a value drifts from the canon or the
+  // anchor is dropped.
+  const stringEntries = [...source.matchAll(/(\w+):\s*'([^']+)',\s*\/\/\s*([\w.-]+)/g)];
+  const numberEntries = [...source.matchAll(/(\w+):\s*(\d+),\s*\/\/\s*([\w.-]+)/g)];
+  assert.ok(stringEntries.length + numberEntries.length >= 20, 'the surface token file must keep its canon-anchored entries');
+  for (const [, key, value, tokenName] of stringEntries) {
+    const token = canon.tokens[tokenName];
+    assert.ok(token, `${key}: canon token ${tokenName} must exist`);
+    assert.equal(value, token.value, `${key}: value must equal canon ${tokenName}`);
+  }
+  for (const [, key, value, tokenName] of numberEntries) {
+    const token = canon.tokens[tokenName];
+    assert.ok(token, `${key}: canon token ${tokenName} must exist`);
+    assert.equal(parseInt(token.value, 10), parseInt(value, 10), `${key}: value must equal canon ${tokenName}`);
+  }
+});
+
 test('guard is wired into npm test (implementation-rules 1 and 7)', () => {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   assert.match(pkg.scripts.test, /test\/design-tokens\.test\.mjs/,
