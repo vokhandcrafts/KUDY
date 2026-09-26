@@ -59,12 +59,25 @@ export function verifyBearer(
   header: string | null | undefined,
   lookup: (secretHash: string) => string | null,
 ): BearerVerification {
-  if (typeof header !== 'string' || !header.startsWith('Bearer ')) {
+  const secretHash = bearerSecretHash(header);
+  if (secretHash === null) {
     return { ok: false, reason: 'malformed_header' };
   }
-  const deviceId = lookup(hashSecret(header.slice('Bearer '.length)));
+  const deviceId = lookup(secretHash);
   if (deviceId === null) return { ok: false, reason: 'unknown_device' };
   return { ok: true, deviceId };
+}
+
+/**
+ * The secret hash carried by a well-formed bearer header, or null — the
+ * parse pre-image of `verifyBearer`. An async-lookup wrapper (the indexed
+ * SQL `devices` query cannot run inside `verifyBearer`'s synchronous
+ * lookup) extracts the hash with this and answers `device_auth_failed` on
+ * no row; the header spelling rules live here only.
+ */
+export function bearerSecretHash(header: string | null | undefined): string | null {
+  if (typeof header !== 'string' || !header.startsWith('Bearer ')) return null;
+  return hashSecret(header.slice('Bearer '.length));
 }
 
 /**
