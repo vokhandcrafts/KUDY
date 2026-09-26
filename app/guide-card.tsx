@@ -63,6 +63,11 @@ const styles = StyleSheet.create({
     color: tokens.colorInk,
     fontSize: tokens.fontBaseSize,
   },
+  bannerDetail: {
+    color: tokens.colorMuted,
+    fontSize: 12,
+    marginTop: tokens.spaceS,
+  },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -124,20 +129,24 @@ export function GuideCard({ card }: { card: CatalogGuideCard }) {
   );
 }
 
-// The honest-state banner (the notice/error pairs of the canon): a named
-// state with its reason, never mascot-only (11 §7).
+// The honest-state banner (the notice/error pairs of the canon): the named
+// state in the primary line, the technical reason (if any) muted below —
+// never mascot-only (a11y-плашка screens.md).
 export function StateBanner({
   tone,
   reason,
+  detail,
   testID,
 }: {
   tone: "notice" | "error";
   reason: string;
+  detail?: string;
   testID: string;
 }) {
   return (
     <View style={[styles.banner, tone === "error" ? styles.bannerError : styles.bannerNotice]} testID={testID}>
       <Text style={styles.bannerText}>{reason}</Text>
+      {detail ? <Text style={styles.bannerDetail}>{detail}</Text> : null}
     </View>
   );
 }
@@ -182,11 +191,13 @@ export function CityMessage({ text }: { text: string }) {
   );
 }
 
-// The state mapping both surfaces share (the coverage table of
-// screens-and-transitions.md): a null state means the build constructed no
-// catalog service (no loader port) — the honest page with nothing invented;
-// offline shows the banner over the last valid cache; error shows its named
-// reason (11 §7); the empty ready city is NAV3's «не апублікавана».
+// The state mapping both surfaces share, named after the state coverage
+// table of screens-and-transitions.md (Explore row): a null state means the
+// build constructed no catalog service (no loader port) — the honest page
+// with nothing invented; offline shows the «папярэдні валідны кэш» banner
+// (21 §3.3) with the technical reason as a secondary detail; the no-cache
+// error is the normal city page without discovery, its reason muted — never
+// the primary message; the empty ready city is NAV3's «не апублікавана».
 export function CatalogStateView({
   state,
   variant,
@@ -197,12 +208,22 @@ export function CatalogStateView({
   if (state === null) return <CityMessage text="Каталог недаступны" />;
   if (state.kind === "loading") return <CityMessage text="Загрузка…" />;
   if (state.kind === "error") {
-    return <StateBanner tone="error" reason={state.reason} testID="catalog-banner" />;
+    return (
+      <View testID="catalog-error">
+        <CityMessage text="Каталог часова недаступны" />
+        <Text style={styles.locales}>{state.reason}</Text>
+      </View>
+    );
   }
   if (state.kind === "offline") {
     return (
       <View>
-        <StateBanner tone="notice" reason={state.reason} testID="catalog-banner" />
+        <StateBanner
+          tone="notice"
+          reason="Папярэдні валідны кэш"
+          detail={state.reason}
+          testID="catalog-banner"
+        />
         <GuideCardsList guides={state.guides} variant={variant} />
       </View>
     );

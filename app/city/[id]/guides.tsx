@@ -2,7 +2,10 @@
 // published guides in the canonical order, each exactly once (11 §16.1), Back
 // to the city (NAV9). The rubric exists only with published content — the
 // empty city renders its honest NAV3 message instead of an empty rubric.
-import { useLocalSearchParams, useRouter } from "expo-router";
+// The [id] route of 19 §2.5 is display-shaped only in the MVP single-city
+// catalog: the surface renders the active city and does not echo an
+// unvalidated param (21 §3.2 — у MVP толькі актыўны Гданьск).
+import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useCatalogController } from "../../../controllers/catalog/useCatalogController";
@@ -25,7 +28,6 @@ const styles = StyleSheet.create({
 });
 
 export default function Guides() {
-  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const services = useServices();
   const controller = useCatalogController(services.catalog?.controller);
@@ -34,9 +36,7 @@ export default function Guides() {
       <Pressable onPress={() => router.back()} style={styles.back} testID="btn-guides-back">
         ← Горад
       </Pressable>
-      <Text style={styles.title}>
-        {CITY_TITLE} — <Text testID="guides-city">{id}</Text>
-      </Text>
+      <Text style={styles.title}>{CITY_TITLE}</Text>
       <CatalogStateView state={controller?.surface ?? null} variant="rubric" />
     </View>
   );

@@ -239,6 +239,16 @@ describe('loadCatalog on the published fixtures', () => {
     const tampered = await loadCatalog({ loader: tamperedLoader, sha256 }, opts, null);
     assert.ok(tampered.kind === 'ready' && tampered.degraded === 'index-unavailable');
     assert.equal(tampered.guides.length, 2);
+
+    // Corrupt index text and a parsed document without offers degrade the
+    // same way (corrupt-input diagnostics, never a crash).
+    for (const indexBody of ['{ not json', '{}']) {
+      const corruptLoader: CatalogPathLoader = (relPath) =>
+        relPath === 'catalog.json' ? Promise.resolve(catalogText) : Promise.resolve(indexBody);
+      const corrupt = await loadCatalog({ loader: corruptLoader, sha256 }, opts, null);
+      assert.ok(corrupt.kind === 'ready' && corrupt.degraded === 'index-unavailable', indexBody);
+      assert.equal(corrupt.guides.length, 2, indexBody);
+    }
   });
 
   it('drops offers whose route is not published, without crashing on corrupt offers', async () => {
@@ -250,6 +260,17 @@ describe('loadCatalog on the published fixtures', () => {
       offers: [
         null,
         { offer_id: 'offer-ghost', ref: { kind: 'guide', route_id: 'r-missing', version: '1' }, editorial_order: 1 },
+        {
+          offer_id: 'offer-bad-access',
+          ref: { kind: 'guide', route_id: 'r-1', version: '1' },
+          city_id: 'city-a',
+          editorial_order: 2,
+          themes: [],
+          localized: { title: { be: 'Невядомы доступ' } },
+          season_recommendations: [],
+          availability: { text_locales: ['be'], audio_locales: [] },
+          access: 'oops',
+        },
         {
           offer_id: 'offer-real',
           ref: { kind: 'guide', route_id: 'r-1', version: '1' },

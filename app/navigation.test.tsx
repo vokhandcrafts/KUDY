@@ -129,7 +129,11 @@ describe("city surface on the published catalog (G06.01.a)", () => {
     renderRouter(withCatalogRoutes(layoutWith(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 }))), {
       initialUrl: "/explore",
     });
-    expect(await screen.findByTestId("catalog-banner")).toBeTruthy();
+    // The normal city page without discovery (21 §3.3): the honest message
+    // primary, the technical reason muted below — and no rubric, no cards.
+    expect(await screen.findByTestId("catalog-error")).toBeTruthy();
+    expect(screen.getByText("Каталог часова недаступны")).toBeTruthy();
+    expect(screen.getByText("catalog-loader-404")).toBeTruthy();
     expect(screen.queryByTestId("link-guides")).toBeNull();
   });
 
@@ -146,7 +150,6 @@ describe("rubric surface and the canonical chain (11 §16.1–16.2)", () => {
       initialUrl: "/city/gdansk/guides",
     });
     expect(await screen.findByTestId("screen-Guides")).toBeTruthy();
-    expect(screen.getByTestId("guides-city")).toBeTruthy();
     expect(await screen.findByTestId("guide-card-guide-route-a1")).toBeTruthy();
     expect(screen.getByTestId("guide-card-guide-route-b1")).toBeTruthy();
 

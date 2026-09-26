@@ -80,7 +80,11 @@ function projectOffer(value: unknown, preference: readonly string[]): CatalogOff
       basis: rawDuration.basis,
     };
   }
-  const access = v.access === 'paid' || v.access === 'mixed' ? v.access : 'free';
+  // The access enum of 21 §3.2 is free | paid | mixed; anything else is
+  // corrupt projection input — the offer is dropped rather than rendered
+  // with a claimed tariff nothing published.
+  if (v.access !== 'free' && v.access !== 'paid' && v.access !== 'mixed') return null;
+  const access: 'free' | 'paid' | 'mixed' = v.access;
   return {
     offer_id: v.offer_id,
     route_id: ref.route_id,
@@ -193,7 +197,8 @@ export async function loadCatalog(
   deps: CatalogDeps,
   options: CatalogDisplayOptions,
   previous: readonly CatalogGuideCard[] | null,
-): Promise<CatalogLoadState> {  let text: string;
+): Promise<CatalogLoadState> {
+  let text: string;
   try {
     text = await deps.loader(CATALOG_PATH);
   } catch (error) {
