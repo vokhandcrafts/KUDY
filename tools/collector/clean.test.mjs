@@ -12,8 +12,9 @@ import { processFetchedPage } from './snapshot.mjs';
 import {
   articleHtml,
   campaignYaml,
+  collectAndClean,
   makeTempDir,
-  pngBytes,
+  NEWS_BODY,
   rawRecord,
   seedCampaign,
   writeCampaignFile,
@@ -32,45 +33,6 @@ const cliPath = fileURLToPath(new URL('./collector.mjs', import.meta.url));
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], { encoding: 'utf8' });
-}
-
-// The news fixture's raw page: three non-content marker paragraphs (each one
-// matches exactly one drop rule of news-v1 — implementation-rules 14) around
-// three content paragraphs, one of them carrying a figure with a caption.
-const NEWS_BODY = [
-  '<p>Меню: Галоўная | Гарады | Кантакты</p>',
-  '<p>The <a href="https://gdansk.example/history">shipyard history</a> began in 1844.</p>',
-  '<p>Рэклама: толькі сёння зніжка на гіды.</p>',
-  '<figure><img src="photo.jpg" alt="Stocznia"><figcaption>Stocznia Gdańska, 1980</figcaption></figure>',
-  '<p>Read the <a href="../museum/main-hall.html">main hall guide</a> and the <a href="https://gdansk.example/cranes">crane list</a>.</p>',
-  '<p>Чытайце таксама: гісторыя верфі ў Гданьску.</p>',
-  '<p>No links in this paragraph at all.</p>',
-];
-
-// Runs the collection (file:// seed — the offline fixture boundary) and the
-// cleaning pass over it through the real CLI, and returns the snapshot dir.
-function collectAndClean(dir, { body = NEWS_BODY } = {}) {
-  const photoPath = path.join(dir, 'photo.jpg');
-  fs.writeFileSync(photoPath, pngBytes(640, 400));
-  const pagePath = path.join(dir, 'seed-page.html');
-  fs.writeFileSync(pagePath, articleHtml({ lang: 'pl', body }), 'utf8');
-  const campaignFile = writeCampaignFile(
-    dir,
-    campaignYaml({ youtube: null, seeds: `seeds:\n  - ${pathToFileURL(pagePath).href}` })
-  );
-  const dbPath = path.join(dir, 'db.sqlite');
-  const run = runCli(['run', '--campaign', campaignFile, '--db', dbPath]);
-  assert.equal(run.status, 0, run.stderr);
-  const snapshotsRoot = path.join(dir, 'snapshots');
-  const [campaignDir] = fs.readdirSync(snapshotsRoot);
-  const [snapshotDir] = fs.readdirSync(path.join(snapshotsRoot, campaignDir));
-  const snapshot = path.join(snapshotsRoot, campaignDir, snapshotDir);
-  assert.match(fs.readFileSync(path.join(snapshot, 'text.md'), 'utf8'), /Меню:/, 'the raw snapshot holds the markers the cleaner must drop');
-
-  const hashes = ['text.md', 'snapshot.html', 'metadata.json'].map((name) => sha256Hex(fs.readFileSync(path.join(snapshot, name))));
-  const clean = runCli(['clean', '--campaign', campaignFile, '--db', dbPath]);
-  assert.equal(clean.status, 0, clean.stderr);
-  return { campaignFile, dbPath, snapshot, hashes };
 }
 
 test('news snapshot cleans to a document without markers, with content, anchors and the photo in place (criteria 1, 4)', () => {

@@ -97,6 +97,23 @@ export function createSchema(db) {
       finished_at TEXT,
       UNIQUE (campaign_id, kind, ref)
     );
+    -- Basket of fragments for the draft export (G17.07): global, one row per
+    -- record — the spec's single-library model (docs/24 «Зборка гайдаў —
+    -- рукамі»). The PRIMARY KEY makes a repeated add a no-op, so a repeated
+    -- draft export never duplicates a fragment.
+    CREATE TABLE IF NOT EXISTS basket (
+      raw_record_id TEXT PRIMARY KEY REFERENCES raw_records(id),
+      added_at TEXT NOT NULL
+    );
+    -- Full-text index over the latest cleaned documents (G17.07): standalone
+    -- FTS5 table, one row per record, holding the indexed version —
+    -- syncSearchIndex (library.mjs) re-indexes a record whose latest version
+    -- moved and drops one whose cleaned versions disappeared. Derived state
+    -- only: it is rebuilt from cleaned_versions before every search and never
+    -- feeds back into raw or cleaned files.
+    CREATE VIRTUAL TABLE IF NOT EXISTS cleaned_fts USING fts5(
+      raw_record_id UNINDEXED, version UNINDEXED, title UNINDEXED, body
+    );
   `);
   // Databases created before G17.03 keep working: their media table lacks the
   // uniqueness the image steps rely on (carried by the named index above,
@@ -320,4 +337,65 @@ export function insertCleanedVersion(db, { rawRecordId, version, package: pkg, p
 
 export function markRecordCleaned(db, recordId) {
   db.prepare(`UPDATE raw_records SET status = 'cleaned' WHERE id = ? AND status = 'raw'`).run(recordId);
+}
+
+// --- Library tools (G17.07): search, basket, draft export ---
+
+// The latest cleaned version of every record that has one (optionally scoped
+// to one campaign), in stable url order. The shared source of the review
+// bundle's per-campaign listing and the library-wide search/export queries.
+export function latestCleanedRecords(db, campaignId = null) {
+  const filter = campaignId ? 'WHERE r.campaign_id = ?' : '';
+  return db.prepare(
+    `SELECT r.id, r.campaign_id, r.source_type, r.url, r.collected_at, r.city, r.status,
+            v.version, v.package, v.package_version, v.path
+     FROM raw_records r
+     JOIN cleaned_versions v ON v.raw_record_id = r.id AND v.version = (
+       SELECT MAX(version) FROM cleaned_versions WHERE raw_record_id = r.id)
+     ${filter}
+     ORDER BY r.url`
+  ).all(...(campaignId ? [campaignId] : []));
+}
+
+// The handoff point of the draft export (docs/24 «Далей — 07 без зменаў»):
+// only a 'cleaned' record moves to 'used' — one that is already used stays
+// used, so a repeat export changes nothing.
+export function markRecordUsed(db, recordId) {
+  const result = db.prepare(`UPDATE raw_records SET status = 'used' WHERE id = ? AND status = 'cleaned'`).run(recordId);
+  return result.changes === 1;
+}
+
+// Adds a record to the basket; false means it was already there (the PRIMARY
+// KEY turns a repeated add into a no-op — fragments never duplicate).
+export function basketAdd(db, recordId, now) {
+  const result = db.prepare(
+    'INSERT INTO basket (raw_record_id, added_at) VALUES (?, ?) ON CONFLICT(raw_record_id) DO NOTHING'
+  ).run(recordId, now);
+  return result.changes === 1;
+}
+
+export function basketIds(db) {
+  return db.prepare('SELECT raw_record_id, added_at FROM basket').all();
+}
+
+// The basket's exportable rows: every basket record that has a latest cleaned
+// version, in the stable url order the draft renders. A basket id whose
+// cleaned versions disappeared is a named diagnostic — a silent filter would
+// shrink the draft without a word, while the same record's missing FILE fails
+// the export loudly.
+export function basketRecords(db) {
+  const ids = basketIds(db);
+  if (ids.length === 0) return [];
+  const added = new Map(ids.map((row) => [row.raw_record_id, row.added_at]));
+  const rows = latestCleanedRecords(db).filter((row) => added.has(row.id));
+  if (rows.length !== ids.length) {
+    const known = new Set(rows.map((row) => row.id));
+    const lost = ids.find((row) => !known.has(row.raw_record_id));
+    throw new Error(`basket record ${lost.raw_record_id} has no cleaned version anymore — clean the record again or clear the basket`);
+  }
+  return rows;
+}
+
+export function basketClear(db) {
+  return db.prepare('DELETE FROM basket').run().changes;
 }
