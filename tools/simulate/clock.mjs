@@ -37,12 +37,6 @@ export class DeterministicClock {
     };
   }
 
-  // Schedules at an absolute simulation time (the audio completions use it).
-  scheduleAt(dueMs, fn, label = null) {
-    const cancel = this.schedule(dueMs - this.currentMs, fn, label);
-    return cancel;
-  }
-
   // Runs every entry due at or before `untilMs`, in (dueMs, seq) order,
   // moving the clock forward entry by entry. A callback that schedules new
   // work at its own due time is picked up by the same drain; work scheduled

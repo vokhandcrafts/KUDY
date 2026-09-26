@@ -185,7 +185,9 @@ export function parseTrace(doc) {
       }
       if (event.type === 'UserCommand') {
         const command = event.command;
-        if (typeof command === 'object' && command !== null) {
+        if (command !== undefined && (typeof command !== 'object' || command === null)) {
+          bad('bad-value', `${where}.command must be an object`, index);
+        } else if (typeof command === 'object' && command !== null) {
           if (!USER_COMMAND_ACTIONS.includes(command.action)) {
             bad('unknown-action', `${where}: unknown user command action '${String(command.action)}'`, index);
           }
@@ -223,10 +225,4 @@ export function parseTrace(doc) {
   }
 
   return { ok: diagnostics.length === 0, diagnostics };
-}
-
-// The injectors' runtime view of the validated trace: which window each
-// accuracy/signal directive covers and the running timestamp shift.
-export function injectorState(events) {
-  return { events, accuracyWindows: [], gapWindows: [], shiftMs: 0 };
 }

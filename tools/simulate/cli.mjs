@@ -19,9 +19,15 @@ function fail(message) {
 }
 
 const args = process.argv.slice(2);
-const traceArg = args.indexOf('--trace') === -1 ? null : args[args.indexOf('--trace') + 1];
-const outArg = args.indexOf('--out') === -1 ? null : args[args.indexOf('--out') + 1];
-if (!traceArg || traceArg.startsWith('--') || (outArg !== null && outArg.startsWith('--'))) {
+const traceIndex = args.indexOf('--trace');
+const outIndex = args.indexOf('--out');
+const traceArg = traceIndex === -1 ? null : args[traceIndex + 1];
+const outArg = outIndex === -1 ? null : args[outIndex + 1];
+if (
+  !traceArg ||
+  traceArg.startsWith('--') ||
+  (outIndex !== -1 && (outArg === undefined || outArg.startsWith('--')))
+) {
   fail(usage());
 }
 

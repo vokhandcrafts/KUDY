@@ -288,6 +288,46 @@ test('AC4: the report lists the trigger latency, timers never fired and stuck_pl
   assert.ok(stop1.latencyMs <= 6000 + 2 * 5000, 'and not much more: two fixes of dwell plus the entry fix');
 });
 
+test('AC3: the CLI refuses malformed arguments and a non-JSON trace with exit 2, never a crash', (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sim-cli-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  // `--out` without a value: a usage diagnostic, not a TypeError.
+  const noValue = spawnSync(process.execPath, [CLI, '--trace', 'x.json', '--out'], { encoding: 'utf8' });
+  assert.equal(noValue.status, 2, noValue.stderr);
+  assert.match(noValue.stderr, /usage:/);
+  assert.doesNotMatch(noValue.stderr, /TypeError|thrown|at file:/);
+  // A trace file that is not JSON at all: the read/parse failure is a named
+  // diagnostic through the production CLI path.
+  const file = path.join(dir, 'broken.json');
+  fs.writeFileSync(file, '{"route": {', 'utf8');
+  const bad = spawnSync(process.execPath, [CLI, '--trace', file], { encoding: 'utf8' });
+  assert.equal(bad.status, 2, bad.stderr);
+  assert.match(bad.stderr, /cannot read the trace file/);
+  assert.doesNotMatch(bad.stderr, /SyntaxError: Unexpected token.*\n\s+at /, 'no raw stack trace');
+});
+
+test('AC4: the CLI surfaces the library outcomes — exit 1 on stuck_playing, 0 on a partial walk', (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sim-cli-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const walk = walkFixes({ fromLat: 54.4 - 0.0005, toLat: 54.4 + 0.001 });
+  const stuckDoc = baseDoc(M1_STOPS.slice(0, 1), [
+    { type: 'UserCommand', at: 0, command: { action: 'Start' } },
+    ...walk,
+  ], { audio: { defaultDurationMs: 600000 } });
+  const stuckFile = path.join(dir, 'stuck.json');
+  fs.writeFileSync(stuckFile, JSON.stringify(stuckDoc), 'utf8');
+  const stuck = spawnSync(process.execPath, [CLI, '--trace', stuckFile], { encoding: 'utf8' });
+  assert.equal(stuck.status, 1, 'a segment still playing at the end is the error exit');
+  assert.match(stuck.stdout, /"stuckPlaying": \{/);
+
+  const full = m1Trace();
+  const partialFile = path.join(dir, 'partial.json');
+  fs.writeFileSync(partialFile, JSON.stringify({ ...full, events: full.events.slice(0, 60) }), 'utf8');
+  const partial = spawnSync(process.execPath, [CLI, '--trace', partialFile], { encoding: 'utf8' });
+  assert.equal(partial.status, 0, 'a partial walk is not a failure');
+  assert.match(partial.stdout, /"finalPhase": "Active"/);
+});
+
 test('AC5: the M1 five-stop walk passes — all fire, none twice, nothing hangs, Ended only after End', () => {
   const run = simulate(m1Trace(), { name: 'm1.json' });
   const report = JSON.parse(run.report);
