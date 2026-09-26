@@ -10,26 +10,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mapProvider } from './map-config.ts';
+import { sourceFiles } from './source-walk.ts';
 
 const WEB_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const TILE_HOSTS =
   /tiles\.openfreemap\.org|maptiler|tile\.openstreetmap\.org|basemaps\.cartocdn\.com|tiles\.stadiamaps\.com/i;
-
-// Walk idiom from interim-catalog.ts (implementation-rules 14): symlinks are
-// skipped and every read is pinned to the realpath of the walked root, so a
-// planted link can never pull the guard over files outside web/.
-function* sourceFiles(dir: string): Generator<{ real: string; rel: string }> {
-  const baseReal = fs.realpathSync(path.join(WEB_ROOT, dir));
-  for (const entry of fs.readdirSync(baseReal, { withFileTypes: true, recursive: true })) {
-    if (!entry.isFile() || entry.isSymbolicLink()) continue;
-    const real = fs.realpathSync(path.resolve(entry.parentPath, entry.name));
-    if (real !== baseReal && !real.startsWith(baseReal + path.sep)) {
-      throw new Error(`source walk escaped ${dir}: ${path.relative(WEB_ROOT, real)}`);
-    }
-    yield { real, rel: path.relative(WEB_ROOT, real).replaceAll(path.sep, '/') };
-  }
-}
 
 test('the recorded provider is OpenFreeMap and the attribution target is the OSM copyright page', () => {
   assert.equal(mapProvider.providerName, 'OpenFreeMap');
@@ -40,7 +26,7 @@ test('the recorded provider is OpenFreeMap and the attribution target is the OSM
 test('tile hosts appear only in lib/map-config.ts, nowhere else in the web sources', () => {
   let configSeen = false;
   for (const dir of ['app', 'components', 'lib', 'scripts']) {
-    for (const { real, rel } of sourceFiles(dir)) {
+    for (const { real, rel } of sourceFiles(WEB_ROOT, dir)) {
       // The guard scans production sources; this and other test files name
       // the hosts only inside their own regexes.
       if (rel.endsWith('.test.ts')) continue;

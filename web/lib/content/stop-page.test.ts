@@ -58,6 +58,9 @@ test('the en stop page renders the en transcript behind the locale-prefixed href
 test('the locked stop page data carries the preview only — no audio, no transcript field exists', () => {
   const page = readSiteStopPage(publicRoot, 'be', 'demo-route-a1', 'stop-2');
   assert.equal(page.locked, true);
+  // G10.02.a added the two public route facts (summary, cover) the card
+  // metadata reuses; the set stays closed otherwise — still no audio and no
+  // transcript field.
   assert.deepEqual(Object.keys(page).sort(), [
     'announce',
     'guide_href',
@@ -65,7 +68,9 @@ test('the locked stop page data carries the preview only — no audio, no transc
     'name',
     'next',
     'prev',
+    'route_cover',
     'route_id',
+    'route_summary',
     'route_title',
     'stop_id',
   ]);

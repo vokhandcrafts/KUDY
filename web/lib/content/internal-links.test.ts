@@ -12,6 +12,7 @@ import { test } from 'node:test';
 
 import { readSiteCatalogPage } from './site.ts';
 import { buildDemoFixture } from './test-fixture.ts';
+import { appLinks } from '../app-links.ts';
 
 const WEB_APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'app');
 
@@ -50,7 +51,7 @@ test('TR-8: every internal href in the catalog page data resolves among the stat
   const routeIds = page.cards.map((card) => card.route_id);
   for (const href of hrefs) {
     const withoutLocale = href === '/' || !href.startsWith('/en/') ? href : href.slice('/en'.length);
-    const guideMatch = /^\/guides\/([^/]+)$/.exec(withoutLocale);
+    const guideMatch = withoutLocale.match(/^\/guides\/([^/]+)$/);
     if (guideMatch) {
       assert.ok(
         routeIds.includes(guideMatch[1]!),
@@ -63,4 +64,20 @@ test('TR-8: every internal href in the catalog page data resolves among the stat
       `internal href ${href} has no static route (TR-8: dead links stay hidden until their route exists)`,
     );
   }
+});
+
+// G10.02.a acceptance 2 (no dead end): the app-transition fallback the config
+// points every CTA at is a real page in both locales. Before the /app page
+// existed this check would have failed — the calm offer linked a route that
+// was not there.
+test('the app-links fallbackPath resolves to real /app routes in both locales', () => {
+  const staticRoutes = collectRoutes(WEB_APP).filter((route) => !route.includes('['));
+  assert.ok(
+    staticRoutes.includes(appLinks.fallbackPath),
+    `fallbackPath ${appLinks.fallbackPath} has no page — every CTA would dead-end`,
+  );
+  assert.ok(
+    staticRoutes.includes(`/en${appLinks.fallbackPath}`),
+    `the en /app page is missing — the en CTA would dead-end`,
+  );
 });

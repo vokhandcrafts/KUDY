@@ -33,4 +33,9 @@ export const en: UiStrings = {
   backToGuide: 'Back to the guide page',
   versionUnavailable: 'Version unavailable',
   homeLink: 'Home',
+  appPageTitle: 'The full version — in the KUDY app',
+  appBenefitGps: 'GPS autoplay of the stories on site',
+  appBenefitOffline: 'Offline: the routes at hand without internet',
+  appBenefitFullRoutes: 'Complete routes: every stop and all audio',
+  appPageStores: 'Find the app:',
 };

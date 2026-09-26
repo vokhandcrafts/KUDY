@@ -3,24 +3,8 @@
 // ships. The real export is scanned at build time by web/scripts/scan-rendered.ts.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
 import { scanRenderedOutput } from './leak-guard.ts';
-
-function writeTree(files: Record<string, string | Buffer>): string {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-web-rendered-'));
-  const rootAbs = path.resolve(root);
-  for (const [rel, content] of Object.entries(files)) {
-    const abs = path.resolve(rootAbs, rel);
-    if (abs !== rootAbs && !abs.startsWith(rootAbs + path.sep)) {
-      throw new Error(`fixture key escapes the temp tree: ${rel}`);
-    }
-    fs.mkdirSync(path.dirname(abs), { recursive: true });
-    fs.writeFileSync(abs, content);
-  }
-  return root;
-}
+import { writeTree } from './test-tree.ts';
 
 test('a clean export passes the rendered-output scan', () => {
   const out = writeTree({
