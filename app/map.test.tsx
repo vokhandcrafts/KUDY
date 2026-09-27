@@ -15,6 +15,8 @@ import Map from "./map";
 import RoutePreview from "./route/[id]";
 import { createServices } from "../controllers/createServices";
 import { fixtureText, layoutWith, makeRunSession, serve, sha256 } from "../test/render-helpers";
+import type { FakeAudioPlayerPort } from "../services/audio/fake-port";
+import type { FakeLocationOsPort } from "../services/location/fake-port";
 
 const CATALOG_TEXT = fixtureText("catalog-with-discovery.json");
 const INDEX_TEXT = fixtureText("index-valid.json");
@@ -26,19 +28,64 @@ const withMapRoutes = (services: ReturnType<typeof createServices>) => ({
   "route/[id]": RoutePreview,
 });
 
+// The subscription commands the port recorded, split by kind — the arming
+// discipline assertions read these (a sibling filter copy is a jscpd clone).
+const startsOf = (port: FakeLocationOsPort): string[] =>
+  port.commands.filter((command) => command.startsWith("start"));
+const stopsOf = (port: FakeLocationOsPort): string[] =>
+  port.commands.filter((command) => command.startsWith("stop"));
+
+// The shared second half of the hand-over scenarios (11 §7: the named state
+// never sticks): the walk ends, the surface re-arms within one poll and
+// releases its own subscription on unmount — a sibling copy is a jscpd clone.
+async function expectReArmAfterWalkEnds(
+  env: ReturnType<typeof makeRunSession>,
+  rendered: { unmount(): void },
+): Promise<void> {
+  act(() => {
+    env.location.setMode("idle");
+  });
+  await waitFor(() => expect(screen.getByTestId("nearby-mode").props.children).toBe("Паблізу"), {
+    timeout: 2000,
+  });
+  expect(env.location.currentMode()).toBe("city-surface");
+  expect(startsOf(env.locationPort)).toEqual(["start 1", "start 2"]);
+
+  rendered.unmount();
+  expect(env.location.currentMode()).toBe("idle");
+}
+
+// The opened Nearby surface over the composition root: the published fixtures
+// served, /map mounted, the offers on screen — the shared arrange of the
+// scenarios (a sibling copy is a jscpd clone). With an env the surface gets
+// its ONE location instance; `withRunSession` joins the walk's session (the
+// audio spy beside the shared location) for the R04 and held-walk scenarios.
+// The env's own ports stay the test's assertion handles.
+async function openNearby(
+  env?: ReturnType<typeof makeRunSession>,
+  withRunSession = false,
+): Promise<{ rendered: { unmount(): void } }> {
+  const services = createServices({
+    catalogOrigin: "https://catalog.test",
+    catalogSha256: sha256,
+    ...(env ? { location: env.location } : {}),
+    ...(env && withRunSession ? { run: { session: env.session } } : {}),
+  });
+  serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
+  const rendered = renderRouter(withMapRoutes(services), { initialUrl: "/map" });
+  await screen.findByTestId("nearby-card-offer-e1-place");
+  return { rendered };
+}
+
 afterEach(() => {
   jest.restoreAllMocks();
 });
 
 describe("Nearby surface (G07.01)", () => {
   test("without a position the surface renders the manual review list in the canon order", async () => {
-    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
     // No location port in the build (the adapter lands with G05.02.c) — the
     // review view is the honest default (criterion 2, no dead-end).
-    renderRouter(withMapRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })), {
-      initialUrl: "/map",
-    });
-    expect(await screen.findByTestId("nearby-mode")).toBeTruthy();
+    await openNearby();
     expect(screen.getByTestId("nearby-mode").props.children).toBe("Агляд");
     // No location note without a location service.
     expect(screen.queryByTestId("nearby-location-note")).toBeNull();
@@ -57,18 +104,13 @@ describe("Nearby surface (G07.01)", () => {
   });
 
   test("with an allowed position the proximity view orders by the published distance", async () => {
-    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
-    const { location } = makeRunSession();
-    renderRouter(
-      withMapRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256, location })),
-      { initialUrl: "/map" },
-    );
-    await screen.findByTestId("nearby-mode");
+    const env = makeRunSession();
+    await openNearby(env);
     expect(screen.getByTestId("nearby-mode").props.children).toBe("Паблізу");
     // Nearest first by the authored distance; the unknown-distance offer
     // sorts after every known one — never a fabricated figure (P02).
-    const ids = await screen.findAllByTestId(/^nearby-card-/);
-    expect(ids.map((card) => card.props.testID)).toEqual([
+    const ids = screen.getAllByTestId(/^nearby-card-/).map((card) => card.props.testID);
+    expect(ids).toEqual([
       "nearby-card-offer-e1-place",
       "nearby-card-offer-a1-place",
       "nearby-card-offer-g1-place",
@@ -79,15 +121,10 @@ describe("Nearby surface (G07.01)", () => {
   });
 
   test("without the permission the surface names the state and stays on the review list", async () => {
-    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
     // The OS reports «denied» before the service exists — the constructor
     // reads it once (the fake port's state is the physical fact).
-    const { location, locationPort } = makeRunSession({ permission: "denied" });
-    renderRouter(
-      withMapRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256, location })),
-      { initialUrl: "/map" },
-    );
-    await screen.findByTestId("nearby-mode");
+    const env = makeRunSession({ permission: "denied" });
+    await openNearby(env);
     expect(screen.getByTestId("nearby-mode").props.children).toBe("Агляд");
     expect(screen.getByTestId("nearby-location-note").props.children).toBe(
       "Пазіцыя не дазволена — ручны агляд",
@@ -98,43 +135,32 @@ describe("Nearby surface (G07.01)", () => {
   });
 
   test("a radius entry and a card tap start no audio and set no geofence window", async () => {
-    serve({
-      "catalog.json": CATALOG_TEXT,
-      [POINTER_PATH]: INDEX_TEXT,
-      "bundle/guide-route-a1/1/route.json": fixtureText("route-guide-route-a1.json"),
-    });
     // The walk's session is wired with the audio spy over the SAME location
     // instance — if the Nearby path ever triggered audio, the port would
     // record it (criterion 3's revert guard).
-    const { session, locationPort, audioPort, location } = makeRunSession();
-    renderRouter(
-      withMapRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256, location, run: { session } })),
-      { initialUrl: "/map" },
-    );
-    await screen.findByTestId("nearby-card-offer-e1-place");
-    await waitFor(() => expect(locationPort.activeSubscriptions()).toBe(1));
+    const env = makeRunSession();
+    const { rendered } = await openNearby(env, true);
+
+    await waitFor(() => expect(startsOf(env.locationPort).length).toBe(1));
 
     // Radius entry: a fix lands near the city's places. The Nearby surface
     // owns no trigger machinery — the port's window stays empty and no audio
     // event exists.
     act(() => {
-      locationPort.emitFix(1, { lat: 54.35, lng: 18.65, accuracy: 5, at: 0 });
+      env.locationPort.emitFix(1, { lat: 54.35, lng: 18.65, accuracy: 5, at: 0 });
     });
-    expect(locationPort.regions.length).toBe(0);
-    expect(audioPort.commands).toEqual([]);
+    expect(env.locationPort.regions.length).toBe(0);
+    expect(env.audioPort.commands).toEqual([]);
 
     // A guide card leads to the guide preview — the explicit chain of
     // Journey 3 — and still starts nothing.
     fireEvent.press(screen.getByTestId("nearby-card-offer-b1-guide"));
     expect(await screen.findByTestId("screen-Route preview")).toBeTruthy();
-    expect(audioPort.commands).toEqual([]);
+    expect(env.audioPort.commands).toEqual([]);
   });
 
   test("a place card renders its facts and navigates nowhere (G07.02 owns the detail)", async () => {
-    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
-    renderRouter(withMapRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })), {
-      initialUrl: "/map",
-    });
+    await openNearby();
     const place = await screen.findByTestId("nearby-card-offer-a1-place");
     // Criterion 5: the screen-reader label carries the card's facts and the
     // honest no-audio hint.
@@ -146,22 +172,17 @@ describe("Nearby surface (G07.01)", () => {
   });
 
   test("the surface arms the one subscription on open and releases it on close", async () => {
-    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
-    const { location, locationPort } = makeRunSession();
-    const rendered = renderRouter(
-      withMapRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256, location })),
-      { initialUrl: "/map" },
-    );
-    await screen.findByTestId("nearby-card-offer-e1-place");
-    await waitFor(() => expect(locationPort.activeSubscriptions()).toBe(1));
-    expect(location.currentMode()).toBe("city-surface");
+    const env = makeRunSession();
+    const { rendered } = await openNearby(env);
+    await waitFor(() => expect(env.locationPort.activeSubscriptions()).toBe(1));
+    expect(env.location.currentMode()).toBe("city-surface");
     // Exactly one subscription start — no second owner (criterion 4).
-    expect(locationPort.commands.filter((command) => command.startsWith("start"))).toEqual(["start 1"]);
+    expect(startsOf(env.locationPort)).toEqual(["start 1"]);
 
     rendered.unmount();
-    expect(locationPort.commands.filter((command) => command.startsWith("stop"))).toEqual(["stop 1"]);
-    expect(location.currentMode()).toBe("idle");
-    expect(locationPort.activeSubscriptions()).toBe(0);
+    expect(stopsOf(env.locationPort)).toEqual(["stop 1"]);
+    expect(env.location.currentMode()).toBe("idle");
+    expect(env.locationPort.activeSubscriptions()).toBe(0);
   });
 
   test("a failing index degrades honestly: the named banner, no invented offers", async () => {
@@ -188,58 +209,48 @@ describe("Nearby surface (G07.01)", () => {
   });
 
   test("a walk that ends while the surface is open hands the subscription back", async () => {
-    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
-    const { location, locationPort } = makeRunSession();
+    const env = makeRunSession();
     // A walk holds the subscription when the surface opens.
-    location.setMode("active-guide");
-    const rendered = renderRouter(
-      withMapRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256, location })),
-      { initialUrl: "/map" },
-    );
-    await screen.findByTestId("nearby-card-offer-e1-place");
+    env.location.setMode("active-guide");
+    const { rendered } = await openNearby(env);
     expect(screen.getByTestId("nearby-mode").props.children).toBe("Агляд");
-    expect(locationPort.commands.filter((command) => command.startsWith("start"))).toEqual(["start 1"]);
+    expect(startsOf(env.locationPort)).toEqual(["start 1"]);
 
-    // The walk ends (runOrchestrator's End → idle): within one poll the
-    // surface re-evaluates the guard, arms the free subscription and shows
-    // the proximity view — the held note never sticks (11 §7).
-    act(() => {
-      location.setMode("idle");
-    });
-    await waitFor(() => expect(screen.getByTestId("nearby-mode").props.children).toBe("Паблізу"), {
-      timeout: 2000,
-    });
-    expect(location.currentMode()).toBe("city-surface");
-    expect(locationPort.commands.filter((command) => command.startsWith("start"))).toEqual([
-      "start 1",
-      "start 2",
-    ]);
-
+    await expectReArmAfterWalkEnds(env, rendered);
     // Closing the surface releases what IT armed; the walk's own End already
     // released the walk's subscription (stop 1 at the idle transition).
-    rendered.unmount();
-    expect(locationPort.commands.filter((command) => command.startsWith("stop"))).toEqual([
-      "stop 1",
-      "stop 2",
-    ]);
-    expect(location.currentMode()).toBe("idle");
+    expect(stopsOf(env.locationPort)).toEqual(["stop 1", "stop 2"]);
   });
 
-  test("a live walk keeps its subscription: Nearby neither arms nor releases it", async () => {    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
-    const { session, location, locationPort } = makeRunSession();
+  test("a walk that takes over an armed surface returns the subscription when it ends", async () => {
+    const env = makeRunSession();
+    const { rendered } = await openNearby(env);
+    // The surface armed first (the only subscription in the port).
+    expect(startsOf(env.locationPort)).toEqual(["start 1"]);
+
+    // A walk starts while the surface stays mounted (the stack keeps it): the
+    // walk's Start carries the subscription over — no second start — and the
+    // surface honestly shows the held state.
+    act(() => {
+      env.location.setMode("active-guide");
+    });
+    await waitFor(() => expect(screen.getByTestId("nearby-mode").props.children).toBe("Агляд"), {
+      timeout: 2000,
+    });
+    expect(startsOf(env.locationPort)).toEqual(["start 1"]);
+
+    await expectReArmAfterWalkEnds(env, rendered);
+  });
+
+  test("a live walk keeps its subscription: Nearby neither arms nor releases it", async () => {
+    const env = makeRunSession();
     // An active walk holds the subscription (the Run surface's mode).
-    location.setMode("active-guide");
-    expect(locationPort.activeSubscriptions()).toBe(1);
-    const rendered = renderRouter(
-      withMapRoutes(
-        createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256, location, run: { session } }),
-      ),
-      { initialUrl: "/map" },
-    );
-    await screen.findByTestId("nearby-card-offer-e1-place");
+    env.location.setMode("active-guide");
+    expect(env.locationPort.activeSubscriptions()).toBe(1);
+    const { rendered } = await openNearby(env, true);
     // No second subscription start, no mode change, the honest note.
-    expect(locationPort.commands.filter((command) => command.startsWith("start"))).toEqual(["start 1"]);
-    expect(location.currentMode()).toBe("active-guide");
+    expect(startsOf(env.locationPort)).toEqual(["start 1"]);
+    expect(env.location.currentMode()).toBe("active-guide");
     expect(screen.getByTestId("nearby-mode").props.children).toBe("Агляд");
     expect(screen.getByTestId("nearby-location-note").props.children).toBe(
       "Прагулка выкарыстоўвае пазіцыю — ручны агляд",
@@ -247,8 +258,8 @@ describe("Nearby surface (G07.01)", () => {
 
     // Closing the surface leaves the walk's subscription alone.
     rendered.unmount();
-    expect(locationPort.commands.filter((command) => command.startsWith("stop"))).toEqual([]);
-    expect(location.currentMode()).toBe("active-guide");
-    expect(locationPort.activeSubscriptions()).toBe(1);
+    expect(stopsOf(env.locationPort)).toEqual([]);
+    expect(env.location.currentMode()).toBe("active-guide");
+    expect(env.locationPort.activeSubscriptions()).toBe(1);
   });
 });

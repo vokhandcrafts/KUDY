@@ -83,12 +83,12 @@ const styles = StyleSheet.create({
 
 // The card's facts line: the availability split (L01: text without audio
 // never promises audio) and the authored duration range — every figure
-// copied from the published offer, nothing invented.
+// copied from the published offer, nothing invented; an empty list renders
+// the honest «—», never a dangling label.
 function cardFacts(offer: NearbyOfferFacts, strings: ReturnType<typeof nearbyStrings>): string {
-  const locales =
-    offer.text_locales.length > 0
-      ? `${strings.textLabel}: ${offer.text_locales.join(", ")}; ${strings.audioLabel}: ${offer.audio_locales.join(", ")}`
-      : `${strings.textLabel}: —; ${strings.audioLabel}: —`;
+  const fmt = (label: string, locales: readonly string[]): string =>
+    `${label}: ${locales.length > 0 ? locales.join(", ") : "—"}`;
+  const locales = `${fmt(strings.textLabel, offer.text_locales)}; ${fmt(strings.audioLabel, offer.audio_locales)}`;
   if (offer.estimated_duration !== null) {
     return `${locales}\n~${offer.estimated_duration.min_minutes}—${offer.estimated_duration.max_minutes} ${strings.durationUnit}`;
   }

@@ -133,11 +133,13 @@ export function useNearbySurface(
     let armedByUs = false;
     const read = () => {
       // The arming decision is re-evaluated every tick, not only on mount: a
-      // walk that started (or ended) while the surface stays open changes the
-      // mode under us — the guard arms as soon as the mode is free again and
-      // never touches a walk's own subscription (criterion 4, 11 §7: the
-      // named state never sticks).
-      if (nearbyArmingDecision(location.currentMode()) === 'arm' && !armedByUs) {
+      // walk that starts (or ends) while the surface stays mounted changes
+      // the mode under us — the guard arms whenever the mode is free again,
+      // whether the surface armed first or the walk did, and never touches a
+      // walk's own subscription (criterion 4, 11 §7: the named state never
+      // sticks).
+      const mode = location.currentMode();
+      if (nearbyArmingDecision(mode) === 'arm' && mode !== 'city-surface') {
         location.setMode('city-surface');
         armedByUs = true;
       }
