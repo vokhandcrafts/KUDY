@@ -53,6 +53,7 @@ import {
   type DownloadAccessPort,
 } from '../services/download/access.ts';
 import type { RunPackageStops, RunReadiness, RunSessionStore } from './useRunController.ts';
+import { sessionStoreOver } from '../test/session-store.ts';
 
 // The contentRepo fixture package: route-x@1, be, paid, two stops on one
 // meridian (~100 m apart) with the fixture's own story ids.
@@ -108,27 +109,8 @@ interface WorldOptions {
 
 const isTierValue = (value: string): value is Tier => value === 'base' || value === 'extended';
 
-// The store port over the real services/db public API — what the composition
-// root of the app build implements (issue #209 AC1).
-function sessionStoreOver(driver: SqlDriver): RunSessionStore {
-  return {
-    start(input) {
-      try {
-        startSession(driver, input);
-        return { ok: true };
-      } catch (error) {
-        if (error instanceof DbError && error.rule === 'live-session-exists') {
-          return { ok: false, reason: 'live-session-exists' };
-        }
-        throw error;
-      }
-    },
-    checkpoint: (sessionId, progress) => checkpointProgress(driver, sessionId, progress),
-    pause: (sessionId, progress) => pauseSession(driver, sessionId, progress),
-    resume: (sessionId) => resumeSession(driver, sessionId),
-    finish: (sessionId, input) => finishSession(driver, sessionId, input),
-  };
-}
+// The store port over the real services/db public API — the shared
+// controllers/test-session-store.ts (the composition root's wiring).
 
 // The real-path recovery read (09 §9.1): the live row over the real db plus
 // the pinned package's per-layer verdicts — the file-level truth through the
@@ -209,7 +191,7 @@ function world(options: WorldOptions = {}): World {
     evaluate: (input) => evaluatePackage(packageStore, input),
   };
   const packageStops: RunPackageStops = {
-    stopsOfLayer: async (tier) => {
+    stopsOfLayer: async (_routeId, tier) => {
       const file = await packageStore.readFile('route.json');
       if (file.kind !== 'present') return null;
       const parsed = parseRouteStops(file.bytes, {
@@ -288,7 +270,7 @@ function restart(
     sessionStore: sessionStoreOver(w.driver),
     readiness: { evaluate: (input) => evaluatePackage(w.packageStore, input) },
     packageStops: {
-      stopsOfLayer: async (tier) => {
+      stopsOfLayer: async (_routeId, tier) => {
         const file = await w.packageStore.readFile('route.json');
         if (file.kind !== 'present') return null;
         const parsed = parseRouteStops(file.bytes, {
@@ -1084,4 +1066,91 @@ test('criterion 4: concurrent recover() calls deduplicate after the read', async
     unavailableTiers: [],
   });
   assert.deepEqual(w.wakelockCalls, ['acquire']); // one restore, not two
+});
+
+// G06.04 (issue #63) — the confirmed guide switch (11 §4.1, ADR G01.03 §3.3
+// switch-guide): one transaction finishes the app's live row of ANOTHER
+// route and inserts this walk's row; the flag is the preview dialog's
+// «Завяршыць і пачаць» decision carried through the handover.
+test('G06.04 criterion 1: the confirmed switch finishes the live row and inserts the new one in one transaction', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  // The live walk of the other guide (the dialog's «Royal Gdańsk» side).
+  startSession(w.driver, {
+    sessionId: 'walk-live',
+    routeId: 'route-other',
+    version: '1',
+    locale: 'be',
+    startedAt: 1,
+  });
+  const result = await w.store.getState().start({ confirmedSwitch: true });
+  const sessionId = okStart(result);
+  // The old row is history, the new one is live — the store's one commit.
+  const oldRow = getSession(w.driver, 'walk-live');
+  assert.equal(oldRow?.state, 'finished');
+  assert.equal(oldRow?.finishedAt, 0); // the injected clock's now
+  const newRow = row(w, sessionId);
+  assert.equal(newRow?.routeId, ROUTE.routeId);
+  assert.equal(newRow?.state, 'active');
+  // The engine runs the new session from Idle: clean sets (11 §4.3).
+  assert.deepEqual(live(w).heard, []);
+  assert.deepEqual(live(w).autoFired, []);
+});
+
+test('G06.04 criterion 1: without the confirm flag the same Start refuses and the live row is untouched', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  startSession(w.driver, {
+    sessionId: 'walk-live',
+    routeId: 'route-other',
+    version: '1',
+    locale: 'be',
+    startedAt: 1,
+  });
+  // The quiet switch is forbidden (11 §4.1): the named refusal, no writes.
+  assert.deepEqual(await w.store.getState().start(), { ok: false, reason: 'live-session-exists' });
+  assert.equal(getSession(w.driver, 'walk-live')?.state, 'active');
+  assert.equal(getLiveSession(w.driver)?.sessionId, 'walk-live');
+});
+
+test('G06.04 criterion 1: a confirmed switch with no live row fails closed', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  // The world changed under the confirmed decision (the live row vanished
+  // between the dialog and the confirm) — never a guess, a named refusal.
+  assert.deepEqual(await w.store.getState().start({ confirmedSwitch: true }), {
+    ok: false,
+    reason: 'switch-no-live-session',
+  });
+  assert.equal(getLiveSession(w.driver), null);
+  assert.equal(sessionCount(w), 0);
+});
+
+// 11 §4.3 «Finished не рэактывуецца; паўторны праход = новая сесія» —
+// G06.04 criterion 2 cites the scenario below (G05.05 criterion 3), which
+// already walks it: the finish after one heard story is legal, the next
+// Start opens a fresh row with clean sets, the ended one never reactivates.
+
+// G06.04 — the composition root retires the switched-away surface: the
+// engine mirror ends, the wakelock releases, and no later callback writes
+// the finished row (ADR §3.1 — the controller dropped the reference).
+test('G06.04 retire: the mirror ends, the wakelock releases, late callbacks write nothing', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  const sessionId = okStart(await w.store.getState().start());
+  fix(w, 0, 0); // stop-1 plays — the guide sound the switch must stop
+  const audioBefore = w.audioPort.commands.length;
+
+  w.store.getState().retire();
+
+  assert.equal(w.store.getState().run.phase, 'Ended');
+  assert.ok(w.wakelockCalls.includes('release'));
+  // The guide launch stopped (§4.3); a sounding moment would not be.
+  assert.ok(w.audioPort.commands.slice(audioBefore).includes('stop'));
+  const heardBefore = row(w, sessionId)?.heard;
+  w.audioPort.finish(1); // the late physical end finds no live row
+  assert.deepEqual(row(w, sessionId)?.heard, heardBefore);
+  // A second retire is a no-op.
+  w.store.getState().retire();
+  assert.equal(w.store.getState().run.phase, 'Ended');
 });

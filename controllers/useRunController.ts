@@ -84,6 +84,16 @@ export interface RunSessionStore {
   pause(sessionId: string, progress?: SessionProgress): void;
   resume(sessionId: string): void;
   finish(sessionId: string, input: { finishedAt: number; progress?: SessionProgress }): void;
+  // The confirmed switch-guide transaction (ADR §3.3 «switch-guide», 11
+  // §4.1): the app's one live row (active/paused) is finished and the next
+  // session's row is inserted in ONE transaction — services/db's
+  // switchSession; the implementation resolves the old session id itself
+  // (the app-wide live row read, G01.03 §3.1) and reports it back, so the
+  // composition root can retire the surface that owned it.
+  startSwitch(
+    input: SessionStartInput,
+    meta: { finishedAt: number },
+  ): { ok: true; finishedSessionId: string } | { ok: false; reason: 'no-live-session' };
 }
 
 // 09 §9, 11 §6: the wakelock belongs to the live Active walk — Paused and
@@ -129,9 +139,12 @@ export interface RunReadiness {
 
 // The stops of one verified layer, read from the pinned package's route.json
 // (ADR §3.2) — the same document the download channel's AccessReady events
-// are built from. null = the document is absent, unreadable or foreign.
+// are built from. The route id is part of the ask (G06.04: the confirmed
+// switch starts ANOTHER route through the same session ports — a port that
+// cannot name its route would hand the new walk a foreign stop set). null =
+// the document is absent, unreadable or foreign.
 export interface RunPackageStops {
-  stopsOfLayer(tier: Tier): Promise<string[] | null>;
+  stopsOfLayer(routeId: string, tier: Tier): Promise<string[] | null>;
 }
 
 export interface RunControllerDeps {
@@ -169,12 +182,15 @@ export interface RunControllerDeps {
 // G04.03 status onto the controller's named refusal
 // (incomplete → package-incomplete, needs-recovery → package-needs-recovery,
 // access-locked → package-access-locked); a second Start while a session is
-// active or paused is the store's one-unfinished-session rule.
+// active or paused is the store's one-unfinished-session rule; a confirmed
+// switch whose live row vanished between the dialog and the confirm fails
+// closed (the world changed under the confirmed decision — never a guess).
 export type RunStartRefusal =
   | 'package-incomplete'
   | 'package-needs-recovery'
   | 'package-access-locked'
-  | 'live-session-exists';
+  | 'live-session-exists'
+  | 'switch-no-live-session';
 
 export interface RunStartInput {
   // The selected tier of this walk; 'base' unless the person starts the paid
@@ -184,6 +200,13 @@ export interface RunStartInput {
   // R07 carry-over (ADR §3.9): the foreground window's shown/dismissed
   // guide_ids moved into session scope inside the Start transaction.
   carryGuideHints?: string[];
+  // G06.04 — the §4.1 dialog's «Завяршыць і пачаць» decision carried over
+  // from the preview (NAV8): the app's one live session of ANOTHER route is
+  // finished inside the same transaction that inserts this walk's row
+  // (ADR §3.3 switch-guide). Without the flag a live session refuses Start
+  // (one-unfinished-session rule); the flag never reaches the store for the
+  // same-route handover — the preview's own entry stays the plain Start.
+  confirmedSwitch?: boolean;
 }
 
 export type RunStartResult = { ok: true; sessionId: string } | { ok: false; reason: RunStartRefusal };
@@ -219,6 +242,13 @@ export interface RunControllerState {
   readonly pauseSession: () => void;
   readonly resumeSession: () => void;
   readonly end: () => void;
+  // G06.04 — the composition root's call when this controller's session was
+  // finished by a confirmed guide switch elsewhere (11 §4.1): the engine
+  // mirror becomes Ended without a dispatch (the row is already history —
+  // ADR §3.3 switch-guide wrote it), the walk's resources are released, and
+  // no later callback writes the finished row. A controller with no live
+  // session ignores the call.
+  readonly retire: () => void;
   // The restart recovery of 09 §9.1: reads the live row and exposes it as a
   // state. The composition root calls it when the run surface opens; a
   // controller that already owns a live session ignores the call.
@@ -309,12 +339,15 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
       grantedTiers: deps.grantedTiers?.(),
     });
     if (readiness.status !== 'ready') return { ok: false, reason: refusalOf(readiness) };
-    const accessible = await startAccessibleStops(deps.packageStops, readiness.tierAvailable);
+    const accessible = await startAccessibleStops(deps.packageStops, deps.route.routeId, readiness.tierAvailable);
     if (accessible === null) return { ok: false, reason: 'package-incomplete' };
     const id = deps.newSessionId();
     // The Start transaction (ADR §3.3): INSERT + the R07 carry-over in one
-    // commit; the store decides the one-unfinished-session rule (§3.1).
-    const started = deps.sessionStore.start({
+    // commit; the store decides the one-unfinished-session rule (§3.1). The
+    // confirmed switch (G06.04) replaces the INSERT with §3.3's switch-guide
+    // transaction — the old row's finish and this row's INSERT in one
+    // commit; the engine Start below stays the transaction's Start effects.
+    const startInput: SessionStartInput = {
       sessionId: id,
       routeId: deps.route.routeId,
       version: deps.route.version,
@@ -322,8 +355,13 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
       tier: [...readiness.tierAvailable],
       startedAt: deps.clock.now(),
       carryGuideHints: input.carryGuideHints,
-    });
-    if (!started.ok) return { ok: false, reason: started.reason };
+    };
+    const started = input.confirmedSwitch
+      ? deps.sessionStore.startSwitch(startInput, { finishedAt: deps.clock.now() })
+      : deps.sessionStore.start(startInput);
+    if (!started.ok) {
+      return { ok: false, reason: started.reason === 'no-live-session' ? 'switch-no-live-session' : started.reason };
+    }
     sessionId = id;
     orchestrator.start(id, accessible, [...readiness.tierAvailable]);
     // ADR §3.3 Start effects: the wakelock is taken after the commit (11 §6).
@@ -346,6 +384,21 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
 
   const end = (): void => {
     if (!orchestrator.end()) return;
+    deps.wakelock.release();
+  };
+
+  // G06.04 — see RunControllerState.retire. The orchestrator injects the
+  // Ended mirror and releases the location axis; the controller drops the
+  // row reference (the row is history — ADR §3.1) and releases the wakelock.
+  const retire = (): void => {
+    if (sessionId === null) return;
+    const finished = sessionId;
+    sessionId = null;
+    orchestrator.retire(finished);
+    // The mirror the screens read is the store's, not the orchestrator's
+    // private one — the injected Ended is a state, not a dispatch, so the
+    // store is notified here (no onCommitted ran).
+    store?.setState({ run: orchestrator.state });
     deps.wakelock.release();
   };
 
@@ -391,6 +444,7 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
     pauseSession,
     resumeSession,
     end,
+    retire,
     recover,
     selectStop: (stopId) => orchestrator.selectStop(stopId),
     selectStory: (stopId, storyId) => orchestrator.selectStory(stopId, storyId),
@@ -470,11 +524,12 @@ function sameList(a: readonly string[], b: readonly string[]): boolean {
 // passed) — refuse instead of starting an unplayable walk.
 async function startAccessibleStops(
   packageStops: RunPackageStops,
+  routeId: string,
   tiers: readonly Tier[],
 ): Promise<string[] | null> {
   const ids = new Set<string>();
   for (const tier of tiers) {
-    const stopIds = await packageStops.stopsOfLayer(tier);
+    const stopIds = await packageStops.stopsOfLayer(routeId, tier);
     if (stopIds === null) return null;
     for (const id of stopIds) ids.add(id);
   }

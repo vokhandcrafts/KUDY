@@ -2,7 +2,8 @@
 // ADR G00.04 §6: zustand 5.0.15). The single import point of zustand for
 // controllers: a controller is a vanilla store built here (drivable in Node
 // tests without React) plus the `useController` hook binding for screens
-// (hooks as controllers, 19 §2.2).
+// (hooks as controllers, 19 §2.2). The screens' null-tolerant subscription
+// lives in useControllerStore.ts (G07.01) — the one shared shape.
 import { useStore } from 'zustand';
 import { createStore } from 'zustand/vanilla';
 import type { StateCreator, StoreApi } from 'zustand/vanilla';

@@ -38,6 +38,19 @@ async function soundStop2(args: { locationPort: FakeLocationOsPort; advance: (ms
   await waitFor(() => expect(textOf("run-status-stop-2")).toBe("Порт — гучыць"));
 }
 
+// The re-entry scenarios' shared mount (G06.04 extracted it): the
+// composition root over the be fixture, the walk started, the map on
+// screen, stop-2 sounding.
+async function mountedRunSoundingStop2(
+  world: Pick<ReturnType<typeof makeRunSession>, "session" | "locationPort" | "advance">,
+): Promise<ReturnType<typeof createServices>> {
+  const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session: world.session } });
+  renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+  await screen.findByTestId("run-map");
+  await soundStop2({ locationPort: world.locationPort, advance: world.advance });
+  return services;
+}
+
 // The mounted surface the plain-session panel tests share: the composition
 // root over the be fixture, the walk started, the map on screen.
 async function mountedRunBe(): Promise<ReturnType<typeof makeRunSession>> {
@@ -163,6 +176,9 @@ function runSessionTracked(): ReturnType<typeof makeRunSession> & { starts: () =
     pause: () => {},
     resume: () => {},
     finish: () => {},
+    // The tracked render world exercises no switch (G06.04): the refusal
+    // keeps the port honest where the scenario never goes.
+    startSwitch: () => ({ ok: false as const, reason: "no-live-session" as const }),
   };
   const recovery: RunSessionPorts["recovery"] = {
     read: async () =>
@@ -312,31 +328,132 @@ describe("run map surface", () => {
   });
 
   test("G06.03 AC4: leaving Run with the panel open keeps the durable session", async () => {
-    const { session, locationPort, advance, starts } = runSessionTracked();
+    const world = runSessionTracked();
+    const services = await mountedRunSoundingStop2(world);
+    const { starts, locationPort, advance } = world;
+    fireEvent.press(screen.getByTestId("run-marker-stop-1"));
+    expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+
+    // The person leaves Run and comes back — the composition root reuses the
+    // surface (G06.04 NAV7 cache), the walk continues: no second Start, the
+    // spent trigger stays spent (check 17's durable half of this panel
+    // criterion), and the panel is where it was left — Half, the card open.
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    expect(starts()).toBe(1);
+    // The live in-memory walk, not a row restore: the story is still sounding
+    // exactly as it was left (the audio service was never touched).
+    await waitFor(() => expect(textOf("run-status-stop-2")).toBe("Порт — гучыць"));
+    expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+  });
+
+  test("G06.04 NAV7: re-entering Run keeps the panel position and never stops the sound", async () => {
+    const world = makeRunSession();
+    const services = await mountedRunSoundingStop2(world);
+    const { audioPort } = world;
+    fireEvent.press(screen.getByTestId("run-marker-stop-1"));
+    expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+
+    // Leave and return through «Прагулка»'s target: the same surface — the
+    // panel is Half again, and the sounding story was never stopped (NAV7:
+    // navigating out of Run does not touch the audio).
+    const stopsBefore = audioPort.commands.filter((command) => command === "stop").length;
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+    expect(audioPort.commands.filter((command) => command === "stop")).toHaveLength(stopsBefore);
+  });
+
+  test("G06.04: the session menu pauses the walk and finishes it after one story (11 §4.2/§4.3)", async () => {
+    const { session, locationPort, audioPort, advance } = makeRunSession();
     const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
     await screen.findByTestId("run-map");
 
-    // The trigger at stop-2 spends auto_fired durably; the card is open.
-    advance(10_000);
-    const commands = locationPort.commands.filter((command) => command.startsWith("start "));
-    const subscription = Number(commands[commands.length - 1].slice("start ".length));
-    act(() => {
-      locationPort.emitFix(subscription, { lat: 54.3535, lng: 18.651, accuracy: 5, at: 10_000 });
-    });
-    await waitFor(() => expect(textOf("run-status-stop-2")).toBe("Порт — гучыць"));
-    fireEvent.press(screen.getByTestId("run-marker-stop-1"));
-    expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+    // The whole-walk pause is its own action, not the audio's: the banner
+    // appears, the pause action gives way to the banner's Resume, and the
+    // finish stays reachable from Paused.
+    fireEvent.press(screen.getByTestId("btn-run-pause"));
+    await waitFor(() => expect(screen.getByTestId("run-paused")).toBeTruthy());
+    expect(screen.queryByTestId("btn-run-pause")).toBeNull();
+    expect(screen.getByTestId("btn-run-end")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("btn-run-resume"));
+    await waitFor(() => expect(screen.queryByTestId("run-paused")).toBeNull());
 
-    // The person leaves Run and comes back — the composition root rebuilds
-    // the surface, the live row is read (09 §9.1) and the walk continues:
-    // no second Start, the spent trigger stays spent (check 17's durable
-    // half of this panel criterion).
-    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    // One story heard (stop-2's automatic launch), then the finish — legal
+    // after one story, no route completion required (11 §4.3).
+    await soundStop2({ locationPort, advance });
+    act(() => {
+      audioPort.finish(1);
+    });
+    await waitFor(() => expect(textOf("run-status-stop-2")).toBe("Порт — праслухана"));
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    expect(await screen.findByTestId("run-ended")).toBeTruthy();
+    // The finished walk has no session actions left — Finished is not a
+    // live walk anymore (11 §3.3).
+    expect(screen.queryByTestId("run-session-actions")).toBeNull();
+  });
+
+  // The confirmed-switch world (G06.04): the live row belongs to ANOTHER
+  // route, so this route's surface recovers nothing; the store port mirrors
+  // the one-unfinished rule — a plain Start refuses, the confirmed switch
+  // finishes the other row and starts this one.
+  function switchWorld(): ReturnType<typeof makeRunSession> & { switched: () => string | null } {
+    const otherRow = {
+      sessionId: "walk-other",
+      routeId: "route-other",
+      version: "1",
+      locale: "be",
+      tier: ["base" as Tier],
+      state: "active" as "active" | "paused" | "finished",
+      startedAt: 0,
+      finishedAt: null as number | null,
+      lastStopId: null,
+      heard: [] as string[],
+      autoFired: [] as string[],
+      playSeq: 0,
+    };
+    let switchedTo: string | null = null;
+    const sessionStore: RunSessionPorts["sessionStore"] = {
+      start: () =>
+        otherRow.state === "active" || otherRow.state === "paused"
+          ? { ok: false as const, reason: "live-session-exists" as const }
+          : { ok: true as const },
+      startSwitch: (_input, meta) => {
+        if (otherRow.state !== "active" && otherRow.state !== "paused") {
+          return { ok: false as const, reason: "no-live-session" as const };
+        }
+        otherRow.state = "finished";
+        otherRow.finishedAt = meta.finishedAt;
+        switchedTo = otherRow.sessionId;
+        return { ok: true as const, finishedSessionId: otherRow.sessionId };
+      },
+      checkpoint: () => {},
+      pause: () => {},
+      resume: () => {},
+      finish: () => {},
+    };
+    const base = makeRunSession({ sessionStore, recovery: { read: async () => null } });
+    return { ...base, switched: () => switchedTo };
+  }
+
+  test("G06.04 NAV8: the confirmed «Завяршыць і пачаць» starts through the switch, not a refusal", async () => {
+    const { session, switched } = switchWorld();
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map?confirmedSwitch=1" });
+    // The surface started: without the flag the live other-route row would
+    // refuse this Start (one-unfinished-session rule) and the screen would
+    // render its unavailable reason instead of the map.
     await screen.findByTestId("run-map");
-    expect(starts()).toBe(1);
-    await waitFor(() => expect(textOf("run-status-stop-2")).toBe("Порт — даступна"));
-    expect(screen.getByTestId("run-panel-bar")).toBeTruthy();
+    expect(switched()).toBe("walk-other");
+  });
+
+  test("G06.04 NAV8: without the flag the same surface refuses — the quiet switch is forbidden", async () => {
+    const { session } = switchWorld();
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    expect(await screen.findByText("Сесія недаступная")).toBeTruthy();
+    expect(screen.getByTestId("run-unavailable-reason").props.children).toBe("Ужо ёсць жывая прагулка");
   });
 
   test("G06.03: the bar's play/pause drives only the audible launch", async () => {

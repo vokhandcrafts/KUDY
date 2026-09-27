@@ -87,6 +87,9 @@ export function makeRunSession(options?: {
     sessionStore:
       options?.sessionStore ?? {
         start: () => ({ ok: true }),
+        // G06.04: the confirmed switch needs a live row to switch away from
+        // — the plain render world honestly refuses here.
+        startSwitch: () => ({ ok: false as const, reason: 'no-live-session' as const }),
         checkpoint: () => {},
         pause: () => {},
         resume: () => {},
@@ -95,7 +98,9 @@ export function makeRunSession(options?: {
     readiness: {
       evaluate: async () => ({ status: 'ready', routeId: 'route-map', version: '1', tier: 'base', tierAvailable: granted }),
     },
-    packageStops: { stopsOfLayer: async (tier) => (tier === 'base' ? ['stop-1', 'stop-2'] : tier === 'extended' ? ['stop-3'] : []) },
+    // G06.04 made the port route-aware: the route id comes first, the tier
+    // second — the helper serves the render fixture's own route.
+    packageStops: { stopsOfLayer: async (_routeId, tier) => (tier === 'base' ? ['stop-1', 'stop-2'] : tier === 'extended' ? ['stop-3'] : []) },
     access: createAccessPort(),
     wakelock: { acquire: () => {}, release: () => {} },
     recovery: options?.recovery ?? { read: async () => null },

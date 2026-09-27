@@ -23,6 +23,7 @@ import {
   getSession,
   getLiveSession,
   getSetting,
+  listSessionHistory,
   openDatabase,
   pauseSession,
   rebuildDerived,
@@ -175,6 +176,24 @@ test('criterion 3: start writes the ADR §3.1 defaults and the row is live', () 
   assert.equal(live.playSeq, 0);
   assert.equal(live.finishedAt, null);
   assert.equal(live.lastStopId, null);
+});
+
+// G06.04: the My KUDY read — the live walk beside the finished runs,
+// newest first; history is never filtered away (ADR §3.1).
+test('G06.04: listSessionHistory returns the live walk beside the finished runs, newest first', () => {
+  const driver = openFresh();
+  startSession(driver, { ...START, sessionId: 'a', startedAt: 1_000 });
+  finishSession(driver, 'a', { finishedAt: 2_000 });
+  startSession(driver, { ...START, sessionId: 'b', startedAt: 3_000 });
+  finishSession(driver, 'b', { finishedAt: 4_000 });
+  startSession(driver, { ...START, sessionId: 'c', startedAt: 5_000 });
+  pauseSession(driver, 'c');
+
+  const history = listSessionHistory(driver);
+  assert.deepEqual(history.map((row) => row.sessionId), ['c', 'b', 'a']);
+  assert.equal(history[0]?.state, 'paused'); // the live walk is on the list
+  assert.equal(history[1]?.state, 'finished');
+  assert.equal(history[2]?.finishedAt, 2_000);
 });
 
 test('criterion 3: a second Start is rejected and leaves exactly one live row', () => {

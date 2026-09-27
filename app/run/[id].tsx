@@ -111,6 +111,24 @@ const styles = StyleSheet.create({
     color: tokens.colorInk,
     fontSize: tokens.fontBaseSize,
   },
+  // The session menu (G06.04): the walk's pause and finish beside each
+  // other, one visual row under the paused banner.
+  sessionActions: {
+    flexDirection: "row",
+    gap: tokens.spaceS,
+    marginBottom: tokens.spaceS,
+  },
+  sessionButton: {
+    alignItems: "center",
+    borderColor: tokens.colorAccent,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    padding: tokens.spaceS,
+  },
+  sessionLabel: {
+    color: tokens.colorAccent,
+    fontSize: tokens.fontBaseSize,
+  },
   resumeButton: {
     alignItems: "center",
     backgroundColor: tokens.colorAccent,
@@ -256,11 +274,14 @@ const styles = StyleSheet.create({
 });
 
 export default function Run() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, confirmedSwitch } = useLocalSearchParams<{ id: string; confirmedSwitch?: string }>();
   const router = useRouter();
   const services = useServices();
   const routeId = typeof id === "string" ? id : "";
-  const surface = useRunSurface(services.run, routeId);
+  // The §4.1 handover's confirmed flag (G06.04): «Завяршыць і пачаць» on the
+  // preview started this route's surface through the switch-guide
+  // transaction. The cached re-entry (NAV7) ignores the flag.
+  const surface = useRunSurface(services.run, routeId, confirmedSwitch === "1");
   const ready = surface?.status === "ready" ? surface : null;
   const run = useRunState(ready?.controller ?? null);
   const strings = runMapStrings(ready?.locale ?? "be");
@@ -347,6 +368,26 @@ export default function Run() {
         <Text style={styles.centered} testID="run-ended">
           {strings.endedTitle}
         </Text>
+      ) : null}
+      {session && session.phase !== "Ended" ? (
+        // The session menu of 11 §4.2/§4.3 (G06.04): the whole-walk pause
+        // (not the audio pause) and the finish — the finish is legal at any
+        // moment, even after one story; from Paused the banner's Resume is
+        // the way back. Neither touches the audio's own play/pause.
+        <View style={styles.sessionActions} testID="run-session-actions">
+          {session.phase === "Active" ? (
+            <Pressable
+              onPress={() => run.pauseSession()}
+              style={styles.sessionButton}
+              testID="btn-run-pause"
+            >
+              <Text style={styles.sessionLabel}>{strings.pauseWalk}</Text>
+            </Pressable>
+          ) : null}
+          <Pressable onPress={() => run.end()} style={styles.sessionButton} testID="btn-run-end">
+            <Text style={styles.sessionLabel}>{strings.endWalk}</Text>
+          </Pressable>
+        </View>
       ) : null}
       {view.markers.length > 0 ? (
         <View style={styles.map} testID="run-map">

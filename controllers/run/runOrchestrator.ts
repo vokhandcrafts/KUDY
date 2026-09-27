@@ -214,6 +214,32 @@ export class RunOrchestrator {
     return true;
   }
 
+  // G06.04 (issue #63) — the confirmed guide switch of 11 §4.1 finishes this
+  // session's durable row in ANOTHER controller's switch transaction (ADR
+  // G01.03 §3.3: one UPDATE + INSERT; this engine is never told), so the
+  // mirror is INJECTED as Ended — no dispatch, no onCommitted, no second
+  // durable write — and the walk's resources are released here. The guide
+  // launch stops (§4.3: finishing stops the guide sound); a sounding moment
+  // survives, it is not the session's property (ADR G01.02 §3.8). The
+  // reducer rejects everything afterward (no live session), so a late
+  // AccessReady or audio callback cannot re-arm the old window. A session
+  // that already ended (or an id that is not this one) is a no-op.
+  retire(finishedSessionId: string): void {
+    if (this.engineState.phase !== 'Active' && this.engineState.phase !== 'Paused') return;
+    if (this.engineState.sessionId !== finishedSessionId) return;
+    if (this.engineState.playing?.owner === 'guide') this.audio.stop();
+    this.engineState = {
+      ...this.engineState,
+      phase: 'Ended',
+      playing: null,
+      queued: null,
+      autoplaySuspended: true,
+      focusLostAt: null,
+    };
+    this.location.setMode('idle');
+    this.location.setGeofenceWindow([]);
+  }
+
   // G05.05.b restart recovery (09 §9.1, ADR G01.03 §3.2): the restored
   // session is INJECTED, not dispatched — no event runs, so no effect, no
   // audio and no location arming happens here; the controller exposes the
