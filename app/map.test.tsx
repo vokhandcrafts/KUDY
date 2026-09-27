@@ -9,7 +9,7 @@
 // keeps its own subscription (criterion 4), and the cards carry
 // screen-reader labels (criterion 5).
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
-import { act, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
+import { act, fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
 
 import Map from "./map";
 import RoutePreview from "./route/[id]";
@@ -166,6 +166,9 @@ describe("Nearby surface (G07.01)", () => {
     // honest no-audio hint.
     expect(place.props.accessibilityLabel).toBe("Двор сукнараў, free");
     expect(place.props.accessibilityHint).toBe("Картка прапановы. Аўдыё не запускаецца.");
+    // The facts line: an empty audio list renders the honest «—» — the
+    // assertion fails on the dangling-label revert (implementation-rules 1).
+    expect(within(place).getByText("Тэкст: be, en; аўдыё: —\n~20—30 хв")).toBeTruthy();
     // A place card is not a button: pressing it opens nothing.
     fireEvent.press(place);
     expect(screen.getByTestId("screen-Map")).toBeTruthy();
