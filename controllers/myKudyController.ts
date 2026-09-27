@@ -7,7 +7,8 @@
 // recomputed or filtered here. Without the port the root constructs no
 // member and the screen shows its honest unavailable state (the root's rule
 // since issue #209).
-import { createControllerStore, useControllerState, type ControllerStore } from './createControllerStore.ts';
+import { createControllerStore, type ControllerStore } from './createControllerStore.ts';
+import { useStoreState } from './useControllerStore.ts';
 import type { SessionRow } from '../services/db/types.ts';
 
 // The history read seam: services/db.listSessionHistory over the device
@@ -59,9 +60,9 @@ export function createMyKudyController(port: SessionHistoryPort): ControllerStor
 }
 
 // The screen binding (19 §2.2, hooks as controllers): the shared
-// null-tolerant subscription — the root constructs the history member only
-// with its port, and the screen renders its honest unavailable state
-// without one.
+// null-tolerant subscription (useControllerStore.ts, G07.01) — the root
+// constructs the history member only with its port, and the screen renders
+// its honest unavailable state without one.
 export function useMyKudy(store: ControllerStore<MyKudyState> | null | undefined): MyKudyState | null {
-  return useControllerState(store);
+  return useStoreState(store);
 }

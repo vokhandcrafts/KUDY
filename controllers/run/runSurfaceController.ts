@@ -12,7 +12,7 @@
 // device seams arrive as its ports. Without them the root constructs no run
 // member and the screen shows its honest unavailable state — no fake stands
 // in for a device adapter (the root's rule since issue #209).
-import { useControllerState, createControllerStore, type ControllerStore } from '../createControllerStore.ts';
+import { createControllerStore, type ControllerStore } from '../createControllerStore.ts';
 import {
   createRunController,
   type RunControllerState,
@@ -31,6 +31,7 @@ import type { AudioService } from '../../services/audio/service.ts';
 import type { PlaybackState } from '../../services/audio/types.ts';
 import type { LocationService } from '../../services/location/service.ts';
 import type { DownloadAccessPort } from '../../services/download/access.ts';
+import { useStoreState } from '../useControllerStore.ts';
 
 import { useMemo } from 'react';
 
@@ -215,12 +216,12 @@ export function useRunSurface(
     () => factory?.create(routeId, confirmedSwitch ? { confirmedSwitch: true } : undefined),
     [factory, routeId, confirmedSwitch],
   );
-  return useControllerState(store);
+  return useStoreState(store);
 }
 
 // The run controller's state for the ready surface — a null-tolerant
 // subscription, since the surface resolves asynchronously (the shared
-// useControllerState keeps the one shape).
+// useStoreState of useControllerStore.ts keeps the one shape).
 export function useRunState(store: ControllerStore<RunControllerState> | null): RunControllerState | null {
-  return useControllerState(store);
+  return useStoreState(store);
 }
