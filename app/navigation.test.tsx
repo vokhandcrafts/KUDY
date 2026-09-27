@@ -7,6 +7,7 @@ import Run from "./run/[id]";
 import RoutePreview from "./route/[id]";
 import Map from "./map";
 import NotFound from "./+not-found";
+import Index from "./index";
 import Explore from "./(tabs)/explore";
 import Guides from "./city/[id]/guides";
 import { ServicesContext } from "./_layout";
@@ -166,6 +167,23 @@ describe("route placeholders (19 §2.5)", () => {
 });
 
 describe("city surface on the published catalog (G06.01.a)", () => {
+  // #339 criterion 1: the cold start opens the catalog, not +not-found — the
+  // index route redirects to the canonical entry (screens-and-transitions,
+  // Explore row: «Уваход: старт дадатка»), no screen of its own. Deleting
+  // app/index.tsx breaks the static import at the file level; dropping the
+  // redirect turns this red on "/".
+  test("the cold start (/) opens the catalog through the index redirect", async () => {
+    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
+    renderRouter(
+      {
+        ...withCatalogRoutes(layoutWith(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 }))),
+        index: Index,
+      },
+      { initialUrl: "/" },
+    );
+    expect(await screen.findByTestId("guide-card-guide-route-a1")).toBeTruthy();
+  });
+
   test("the city renders the published guides: one card per guide, canon facts", async () => {
     serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
     renderRouter(withCatalogRoutes(layoutWith(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 }))), {

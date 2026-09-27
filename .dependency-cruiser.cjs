@@ -146,6 +146,20 @@ module.exports = {
       },
       to: { path: '^services/', dependencyTypesNot: ['type-only'] },
     },
+    // components/ is the shared UI-support zone (issue #339): the design
+    // tokens and the cross-surface view atoms live outside app/ because
+    // expo-router treats every app/ file as a route. Screens pass state in —
+    // the zone takes no runtime imports from the other zones; type-only
+    // imports (the guide card's controller types, the walk button's Services
+    // member) are exempt, matching the controllers rule's own exemption.
+    {
+      name: 'components-zone-closed',
+      comment:
+        'components/ must not import app/, controllers/ (except type-only), services/, core/, web/, tools/, spikes/ (issue #339)',
+      severity: 'error',
+      from: { path: '^components/' },
+      to: { path: '^(app|controllers|services|core|web|tools|spikes)/', dependencyTypesNot: ['type-only'] },
+    },
     // Cycles are forbidden within and across all checked zones (19 §4.2).
     {
       name: 'no-cycles',

@@ -5,12 +5,15 @@
 // cached per route by the composition root, so the re-entry reuses the
 // same controller (NAV7). Navigation only: it never stops the audio and
 // never changes the session. Without a live walk there is no target — the
-// button renders nowhere (no fake destination).
+// button renders nowhere (no fake destination). Lives in components/, not
+// app/: expo-router treats every app/ file as a route (issue #339); the
+// screen passes its services walk member in as a prop — components takes
+// no runtime imports from the other zones.
 import { useCallback, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text } from "react-native";
 
-import { useServices } from "./_layout";
+import type { Services } from "../controllers/createServices";
 import { tokens } from "./design-tokens";
 
 const styles = StyleSheet.create({
@@ -28,17 +31,16 @@ const styles = StyleSheet.create({
   },
 });
 
-export function WalkButton() {
+export function WalkButton({ walk }: { walk?: Services["walk"] }) {
   const router = useRouter();
-  const services = useServices();
-  const [live, setLive] = useState(() => services.walk?.liveSession() ?? null);
+  const [live, setLive] = useState(() => walk?.liveSession() ?? null);
   useFocusEffect(
     useCallback(() => {
       // Re-read on every focus: a walk started (or finished) while this
       // surface stayed in the stack is on this read when the surface
       // returns — the button follows the live walk, not the mount time.
-      setLive(services.walk?.liveSession() ?? null);
-    }, [services]),
+      setLive(walk?.liveSession() ?? null);
+    }, [walk]),
   );
   if (!live) return null;
   return (

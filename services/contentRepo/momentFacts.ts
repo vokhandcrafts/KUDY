@@ -16,7 +16,7 @@
 // story_id from the manifest is untrusted content, an unsafe one yields a
 // null audio path with a diagnostic, never a path.
 import type { BundlesStore } from './types.ts';
-import { isSafeSegment } from './inventory.ts';
+import { isSafeSegment } from '../safe-path.ts';
 
 export interface MomentFact {
   readonly momentId: string;

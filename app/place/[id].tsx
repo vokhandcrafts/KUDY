@@ -20,8 +20,8 @@ import {
 import type { MomentPlayBinding, MomentPlayOutcome } from "../../controllers/moment/momentPlayController";
 import { useStoreState } from "../../controllers/useControllerStore";
 import { useServices } from "../_layout";
-import { AccessBadge } from "../guide-card";
-import { tokens } from "../design-tokens";
+import { AccessBadge } from "../../components/guide-card";
+import { tokens } from "../../components/design-tokens";
 
 const styles = StyleSheet.create({
   screen: {

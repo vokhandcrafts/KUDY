@@ -33,7 +33,9 @@ function formatParams(params?: Record<string, string | string[]>) {
 
 /**
  * Navigation-skeleton chrome shared by every route of 19 §2.5 (G06.09.a).
- * No product visuals: screen appearance is gated by G06.06–G06.08.
+ * No product visuals: screen appearance is gated by G06.06–G06.08. Lives in
+ * components/, not app/: expo-router treats every app/ file as a route
+ * (issue #339).
  */
 export function PlaceholderScreen({
   name,

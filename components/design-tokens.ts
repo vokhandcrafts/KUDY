@@ -3,7 +3,8 @@
 // docs/design/visual-language.md («Дадатак», the machine JSON block, G06.07
 // canon). Only the values these surfaces render live here; the guard in
 // test/design-tokens.test.mjs pins this file to the canon — changing a value
-// here without the canon turns the suite red.
+// here without the canon turns the suite red. Lives in components/, not
+// app/: expo-router treats every app/ file as a route (issue #339).
 export const tokens = {
   colorPaper: '#faf7f2', // color.paper — фон экрана
   colorInk: '#22262b', // color.ink — асноўны тэкст
