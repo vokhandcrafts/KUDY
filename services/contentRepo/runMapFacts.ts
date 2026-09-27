@@ -70,7 +70,12 @@ function parseRouteDocument(bytes: Uint8Array, key: PackageKey): { ok: true; sto
   if (!Array.isArray(routeDoc.stops)) return { ok: false, diagnostic: 'run-map#route-json-invalid' };
   const stops: RunStopFact[] = [];
   for (const stop of routeDoc.stops) {
-    if (stop === null || typeof stop !== 'object') continue;
+    // The join must be total (the header contract): a malformed stop record
+    // would silently vanish from the map and from the geofence window —
+    // refuse the whole read, never skip a row.
+    if (stop === null || typeof stop !== 'object') {
+      return { ok: false, diagnostic: 'run-map#route-json-stop-invalid' };
+    }
     const record = stop as {
       id?: unknown;
       place_id?: unknown;
@@ -78,7 +83,9 @@ function parseRouteDocument(bytes: Uint8Array, key: PackageKey): { ok: true; sto
       story_extended_id?: unknown;
       preview?: unknown;
     };
-    if (typeof record.id !== 'string' || typeof record.place_id !== 'string') continue;
+    if (typeof record.id !== 'string' || typeof record.place_id !== 'string') {
+      return { ok: false, diagnostic: 'run-map#route-json-stop-invalid' };
+    }
     stops.push({
       stopId: record.id,
       placeId: record.place_id,

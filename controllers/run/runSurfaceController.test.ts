@@ -425,6 +425,37 @@ test('refusals are named, never guesses', async () => {
   const refusedUnplaced = await openSurface(unplaced, 'route-map');
   assert.deepEqual(refusedUnplaced.state, { status: 'unavailable', reason: 'run-map#stop-unplaced:stop-2' });
 
+  // Corrupt-input diagnostics (implementation-rules 14), each through the
+  // production path: torn JSON, a non-array places document, a null place
+  // element, and a malformed stop record.
+  const torn = mapWorld({
+    ...DEFAULT_FILES,
+    [`${LAYER}/route.json`]: '{"route_id":"route-map","version":"1"',
+  });
+  const refusedTorn = await openSurface(torn, 'route-map');
+  assert.deepEqual(refusedTorn.state, { status: 'unavailable', reason: 'run-map#route-json-invalid' });
+
+  const notArrayPlaces = mapWorld({
+    ...DEFAULT_FILES,
+    [`${LAYER}/places.json`]: '{"id": "place-1"}',
+  });
+  const refusedPlaces = await openSurface(notArrayPlaces, 'route-map');
+  assert.deepEqual(refusedPlaces.state, { status: 'unavailable', reason: 'run-map#places-json-invalid' });
+
+  const nullPlace = mapWorld({
+    ...DEFAULT_FILES,
+    [`${LAYER}/places.json`]: '[null]',
+  });
+  const refusedNullPlace = await openSurface(nullPlace, 'route-map');
+  assert.deepEqual(refusedNullPlace.state, { status: 'unavailable', reason: 'run-map#places-json-invalid' });
+
+  const badStop = mapWorld({
+    ...DEFAULT_FILES,
+    [`${LAYER}/route.json`]: ROUTE_JSON.replace('"place_id":"place-2"', '"place_x":"place-2"'),
+  });
+  const refusedBadStop = await openSurface(badStop, 'route-map');
+  assert.deepEqual(refusedBadStop.state, { status: 'unavailable', reason: 'run-map#route-json-stop-invalid' });
+
   // An unsafe route id never reaches the file system.
   const unsafe = mapWorld();
   const refusedUnsafe = await openSurface(unsafe, '../elsewhere');
