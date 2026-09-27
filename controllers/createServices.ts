@@ -24,6 +24,10 @@ import {
   createNearbySurfaceController,
   type NearbySurfaceBinding,
 } from './nearby/nearbySurfaceController.ts';
+import { createPlaceDetailController, type PlaceDetailBinding } from './place/placeDetailController.ts';
+import { readMomentFacts } from '../services/contentRepo/momentFacts.ts';
+import { createMomentPlayController, type MomentPlayBinding, type MomentPlayState } from './moment/momentPlayController.ts';
+import type { AudioService } from '../services/audio/service.ts';
 import type { LocationService } from '../services/location/service.ts';
 import {
   createRunSurfaceController,
@@ -69,6 +73,23 @@ export interface ServicePorts {
   // receive the same instance; absent until the G05.02.c adapter lands, in
   // which case the Nearby surface renders its review view.
   readonly location?: LocationService;
+  // G07.02 (issue #282) — the ONE audio service instance the app owns
+  // (ADR G01.02 §3: one physical player). The run sessions and the moment
+  // controller receive the same instance; absent until the G05.03.b adapter
+  // lands, in which case the place detail renders its honest no-Play state.
+  readonly audio?: AudioService;
+  // G07.02 — the live session's moment entry (the PreviewRunSessionPort
+  // idiom): true iff the live session's engine accepted the moment launch.
+  // Absent in the app build until the run-screen wiring lands; a moment play
+  // over a session-owned player is then a named refusal.
+  readonly sessionMoment?: { readonly playMoment: (momentId: string, storyId: string) => boolean };
+  // G07.02 — an optional deterministic counter for tests; the root mints its
+  // own process-wide counter when absent (one counter per process, ADR
+  // G01.02 §3.2).
+  readonly nextMomentSeq?: () => number;
+  // G07.02 — the clock the FocusRegain threshold reads (§3.7); the root
+  // defaults to the wall clock when absent.
+  readonly now?: () => number;
 }
 
 export interface Services {
@@ -109,19 +130,75 @@ export interface Services {
         readonly create: () => NearbySurfaceBinding;
       }
     | undefined;
+  // G07.02 (issue #282) — the place detail binding: one store per opened
+  // place (the offer facts of the validated catalog projection plus the
+  // place's moment teasers from the downloaded packages). Exists when the
+  // catalog service does — the teasers are rendered without Play when the
+  // audio port is absent.
+  readonly place:
+    | {
+        readonly create: (placeId: string) => PlaceDetailBinding;
+      }
+    | undefined;
+  // G07.02 — the ONE moment play controller (ADR G01.02 §3.8: the no-session
+  // launch lives here). Exists only with the audio port; the playback state
+  // survives navigation — the place detail and the Run panel both read it.
+  readonly moment: MomentPlayBinding | undefined;
 }
 
 export function createServices(ports: ServicePorts): Services {
-  const { packageStore, catalogOrigin, catalogSha256, bundlesStore, evaluateLayer, downloadLayer, runSession, location } =
-    ports;
+  const {
+    packageStore,
+    catalogOrigin,
+    catalogSha256,
+    bundlesStore,
+    evaluateLayer,
+    downloadLayer,
+    runSession,
+    location,
+    audio,
+    sessionMoment,
+    nextMomentSeq,
+    now,
+  } = ports;
   const catalogLoader = catalogOrigin ? createOriginCatalogLoader(catalogOrigin) : undefined;
   // MVP display-locale order: Belarusian first (21 §3.2 allowlist; the
   // UI-locale selection is G06.05/L02 and will replace this). One preference
-  // value for the catalog service and the preview controller.
+  // value for the catalog service, the preview controller and the moment
+  // facts reader.
   const localePreference: readonly string[] = ['be', 'en'];
   const catalogService = catalogLoader &&
     catalogSha256 &&
     createCatalogService({ loader: catalogLoader, sha256: catalogSha256 }, { localePreference });
+  // G07.02 — the process-wide moment counter (ADR G01.02 §3.2: ONE counter
+  // over every moment launch) and the one moment play controller over the
+  // one audio instance. Both live only with the audio port.
+  let momentSeqCounter = 0;
+  const rootNextMomentSeq = nextMomentSeq ?? (() => ++momentSeqCounter);
+  const momentPlay = audio
+    ? createMomentPlayController({
+        audio,
+        nextSeq: rootNextMomentSeq,
+        sessionMoment,
+        now: now ?? (() => Date.now()),
+      })
+    : undefined;
+  // The idle launch facts Start reads (ADR §3.8: Start inherits the sounding
+  // moment instead of stopping it) — a paused launch inherits nothing.
+  const currentMomentPlay = momentPlay
+    ? (): { momentId: string; storyId: string; seq: number; paused: boolean } | null => {
+        const state: MomentPlayState = momentPlay.store.getState();
+        return state.kind === 'playing'
+          ? { momentId: state.momentId, storyId: state.storyId, seq: state.token.seq, paused: state.paused }
+          : null;
+      }
+    : undefined;
+  // G07.02 — the moment facts reader over the downloaded packages (the root
+  // is the one module that value-imports services); absent without a bundles
+  // store — the place detail renders without teasers.
+  const momentsReader = bundlesStore
+    ? () => readMomentFacts(bundlesStore, { locales: localePreference })
+    : undefined;
   // The preview button's inventory port: the asked layer's disk facts read
   // through the shared readLayerFacts reader (G04.04.a) — the version
   // directory decides not_downloaded, the layer facts decide
@@ -243,7 +320,14 @@ export function createServices(ports: ServicePorts): Services {
         createRunSurfaceController({
           routeId,
           pinnedPackage,
-          session: runPorts,
+          // The root injects its moment fields over the provider's ports —
+          // one process-wide counter and one idle-launch fact source
+          // (ADR G01.02 §3.2/§3.8); a provider value for them is overridden.
+          session: {
+            ...runPorts,
+            nextMomentSeq: rootNextMomentSeq,
+            currentMomentPlay,
+          },
           localePreference,
         }),
     },
@@ -255,5 +339,14 @@ export function createServices(ports: ServicePorts): Services {
           locale: localePreference[0] ?? 'be',
         }),
     },
+    place: catalogService && {
+      create: (placeId) =>
+        createPlaceDetailController({
+          service: catalogService,
+          moments: momentsReader,
+          placeId,
+        }),
+    },
+    moment: momentPlay,
   };
 }

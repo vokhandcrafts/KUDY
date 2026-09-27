@@ -89,6 +89,21 @@ export interface RunOrchestratorDeps {
   // Header note 7: optional for the G05.04 scenarios, always passed by
   // useRunController.
   access?: DownloadAccessPort;
+  // G07.02 (ADR G01.02 §3.2): ONE process-wide counter over every moment
+  // launch — the composition root mints it once and hands the same source to
+  // the moment controller; without it the orchestrator counts its own
+  // (two counters could mint the same token value for two launches).
+  nextMomentSeq?: () => number;
+  // G07.02 (ADR G01.02 §3.3/§3.8): the idle moment controller's live launch
+  // facts, read at Start — a walk started while a no-session Moment sounds
+  // inherits the occupied player instead of stopping it by autoplay command.
+  // Null/paused inherit nothing (a paused launch is not «sounding»).
+  currentMomentPlay?: () => {
+    readonly momentId: string;
+    readonly storyId: string;
+    readonly seq: number;
+    readonly paused: boolean;
+  } | null;
   // Header note 7: the durability point — after the engine committed an
   // event, before its effects fire.
   onCommitted?: (before: RunState, after: RunState) => void;
@@ -107,10 +122,14 @@ export class RunOrchestrator {
   // Not readonly either: restore() rebuilds it with the swapped stop set.
   private candidates: ReadonlyMap<string, PipelineCandidate>;
   private readonly onCommitted: ((before: RunState, after: RunState) => void) | undefined;
+  // Not readonly when no injected source is given: the fallback counter
+  // lives here (the pre-G07.02 behavior, backward compatible for tests).
+  private nextMomentSeq: () => number;
+  private readonly currentMomentPlay: RunOrchestratorDeps['currentMomentPlay'];
 
   private engineState: RunState = initialRunState;
   private pipelineState: PipelineState = initialPipelineState;
-  private momentSeq = 0;
+  private ownMomentSeq = 0;
 
   constructor(deps: RunOrchestratorDeps) {
     this.location = deps.location;
@@ -121,6 +140,8 @@ export class RunOrchestrator {
     this.route = deps.route;
     this.stops = deps.stops;
     this.onCommitted = deps.onCommitted;
+    this.nextMomentSeq = deps.nextMomentSeq ?? (() => ++this.ownMomentSeq);
+    this.currentMomentPlay = deps.currentMomentPlay;
     this.candidates = new Map(
       deps.stops.map((stop) => [stop.stopId, { lat: stop.lat, lng: stop.lng, radius: stop.radius }]),
     );
@@ -164,6 +185,17 @@ export class RunOrchestrator {
       }
       this.engineState = initialRunState;
       this.pipelineState = initialPipelineState;
+    }
+    // G07.02 (ADR §3.8): a walk started while a no-session Moment sounds
+    // inherits the occupied player — a fresh orchestrator has no Ended
+    // mirror to read, so the idle controller's live launch facts are the
+    // source. The same not-paused rule: a paused launch is not «sounding»,
+    // the next launch frees the source by the one-player rule instead.
+    if (playingNow === undefined) {
+      const idle = this.currentMomentPlay?.() ?? null;
+      if (idle && !idle.paused) {
+        playingNow = { momentId: idle.momentId, storyId: idle.storyId, seq: idle.seq };
+      }
     }
     const ids = accessibleStopIds ?? this.stops.map((stop) => stop.stopId);
     this.dispatch({
@@ -259,7 +291,7 @@ export class RunOrchestrator {
       type: 'PlayMoment',
       momentId,
       storyId,
-      token: { kind: 'moment', ref: momentId, seq: ++this.momentSeq },
+      token: { kind: 'moment', ref: momentId, seq: this.nextMomentSeq() },
     });
   }
 

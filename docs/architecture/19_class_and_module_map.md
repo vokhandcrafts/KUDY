@@ -108,7 +108,7 @@
 
 ### 2.5 UI-экраны
 
-`app/(tabs)/explore.tsx`, `app/city/[id]/guides.tsx`, `app/route/[id].tsx`, `app/run/[id].tsx`, `app/(tabs)/my.tsx`, `app/map.tsx` — адлюстраванне прынятага стану і жэсты → каманды кантролераў; без fetch, аўтарызацыі і persistent-прагрэсу. Уся візуальная рэалізацыя **gated** праз G06.06–G06.08.
+`app/(tabs)/explore.tsx`, `app/city/[id]/guides.tsx`, `app/route/[id].tsx`, `app/run/[id].tsx`, `app/(tabs)/my.tsx`, `app/map.tsx`, `app/place/[id].tsx` — адлюстраванне прынятага стану і жэсты → каманды кантролераў; без fetch, аўтарызацыі і persistent-прагрэсу. Уся візуальная рэалізацыя **gated** праз G06.06–G06.08.
 
 ### 2.6 Што наўмысна адсутнічае
 
@@ -210,6 +210,8 @@ interface AudioService {
 // AudioTaggedEvent — канчатковы tagged union: G01.02 (адкрыта). Мінімум, які ўжо можна лічыць абавязаным:
 // завершэнне файла, збой прайгравання (→ story_play_failed, не AudioFinished), UserPausedAudio, FocusLoss/FocusRegain.
 ```
+
+Уладальнік па-за сесіяй (G07.02, ADR G01.02 §3.8): ручны Play Moment у `Idle` жыве ў кантролеры адзінага плэера (`controllers/moment/momentPlayController.ts`) — без уваходу ў engine, чаргі і `auto_fired`; токен `play_token = { kind: 'moment', ref: moment_id, seq }` з адзіным працэсным лічыльнікам (§3.2), які корань дадатка перадае і run-сесіям (`RunSessionPorts.nextMomentSeq`). Перахоп уладання пры жывой сесіі ідзе толькі праз яе рухавік (падзея `PlayMoment`, §3.4); без порта да яго — іменаваная адмова, ніколі другі плэер.
 
 ### 3.5 Кантэнт, загрузка, гатоўнасць
 
