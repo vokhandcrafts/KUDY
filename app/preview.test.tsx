@@ -6,7 +6,7 @@
 // Download→Start flip of AC3 (the Proof at the render level), the §4.1
 // dialog of NAV8 and the fail-closed state without ports.
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
-import { fireEvent, renderRouter, screen } from "expo-router/testing-library";
+import { fireEvent, renderRouter, screen, within } from "expo-router/testing-library";
 
 import Explore from "./(tabs)/explore";
 import Guides from "./city/[id]/guides";
@@ -203,6 +203,20 @@ describe("guide preview surface (G06.01.b)", () => {
     expect(await screen.findByTestId("screen-Route preview")).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-preview-back"));
     expect(await screen.findByTestId("screen-Explore")).toBeTruthy();
+  });
+
+  // The bare-string guard (issue #343): the JS render never throws on a
+  // string child of <Pressable> — the error is the native renderer's — so
+  // the label is asserted through the text query, which only reaches
+  // strings inside a <Text> host. Removing the wrapper fails this.
+  test("the back label sits in a Text host, not bare in the Pressable (issue #343)", async () => {
+    serve(PUBLISHED);
+    renderRouter(
+      withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
+      { initialUrl: "/route/guide-route-a1?from=rubric" },
+    );
+    expect(await screen.findByTestId("btn-preview-back")).toBeTruthy();
+    expect(within(screen.getByTestId("btn-preview-back")).getByText("← Назад")).toBeTruthy();
   });
 
   test("a route the catalog does not name renders the honest unavailable state", async () => {
