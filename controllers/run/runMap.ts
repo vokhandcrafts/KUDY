@@ -117,9 +117,9 @@ export function runMapView(
   return { markers, pois };
 }
 
-// The surface's words, per the walk's pinned locale (BE/EN; the MVP display
-// allowlist is 21 §3.2 — an unknown locale falls back to Belarusian, the
-// app's first preference).
+// The surface's words, per the walk's pinned locale (BE/EN; the language
+// canon is 09 §0 — be + en — and an unknown locale falls back to Belarusian,
+// the app's first preference).
 export interface RunMapStrings {
   readonly status: Record<StopStatus, string>;
   readonly pausedTitle: string;

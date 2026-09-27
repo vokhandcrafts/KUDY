@@ -247,7 +247,11 @@ export default function Run() {
       ) : null}
       <Text style={styles.note}>{strings.schematicNote}</Text>
       <Text
-        onPress={() => void Linking.openURL(OSM_ATTRIBUTION_URL)}
+        onPress={() => {
+          // A failed external open has no in-app surface — the failure is
+          // deliberately silent, the attribution text stays readable either way.
+          void Linking.openURL(OSM_ATTRIBUTION_URL).catch(() => undefined);
+        }}
         style={styles.attribution}
         testID="map-attribution"
       >
