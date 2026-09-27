@@ -22,7 +22,7 @@ stub call: KUDY: node builtin isAbsolute must not run in the device bundle
 
 Поўны ланцуг доказаў задачы (гэта ж сесія, гейты на HEAD): device-бандл з пакета
 `expo-router/entry.bundle?platform=android&dev=true&lazy=true&transform.engine=hermes&transform.routerRoot=app`
-адказвае HTTP 200 (1128 модуляў у логу Metro), і дадатак на AVD `kudy-test` пад `/explore`
+адказвае HTTP 200 (лог Metro з лікам модуляў — у Evidence PR), і дадатак на AVD `kudy-test` пад `/explore`
 рэндэрыць каталог («Гданьск», «Побач», «Каталог недаступны» — сумленны стан без портаў).
 Адкат праверкі (праверана перад push): выразанне blockList з `metro.config.js`, выразанне
 `resolveRequest` або выдаленне `metro-node-stub.js` — кожны з трох эксперыментаў рабіць

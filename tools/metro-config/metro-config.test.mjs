@@ -5,7 +5,7 @@
 // file fails the resolution and existence assertions.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -57,4 +57,22 @@ test('guard: the stub loads silently and throws only when a builtin is called', 
   }, 'importing/reading bindings must not throw (module load happens on device)');
   assert.equal(typeof bound, 'function');
   assert.throws(() => bound(), /KUDY: node builtin isAbsolute/, 'the call must fail loudly');
+});
+
+test('guard: the app value-chain sources stay node-free (the #338 criterion-1 revert)', () => {
+  // The stub only fails at call time, so a returned `node:*` import in the
+  // value chain would build silently and break on device — the sources the
+  // #338 proof names are asserted directly instead.
+  for (const rel of [
+    'controllers/createServices.ts',
+    'services/contentRepo/inventory.ts',
+    'services/safe-path.ts',
+  ]) {
+    const source = readFileSync(join(root, rel), 'utf8');
+    assert.doesNotMatch(
+      source,
+      /from\s+['"]node:/,
+      `${rel} must not import node:* (the device bundle resolves it to the throwing stub)`,
+    );
+  }
 });
