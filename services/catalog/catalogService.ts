@@ -9,6 +9,7 @@
 // corrupt text answers with a named state, never a thrown error.
 import { isSafeRel } from '../contentRepo/inventory.ts';
 import type { Sha256 } from '../contentRepo/types.ts';
+import { byEditorialOrder } from '../../core/discovery/selectDiscovery.ts';
 import { readCatalogEnvelope, type CatalogEnvelope } from './envelope.ts';
 import type {
   CatalogGuideCard,
@@ -17,6 +18,8 @@ import type {
   CatalogPathLoader,
   CatalogService,
   GuidePreview,
+  NearbyOfferFacts,
+  NearbyLoadState,
   PreviewLoadState,
   PreviewStop,
 } from './types.ts';
@@ -52,14 +55,23 @@ function localizedLabel(value: unknown, preference: readonly string[]): string |
   return null;
 }
 
-function projectOffer(value: unknown, preference: readonly string[]): CatalogOfferFacts | null {
+function projectOfferCore(value: unknown, preference: readonly string[]): {
+  offer_id: string;
+  editorial_order: number;
+  title: string | null;
+  summary: string | null;
+  text_locales: readonly string[];
+  audio_locales: readonly string[];
+  access: 'free' | 'paid' | 'mixed';
+  estimated_duration: CatalogOfferFacts['estimated_duration'];
+  distance_m: number | null;
+  ref: Record<string, unknown>;
+} | null {
   if (!value || typeof value !== 'object') return null;
   const v = value as Record<string, unknown>;
   if (typeof v.offer_id !== 'string' || v.offer_id.length === 0) return null;
   const ref = v.ref as Record<string, unknown> | undefined;
-  if (!ref || ref.kind !== 'guide' || typeof ref.route_id !== 'string' || ref.route_id.length === 0) {
-    return null;
-  }
+  if (!ref || typeof ref.kind !== 'string') return null;
   if (typeof v.editorial_order !== 'number' || !Number.isFinite(v.editorial_order)) return null;
   const localized = (v.localized ?? {}) as Record<string, unknown>;
   const availability = (v.availability ?? {}) as Record<string, unknown>;
@@ -88,9 +100,16 @@ function projectOffer(value: unknown, preference: readonly string[]): CatalogOff
   // with a claimed tariff nothing published.
   if (v.access !== 'free' && v.access !== 'paid' && v.access !== 'mixed') return null;
   const access: 'free' | 'paid' | 'mixed' = v.access;
+  // The authored distance figure of 21 §3.2 (≤ 100000 m); anything outside
+  // the published contract range is «не апублікавана» (null), never a
+  // fabricated figure.
+  const distance =
+    typeof v.distance_m === 'number' && Number.isFinite(v.distance_m) &&
+    v.distance_m >= 0 && v.distance_m <= 100000
+      ? v.distance_m
+      : null;
   return {
     offer_id: v.offer_id,
-    route_id: ref.route_id,
     editorial_order: v.editorial_order,
     title: localizedLabel(localized.title, preference),
     summary: localizedLabel(localized.summary, preference),
@@ -98,7 +117,72 @@ function projectOffer(value: unknown, preference: readonly string[]): CatalogOff
     audio_locales: audioLocales,
     access,
     estimated_duration: duration,
+    distance_m: distance,
+    ref,
   };
+}
+
+function projectOffer(value: unknown, preference: readonly string[]): CatalogOfferFacts | null {
+  const core = projectOfferCore(value, preference);
+  if (!core) return null;
+  if (core.ref.kind !== 'guide' || typeof core.ref.route_id !== 'string' || core.ref.route_id.length === 0) {
+    return null;
+  }
+  return {
+    offer_id: core.offer_id,
+    route_id: core.ref.route_id,
+    editorial_order: core.editorial_order,
+    title: core.title,
+    summary: core.summary,
+    text_locales: core.text_locales,
+    audio_locales: core.audio_locales,
+    access: core.access,
+    estimated_duration: core.estimated_duration,
+  };
+}
+
+// G07.01 (issue #281) — the Nearby projection: guide and place offers keep
+// their identity; collection offers belong to G07.02 and drop here (the
+// G06.08 canon). An offer whose ref is corrupt drops whole — no fabricated
+// card (implementation-rules 14).
+function projectNearbyOffer(value: unknown, preference: readonly string[]): NearbyOfferFacts | null {
+  const core = projectOfferCore(value, preference);
+  if (!core) return null;
+  if (core.ref.kind === 'guide') {
+    if (typeof core.ref.route_id !== 'string' || core.ref.route_id.length === 0) return null;
+    return {
+      offer_id: core.offer_id,
+      kind: 'guide',
+      route_id: core.ref.route_id,
+      place_id: null,
+      editorial_order: core.editorial_order,
+      title: core.title,
+      summary: core.summary,
+      distance_m: core.distance_m,
+      text_locales: core.text_locales,
+      audio_locales: core.audio_locales,
+      access: core.access,
+      estimated_duration: core.estimated_duration,
+    };
+  }
+  if (core.ref.kind === 'place') {
+    if (typeof core.ref.place_id !== 'string' || core.ref.place_id.length === 0) return null;
+    return {
+      offer_id: core.offer_id,
+      kind: 'place',
+      route_id: null,
+      place_id: core.ref.place_id,
+      editorial_order: core.editorial_order,
+      title: core.title,
+      summary: core.summary,
+      distance_m: core.distance_m,
+      text_locales: core.text_locales,
+      audio_locales: core.audio_locales,
+      access: core.access,
+      estimated_duration: core.estimated_duration,
+    };
+  }
+  return null;
 }
 
 // The offer→card projection, shared by the city list (projectGuides) and the
@@ -123,16 +207,10 @@ function offerCard(
   };
 }
 
-// The canon order of offers (21 §4): editorial_order, then offer_id for
-// stability — one comparator for the city list, the duplicate-offer dedup
-// (issue #324, the sorted-first wins) and the preview's offer pick.
-function byEditorialOrder(a: CatalogOfferFacts, b: CatalogOfferFacts): number {
-  return a.editorial_order !== b.editorial_order
-    ? a.editorial_order - b.editorial_order
-    : a.offer_id < b.offer_id
-      ? -1
-      : 1;
-}
+// The canon order comparator (21 §4 rule 6) lives in its canon home —
+// core/discovery/selectDiscovery (G07.01 moved the shared spelling there);
+// the city list, the duplicate-offer dedup (issue #324) and the preview's
+// offer pick import it instead of restating the rule.
 
 function routeOnlyCard(route: CatalogEnvelope['routes'][number]): CatalogGuideCard {
   return {
@@ -182,11 +260,14 @@ export function projectGuides(
   return [...publishedOffers, ...routeOnly];
 }
 
-async function loadIndex(
-  deps: CatalogDeps,
-  options: CatalogDisplayOptions,
-  envelope: CatalogEnvelope,
-): Promise<CatalogOfferFacts[] | null> {
+// The validated raw offers of the envelope's discovery index, or null when
+// the pointer is absent or the index fails any pin. One fetch, one integrity
+// pin, one parse — shared by the guide projection (loadCatalog, loadPreview)
+// and the Nearby projection (loadNearby, G07.01); no consumer re-implements
+// the reader policy (implementation-rules 3).
+type RawOffers = ReadonlyArray<Record<string, unknown>>;
+
+async function readValidatedIndex(deps: CatalogDeps, envelope: CatalogEnvelope): Promise<RawOffers | null> {
   const pointer = envelope.discovery_index;
   if (!pointer) return null;
   // 21 §3.3: paths, ids and URLs are untrusted input even from the CDN —
@@ -214,12 +295,68 @@ async function loadIndex(
   const digest = await deps.sha256(bytes);
   if (digest !== pointer.sha256 || bytes.byteLength !== pointer.bytes) return null;
   if (!Array.isArray(index.offers)) return null;
+  return index.offers.filter(
+    (raw): raw is Record<string, unknown> => raw !== null && typeof raw === 'object' && !Array.isArray(raw),
+  );
+}
+
+async function loadIndex(
+  deps: CatalogDeps,
+  options: CatalogDisplayOptions,
+  envelope: CatalogEnvelope,
+): Promise<CatalogOfferFacts[] | null> {
+  const raw = await readValidatedIndex(deps, envelope);
+  if (raw === null) return null;
   const offers: CatalogOfferFacts[] = [];
-  for (const raw of index.offers) {
-    const projected = projectOffer(raw, options.localePreference);
+  for (const entry of raw) {
+    const projected = projectOffer(entry, options.localePreference);
     if (projected !== null) offers.push(projected);
   }
   return offers;
+}
+
+// G07.01 (issue #281) — the Nearby offer list: the same envelope read and
+// reader policy as the city list, projected for guide and place offers. One
+// ref shows once (21 §4 rule 6, the issue #324 canon): the list is ordered
+// by the canon comparator and the sorted-first offer of a duplicated ref
+// survives — the same discipline projectGuides and loadPreview apply. A
+// collection ref drops (G07.02).
+export async function loadNearby(
+  deps: CatalogDeps,
+  options: CatalogDisplayOptions,
+  previous: readonly NearbyOfferFacts[] | null,
+): Promise<NearbyLoadState> {
+  const read = await readEnvelope(deps);
+  if (!read.ok) {
+    return previous && previous.length > 0
+      ? { kind: 'offline', offers: previous, reason: read.reason }
+      : { kind: 'error', reason: read.reason };
+  }
+  let raw: RawOffers | null = null;
+  try {
+    raw = await readValidatedIndex(deps, read.envelope);
+  } catch {
+    raw = null;
+  }
+  const offers: NearbyOfferFacts[] = [];
+  if (raw !== null) {
+    const projected: NearbyOfferFacts[] = [];
+    for (const entry of raw) {
+      const offer = projectNearbyOffer(entry, options.localePreference);
+      if (offer !== null) projected.push(offer);
+    }
+    const seen = new Set<string>();
+    for (const offer of projected.sort(byEditorialOrder)) {
+      const key = `${offer.kind}:${offer.route_id ?? offer.place_id ?? offer.offer_id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      offers.push(offer);
+    }
+  }
+  if (raw === null && read.envelope.discovery_index !== null) {
+    return { kind: 'ready', offers, degraded: 'index-unavailable' };
+  }
+  return { kind: 'ready', offers, degraded: null };
 }
 
 // The shared envelope read of both service methods: fetch the catalog, parse
@@ -462,5 +599,6 @@ export function createCatalogService(
   return {
     load: (previous) => loadCatalog(deps, options, previous),
     loadPreview: (routeId, previous) => loadPreview(deps, options, routeId, previous),
+    loadNearby: (previous) => loadNearby(deps, options, previous),
   };
 }

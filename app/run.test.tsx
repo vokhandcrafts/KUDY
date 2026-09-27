@@ -11,15 +11,10 @@ import { act } from "@testing-library/react-native";
 
 import Run from "./run/[id]";
 import { createServices } from "../controllers/createServices";
-import type { BundlesStore, Tier } from "../services/contentRepo/types";
 import type { RunSessionPorts } from "../controllers/run/runSurfaceController";
-import { defaultEngineConfig } from "../core/engine/reducer";
-import { LocationService } from "../services/location/service";
+import type { BundlesStore, Tier } from "../services/contentRepo/types";
 import { FakeLocationOsPort } from "../services/location/fake-port";
-import { AudioService } from "../services/audio/service";
-import { FakeAudioPlayerPort } from "../services/audio/fake-port";
-import { createAccessPort } from "../services/download/access";
-import { layoutWith } from "../test/render-helpers";
+import { layoutWith, makeRunSession } from "../test/render-helpers";
 
 // The status label's text: a single-string Text child in this surface.
 const textOf = (testId: string): string => {
@@ -45,8 +40,8 @@ async function soundStop2(args: { locationPort: FakeLocationOsPort; advance: (ms
 
 // The mounted surface the plain-session panel tests share: the composition
 // root over the be fixture, the walk started, the map on screen.
-async function mountedRunBe(): Promise<ReturnType<typeof runSession>> {
-  const env = runSession();
+async function mountedRunBe(): Promise<ReturnType<typeof makeRunSession>> {
+  const env = makeRunSession();
   const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session: env.session } });
   renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
   await screen.findByTestId("run-map");
@@ -126,52 +121,10 @@ function memoryBundles(files: Record<string, string>): BundlesStore {
   };
 }
 
-// The walk's ports: real services over fake OS ports; the durable row is an
-// in-memory fake — the node suite covers the real services/db path.
-function runSession(
-  overrides?: {
-    sessionStore?: RunSessionPorts["sessionStore"];
-    recovery?: RunSessionPorts["recovery"];
-  },
-): {
-  session: RunSessionPorts;
-  locationPort: FakeLocationOsPort;
-  audioPort: FakeAudioPlayerPort;
-  advance: (ms: number) => void;
-} {
-  const locationPort = new FakeLocationOsPort();
-  const audioPort = new FakeAudioPlayerPort();
-  const granted: Tier[] = ["base"];
-  let now = 0;
-  const session: RunSessionPorts = {
-    location: new LocationService({
-      port: locationPort,
-      clock: { now: () => now, schedule: () => () => {} },
-      permissions: { foreground: "fg", background: "bg" },
-    }),
-    audio: new AudioService({ createPort: () => audioPort }),
-    clock: { now: () => now },
-    engineConfig: defaultEngineConfig,
-    pipelineConfig: { dwellMs: 0 },
-    sessionStore: overrides?.sessionStore ?? {
-      start: () => ({ ok: true }),
-      checkpoint: () => {},
-      pause: () => {},
-      resume: () => {},
-      finish: () => {},
-    },
-    readiness: {
-      evaluate: async () => ({ status: "ready", routeId: "route-map", version: "1", tier: "base", tierAvailable: granted }),
-    },
-    packageStops: { stopsOfLayer: async (tier) => (tier === "base" ? ["stop-1", "stop-2"] : tier === "extended" ? ["stop-3"] : []) },
-    access: createAccessPort(),
-    wakelock: { acquire: () => {}, release: () => {} },
-    recovery: overrides?.recovery ?? { read: async () => null },
-    newSessionId: () => "walk-render",
-    grantedTiers: () => granted,
-  };
-  return { session, locationPort, audioPort, advance: (ms: number) => (now = ms) };
-}
+// The walk's ports come from the shared makeRunSession helper
+// (test/render-helpers): real services over fake OS ports, the one
+// LocationService instance the app owns. Session-store and recovery
+// overrides pass through for the recovery/panel scenarios.
 
 const withRunRoutes = (services: ReturnType<typeof createServices>) => ({
   _layout: layoutWith(services),
@@ -181,7 +134,7 @@ const withRunRoutes = (services: ReturnType<typeof createServices>) => ({
 // The stateful session for the AC4 walk: the fake row records the durable
 // deltas through the same checkpoint path the production row takes, and the
 // recovery read returns it — the restart-recovery loop of 09 §9.1.
-function runSessionTracked(): ReturnType<typeof runSession> & { starts: () => number } {
+function runSessionTracked(): ReturnType<typeof makeRunSession> & { starts: () => number } {
   const row = {
     sessionId: "walk-render",
     routeId: "route-map",
@@ -231,7 +184,7 @@ function runSessionTracked(): ReturnType<typeof runSession> & { starts: () => nu
             ],
           },
   };
-  const base = runSession({ sessionStore, recovery });
+  const base = makeRunSession({ sessionStore, recovery });
   return { ...base, starts: () => starts };
 }
 
@@ -241,7 +194,7 @@ afterEach(() => {
 
 describe("run map surface", () => {
   test("AC1: the map renders the engine's marker states live", async () => {
-    const { session, locationPort, audioPort, advance } = runSession();
+    const { session, locationPort, audioPort, advance } = makeRunSession();
     const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
 
@@ -287,7 +240,7 @@ describe("run map surface", () => {
   });
 
   test("AC5: the words follow the walk's pinned locale, with screen-reader labels", async () => {
-    const { session } = runSession();
+    const { session } = makeRunSession();
     const services = createServices({ bundlesStore: memoryBundles(layerFiles("en")), run: { session } });
     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
     await screen.findByTestId("run-map");

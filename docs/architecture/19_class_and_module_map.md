@@ -186,6 +186,7 @@ interface LocationService {
   setGeofenceWindow(stopIds: StopId[]): void; // ≤ 20 рэгіёнаў; пералік па свежым фіксе
   onFix(handler: (fix: FixInput) => void): void;   // сыры фікс → кантролер (далей acceptFix у pipeline, §5.2)
   status(): 'acquiring' | 'live' | 'recovering' | 'stalled';       // watchdog, парог 15 с
+  currentMode(): LocationMode;                // чытанне рэжыму (G07.01: паверхня горада ўзброіцца толькі па-за жывой прагулкай)
 }
 // Выхад pipeline'а кантролер правярае праз step(): падзеі ўжо сабраныя ў формы RunEvent з §3.1,
 // у тым лічбе LocationAccepted несце прыняты fix (крыніца last_fix для праверак свежасці, 09 інварыянт 8).

@@ -31,8 +31,9 @@ import type { AudioService } from '../../services/audio/service.ts';
 import type { PlaybackState } from '../../services/audio/types.ts';
 import type { LocationService } from '../../services/location/service.ts';
 import type { DownloadAccessPort } from '../../services/download/access.ts';
+import { useStoreState } from '../useControllerStore.ts';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 // The walk's device seams: the RunControllerDeps fields that are not the
 // per-route package facts. The provider owns every default — the surface
@@ -199,17 +200,4 @@ export function useRunSurface(
 // subscription, since the surface resolves asynchronously.
 export function useRunState(store: ControllerStore<RunControllerState> | null): RunControllerState | null {
   return useStoreState(store);
-}
-
-function useStoreState<T>(store: ControllerStore<T> | null | undefined): T | null {
-  const [state, setState] = useState<T | null>(store ? store.getState() : null);
-  useEffect(() => {
-    if (!store) {
-      setState(null);
-      return;
-    }
-    setState(store.getState());
-    return store.subscribe(setState);
-  }, [store]);
-  return state;
 }

@@ -21,6 +21,11 @@ import {
   type PreviewRunSessionPort,
 } from './catalog/previewController.ts';
 import {
+  createNearbySurfaceController,
+  type NearbySurfaceBinding,
+} from './nearby/nearbySurfaceController.ts';
+import type { LocationService } from '../services/location/service.ts';
+import {
   createRunSurfaceController,
   type RunPinnedPackagePort,
   type RunSessionPorts,
@@ -59,6 +64,11 @@ export interface ServicePorts {
   // filesystem/db), the run surfaces show their honest unavailable state —
   // the same rule the catalog member follows.
   readonly run?: { readonly session: RunSessionPorts };
+  // G07.01 (issue #281) — the ONE location service instance the app owns
+  // (19 §3.3: one OS subscription). The run sessions and the Nearby surface
+  // receive the same instance; absent until the G05.02.c adapter lands, in
+  // which case the Nearby surface renders its review view.
+  readonly location?: LocationService;
 }
 
 export interface Services {
@@ -89,10 +99,20 @@ export interface Services {
         readonly create: (routeId: string) => ControllerStore<RunSurfaceState>;
       }
     | undefined;
+  // G07.01 (issue #281) — the Nearby (Побач) surface binding: the offers
+  // store over the shared catalog service plus the location service the
+  // arming guard uses (undefined until the adapter lands — the review view
+  // is then the honest default). Exists when the catalog service does: the
+  // offers are its discovery-index projection.
+  readonly nearby:
+    | {
+        readonly create: () => NearbySurfaceBinding;
+      }
+    | undefined;
 }
 
 export function createServices(ports: ServicePorts): Services {
-  const { packageStore, catalogOrigin, catalogSha256, bundlesStore, evaluateLayer, downloadLayer, runSession } =
+  const { packageStore, catalogOrigin, catalogSha256, bundlesStore, evaluateLayer, downloadLayer, runSession, location } =
     ports;
   const catalogLoader = catalogOrigin ? createOriginCatalogLoader(catalogOrigin) : undefined;
   // MVP display-locale order: Belarusian first (21 §3.2 allowlist; the
@@ -225,6 +245,14 @@ export function createServices(ports: ServicePorts): Services {
           pinnedPackage,
           session: runPorts,
           localePreference,
+        }),
+    },
+    nearby: catalogService && {
+      create: () =>
+        createNearbySurfaceController({
+          service: catalogService,
+          location,
+          locale: localePreference[0] ?? 'be',
         }),
     },
   };

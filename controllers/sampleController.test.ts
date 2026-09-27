@@ -37,12 +37,14 @@ test('criterion 2: without the port the root constructs no contentRepo (the app 
   // The root constructs a member only when its port is provided; with no
   // ports at all every member stays undefined (the catalog joined as the
   // second member with G06.01.a, the preview factory as the third with
-  // G06.01.b, the run surface factory as the fourth with G06.02).
+  // G06.01.b, the run surface factory as the fourth with G06.02, the nearby
+  // binding as the fifth with G07.01).
   assert.deepEqual(services, {
     contentRepo: undefined,
     catalog: undefined,
     preview: undefined,
     run: undefined,
+    nearby: undefined,
   });
 });
 
