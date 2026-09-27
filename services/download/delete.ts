@@ -9,8 +9,8 @@
 // or feedback), `09` §17 (no automatic cleanup or storage budgets — deletion
 // happens only through this explicit call), `19` §2.2 (useLibraryController
 // must not delete a pinned version — the guard lives here, not in the UI).
-import { isSafeSegment } from '../contentRepo/inventory.ts';
 import { deletePackageAssets, listUnfinishedSessions } from '../db/db.ts';
+import { isSafeSegment } from '../safe-path.ts';
 import { packagePath, stagingVersionPath } from './download.ts';
 import type { DeletionGate, DeleteDeps, DeleteResult, PackageKey } from './types.ts';
 

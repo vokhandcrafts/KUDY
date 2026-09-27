@@ -7,7 +7,7 @@
 // writes nothing: sizes are derived per call, never stored (criterion 3;
 // zone B untouched). Non-goals: deletion (G04.04.b), the presence re-hash
 // (G04.04.c), downloading the update (G04.02), UI (G06.04).
-import path from 'node:path';
+import { isSafeRel, isSafeSegment } from '../safe-path.ts';
 
 import type {
   BundlesStore,
@@ -17,29 +17,6 @@ import type {
   LockEntry,
   Tier,
 } from './types.ts';
-
-// 09 §7: identifiers reaching the filesystem are untrusted input and are
-// checked as safe path segments (no separators, no '..', no NUL) on input.
-// Catalog-sourced strings are exactly that. Disk-sourced names come from
-// readdir and cannot contain separators, so they are used as listed; the
-// adapter still owns confinement, as for PackageStore. Exported as the shared
-// safe-unit idiom (implementation-rules 3): the download activation
-// (G04.02.a) reuses these instead of a second variant.
-export function isSafeSegment(value: unknown): value is string {
-  return typeof value === 'string' && value.length > 0 && !path.isAbsolute(value) &&
-    !value.includes('/') && !value.includes('\\') && !value.includes('\0') &&
-    value !== '.' && value !== '..';
-}
-
-// A lock path is a multi-segment rel path inside the layer directory:
-// '/'-separated (validate-package idiom — the fs APIs accept '/' everywhere),
-// never absolute, no traversal segments, no NUL. Exported together with
-// isSafeSegment as the shared safe-unit idiom.
-export function isSafeRel(value: unknown): value is string {
-  return typeof value === 'string' && value.length > 0 && !path.isAbsolute(value) &&
-    !value.includes('\\') && !value.includes('\0') &&
-    value.split('/').every((segment) => segment.length > 0 && segment !== '.' && segment !== '..');
-}
 
 function isTier(value: unknown): value is Tier {
   return value === 'base' || value === 'extended';

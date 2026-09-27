@@ -7,9 +7,9 @@
 // pinned to the declared sha256, and any index trouble degrades to
 // route-entry cards without inventing content. All inputs are untrusted:
 // corrupt text answers with a named state, never a thrown error.
-import { isSafeRel } from '../contentRepo/inventory.ts';
 import type { Sha256 } from '../contentRepo/types.ts';
 import { byEditorialOrder } from '../../core/discovery/selectDiscovery.ts';
+import { isSafeRel } from '../safe-path.ts';
 import { readCatalogEnvelope, type CatalogEnvelope } from './envelope.ts';
 import type {
   CatalogGuideCard,

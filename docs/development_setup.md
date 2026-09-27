@@ -43,6 +43,8 @@ npx expo start
 
 Metro bundler; прэв'ю ў Expo Go або эмулятары. **Абмежаванне:** Expo Go не з'яўляецца доказам стэку — background location, background audio і натыўны рэндэр карты патрабуюць development build (ADR §2). Дадатак мантуецца праз Expo Router (`app/`): маршруты `19` §2.5 — заглушки з імем экрана і яго params, рэальнага прадуктовага UI яшчэ няма (G06.06–G06.08); выклікаў SDK у ім няма.
 
+Абнаўленне 2026-09-27 (issue #338, першы паспяховы device-run): у гэтым стэку Expo Go недаступны — натыўныя карта, аўдыё і крамы патрабуюць development build. Працоўны спосаб: development build (`by.kudy.app`) на эмулятары/прыладзе + `npm start` (`expo start --dev-client`) — дадатак грузіць бандл з запушчанага Metro праз Dev Launcher. Зборку бандла трымаюць два файлы ў кораню рэпазітара: `metro.config.js` — blockList выключае `*.test.*` і службовыя тэчкі `.mimosa`/`.zcode`/`.scratch` (require.context expo-router цягне jest-сюты з `app/` у бандл), а `resolveRequest` перанакіроўвае `node:*` на стаб; і `metro-node-stub.js` — проксі, каторы кідае іменаваную памылку толькі пры выкліку builtin-а (сам імпарт праходзіць: прадуктовы ланцуг з `app/` node-free пасля пераносу safe-path ідыёму ў `services/safe-path.ts`). Wiring абодвух элементаў ахаваны committed тэстам `tools/metro-config/metro-config.test.mjs` — падае пры выдаленні любога з іх. Хрушкасць вотчара: на ФС не-ext4 metro-file-map FallbackWatcher падае з `ENOENT`, калі паралельная сесія выдаляе `.mimosa/hook-state/sess_*.lock` падчас яго прагулкі — дастаткова перазапусціць Metro.
+
 ## Натыўныя зборкі (development build)
 
 Прадумова: профіль `development` мае `developmentClient: true` — EAS патрабуе залежнасць `expo-dev-client` у `package.json` (у каркасе: `~6.0.21`).
