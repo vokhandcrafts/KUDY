@@ -336,3 +336,41 @@ test('criterion 6: a paused moment launch is not inherited by the fresh session'
   dwellAt(h, 0.0009, 0, 35_000);
   assert.equal(playingStopId(live(h)), 'b'); // the next launch frees the source and plays
 });
+
+// G06.04 (issue #63) — the confirmed guide switch (11 §4.1) finished this
+// session's durable row in ANOTHER controller's switch transaction (ADR
+// G01.03 §3.3 switch-guide); retire() injects the Ended mirror — no
+// dispatch, no second durable write — and releases the walk's resources.
+test('G06.04 retire: the guide sound stops, the window and the mode release, the mirror is Ended without a dispatch', () => {
+  const h = harness();
+  deliver(h, 0, 0); // stop a plays — the guide sound the switch must stop
+  assert.equal(playingStopId(live(h)), 'a');
+  const audioBefore = h.audioPort.commands.length;
+  const locationBefore = h.locationPort.commands.length;
+
+  h.orchestrator.retire('walk-1');
+
+  assert.equal(h.orchestrator.state.phase, 'Ended');
+  // §4.3: finishing stops the guide sound — one stop command, nothing else.
+  assert.deepEqual(h.audioPort.commands.slice(audioBefore), ['stop']);
+  // The location axis releases: the subscription stops, the window empties.
+  const locationAfter = h.locationPort.commands.slice(locationBefore);
+  assert.ok(locationAfter.some((command) => command.startsWith('stop ')));
+  assert.deepEqual(locationAfter.filter((command) => command.startsWith('regions')), ['regions 0']);
+  // The switch's other side cannot re-arm this mirror: a confirmed dwell at
+  // b dispatches into a reducer with no live session — no play, no state.
+  dwellAt(h, 0.0009, 0, 40_000);
+  assert.equal(h.orchestrator.state.phase, 'Ended');
+  assert.equal(h.audioPort.commands.length, audioBefore + 1);
+});
+
+test('G06.04 retire: a foreign id or an already ended session is a no-op', () => {
+  const h = harness();
+  h.orchestrator.retire('other-walk'); // not this session's id
+  assert.equal(h.orchestrator.state.phase, 'Active');
+  h.orchestrator.retire('walk-1');
+  assert.equal(h.orchestrator.state.phase, 'Ended');
+  const audioAtEnd = h.audioPort.commands.length;
+  h.orchestrator.retire('walk-1'); // already Ended — nothing again
+  assert.equal(h.audioPort.commands.length, audioAtEnd);
+});

@@ -11,6 +11,7 @@ import { useCatalogController } from "../../controllers/catalog/useCatalogContro
 import { useServices } from "../_layout";
 import { tokens } from "../design-tokens";
 import { CatalogStateView, CITY_TITLE } from "../guide-card";
+import { WalkButton } from "../walk-button";
 
 const styles = StyleSheet.create({
   title: {
@@ -32,6 +33,7 @@ export default function Explore() {
   const controller = useCatalogController(services.catalog?.controller);
   return (
     <View style={{ backgroundColor: tokens.colorPaper, flex: 1, padding: tokens.spaceL }} testID="screen-Explore">
+      <WalkButton />
       <Text style={styles.title}>{CITY_TITLE}</Text>
       <Link href="/map" testID="link-nearby">
         <Text style={styles.nearbyLink}>Побач</Text>

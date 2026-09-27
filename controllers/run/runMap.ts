@@ -124,6 +124,10 @@ export interface RunMapStrings {
   readonly status: Record<StopStatus, string>;
   readonly pausedTitle: string;
   readonly resume: string;
+  // The session menu of 11 §4.2/§4.3 (G06.04): the whole-walk pause and the
+  // finish — both legal at any moment of a live walk.
+  readonly pauseWalk: string;
+  readonly endWalk: string;
   readonly endedTitle: string;
   readonly back: string;
   readonly close: string;
@@ -151,6 +155,7 @@ export interface RunMapStrings {
     | 'package-needs-recovery'
     | 'package-access-locked'
     | 'live-session-exists'
+    | 'switch-no-live-session'
     | 'run#package-not-downloaded'
     | 'run#package-ambiguous'
     | 'run#unsafe-route-id'
@@ -178,6 +183,8 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     },
     pausedTitle: 'Прагулка прыпынена',
     resume: 'Працягнуць',
+    pauseWalk: 'Прыпыніць прагулку',
+    endWalk: 'Завяршыць прагулку',
     endedTitle: 'Прагулка завершана',
     back: '← Назад',
     close: 'Зачыніць',
@@ -198,6 +205,7 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
       'package-needs-recovery': 'Пакет патрабуе аднаўлення',
       'package-access-locked': 'Доступ да пакета яшчэ не адкрыты',
       'live-session-exists': 'Ужо ёсць жывая прагулка',
+      'switch-no-live-session': 'Жывой прагулкі ўжо няма — пачніце нанова',
       'run#package-not-downloaded': 'Пакет не спампаваны',
       'run#package-ambiguous': 'На дыску некалькі версій пакета',
       'run#unsafe-route-id': 'Няверны ідэнтыфікатар маршруту',
@@ -217,6 +225,8 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     },
     pausedTitle: 'Walk paused',
     resume: 'Resume',
+    pauseWalk: 'Pause the walk',
+    endWalk: 'Finish the walk',
     endedTitle: 'Walk finished',
     back: '← Back',
     close: 'Close',
@@ -237,6 +247,7 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
       'package-needs-recovery': 'Package needs recovery',
       'package-access-locked': 'Package access locked',
       'live-session-exists': 'A live walk already exists',
+      'switch-no-live-session': 'No live walk anymore — start again',
       'run#package-not-downloaded': 'Package not downloaded',
       'run#package-ambiguous': 'Several package versions on disk',
       'run#unsafe-route-id': 'Invalid route id',
