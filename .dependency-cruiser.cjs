@@ -112,20 +112,23 @@ module.exports = {
     },
     // UI screens reach state and effects only through controllers (19 §4.2
     // edge rule); introduced with the Expo Router skeleton (G06.09.a).
+    // Render tests are exempt (G06.02): they wire the real services over
+    // fake OS ports through the composition root — the same exemption the
+    // controllers rule grants its tests.
     {
       name: 'app-no-services',
-      comment: 'app/ must not import services/ directly — controllers only (19 §4.2 edge rule)',
+      comment: 'app/ must not import services/ directly — controllers only (19 §4.2 edge rule; render tests exempt)',
       severity: 'error',
-      from: { path: '^app/' },
+      from: { path: '^app/', pathNot: '\\.test\\.[cm]?[jt]sx?$' },
       to: { path: '^services/' },
     },
     // G06.09.b completes the app-side edge: screens import controllers/ only
     // (plus React/Expo) — core/ is reached through controllers as well.
     {
       name: 'app-no-core',
-      comment: 'app/ must not import core/ directly — controllers only (19 §4.2 edge rule)',
+      comment: 'app/ must not import core/ directly — controllers only (19 §4.2 edge rule; render tests exempt)',
       severity: 'error',
-      from: { path: '^app/' },
+      from: { path: '^app/', pathNot: '\\.test\\.[cm]?[jt]sx?$' },
       to: { path: '^core/' },
     },
     // Controllers consume services/ through explicit ports (issue #209 AC1):

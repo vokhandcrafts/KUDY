@@ -52,13 +52,22 @@ afterEach(() => {
 describe("route placeholders (19 §2.5)", () => {
   test.each([
     ["/my", "screen-My KUDY", null],
-    ["/run/r1", "screen-Run", "id: r1"],
     ["/map", "screen-Map", null],
   ])("%s renders its placeholder", async (initialUrl, testID, param) => {
     renderRouter(routes, { initialUrl });
     const placeholder = await screen.findByTestId(testID);
     expect(placeholder).toBeTruthy();
     if (param) expect(within(placeholder).getByText(param)).toBeTruthy();
+  });
+
+  // G06.02: the run surface is a real surface now. Without the run ports the
+  // root constructs no run member and the screen shows its honest unavailable
+  // state — no fake session stands in (the composition root's rule).
+  test("the run surface without the run ports renders its honest unavailable state", async () => {
+    renderRouter({ "_layout": layoutWith(createServices({})), "run/[id]": Run }, { initialUrl: "/run/r1" });
+    const runScreen = await screen.findByTestId("screen-Run");
+    expect(runScreen).toBeTruthy();
+    expect(within(runScreen).getByText("Сесія недаступная")).toBeTruthy();
   });
 
   test("unknown path renders +not-found, not a crash", async () => {
