@@ -123,6 +123,17 @@ function offerCard(
   };
 }
 
+// The canon order of offers (21 §4): editorial_order, then offer_id for
+// stability — one comparator for the city list, the duplicate-offer dedup
+// (issue #324, the sorted-first wins) and the preview's offer pick.
+function byEditorialOrder(a: CatalogOfferFacts, b: CatalogOfferFacts): number {
+  return a.editorial_order !== b.editorial_order
+    ? a.editorial_order - b.editorial_order
+    : a.offer_id < b.offer_id
+      ? -1
+      : 1;
+}
+
 function routeOnlyCard(route: CatalogEnvelope['routes'][number]): CatalogGuideCard {
   return {
     routeId: route.route_id,
@@ -148,15 +159,18 @@ export function projectGuides(
   offers: readonly CatalogOfferFacts[],
 ): CatalogGuideCard[] {
   const routeIds = new Set(envelope.routes.map((route) => route.route_id));
+  const seenRoutes = new Set<string>();
   const publishedOffers = offers
     .filter((offer) => routeIds.has(offer.route_id))
-    .sort((a, b) =>
-      a.editorial_order !== b.editorial_order
-        ? a.editorial_order - b.editorial_order
-        : a.offer_id < b.offer_id
-          ? -1
-          : 1,
-    )
+    .sort(byEditorialOrder)
+    // A malformed publication may pin several offers to one route (issue
+    // #324): each guide renders exactly once (21 §4) — the sorted-first
+    // offer wins, the duplicates are dropped, not echoed.
+    .filter((offer) => {
+      if (seenRoutes.has(offer.route_id)) return false;
+      seenRoutes.add(offer.route_id);
+      return true;
+    })
     .map<CatalogGuideCard>((offer) =>
       offerCard(offer, envelope.routes.find((route) => route.route_id === offer.route_id)?.version ?? ''),
     );
@@ -398,7 +412,12 @@ export async function loadPreview(
   } catch {
     offers = null;
   }
-  const offer = offers?.find((candidate) => candidate.route_id === routeId) ?? null;
+  // The preview shows the same offer the city list dedups to (issue #324):
+  // the sorted-first offer of the route, never an arbitrary duplicate.
+  const offer =
+    (offers ?? [])
+      .filter((candidate) => candidate.route_id === routeId)
+      .sort(byEditorialOrder)[0] ?? null;
   const card = offer
     ? offerCard(offer, entry.version)
     : routeOnlyCard(entry);

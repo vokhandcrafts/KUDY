@@ -200,6 +200,35 @@ describe('loadCatalog on the published fixtures', () => {
     assert.deepEqual(titles(state.guides), ['Ранні', 'Таксама пяты', 'Пяты', 'r-0']);
   });
 
+  it('renders a route exactly once when a malformed publication pins two offers to it (issue #324)', async () => {
+    const offer = (offer_id: string, editorial_order: number, title: string) => ({
+      offer_id,
+      ref: { kind: 'guide', route_id: 'r-1', version: '1' },
+      city_id: 'city-a',
+      editorial_order,
+      themes: [],
+      localized: { title: { be: title } },
+      season_recommendations: [],
+      availability: { text_locales: ['be'], audio_locales: [] },
+      access: 'free',
+    });
+    // The higher-order duplicate comes first in the input: the winner must be
+    // the canonically sorted one, not the first seen.
+    const index = {
+      schema_version: 1,
+      revision: 'rev',
+      city_id: 'city-a',
+      themes: [],
+      offers: [offer('offer-dup-late', 5, 'Дубль позні'), offer('offer-dup-early', 1, 'Дубль ранні')],
+      collections: [],
+    };
+    const loader = serveIndexPair([{ route_id: 'r-1', version: '1', locales: ['be'], layers: ['base'] }], index);
+    const state = await loadCatalog({ loader, sha256 }, opts, null);
+    assert.ok(state.kind === 'ready');
+    assert.deepEqual(state.guides.map((card) => card.offerId), ['offer-dup-early']);
+    assert.equal(state.guides[0].title, 'Дубль ранні');
+  });
+
   it('renders the empty city when nothing is published (NAV3 input)', async () => {
     const loader: CatalogPathLoader = () =>
       Promise.resolve(JSON.stringify({ catalog_schema_version: 1, routes: [] }));
@@ -542,6 +571,26 @@ describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
   it('a route the catalog does not name is not-published, never a fabricated preview', async () => {
     const state = await loadPreview({ loader: previewLoader(true), sha256 }, opts, 'no-such-route', null);
     assert.deepEqual(state, { kind: 'not-published' });
+  });
+
+  it('duplicate offers on one route: the preview shows the same sorted-first offer the list dedups to (#324)', async () => {
+    const offer = (id: string, order: number, title: string) => ({
+      offer_id: id,
+      editorial_order: order,
+      ref: { kind: 'guide', route_id: 'guide-route-a1' },
+      localized: { title: { be: title } },
+      availability: { text_locales: ['be'], audio_locales: [] },
+      access: 'paid',
+    });
+    // The index deliberately lists the order-2 duplicate first: the pick
+    // must follow the canon order, not the array order.
+    const loader = serveIndexPair(
+      [{ route_id: 'guide-route-a1', version: '1', locales: ['be'], layers: ['base'] }],
+      { offers: [offer('dup-2', 2, 'Дублікат'), offer('dup-1', 1, 'Пераможца')] },
+    );
+    const state = await loadPreview({ loader, sha256 }, opts, 'guide-route-a1', null);
+    assert.ok(state.kind === 'ready');
+    assert.equal(state.preview.title, 'Пераможца');
   });
 
   it('an envelope failure keeps the previous preview (09 §4) or names the error', async () => {
