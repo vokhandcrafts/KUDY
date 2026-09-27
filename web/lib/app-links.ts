@@ -32,6 +32,11 @@ export interface AppLinks {
   // Unpublished until the app ships.
   deepLinkBase: Unpublished | LiveUrl<`https://${string}`>;
   siteOrigin: SiteOrigin;
+  // The public support channel (issue #331): the repository issues — the only
+  // support contact that exists today; a dedicated address is a G11.04 (#299)
+  // release-checklist decision. The privacy page binds its contact link here,
+  // and the store Privacy Policy fields take this URL from the checklist.
+  supportIssuesUrl: `https://${string}`;
   // The internal page every CTA lands on while the stores are unpublished —
   // 16 G10.02: «неўсталяваны дадатак не дае тупік».
   fallbackPath: '/app';
@@ -42,6 +47,7 @@ export const appLinks: AppLinks = {
   playStore: { kind: 'unpublished' },
   deepLinkBase: { kind: 'unpublished' },
   siteOrigin: { kind: 'unpublished' },
+  supportIssuesUrl: 'https://github.com/vokhandcrafts/KUDY/issues',
   fallbackPath: '/app',
 };
 
