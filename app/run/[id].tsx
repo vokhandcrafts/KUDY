@@ -398,15 +398,19 @@ export default function Run() {
             <Text style={styles.barTitle} testID="run-bar-title">
               {playingName ? `${strings.nowPlayingLabel}: ${playingName}` : strings.nothingPlaying}
             </Text>
-            {playing ? (
+            {playingGuide ? (
+              // The bar's control is the guide launch's only: a moment
+              // launch (G07) resumes through its own path, never through
+              // this button — the controller's guide-token rebuild must not
+              // become a silent no-op behind a visible control.
               <Pressable
-                accessibilityLabel={playing.paused ? strings.playAudio : strings.pauseAudio}
-                onPress={() => (playing.paused ? run.resumeCurrentAudio() : run.pauseAudio())}
+                accessibilityLabel={playingGuide.paused ? strings.playAudio : strings.pauseAudio}
+                onPress={() => (playingGuide.paused ? run.resumeCurrentAudio() : run.pauseAudio())}
                 style={styles.barControl}
                 testID="btn-bar-playpause"
               >
                 <Text style={styles.barControlLabel}>
-                  {playing.paused ? strings.playAudio : strings.pauseAudio}
+                  {playingGuide.paused ? strings.playAudio : strings.pauseAudio}
                 </Text>
               </Pressable>
             ) : null}
