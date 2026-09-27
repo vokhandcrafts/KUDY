@@ -49,6 +49,16 @@ export interface UiStrings {
   appBenefitOffline: string;
   appBenefitFullRoutes: string;
   appPageStores: string;
+  privacyTitle: string;
+  privacyIntro: string;
+  privacyWeb: string;
+  privacyAppData: string;
+  privacyLocation: string;
+  privacyAnalytics: string;
+  privacyRetention: string;
+  privacyDeletion: string;
+  privacyPurchases: string;
+  privacyContact: string;
 }
 
 const STRINGS: Record<UiLocale, UiStrings> = { be, en };
