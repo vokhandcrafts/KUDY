@@ -50,7 +50,7 @@ export const en: UiStrings = {
   privacyAnalytics:
     'Analytics only with explicit consent. Events reach the server no earlier than consent is given; refusal means the log stays on the device only, and the app works in full. Coordinates, names and user-entered text are never sent.',
   privacyRetention:
-    'Retention: raw sent events are kept for 14 months, then deleted by a scheduled job; aggregated counts per routes remain without the device identifier.',
+    'Retention: raw sent events are kept for 14 months, then deleted by a scheduled job; aggregated counts per route remain without the device identifier.',
   privacyDeletion:
     'Data deletion: in the app, the My KUDY section has a device-deletion button — it clears the event log on the server and the device record; content downloads stay. No email or request needs to be sent.',
   privacyPurchases:
