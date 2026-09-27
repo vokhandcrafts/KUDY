@@ -5,34 +5,20 @@
 // (a default export) and colocated `*.test.*` suites (the metro blockList
 // keeps those out of the bundle). Dropping a nonscreen module back into
 // app/ — or neutering this file's classification — turns the suite red
-// (implementation-rules 1).
+// (implementation-rules 1). The classifier is shared with the demo driver
+// (test/app-router-classifier.mjs).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { classifyAppFiles } from './app-router-classifier.mjs';
+
 const appDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'app');
 
-function listAppFiles(dir) {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const full = join(dir, entry.name);
-    return entry.isDirectory() ? listAppFiles(full) : [full];
-  });
-}
-
 test('guard: app/ holds only routes, router special files and colocated suites', () => {
-  const offenders = [];
-  for (const file of listAppFiles(appDir)) {
-    const rel = file.slice(appDir.length + 1);
-    const base = rel.split('/').pop();
-    if (base.startsWith('+') || base.startsWith('_')) continue; // router special files
-    if (/\.(test|spec)\.[cm]?[jt]sx?$/.test(base)) continue; // colocated jest suites
-    if (/export\s+default/.test(readFileSync(file, 'utf8'))) continue; // route screens
-    offenders.push(rel);
-  }
   assert.deepEqual(
-    offenders,
+    classifyAppFiles(appDir).nonscreen,
     [],
     'nonscreen modules must live outside app/ (expo-router treats them as routes) — see components/',
   );
