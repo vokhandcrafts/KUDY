@@ -1,5 +1,6 @@
 import { evaluatePackage } from '../services/contentRepo/contentRepo.ts';
 import { readLayerFacts, isSafeSegment } from '../services/contentRepo/inventory.ts';
+import { readRunMapFacts } from '../services/contentRepo/runMapFacts.ts';
 import type {
   BundlesStore,
   EvaluateInput,
@@ -18,6 +19,12 @@ import {
   type PreviewControllerState,
   type PreviewRunSessionPort,
 } from './catalog/previewController.ts';
+import {
+  createRunSurfaceController,
+  type RunPinnedPackagePort,
+  type RunSessionPorts,
+  type RunSurfaceState,
+} from './run/runSurfaceController.ts';
 import type { ControllerStore } from './createControllerStore.ts';
 
 export interface ServicePorts {
@@ -45,6 +52,12 @@ export interface ServicePorts {
   }) => Promise<Readiness>;
   readonly downloadLayer?: (key: LayerKey) => Promise<ActivationResult>;
   readonly runSession?: PreviewRunSessionPort;
+  // G06.02 — the walk's device seams (G05.02–G05.05 contracts): the run
+  // surface controller is constructed only when they are all present. Until
+  // the device adapters land (G05.02.c location, G05.03.b audio, TR-10
+  // filesystem/db), the run surfaces show their honest unavailable state —
+  // the same rule the catalog member follows.
+  readonly run?: { readonly session: RunSessionPorts };
 }
 
 export interface Services {
@@ -63,6 +76,16 @@ export interface Services {
   readonly preview:
     | {
         readonly create: (routeId: string) => ControllerStore<PreviewControllerState>;
+      }
+    | undefined;
+  // G06.02 — one run surface controller per opened route: it resolves the
+  // walk's pinned package (the live row's pin wins — ADR G01.03 §3.4; a
+  // fresh walk takes the single version/locale on disk), constructs the run
+  // controller over the session ports and opens the walk (recover, else
+  // start). The screen renders the surface state.
+  readonly run:
+    | {
+        readonly create: (routeId: string) => ControllerStore<RunSurfaceState>;
       }
     | undefined;
 }
@@ -104,6 +127,62 @@ export function createServices(ports: ServicePorts): Services {
       return { state: facts.state, missingCount: facts.missingCount };
     },
   };
+  // The run surface's pinned-package port, implemented here over the root's
+  // own disk seams (the root is the one module that value-imports services):
+  // the live row's version/locale/tier pin wins (ADR G01.03 §3.4 — a newer
+  // catalog never substitutes a live walk's files); a fresh walk takes the
+  // single version on disk and the first preferred locale present. Anything
+  // ambiguous, absent or damaged is a named refusal — never a guess.
+  const isTierValue = (value: string): value is Tier => value === 'base' || value === 'extended';
+  const runPorts = ports.run?.session;
+  const pinnedPackage: RunPinnedPackagePort | undefined =
+    runPorts && bundlesStore
+      ? {
+          read: async (routeId) => {
+            if (!isSafeSegment(routeId)) return { kind: 'refused', reason: 'run#unsafe-route-id' };
+            const live = await runPorts.recovery.read(routeId);
+            let version: string;
+            let locale: string;
+            let tier: Tier[];
+            if (
+              live &&
+              live.routeId === routeId &&
+              (live.row.state === 'active' || live.row.state === 'paused')
+            ) {
+              version = live.row.version;
+              locale = live.row.locale;
+              tier = live.row.tier.filter(isTierValue);
+            } else {
+              const versions = await bundlesStore.listDir(`bundles/${routeId}`);
+              if (!versions || versions.length === 0) {
+                return { kind: 'refused', reason: 'run#package-not-downloaded' };
+              }
+              if (versions.length > 1) return { kind: 'refused', reason: 'run#package-ambiguous' };
+              version = versions[0];
+              const locales = await bundlesStore.listDir(`bundles/${routeId}/${version}`);
+              if (!locales || locales.length === 0) {
+                return { kind: 'refused', reason: 'run#locale-missing' };
+              }
+              locale = localePreference.find((candidate) => locales.includes(candidate)) ?? locales[0];
+              tier = ['base'];
+            }
+            const facts = await readRunMapFacts(
+              bundlesStore,
+              `bundles/${routeId}/${version}/${locale}/base`,
+              { routeId, version },
+            );
+            if (!facts.ok) return { kind: 'refused', reason: facts.diagnostic };
+            return {
+              kind: 'pinned',
+              version,
+              locale,
+              tier,
+              stops: facts.stops,
+              places: facts.places,
+            };
+          },
+        }
+      : undefined;
   return {
     contentRepo: packageStore && {
       evaluatePackage: (input) => evaluatePackage(packageStore, input),
@@ -127,6 +206,15 @@ export function createServices(ports: ServicePorts): Services {
           },
           routeId,
         ),
+    },
+    run: runPorts && bundlesStore && pinnedPackage && {
+      create: (routeId) =>
+        createRunSurfaceController({
+          routeId,
+          pinnedPackage,
+          session: runPorts,
+          localePreference,
+        }),
     },
   };
 }
