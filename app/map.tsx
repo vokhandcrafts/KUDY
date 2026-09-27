@@ -19,8 +19,8 @@ import {
   type NearbyOfferFacts,
 } from "../controllers/nearby/nearbySurfaceController";
 import { useServices } from "./_layout";
-import { AccessBadge, StateBanner } from "./guide-card";
-import { tokens } from "./design-tokens";
+import { AccessBadge, StateBanner } from "../components/guide-card";
+import { tokens } from "../components/design-tokens";
 
 const styles = StyleSheet.create({
   title: {

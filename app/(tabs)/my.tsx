@@ -14,7 +14,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useMyKudy } from "../../controllers/myKudyController";
 import type { MyKudyState } from "../../controllers/myKudyController";
 import { useServices } from "../_layout";
-import { tokens } from "../design-tokens";
+import { tokens } from "../../components/design-tokens";
 
 const styles = StyleSheet.create({
   screen: {

@@ -200,7 +200,7 @@ test('component-level CSS overrides resolve to canon tokens', () => {
 });
 
 test('production surface tokens stay verbatim with the canon (G06.01.a)', () => {
-  const source = readFileSync(join(root, 'app/design-tokens.ts'), 'utf8');
+  const source = readFileSync(join(root, 'components/design-tokens.ts'), 'utf8');
   // Each entry is anchored to its canon token by name in the trailing
   // comment; the guard fails when a value drifts from the canon or the
   // anchor is dropped.

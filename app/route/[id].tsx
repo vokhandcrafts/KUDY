@@ -12,9 +12,9 @@ import { useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { usePreviewController } from "../../controllers/catalog/usePreviewController";
-import { tokens } from "../design-tokens";
-import { AccessBadge, LocalesLine, StateBanner } from "../guide-card";
-import { WalkButton } from "../walk-button";
+import { tokens } from "../../components/design-tokens";
+import { AccessBadge, LocalesLine, StateBanner } from "../../components/guide-card";
+import { WalkButton } from "../../components/walk-button";
 import { useServices } from "../_layout";
 
 const styles = StyleSheet.create({
@@ -188,7 +188,7 @@ export default function RoutePreview() {
       <Pressable onPress={() => router.back()} style={styles.back} testID="btn-preview-back">
         ← Назад
       </Pressable>
-      <WalkButton />
+      <WalkButton walk={services.walk} />
       {state.surface.kind === "loading" ? <Text style={styles.unavailable}>Загрузка…</Text> : null}
       {state.surface.kind === "unavailable" ? (
         <View testID="preview-unavailable">

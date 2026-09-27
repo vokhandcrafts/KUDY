@@ -10,9 +10,9 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useCatalogController } from "../../../controllers/catalog/useCatalogController";
 import { useServices } from "../../_layout";
-import { tokens } from "../../design-tokens";
-import { CatalogStateView, CITY_TITLE } from "../../guide-card";
-import { WalkButton } from "../../walk-button";
+import { tokens } from "../../../components/design-tokens";
+import { CatalogStateView, CITY_TITLE } from "../../../components/guide-card";
+import { WalkButton } from "../../../components/walk-button";
 
 const styles = StyleSheet.create({
   back: {
@@ -37,7 +37,7 @@ export default function Guides() {
       <Pressable onPress={() => router.back()} style={styles.back} testID="btn-guides-back">
         ← Горад
       </Pressable>
-      <WalkButton />
+      <WalkButton walk={services.walk} />
       <Text style={styles.title}>{CITY_TITLE}</Text>
       <CatalogStateView state={controller?.surface ?? null} variant="rubric" />
     </View>

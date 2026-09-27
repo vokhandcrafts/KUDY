@@ -1,8 +1,11 @@
 // G06.01.a (issue #313) — the shared City/Guides chrome: the guide card, the
 // access badge and the honest-state banner, styled from the canon tokens in
-// app/design-tokens.ts (docs/design/visual-language.md, G06.07). Screens
-// render state — every decision about what exists lives in the catalog
-// controller, nothing is invented here.
+// components/design-tokens.ts (docs/design/visual-language.md, G06.07).
+// Screens render state — every decision about what exists lives in the catalog
+// controller, nothing is invented here. Lives in components/, not app/:
+// expo-router treats every app/ file as a route (issue #339); the controller
+// types come in as a type-only import (components takes no runtime imports
+// from the other zones).
 import { Link } from "expo-router";
 import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 

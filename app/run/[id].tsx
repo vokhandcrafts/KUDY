@@ -18,7 +18,7 @@ import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/runMap";
 import { useRunState, useRunSurface } from "../../controllers/run/runSurfaceController";
-import { tokens } from "../design-tokens";
+import { tokens } from "../../components/design-tokens";
 import { useServices } from "../_layout";
 
 const OSM_ATTRIBUTION_URL = "https://www.openstreetmap.org/copyright";

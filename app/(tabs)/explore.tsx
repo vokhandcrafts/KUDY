@@ -9,9 +9,9 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { useCatalogController } from "../../controllers/catalog/useCatalogController";
 import { useServices } from "../_layout";
-import { tokens } from "../design-tokens";
-import { CatalogStateView, CITY_TITLE } from "../guide-card";
-import { WalkButton } from "../walk-button";
+import { tokens } from "../../components/design-tokens";
+import { CatalogStateView, CITY_TITLE } from "../../components/guide-card";
+import { WalkButton } from "../../components/walk-button";
 
 const styles = StyleSheet.create({
   title: {
@@ -33,7 +33,7 @@ export default function Explore() {
   const controller = useCatalogController(services.catalog?.controller);
   return (
     <View style={{ backgroundColor: tokens.colorPaper, flex: 1, padding: tokens.spaceL }} testID="screen-Explore">
-      <WalkButton />
+      <WalkButton walk={services.walk} />
       <Text style={styles.title}>{CITY_TITLE}</Text>
       <Link href="/map" testID="link-nearby">
         <Text style={styles.nearbyLink}>Побач</Text>
