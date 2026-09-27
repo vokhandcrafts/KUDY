@@ -79,7 +79,7 @@ export async function readMomentFacts(
       const packageRoot = `bundles/${routeId}/${version}`;
       const raw = await readManifest(store, packageRoot, diagnostics);
       for (const moment of raw) {
-        const audioPath = await resolveAudioPath(store, packageRoot, moment.storyId, options.locales);
+        const audioPath = await resolveAudioPath(store, packageRoot, moment.storyId, options.locales, diagnostics);
         const teaserText = await readTeaserText(store, packageRoot, moment.storyId, options.locales);
         moments.push({ ...moment, routeId, version, audioPath, teaserText });
       }
@@ -145,8 +145,12 @@ async function resolveAudioPath(
   packageRoot: string,
   storyId: string,
   locales: readonly string[],
+  diagnostics: string[],
 ): Promise<string | null> {
-  if (!isSafeSegment(storyId)) return null;
+  if (!isSafeSegment(storyId)) {
+    diagnostics.push(`moment-facts#unsafe-story-id:${packageRoot}`);
+    return null;
+  }
   for (const locale of locales) {
     if (!isSafeSegment(locale)) continue;
     const path = `${packageRoot}/${locale}/base/audio/${storyId}.m4a`;

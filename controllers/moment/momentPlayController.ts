@@ -125,8 +125,10 @@ export function createMomentPlayController(deps: MomentPlayDeps): MomentPlayBind
         return;
       case 'FocusRegain':
         if (focusLostAt !== null && deps.now() - focusLostAt > FOCUS_REGAIN_CLOSE_MS) {
-          // §3.7: the launch is closed — a repeat is always a fresh launch
-          // from the beginning (a new token).
+          // §3.7: the launch is closed — the player is released by command (a
+          // closed launch keeps no physical hold, the next listen of the file
+          // is a fresh launch from the beginning with a new token).
+          deps.audio.stop();
           focusLostAt = null;
           store.setState({ kind: 'idle' }, true);
         }

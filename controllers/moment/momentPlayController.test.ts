@@ -126,23 +126,30 @@ test('FocusLoss is a live pause; FocusRegain within 10 min offers Resume of the 
   assert.ok(state.token && token && state.token.seq === token.seq);
 });
 
-test('FocusRegain past 10 min closes the launch — the next Play is a fresh token (§3.7)', () => {
+test('FocusRegain past 10 min closes the launch — the player is released, the next Play is fresh (§3.7)', () => {
   const clock = new ManualClock();
   const port = new FakeAudioPlayerPort();
   const audio = new AudioService({ createPort: () => port });
   const controller = momentHarness(audio, sharedCounter(), clock);
   playOutcome(controller);
   port.focusLoss();
+  // The physical fact after the interruption: the player holds a live pause.
+  port.snapshotValue = { state: 'paused', positionMs: 1000, durationMs: 9000 };
 
   clock.set(10 * 60 * 1000 + 1);
   port.focusRegain();
   assert.deepEqual(controller.store.getState(), { kind: 'idle' });
+  // The closed launch keeps no physical hold: the player is stopped by
+  // command (otherwise the next Play would see a foreign launch and refuse).
+  assert.deepEqual(port.commands, [`play 1:${MOMENT_PATH}`, 'stop']);
 
+  port.snapshotValue = { state: 'playing', positionMs: 0, durationMs: 9000 };
   playOutcome(controller, 'm-1');
   const state = controller.store.getState();
   assert.ok(state.kind === 'playing');
   if (state.kind !== 'playing') return;
   assert.equal(state.token.seq, 2);
+  assert.deepEqual(port.commands, [`play 1:${MOMENT_PATH}`, 'stop', `play 2:${MOMENT_PATH}`]);
 });
 
 test('a repeat of the own launch is stopped by command and re-launched with a fresh token', () => {

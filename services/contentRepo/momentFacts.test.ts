@@ -153,7 +153,7 @@ test('an entry missing cooldown_min is isolated and skipped with its own diagnos
   assert.deepEqual(result.moments.map((moment) => moment.momentId), ['m-ok']);
 });
 
-test('an unsafe story_id from the manifest yields no audio path, never a path (09 §7)', async () => {
+test('an unsafe story_id from the manifest yields a null path with its own diagnostic, never a path (09 §7)', async () => {
   const store = new FakeStore(
     new Map<string, string[]>([
       ['bundles', ['route-a']],
@@ -168,6 +168,34 @@ test('an unsafe story_id from the manifest yields no audio path, never a path (0
   assert.ok(result.ok);
   if (!result.ok) return;
   assert.equal(result.moments[0]?.audioPath, null);
+  assert.deepEqual(result.diagnostics, ['moment-facts#unsafe-story-id:bundles/route-a/1']);
+});
+
+test('a damaged stops.json never blocks the teaser — the honest null text, no manifest diagnostics (rule 14)', async () => {
+  const store = new FakeStore(
+    new Map<string, string[]>([
+      ['bundles', ['route-a', 'route-b']],
+      ['bundles/route-a', ['1']],
+      ['bundles/route-b', ['1']],
+    ]),
+    new Map<string, FileFacts>([
+      ['bundles/route-a/1/moments.json', bytes(moment())],
+      // Broken JSON: the parse-throw branch of the teaser-text read.
+      ['bundles/route-a/1/be/base/stops.json', bytes('{broken')],
+      ['bundles/route-a/1/be/base/audio/s-1.m4a', bytes('audio')],
+      ['bundles/route-b/1/moments.json', bytes(moment({ id: 'm-2' }))],
+      // Valid JSON that is not an array: the shape branch of the same read.
+      ['bundles/route-b/1/be/base/stops.json', bytes('{"story_id": "s-1"}')],
+      ['bundles/route-b/1/be/base/audio/s-1.m4a', bytes('audio')],
+    ]),
+  );
+  const result = await readMomentFacts(store, { locales: ['be'] });
+  assert.ok(result.ok);
+  if (!result.ok) return;
+  assert.deepEqual(result.moments.map((moment) => [moment.momentId, moment.teaserText, moment.audioPath !== null]), [
+    ['m-1', null, true],
+    ['m-2', null, true],
+  ]);
   assert.deepEqual(result.diagnostics, []);
 });
 
