@@ -132,6 +132,17 @@ export interface RunMapStrings {
   readonly schematicNote: string;
   readonly attribution: string;
   readonly markerHint: string;
+  // The history panel's words (G06.03, 11 §2/§3.2): the Peek bar's idle
+  // line, the «Зараз грае» return row, the Full transcript heading with its
+  // honest pending note (no story text exists in the package facts yet),
+  // the Half→Full affordance and the bar's playback control labels.
+  readonly nothingPlaying: string;
+  readonly nowPlayingLabel: string;
+  readonly transcript: string;
+  readonly transcriptPending: string;
+  readonly readMore: string;
+  readonly pauseAudio: string;
+  readonly playAudio: string;
   // The named refusals the surface states carry: the run controller's start
   // refusals (verbatim enums) and the pinned-package port's own refusals.
   // A diagnostic outside the map shows as-is — honest, never invented.
@@ -175,6 +186,13 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     schematicNote: 'Схема кропак маршруту — карта горада зʼявіцца пасля рашэння пра тайлы',
     attribution: 'Дадзеныя © удзельнікі OpenStreetMap, ODbL',
     markerHint: 'Прагляд кропкі. Аўдыё не запускаецца.',
+    nothingPlaying: 'Нічога не грае',
+    nowPlayingLabel: 'Зараз грае',
+    transcript: 'Транскрыпт',
+    transcriptPending: 'Тэкст прыйдзе з кантэнтам пакета',
+    readMore: 'Чытаць',
+    pauseAudio: 'Паўза',
+    playAudio: 'Граць',
     reasonText: {
       'package-incomplete': 'Пакет не поўны',
       'package-needs-recovery': 'Пакет патрабуе аднаўлення',
@@ -207,6 +225,13 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     schematicNote: 'Route points schematic — the city map arrives after the tiles decision',
     attribution: 'Data © OpenStreetMap contributors, ODbL',
     markerHint: 'Point preview. Audio does not start.',
+    nothingPlaying: 'Nothing is playing',
+    nowPlayingLabel: 'Now playing',
+    transcript: 'Transcript',
+    transcriptPending: 'Text arrives with the content package',
+    readMore: 'Read',
+    pauseAudio: 'Pause',
+    playAudio: 'Play',
     reasonText: {
       'package-incomplete': 'Package incomplete',
       'package-needs-recovery': 'Package needs recovery',

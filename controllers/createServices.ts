@@ -1,6 +1,7 @@
 import { evaluatePackage } from '../services/contentRepo/contentRepo.ts';
 import { readLayerFacts, isSafeSegment } from '../services/contentRepo/inventory.ts';
 import { readRunMapFacts } from '../services/contentRepo/runMapFacts.ts';
+import { readRunStoryFacts } from '../services/contentRepo/runStoryFacts.ts';
 import type {
   BundlesStore,
   EvaluateInput,
@@ -172,6 +173,15 @@ export function createServices(ports: ServicePorts): Services {
               { routeId, version },
             );
             if (!facts.ok) return { kind: 'refused', reason: facts.diagnostic };
+            // The panel card's transcript source (11 §3: the transcript is
+            // inspected's), read from the same layer directory as the map
+            // facts. A damaged stops.json never blocks the walk — the card
+            // renders its honest pending word; the engine's truth is the
+            // walk, not the card.
+            const stories = await readRunStoryFacts(
+              bundlesStore,
+              `bundles/${routeId}/${version}/${locale}/base`,
+            );
             return {
               kind: 'pinned',
               version,
@@ -179,6 +189,7 @@ export function createServices(ports: ServicePorts): Services {
               tier,
               stops: facts.stops,
               places: facts.places,
+              stories: stories.ok ? stories.stories : [],
             };
           },
         }
