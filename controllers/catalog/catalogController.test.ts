@@ -7,6 +7,7 @@ import { describe, it } from 'node:test';
 import { createCatalogController } from './catalogController.ts';
 import { createCatalogService } from '../../services/catalog/catalogService.ts';
 import type { CatalogPathLoader } from '../../services/catalog/types.ts';
+import { deferred, loaderFromTexts, waitUntil } from './test-helpers.ts';
 
 // The root constructs the service over its ports and hands it to the
 // controller; the tests repeat exactly that wiring with fake ports.
@@ -14,29 +15,7 @@ function makeController(loader: CatalogPathLoader, sha: (bytes: Uint8Array) => P
   return createCatalogController(createCatalogService({ loader, sha256: sha }, { localePreference: ['be', 'en'] }));
 }
 
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-}
-
-async function waitUntil(predicate: () => boolean): Promise<void> {
-  for (let i = 0; i < 100 && !predicate(); i += 1) {
-    await new Promise((resolve) => setImmediate(resolve));
-  }
-  assert.ok(predicate(), 'condition not reached');
-}
-
 const EMPTY_CATALOG = JSON.stringify({ catalog_schema_version: 1, routes: [] });
-
-function loaderFromTexts(map: Record<string, string>): CatalogPathLoader {
-  return (relPath) =>
-    relPath in map ? Promise.resolve(map[relPath]) : Promise.reject(new Error(`unexpected: ${relPath}`));
-}
 
 const sha256 = async () => 'deadbeef';
 

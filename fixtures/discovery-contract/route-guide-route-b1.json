@@ -1,0 +1,40 @@
+{
+  "route_id": "guide-route-b1",
+  "version": "3",
+  "city_id": "gdansk",
+  "access": "free_base",
+  "distance_m": 1800,
+  "duration_min": 35,
+  "free_stop_count": 2,
+  "published": true,
+  "stops": [
+    {
+      "id": "stop-b1-1",
+      "position": 0,
+      "place_id": "place-b1-1",
+      "access_tier": "base",
+      "story_base_id": "story-b1-1",
+      "preview": {
+        "name": { "be": "Стары порт", "en": "The Old Port" },
+        "announce": {
+          "be": "Адкуль пачыналася кожнае марское падарожжа горада.",
+          "en": "Where every sea journey of the city began."
+        }
+      }
+    },
+    {
+      "id": "stop-b1-2",
+      "position": 1,
+      "place_id": "place-b1-2",
+      "access_tier": "extended",
+      "story_extended_id": "story-b1-2-ext",
+      "preview": {
+        "name": { "be": "Млынавая вуліца", "en": "Mill Street" },
+        "announce": {
+          "be": "Кароткі анонс пашыранай гісторыі пра млын.",
+          "en": "A short teaser of the extended mill story."
+        }
+      }
+    }
+  ]
+}

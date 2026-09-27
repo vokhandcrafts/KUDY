@@ -1,0 +1,41 @@
+{
+  "route_id": "guide-route-a1",
+  "version": "1",
+  "city_id": "gdansk",
+  "access": "paid",
+  "product_id_route": "route_a1_prod",
+  "distance_m": 2400,
+  "duration_min": 45,
+  "free_stop_count": 1,
+  "published": true,
+  "stops": [
+    {
+      "id": "stop-a1-1",
+      "position": 0,
+      "place_id": "place-a1-1",
+      "access_tier": "base",
+      "story_base_id": "story-a1-1",
+      "preview": {
+        "name": { "be": "Мытня", "en": "The Customs House" },
+        "announce": {
+          "be": "Першая гісторыя маршруту сукнараў.",
+          "en": "The first story of the cloth merchants' route."
+        }
+      }
+    },
+    {
+      "id": "stop-a1-2",
+      "position": 1,
+      "place_id": "place-a1-2",
+      "access_tier": "extended",
+      "story_extended_id": "story-a1-2-ext",
+      "preview": {
+        "name": { "be": "Порт", "en": "The Port" },
+        "announce": {
+          "be": "Анонс пашыранай гісторыі пра порт.",
+          "en": "The teaser of the extended port story."
+        }
+      }
+    }
+  ]
+}

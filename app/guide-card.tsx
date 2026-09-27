@@ -104,21 +104,52 @@ export function AccessBadge({ access }: { access: CatalogGuideCard["access"] }) 
 }
 
 // The languages line: offer-backed cards split text from audio (the
-// availability facts); route-only cards state the layer locales without
-// claiming a split nothing published.
-export function GuideCardLocales({ card }: { card: CatalogGuideCard }) {
-  if (!card.localesKnown) {
-    return <Text style={styles.locales}>{`Мовы: ${card.textLocales.join(", ")}`}</Text>;
+// availability facts — L01: text without audio never promises audio);
+// route-only cards state the layer locales without claiming a split nothing
+// published. Shared by the card and the guide preview.
+export function LocalesLine({
+  textLocales,
+  audioLocales,
+  localesKnown,
+  testID,
+}: {
+  textLocales: readonly string[];
+  audioLocales: readonly string[];
+  localesKnown: boolean;
+  testID?: string;
+}) {
+  if (!localesKnown) {
+    return (
+      <Text style={styles.locales} testID={testID}>
+        {`Мовы: ${textLocales.join(", ")}`}
+      </Text>
+    );
   }
-  const audio = card.audioLocales.length > 0 ? `; аўдыё: ${card.audioLocales.join(", ")}` : "";
-  return <Text style={styles.locales}>{`Тэкст: ${card.textLocales.join(", ")}${audio}`}</Text>;
+  const audio = audioLocales.length > 0 ? `; аўдыё: ${audioLocales.join(", ")}` : "";
+  return (
+    <Text style={styles.locales} testID={testID}>
+      {`Тэкст: ${textLocales.join(", ")}${audio}`}
+    </Text>
+  );
+}
+
+export function GuideCardLocales({ card }: { card: CatalogGuideCard }) {
+  return (
+    <LocalesLine
+      textLocales={card.textLocales}
+      audioLocales={card.audioLocales}
+      localesKnown={card.localesKnown}
+    />
+  );
 }
 
 // One guide card (the ordinary card kind of the canon): the same card on the
 // city surface and in the rubric leads to the same preview (D02, 11 §16.1).
-export function GuideCard({ card }: { card: CatalogGuideCard }) {
+// `from` records the opening surface for NAV9 (11 §16.2: every preview
+// opening has a source surface Back returns to).
+export function GuideCard({ card, from }: { card: CatalogGuideCard; from?: "city" | "rubric" }) {
   return (
-    <Link href={`/route/${card.routeId}`} asChild>
+    <Link href={{ pathname: `/route/${card.routeId}`, params: from ? { from } : {} }} asChild>
       <Pressable style={styles.card} testID={`guide-card-${card.routeId}`}>
         <Text style={styles.cardTitle}>{card.title}</Text>
         {card.summary ? <Text style={styles.cardSummary}>{card.summary}</Text> : null}
@@ -162,9 +193,12 @@ function GuideCardsList({
   variant: "city" | "rubric";
 }) {
   const wide = isWide(useWindowDimensions().width);
+  // The NAV9 source surface follows the variant: the city card and the
+  // rubric are the MVP's two preview sources (11 §16.2).
+  const from = variant === "rubric" ? "rubric" : "city";
   const cards = guides.map((card) => (
     <View key={card.routeId} style={wide ? styles.gridColumn : null}>
-      <GuideCard card={card} />
+      <GuideCard card={card} from={from} />
     </View>
   ));
   if (variant === "rubric") {
