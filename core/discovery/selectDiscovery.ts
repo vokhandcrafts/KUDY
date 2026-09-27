@@ -207,12 +207,10 @@ export function selectDiscovery(index: DiscoveryIndexV1, criteria: DiscoveryCrit
     });
   }
 
-  // Rule 6: both lists sort by editorial_order, then offer_id; one ref shows
-  // once. Rules 6–7: exact is everything with no difference; the UI decides
-  // when alternatives are shown, the selector never widens the query.
-  const byEditorialOrder = (a: DiscoveryOffer, b: DiscoveryOffer): number =>
-    a.editorial_order - b.editorial_order || (a.offer_id < b.offer_id ? -1 : a.offer_id > b.offer_id ? 1 : 0);
-
+  // Rule 6: both lists sort by editorial_order, then offer_id (the shared
+  // comparator below); one ref shows once. Rules 6–7: exact is everything
+  // with no difference; the UI decides when alternatives are shown, the
+  // selector never widens the query.
   const shown = new Set<string>();
   const exact: DiscoveryMatch[] = [];
   const alternatives: DiscoveryMatch[] = [];
@@ -225,4 +223,15 @@ export function selectDiscovery(index: DiscoveryIndexV1, criteria: DiscoveryCrit
   }
 
   return { exact, alternatives };
+}
+
+// The canon order of offers (21 §4 rule 6): editorial_order, then offer_id
+// for stability. One comparator for the selector's lists (this module), the
+// catalog projections and the Nearby orders (G07.01) — the canon order's
+// single spelling, never a second contract (implementation-rules 2).
+export function byEditorialOrder<T extends { readonly offer_id: string; readonly editorial_order: number }>(
+  a: T,
+  b: T,
+): number {
+  return a.editorial_order - b.editorial_order || (a.offer_id < b.offer_id ? -1 : a.offer_id > b.offer_id ? 1 : 0);
 }

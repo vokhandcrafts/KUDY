@@ -50,14 +50,25 @@ afterEach(() => {
 });
 
 describe("route placeholders (19 §2.5)", () => {
-  test.each([
-    ["/my", "screen-My KUDY", null],
-    ["/map", "screen-Map", null],
-  ])("%s renders its placeholder", async (initialUrl, testID, param) => {
-    renderRouter(routes, { initialUrl });
-    const placeholder = await screen.findByTestId(testID);
-    expect(placeholder).toBeTruthy();
-    if (param) expect(within(placeholder).getByText(param)).toBeTruthy();
+  test.each([["/my", "screen-My KUDY", null]])(
+    "%s renders its placeholder",
+    async (initialUrl, testID, param) => {
+      renderRouter(routes, { initialUrl });
+      const placeholder = await screen.findByTestId(testID);
+      expect(placeholder).toBeTruthy();
+      if (param) expect(within(placeholder).getByText(param)).toBeTruthy();
+    },
+  );
+
+  // G07.01 (issue #281): the Nearby surface is a real surface now. Without
+  // the catalog ports the root constructs no nearby member and the screen
+  // shows its honest unavailable state — no fake offers stand in (the
+  // composition root's rule).
+  test("the Nearby surface without the catalog ports renders its honest unavailable state", async () => {
+    renderRouter({ "_layout": layoutWith(createServices({})), map: Map }, { initialUrl: "/map" });
+    const nearby = await screen.findByTestId("screen-Map");
+    expect(nearby).toBeTruthy();
+    expect(within(nearby).getByText("Каталог недаступны")).toBeTruthy();
   });
 
   // G06.02: the run surface is a real surface now. Without the run ports the
@@ -182,5 +193,17 @@ describe("rubric surface and the canonical chain (11 §16.1–16.2)", () => {
     expect(await screen.findByTestId("screen-Guides")).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-guides-back"));
     expect(await screen.findByTestId("screen-Explore")).toBeTruthy();
+  });
+
+  // G07.01 (issue #281): Journey 3's entry — the city surface's «Побач»
+  // button opens the Nearby surface (NAV3: it works from the empty city too).
+  test("the Explore surface's «Побач» button opens the Nearby surface", async () => {
+    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
+    renderRouter(
+      { ...withCatalogRoutes(layoutWith(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 }))), map: Map },
+      { initialUrl: "/explore" },
+    );
+    fireEvent.press(await screen.findByTestId("link-nearby"));
+    expect(await screen.findByTestId("screen-Map")).toBeTruthy();
   });
 });

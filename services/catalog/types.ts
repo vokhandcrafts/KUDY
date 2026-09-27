@@ -70,6 +70,36 @@ export type CatalogLoadState =
   | { readonly kind: 'offline'; readonly guides: readonly CatalogGuideCard[]; readonly reason: string }
   | { readonly kind: 'error'; readonly reason: string };
 
+// G07.01 (issue #281) — the Nearby (Побач) projection of a discovery offer:
+// guide and place offers of the validated index. The collection kind belongs
+// to G07.02 and is not projected here (the G06.08 canon: collection cards are
+// G15.03/G07.02 surfaces). `distance_m` is the authored figure 21 §3.2
+// publishes per offer — never a user-relative distance: the index carries no
+// user data at all (21 §4: «сігналы nearby не ўваходзяць»), so the surface
+// orders by it and renders no «ад вас» numbers (P02, 15 §P02: «без выдуманай
+// адлегласці»).
+export interface NearbyOfferFacts {
+  readonly offer_id: string;
+  readonly kind: 'guide' | 'place';
+  readonly route_id: string | null;
+  readonly place_id: string | null;
+  readonly editorial_order: number;
+  readonly title: string | null;
+  readonly summary: string | null;
+  readonly distance_m: number | null;
+  readonly text_locales: readonly string[];
+  readonly audio_locales: readonly string[];
+  readonly access: 'free' | 'paid' | 'mixed';
+  readonly estimated_duration: CatalogOfferFacts['estimated_duration'];
+}
+
+// The Nearby load outcome — the same reader-policy states the city list uses
+// (09 §4: a failure is fatal only with no previous result).
+export type NearbyLoadState =
+  | { readonly kind: 'ready'; readonly offers: readonly NearbyOfferFacts[]; readonly degraded: 'index-unavailable' | null }
+  | { readonly kind: 'offline'; readonly offers: readonly NearbyOfferFacts[]; readonly reason: string }
+  | { readonly kind: 'error'; readonly reason: string };
+
 // The service the composition root hands to the catalog controller: one
 // load call re-runs the reader policy over the ports and returns the next
 // surface state; `previous` is the last ready/offline projection (09 §4 —
@@ -83,6 +113,10 @@ export interface CatalogService {
   // policy, no second parser. `previous` is the last ready projection of
   // THIS route (09 §4: a failure is fatal only with no previous result).
   loadPreview(routeId: string, previous: GuidePreview | null): Promise<PreviewLoadState>;
+  // G07.01 (issue #281) — the Nearby (Побач) offer list: the validated
+  // index's guide and place offers projected for the proximity/review views.
+  // The published array order is returned as-is; the surface orders per view.
+  loadNearby(previous: readonly NearbyOfferFacts[] | null): Promise<NearbyLoadState>;
 }
 
 // One stop row of the preview. Locked = the stop's narrative is not in the

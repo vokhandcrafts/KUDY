@@ -16,10 +16,10 @@ import { after, describe, it } from 'node:test';
 // same surface locally).
 // @ts-expect-error — reader.mjs has no type declarations
 import { readCatalogDoc } from '../../contracts/reader.mjs';
-import { loadCatalog, loadPreview } from './catalogService.ts';
+import { loadCatalog, loadNearby, loadPreview } from './catalogService.ts';
 import { readCatalogEnvelope } from './envelope.ts';
 import { createOriginCatalogLoader } from './loader.ts';
-import type { CatalogGuideCard, CatalogPathLoader, Sha256 } from './types.ts';
+import type { CatalogGuideCard, CatalogPathLoader, NearbyOfferFacts, Sha256 } from './types.ts';
 
 const FIXTURES = path.resolve(import.meta.dirname, '../../fixtures/discovery-contract');
 
@@ -615,6 +615,130 @@ describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
     const cached = await loadPreview({ loader: failing, sha256 }, opts, 'guide-route-b1', previous);
     assert.ok(cached.kind === 'ready' && cached.degraded === 'network gone');
     const bare = await loadPreview({ loader: failing, sha256 }, opts, 'guide-route-b1', null);
+    assert.deepEqual(bare, { kind: 'error', reason: 'network gone' });
+  });
+});
+
+// G07.01 (issue #281) — the Nearby projection of the same validated index:
+// guide and place offers, the collection kind left to G07.02, the authored
+// distance passed through only when the contract range publishes it.
+describe('loadNearby — the Nearby offer projection (G07.01)', () => {
+  const previous: readonly NearbyOfferFacts[] = [
+    {
+      offer_id: 'offer-kept',
+      kind: 'place',
+      route_id: null,
+      place_id: 'place-kept',
+      editorial_order: 9,
+      title: 'Кэш',
+      summary: null,
+      distance_m: null,
+      text_locales: ['be'],
+      audio_locales: [],
+      access: 'free',
+      estimated_duration: null,
+    },
+  ];
+
+  it('projects guide and place offers, drops the collection kind (G07.02)', async () => {
+    const state = await loadNearby({ loader: fixtureLoader, sha256 }, opts, null);
+    assert.equal(state.kind, 'ready');
+    assert.ok(state.kind === 'ready');
+    assert.equal(state.degraded, null);
+    // The published array order returns as-is; the surface orders per view.
+    assert.deepEqual(
+      state.offers.map((offer) => offer.offer_id),
+      [
+        'offer-a1-place',
+        'offer-b1-guide',
+        'offer-c1-place',
+        'offer-e1-place',
+        'offer-g1-place',
+        'offer-h1-place',
+      ],
+    );
+    const [place, guide] = state.offers;
+    assert.equal(guide.kind, 'guide');
+    assert.equal(guide.route_id, 'guide-route-a1');
+    assert.equal(guide.place_id, null);
+    assert.equal(guide.distance_m, 3200);
+    assert.equal(place.kind, 'place');
+    assert.equal(place.route_id, null);
+    assert.equal(place.place_id, 'place-a1');
+    assert.equal(place.distance_m, 800);
+    // An offer without a Belarusian label falls back to any published one —
+    // the availability line stays the honest language statement.
+    const english = state.offers.find((offer) => offer.offer_id === 'offer-e1-place');
+    assert.equal(english?.title, 'Brick Arches Photo Stop');
+  });
+
+  it('honors the locale preference for the localized labels', async () => {
+    const state = await loadNearby(
+      { loader: fixtureLoader, sha256 },
+      { localePreference: ['en', 'be'] },
+      null,
+    );
+    assert.ok(state.kind === 'ready');
+    const guide = state.offers.find((offer) => offer.offer_id === 'offer-b1-guide');
+    assert.equal(guide?.title, "Cloth Merchants' Stories: from the Customs House to the Port");
+  });
+
+  it('a distance outside the published contract range is not published, not invented', async () => {
+    const placeOffer = (distance: unknown): Record<string, unknown> => ({
+      offer_id: 'offer-place-x',
+      ref: { kind: 'place', place_id: 'place-x', content_version: '1' },
+      city_id: 'city-a',
+      editorial_order: 1,
+      themes: [],
+      localized: { title: { be: 'Месца' } },
+      season_recommendations: [],
+      availability: { text_locales: ['be'], audio_locales: [] },
+      access: 'free',
+      ...(distance === undefined ? {} : { distance_m: distance }),
+    });
+    const over = await loadNearby(
+      { loader: serveIndexPair([], { offers: [placeOffer(100_001)] }), sha256 },
+      opts,
+      null,
+    );
+    assert.ok(over.kind === 'ready' && over.offers[0]?.distance_m === null);
+    const negative = await loadNearby(
+      { loader: serveIndexPair([], { offers: [placeOffer(-5)] }), sha256 },
+      opts,
+      null,
+    );
+    assert.ok(negative.kind === 'ready' && negative.offers[0]?.distance_m === null);
+    const absent = await loadNearby(
+      { loader: serveIndexPair([], { offers: [placeOffer(undefined)] }), sha256 },
+      opts,
+      null,
+    );
+    assert.ok(absent.kind === 'ready' && absent.offers[0]?.distance_m === null);
+  });
+
+  it('a catalog without the discovery pointer is a ready empty list, not an error', async () => {
+    const loader: CatalogPathLoader = (relPath) =>
+      relPath === 'catalog.json'
+        ? Promise.resolve(JSON.stringify({ catalog_schema_version: 1, routes: [] }))
+        : Promise.reject(new Error(`unexpected path: ${relPath}`));
+    const state = await loadNearby({ loader, sha256 }, opts, null);
+    assert.deepEqual(state, { kind: 'ready', offers: [], degraded: null });
+  });
+
+  it('a declared index that fails its pins degrades — the state is named, offers stay empty', async () => {
+    const loader: CatalogPathLoader = (relPath) =>
+      relPath === 'catalog.json'
+        ? Promise.resolve(fixtureText('catalog-with-discovery.json'))
+        : Promise.reject(new Error('index-loader-404'));
+    const state = await loadNearby({ loader, sha256 }, opts, null);
+    assert.deepEqual(state, { kind: 'ready', offers: [], degraded: 'index-unavailable' });
+  });
+
+  it('an envelope failure keeps the previous list (09 §4) or names the error', async () => {
+    const failing: CatalogPathLoader = () => Promise.reject(new Error('network gone'));
+    const cached = await loadNearby({ loader: failing, sha256 }, opts, previous);
+    assert.deepEqual(cached, { kind: 'offline', offers: previous, reason: 'network gone' });
+    const bare = await loadNearby({ loader: failing, sha256 }, opts, null);
     assert.deepEqual(bare, { kind: 'error', reason: 'network gone' });
   });
 });

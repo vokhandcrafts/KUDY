@@ -128,6 +128,16 @@ export class LocationService {
     return { state: this.watchdog };
   }
 
+  // G07.01 (issue #281) — the read-only mode a guard consumer needs: a city
+  // surface may arm the subscription only when no walk holds it
+  // ('idle'/'city-surface'), and may release only what it armed. Read-only on
+  // purpose — transitions stay setMode's (19 §3.3); the 'paused' mode of a
+  // live session is visible here while status() alone reports 'idle' for
+  // every disarmed state.
+  currentMode(): LocationMode {
+    return this.mode;
+  }
+
   private arm(): void {
     if (this.permission === 'denied') {
       this.permissionReason = 'denied';
