@@ -106,12 +106,28 @@ function NearbyCard({ offer, strings }: { offer: NearbyOfferFacts; strings: Retu
       <Text style={styles.facts}>{cardFacts(offer, strings)}</Text>
     </>
   );
-  // Guide offers lead to the guide preview (the explicit chain of Journey 3);
-  // place offers render their facts only — the place detail is G07.02. The
-  // tap starts no audio in either case (criterion 3, R04).
+  // Guide offers lead to the guide preview, place offers to the place detail
+  // (G07.02 — Journey 3: «месца або Moment → прэв'ю»); the tap starts no
+  // audio in either case (criterion 3 of G07.01, R04 — the teaser sounds
+  // only through the detail's explicit Play).
   if (offer.kind === "guide" && offer.route_id !== null) {
     return (
       <Link href={`/route/${offer.route_id}`} asChild>
+        <Pressable
+          style={styles.card}
+          testID={`nearby-card-${offer.offer_id}`}
+          accessibilityRole="button"
+          accessibilityLabel={label}
+          accessibilityHint={strings.cardHint}
+        >
+          {inner}
+        </Pressable>
+      </Link>
+    );
+  }
+  if (offer.kind === "place" && offer.place_id !== null) {
+    return (
+      <Link href={`/place/${offer.place_id}`} asChild>
         <Pressable
           style={styles.card}
           testID={`nearby-card-${offer.offer_id}`}

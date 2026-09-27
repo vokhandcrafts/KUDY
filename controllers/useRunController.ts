@@ -176,6 +176,17 @@ export interface RunControllerDeps {
   wakelock: RunWakelock;
   // The restart-recovery read (09 §9.1 — see decision 7).
   recovery: RunRecovery;
+  // G07.02 (ADR G01.02 §3.2/§3.8): the composition root's process-wide
+  // moment counter and the idle moment controller's live launch facts —
+  // threaded to the orchestrator's Start/PlayMoment (optional; a provider
+  // without them keeps the pre-G07.02 own-counter behavior).
+  nextMomentSeq?: () => number;
+  currentMomentPlay?: () => {
+    readonly momentId: string;
+    readonly storyId: string;
+    readonly seq: number;
+    readonly paused: boolean;
+  } | null;
 }
 
 // The named refusals of Start (criterion 1/2): a not-ready package maps its
@@ -297,6 +308,8 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
     route: deps.route,
     stops: deps.stops,
     access: deps.access,
+    nextMomentSeq: deps.nextMomentSeq,
+    currentMomentPlay: deps.currentMomentPlay,
     onCommitted: (before, after) => {
       // The mirror first (the engine state is committed either way), then
       // the durable write — its failure aborts the pending effects below

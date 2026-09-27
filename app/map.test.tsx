@@ -12,6 +12,7 @@ import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
 
 import Map from "./map";
+import PlaceDetail from "./place/[id]";
 import RoutePreview from "./route/[id]";
 import { createServices } from "../controllers/createServices";
 import { fixtureText, layoutWith, makeRunSession, serve, sha256 } from "../test/render-helpers";
@@ -25,6 +26,7 @@ const POINTER_PATH = "discovery/city-a/r-2026-09-14-1/index.json";
 const withMapRoutes = (services: ReturnType<typeof createServices>) => ({
   _layout: layoutWith(services),
   map: Map,
+  "place/[id]": PlaceDetail,
   "route/[id]": RoutePreview,
 });
 
@@ -159,7 +161,7 @@ describe("Nearby surface (G07.01)", () => {
     expect(env.audioPort.commands).toEqual([]);
   });
 
-  test("a place card renders its facts and navigates nowhere (G07.02 owns the detail)", async () => {
+  test("a place card renders its facts and opens the place detail (G07.02 — Journey 3)", async () => {
     await openNearby();
     const place = await screen.findByTestId("nearby-card-offer-a1-place");
     // Criterion 5: the screen-reader label carries the card's facts and the
@@ -169,9 +171,14 @@ describe("Nearby surface (G07.01)", () => {
     // The facts line: an empty audio list renders the honest «—» — the
     // assertion fails on the dangling-label revert (implementation-rules 1).
     expect(within(place).getByText("Тэкст: be, en; аўдыё: —\n~20—30 хв")).toBeTruthy();
-    // A place card is not a button: pressing it opens nothing.
+    // The Journey-3 chain: the place card opens the place detail — the tap
+    // itself still starts no audio (R04; the teaser sounds only through the
+    // detail's explicit Play).
     fireEvent.press(place);
-    expect(screen.getByTestId("screen-Map")).toBeTruthy();
+    expect(await screen.findByTestId("screen-Place detail")).toBeTruthy();
+    // The place detail's facts come from the same validated projection; the
+    // honest empty-teasers state without a bundles store.
+    expect(await screen.findByTestId("place-moments-empty")).toBeTruthy();
   });
 
   test("the surface arms the one subscription on open and releases it on close", async () => {

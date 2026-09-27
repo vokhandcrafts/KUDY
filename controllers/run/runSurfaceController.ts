@@ -54,6 +54,17 @@ export interface RunSessionPorts {
   readonly recovery: RunControllerDeps['recovery'];
   readonly newSessionId: () => string;
   readonly grantedTiers?: () => readonly Tier[];
+  // G07.02 — injected by the composition root over its moment controller
+  // (ADR G01.02 §3.2/§3.8): the process-wide moment counter and the idle
+  // launch facts Start reads. A provider value for these is overridden by
+  // the root — one counter per process, the root's.
+  readonly nextMomentSeq?: () => number;
+  readonly currentMomentPlay?: () => {
+    readonly momentId: string;
+    readonly storyId: string;
+    readonly seq: number;
+    readonly paused: boolean;
+  } | null;
 }
 
 // The walk's pinned package, resolved by the composition root over its own
@@ -164,6 +175,8 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
     grantedTiers: deps.session.grantedTiers,
     wakelock: deps.session.wakelock,
     recovery: deps.session.recovery,
+    nextMomentSeq: deps.session.nextMomentSeq,
+    currentMomentPlay: deps.session.currentMomentPlay,
   });
   try {
     // 09 §9.1: the surface opening reads the live row — a restored walk is a

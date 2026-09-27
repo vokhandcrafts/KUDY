@@ -24,8 +24,11 @@ export interface AudioServiceDeps {
   createPort: () => AudioPlayerPort;
 }
 
-// One live subscription slot: the composition root passes the controller's
-// sink once. A second onEvent() call replaces it.
+// Every subscriber receives every event: the run orchestrator and the moment
+// controller (G07.02) each add their own sink over the one physical player
+// and filter by their own token — a handler whose token is not its launch
+// ignores the event entirely (ADR G01.02 §3.5). Repeated onEvent() calls
+// accumulate listeners; dispose drops them with the port.
 type EventHandler = (event: AudioServiceEvent) => void;
 
 // The port instance the service currently plays on. `alive` dies with
@@ -44,14 +47,14 @@ export class AudioService {
   // accepted finished/failed, and after dispose.
   private current: { key: number; token: PlayToken } | null = null;
   private nextKey = 0;
-  private handler: EventHandler | null = null;
+  private readonly handlers = new Set<EventHandler>();
 
   constructor(deps: AudioServiceDeps) {
     this.createPort = deps.createPort;
   }
 
   onEvent(handler: EventHandler): void {
-    this.handler = handler;
+    this.handlers.add(handler);
   }
 
   // PlayStory / PlayMoment carry the controller's token (ADR G01.02 §3.2);
@@ -174,7 +177,7 @@ export class AudioService {
   }
 
   private emit(event: AudioServiceEvent): void {
-    this.handler?.(event);
+    for (const handler of this.handlers) handler(event);
   }
 }
 
