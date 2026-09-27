@@ -36,8 +36,9 @@ test('criterion 2: without the port the root constructs no contentRepo (the app 
   const services = createServices({});
   // The root constructs a member only when its port is provided; with no
   // ports at all every member stays undefined (the catalog joined as the
-  // second member with G06.01.a).
-  assert.deepEqual(services, { contentRepo: undefined, catalog: undefined });
+  // second member with G06.01.a, the preview factory as the third with
+  // G06.01.b).
+  assert.deepEqual(services, { contentRepo: undefined, catalog: undefined, preview: undefined });
 });
 
 test('criterion 2: a failing port surfaces as a readiness card, not a crash', async () => {

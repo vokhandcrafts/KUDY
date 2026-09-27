@@ -76,4 +76,70 @@ export type CatalogLoadState =
 // a failure is fatal only with no previous result).
 export interface CatalogService {
   load(previous: readonly CatalogGuideCard[] | null): Promise<CatalogLoadState>;
+  // G06.01.b — the guide preview (RouteDetail) assembly for one route: the
+  // envelope's route entry + offer facts, plus the route's public document
+  // (route.json at bundle/<route_id>/<version>/route.json, the build-bundle
+  // public layout) read through the same origin loader — the shared reader
+  // policy, no second parser. `previous` is the last ready projection of
+  // THIS route (09 §4: a failure is fatal only with no previous result).
+  loadPreview(routeId: string, previous: GuidePreview | null): Promise<PreviewLoadState>;
 }
+
+// One stop row of the preview. Locked = the stop's narrative is not in the
+// free package: an extended-tier stop, or any stop of a `paid` route
+// (11 §16.4, 09 §3 `free_stop_count`). Locked rows render name, place,
+// announce and lock only — full texts, transcripts and media are never
+// projected here (NAV5); the route document's stop entries carry only the
+// public `preview` fields by schema, so nothing private can leak through.
+export interface PreviewStop {
+  readonly stopId: string;
+  readonly position: number;
+  readonly placeId: string;
+  readonly tier: 'base' | 'extended';
+  readonly locked: boolean;
+  // Localized per the display preference; null when nothing published —
+  // the row renders the ordinal position instead of an invented name.
+  readonly name: string | null;
+  readonly announce: string | null;
+  readonly optional: boolean;
+}
+
+// The guide preview view state (09 §6.5 RouteDetail row): the card's canon
+// facts plus the route document's published facts. Every field stays null
+// when its source did not publish it — nothing is invented.
+export interface GuidePreview {
+  readonly routeId: string;
+  readonly version: string;
+  readonly title: string;
+  readonly summary: string | null;
+  readonly textLocales: readonly string[];
+  readonly audioLocales: readonly string[];
+  readonly localesKnown: boolean;
+  readonly access: 'free' | 'paid' | 'mixed';
+  // route.json `access` verbatim (route.schema.json: free_base | paid);
+  // null when the route document is unavailable.
+  readonly routeAccess: 'free_base' | 'paid' | null;
+  // The recommended route time: the offer's estimated_duration range when
+  // published, else the route document's duration_min (AC1).
+  readonly estimatedDuration: CatalogOfferFacts['estimated_duration'];
+  readonly durationMin: number | null;
+  // 09 §3 Route.free_stop_count — shown for a paid preview (AC2).
+  readonly freeStopCount: number | null;
+  // The catalog entry's base-layer size in bytes, when published (the
+  // «42 МБ» counts line of 09 §6.5).
+  readonly baseSizeBytes: number | null;
+  // Ordered stops of the route document; null when the document is
+  // unavailable or corrupt (degradedRouteDoc carries the named reason).
+  readonly stops: readonly PreviewStop[] | null;
+  readonly degradedRouteDoc: string | null;
+}
+
+// The load outcome for one route's preview: ready (with the degraded note
+// when the route document or the index did not serve), not-published (the
+// envelope read fine and names no such route — the honest unavailable
+// state, never a fabricated preview) and error (the envelope itself could
+// not be read and no previous result exists, 09 §4).
+export type PreviewLoadState =
+  | { readonly kind: 'ready'; readonly preview: GuidePreview; readonly degraded: string | null }
+  | { readonly kind: 'not-published' }
+  | { readonly kind: 'error'; readonly reason: string };

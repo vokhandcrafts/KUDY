@@ -16,6 +16,9 @@ import type {
   CatalogOfferFacts,
   CatalogPathLoader,
   CatalogService,
+  GuidePreview,
+  PreviewLoadState,
+  PreviewStop,
 } from './types.ts';
 
 export interface CatalogDeps {
@@ -98,6 +101,28 @@ function projectOffer(value: unknown, preference: readonly string[]): CatalogOff
   };
 }
 
+// The offer→card projection, shared by the city list (projectGuides) and the
+// guide preview (loadPreview) — one mapping, two consumers
+// (implementation-rules 3, 8).
+function offerCard(
+  offer: CatalogOfferFacts,
+  version: string,
+): CatalogGuideCard {
+  return {
+    routeId: offer.route_id,
+    version,
+    offerId: offer.offer_id,
+    title: offer.title ?? offer.route_id,
+    summary: offer.summary,
+    textLocales: offer.text_locales,
+    audioLocales: offer.audio_locales,
+    localesKnown: true,
+    access: offer.access,
+    editorialOrder: offer.editorial_order,
+    estimatedDuration: offer.estimated_duration,
+  };
+}
+
 function routeOnlyCard(route: CatalogEnvelope['routes'][number]): CatalogGuideCard {
   return {
     routeId: route.route_id,
@@ -132,19 +157,9 @@ export function projectGuides(
           ? -1
           : 1,
     )
-    .map<CatalogGuideCard>((offer) => ({
-      routeId: offer.route_id,
-      version: envelope.routes.find((route) => route.route_id === offer.route_id)?.version ?? '',
-      offerId: offer.offer_id,
-      title: offer.title ?? offer.route_id,
-      summary: offer.summary,
-      textLocales: offer.text_locales,
-      audioLocales: offer.audio_locales,
-      localesKnown: true,
-      access: offer.access,
-      editorialOrder: offer.editorial_order,
-      estimatedDuration: offer.estimated_duration,
-    }));
+    .map<CatalogGuideCard>((offer) =>
+      offerCard(offer, envelope.routes.find((route) => route.route_id === offer.route_id)?.version ?? ''),
+    );
   const offeredRouteIds = new Set(publishedOffers.map((card) => card.routeId));
   const routeOnly = envelope.routes
     .filter((route) => !offeredRouteIds.has(route.route_id))
@@ -193,46 +208,229 @@ async function loadIndex(
   return offers;
 }
 
-export async function loadCatalog(
-  deps: CatalogDeps,
-  options: CatalogDisplayOptions,
-  previous: readonly CatalogGuideCard[] | null,
-): Promise<CatalogLoadState> {
+// The shared envelope read of both service methods: fetch the catalog, parse
+// it, run the reader projection and reject the invalid status. The callers
+// map the failure to their own previous-result policy (09 §4: a failure is
+// fatal only with no previous result).
+type EnvelopeRead = { ok: true; envelope: CatalogEnvelope } | { ok: false; reason: string };
+
+async function readEnvelope(deps: CatalogDeps): Promise<EnvelopeRead> {
   let text: string;
   try {
     text = await deps.loader(CATALOG_PATH);
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    return previous && previous.length > 0
-      ? { kind: 'offline', guides: previous, reason }
-      : { kind: 'error', reason };
+    return { ok: false, reason: error instanceof Error ? error.message : String(error) };
   }
   let envelope: CatalogEnvelope;
   try {
     envelope = readCatalogEnvelope(JSON.parse(text));
   } catch {
-    const reason = 'catalog-json-corrupt';
-    return previous && previous.length > 0
-      ? { kind: 'offline', guides: previous, reason }
-      : { kind: 'error', reason };
+    return { ok: false, reason: 'catalog-json-corrupt' };
   }
-  if (envelope.status === 'invalid') {
-    const reason = 'catalog-invalid';
+  if (envelope.status === 'invalid') return { ok: false, reason: 'catalog-invalid' };
+  return { ok: true, envelope };
+}
+
+export async function loadCatalog(
+  deps: CatalogDeps,
+  options: CatalogDisplayOptions,
+  previous: readonly CatalogGuideCard[] | null,
+): Promise<CatalogLoadState> {
+  const read = await readEnvelope(deps);
+  if (!read.ok) {
     return previous && previous.length > 0
-      ? { kind: 'offline', guides: previous, reason }
-      : { kind: 'error', reason };
+      ? { kind: 'offline', guides: previous, reason: read.reason }
+      : { kind: 'error', reason: read.reason };
   }
   let offers: CatalogOfferFacts[] | null = null;
   try {
-    offers = await loadIndex(deps, options, envelope);
+    offers = await loadIndex(deps, options, read.envelope);
   } catch {
     offers = null;
   }
-  const guides = projectGuides(envelope, offers ?? []);
-  if (offers === null && envelope.discovery_index !== null) {
+  const guides = projectGuides(read.envelope, offers ?? []);
+  if (offers === null && read.envelope.discovery_index !== null) {
     return { kind: 'ready', guides, degraded: 'index-unavailable' };
   }
   return { kind: 'ready', guides, degraded: null };
+}
+
+// The route document's projected facts: the typed route-level fields plus the
+// ordered stop rows. Only the public projection is built — the document's
+// stop entries carry the public `preview` fields by schema (route.schema.json,
+// stop.schema.json), and any identity fault drops the row rather than
+// rendering a fabricated one (implementation-rules 14: diagnostics, never a
+// crash or an invention).
+interface RouteDocFacts {
+  routeAccess: 'free_base' | 'paid' | null;
+  durationMin: number | null;
+  freeStopCount: number | null;
+  stops: PreviewStop[] | null;
+  degraded: string | null;
+}
+
+const ROUTE_DOC_UNAVAILABLE: RouteDocFacts = {
+  routeAccess: null,
+  durationMin: null,
+  freeStopCount: null,
+  stops: null,
+  degraded: 'route-doc-unavailable',
+};
+
+// An unknown route `access` fails closed: every stop renders locked until the
+// document says otherwise — the preview never grants content by a fault.
+function isRouteAccess(value: unknown): value is 'free_base' | 'paid' {
+  return value === 'free_base' || value === 'paid';
+}
+
+function projectStops(
+  value: readonly unknown[],
+  routeAccess: 'free_base' | 'paid' | null,
+  preference: readonly string[],
+): PreviewStop[] {
+  const stops: PreviewStop[] = [];
+  for (const raw of value) {
+    if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) continue;
+    const v = raw as Record<string, unknown>;
+    if (typeof v.id !== 'string' || v.id.length === 0) continue;
+    if (typeof v.position !== 'number' || !Number.isInteger(v.position)) continue;
+    if (typeof v.place_id !== 'string' || v.place_id.length === 0) continue;
+    if (v.access_tier !== 'base' && v.access_tier !== 'extended') continue;
+    const preview =
+      v.preview && typeof v.preview === 'object' && !Array.isArray(v.preview)
+        ? (v.preview as Record<string, unknown>)
+        : null;
+    stops.push({
+      stopId: v.id,
+      position: v.position,
+      placeId: v.place_id,
+      tier: v.access_tier,
+      locked: routeAccess === 'paid' || v.access_tier === 'extended',
+      name: localizedLabel(preview?.name ?? null, preference),
+      announce: localizedLabel(preview?.announce ?? null, preference),
+      optional: v.optional === true,
+    });
+  }
+  // `position` is the recommended showing order (09 §3) — the preview renders
+  // the published order; the sort is defensive, never a re-numbering.
+  return stops.sort((a, b) => a.position - b.position);
+}
+
+async function loadRouteDoc(
+  deps: CatalogDeps,
+  routeId: string,
+  version: string,
+  preference: readonly string[],
+): Promise<RouteDocFacts> {
+  // The build-bundle public layout: bundle/<route_id>/<version>/route.json.
+  // Catalog-sourced identifiers are untrusted input even from the CDN
+  // (21 §3.3) — the composed path is checked against the shared safe-rel
+  // idiom before any fetch.
+  const rel = `bundle/${routeId}/${version}/route.json`;
+  if (!isSafeRel(rel)) return ROUTE_DOC_UNAVAILABLE;
+  let text: string;
+  try {
+    text = await deps.loader(rel);
+  } catch {
+    return ROUTE_DOC_UNAVAILABLE;
+  }
+  let doc: unknown;
+  try {
+    doc = JSON.parse(text);
+  } catch {
+    return { ...ROUTE_DOC_UNAVAILABLE, degraded: 'route-doc-corrupt' };
+  }
+  if (!doc || typeof doc !== 'object' || Array.isArray(doc)) {
+    return { ...ROUTE_DOC_UNAVAILABLE, degraded: 'route-doc-corrupt' };
+  }
+  const v = doc as Record<string, unknown>;
+  // A foreign document (another route's or another version's) is not this
+  // guide's preview — fail closed to the degraded state, never render it.
+  if (v.route_id !== routeId || v.version !== version) {
+    return { ...ROUTE_DOC_UNAVAILABLE, degraded: 'route-doc-corrupt' };
+  }
+  const routeAccess = isRouteAccess(v.access) ? v.access : null;
+  const durationMin =
+    typeof v.duration_min === 'number' && Number.isInteger(v.duration_min) &&
+    v.duration_min >= 1 && v.duration_min <= 1440
+      ? v.duration_min
+      : null;
+  const freeStopCount =
+    typeof v.free_stop_count === 'number' && Number.isInteger(v.free_stop_count) &&
+    v.free_stop_count >= 0
+      ? v.free_stop_count
+      : null;
+  const stops = Array.isArray(v.stops) ? projectStops(v.stops, routeAccess, preference) : null;
+  // A stops array whose every row failed the identity checks is corruption,
+  // not an empty route — «Кропкі: 0» would be a fabricated fact (11 §16.1:
+  // nothing invented). The honest zero is a published empty array: it stays
+  // an empty list and the count of zero is then true.
+  const allRowsDropped =
+    Array.isArray(v.stops) && v.stops.length > 0 && stops !== null && stops.length === 0;
+  return {
+    routeAccess,
+    durationMin,
+    freeStopCount,
+    stops: allRowsDropped ? null : stops,
+    degraded: stops === null || allRowsDropped ? 'route-doc-corrupt' : null,
+  };
+}
+
+export async function loadPreview(
+  deps: CatalogDeps,
+  options: CatalogDisplayOptions,
+  routeId: string,
+  previous: GuidePreview | null,
+): Promise<PreviewLoadState> {
+  const read = await readEnvelope(deps);
+  if (!read.ok) {
+    return previous
+      ? { kind: 'ready', preview: previous, degraded: read.reason }
+      : { kind: 'error', reason: read.reason };
+  }
+  const entry = read.envelope.routes.find((route) => route.route_id === routeId);
+  // The envelope read fine and names no such route — the honest unavailable
+  // state, never a fabricated preview (11 §16.1: no invented cards).
+  if (!entry) return { kind: 'not-published' };
+  let offers: CatalogOfferFacts[] | null = null;
+  try {
+    offers = await loadIndex(deps, options, read.envelope);
+  } catch {
+    offers = null;
+  }
+  const offer = offers?.find((candidate) => candidate.route_id === routeId) ?? null;
+  const card = offer
+    ? offerCard(offer, entry.version)
+    : routeOnlyCard(entry);
+  const doc = await loadRouteDoc(deps, routeId, entry.version, options.localePreference);
+  const indexDegraded = offers === null && read.envelope.discovery_index !== null;
+  const degraded = [doc.degraded, indexDegraded ? 'index-unavailable' : null].find(
+    (reason): reason is string => reason !== null,
+  ) ?? null;
+  return {
+    kind: 'ready',
+    preview: {
+      routeId: card.routeId,
+      version: entry.version,
+      title: card.title,
+      summary: card.summary,
+      textLocales: card.textLocales,
+      audioLocales: card.audioLocales,
+      localesKnown: card.localesKnown,
+      access: card.access,
+      routeAccess: doc.routeAccess,
+      estimatedDuration: card.estimatedDuration,
+      durationMin: doc.durationMin,
+      freeStopCount: doc.freeStopCount,
+      baseSizeBytes:
+        typeof entry.sizes?.base === 'number' && Number.isFinite(entry.sizes.base)
+          ? entry.sizes.base
+          : null,
+      stops: doc.stops,
+      degradedRouteDoc: doc.degraded,
+    },
+    degraded,
+  };
 }
 
 // The composition root constructs the service over its ports (the loader
@@ -244,5 +442,6 @@ export function createCatalogService(
 ): CatalogService {
   return {
     load: (previous) => loadCatalog(deps, options, previous),
+    loadPreview: (routeId, previous) => loadPreview(deps, options, routeId, previous),
   };
 }

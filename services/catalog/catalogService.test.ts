@@ -16,7 +16,7 @@ import { after, describe, it } from 'node:test';
 // same surface locally).
 // @ts-expect-error — reader.mjs has no type declarations
 import { readCatalogDoc } from '../../contracts/reader.mjs';
-import { loadCatalog } from './catalogService.ts';
+import { loadCatalog, loadPreview } from './catalogService.ts';
 import { readCatalogEnvelope } from './envelope.ts';
 import { createOriginCatalogLoader } from './loader.ts';
 import type { CatalogGuideCard, CatalogPathLoader, Sha256 } from './types.ts';
@@ -348,5 +348,224 @@ describe('origin catalog loader', () => {
     const text = await loader('catalog.json');
     assert.deepEqual(JSON.parse(text), { catalog_schema_version: 1, routes: [] });
     await assert.rejects(loader('missing.json'), /catalog-loader-404/);
+  });
+});
+
+// The route documents of the two published fixture guides (the build-bundle
+// public layout: bundle/<route_id>/<version>/route.json); `withDocs: false`
+// serves a catalog whose guides have no route document on the origin.
+function previewLoader(withDocs: boolean, extra: Record<string, string> = {}): CatalogPathLoader {
+  const map: Record<string, string> = {
+    'catalog.json': fixtureText('catalog-with-discovery.json'),
+    [POINTER_PATH]: fixtureText('index-valid.json'),
+    ...(withDocs
+      ? {
+          'bundle/guide-route-a1/1/route.json': fixtureText('route-guide-route-a1.json'),
+          'bundle/guide-route-b1/3/route.json': fixtureText('route-guide-route-b1.json'),
+        }
+      : {}),
+    ...extra,
+  };
+  return (relPath) =>
+    relPath in map ? Promise.resolve(map[relPath]) : Promise.reject(new Error(`unexpected path: ${relPath}`));
+}
+
+describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
+  it('assembles the offer-backed paid preview from the published pair and the route document', async () => {
+    const state = await loadPreview({ loader: previewLoader(true), sha256 }, opts, 'guide-route-a1', null);
+    assert.equal(state.kind, 'ready');
+    assert.ok(state.kind === 'ready');
+    const preview = state.preview;
+    assert.equal(preview.title, 'Гісторыі сукнараў: ад мытні да порта');
+    assert.equal(preview.access, 'paid');
+    assert.equal(preview.routeAccess, 'paid');
+    assert.equal(preview.durationMin, 45);
+    assert.equal(preview.freeStopCount, 1);
+    assert.equal(preview.baseSizeBytes, 52428800);
+    assert.equal(preview.textLocales.join(','), 'be,en,uk');
+    assert.ok(preview.stops);
+    assert.equal(preview.stops.length, 2);
+    assert.equal(preview.stops[0]?.name, 'Мытня');
+    assert.ok(preview.stops[0]?.announce);
+    assert.ok(state.degraded === null);
+  });
+
+  it('a paid route locks every stop; a free_base route locks only its extended stop (NAV5)', async () => {
+    const paid = await loadPreview({ loader: previewLoader(true), sha256 }, opts, 'guide-route-a1', null);
+    assert.ok(paid.kind === 'ready' && paid.preview.stops);
+    assert.ok(paid.preview.stops.every((stop) => stop.locked), 'paid route: every stop locked');
+
+    const free = await loadPreview({ loader: previewLoader(true), sha256 }, opts, 'guide-route-b1', null);
+    assert.ok(free.kind === 'ready' && free.preview.stops);
+    const [open, locked] = free.preview.stops;
+    assert.equal(open?.locked, false);
+    assert.equal(locked?.locked, true);
+    assert.equal(open?.tier, 'base');
+    assert.equal(locked?.tier, 'extended');
+  });
+
+  it('renders the route-only guide honestly from the entry facts', async () => {
+    const state = await loadPreview({ loader: previewLoader(true), sha256 }, opts, 'guide-route-b1', null);
+    assert.ok(state.kind === 'ready');
+    const preview = state.preview;
+    assert.equal(preview.title, 'guide-route-b1');
+    assert.equal(preview.access, 'free');
+    assert.equal(preview.localesKnown, false);
+    assert.equal(preview.durationMin, 35);
+    assert.equal(preview.estimatedDuration, null);
+  });
+
+  it('a missing route document degrades with the named reason, stops are null — nothing invented', async () => {
+    const state = await loadPreview({ loader: previewLoader(false), sha256 }, opts, 'guide-route-b1', null);
+    assert.ok(state.kind === 'ready');
+    assert.equal(state.preview.stops, null);
+    assert.equal(state.preview.degradedRouteDoc, 'route-doc-unavailable');
+    assert.equal(state.degraded, 'route-doc-unavailable');
+    assert.equal(state.preview.durationMin, null);
+  });
+
+  it('a foreign or corrupt route document fails closed to the corrupt state', async () => {
+    const foreign = JSON.stringify({ route_id: 'other-route', version: '1', stops: [] });
+    const state = await loadPreview(
+      { loader: previewLoader(true, { 'bundle/guide-route-b1/3/route.json': foreign }), sha256 },
+      opts,
+      'guide-route-b1',
+      null,
+    );
+    assert.ok(state.kind === 'ready');
+    assert.equal(state.preview.stops, null);
+    assert.equal(state.preview.degradedRouteDoc, 'route-doc-corrupt');
+  });
+
+  it('per-row identity faults drop the row and keep the valid ones, without a degradation note', async () => {
+    const partial = JSON.stringify({
+      route_id: 'guide-route-b1',
+      version: '3',
+      city_id: 'gdansk',
+      access: 'free_base',
+      distance_m: 1800,
+      duration_min: 35,
+      free_stop_count: 1,
+      published: true,
+      stops: [
+        {
+          id: 'stop-good',
+          position: 0,
+          place_id: 'place-good',
+          access_tier: 'base',
+          story_base_id: 'story-good',
+          preview: { name: { be: 'Захаваная кропка' }, announce: { be: 'Анонс' } },
+        },
+        { id: 'stop-no-place', position: 1, access_tier: 'base', story_base_id: 'story-x' },
+        { id: 'stop-bad-tier', position: 2, place_id: 'place-x', access_tier: 'premium' },
+        { position: 3, place_id: 'place-x', access_tier: 'base' },
+      ],
+    });
+    const state = await loadPreview(
+      { loader: previewLoader(true, { 'bundle/guide-route-b1/3/route.json': partial }), sha256 },
+      opts,
+      'guide-route-b1',
+      null,
+    );
+    assert.ok(state.kind === 'ready');
+    assert.ok(state.preview.stops);
+    assert.deepEqual(state.preview.stops.map((stop) => stop.stopId), ['stop-good']);
+    assert.equal(state.preview.degradedRouteDoc, null);
+  });
+
+  it('a stops array whose every row is malformed is corruption, not an honest zero', async () => {
+    const allBad = JSON.stringify({
+      route_id: 'guide-route-b1',
+      version: '3',
+      city_id: 'gdansk',
+      access: 'free_base',
+      distance_m: 1800,
+      duration_min: 35,
+      free_stop_count: 0,
+      published: true,
+      stops: [
+        { id: 'stop-a', position: 0 },
+        { position: 1, place_id: 'place-x', access_tier: 'base' },
+        { id: 'stop-c', position: 2, place_id: 'place-x', access_tier: 'nope' },
+      ],
+    });
+    const state = await loadPreview(
+      { loader: previewLoader(true, { 'bundle/guide-route-b1/3/route.json': allBad }), sha256 },
+      opts,
+      'guide-route-b1',
+      null,
+    );
+    assert.ok(state.kind === 'ready');
+    assert.equal(state.preview.stops, null);
+    assert.equal(state.preview.degradedRouteDoc, 'route-doc-corrupt');
+    assert.equal(state.degraded, 'route-doc-corrupt');
+  });
+
+  it('a published empty stops array is the honest zero, not a fault', async () => {
+    const empty = JSON.stringify({
+      route_id: 'guide-route-b1',
+      version: '3',
+      city_id: 'gdansk',
+      access: 'free_base',
+      distance_m: 1800,
+      duration_min: 35,
+      free_stop_count: 0,
+      published: true,
+      stops: [],
+    });
+    const state = await loadPreview(
+      { loader: previewLoader(true, { 'bundle/guide-route-b1/3/route.json': empty }), sha256 },
+      opts,
+      'guide-route-b1',
+      null,
+    );
+    assert.ok(state.kind === 'ready');
+    assert.deepEqual(state.preview.stops, []);
+    assert.equal(state.preview.degradedRouteDoc, null);
+  });
+
+  it('an unsafe route_id never composes a fetch path (21 §3.3)', async () => {
+    const unsafeCatalog = JSON.stringify({
+      catalog_schema_version: 1,
+      routes: [{ route_id: '../evil', version: '1', locales: ['be'], layers: ['base'] }],
+    });
+    const loader: CatalogPathLoader = (relPath) => {
+      if (relPath === 'catalog.json') return Promise.resolve(unsafeCatalog);
+      return Promise.reject(new Error(`unexpected path: ${relPath}`));
+    };
+    const state = await loadPreview({ loader, sha256 }, opts, '../evil', null);
+    assert.ok(state.kind === 'ready');
+    assert.equal(state.preview.degradedRouteDoc, 'route-doc-unavailable');
+    assert.equal(state.preview.stops, null);
+  });
+
+  it('a route the catalog does not name is not-published, never a fabricated preview', async () => {
+    const state = await loadPreview({ loader: previewLoader(true), sha256 }, opts, 'no-such-route', null);
+    assert.deepEqual(state, { kind: 'not-published' });
+  });
+
+  it('an envelope failure keeps the previous preview (09 §4) or names the error', async () => {
+    const previous = {
+      routeId: 'guide-route-b1',
+      version: '3',
+      title: 'guide-route-b1',
+      summary: null,
+      textLocales: ['be'],
+      audioLocales: [],
+      localesKnown: false,
+      access: 'free' as const,
+      routeAccess: 'free_base' as const,
+      estimatedDuration: null,
+      durationMin: 35,
+      freeStopCount: null,
+      baseSizeBytes: null,
+      stops: null,
+      degradedRouteDoc: null,
+    };
+    const failing: CatalogPathLoader = () => Promise.reject(new Error('network gone'));
+    const cached = await loadPreview({ loader: failing, sha256 }, opts, 'guide-route-b1', previous);
+    assert.ok(cached.kind === 'ready' && cached.degraded === 'network gone');
+    const bare = await loadPreview({ loader: failing, sha256 }, opts, 'guide-route-b1', null);
+    assert.deepEqual(bare, { kind: 'error', reason: 'network gone' });
   });
 });
