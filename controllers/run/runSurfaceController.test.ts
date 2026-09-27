@@ -20,9 +20,9 @@ import type {
   RunRecovery,
   RunRecoveryLayer,
   RunRecoveryPayload,
-  RunSessionStore,
   RunWakelock,
 } from '../useRunController.ts';
+import { sessionStoreOver } from '../../test/session-store.ts';
 import type { ControllerStore } from '../createControllerStore.ts';
 import { defaultEngineConfig } from '../../core/engine/reducer.ts';
 import { runMapView, runMapStrings } from './runMap.ts';
@@ -32,16 +32,16 @@ import { AudioService } from '../../services/audio/service.ts';
 import { FakeAudioPlayerPort } from '../../services/audio/fake-port.ts';
 import { createAccessPort } from '../../services/download/access.ts';
 import {
-  DbError,
-  checkpointProgress,
   finishSession,
   getLiveSession,
+  getSession,
   openDatabase,
   pauseSession,
   resumeSession,
   startSession,
 } from '../../services/db/db.ts';
 import { nodeSqliteDriver } from '../../services/db/test-fixture.ts';
+import { memoryBundles } from '../../test/memory-bundles.ts';
 import type { SqlDriver } from '../../services/db/types.ts';
 
 // The synthetic pinned package: route-map@1, be, paid. Four stops — stop-1
@@ -102,27 +102,28 @@ const DEFAULT_FILES: Record<string, string> = {
 };
 const BASE_STOP_IDS = ['stop-1', 'stop-2', 'stop-4'];
 
-// The store over an in-memory file map: the same BundlesStore seam the device
-// adapter implements; listDir answers null for "nothing here" (09 §7).
-function memoryBundles(files: Record<string, string>): BundlesStore {
-  return {
-    listDir: async (rel) => {
-      const prefix = rel.endsWith('/') ? rel : `${rel}/`;
-      const names = new Set<string>();
-      for (const key of Object.keys(files)) {
-        if (key.startsWith(prefix)) names.add(key.slice(prefix.length).split('/')[0]);
-      }
-      return names.size > 0 ? [...names] : null;
+// G06.04 (issue #63) — the second guide's package: the confirmed switch's
+// destination, one base stop of its own.
+const ROUTE_OTHER_JSON = JSON.stringify({
+  route_id: 'route-other',
+  version: '1',
+  city_id: 'gdansk',
+  access: 'paid',
+  stops: [
+    {
+      id: 'ostop-1',
+      position: 0,
+      place_id: 'oplace-1',
+      access_tier: 'base',
+      story_base_id: 'ostory-1',
+      preview: { name: { be: 'Іншая', en: 'Other' } },
     },
-    readFile: async (rel) => {
-      const data = files[rel];
-      return data === undefined
-        ? { kind: 'absent' }
-        : { kind: 'present', bytes: new TextEncoder().encode(data) };
-    },
-    statSize: async () => null,
-  };
-}
+  ],
+});
+const PLACES_OTHER_JSON = JSON.stringify([
+  { id: 'oplace-1', content_version: 'cv-1', lat: 54.36, lng: 18.66, trigger_radius_m: 30, kind: 'historic' },
+]);
+const OTHER_LAYER = 'bundles/route-other/1/be/base';
 
 // The injected clock — the controller must not read a wall clock (G05.05
 // criterion 6); every timestamp in these scenarios is a handed-out number.
@@ -145,30 +146,15 @@ interface World {
   driver: SqlDriver;
   granted: Tier[];
   files: Record<string, string>;
+  wakelockCalls: string[];
+  // The world's session ports, kept for restart scenarios: a new
+  // composition root over the same ports models the app restart — the
+  // durable row survives, the in-memory surface cache does not.
+  session: RunSessionPorts;
 }
 
-// The store port over the real services/db public API — the wiring the
-// composition root of the app build implements; the methods list in the
-// row's lifecycle order (pause, resume, finish, checkpoint, start).
-function sessionStoreOver(driver: SqlDriver): RunSessionStore {
-  return {
-    pause: (sessionId, progress) => pauseSession(driver, sessionId, progress),
-    resume: (sessionId) => resumeSession(driver, sessionId),
-    finish: (sessionId, input) => finishSession(driver, sessionId, input),
-    checkpoint: (sessionId, progress) => checkpointProgress(driver, sessionId, progress),
-    start: (input) => {
-      try {
-        startSession(driver, input);
-        return { ok: true };
-      } catch (error) {
-        if (error instanceof DbError && error.rule === 'live-session-exists') {
-          return { ok: false, reason: 'live-session-exists' };
-        }
-        throw error;
-      }
-    },
-  };
-}
+// The store port over the real services/db public API — the shared
+// controllers/test-session-store.ts (the composition root's wiring).
 
 // The read-only restart-recovery view over the real db: the live row plus the
 // recorded layers' stop records from the same pinned facts the map reads —
@@ -229,8 +215,18 @@ function mapWorld(files: Record<string, string> = DEFAULT_FILES): World {
         : { status: 'access-locked', tier: 'base' },
   };
   const packageStops: RunPackageStops = {
-    stopsOfLayer: async (tier) => (tier === 'base' ? [...BASE_STOP_IDS] : tier === 'extended' ? ['stop-3'] : []),
+    stopsOfLayer: async (routeId, tier) =>
+      routeId === 'route-other'
+        ? tier === 'base'
+          ? ['ostop-1']
+          : []
+        : tier === 'base'
+          ? [...BASE_STOP_IDS]
+          : tier === 'extended'
+            ? ['stop-3']
+            : [],
   };
+  const wakelockCalls: string[] = [];
   const session: RunSessionPorts = {
     location: new LocationService({ port: locationPort, clock, permissions: { foreground: 'fg', background: 'bg' } }),
     audio: new AudioService({ createPort: () => audioPort }),
@@ -241,7 +237,10 @@ function mapWorld(files: Record<string, string> = DEFAULT_FILES): World {
     readiness,
     packageStops,
     access: createAccessPort(),
-    wakelock: { acquire: () => {}, release: () => {} },
+    wakelock: {
+      acquire: () => wakelockCalls.push('acquire'),
+      release: () => wakelockCalls.push('release'),
+    },
     recovery: recoveryPortOver(driver),
     newSessionId: (() => {
       let n = 0;
@@ -250,7 +249,7 @@ function mapWorld(files: Record<string, string> = DEFAULT_FILES): World {
     grantedTiers: () => granted,
   };
   const services = createServices({ bundlesStore: memoryBundles(owned), run: { session } });
-  return { services, locationPort, audioPort, clock, driver, granted, files: owned };
+  return { services, locationPort, audioPort, clock, driver, granted, files: owned, wakelockCalls, session };
 }
 
 const settled = (store: ControllerStore<RunSurfaceState>): Promise<Exclude<RunSurfaceState, { status: 'loading' }>> =>
@@ -364,10 +363,16 @@ test('AC1: the walk restores from the live row — paused, nothing sounds, no se
   assert.equal(getLiveSession(world.driver)?.state, 'paused');
   const commandsBefore = world.audioPort.commands.length;
 
-  // The reopening surface: the row's pin wins even with two versions on disk.
+  // The restart: a NEW composition root over the same ports — the durable
+  // row survives the process, the surface cache does not. (G06.04 split the
+  // two re-openings: the same root's re-entry is the NAV7 cache, a restart
+  // is the recovery read.)
   world.files['bundles/route-map/2/be/base/route.json'] = ROUTE_JSON;
   world.files['bundles/route-map/2/be/base/places.json'] = PLACES_JSON;
-  const reopened = await openSurface(world);
+  const restarted = createServices({ bundlesStore: memoryBundles(world.files), run: { session: world.session } });
+  const reopenedStore = restarted.run?.create('route-map');
+  if (!reopenedStore) throw new Error('the restarted root constructed no run member');
+  const reopened = { store: reopenedStore, state: await settled(reopenedStore) };
   assert.equal(reopened.state.status, 'ready');
   assert.equal(reopened.state.controller.getState().run.phase, 'Paused');
   assert.equal(reopened.state.locale, 'be');
@@ -478,4 +483,79 @@ test('BE/EN: the surface locale is the walk pin, the words follow it', async () 
   assert.equal(runMapStrings('fr').status.played, 'праслухана'); // allowlist fallback
   assert.equal(runMapStrings('en').reasonText['package-incomplete'], 'Package incomplete');
   assert.equal(runMapStrings('be').reasonText['package-incomplete'], 'Пакет не поўны');
+});
+
+// G06.04 (issue #63) — the run surface cache (NAV7): «Прагулка» returns to
+// the same controller, so the panel position and the inspected card are the
+// ones the person left behind.
+test('G06.04 NAV7: the re-entry reuses the surface — the panel position is the one left behind', async () => {
+  const world = mapWorld();
+  const first = await openSurface(world);
+  assert.equal(first.state.status, 'ready');
+  first.state.controller.getState().openCard('stop-1');
+  assert.equal(first.state.controller.getState().panel, 'half');
+  assert.equal(first.state.controller.getState().inspected, 'stop-1');
+
+  const again = world.services.run?.create('route-map');
+  assert.equal(again, first.store); // the same controller, not a rebuild
+  const state = again?.getState();
+  assert.ok(state && state.status === 'ready');
+  assert.equal(state.controller.getState().panel, 'half');
+});
+
+// The confirmed switch through the composition root (11 §4.1, ADR G01.03
+// §3.3 switch-guide): the live walk of route-map is finished by route-other's
+// Start transaction, the switched-away surface is retired (Ended mirror,
+// resources released) and evicted — a stale surface never renders.
+test('G06.04 criterion 1: the confirmed switch retires the switched-away surface and evicts the cache', async () => {
+  const world = mapWorld({
+    ...DEFAULT_FILES,
+    [`${OTHER_LAYER}/route.json`]: ROUTE_OTHER_JSON,
+    [`${OTHER_LAYER}/places.json`]: PLACES_OTHER_JSON,
+  });
+  const surfaceA = await openSurface(world); // walk-1 live on route-map
+  const controllerA = surfaceA.state.status === 'ready' ? surfaceA.state.controller : null;
+  assert.ok(controllerA);
+  controllerA.getState().openCard('stop-1'); // the position the person left
+
+  const surfaceB = world.services.run?.create('route-other', { confirmedSwitch: true });
+  if (!surfaceB) throw new Error('the root constructed no run member');
+  const stateB = await settled(surfaceB);
+  assert.equal(stateB.status, 'ready');
+  const runB = stateB.controller.getState().run;
+  assert.ok(runB.phase !== 'Idle');
+  // The old walk is history; the new one is the app's live row.
+  assert.equal(getLiveSession(world.driver)?.routeId, 'route-other');
+  assert.equal(getSession(world.driver, 'walk-1')?.state, 'finished');
+  // The switched-away surface: the mirror is Ended, the wakelock released,
+  // the next open of route-map is a fresh surface, not the stale one.
+  assert.equal(controllerA.getState().run.phase, 'Ended');
+  assert.ok(world.wakelockCalls.includes('release'));
+  const reopenedA = world.services.run?.create('route-map');
+  assert.ok(reopenedA !== undefined && reopenedA !== surfaceA.store);
+});
+
+// The repeat walk (11 §4.3): after End the finished walk's surface is
+// evicted — the next open starts a NEW session (new session_id, clean sets),
+// the finished row stays history.
+test('G06.04 criterion 2: after End the cache evicts — the repeat walk opens a fresh session', async () => {
+  const world = mapWorld();
+  const first = await openSurface(world);
+  const controllerA = first.state.status === 'ready' ? first.state.controller : null;
+  assert.ok(controllerA);
+  const runFirst = controllerA.getState().run;
+  assert.ok(runFirst.phase !== 'Idle');
+  const firstSessionId = runFirst.sessionId;
+
+  controllerA.getState().end();
+  assert.equal(getSession(world.driver, firstSessionId)?.state, 'finished');
+
+  const second = world.services.run?.create('route-map');
+  assert.ok(second !== undefined && second !== first.store); // evicted, not reused
+  const stateSecond = await settled(second);
+  assert.equal(stateSecond.status, 'ready');
+  const runSecond = stateSecond.controller.getState().run;
+  assert.ok(runSecond.phase !== 'Idle');
+  assert.notEqual(runSecond.sessionId, firstSessionId);
+  assert.deepEqual(runSecond.heard, []); // clean sets
 });

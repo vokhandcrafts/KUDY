@@ -14,6 +14,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { usePreviewController } from "../../controllers/catalog/usePreviewController";
 import { tokens } from "../design-tokens";
 import { AccessBadge, LocalesLine, StateBanner } from "../guide-card";
+import { WalkButton } from "../walk-button";
 import { useServices } from "../_layout";
 
 const styles = StyleSheet.create({
@@ -187,6 +188,7 @@ export default function RoutePreview() {
       <Pressable onPress={() => router.back()} style={styles.back} testID="btn-preview-back">
         ← Назад
       </Pressable>
+      <WalkButton />
       {state.surface.kind === "loading" ? <Text style={styles.unavailable}>Загрузка…</Text> : null}
       {state.surface.kind === "unavailable" ? (
         <View testID="preview-unavailable">
@@ -282,8 +284,12 @@ export default function RoutePreview() {
             </Text>
             <Pressable
               onPress={() => {
+                // The confirmed §4.1 switch (NAV8): the flag rides the route
+                // params — the run surface starts through the switch-guide
+                // transaction (the live walk finishes in the same commit the
+                // new row inserts), the dialog state itself carries no write.
                 state.confirmHandover();
-                router.push(`/run/${routeId}`);
+                router.push(`/run/${routeId}?confirmedSwitch=1`);
               }}
               style={styles.confirmButton}
               testID="btn-confirm-start"

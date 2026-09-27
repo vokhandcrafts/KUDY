@@ -12,7 +12,7 @@
 // device seams arrive as its ports. Without them the root constructs no run
 // member and the screen shows its honest unavailable state — no fake stands
 // in for a device adapter (the root's rule since issue #209).
-import { createControllerStore, type ControllerStore } from '../createControllerStore.ts';
+import { useControllerState, createControllerStore, type ControllerStore } from '../createControllerStore.ts';
 import {
   createRunController,
   type RunControllerState,
@@ -32,7 +32,7 @@ import type { PlaybackState } from '../../services/audio/types.ts';
 import type { LocationService } from '../../services/location/service.ts';
 import type { DownloadAccessPort } from '../../services/download/access.ts';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 // The walk's device seams: the RunControllerDeps fields that are not the
 // per-route package facts. The provider owns every default — the surface
@@ -102,6 +102,11 @@ export interface RunSurfaceDeps {
   readonly pinnedPackage: RunPinnedPackagePort;
   readonly session: RunSessionPorts;
   readonly localePreference?: readonly string[];
+  // G06.04 — the §4.1 dialog's confirmed «Завяршыць і пачаць» carried from
+  // the preview through the route params (NAV8): the fresh handover starts
+  // through the switch-guide transaction. A cached surface (the walk is
+  // already live) ignores it.
+  readonly confirmedSwitch?: boolean;
 }
 
 export function createRunSurfaceController(deps: RunSurfaceDeps): ControllerStore<RunSurfaceState> {
@@ -169,8 +174,12 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
   if (controller.getState().run.phase === 'Idle') {
     // No live row for this route: the surface opened for a fresh handover
     // (the preview gated the §4.1 dialog and handed over), so the walk
-    // starts here. A refusal is the named reason — the walk never half-starts.
-    const started = await controller.getState().start();
+    // starts here — through the confirmed switch-guide transaction when the
+    // dialog's «Завяршыць і пачаць» led here (G06.04). A refusal is the
+    // named reason — the walk never half-starts.
+    const started = await controller
+      .getState()
+      .start(deps.confirmedSwitch ? { confirmedSwitch: true } : undefined);
     if (!started.ok) return unavailable(started.reason);
   }
   store.setState({
@@ -188,28 +197,30 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
 // --- React bindings (hooks as controllers, 19 §2.2) ---------------------------
 
 export function useRunSurface(
-  factory: { create(routeId: string): ControllerStore<RunSurfaceState> } | undefined,
+  factory:
+    | {
+        create(
+          routeId: string,
+          options?: { confirmedSwitch?: boolean },
+        ): ControllerStore<RunSurfaceState>;
+      }
+    | undefined,
   routeId: string,
+  confirmedSwitch?: boolean,
 ): RunSurfaceState | null {
-  const store = useMemo(() => factory?.create(routeId), [factory, routeId]);
-  return useStoreState(store);
+  // The confirmed-switch flag is a mount input (the §4.1 handover's route
+  // param): the factory decides with it whether the fresh surface starts
+  // through the switch transaction; a cached surface ignores it.
+  const store = useMemo(
+    () => factory?.create(routeId, confirmedSwitch ? { confirmedSwitch: true } : undefined),
+    [factory, routeId, confirmedSwitch],
+  );
+  return useControllerState(store);
 }
 
 // The run controller's state for the ready surface — a null-tolerant
-// subscription, since the surface resolves asynchronously.
+// subscription, since the surface resolves asynchronously (the shared
+// useControllerState keeps the one shape).
 export function useRunState(store: ControllerStore<RunControllerState> | null): RunControllerState | null {
-  return useStoreState(store);
-}
-
-function useStoreState<T>(store: ControllerStore<T> | null | undefined): T | null {
-  const [state, setState] = useState<T | null>(store ? store.getState() : null);
-  useEffect(() => {
-    if (!store) {
-      setState(null);
-      return;
-    }
-    setState(store.getState());
-    return store.subscribe(setState);
-  }, [store]);
-  return state;
+  return useControllerState(store);
 }

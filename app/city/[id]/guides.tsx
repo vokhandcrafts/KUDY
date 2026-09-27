@@ -12,6 +12,7 @@ import { useCatalogController } from "../../../controllers/catalog/useCatalogCon
 import { useServices } from "../../_layout";
 import { tokens } from "../../design-tokens";
 import { CatalogStateView, CITY_TITLE } from "../../guide-card";
+import { WalkButton } from "../../walk-button";
 
 const styles = StyleSheet.create({
   back: {
@@ -36,6 +37,7 @@ export default function Guides() {
       <Pressable onPress={() => router.back()} style={styles.back} testID="btn-guides-back">
         ← Горад
       </Pressable>
+      <WalkButton />
       <Text style={styles.title}>{CITY_TITLE}</Text>
       <CatalogStateView state={controller?.surface ?? null} variant="rubric" />
     </View>

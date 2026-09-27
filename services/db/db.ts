@@ -149,6 +149,16 @@ export function getLiveSession(driver: SqlDriver): SessionRow | null {
   return row ? toSessionRow(row) : null;
 }
 
+// My KUDY history read (G06.04): every session row of the app — the live
+// walk (active/paused) beside the finished previous runs, newest first.
+// Read-only: history is never deleted or overwritten (ADR §3.1).
+export function listSessionHistory(driver: SqlDriver): SessionRow[] {
+  return driver
+    .prepare(`SELECT ${SESSION_COLUMNS} FROM session ORDER BY started_at DESC, session_id DESC`)
+    .all()
+    .map(toSessionRow);
+}
+
 // The deletion-guard read (G04.04.b, ADR G01.03 §3.4): every non-finished
 // walk of this exact package version pins it against local deletion — a
 // paused session from yesterday counts exactly like the live one, and

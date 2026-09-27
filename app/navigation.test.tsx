@@ -50,14 +50,87 @@ afterEach(() => {
 });
 
 describe("route placeholders (19 §2.5)", () => {
-  test.each([
-    ["/my", "screen-My KUDY", null],
-    ["/map", "screen-Map", null],
-  ])("%s renders its placeholder", async (initialUrl, testID, param) => {
-    renderRouter(routes, { initialUrl });
-    const placeholder = await screen.findByTestId(testID);
+  test("/map renders its placeholder", async () => {
+    renderRouter(routes, { initialUrl: "/map" });
+    const placeholder = await screen.findByTestId("screen-Map");
     expect(placeholder).toBeTruthy();
-    if (param) expect(within(placeholder).getByText(param)).toBeTruthy();
+  });
+
+  // G06.04: My KUDY is a real surface now. Without the history member (the
+  // device db adapter is still to land) the root constructs no member and
+  // the screen shows its honest unavailable state — no fake history.
+  test("My KUDY without the history member renders its honest unavailable state", async () => {
+    renderRouter({ "_layout": layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
+    const myScreen = await screen.findByTestId("screen-My KUDY");
+    expect(myScreen).toBeTruthy();
+    expect(within(myScreen).getByText("Гісторыя недаступная")).toBeTruthy();
+  });
+
+  // G06.04 criterion 3: the session history — the live walk beside the
+  // finished previous runs, the rows exactly what the durable zone keeps.
+  test("My KUDY shows the live walk and the previous runs (11 §16.2, 03)", async () => {
+    const sessionHistory = {
+      list: async () => [
+        {
+          sessionId: "walk-old",
+          routeId: "route-map",
+          version: "1",
+          locale: "be",
+          tier: ["base"],
+          state: "finished" as const,
+          startedAt: 1_000,
+          finishedAt: 2_000,
+          autoFired: [],
+          heard: ["story-1"],
+          lastStopId: null,
+          playSeq: 1,
+        },
+        {
+          sessionId: "walk-live",
+          routeId: "route-other",
+          version: "1",
+          locale: "be",
+          tier: ["base"],
+          state: "paused" as const,
+          startedAt: 5_000,
+          finishedAt: null,
+          autoFired: ["stop-1"],
+          heard: ["story-1", "story-2"],
+          lastStopId: null,
+          playSeq: 2,
+        },
+      ],
+    };
+    renderRouter(
+      { "_layout": layoutWith(createServices({ sessionHistory })), "(tabs)/my": My },
+      { initialUrl: "/my" },
+    );
+    expect(await screen.findByTestId("my-live-section")).toBeTruthy();
+    expect(screen.getByTestId("my-session-walk-live")).toBeTruthy();
+    expect(screen.getByTestId("my-history-section")).toBeTruthy();
+    expect(screen.getByTestId("my-session-walk-old")).toBeTruthy();
+    // The row's own facts: the paused state word and the heard count.
+    expect(screen.getByText(/прыпыненая — з 1970-01-01 — праслышана: 2/)).toBeTruthy();
+  });
+
+  // G06.04 (11 §1, NAV7): the live walk puts «Прагулка» on the section-16
+  // surfaces; pressing it navigates to the walk's Run surface — navigation
+  // only, nothing else runs.
+  test("the live walk shows «Прагулка» on Explore and it returns to the walk's Run", async () => {
+    const services = createServices({
+      runSession: { liveSession: () => ({ routeId: "route-map", title: "Каралеўская" }) },
+    });
+    renderRouter(withCatalogRoutes(layoutWith(services)), { initialUrl: "/explore" });
+    fireEvent.press(await screen.findByTestId("btn-walk-mode"));
+    // The run member is not constructed here (no run ports): the Run screen
+    // renders its honest unavailable state — the navigation itself happened.
+    expect(await screen.findByTestId("screen-Run")).toBeTruthy();
+  });
+
+  test("without a live walk no surface shows «Прагулка» (no fake destination)", async () => {
+    renderRouter(withCatalogRoutes(layoutWith(createServices({}))), { initialUrl: "/explore" });
+    expect(await screen.findByTestId("screen-Explore")).toBeTruthy();
+    expect(screen.queryByTestId("btn-walk-mode")).toBeNull();
   });
 
   // G06.02: the run surface is a real surface now. Without the run ports the
