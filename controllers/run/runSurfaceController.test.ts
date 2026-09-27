@@ -559,3 +559,27 @@ test('G06.04 criterion 2: after End the cache evicts — the repeat walk opens a
   assert.notEqual(runSecond.sessionId, firstSessionId);
   assert.deepEqual(runSecond.heard, []); // clean sets
 });
+
+// The refused surface does not stick in the cache (the review's High): a
+// Start refusal is not the walk's anchor — when the blocker clears, the
+// next open re-resolves instead of serving the cached 'unavailable' forever.
+test('G06.04: a refused surface is evicted — the next open re-resolves', async () => {
+  const world = mapWorld();
+  // The live walk of the other route refuses this route's fresh surface.
+  startSession(world.driver, {
+    sessionId: 'walk-live',
+    routeId: 'route-other',
+    version: '1',
+    locale: 'be',
+    startedAt: 1,
+  });
+  const refused = await openSurface(world);
+  assert.deepEqual(refused.state, { status: 'unavailable', reason: 'live-session-exists' });
+
+  // The blocker clears (the other walk finishes); the same route opens fresh.
+  finishSession(world.driver, 'walk-live', { finishedAt: 2 });
+  const reopened = await openSurface(world);
+  assert.equal(reopened.state.status, 'ready');
+  const run = reopened.state.controller.getState().run;
+  assert.ok(run.phase !== 'Idle'); // the walk started on the re-open
+});

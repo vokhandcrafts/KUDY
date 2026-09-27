@@ -310,6 +310,14 @@ export function createServices(ports: ServicePorts): Services {
           confirmedSwitch: options?.confirmedSwitch,
         });
         runSurfaces.set(routeId, store);
+        // A refused surface (the walk never started) is not the walk's
+        // anchor — NAV7 keeps only a living walk's position. Evict on
+        // 'unavailable': the transient reasons (the package read, the
+        // recovery, the one-live-session rule) may clear, and the next
+        // create re-resolves instead of serving the cached refusal forever.
+        store.subscribe((state) => {
+          if (state.status === 'unavailable') runSurfaces.delete(routeId);
+        });
         return store;
       },
     },

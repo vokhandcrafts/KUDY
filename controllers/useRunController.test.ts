@@ -473,7 +473,8 @@ test('criterion 1: a layer document that vanishes after readiness refuses Start'
   // readiness pass went through the real contentRepo path, then the stops
   // port reports the document gone — the guard between the two must refuse
   // the walk instead of starting it on whatever it could read.
-  const w = world({ packageStops: () => ({ stopsOfLayer: async () => null }) });  t.after(w.discardPackage);
+  const w = world({ packageStops: () => ({ stopsOfLayer: async () => null }) });
+  t.after(w.discardPackage);
 
   assert.deepEqual(await w.store.getState().start(), { ok: false, reason: 'package-incomplete' });
   assert.equal(sessionCount(w), 0);
