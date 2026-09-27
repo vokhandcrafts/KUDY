@@ -114,8 +114,8 @@ export interface CatalogService {
   // THIS route (09 §4: a failure is fatal only with no previous result).
   loadPreview(routeId: string, previous: GuidePreview | null): Promise<PreviewLoadState>;
   // G07.01 (issue #281) — the Nearby (Побач) offer list: the validated
-  // index's guide and place offers projected for the proximity/review views.
-  // The published array order is returned as-is; the surface orders per view.
+  // index's guide and place offers projected for the proximity/review views,
+  // canon-ordered and deduped per ref (21 §4 rule 6, the #324 discipline).
   loadNearby(previous: readonly NearbyOfferFacts[] | null): Promise<NearbyLoadState>;
 }
 

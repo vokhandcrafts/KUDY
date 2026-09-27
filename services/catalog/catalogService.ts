@@ -316,8 +316,11 @@ async function loadIndex(
 }
 
 // G07.01 (issue #281) — the Nearby offer list: the same envelope read and
-// reader policy as the city list, projected for guide and place offers. The
-// published array order returns as-is — the surface orders per its view.
+// reader policy as the city list, projected for guide and place offers. One
+// ref shows once (21 §4 rule 6, the issue #324 canon): the list is ordered
+// by the canon comparator and the sorted-first offer of a duplicated ref
+// survives — the same discipline projectGuides and loadPreview apply. A
+// collection ref drops (G07.02).
 export async function loadNearby(
   deps: CatalogDeps,
   options: CatalogDisplayOptions,
@@ -337,9 +340,17 @@ export async function loadNearby(
   }
   const offers: NearbyOfferFacts[] = [];
   if (raw !== null) {
+    const projected: NearbyOfferFacts[] = [];
     for (const entry of raw) {
-      const projected = projectNearbyOffer(entry, options.localePreference);
-      if (projected !== null) offers.push(projected);
+      const offer = projectNearbyOffer(entry, options.localePreference);
+      if (offer !== null) projected.push(offer);
+    }
+    const seen = new Set<string>();
+    for (const offer of projected.sort(byEditorialOrder)) {
+      const key = `${offer.kind}:${offer.route_id ?? offer.place_id ?? offer.offer_id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      offers.push(offer);
     }
   }
   if (raw === null && read.envelope.discovery_index !== null) {

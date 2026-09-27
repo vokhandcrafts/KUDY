@@ -151,8 +151,8 @@ export default function Map() {
   // One binding per open: the factory resolves the offers store and the
   // location guard (the composition root owns both — 19 §4.2).
   const binding = useMemo(() => services.nearby?.create(), [services.nearby]);
-  const { surface, locationView } = useNearbySurface(binding);
-  const strings = nearbyStrings("be");
+  const { surface, locationView, locale } = useNearbySurface(binding);
+  const strings = nearbyStrings(locale);
   const offers =
     surface && (surface.kind === "ready" || surface.kind === "offline") ? surface.offers : [];
   const list = nearbyOrder(offers, locationView);
@@ -183,14 +183,6 @@ export default function Map() {
             <Text style={styles.note} testID="nearby-location-note">
               {note}
             </Text>
-          ) : null}
-          {surface.kind === "offline" ? (
-            <StateBanner
-              tone="notice"
-              reason={strings.cacheBanner}
-              detail={surface.reason}
-              testID="nearby-banner"
-            />
           ) : null}
           {surface.kind === "ready" && surface.degraded !== null ? (
             <StateBanner tone="notice" reason={strings.indexDegraded} testID="nearby-degraded" />

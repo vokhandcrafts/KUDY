@@ -119,23 +119,30 @@ const STATUS_POLL_MS = 500;
 
 export function useNearbySurface(
   binding: NearbySurfaceBinding | undefined,
-): { surface: NearbySurfaceState | null; locationView: NearbyLocationView } {
+): { surface: NearbySurfaceState | null; locationView: NearbyLocationView; locale: string } {
   const store = binding?.store;
   const surface = useStoreState(store);
   const location = binding?.location;
+  const locale = binding?.locale ?? 'be';
   const [locationView, setLocationView] = useState<NearbyLocationView>({ state: 'absent' });
   useEffect(() => {
     if (!location) {
       setLocationView({ state: 'absent' });
       return;
     }
-    const decision = nearbyArmingDecision(location.currentMode());
     let armedByUs = false;
-    if (decision === 'arm') {
-      location.setMode('city-surface');
-      armedByUs = true;
-    }
-    const read = () => setLocationView(nearbyLocationView(location));
+    const read = () => {
+      // The arming decision is re-evaluated every tick, not only on mount: a
+      // walk that started (or ended) while the surface stays open changes the
+      // mode under us — the guard arms as soon as the mode is free again and
+      // never touches a walk's own subscription (criterion 4, 11 §7: the
+      // named state never sticks).
+      if (nearbyArmingDecision(location.currentMode()) === 'arm' && !armedByUs) {
+        location.setMode('city-surface');
+        armedByUs = true;
+      }
+      setLocationView(nearbyLocationView(location));
+    };
     read();
     // The service emits no status change event; the surface polls its
     // status() read while open (a permission answer, a grant or a watchdog
@@ -150,7 +157,7 @@ export function useNearbySurface(
       }
     };
   }, [location]);
-  return { surface, locationView };
+  return { surface, locationView, locale };
 }
 
 // --- Words (BE/EN; the language canon is 09 §0 — be + en) ---------------------
@@ -166,7 +173,6 @@ export interface NearbyStrings {
   readonly empty: string;
   readonly unavailable: string;
   readonly loading: string;
-  readonly cacheBanner: string;
   readonly indexDegraded: string;
   readonly mapNote: string;
   readonly cardHint: string;
@@ -187,7 +193,6 @@ const STRINGS: Record<'be' | 'en', NearbyStrings> = {
     empty: 'Прапановы пакуль не апублікаваны',
     unavailable: 'Каталог недаступны',
     loading: 'Загрузка…',
-    cacheBanner: 'Папярэдні валідны кэш',
     indexDegraded: 'Індэкс прапаноў часова недаступны',
     mapNote: 'Карта горада зʼявіцца пасля рашэння пра тайлы',
     cardHint: 'Картка прапановы. Аўдыё не запускаецца.',
@@ -206,7 +211,6 @@ const STRINGS: Record<'be' | 'en', NearbyStrings> = {
     empty: 'No offers published yet',
     unavailable: 'Catalog unavailable',
     loading: 'Loading…',
-    cacheBanner: 'Previous valid cache',
     indexDegraded: 'The offers index is temporarily unavailable',
     mapNote: 'The city map arrives after the tiles decision',
     cardHint: 'Offer card. Audio does not start.',

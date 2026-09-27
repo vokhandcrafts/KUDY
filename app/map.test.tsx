@@ -187,8 +187,45 @@ describe("Nearby surface (G07.01)", () => {
     expect(screen.queryByTestId("nearby-degraded")).toBeNull();
   });
 
-  test("a live walk keeps its subscription: Nearby neither arms nor releases it", async () => {
+  test("a walk that ends while the surface is open hands the subscription back", async () => {
     serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
+    const { location, locationPort } = makeRunSession();
+    // A walk holds the subscription when the surface opens.
+    location.setMode("active-guide");
+    const rendered = renderRouter(
+      withMapRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256, location })),
+      { initialUrl: "/map" },
+    );
+    await screen.findByTestId("nearby-card-offer-e1-place");
+    expect(screen.getByTestId("nearby-mode").props.children).toBe("Агляд");
+    expect(locationPort.commands.filter((command) => command.startsWith("start"))).toEqual(["start 1"]);
+
+    // The walk ends (runOrchestrator's End → idle): within one poll the
+    // surface re-evaluates the guard, arms the free subscription and shows
+    // the proximity view — the held note never sticks (11 §7).
+    act(() => {
+      location.setMode("idle");
+    });
+    await waitFor(() => expect(screen.getByTestId("nearby-mode").props.children).toBe("Паблізу"), {
+      timeout: 2000,
+    });
+    expect(location.currentMode()).toBe("city-surface");
+    expect(locationPort.commands.filter((command) => command.startsWith("start"))).toEqual([
+      "start 1",
+      "start 2",
+    ]);
+
+    // Closing the surface releases what IT armed; the walk's own End already
+    // released the walk's subscription (stop 1 at the idle transition).
+    rendered.unmount();
+    expect(locationPort.commands.filter((command) => command.startsWith("stop"))).toEqual([
+      "stop 1",
+      "stop 2",
+    ]);
+    expect(location.currentMode()).toBe("idle");
+  });
+
+  test("a live walk keeps its subscription: Nearby neither arms nor releases it", async () => {    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
     const { session, location, locationPort } = makeRunSession();
     // An active walk holds the subscription (the Run surface's mode).
     location.setMode("active-guide");

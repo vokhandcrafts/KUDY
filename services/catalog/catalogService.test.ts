@@ -623,6 +623,24 @@ describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
 // guide and place offers, the collection kind left to G07.02, the authored
 // distance passed through only when the contract range publishes it.
 describe('loadNearby — the Nearby offer projection (G07.01)', () => {
+  // The full offer shape the projection reads — one builder for the negative
+  // suites (a sibling literal pair is a jscpd clone).
+  const nearbyOffer = (
+    offer_id: string,
+    ref: Record<string, unknown>,
+    editorial_order: number,
+    title: string,
+  ): Record<string, unknown> => ({
+    offer_id,
+    ref,
+    city_id: 'city-a',
+    editorial_order,
+    themes: [],
+    localized: { title: { be: title } },
+    season_recommendations: [],
+    availability: { text_locales: ['be'], audio_locales: [] },
+    access: 'free',
+  });
   const previous: readonly NearbyOfferFacts[] = [
     {
       offer_id: 'offer-kept',
@@ -645,19 +663,19 @@ describe('loadNearby — the Nearby offer projection (G07.01)', () => {
     assert.equal(state.kind, 'ready');
     assert.ok(state.kind === 'ready');
     assert.equal(state.degraded, null);
-    // The published array order returns as-is; the surface orders per view.
+    // The canon order (21 §4 rule 6: editorial_order, offer_id tiebreak).
     assert.deepEqual(
       state.offers.map((offer) => offer.offer_id),
       [
-        'offer-a1-place',
         'offer-b1-guide',
+        'offer-a1-place',
         'offer-c1-place',
         'offer-e1-place',
         'offer-g1-place',
         'offer-h1-place',
       ],
     );
-    const [place, guide] = state.offers;
+    const [guide, place] = state.offers;
     assert.equal(guide.kind, 'guide');
     assert.equal(guide.route_id, 'guide-route-a1');
     assert.equal(guide.place_id, null);
@@ -670,6 +688,41 @@ describe('loadNearby — the Nearby offer projection (G07.01)', () => {
     // the availability line stays the honest language statement.
     const english = state.offers.find((offer) => offer.offer_id === 'offer-e1-place');
     assert.equal(english?.title, 'Brick Arches Photo Stop');
+  });
+
+  it('a duplicated ref renders once: the sorted-first offer wins (issue #324 canon)', async () => {
+    // The index deliberately lists the order-2 duplicate first: the pick
+    // must follow the canon order, not the array order.
+    const loader = serveIndexPair([], {
+      offers: [
+        nearbyOffer('offer-dup-2', { kind: 'guide', route_id: 'r-dup', version: '1' }, 2, 'Дублікат'),
+        nearbyOffer('offer-dup-1', { kind: 'guide', route_id: 'r-dup', version: '1' }, 1, 'Пераможца'),
+        nearbyOffer('offer-place-twin-b', { kind: 'place', place_id: 'place-twin', content_version: '1' }, 4, 'Двойчы'),
+        nearbyOffer('offer-place-twin-a', { kind: 'place', place_id: 'place-twin', content_version: '1' }, 3, 'Адзінае месца'),
+      ],
+    });
+    const state = await loadNearby({ loader, sha256 }, opts, null);
+    assert.ok(state.kind === 'ready');
+    assert.deepEqual(
+      state.offers.map((offer) => offer.offer_id),
+      ['offer-dup-1', 'offer-place-twin-a'],
+    );
+  });
+
+  it('a corrupt ref drops whole: a guide without route_id, a place without place_id', async () => {
+    const loader = serveIndexPair([], {
+      offers: [
+        nearbyOffer('offer-guide-no-route', { kind: 'guide', version: '1' }, 1, 'Без маршруту'),
+        nearbyOffer('offer-place-no-place', { kind: 'place', content_version: '1' }, 2, 'Без месца'),
+        nearbyOffer('offer-kept', { kind: 'place', place_id: 'place-kept', content_version: '1' }, 3, 'Застаецца'),
+      ],
+    });
+    const state = await loadNearby({ loader, sha256 }, opts, null);
+    assert.ok(state.kind === 'ready');
+    assert.deepEqual(
+      state.offers.map((offer) => offer.offer_id),
+      ['offer-kept'],
+    );
   });
 
   it('honors the locale preference for the localized labels', async () => {
