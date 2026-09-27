@@ -101,3 +101,11 @@
   pass з note), не бинарны мапінг: неблакавальнае папярэджанне не павінна
   паказвацца як fail, калі report.ok = true.
   Выпраўлена: tools/validate/verify-audio.mjs, machineRow — issue #316.
+
+- key: missing-route-dedup — праекцыя каталогу рэндэрыць адзін гід роўна адзін
+  раз (21 §4): калі ўваходны спіс offer'аў можа трымаць два offer'ы з
+  аднолькавым route_id (скажаная публікацыя), праекцыя адкідвае дублікаты па
+  route_id пасля кананічнага сартавання (сартаваны першы выйграе), а не
+  рэндэрыць адзін і той жа гід двойчы на Explore і ў рубрыцы «Гіды»;
+  negative-тэст праз production loadCatalog мусіць упадаць пры адкате фільтра.
+  Выпраўлена: services/catalog/catalogService.ts, projectGuides — issue #324.
