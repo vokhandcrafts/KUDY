@@ -1,13 +1,19 @@
-// G06.02 (issue #278) — the Run surface (11 §6): the route's points on an
-// honest schematic map — no tile engine exists until the map decision
-// (ADR G00.02) is accepted — with the five marker states computed by the
-// engine (ADR G01.01 §4.5), the POI points visually distinct from the audio
-// points, and the ODbL attribution visible and tappable. A marker tap opens
-// the point preview and nothing else: no audio, no session change (11 §6).
+// G06.02 (issue #278) + G06.03 (issue #279) — the Run surface (11 §6): the
+// route's points on an honest schematic map — no tile engine exists until
+// the map decision (ADR G00.02) is accepted — with the five marker states
+// computed by the engine (ADR G01.01 §4.5), the POI points visually distinct
+// from the audio points, and the ODbL attribution visible and tappable.
+// G06.03 adds the history panel (11 §2): one bottom sheet over the map with
+// three fixed heights — the Peek player bar (the session's anchor), the
+// Half preview and the Full story with the transcript slot. The panel's
+// position and the inspected card are the run controller's UI state: a
+// marker tap opens the card (11 §2), ✕ and Back dismiss one position down
+// and are identical (AC1), the transcript belongs to `inspected` while the
+// bar and its progress track belong to the audible story (AC2), and no
+// panel change dispatches to the audio service (AC3).
 // The walk itself lives in the run controller the composition root built —
 // this surface owns no GPS, no player and no engine (AC4).
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/runMap";
@@ -148,6 +154,105 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: tokens.spaceS,
   },
+  // The history panel (G06.03): one sheet over the map, three heights.
+  panel: {
+    backgroundColor: tokens.colorCard,
+    borderColor: tokens.colorLine,
+    borderTopLeftRadius: tokens.radiusBase,
+    borderTopRightRadius: tokens.radiusBase,
+    borderTopWidth: 1,
+    bottom: 0,
+    left: 0,
+    padding: tokens.spaceM,
+    position: "absolute",
+    right: 0,
+  },
+  panelHalf: {
+    height: "45%",
+  },
+  panelFull: {
+    height: "92%",
+  },
+  panelBar: {
+    backgroundColor: tokens.colorCard,
+    borderColor: tokens.colorLine,
+    borderTopWidth: 1,
+    bottom: 0,
+    left: 0,
+    padding: tokens.spaceM,
+    position: "absolute",
+    right: 0,
+  },
+  barTitle: {
+    color: tokens.colorInk,
+    flexShrink: 1,
+    fontSize: tokens.fontBaseSize,
+    fontWeight: tokens.fontWeightStrong,
+  },
+  barRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: tokens.spaceS,
+  },
+  barControl: {
+    borderColor: tokens.colorLine,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    paddingHorizontal: tokens.spaceM,
+    paddingVertical: tokens.spaceS,
+  },
+  barControlLabel: {
+    color: tokens.colorAccent,
+    fontSize: tokens.fontBaseSize,
+  },
+  progressTrack: {
+    backgroundColor: tokens.colorLine,
+    height: 2,
+    marginTop: tokens.spaceS,
+  },
+  progressFill: {
+    backgroundColor: tokens.colorAccent,
+    height: "100%",
+  },
+  nowPlayingRow: {
+    borderColor: tokens.colorNoticeBorder,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    marginBottom: tokens.spaceS,
+    padding: tokens.spaceS,
+  },
+  nowPlayingText: {
+    color: tokens.colorInk,
+    fontSize: tokens.fontBaseSize,
+  },
+  transcriptHeading: {
+    color: tokens.colorInk,
+    fontSize: tokens.fontBaseSize,
+    fontWeight: tokens.fontWeightStrong,
+    marginTop: tokens.spaceS,
+  },
+  transcriptNote: {
+    color: tokens.colorMuted,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  transcriptBody: {
+    color: tokens.colorInk,
+    fontSize: tokens.fontBaseSize,
+    marginTop: 2,
+  },
+  readButton: {
+    alignItems: "center",
+    borderColor: tokens.colorAccent,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    marginTop: tokens.spaceS,
+    padding: tokens.spaceS,
+  },
+  readLabel: {
+    color: tokens.colorAccent,
+    fontSize: tokens.fontBaseSize,
+  },
 });
 
 export default function Run() {
@@ -159,7 +264,6 @@ export default function Run() {
   const ready = surface?.status === "ready" ? surface : null;
   const run = useRunState(ready?.controller ?? null);
   const strings = runMapStrings(ready?.locale ?? "be");
-  const [selected, setSelected] = useState<string | null>(null);
 
   if (surface === null || surface.status === "unavailable") {
     return (
@@ -184,16 +288,47 @@ export default function Run() {
     );
   }
   const view = runMapView(run.run, surface.stops, surface.facts, surface.places, [surface.locale, "be", "en"]);
-  const selectedMarker = view.markers.find((marker) => marker.stopId === selected) ?? null;
-  const preview = selectedMarker
-    ? {
-        name: selectedMarker.name,
-        status: strings.status[selectedMarker.status],
-      }
+  // The panel's two pointers (11 §3.2): `inspected` — whose card is open —
+  // and the audible launch the bar mirrors. Independent by design: the card
+  // follows the taps, the bar follows the sound.
+  const session = run.run.phase === "Idle" ? null : run.run;
+  const playing = session?.playing ?? null;
+  const playingGuide = playing && playing.owner === "guide" ? playing : null;
+  const playingName = playing
+    ? playingGuide
+      ? (view.markers.find((marker) => marker.stopId === playingGuide.stopId)?.name ?? playingGuide.storyId)
+      : playing.storyId
     : null;
+  const inspectedMarker = run.inspected
+    ? (view.markers.find((marker) => marker.stopId === run.inspected) ?? null)
+    : null;
+  // The strip's fill is the audible audio's own line (AC2): read from the
+  // audio service's computed state (09 §6.3) — never from the card's data.
+  const playback = surface.playback();
+  const stripProgress =
+    (playback.kind === "playing" || playback.kind === "paused") && playback.durationMs > 0
+      ? Math.min(1, Math.max(0, playback.positionMs / playback.durationMs))
+      : 0;
+  // The inspected card's transcript (11 §3.2): the base story the pinned
+  // layer's stops.json names for the stop. A locked card shows none; a
+  // story without a readable transcript keeps the honest pending note —
+  // never invented text.
+  const inspectedTranscript = (() => {
+    if (!inspectedMarker || inspectedMarker.status === "locked") return null;
+    const storyId = surface.facts.find((fact) => fact.stopId === inspectedMarker.stopId)?.storyBaseId;
+    if (storyId === undefined) return null;
+    return surface.stories.find((story) => story.storyId === storyId)?.transcript ?? null;
+  })();
+  // ✕ and Back dismiss identically (AC1, 11 §2 — "адно і тое ж"); from Peek
+  // the Back button is the navigation out of Run — it never stops the audio
+  // and never changes the session (AC4).
+  const backOrDismiss = () => {
+    if (run.panel !== "peek") run.dismissPanel();
+    else router.back();
+  };
   return (
     <View style={styles.screen} testID="screen-Run">
-      <Pressable onPress={() => router.back()} style={styles.back} testID="btn-run-back">
+      <Pressable onPress={backOrDismiss} style={styles.back} testID="btn-run-back">
         {strings.back}
       </Pressable>
       {run.run.phase === "Paused" ? (
@@ -230,7 +365,7 @@ export default function Run() {
               key={marker.stopId}
               accessibilityHint={strings.markerHint}
               accessibilityLabel={`${marker.name}, ${strings.status[marker.status]}`}
-              onPress={() => setSelected(marker.stopId)}
+              onPress={() => run.openCard(marker.stopId)}
               style={[
                 styles.marker,
                 { left: `${marker.nx * 100}%`, top: `${marker.ny * 100}%`, transform: [{ translateX: -60 }, { translateY: -9 }] },
@@ -257,13 +392,79 @@ export default function Run() {
       >
         {strings.attribution}
       </Text>
-      {preview ? (
-        <View style={styles.preview} testID="run-preview">
-          <Text style={styles.previewName}>{preview.name}</Text>
-          <Text style={styles.previewStatus}>{preview.status}</Text>
-          <Pressable onPress={() => setSelected(null)} style={styles.closeButton} testID="btn-preview-close">
-            <Text style={styles.closeLabel}>{strings.close}</Text>
-          </Pressable>
+      {session && session.phase !== "Ended" && run.panel === "peek" ? (
+        <View style={styles.panelBar} testID="run-panel-bar">
+          <View style={styles.barRow}>
+            <Text style={styles.barTitle} testID="run-bar-title">
+              {playingName ? `${strings.nowPlayingLabel}: ${playingName}` : strings.nothingPlaying}
+            </Text>
+            {playingGuide ? (
+              // The bar's control is the guide launch's only: a moment
+              // launch (G07) resumes through its own path, never through
+              // this button — the controller's guide-token rebuild must not
+              // become a silent no-op behind a visible control.
+              <Pressable
+                accessibilityLabel={playingGuide.paused ? strings.playAudio : strings.pauseAudio}
+                onPress={() => (playingGuide.paused ? run.resumeCurrentAudio() : run.pauseAudio())}
+                style={styles.barControl}
+                testID="btn-bar-playpause"
+              >
+                <Text style={styles.barControlLabel}>
+                  {playingGuide.paused ? strings.playAudio : strings.pauseAudio}
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+          {playing ? (
+            <View style={styles.progressTrack} testID="run-bar-progress">
+              <View
+                style={[styles.progressFill, { width: `${Math.round(stripProgress * 100)}%` }]}
+                testID="run-bar-progress-fill"
+              />
+            </View>
+          ) : null}
+        </View>
+      ) : null}
+      {run.panel !== "peek" ? (
+        <View
+          style={[styles.panel, run.panel === "full" ? styles.panelFull : styles.panelHalf]}
+          testID={`run-panel-${run.panel}`}
+        >
+          {playingGuide && run.inspected !== playingGuide.stopId ? (
+            <Pressable
+              onPress={() => run.openCard(playingGuide.stopId)}
+              style={styles.nowPlayingRow}
+              testID="run-nowplaying-row"
+            >
+              <Text style={styles.nowPlayingText}>
+                {`${strings.nowPlayingLabel}: ${playingName}`}
+              </Text>
+            </Pressable>
+          ) : null}
+          {inspectedMarker ? (
+            <View style={styles.preview} testID="run-preview">
+              <Text style={styles.previewName}>{inspectedMarker.name}</Text>
+              <Text style={styles.previewStatus}>{strings.status[inspectedMarker.status]}</Text>
+              {run.panel === "full" ? (
+                // The transcript belongs to the inspected card (11 §3.2), not
+                // to the audible story. The pinned layer's stops.json names
+                // it; a story without a readable transcript keeps the honest
+                // pending note — never invented text.
+                <View testID="run-transcript">
+                  <Text style={styles.transcriptHeading}>{strings.transcript}</Text>
+                  <Text style={styles.transcriptBody}>{inspectedTranscript ?? strings.transcriptPending}</Text>
+                </View>
+              ) : null}
+              {run.panel === "half" ? (
+                <Pressable onPress={() => run.expandPanel()} style={styles.readButton} testID="btn-panel-read">
+                  <Text style={styles.readLabel}>{strings.readMore}</Text>
+                </Pressable>
+              ) : null}
+              <Pressable onPress={() => run.dismissPanel()} style={styles.closeButton} testID="btn-panel-close">
+                <Text style={styles.closeLabel}>{strings.close}</Text>
+              </Pressable>
+            </View>
+          ) : null}
         </View>
       ) : null}
     </View>

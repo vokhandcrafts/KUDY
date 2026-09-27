@@ -26,7 +26,9 @@ import type { EngineConfig } from '../../core/engine/reducer.ts';
 import type { PipelineConfig } from '../../core/pipeline/types.ts';
 import type { Tier } from '../../services/contentRepo/types.ts';
 import type { RunPlaceFact, RunStopFact } from '../../services/contentRepo/runMapFacts.ts';
+import type { RunStoryFact } from '../../services/contentRepo/runStoryFacts.ts';
 import type { AudioService } from '../../services/audio/service.ts';
+import type { PlaybackState } from '../../services/audio/types.ts';
 import type { LocationService } from '../../services/location/service.ts';
 import type { DownloadAccessPort } from '../../services/download/access.ts';
 
@@ -65,6 +67,10 @@ export type RunPinnedPackage =
       tier: Tier[];
       stops: ReadonlyArray<RunStopFact>;
       places: ReadonlyArray<RunPlaceFact>;
+      // The pinned layer's story facts (11 §3: the card's transcript is
+      // inspected's) — read beside the map facts; a damaged stops.json
+      // never blocks the walk, the card renders its pending word.
+      stories: ReadonlyArray<RunStoryFact>;
     }
   | { kind: 'refused'; reason: string };
 
@@ -81,6 +87,13 @@ export type RunSurfaceState =
       stops: ReadonlyArray<RunStop>;
       facts: ReadonlyArray<RunStopFact>;
       places: ReadonlyArray<RunPlaceFact>;
+      // The pinned layer's story facts — the panel card's transcript source
+      // (11 §3: the transcript is inspected's).
+      stories: ReadonlyArray<RunStoryFact>;
+      // The audio's computed physical state (09 §6.3), read through the
+      // session's own service — the strip's progress line reads it per
+      // render; the surface keeps no second copy.
+      playback: () => PlaybackState;
       locale: string;
     };
 
@@ -166,6 +179,8 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
     stops,
     facts: pinned.stops,
     places: pinned.places,
+    stories: pinned.stories,
+    playback: () => deps.session.audio.playbackState(),
     locale: pinned.locale,
   });
 }

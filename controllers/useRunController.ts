@@ -55,6 +55,10 @@
 //    window re-arms through the explicit Resume.
 import { createControllerStore, useController, type ControllerStore } from './createControllerStore.ts';
 import { RunOrchestrator, type RunClock, type RunRoute, type RunStop } from './run/runOrchestrator.ts';
+// The panel's transitions have one source (runPanel.ts) — the actions below
+// adapt the flat store fields onto it and write the result back; no second
+// ladder lives here.
+import { panelClosed, panelOpened, panelRaised, type RunPanelPosition } from './run/runPanel.ts';
 import type { SessionProgress, SessionRow, SessionStartInput } from '../services/db/types.ts';
 import type { Readiness, Tier } from '../services/contentRepo/types.ts';
 import type { DownloadAccessPort } from '../services/download/access.ts';
@@ -184,6 +188,14 @@ export interface RunStartInput {
 
 export type RunStartResult = { ok: true; sessionId: string } | { ok: false; reason: RunStartRefusal };
 
+// G06.03 (issue #279) — the history panel's three fixed heights (11 §2):
+// one surface, no navigation stack. Peek is the player bar (the session's
+// anchor — it never disappears until the walk is finished), Half is the
+// point's preview, Full is the open story with the transcript. The
+// spelling's single home is runPanel.ts — re-exported here for the
+// controller's consumers.
+export type { RunPanelPosition } from './run/runPanel.ts';
+
 export interface RunControllerState {
   // The engine's committed state, mirrored on every accepted event — the
   // single source the screens read.
@@ -193,6 +205,16 @@ export interface RunControllerState {
   // continues the walk itself (criterion 4). unavailableTiers is the §3.7
   // report: recorded layers whose pinned files do not verify now.
   readonly recovery: RunRecoveryState;
+  // G06.03 — the history panel's UI state (11 §11: the panel position and
+  // inspected live in the run controller, never in the engine). 'peek' is
+  // the player bar — the walk's anchor that never disappears until the
+  // session is finished; 'half' shows the inspected point's preview, 'full'
+  // the open story with the transcript. `inspected` is whose card is open
+  // (11 §3.2) — an independent pointer: opening or closing a card never
+  // changes the audio owner, never counts progress (AC5), and the panel
+  // actions dispatch nothing to the audio service (AC3).
+  readonly panel: RunPanelPosition;
+  readonly inspected: string | null;
   readonly start: (input?: RunStartInput) => Promise<RunStartResult>;
   readonly pauseSession: () => void;
   readonly resumeSession: () => void;
@@ -208,6 +230,21 @@ export interface RunControllerState {
   readonly resumeAudio: (token: PlayToken) => void;
   readonly guideResume: () => void;
   readonly playMoment: (momentId: string, storyId: string) => void;
+  // The panel actions of G06.03 (11 §2): dismiss is always "one position
+  // down" (Full → Half → Peek) and identical for the panel's ✕ and the
+  // screen Back (AC1) — from Peek the Back button is navigation, the
+  // screen's concern. openCard sets the inspected card and lands the panel
+  // on Half; dismiss keeps `inspected` — «што апошняе адкрывалі» (11 §3.2).
+  // All three are UI writes: no audio command, no engine dispatch.
+  readonly openCard: (stopId: string) => void;
+  readonly dismissPanel: () => void;
+  readonly expandPanel: () => void;
+  // The Peek bar's resume of the guide launch (11 §2: playback control
+  // lives in the bar). The controller rebuilds the guide token — the
+  // (session_id, play_id) pair is the token's public identity (ADR G01.02
+  // §3.2) — so the UI never assembles one; a moment launch resumes through
+  // its own path (G07).
+  readonly resumeCurrentAudio: () => void;
 }
 
 export type RunRecoveryState =
@@ -348,6 +385,8 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
   const created = createControllerStore<RunControllerState>(() => ({
     run: initialRunState,
     recovery: { status: 'none' },
+    panel: 'peek',
+    inspected: null,
     start,
     pauseSession,
     resumeSession,
@@ -360,6 +399,32 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
     resumeAudio: (token) => orchestrator.resumeAudio(token),
     guideResume: () => orchestrator.guideResume(),
     playMoment: (momentId, storyId) => orchestrator.playMoment(momentId, storyId),
+    openCard: (stopId) => {
+      const current = store?.getState();
+      if (!current) return;
+      const next = panelOpened({ position: current.panel, inspected: current.inspected }, stopId);
+      if (next.position !== current.panel || next.inspected !== current.inspected) {
+        store?.setState({ panel: next.position, inspected: next.inspected });
+      }
+    },
+    dismissPanel: () => {
+      const current = store?.getState();
+      if (!current) return;
+      const next = panelClosed({ position: current.panel, inspected: current.inspected });
+      if (next.position !== current.panel) store?.setState({ panel: next.position });
+    },
+    expandPanel: () => {
+      const current = store?.getState();
+      if (!current) return;
+      const next = panelRaised({ position: current.panel, inspected: current.inspected });
+      if (next.position !== current.panel) store?.setState({ panel: next.position });
+    },
+    resumeCurrentAudio: () => {
+      const state = store?.getState().run;
+      if (!state || state.phase === 'Idle' || !state.playing) return;
+      if (state.playing.owner !== 'guide') return;
+      orchestrator.resumeAudio({ kind: 'guide', ref: state.sessionId, seq: state.playing.playId });
+    },
   }));
   store = created;
   return created;
