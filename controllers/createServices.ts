@@ -1,5 +1,6 @@
 import { evaluatePackage } from '../services/contentRepo/contentRepo.ts';
-import { readLayerFacts, isSafeSegment } from '../services/contentRepo/inventory.ts';
+import { readLayerFacts } from '../services/contentRepo/inventory.ts';
+import { isSafeSegment } from '../services/safe-path.ts';
 import { readRunMapFacts } from '../services/contentRepo/runMapFacts.ts';
 import { readRunStoryFacts } from '../services/contentRepo/runStoryFacts.ts';
 import type {
