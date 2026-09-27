@@ -24,9 +24,11 @@ const styles = StyleSheet.create({
     padding: tokens.spaceL,
   },
   back: {
+    marginBottom: tokens.spaceM,
+  },
+  backLabel: {
     color: tokens.colorAccent,
     fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
   },
   title: {
     color: tokens.colorInk,
@@ -186,7 +188,7 @@ export default function RoutePreview() {
   return (
     <View style={styles.screen} testID="screen-Route preview">
       <Pressable onPress={() => router.back()} style={styles.back} testID="btn-preview-back">
-        ← Назад
+        <Text style={styles.backLabel}>← Назад</Text>
       </Pressable>
       <WalkButton walk={services.walk} />
       {state.surface.kind === "loading" ? <Text style={styles.unavailable}>Загрузка…</Text> : null}
