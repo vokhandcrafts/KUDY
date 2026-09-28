@@ -63,6 +63,10 @@ describe("route placeholders (19 §2.5)", () => {
 
   // G06.04 criterion 3: the session history — the live walk beside the
   // finished previous runs, the rows exactly what the durable zone keeps.
+  // UX 05 (issue #351): the row's dates are the user's local calendar day.
+  // The jest workers' zone is pinned to America/Anchorage (jest.config.js),
+  // where 1970-01-01T00:00:05Z is already 1969-12-31 — a revert to the UTC
+  // day fails this (implementation-rules 1).
   test("My KUDY shows the live walk and the previous runs (11 §16.2, 03)", async () => {
     const sessionHistory = {
       list: async () => [
@@ -104,8 +108,11 @@ describe("route placeholders (19 §2.5)", () => {
     expect(screen.getByTestId("my-session-walk-live")).toBeTruthy();
     expect(screen.getByTestId("my-history-section")).toBeTruthy();
     expect(screen.getByTestId("my-session-walk-old")).toBeTruthy();
-    // The row's own facts: the paused state word and the heard count.
-    expect(screen.getByText(/прыпыненая — з 1970-01-01 — праслышана: 2/)).toBeTruthy();
+    // The row's own facts: the paused state word, the local started day and
+    // the heard count. The catalog is absent here — the raw id stays the
+    // row's title (UX 05, AC2's honest fallback).
+    expect(screen.getByText(/route-other/)).toBeTruthy();
+    expect(screen.getByText(/прыпыненая — з 1969-12-31 — праслышана: 2/)).toBeTruthy();
   });
 
   // G06.04 (11 §1, NAV7): the live walk puts «Прагулка» on the section-16

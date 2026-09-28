@@ -307,12 +307,48 @@ async function loadIndex(
 ): Promise<CatalogOfferFacts[] | null> {
   const raw = await readValidatedIndex(deps, envelope);
   if (raw === null) return null;
+  return projectGuideOffers(raw, options.localePreference);
+}
+
+// The guide-offer projection of the validated raw offers — extracted so
+// loadPreview reads the index once and projects both the route's offer and
+// the place titles from the same raw rows (no second fetch path).
+function projectGuideOffers(
+  raw: RawOffers,
+  preference: readonly string[],
+): CatalogOfferFacts[] {
   const offers: CatalogOfferFacts[] = [];
   for (const entry of raw) {
-    const projected = projectOffer(entry, options.localePreference);
+    const projected = projectOffer(entry, preference);
     if (projected !== null) offers.push(projected);
   }
   return offers;
+}
+
+// The place titles of the discovery index's place offers (UX 05, issue
+// #351): place_id → the localized title. The same dedup discipline as the
+// Nearby list (21 §4 rule 6): offers ordered by the canon comparator, the
+// sorted-first offer of a duplicated place ref wins. An offer without a
+// title contributes no entry — the preview hides the place line rather than
+// showing an invented name.
+function projectPlaceTitles(
+  raw: RawOffers,
+  preference: readonly string[],
+): ReadonlyMap<string, string> {
+  const titles = new Map<string, string>();
+  const seen = new Set<string>();
+  const projected: NearbyOfferFacts[] = [];
+  for (const entry of raw) {
+    const offer = projectNearbyOffer(entry, preference);
+    if (offer !== null) projected.push(offer);
+  }
+  for (const offer of projected.sort(byEditorialOrder)) {
+    if (offer.kind !== 'place' || offer.place_id === null) continue;
+    if (seen.has(offer.place_id)) continue;
+    seen.add(offer.place_id);
+    if (offer.title !== null) titles.set(offer.place_id, offer.title);
+  }
+  return titles;
 }
 
 // G07.01 (issue #281) — the Nearby offer list: the same envelope read and
@@ -438,6 +474,7 @@ function projectStops(
   value: readonly unknown[],
   routeAccess: 'free_base' | 'paid' | null,
   preference: readonly string[],
+  placeNames: ReadonlyMap<string, string> | null,
 ): PreviewStop[] {
   const stops: PreviewStop[] = [];
   for (const raw of value) {
@@ -455,6 +492,7 @@ function projectStops(
       stopId: v.id,
       position: v.position,
       placeId: v.place_id,
+      placeName: placeNames?.get(v.place_id) ?? null,
       tier: v.access_tier,
       locked: routeAccess === 'paid' || v.access_tier === 'extended',
       name: localizedLabel(preview?.name ?? null, preference),
@@ -472,6 +510,7 @@ async function loadRouteDoc(
   routeId: string,
   version: string,
   preference: readonly string[],
+  placeNames: ReadonlyMap<string, string> | null,
 ): Promise<RouteDocFacts> {
   // The build-bundle public layout: bundle/<route_id>/<version>/route.json.
   // Catalog-sourced identifiers are untrusted input even from the CDN
@@ -511,7 +550,9 @@ async function loadRouteDoc(
     v.free_stop_count >= 0
       ? v.free_stop_count
       : null;
-  const stops = Array.isArray(v.stops) ? projectStops(v.stops, routeAccess, preference) : null;
+  const stops = Array.isArray(v.stops)
+    ? projectStops(v.stops, routeAccess, preference, placeNames)
+    : null;
   // A stops array whose every row failed the identity checks is corruption,
   // not an empty route — «Кропкі: 0» would be a fabricated fact (11 §16.1:
   // nothing invented). The honest zero is a published empty array: it stays
@@ -543,12 +584,18 @@ export async function loadPreview(
   // The envelope read fine and names no such route — the honest unavailable
   // state, never a fabricated preview (11 §16.1: no invented cards).
   if (!entry) return { kind: 'not-published' };
-  let offers: CatalogOfferFacts[] | null = null;
+  // One index read serves both the route's offer and the stop rows' place
+  // titles (UX 05, issue #351) — no second fetch path. A null raw index
+  // (absent pointer, failed pin) degrades both: the route-only card and the
+  // hidden place lines — the raw place_id never renders.
+  let raw: RawOffers | null = null;
   try {
-    offers = await loadIndex(deps, options, read.envelope);
+    raw = await readValidatedIndex(deps, read.envelope);
   } catch {
-    offers = null;
+    raw = null;
   }
+  const offers = raw === null ? null : projectGuideOffers(raw, options.localePreference);
+  const placeTitles = raw === null ? null : projectPlaceTitles(raw, options.localePreference);
   // The preview shows the same offer the city list dedups to (issue #324):
   // the sorted-first offer of the route, never an arbitrary duplicate.
   const offer =
@@ -558,7 +605,7 @@ export async function loadPreview(
   const card = offer
     ? offerCard(offer, entry.version)
     : routeOnlyCard(entry);
-  const doc = await loadRouteDoc(deps, routeId, entry.version, options.localePreference);
+  const doc = await loadRouteDoc(deps, routeId, entry.version, options.localePreference, placeTitles);
   const indexDegraded = offers === null && read.envelope.discovery_index !== null;
   const degraded = [doc.degraded, indexDegraded ? 'index-unavailable' : null].find(
     (reason): reason is string => reason !== null,

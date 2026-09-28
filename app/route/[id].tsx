@@ -247,7 +247,10 @@ export default function RoutePreview() {
                 {state.surface.preview.stops.map((stop) => (
                   <View key={stop.stopId} style={styles.stopRow} testID={`stop-${stop.stopId}`}>
                     <Text style={styles.stopName}>{stop.name ?? `Кропка ${stop.position + 1}`}</Text>
-                    <Text style={styles.stopPlace}>{stop.placeId}</Text>
+                    {/* UX 05 (issue #351): the place's human title from the
+                        catalog, never the raw place id — with no published
+                        title the line is hidden, nothing is invented. */}
+                    {stop.placeName ? <Text style={styles.stopPlace}>{stop.placeName}</Text> : null}
                     {stop.announce ? <Text style={styles.stopAnnounce}>{stop.announce}</Text> : null}
                     {stop.locked ? (
                       <View style={styles.lockBadge} testID={`stop-locked-${stop.stopId}`}>
