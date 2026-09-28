@@ -100,6 +100,7 @@ export function makeRunSession(options?: {
   permission?: 'granted' | 'denied' | 'undetermined';
   sessionStore?: RunSessionPorts['sessionStore'];
   recovery?: RunSessionPorts['recovery'];
+  readiness?: RunSessionPorts['readiness'];
 }): {
   session: RunSessionPorts;
   locationPort: FakeLocationOsPort;
@@ -134,9 +135,10 @@ export function makeRunSession(options?: {
         resume: () => {},
         finish: () => {},
       },
-    readiness: {
-      evaluate: async () => ({ status: 'ready', routeId: 'route-map', version: '1', tier: 'base', tierAvailable: granted }),
-    },
+    readiness:
+      options?.readiness ?? {
+        evaluate: async () => ({ status: 'ready', routeId: 'route-map', version: '1', tier: 'base', tierAvailable: granted }),
+      },
     // G06.04 made the port route-aware: the route id comes first, the tier
     // second — the helper serves the render fixture's own route.
     packageStops: { stopsOfLayer: async (_routeId, tier) => (tier === 'base' ? ['stop-1', 'stop-2'] : tier === 'extended' ? ['stop-3'] : []) },

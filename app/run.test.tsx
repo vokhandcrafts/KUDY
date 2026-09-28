@@ -12,7 +12,7 @@ import { act } from "@testing-library/react-native";
 import Run from "./run/[id]";
 import { createServices } from "../controllers/createServices";
 import type { RunSessionPorts } from "../controllers/run/runSurfaceController";
-import type { BundlesStore, Tier } from "../services/contentRepo/types";
+import type { BundlesStore, Readiness, Tier } from "../services/contentRepo/types";
 import { FakeLocationOsPort } from "../services/location/fake-port";
 import { flatStyle, layoutWith, makeRunSession } from "../test/render-helpers";
 import { tokens } from "../components/design-tokens";
@@ -280,6 +280,22 @@ describe("run map surface", () => {
     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
     expect(await screen.findByText("Сесія недаступная")).toBeTruthy();
     expect(screen.queryByTestId("run-map")).toBeNull();
+  });
+
+  // UX 02 (issue #348): the surface starts at status 'loading' and resolves
+  // through the readiness port — a pending readiness holds the state, and
+  // the frame's back must be there. Reverting the loading branch's
+  // BackButton in app/run/[id].tsx turns this red (implementation-rules 1).
+  test("UX 02: the loading state keeps the back element (AC2)", async () => {
+    const pending = new Promise<Readiness>(() => {});
+    const { session } = makeRunSession({ readiness: { evaluate: () => pending } });
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    // The loading branch itself, not the unavailable one: the honest
+    // «Загрузка…» wording is on the screen while readiness stays pending.
+    expect(await screen.findByText("Загрузка…")).toBeTruthy();
+    expect(await screen.findByTestId("btn-run-back")).toBeTruthy();
+    expect(within(screen.getByTestId("btn-run-back")).getByText("← Назад")).toBeTruthy();
   });
 
   test("G06.03 AC1: Back and the card's ✕ dismiss the panel identically", async () => {
