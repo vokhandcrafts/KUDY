@@ -10,6 +10,14 @@ import { Stack } from "expo-router";
 
 import { defaultEngineConfig } from "../core/engine/reducer";
 import { ServicesContext } from "../app/_layout";
+import Explore from "../app/(tabs)/explore";
+import Guides from "../app/city/[id]/guides";
+import Map from "../app/map";
+import My from "../app/(tabs)/my";
+import PlaceDetail from "../app/place/[id]";
+import RoutePreview from "../app/route/[id]";
+import Run from "../app/run/[id]";
+import { createServices } from "../controllers/createServices";
 import type { Services } from "../controllers/createServices";
 import type { RunSessionPorts } from "../controllers/run/runSurfaceController";
 import type { Tier } from "../services/contentRepo/types";
@@ -38,14 +46,45 @@ export function serve(paths: Record<string, string>) {
 
 export function layoutWith(services: Services) {
   // The test layout mirrors app/_layout.tsx: the provider around the Stack
-  // navigator (expo-router reads the routes from context, children are not
-  // rendered explicitly).
+  // navigator with the native header off (UX 02, issue #348 — expo-router
+  // reads the routes from context, children are not rendered explicitly).
   return function TestLayout() {
     return (
       <ServicesContext.Provider value={services}>
-        <Stack />
+        <Stack screenOptions={{ headerShown: false }} />
       </ServicesContext.Provider>
     );
+  };
+}
+
+// The flattened style of a rendered element: the screens merge their frame
+// styles into arrays (inset + base spacing), the guards read the effective
+// value (UX 02, issue #348).
+export function flatStyle(element: { props: { style?: unknown } }): Record<string, unknown> {
+  const style = element.props.style;
+  if (Array.isArray(style)) {
+    return Object.assign(
+      {},
+      ...style.filter((part) => part !== null && part !== undefined),
+    ) as Record<string, unknown>;
+  }
+  return (style ?? {}) as Record<string, unknown>;
+}
+
+// UX 02 (issue #348) — the full route tree for the navigation-frame guards
+// (back navigation, safe-area): the real screen components under the
+// mirrored layout, the honest no-ports services. One copy for the frame
+// suites — sibling route maps are jscpd clones (implementation-rules 3).
+export function frameRoutes() {
+  return {
+    "_layout": layoutWith(createServices({})),
+    "(tabs)/explore": Explore,
+    "(tabs)/my": My,
+    "city/[id]/guides": Guides,
+    "route/[id]": RoutePreview,
+    "place/[id]": PlaceDetail,
+    "run/[id]": Run,
+    "map": Map,
   };
 }
 
@@ -61,6 +100,7 @@ export function makeRunSession(options?: {
   permission?: 'granted' | 'denied' | 'undetermined';
   sessionStore?: RunSessionPorts['sessionStore'];
   recovery?: RunSessionPorts['recovery'];
+  readiness?: RunSessionPorts['readiness'];
 }): {
   session: RunSessionPorts;
   locationPort: FakeLocationOsPort;
@@ -95,9 +135,10 @@ export function makeRunSession(options?: {
         resume: () => {},
         finish: () => {},
       },
-    readiness: {
-      evaluate: async () => ({ status: 'ready', routeId: 'route-map', version: '1', tier: 'base', tierAvailable: granted }),
-    },
+    readiness:
+      options?.readiness ?? {
+        evaluate: async () => ({ status: 'ready', routeId: 'route-map', version: '1', tier: 'base', tierAvailable: granted }),
+      },
     // G06.04 made the port route-aware: the route id comes first, the tier
     // second — the helper serves the render fixture's own route.
     packageStops: { stopsOfLayer: async (_routeId, tier) => (tier === 'base' ? ['stop-1', 'stop-2'] : tier === 'extended' ? ['stop-3'] : []) },

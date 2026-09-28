@@ -9,34 +9,19 @@
 // recorded source kept in the controller state.
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { usePreviewController } from "../../controllers/catalog/usePreviewController";
+import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
 import { AccessBadge, LocalesLine, StateBanner } from "../../components/guide-card";
 import { PressableSurface } from "../../components/pressable-surface";
+import { screenStyles } from "../../components/screen-styles";
 import { WalkButton } from "../../components/walk-button";
 import { useServices } from "../_layout";
 
 const styles = StyleSheet.create({
-  screen: {
-    backgroundColor: tokens.colorPaper,
-    flex: 1,
-    padding: tokens.spaceL,
-  },
-  back: {
-    marginBottom: tokens.spaceM,
-  },
-  backLabel: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
-  },
-  title: {
-    color: tokens.colorInk,
-    fontSize: 18,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceS,
-  },
   summary: {
     color: tokens.colorMuted,
     fontSize: tokens.fontBaseSize,
@@ -168,9 +153,20 @@ export default function RoutePreview() {
     controller?.recordSource(typeof from === "string" ? from : null);
   }, [controller, from]);
 
+  // UX 02 (issue #348): the frame's top inset — the content starts below the
+  // status bar and the notch with the native header off (AC4). A hook —
+  // before the early returns.
+  const insets = useSafeAreaInsets();
+
   if (!controller) {
     return (
-      <View style={styles.screen} testID="screen-Route preview">
+      <View
+        style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]}
+        testID="screen-Route preview"
+      >
+        {/* UX 02 (issue #348): even the unavailable state keeps the frame —
+            with the native header off there is no other way back (AC2). */}
+        <BackButton label="← Назад" testID="btn-preview-back" />
         <Text style={styles.unavailable}>Каталог недаступны</Text>
       </View>
     );
@@ -187,13 +183,13 @@ export default function RoutePreview() {
   };
   const state = controller;
   return (
-    <View style={styles.screen} testID="screen-Route preview">
+    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Route preview">
+      {/* UX 02 (issue #348): the back sits in the frame above the scroll —
+          reachable while the stops list is scrolled (AC2). */}
+      <BackButton label="← Назад" testID="btn-preview-back" />
       {/* UX 01 (issue #347): the surface scrolls — every stop and the main
           button stay reachable beyond the fold; the §4.1 overlay stays above. */}
       <ScrollView testID="scroll-preview">
-        <Pressable onPress={() => router.back()} style={styles.back} testID="btn-preview-back">
-          <Text style={styles.backLabel}>← Назад</Text>
-        </Pressable>
         <WalkButton walk={services.walk} />
         {state.surface.kind === "loading" ? <Text style={styles.unavailable}>Загрузка…</Text> : null}
         {state.surface.kind === "unavailable" ? (
@@ -204,7 +200,7 @@ export default function RoutePreview() {
         ) : null}
         {state.surface.kind === "ready" ? (
           <View>
-            <Text style={styles.title}>{state.surface.preview.title}</Text>
+            <Text style={screenStyles.title}>{state.surface.preview.title}</Text>
             {state.surface.preview.summary ? (
               <Text style={styles.summary}>{state.surface.preview.summary}</Text>
             ) : null}

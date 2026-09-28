@@ -9,9 +9,10 @@
 // State rendering only: every decision lives in the controllers (19 §4.2);
 // the physical playback fact arrives through the binding's read (09 §6.3,
 // the run surface's `playback` idiom), never a services import.
-import { Link, useRouter, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   placeDetailStrings,
@@ -21,26 +22,12 @@ import type { MomentPlayBinding, MomentPlayOutcome } from "../../controllers/mom
 import { useStoreState } from "../../controllers/useControllerStore";
 import { useServices } from "../_layout";
 import { AccessBadge } from "../../components/guide-card";
+import { BackButton } from "../../components/back-button";
 import { PressableSurface } from "../../components/pressable-surface";
+import { screenStyles } from "../../components/screen-styles";
 import { tokens } from "../../components/design-tokens";
 
 const styles = StyleSheet.create({
-  screen: {
-    backgroundColor: tokens.colorPaper,
-    flex: 1,
-    padding: tokens.spaceL,
-  },
-  back: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
-  },
-  title: {
-    color: tokens.colorInk,
-    fontSize: 18,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceS,
-  },
   summary: {
     color: tokens.colorMuted,
     fontSize: tokens.fontBaseSize,
@@ -202,7 +189,6 @@ function MomentCard({
 
 export default function PlaceDetail() {
   const services = useServices();
-  const router = useRouter();
   const params = useLocalSearchParams<{ id: string }>();
   const placeId = typeof params.id === "string" ? params.id : "";
   // One binding per open (the Nearby surface's pattern); the moment play
@@ -217,17 +203,20 @@ export default function PlaceDetail() {
   // fact itself is re-read per render through the binding.
   useStoreState(momentPlay?.store);
   const strings = placeDetailStrings("be");
+  // UX 02 (issue #348): the frame's top inset — the content starts below the
+  // status bar and the notch with the native header off (AC4).
+  const insets = useSafeAreaInsets();
   const facts = state !== null && state.kind === "ready" ? state.facts : null;
   const title = facts?.title ?? placeId;
   return (
-    <View style={styles.screen} testID="screen-Place detail">
+    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Place detail">
+      {/* UX 02 (issue #348): the back sits in the frame above the scroll —
+          reachable while the moment cards are scrolled (AC2). */}
+      <BackButton label={strings.back} testID="btn-place-back" />
       {/* UX 01 (issue #347): the detail scrolls — the last moment card is
           reachable beyond the fold. */}
       <ScrollView testID="scroll-place">
-        <Pressable onPress={() => router.back()} testID="btn-place-back">
-          <Text style={styles.back}>{strings.back}</Text>
-        </Pressable>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={screenStyles.title}>{title}</Text>
         {state === null ? (
           <Text style={styles.note} testID="place-unavailable">
             {strings.unavailable}
