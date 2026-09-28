@@ -34,5 +34,6 @@ export const tokens = {
   spaceL: 16, // space.l
   dialogMaxWidth: 400, // dialog.max-width — дыялог, гл. visual-language §4
   fontBaseSize: 16, // font.base-size
+  fontTitleSize: 18, // font.size-title — памер загалоўка экрана
   fontWeightStrong: '600', // font.weight-strong
 } as const;
