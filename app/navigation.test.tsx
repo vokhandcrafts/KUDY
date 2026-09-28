@@ -201,11 +201,13 @@ describe("city surface on the published catalog (G06.01.a)", () => {
     expect(await screen.findByTestId("guide-card-guide-route-a1")).toBeTruthy();
     expect(screen.getByText("Гісторыі сукнараў: ад мытні да порта")).toBeTruthy();
     expect(screen.getByTestId("badge-access-paid")).toBeTruthy();
+    expect(screen.getByText("Платна")).toBeTruthy();
     expect(screen.getByText("Тэкст: be, en, uk; аўдыё: be, en")).toBeTruthy();
     // The route without an offer stays honest: identifier as the title.
     expect(await screen.findByTestId("guide-card-guide-route-b1")).toBeTruthy();
     expect(screen.getByText("guide-route-b1")).toBeTruthy();
     expect(screen.getByTestId("badge-access-free")).toBeTruthy();
+    expect(screen.getByText("Бясплатна")).toBeTruthy();
     // The rubric section is the chain's entry to the full list (11 §16.1).
     expect(screen.getByTestId("link-guides")).toBeTruthy();
   });

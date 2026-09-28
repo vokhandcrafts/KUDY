@@ -97,12 +97,20 @@ const styles = StyleSheet.create({
 });
 
 // The tariff is a badge on the card, never a separate rubric (11 §16.1, 20
-// §6); the label is the contract value verbatim (21 §3.2 access values).
+// §6). The contract value stays free|paid|mixed (21 §3.2 — schemas, index and
+// the testID are untouched); the label renders it in the interface language
+// (the app has one, Belarusian) per the owner consent recorded in issue #355.
+const ACCESS_LABELS: Record<CatalogGuideCard["access"], string> = {
+  free: "Бясплатна",
+  paid: "Платна",
+  mixed: "Змешана",
+};
+
 export function AccessBadge({ access }: { access: CatalogGuideCard["access"] }) {
   const tone = access === "paid" ? styles.badgePaid : access === "mixed" ? styles.badgeMixed : null;
   return (
     <View style={[styles.badge, tone]} testID={`badge-access-${access}`}>
-      <Text style={styles.badgeText}>{access}</Text>
+      <Text style={styles.badgeText}>{ACCESS_LABELS[access]}</Text>
     </View>
   );
 }
