@@ -6,7 +6,7 @@
 // their canonical sources, and the suite itself must stay wired into npm test.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { contrast } from './wcag-contrast.mjs';
@@ -192,6 +192,29 @@ test('production surface tokens stay verbatim with the canon (G06.01.a)', () => 
     assert.ok(token, `${key}: canon token ${tokenName} must exist`);
     assert.equal(parseInt(token.value, 10), parseInt(value, 10), `${key}: value must equal canon ${tokenName}`);
   }
+});
+
+test('surface styles consume the canon title token — no hardcoded title size (UX 08)', () => {
+  // The six screen titles (Explore, My KUDY, Побач, guides rubric, route
+  // preview, place detail) take their size from tokens.fontTitleSize, pinned
+  // to canon font.size-title above. A literal fontSize: 18 on a surface
+  // bypasses the canon — this walk is the reverted-line check
+  // (implementation-rules 1) that fails until it is back on the token.
+  const offenders = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const filePath = join(dir, entry.name);
+      if (entry.isDirectory()) walk(filePath);
+      else if (/\.(tsx|ts)$/.test(entry.name) &&
+        /fontSize:\s*18(?![.\d])/.test(readFileSync(filePath, 'utf8'))) {
+        offenders.push(filePath);
+      }
+    }
+  };
+  walk(join(root, 'app'));
+  walk(join(root, 'components'));
+  assert.deepEqual(offenders, [],
+    `hardcoded title size must come from tokens.fontTitleSize: ${offenders.join(', ')}`);
 });
 
 test('guard is wired into npm test (implementation-rules 1 and 7)', () => {

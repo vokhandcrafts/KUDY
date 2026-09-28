@@ -18,7 +18,7 @@ import { WalkButton } from "../../../components/walk-button";
 const styles = StyleSheet.create({
   title: {
     color: tokens.colorInk,
-    fontSize: 18,
+    fontSize: tokens.fontTitleSize,
     fontWeight: tokens.fontWeightStrong,
     marginBottom: tokens.spaceM,
   },

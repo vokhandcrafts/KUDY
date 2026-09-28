@@ -14,7 +14,7 @@ export const screenStyles = StyleSheet.create({
   },
   title: {
     color: tokens.colorInk,
-    fontSize: 18,
+    fontSize: tokens.fontTitleSize,
     fontWeight: tokens.fontWeightStrong,
     marginBottom: tokens.spaceS,
   },
