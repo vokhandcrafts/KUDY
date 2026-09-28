@@ -14,7 +14,7 @@
 // The walk itself lives in the run controller the composition root built —
 // this surface owns no GPS, no player and no engine (AC4).
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/runMap";
 import { useRunState, useRunSurface } from "../../controllers/run/runSurfaceController";
@@ -471,41 +471,46 @@ export default function Run() {
           style={[styles.panel, run.panel === "full" ? styles.panelFull : styles.panelHalf]}
           testID={`run-panel-${run.panel}`}
         >
-          {playingGuide && run.inspected !== playingGuide.stopId ? (
-            <Pressable
-              onPress={() => run.openCard(playingGuide.stopId)}
-              style={styles.nowPlayingRow}
-              testID="run-nowplaying-row"
-            >
-              <Text style={styles.nowPlayingText}>
-                {`${strings.nowPlayingLabel}: ${playingName}`}
-              </Text>
-            </Pressable>
-          ) : null}
-          {inspectedMarker ? (
-            <View style={styles.preview} testID="run-preview">
-              <Text style={styles.previewName}>{inspectedMarker.name}</Text>
-              <Text style={styles.previewStatus}>{strings.status[inspectedMarker.status]}</Text>
-              {run.panel === "full" ? (
-                // The transcript belongs to the inspected card (11 §3.2), not
-                // to the audible story. The pinned layer's stops.json names
-                // it; a story without a readable transcript keeps the honest
-                // pending note — never invented text.
-                <View testID="run-transcript">
-                  <Text style={styles.transcriptHeading}>{strings.transcript}</Text>
-                  <Text style={styles.transcriptBody}>{inspectedTranscript ?? strings.transcriptPending}</Text>
-                </View>
-              ) : null}
-              {run.panel === "half" ? (
-                <Pressable onPress={() => run.expandPanel()} style={styles.readButton} testID="btn-panel-read">
-                  <Text style={styles.readLabel}>{strings.readMore}</Text>
-                </Pressable>
-              ) : null}
-              <Pressable onPress={() => run.dismissPanel()} style={styles.closeButton} testID="btn-panel-close">
-                <Text style={styles.closeLabel}>{strings.close}</Text>
+          {/* UX 01 (issue #347): the panel's card content scrolls — a long
+              transcript stays readable in Full; the map stays a fixed flex
+              child, never a scroll surface. */}
+          <ScrollView testID="scroll-run-panel">
+            {playingGuide && run.inspected !== playingGuide.stopId ? (
+              <Pressable
+                onPress={() => run.openCard(playingGuide.stopId)}
+                style={styles.nowPlayingRow}
+                testID="run-nowplaying-row"
+              >
+                <Text style={styles.nowPlayingText}>
+                  {`${strings.nowPlayingLabel}: ${playingName}`}
+                </Text>
               </Pressable>
-            </View>
-          ) : null}
+            ) : null}
+            {inspectedMarker ? (
+              <View style={styles.preview} testID="run-preview">
+                <Text style={styles.previewName}>{inspectedMarker.name}</Text>
+                <Text style={styles.previewStatus}>{strings.status[inspectedMarker.status]}</Text>
+                {run.panel === "full" ? (
+                  // The transcript belongs to the inspected card (11 §3.2), not
+                  // to the audible story. The pinned layer's stops.json names
+                  // it; a story without a readable transcript keeps the honest
+                  // pending note — never invented text.
+                  <View testID="run-transcript">
+                    <Text style={styles.transcriptHeading}>{strings.transcript}</Text>
+                    <Text style={styles.transcriptBody}>{inspectedTranscript ?? strings.transcriptPending}</Text>
+                  </View>
+                ) : null}
+                {run.panel === "half" ? (
+                  <Pressable onPress={() => run.expandPanel()} style={styles.readButton} testID="btn-panel-read">
+                    <Text style={styles.readLabel}>{strings.readMore}</Text>
+                  </Pressable>
+                ) : null}
+                <Pressable onPress={() => run.dismissPanel()} style={styles.closeButton} testID="btn-panel-close">
+                  <Text style={styles.closeLabel}>{strings.close}</Text>
+                </Pressable>
+              </View>
+            ) : null}
+          </ScrollView>
         </View>
       ) : null}
     </View>

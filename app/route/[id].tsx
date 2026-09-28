@@ -9,7 +9,7 @@
 // recorded source kept in the controller state.
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { usePreviewController } from "../../controllers/catalog/usePreviewController";
 import { tokens } from "../../components/design-tokens";
@@ -187,97 +187,101 @@ export default function RoutePreview() {
   const state = controller;
   return (
     <View style={styles.screen} testID="screen-Route preview">
-      <Pressable onPress={() => router.back()} style={styles.back} testID="btn-preview-back">
-        <Text style={styles.backLabel}>← Назад</Text>
-      </Pressable>
-      <WalkButton walk={services.walk} />
-      {state.surface.kind === "loading" ? <Text style={styles.unavailable}>Загрузка…</Text> : null}
-      {state.surface.kind === "unavailable" ? (
-        <View testID="preview-unavailable">
-          <Text style={styles.unavailable}>Прэв'ю часова недаступны</Text>
-          <Text style={styles.buttonDetail}>{state.surface.reason}</Text>
-        </View>
-      ) : null}
-      {state.surface.kind === "ready" ? (
-        <View>
-          <Text style={styles.title}>{state.surface.preview.title}</Text>
-          {state.surface.preview.summary ? (
-            <Text style={styles.summary}>{state.surface.preview.summary}</Text>
-          ) : null}
-          <AccessBadge access={state.surface.preview.access} />
-          <LocalesLine
-            textLocales={state.surface.preview.textLocales}
-            audioLocales={state.surface.preview.audioLocales}
-            localesKnown={state.surface.preview.localesKnown}
-            testID="preview-locales"
-          />
-          {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin) ? (
-            <Text style={styles.fact} testID="preview-duration">
-              {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin)}
-            </Text>
-          ) : null}
-          {state.surface.preview.stops ? (
-            <Text style={styles.fact} testID="preview-counts">
-              {`Кропкі: ${state.surface.preview.stops.length}`}
-            </Text>
-          ) : null}
-          {state.surface.preview.baseSizeBytes !== null ? (
-            <Text style={styles.fact} testID="preview-size">
-              {`Памер: ${Math.max(1, Math.round(state.surface.preview.baseSizeBytes / 1048576))} МБ`}
-            </Text>
-          ) : null}
-          {state.surface.preview.access === "paid" && state.surface.preview.freeStopCount !== null ? (
-            <Text style={styles.fact} testID="preview-free-stop-count">
-              {`Кропак бясплатна: ${state.surface.preview.freeStopCount}`}
-            </Text>
-          ) : null}
-          {state.surface.degraded ? (
-            <StateBanner
-              tone="notice"
-              reason="Частка звестак часова недаступная"
-              detail={state.surface.degraded}
-              testID="preview-banner"
+      {/* UX 01 (issue #347): the surface scrolls — every stop and the main
+          button stay reachable beyond the fold; the §4.1 overlay stays above. */}
+      <ScrollView testID="scroll-preview">
+        <Pressable onPress={() => router.back()} style={styles.back} testID="btn-preview-back">
+          <Text style={styles.backLabel}>← Назад</Text>
+        </Pressable>
+        <WalkButton walk={services.walk} />
+        {state.surface.kind === "loading" ? <Text style={styles.unavailable}>Загрузка…</Text> : null}
+        {state.surface.kind === "unavailable" ? (
+          <View testID="preview-unavailable">
+            <Text style={styles.unavailable}>Прэв'ю часова недаступны</Text>
+            <Text style={styles.buttonDetail}>{state.surface.reason}</Text>
+          </View>
+        ) : null}
+        {state.surface.kind === "ready" ? (
+          <View>
+            <Text style={styles.title}>{state.surface.preview.title}</Text>
+            {state.surface.preview.summary ? (
+              <Text style={styles.summary}>{state.surface.preview.summary}</Text>
+            ) : null}
+            <AccessBadge access={state.surface.preview.access} />
+            <LocalesLine
+              textLocales={state.surface.preview.textLocales}
+              audioLocales={state.surface.preview.audioLocales}
+              localesKnown={state.surface.preview.localesKnown}
+              testID="preview-locales"
             />
-          ) : null}
-          {state.downloadError ? (
-            <StateBanner tone="error" reason="Збой загрузкі" detail={state.downloadError} testID="download-error" />
-          ) : null}
-          {state.surface.preview.stops ? (
-            <View style={styles.stops} testID="preview-stops">
-              {state.surface.preview.stops.map((stop) => (
-                <View key={stop.stopId} style={styles.stopRow} testID={`stop-${stop.stopId}`}>
-                  <Text style={styles.stopName}>{stop.name ?? `Кропка ${stop.position + 1}`}</Text>
-                  <Text style={styles.stopPlace}>{stop.placeId}</Text>
-                  {stop.announce ? <Text style={styles.stopAnnounce}>{stop.announce}</Text> : null}
-                  {stop.locked ? (
-                    <View style={styles.lockBadge} testID={`stop-locked-${stop.stopId}`}>
-                      <Text style={styles.lockBadgeText}>🔒</Text>
-                    </View>
-                  ) : null}
-                </View>
-              ))}
-            </View>
-          ) : null}
-          <Pressable
-            onPress={() => void handleMainButton()}
-            disabled={!state.button.enabled || state.busy}
-            style={[styles.mainButton, (!state.button.enabled || state.busy) && styles.mainButtonDisabled]}
-            testID={state.button.action === "download" ? "btn-download" : "btn-start"}
-          >
-            <Text style={styles.mainButtonLabel}>{state.button.label}</Text>
-          </Pressable>
-          {state.button.reason ? (
-            <Text style={styles.buttonReason} testID="button-reason">
-              {state.button.reason}
-            </Text>
-          ) : null}
-          {state.button.detail ? (
-            <Text style={styles.buttonDetail} testID="button-detail">
-              {state.button.detail}
-            </Text>
-          ) : null}
-        </View>
-      ) : null}
+            {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin) ? (
+              <Text style={styles.fact} testID="preview-duration">
+                {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin)}
+              </Text>
+            ) : null}
+            {state.surface.preview.stops ? (
+              <Text style={styles.fact} testID="preview-counts">
+                {`Кропкі: ${state.surface.preview.stops.length}`}
+              </Text>
+            ) : null}
+            {state.surface.preview.baseSizeBytes !== null ? (
+              <Text style={styles.fact} testID="preview-size">
+                {`Памер: ${Math.max(1, Math.round(state.surface.preview.baseSizeBytes / 1048576))} МБ`}
+              </Text>
+            ) : null}
+            {state.surface.preview.access === "paid" && state.surface.preview.freeStopCount !== null ? (
+              <Text style={styles.fact} testID="preview-free-stop-count">
+                {`Кропак бясплатна: ${state.surface.preview.freeStopCount}`}
+              </Text>
+            ) : null}
+            {state.surface.degraded ? (
+              <StateBanner
+                tone="notice"
+                reason="Частка звестак часова недаступная"
+                detail={state.surface.degraded}
+                testID="preview-banner"
+              />
+            ) : null}
+            {state.downloadError ? (
+              <StateBanner tone="error" reason="Збой загрузкі" detail={state.downloadError} testID="download-error" />
+            ) : null}
+            {state.surface.preview.stops ? (
+              <View style={styles.stops} testID="preview-stops">
+                {state.surface.preview.stops.map((stop) => (
+                  <View key={stop.stopId} style={styles.stopRow} testID={`stop-${stop.stopId}`}>
+                    <Text style={styles.stopName}>{stop.name ?? `Кропка ${stop.position + 1}`}</Text>
+                    <Text style={styles.stopPlace}>{stop.placeId}</Text>
+                    {stop.announce ? <Text style={styles.stopAnnounce}>{stop.announce}</Text> : null}
+                    {stop.locked ? (
+                      <View style={styles.lockBadge} testID={`stop-locked-${stop.stopId}`}>
+                        <Text style={styles.lockBadgeText}>🔒</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                ))}
+              </View>
+            ) : null}
+            <Pressable
+              onPress={() => void handleMainButton()}
+              disabled={!state.button.enabled || state.busy}
+              style={[styles.mainButton, (!state.button.enabled || state.busy) && styles.mainButtonDisabled]}
+              testID={state.button.action === "download" ? "btn-download" : "btn-start"}
+            >
+              <Text style={styles.mainButtonLabel}>{state.button.label}</Text>
+            </Pressable>
+            {state.button.reason ? (
+              <Text style={styles.buttonReason} testID="button-reason">
+                {state.button.reason}
+              </Text>
+            ) : null}
+            {state.button.detail ? (
+              <Text style={styles.buttonDetail} testID="button-detail">
+                {state.button.detail}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+      </ScrollView>
       {state.confirm ? (
         <View style={styles.confirmOverlay} testID="confirm-dialog">
           <View style={styles.confirmCard}>

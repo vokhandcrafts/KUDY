@@ -27,32 +27,49 @@ const INDEX_TEXT = fixtureText("index-valid.json");
 const POINTER_PATH = "discovery/city-a/r-2026-09-14-1/index.json";
 const MOMENT_PATH = "bundles/route-a1/1/be/base/audio/s-a1.m4a";
 
-// The downloaded package of route-a1: the root moments manifest names one
-// place-a1 teaser; the base layer carries its text and its audio file.
+// The downloaded package of route-a1: the root moments manifest names N
+// place-a1 teasers (one by default); the base layer carries their texts and
+// their audio files. The scroll scenario (UX 01) passes 5; the first teaser
+// keeps the original text the other tests assert.
 class MomentStore implements BundlesStore {
-  private readonly dirs = new Map<string, string[]>([
-    ["bundles", ["route-a1"]],
-    ["bundles/route-a1", ["1"]],
-  ]);
-  private readonly files = new Map<string, FileFacts>([
-    [
-      "bundles/route-a1/1/moments.json",
-      {
-        kind: "present",
-        bytes: new TextEncoder().encode(
-          JSON.stringify([{ id: "m-a1", place_id: "place-a1", story_id: "s-a1", kind: "teaser", cooldown_min: 60 }]),
-        ),
-      },
-    ],
-    [
-      "bundles/route-a1/1/be/base/stops.json",
-      {
-        kind: "present",
-        bytes: new TextEncoder().encode(JSON.stringify([{ story_id: "s-a1", text: "Тэйзер двара сукнараў" }])),
-      },
-    ],
-    ["bundles/route-a1/1/be/base/audio/s-a1.m4a", { kind: "present", bytes: new TextEncoder().encode("audio") }],
-  ]);
+  private readonly dirs: Map<string, string[]>;
+  private readonly files: Map<string, FileFacts>;
+
+  constructor(momentCount = 1) {
+    const moments = Array.from({ length: momentCount }, (_, i) => ({
+      id: `m-a${i + 1}`,
+      place_id: "place-a1",
+      story_id: `s-a${i + 1}`,
+      kind: "teaser",
+      cooldown_min: 60,
+    }));
+    const teaserText = (storyId: string): string =>
+      storyId === "s-a1" ? "Тэйзер двара сукнараў" : `Тэйзер моманту ${storyId}`;
+    this.dirs = new Map<string, string[]>([
+      ["bundles", ["route-a1"]],
+      ["bundles/route-a1", ["1"]],
+    ]);
+    this.files = new Map<string, FileFacts>([
+      [
+        "bundles/route-a1/1/moments.json",
+        { kind: "present", bytes: new TextEncoder().encode(JSON.stringify(moments)) },
+      ],
+      [
+        "bundles/route-a1/1/be/base/stops.json",
+        {
+          kind: "present",
+          bytes: new TextEncoder().encode(
+            JSON.stringify(moments.map((moment) => ({ story_id: moment.story_id, text: teaserText(moment.story_id) }))),
+          ),
+        },
+      ],
+      ...moments.map((moment): [string, FileFacts] => [
+        `bundles/route-a1/1/be/base/audio/${moment.story_id}.m4a`,
+        { kind: "present", bytes: new TextEncoder().encode("audio") },
+      ]),
+    ]);
+  }
+
   listDir(rel: string): Promise<string[] | null> {
     return Promise.resolve(this.dirs.get(rel) ?? null);
   }
@@ -75,7 +92,7 @@ const withPlaceRoutes = (services: ReturnType<typeof createServices>) => ({
 // port, the teasers store, the fixtures' catalog — the shared arrange (a
 // sibling copy is a jscpd clone). The audio instance returns for scenarios
 // that hold a foreign launch before the screen opens.
-function placeServices(audioPort: FakeAudioPlayerPort): {
+function placeServices(audioPort: FakeAudioPlayerPort, momentCount = 1): {
   services: ReturnType<typeof createServices>;
   audio: AudioService;
 } {
@@ -84,7 +101,7 @@ function placeServices(audioPort: FakeAudioPlayerPort): {
     services: createServices({
       catalogOrigin: "https://catalog.test",
       catalogSha256: sha256,
-      bundlesStore: new MomentStore(),
+      bundlesStore: new MomentStore(momentCount),
       audio,
     }),
     audio,
@@ -190,5 +207,20 @@ describe("Place detail surface (G07.02)", () => {
     fireEvent.press(screen.getByTestId("btn-place-back"));
     expect(await screen.findByTestId("screen-Map")).toBeTruthy();
     expect(audioPort.commands).toEqual([`play 1:${MOMENT_PATH}`]);
+  });
+
+  // UX 01 (issue #347): the moment list scrolls — the fifth teaser renders
+  // inside the detail's ScrollView instead of being cut by the fold.
+  // Removing the ScrollView drops the scroll testID and fails this
+  // (implementation-rules 1).
+  test("the moment list scrolls: five teaser cards render inside the ScrollView (UX 01)", async () => {
+    const { services } = placeServices(new FakeAudioPlayerPort(), 5);
+    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
+    renderRouter(withPlaceRoutes(services), { initialUrl: "/place/place-a1" });
+    expect(await screen.findByTestId("scroll-place")).toBeTruthy();
+    for (let n = 1; n <= 5; n += 1) {
+      expect(screen.getByTestId(`place-moment-m-a${n}`)).toBeTruthy();
+    }
+    expect(screen.getByText("Тэйзер моманту s-a5")).toBeTruthy();
   });
 });

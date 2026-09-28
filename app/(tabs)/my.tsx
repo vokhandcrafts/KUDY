@@ -9,7 +9,7 @@
 // returns.
 import { useCallback } from "react";
 import { useFocusEffect } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useMyKudy } from "../../controllers/myKudyController";
 import type { MyKudyState } from "../../controllers/myKudyController";
@@ -82,19 +82,23 @@ export default function My() {
   );
   return (
     <View style={styles.screen} testID="screen-My KUDY">
-      <Text style={styles.title}>My KUDY</Text>
-      {controller === null || controller.status === "unavailable" ? (
-        // No member (the db adapter has not landed) and a failed read are
-        // the same honest surface: no history is invented either way.
-        <View testID="my-unavailable">
-          <Text style={styles.unavailable}>Гісторыя недаступная</Text>
-          {controller !== null ? <Text style={styles.rowLine}>{controller.reason}</Text> : null}
-        </View>
-      ) : null}
-      {controller !== null && controller.status === "loading" ? (
-        <Text style={styles.unavailable}>Загрузка…</Text>
-      ) : null}
-      {controller !== null && controller.status === "ready" ? <MyKudyRows state={controller} /> : null}
+      {/* UX 01 (issue #347): the history list scrolls — long finished-run
+          lists stay reachable beyond the fold. */}
+      <ScrollView testID="scroll-my">
+        <Text style={styles.title}>My KUDY</Text>
+        {controller === null || controller.status === "unavailable" ? (
+          // No member (the db adapter has not landed) and a failed read are
+          // the same honest surface: no history is invented either way.
+          <View testID="my-unavailable">
+            <Text style={styles.unavailable}>Гісторыя недаступная</Text>
+            {controller !== null ? <Text style={styles.rowLine}>{controller.reason}</Text> : null}
+          </View>
+        ) : null}
+        {controller !== null && controller.status === "loading" ? (
+          <Text style={styles.unavailable}>Загрузка…</Text>
+        ) : null}
+        {controller !== null && controller.status === "ready" ? <MyKudyRows state={controller} /> : null}
+      </ScrollView>
     </View>
   );
 }

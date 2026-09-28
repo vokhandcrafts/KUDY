@@ -228,4 +228,52 @@ describe("guide preview surface (G06.01.b)", () => {
     expect(await screen.findByTestId("preview-unavailable")).toBeTruthy();
     expect(screen.getByText("гід не апублікаваны")).toBeTruthy();
   });
+
+  // UX 01 (issue #347): the surface scrolls — twelve stops and the main
+  // action all render inside the preview's ScrollView. Removing the
+  // ScrollView drops the scroll testID and fails this (implementation-rules 1).
+  test("the preview scrolls: twelve stops and the main button render inside the ScrollView (UX 01)", async () => {
+    serve({
+      ...PUBLISHED,
+      "bundle/guide-route-b1/3/route.json": JSON.stringify({
+        route_id: "guide-route-b1",
+        version: "3",
+        city_id: "gdansk",
+        access: "free_base",
+        distance_m: 4200,
+        duration_min: 90,
+        free_stop_count: 12,
+        published: true,
+        stops: Array.from({ length: 12 }, (_, position) => ({
+          id: `stop-twelve-${position + 1}`,
+          position,
+          place_id: `place-twelve-${position + 1}`,
+          access_tier: "base",
+          story_base_id: `story-twelve-${position + 1}`,
+          preview: {
+            name: { be: `Кропка ${position + 1}`, en: `Stop ${position + 1}` },
+            announce: { be: `Анонс кропкі ${position + 1}.`, en: `Stop ${position + 1} teaser.` },
+          },
+        })),
+      }),
+    });
+    const bundles = memoryBundles();
+    bundles.setDownloaded(true);
+    renderRouter(
+      withPreviewRoutes(
+        createServices({
+          catalogOrigin: "https://catalog.test",
+          catalogSha256: sha256,
+          bundlesStore: bundles.store,
+          evaluateLayer: READY_EVALUATE("guide-route-b1", "3"),
+        }),
+      ),
+      { initialUrl: "/route/guide-route-b1?from=city" },
+    );
+    expect(await screen.findByTestId("scroll-preview")).toBeTruthy();
+    for (let position = 1; position <= 12; position += 1) {
+      expect(screen.getByTestId(`stop-stop-twelve-${position}`)).toBeTruthy();
+    }
+    expect(screen.getByTestId("btn-start")).toBeTruthy();
+  });
 });

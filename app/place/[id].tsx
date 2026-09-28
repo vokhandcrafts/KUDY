@@ -11,7 +11,7 @@
 // the run surface's `playback` idiom), never a services import.
 import { Link, useRouter, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
   placeDetailStrings,
@@ -217,55 +217,59 @@ export default function PlaceDetail() {
   const title = facts?.title ?? placeId;
   return (
     <View style={styles.screen} testID="screen-Place detail">
-      <Pressable onPress={() => router.back()} testID="btn-place-back">
-        <Text style={styles.back}>{strings.back}</Text>
-      </Pressable>
-      <Text style={styles.title}>{title}</Text>
-      {state === null ? (
-        <Text style={styles.note} testID="place-unavailable">
-          {strings.unavailable}
-        </Text>
-      ) : state.kind === "loading" ? (
-        <Text style={styles.note} testID="place-loading">
-          {strings.loading}
-        </Text>
-      ) : state.kind === "error" ? (
-        <Text style={styles.note} testID="place-error">
-          {strings.error}
-        </Text>
-      ) : (
-        <>
-          {facts === null ? (
-            <Text style={styles.note} testID="place-nofacts">
-              {strings.noFacts}
-            </Text>
-          ) : (
-            <>
-              {facts.summary !== null ? <Text style={styles.summary}>{facts.summary}</Text> : null}
-              <View style={{ marginBottom: tokens.spaceM }}>
-                <AccessBadge access={facts.access} />
-              </View>
-              <Text style={styles.facts}>
-                {strings.textLabel}: {facts.text_locales.length > 0 ? facts.text_locales.join(", ") : "—"};{" "}
-                {strings.audioLabel}: {facts.audio_locales.length > 0 ? facts.audio_locales.join(", ") : "—"}
+      {/* UX 01 (issue #347): the detail scrolls — the last moment card is
+          reachable beyond the fold. */}
+      <ScrollView testID="scroll-place">
+        <Pressable onPress={() => router.back()} testID="btn-place-back">
+          <Text style={styles.back}>{strings.back}</Text>
+        </Pressable>
+        <Text style={styles.title}>{title}</Text>
+        {state === null ? (
+          <Text style={styles.note} testID="place-unavailable">
+            {strings.unavailable}
+          </Text>
+        ) : state.kind === "loading" ? (
+          <Text style={styles.note} testID="place-loading">
+            {strings.loading}
+          </Text>
+        ) : state.kind === "error" ? (
+          <Text style={styles.note} testID="place-error">
+            {strings.error}
+          </Text>
+        ) : (
+          <>
+            {facts === null ? (
+              <Text style={styles.note} testID="place-nofacts">
+                {strings.noFacts}
               </Text>
-            </>
-          )}
-          {state.moments.length === 0 ? (
-            <Text style={styles.note} testID="place-moments-empty">
-              {strings.empty}
-            </Text>
-          ) : momentPlay === null ? (
-            <Text style={styles.note} testID="place-no-play">
-              {strings.unavailable}
-            </Text>
-          ) : (
-            state.moments.map((moment) => (
-              <MomentCard key={moment.momentId} moment={moment} momentPlay={momentPlay} strings={strings} />
-            ))
-          )}
-        </>
-      )}
+            ) : (
+              <>
+                {facts.summary !== null ? <Text style={styles.summary}>{facts.summary}</Text> : null}
+                <View style={{ marginBottom: tokens.spaceM }}>
+                  <AccessBadge access={facts.access} />
+                </View>
+                <Text style={styles.facts}>
+                  {strings.textLabel}: {facts.text_locales.length > 0 ? facts.text_locales.join(", ") : "—"};{" "}
+                  {strings.audioLabel}: {facts.audio_locales.length > 0 ? facts.audio_locales.join(", ") : "—"}
+                </Text>
+              </>
+            )}
+            {state.moments.length === 0 ? (
+              <Text style={styles.note} testID="place-moments-empty">
+                {strings.empty}
+              </Text>
+            ) : momentPlay === null ? (
+              <Text style={styles.note} testID="place-no-play">
+                {strings.unavailable}
+              </Text>
+            ) : (
+              state.moments.map((moment) => (
+                <MomentCard key={moment.momentId} moment={moment} momentPlay={momentPlay} strings={strings} />
+              ))
+            )}
+          </>
+        )}
+      </ScrollView>
     </View>
   );
 }
