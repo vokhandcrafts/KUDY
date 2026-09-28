@@ -304,6 +304,9 @@ export default function Run() {
   if (surface.status === "loading" || run === null) {
     return (
       <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Run">
+        {/* UX 02 (issue #348): the loading state keeps the frame — with the
+            native header off there is no other way back (AC2). */}
+        <BackButton label={strings.back} testID="btn-run-back" />
         <Text style={styles.centered}>{strings.loading}</Text>
       </View>
     );

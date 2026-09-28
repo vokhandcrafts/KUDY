@@ -14,7 +14,16 @@ import { createServices } from "../controllers/createServices";
 import type { RunSessionPorts } from "../controllers/run/runSurfaceController";
 import type { BundlesStore, Tier } from "../services/contentRepo/types";
 import { FakeLocationOsPort } from "../services/location/fake-port";
-import { layoutWith, makeRunSession } from "../test/render-helpers";
+import { flatStyle, layoutWith, makeRunSession } from "../test/render-helpers";
+import { tokens } from "../components/design-tokens";
+
+// UX 02 (issue #348): the frame's insets are pinned to the same fake the
+// safe-area guard uses — the panel's bottom padding assertions below read
+// spaceM + 34 against it.
+jest.mock("react-native-safe-area-context", () => ({
+  ...(jest.requireActual("react-native-safe-area-context") as Record<string, unknown>),
+  useSafeAreaInsets: () => ({ top: 50, bottom: 34, left: 0, right: 0 }),
+}));
 
 // The status label's text: a single-string Text child in this surface.
 const textOf = (testId: string): string => {
@@ -278,13 +287,19 @@ describe("run map surface", () => {
 
     fireEvent.press(screen.getByTestId("run-marker-stop-1"));
     expect(screen.getByTestId("run-panel-half")).toBeTruthy();
-    // UX 02 (issue #348): the ready surface's back hosts its label in a
-    // <Text> — the #344 guard (within().getByText() reaches only <Text>
-    // hosts, a reverted bare string fails here).
+    // UX 02 (issue #348): the sheet's bottom padding keeps its content above
+    // the home-indicator area — the pinned bottom inset (34) on the base
+    // spacing (AC4).
+    expect(flatStyle(screen.getByTestId("run-panel-half")).paddingBottom).toBe(tokens.spaceM + 34);
+    // UX 02 (issue #348): the back's label lives in a <Text> — the #344 guard
+    // (within().getByText() reaches only <Text> hosts, a reverted bare string
+    // fails here).
     expect(within(screen.getByTestId("btn-run-back")).getByText("← Назад")).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-run-back"));
     expect(screen.queryByTestId("run-panel-half")).toBeNull();
     expect(screen.getByTestId("run-panel-bar")).toBeTruthy();
+    // The bar rides the same bottom inset (AC4).
+    expect(flatStyle(screen.getByTestId("run-panel-bar")).paddingBottom).toBe(tokens.spaceM + 34);
     expect(audioPort.commands).toEqual([]);
     // Peeking credited nothing: the card's stop is still pending (AC5).
     expect(textOf("run-status-stop-1")).toBe("Мытня — чакае");

@@ -57,6 +57,20 @@ export function layoutWith(services: Services) {
   };
 }
 
+// The flattened style of a rendered element: the screens merge their frame
+// styles into arrays (inset + base spacing), the guards read the effective
+// value (UX 02, issue #348).
+export function flatStyle(element: { props: { style?: unknown } }): Record<string, unknown> {
+  const style = element.props.style;
+  if (Array.isArray(style)) {
+    return Object.assign(
+      {},
+      ...style.filter((part) => part !== null && part !== undefined),
+    ) as Record<string, unknown>;
+  }
+  return (style ?? {}) as Record<string, unknown>;
+}
+
 // UX 02 (issue #348) — the full route tree for the navigation-frame guards
 // (back navigation, safe-area): the real screen components under the
 // mirrored layout, the honest no-ports services. One copy for the frame
