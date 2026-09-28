@@ -107,6 +107,7 @@ const PLACES_JSON = JSON.stringify([
   { id: "place-2", content_version: "cv-1", lat: 54.3535, lng: 18.651, trigger_radius_m: 30, kind: "historic" },
   { id: "place-3", content_version: "cv-1", lat: 54.3548, lng: 18.654, trigger_radius_m: 30, kind: "viewpoint" },
   { id: "place-9", content_version: "cv-1", lat: 54.3512, lng: 18.6498, trigger_radius_m: 10, kind: "cafe" },
+  { id: "place-10", content_version: "cv-1", lat: 54.3515, lng: 18.6502, trigger_radius_m: 10, kind: "sight" },
 ]);
 // The pinned layer's story facts (11 §3): each stop's base story with its
 // own transcript, so the panel's split is provable — the card shows its
@@ -228,9 +229,15 @@ describe("run map surface", () => {
     expect(screen.getByTestId("run-marker-stop-1")).toBeTruthy();
     expect(textOf("run-status-stop-1")).toBe("Мытня — чакае");
     expect(textOf("run-status-stop-3")).toBe("Вежа — зачынена");
-    // The POI point is its own kind, not a stop marker.
+    // The POI point is its own kind, not a stop marker. UX 05 (issue
+    // #351): the label goes through the run strings' kind dictionary —
+    // «sight» renders its Belarusian word, a kind without an entry renders
+    // no label and the raw value never shows. Reverting the screen to
+    // `poi.kind` surfaces the raw "cafe" and fails the null query.
     expect(screen.getByTestId("run-poi-place-9")).toBeTruthy();
-    expect(screen.getByText("cafe")).toBeTruthy();
+    expect(screen.getByTestId("run-poi-place-10")).toBeTruthy();
+    expect(screen.getByText("Славутасць")).toBeTruthy();
+    expect(screen.queryByText(/cafe/)).toBeNull();
     // The ODbL attribution is on the screen (11 §6 — the license duty).
     expect(screen.getByTestId("map-attribution")).toBeTruthy();
 

@@ -43,9 +43,12 @@ const opts = { localePreference: ['be', 'en'] };
 
 // A catalog+index pair whose pointer's bytes and sha256 are computed from
 // the served index text — the same pin publication applies (21 §3.3).
+// `docs` serves additional origin paths (the route documents the preview
+// assembly reads); every other path still serves the index text.
 function serveIndexPair(
   routes: ReadonlyArray<Record<string, unknown>>,
   index: Record<string, unknown>,
+  docs: Readonly<Record<string, string>> = {},
 ): CatalogPathLoader {
   const indexText = JSON.stringify(index);
   const indexBytes = new TextEncoder().encode(indexText);
@@ -60,8 +63,11 @@ function serveIndexPair(
       sha256: createHash('sha256').update(indexBytes).digest('hex'),
     },
   });
-  return (relPath) =>
-    relPath === 'catalog.json' ? Promise.resolve(catalogText) : Promise.resolve(indexText);
+  return (relPath) => {
+    if (relPath === 'catalog.json') return Promise.resolve(catalogText);
+    if (relPath in docs) return Promise.resolve(docs[relPath]);
+    return Promise.resolve(indexText);
+  };
 }
 
 function titles(guides: readonly CatalogGuideCard[]): string[] {
@@ -431,6 +437,77 @@ describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
     assert.equal(locked?.locked, true);
     assert.equal(open?.tier, 'base');
     assert.equal(locked?.tier, 'extended');
+  });
+
+  it('joins the stop rows with the index place titles; unknown and untitled places hide the line (UX 05, issue #351)', async () => {
+    // The dedup of 21 §4 rule 6 applies inside the title map too: of two
+    // offers pinned to one place, the sorted-first title wins.
+    const index = {
+      offers: [
+        {
+          offer_id: 'offer-place-known',
+          ref: { kind: 'place', place_id: 'place-known', content_version: '1' },
+          editorial_order: 1,
+          localized: { title: { be: 'Вядомы двор', en: 'Known Courtyard' } },
+          availability: { text_locales: ['be'], audio_locales: [] },
+          access: 'free',
+        },
+        {
+          offer_id: 'offer-place-untitled',
+          ref: { kind: 'place', place_id: 'place-untitled', content_version: '1' },
+          editorial_order: 2,
+          localized: {},
+          availability: {},
+          access: 'free',
+        },
+        {
+          offer_id: 'offer-place-dup-late',
+          ref: { kind: 'place', place_id: 'place-dup', content_version: '1' },
+          editorial_order: 5,
+          localized: { title: { be: 'Дубль' } },
+          availability: {},
+          access: 'free',
+        },
+        {
+          offer_id: 'offer-place-dup-early',
+          ref: { kind: 'place', place_id: 'place-dup', content_version: '1' },
+          editorial_order: 4,
+          localized: { title: { be: 'Пераможца' } },
+          availability: {},
+          access: 'free',
+        },
+      ],
+    };
+    const routeDoc = JSON.stringify({
+      route_id: 'guide-route-b1',
+      version: '3',
+      city_id: 'gdansk',
+      access: 'free_base',
+      distance_m: 100,
+      duration_min: 30,
+      free_stop_count: 3,
+      published: true,
+      stops: [
+        { id: 'stop-known', position: 0, place_id: 'place-known', access_tier: 'base', story_base_id: 's1' },
+        { id: 'stop-unknown', position: 1, place_id: 'place-unknown', access_tier: 'base', story_base_id: 's2' },
+        { id: 'stop-untitled', position: 2, place_id: 'place-untitled', access_tier: 'base', story_base_id: 's3' },
+        { id: 'stop-dup', position: 3, place_id: 'place-dup', access_tier: 'base', story_base_id: 's4' },
+      ],
+    });
+    const loader = serveIndexPair(
+      [{ route_id: 'guide-route-b1', version: '3', locales: ['be'], layers: ['base'] }],
+      index,
+      { 'bundle/guide-route-b1/3/route.json': routeDoc },
+    );
+    const state = await loadPreview({ loader, sha256 }, opts, 'guide-route-b1', null);
+    assert.ok(state.kind === 'ready' && state.preview.stops);
+    const [known, unknown, untitled, dup] = state.preview.stops;
+    assert.equal(known?.placeName, 'Вядомы двор');
+    // No offer, or an offer without a title — the place line hides, the raw
+    // place_id never reaches the view (nothing invented).
+    assert.equal(unknown?.placeName, null);
+    assert.equal(untitled?.placeName, null);
+    assert.equal(dup?.placeName, 'Пераможца');
   });
 
   it('renders the route-only guide honestly from the entry facts', async () => {

@@ -127,7 +127,7 @@ node --test --experimental-strip-types "services/catalog/catalogService.test.ts"
 ```
 
 ```output
-ℹ tests 16
-ℹ pass 16
+ℹ tests 37
+ℹ pass 37
 ℹ fail 0
 ```

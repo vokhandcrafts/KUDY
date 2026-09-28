@@ -19,7 +19,7 @@ node_modules/.bin/jest app/preview.test.tsx -t "Text host" 2>&1 | grep -E "^(Tes
 
 ```output
 Test Suites: 1 passed, 1 total
-Tests:       7 skipped, 1 passed, 8 total
+Tests:       9 skipped, 1 passed, 10 total
 Snapshots:   0 total
 ```
 

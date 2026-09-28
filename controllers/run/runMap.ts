@@ -165,6 +165,11 @@ export interface RunMapStrings {
     | 'fallback',
     string
   >;
+  // UX 05 (issue #351): the POI labels — the package's places.json kind
+  // string (place.schema.json keeps it a free ≤32-char value) mapped through
+  // this per-locale dictionary. A kind without an entry renders no label at
+  // all — the raw value never shows, nothing is invented.
+  readonly poiKind: Record<string, string>;
 }
 
 // The refusal's rendered word: the known map, else the raw reason itself.
@@ -214,6 +219,9 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
       'run#recovery-failed': 'Збой чытання жывой сесіі',
       fallback: 'Збой',
     },
+    poiKind: {
+      sight: 'Славутасць',
+    },
   },
   en: {
     status: {
@@ -255,6 +263,9 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
       'run#package-read-failed': 'Package unreadable',
       'run#recovery-failed': 'Live session read failed',
       fallback: 'Failure',
+    },
+    poiKind: {
+      sight: 'Sight',
     },
   },
 };

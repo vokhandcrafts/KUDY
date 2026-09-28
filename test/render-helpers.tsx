@@ -33,6 +33,17 @@ export function fixtureText(name: string): string {
   return readFileSync(join(FIXTURES, name), "utf8");
 }
 
+// The real published catalog pair over the committed fixtures (the pointer's
+// pin covers index-valid.json), served to suites that need a ready catalog
+// — one copy; sibling maps are jscpd clones (implementation-rules 3, 8).
+export const CATALOG_POINTER = "discovery/city-a/r-2026-09-14-1/index.json";
+export const CATALOG_FIXTURES: Record<string, string> = {
+  "catalog.json": fixtureText("catalog-with-discovery.json"),
+  [CATALOG_POINTER]: fixtureText("index-valid.json"),
+  "bundle/guide-route-a1/1/route.json": fixtureText("route-guide-route-a1.json"),
+  "bundle/guide-route-b1/3/route.json": fixtureText("route-guide-route-b1.json"),
+};
+
 export const sha256 = async (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
 export function serve(paths: Record<string, string>) {

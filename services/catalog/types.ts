@@ -129,6 +129,11 @@ export interface PreviewStop {
   readonly stopId: string;
   readonly position: number;
   readonly placeId: string;
+  // The place's human title from the discovery index's place offer
+  // (localized per the display preference). Null when the index names no
+  // such place or publishes no title — the row hides the place line, the
+  // raw place_id never renders (UX 05, issue #351).
+  readonly placeName: string | null;
   readonly tier: 'base' | 'extended';
   readonly locked: boolean;
   // Localized per the display preference; null when nothing published —

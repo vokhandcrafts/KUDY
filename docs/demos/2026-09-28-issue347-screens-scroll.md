@@ -17,7 +17,7 @@ node_modules/.bin/jest app/preview.test.tsx app/map.test.tsx app/place/place.tes
 
 ```output
 Test Suites: 5 passed, 5 total
-Tests:       36 skipped, 5 passed, 41 total
+Tests:       39 skipped, 5 passed, 44 total
 Snapshots:   0 total
 ```
 

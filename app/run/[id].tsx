@@ -395,16 +395,22 @@ export default function Run() {
       ) : null}
       {view.markers.length > 0 ? (
         <View style={styles.map} testID="run-map">
-          {view.pois.map((poi) => (
-            <View
-              key={poi.placeId}
-              style={[styles.marker, { left: `${poi.nx * 100}%`, top: `${poi.ny * 100}%`, transform: [{ translateX: -60 }, { translateY: -9 }] }]}
-              testID={`run-poi-${poi.placeId}`}
-            >
-              <View style={styles.poi} />
-              <Text style={styles.poiLabel}>{poi.kind}</Text>
-            </View>
-          ))}
+          {view.pois.map((poi) => {
+            // UX 05 (issue #351): the label goes through the run strings'
+            // kind dictionary — a kind without an entry renders no label,
+            // the raw value never shows (nothing invented).
+            const poiLabel = strings.poiKind[poi.kind] ?? null;
+            return (
+              <View
+                key={poi.placeId}
+                style={[styles.marker, { left: `${poi.nx * 100}%`, top: `${poi.ny * 100}%`, transform: [{ translateX: -60 }, { translateY: -9 }] }]}
+                testID={`run-poi-${poi.placeId}`}
+              >
+                <View style={styles.poi} />
+                {poiLabel ? <Text style={styles.poiLabel}>{poiLabel}</Text> : null}
+              </View>
+            );
+          })}
           {view.markers.map((marker) => (
             <Pressable
               key={marker.stopId}
