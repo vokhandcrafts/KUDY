@@ -10,6 +10,7 @@
 import { Link } from "expo-router";
 import { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   nearbyOrder,
@@ -19,6 +20,7 @@ import {
   type NearbyOfferFacts,
 } from "../controllers/nearby/nearbySurfaceController";
 import { useServices } from "./_layout";
+import { BackButton } from "../components/back-button";
 import { AccessBadge, StateBanner } from "../components/guide-card";
 import { tokens } from "../components/design-tokens";
 
@@ -173,8 +175,23 @@ export default function Map() {
     surface && (surface.kind === "ready" || surface.kind === "offline") ? surface.offers : [];
   const list = nearbyOrder(offers, locationView);
   const note = locationNote(locationView, strings);
+  // UX 02 (issue #348): the frame's top inset — the content starts below the
+  // status bar and the notch with the native header off (AC4).
+  const insets = useSafeAreaInsets();
   return (
-    <View style={{ backgroundColor: tokens.colorPaper, flex: 1, padding: tokens.spaceL }} testID="screen-Map">
+    <View
+      style={{
+        backgroundColor: tokens.colorPaper,
+        flex: 1,
+        padding: tokens.spaceL,
+        paddingTop: insets.top + tokens.spaceL,
+      }}
+      testID="screen-Map"
+    >
+      {/* UX 02 (issue #348): the Nearby surface gains its one back element —
+          it never had one (AC2); the label is hosted by the shared
+          component's <Text> (the #344 class guard). */}
+      <BackButton label="← Назад" testID="btn-map-back" />
       {/* UX 01 (issue #347): the offer list scrolls — the last card is
           reachable beyond the fold, never cut by the screen edge. */}
       <ScrollView testID="scroll-nearby">

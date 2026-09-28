@@ -6,15 +6,24 @@
 // screen-reader labels on the markers, and the surface without the run ports
 // shows its honest unavailable state (AC4's composition-root rule).
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
-import { fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
+import { fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
 import { act } from "@testing-library/react-native";
 
 import Run from "./run/[id]";
 import { createServices } from "../controllers/createServices";
 import type { RunSessionPorts } from "../controllers/run/runSurfaceController";
-import type { BundlesStore, Tier } from "../services/contentRepo/types";
+import type { BundlesStore, Readiness, Tier } from "../services/contentRepo/types";
 import { FakeLocationOsPort } from "../services/location/fake-port";
-import { layoutWith, makeRunSession } from "../test/render-helpers";
+import { flatStyle, layoutWith, makeRunSession } from "../test/render-helpers";
+import { tokens } from "../components/design-tokens";
+
+// UX 02 (issue #348): the frame's insets are pinned to the same fake the
+// safe-area guard uses — the panel's bottom padding assertions below read
+// spaceM + 34 against it.
+jest.mock("react-native-safe-area-context", () => ({
+  ...(jest.requireActual("react-native-safe-area-context") as Record<string, unknown>),
+  useSafeAreaInsets: () => ({ top: 50, bottom: 34, left: 0, right: 0 }),
+}));
 
 // The status label's text: a single-string Text child in this surface.
 const textOf = (testId: string): string => {
@@ -273,14 +282,40 @@ describe("run map surface", () => {
     expect(screen.queryByTestId("run-map")).toBeNull();
   });
 
+  // UX 02 (issue #348): the surface starts at status 'loading' and resolves
+  // through the readiness port — a pending readiness holds the state, and
+  // the frame's back must be there. Reverting the loading branch's
+  // BackButton in app/run/[id].tsx turns this red (implementation-rules 1).
+  test("UX 02: the loading state keeps the back element (AC2)", async () => {
+    const pending = new Promise<Readiness>(() => {});
+    const { session } = makeRunSession({ readiness: { evaluate: () => pending } });
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    // The loading branch itself, not the unavailable one: the honest
+    // «Загрузка…» wording is on the screen while readiness stays pending.
+    expect(await screen.findByText("Загрузка…")).toBeTruthy();
+    expect(await screen.findByTestId("btn-run-back")).toBeTruthy();
+    expect(within(screen.getByTestId("btn-run-back")).getByText("← Назад")).toBeTruthy();
+  });
+
   test("G06.03 AC1: Back and the card's ✕ dismiss the panel identically", async () => {
     const { session, audioPort } = await mountedRunBe();
 
     fireEvent.press(screen.getByTestId("run-marker-stop-1"));
     expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+    // UX 02 (issue #348): the sheet's bottom padding keeps its content above
+    // the home-indicator area — the pinned bottom inset (34) on the base
+    // spacing (AC4).
+    expect(flatStyle(screen.getByTestId("run-panel-half")).paddingBottom).toBe(tokens.spaceM + 34);
+    // UX 02 (issue #348): the back's label lives in a <Text> — the #344 guard
+    // (within().getByText() reaches only <Text> hosts, a reverted bare string
+    // fails here).
+    expect(within(screen.getByTestId("btn-run-back")).getByText("← Назад")).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-run-back"));
     expect(screen.queryByTestId("run-panel-half")).toBeNull();
     expect(screen.getByTestId("run-panel-bar")).toBeTruthy();
+    // The bar rides the same bottom inset (AC4).
+    expect(flatStyle(screen.getByTestId("run-panel-bar")).paddingBottom).toBe(tokens.spaceM + 34);
     expect(audioPort.commands).toEqual([]);
     // Peeking credited nothing: the card's stop is still pending (AC5).
     expect(textOf("run-status-stop-1")).toBe("Мытня — чакае");

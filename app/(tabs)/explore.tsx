@@ -6,6 +6,7 @@
 // «Побач»; NAV3 — the button works from the empty city too).
 import { Link } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCatalogController } from "../../controllers/catalog/useCatalogController";
 import { useServices } from "../_layout";
@@ -31,8 +32,20 @@ const styles = StyleSheet.create({
 export default function Explore() {
   const services = useServices();
   const controller = useCatalogController(services.catalog?.controller);
+  // UX 02 (issue #348): with the native header off the screen starts below
+  // the status bar and the notch — the top safe-area inset is the screen's
+  // own (AC4).
+  const insets = useSafeAreaInsets();
   return (
-    <View style={{ backgroundColor: tokens.colorPaper, flex: 1, padding: tokens.spaceL }} testID="screen-Explore">
+    <View
+      style={{
+        backgroundColor: tokens.colorPaper,
+        flex: 1,
+        padding: tokens.spaceL,
+        paddingTop: insets.top + tokens.spaceL,
+      }}
+      testID="screen-Explore"
+    >
       <WalkButton walk={services.walk} />
       <Text style={styles.title}>{CITY_TITLE}</Text>
       <Link href="/map" testID="link-nearby">
