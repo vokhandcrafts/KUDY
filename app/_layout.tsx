@@ -35,7 +35,10 @@ export default function RootLayout() {
   const services = useMemo(() => createServices(devicePorts), []);
   return (
     <ServicesContext.Provider value={services}>
-      <Stack />
+      {/* UX 02 (issue #348): the native header is off — it printed raw route
+          names as titles and duplicated the screens' own back; every screen
+          owns its frame (one BackButton, safe-area padding). */}
+      <Stack screenOptions={{ headerShown: false }} />
     </ServicesContext.Provider>
   );
 }

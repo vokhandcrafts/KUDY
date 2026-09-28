@@ -15,9 +15,11 @@
 // this surface owns no GPS, no player and no engine (AC4).
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/runMap";
 import { useRunState, useRunSurface } from "../../controllers/run/runSurfaceController";
+import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
 import { useServices } from "../_layout";
 
@@ -38,11 +40,6 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colorPaper,
     flex: 1,
     padding: tokens.spaceL,
-  },
-  back: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceS,
   },
   centered: {
     color: tokens.colorMuted,
@@ -286,12 +283,15 @@ export default function Run() {
   const run = useRunState(ready?.controller ?? null);
   const strings = runMapStrings(ready?.locale ?? "be");
 
+  // UX 02 (issue #348): the frame's top inset — the content starts below the
+  // status bar and the notch with the native header off (AC4). A hook —
+  // before the early returns.
+  const insets = useSafeAreaInsets();
+
   if (surface === null || surface.status === "unavailable") {
     return (
-      <View style={styles.screen} testID="screen-Run">
-        <Pressable onPress={() => router.back()} style={styles.back} testID="btn-run-back">
-          {strings.back}
-        </Pressable>
+      <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Run">
+        <BackButton label={strings.back} testID="btn-run-back" />
         <Text style={styles.centered}>{strings.unavailableTitle}</Text>
         {surface !== null ? (
           <Text style={styles.reason} testID="run-unavailable-reason">
@@ -303,7 +303,7 @@ export default function Run() {
   }
   if (surface.status === "loading" || run === null) {
     return (
-      <View style={styles.screen} testID="screen-Run">
+      <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Run">
         <Text style={styles.centered}>{strings.loading}</Text>
       </View>
     );
@@ -348,10 +348,11 @@ export default function Run() {
     else router.back();
   };
   return (
-    <View style={styles.screen} testID="screen-Run">
-      <Pressable onPress={backOrDismiss} style={styles.back} testID="btn-run-back">
-        {strings.back}
-      </Pressable>
+    <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Run">
+      {/* UX 02 (issue #348): the one back element; from Peek it is the
+          navigation out of Run, from an open card it dismisses the card —
+          the controller's backOrDismiss (AC2). */}
+      <BackButton label={strings.back} onPress={backOrDismiss} testID="btn-run-back" />
       {run.run.phase === "Paused" ? (
         <View style={styles.pausedBanner} testID="run-paused">
           <Text style={styles.pausedText}>{strings.pausedTitle}</Text>
@@ -434,7 +435,12 @@ export default function Run() {
         {strings.attribution}
       </Text>
       {session && session.phase !== "Ended" && run.panel === "peek" ? (
-        <View style={styles.panelBar} testID="run-panel-bar">
+        // UX 02 (issue #348): the bar's bottom padding keeps its controls
+        // above the home-indicator area (AC4).
+        <View
+          style={[styles.panelBar, { paddingBottom: tokens.spaceM + insets.bottom }]}
+          testID="run-panel-bar"
+        >
           <View style={styles.barRow}>
             <Text style={styles.barTitle} testID="run-bar-title">
               {playingName ? `${strings.nowPlayingLabel}: ${playingName}` : strings.nothingPlaying}
@@ -467,8 +473,14 @@ export default function Run() {
         </View>
       ) : null}
       {run.panel !== "peek" ? (
+        // UX 02 (issue #348): the sheet's bottom padding keeps its content
+        // above the home-indicator area (AC4).
         <View
-          style={[styles.panel, run.panel === "full" ? styles.panelFull : styles.panelHalf]}
+          style={[
+            styles.panel,
+            run.panel === "full" ? styles.panelFull : styles.panelHalf,
+            { paddingBottom: tokens.spaceM + insets.bottom },
+          ]}
           testID={`run-panel-${run.panel}`}
         >
           {/* UX 01 (issue #347): the panel's card content scrolls — a long

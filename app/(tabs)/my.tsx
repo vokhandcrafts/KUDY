@@ -10,10 +10,12 @@
 import { useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useMyKudy } from "../../controllers/myKudyController";
 import type { MyKudyState } from "../../controllers/myKudyController";
 import { useServices } from "../_layout";
+import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
 
 const styles = StyleSheet.create({
@@ -80,8 +82,14 @@ export default function My() {
       void historyStore?.getState().refresh();
     }, [historyStore]),
   );
+  // UX 02 (issue #348): the frame's top inset — the content starts below the
+  // status bar and the notch with the native header off (AC4).
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.screen} testID="screen-My KUDY">
+    <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-My KUDY">
+      {/* UX 02 (issue #348): the surface's one back element (AC2), fixed
+          above the scrolling history so it stays reachable. */}
+      <BackButton label="← Назад" testID="btn-my-back" />
       {/* UX 01 (issue #347): the history list scrolls — long finished-run
           lists stay reachable beyond the fold. */}
       <ScrollView testID="scroll-my">

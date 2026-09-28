@@ -6,7 +6,7 @@
 // screen-reader labels on the markers, and the surface without the run ports
 // shows its honest unavailable state (AC4's composition-root rule).
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
-import { fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
+import { fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
 import { act } from "@testing-library/react-native";
 
 import Run from "./run/[id]";
@@ -278,6 +278,10 @@ describe("run map surface", () => {
 
     fireEvent.press(screen.getByTestId("run-marker-stop-1"));
     expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+    // UX 02 (issue #348): the ready surface's back hosts its label in a
+    // <Text> — the #344 guard (within().getByText() reaches only <Text>
+    // hosts, a reverted bare string fails here).
+    expect(within(screen.getByTestId("btn-run-back")).getByText("← Назад")).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-run-back"));
     expect(screen.queryByTestId("run-panel-half")).toBeNull();
     expect(screen.getByTestId("run-panel-bar")).toBeTruthy();
