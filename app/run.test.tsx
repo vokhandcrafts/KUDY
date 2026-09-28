@@ -9,6 +9,8 @@ import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
 import { act } from "@testing-library/react-native";
 
+import { Modal } from "react-native";
+
 import Run from "./run/[id]";
 import { createServices } from "../controllers/createServices";
 import type { RunSessionPorts } from "../controllers/run/runSurfaceController";
@@ -107,6 +109,7 @@ const PLACES_JSON = JSON.stringify([
   { id: "place-2", content_version: "cv-1", lat: 54.3535, lng: 18.651, trigger_radius_m: 30, kind: "historic" },
   { id: "place-3", content_version: "cv-1", lat: 54.3548, lng: 18.654, trigger_radius_m: 30, kind: "viewpoint" },
   { id: "place-9", content_version: "cv-1", lat: 54.3512, lng: 18.6498, trigger_radius_m: 10, kind: "cafe" },
+  { id: "place-10", content_version: "cv-1", lat: 54.3515, lng: 18.6502, trigger_radius_m: 10, kind: "sight" },
 ]);
 // The pinned layer's story facts (11 §3): each stop's base story with its
 // own transcript, so the panel's split is provable — the card shows its
@@ -228,9 +231,15 @@ describe("run map surface", () => {
     expect(screen.getByTestId("run-marker-stop-1")).toBeTruthy();
     expect(textOf("run-status-stop-1")).toBe("Мытня — чакае");
     expect(textOf("run-status-stop-3")).toBe("Вежа — зачынена");
-    // The POI point is its own kind, not a stop marker.
+    // The POI point is its own kind, not a stop marker. UX 05 (issue
+    // #351): the label goes through the run strings' kind dictionary —
+    // «sight» renders its Belarusian word, a kind without an entry renders
+    // no label and the raw value never shows. Reverting the screen to
+    // `poi.kind` surfaces the raw "cafe" and fails the null query.
     expect(screen.getByTestId("run-poi-place-9")).toBeTruthy();
-    expect(screen.getByText("cafe")).toBeTruthy();
+    expect(screen.getByTestId("run-poi-place-10")).toBeTruthy();
+    expect(screen.getByText("Славутасць")).toBeTruthy();
+    expect(screen.queryByText(/cafe/)).toBeNull();
     // The ODbL attribution is on the screen (11 §6 — the license duty).
     expect(screen.getByTestId("map-attribution")).toBeTruthy();
 
@@ -416,13 +425,15 @@ describe("run map surface", () => {
     await waitFor(() => expect(screen.queryByTestId("run-paused")).toBeNull());
 
     // One story heard (stop-2's automatic launch), then the finish — legal
-    // after one story, no route completion required (11 §4.3).
+    // after one story, no route completion required (11 §4.3). UX 06 (issue
+    // #352): the destructive finish asks first, the confirmation ends it.
     await soundStop2({ locationPort, advance });
     act(() => {
       audioPort.finish(1);
     });
     await waitFor(() => expect(textOf("run-status-stop-2")).toBe("Порт — праслухана"));
     fireEvent.press(screen.getByTestId("btn-run-end"));
+    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
     expect(await screen.findByTestId("run-ended")).toBeTruthy();
     // The finished walk has no session actions left — Finished is not a
     // live walk anymore (11 §3.3).
@@ -489,6 +500,44 @@ describe("run map surface", () => {
     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
     expect(await screen.findByText("Сесія недаступная")).toBeTruthy();
     expect(screen.getByTestId("run-unavailable-reason").props.children).toBe("Ужо ёсць жывая прагулка");
+  });
+
+  // UX 06 (issue #352) AC3: the destructive finish asks first; the decline
+  // (and the system Back, the shell's onRequestClose) leaves the session
+  // active and unchanged, the confirmation finishes as before. Reverting
+  // btn-run-end to a direct run.end() fails the first half — the dialog
+  // never appears and the walk ends on the press (implementation-rules 1).
+  test("UX 06 AC3: the finish asks for confirmation; the decline keeps the session", async () => {
+    const { session } = await mountedRunBe();
+
+    // The press opens the confirmation modal, the walk stays live.
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    expect(screen.getByTestId("end-confirm-dialog")).toBeTruthy();
+    expect(screen.UNSAFE_queryAllByType(Modal)).toHaveLength(1);
+    expect(screen.queryByTestId("run-ended")).toBeNull();
+    expect(screen.getByTestId("run-session-actions")).toBeTruthy();
+
+    // The decline closes the dialog and changes nothing.
+    fireEvent.press(screen.getByTestId("btn-end-confirm-cancel"));
+    expect(screen.queryByTestId("end-confirm-dialog")).toBeNull();
+    expect(screen.queryByTestId("run-ended")).toBeNull();
+    expect(screen.getByTestId("run-session-actions")).toBeTruthy();
+
+    // The system Back runs the same decline path through the shell's
+    // onRequestClose — the session is still unchanged.
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    act(() => {
+      screen.UNSAFE_queryByType(Modal)?.props.onRequestClose();
+    });
+    expect(screen.queryByTestId("end-confirm-dialog")).toBeNull();
+    expect(screen.queryByTestId("run-ended")).toBeNull();
+
+    // The confirmation finishes the walk as before — the ended screen, no
+    // session actions left.
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
+    expect(await screen.findByTestId("run-ended")).toBeTruthy();
+    expect(screen.queryByTestId("run-session-actions")).toBeNull();
   });
 
   test("G06.03: the bar's play/pause drives only the audible launch", async () => {

@@ -7,26 +7,27 @@
 // dialog of NAV8 and the fail-closed state without ports.
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, renderRouter, screen, within } from "expo-router/testing-library";
+import { act } from "@testing-library/react-native";
+import { Modal } from "react-native";
 
 import Explore from "./(tabs)/explore";
 import Guides from "./city/[id]/guides";
 import RoutePreview from "./route/[id]";
+import { tokens } from "../components/design-tokens";
 import { createServices } from "../controllers/createServices";
 import type { BundlesStore, Readiness } from "../services/contentRepo/types";
 import type { ActivationResult, LayerKey } from "../services/download/types";
-import { fixtureText, layoutWith, serve, sha256 } from "../test/render-helpers";
+import { fixtureText, layoutWith, serve, sha256, CATALOG_FIXTURES, CATALOG_POINTER } from "../test/render-helpers";
 
-const CATALOG_TEXT = fixtureText("catalog-with-discovery.json");
-const INDEX_TEXT = fixtureText("index-valid.json");
-const ROUTE_A1_TEXT = fixtureText("route-guide-route-a1.json");
-const ROUTE_B1_TEXT = fixtureText("route-guide-route-b1.json");
-const POINTER_PATH = "discovery/city-a/r-2026-09-14-1/index.json";
+const STOP_PLACE_CATALOG_TEXT = fixtureText("catalog-discovery-stop-places.json");
+const STOP_PLACE_INDEX_TEXT = fixtureText("index-stop-places.json");
 
-const PUBLISHED = {
-  "catalog.json": CATALOG_TEXT,
-  [POINTER_PATH]: INDEX_TEXT,
-  "bundle/guide-route-a1/1/route.json": ROUTE_A1_TEXT,
-  "bundle/guide-route-b1/3/route.json": ROUTE_B1_TEXT,
+// The same publication with the index extended by route-b1's stop-place
+// offers (UX 05, issue #351): the pointer's pin covers the new text.
+const STOP_PLACE_PUBLISHED = {
+  ...CATALOG_FIXTURES,
+  "catalog.json": STOP_PLACE_CATALOG_TEXT,
+  [CATALOG_POINTER]: STOP_PLACE_INDEX_TEXT,
 };
 
 const withPreviewRoutes = (services: ReturnType<typeof createServices>) => ({
@@ -92,7 +93,7 @@ afterEach(() => {
 
 describe("guide preview surface (G06.01.b)", () => {
   test("the paid preview shows the canon facts, free_stop_count and the disabled paid start (AC1, AC2, NAV6)", async () => {
-    serve(PUBLISHED);
+    serve(CATALOG_FIXTURES);
     renderRouter(
       withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
       { initialUrl: "/route/guide-route-a1?from=rubric" },
@@ -115,22 +116,40 @@ describe("guide preview surface (G06.01.b)", () => {
   });
 
   test("open and locked stops are distinguishable; the locked row shows name, place, announce and lock only (NAV5)", async () => {
-    serve(PUBLISHED);
+    serve(CATALOG_FIXTURES);
     renderRouter(
       withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
       { initialUrl: "/route/guide-route-b1?from=city" },
     );
     expect(await screen.findByTestId("stop-stop-b1-1")).toBeTruthy();
     expect(screen.getByText("Стары порт")).toBeTruthy();
-    expect(screen.getByText("place-b1-1")).toBeTruthy();
+    // The index-valid fixture names no place for these stops — the place
+    // line is hidden, the raw place id never renders (UX 05, issue #351).
+    expect(screen.queryByText(/place-b1/)).toBeNull();
     expect(screen.queryByTestId("stop-locked-stop-b1-1")).toBeNull();
     expect(screen.getByTestId("stop-locked-stop-b1-2")).toBeTruthy();
     expect(screen.getByText("Млынавая вуліца")).toBeTruthy();
     expect(screen.getByText("Кароткі анонс пашыранай гісторыі пра млын.")).toBeTruthy();
   });
 
+  test("the stop rows show the place's human title from the catalog, never the raw place id (UX 05, AC1)", async () => {
+    // The index-stop-places fixture publishes place offers for route-b1's
+    // stops: the open row shows name + place title, the locked row shows the
+    // full NAV5 set — name, place, announce and lock — with human words.
+    serve(STOP_PLACE_PUBLISHED);
+    renderRouter(
+      withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
+      { initialUrl: "/route/guide-route-b1?from=city" },
+    );
+    expect(await screen.findByTestId("stop-stop-b1-1")).toBeTruthy();
+    expect(screen.getByText("Портаўская брама")).toBeTruthy();
+    expect(screen.getByTestId("stop-locked-stop-b1-2")).toBeTruthy();
+    expect(screen.getByText("Стары млын")).toBeTruthy();
+    expect(screen.queryByText(/place-b1/)).toBeNull();
+  });
+
   test("without the disk-truth port the button fails closed with its named reason (11 §7)", async () => {
-    serve(PUBLISHED);
+    serve(CATALOG_FIXTURES);
     renderRouter(
       withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
       { initialUrl: "/route/guide-route-b1" },
@@ -140,7 +159,7 @@ describe("guide preview surface (G06.01.b)", () => {
   });
 
   test("Download triggers the download flow and the same button becomes Start (AC3, the Proof)", async () => {
-    serve(PUBLISHED);
+    serve(CATALOG_FIXTURES);
     const bundles = memoryBundles();
     const download = recordingDownload();
     renderRouter(
@@ -168,8 +187,10 @@ describe("guide preview surface (G06.01.b)", () => {
     expect(download.keys).toEqual(["guide-route-b1"]);
   });
 
-  test("Start of another guide with a live session opens the §4.1 dialog; «Скасаваць» returns unchanged (NAV8)", async () => {
-    serve(PUBLISHED);
+  // The §4.1 world the NAV8 and UX 06 guards share: the ready Start and the
+  // live session of another guide, so the dialog is open on entry.
+  async function mountedConfirmDialog() {
+    serve(CATALOG_FIXTURES);
     const bundles = memoryBundles();
     bundles.setDownloaded(true);
     const session = liveSessionOf("r-other");
@@ -186,15 +207,46 @@ describe("guide preview surface (G06.01.b)", () => {
       { initialUrl: "/route/guide-route-b1" },
     );
     fireEvent.press(await screen.findByTestId("btn-start"));
-    expect(await screen.findByTestId("confirm-dialog")).toBeTruthy();
+    await screen.findByTestId("confirm-dialog");
+  }
+
+  test("Start of another guide with a live session opens the §4.1 dialog; «Скасаваць» returns unchanged (NAV8)", async () => {
+    await mountedConfirmDialog();
     expect(screen.getByText("Завяршыць «Каралеўская» і пачаць «guide-route-b1»?")).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-confirm-cancel"));
     expect(screen.queryByTestId("confirm-dialog")).toBeNull();
     expect(screen.getByTestId("screen-Route preview")).toBeTruthy();
   });
 
+  // UX 06 (issue #352) AC1: the dialog is a real modal — a native Modal in
+  // the tree (an in-tree overlay leaves none and the guard fails —
+  // implementation-rules 1), and the system Back closes it in place: the
+  // dialog goes, the preview stays, no walk starts and nothing navigates.
+  test("UX 06 AC1: the §4.1 dialog is a native Modal; the system Back closes it in place", async () => {
+    await mountedConfirmDialog();
+    expect(screen.UNSAFE_queryAllByType(Modal)).toHaveLength(1);
+    act(() => {
+      screen.UNSAFE_queryByType(Modal)?.props.onRequestClose();
+    });
+    expect(screen.queryByTestId("confirm-dialog")).toBeNull();
+    expect(screen.getByTestId("screen-Route preview")).toBeTruthy();
+  });
+
+  // UX 06 (issue #352) AC2: «Скасаваць» is an active action with its own
+  // outline style — no dimmed disabled opacity, the accent outline present.
+  // Reverting the cancel to the disabled copy of the main button fails both
+  // queries (implementation-rules 1).
+  test("UX 06 AC2: «Скасаваць» carries its own outline style, not the disabled look", async () => {
+    await mountedConfirmDialog();
+    const resting = [screen.getByTestId("btn-confirm-cancel").props.style].flat(Infinity);
+    expect(resting.some((s) => s && typeof s === "object" && s.opacity !== undefined)).toBe(false);
+    expect(
+      resting.some((s) => s && typeof s === "object" && s.borderColor === tokens.colorAccent && s.borderWidth === 1),
+    ).toBe(true);
+  });
+
   test("Back from the preview returns to the city card it was opened from (NAV9)", async () => {
-    serve(PUBLISHED);
+    serve(CATALOG_FIXTURES);
     renderRouter(
       withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
       { initialUrl: "/explore" },
@@ -210,7 +262,7 @@ describe("guide preview surface (G06.01.b)", () => {
   // the label is asserted through the text query, which only reaches
   // strings inside a <Text> host. Removing the wrapper fails this.
   test("the back label sits in a Text host, not bare in the Pressable (issue #343)", async () => {
-    serve(PUBLISHED);
+    serve(CATALOG_FIXTURES);
     renderRouter(
       withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
       { initialUrl: "/route/guide-route-a1?from=rubric" },
@@ -220,7 +272,7 @@ describe("guide preview surface (G06.01.b)", () => {
   });
 
   test("a route the catalog does not name renders the honest unavailable state", async () => {
-    serve(PUBLISHED);
+    serve(CATALOG_FIXTURES);
     renderRouter(
       withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
       { initialUrl: "/route/no-such-route" },
@@ -234,7 +286,7 @@ describe("guide preview surface (G06.01.b)", () => {
   // ScrollView drops the scroll testID and fails this (implementation-rules 1).
   test("the preview scrolls: twelve stops and the main button render inside the ScrollView (UX 01)", async () => {
     serve({
-      ...PUBLISHED,
+      ...CATALOG_FIXTURES,
       "bundle/guide-route-b1/3/route.json": JSON.stringify({
         route_id: "guide-route-b1",
         version: "3",
