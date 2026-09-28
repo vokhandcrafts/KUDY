@@ -9,6 +9,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { contrast } from './wcag-contrast.mjs';
+import { loadCanon } from './design-canon.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const canonPath = join(root, 'docs/design/visual-language.md');
@@ -17,18 +19,6 @@ const packageScreensPath = join(root, 'spikes/G06.08-prototype/package/screens.m
 const schemesPath = join(root, 'docs/design/screens-and-transitions.md');
 const adrMarkersPath = join(root, 'docs/architecture/decisions/G01.01-narration-progress.md');
 const brandPath = join(root, 'docs/06_brand_and_promotion.md');
-
-function loadCanon() {
-  const doc = readFileSync(canonPath, 'utf8');
-  const fenced = doc.split('```json')[1];
-  assert.ok(fenced, 'visual-language.md must contain the machine token block (```json)');
-  const raw = fenced.split('```')[0];
-  try {
-    return JSON.parse(raw);
-  } catch (error) {
-    assert.fail(`canon token block is not valid JSON: ${error.message}`);
-  }
-}
 
 function loadRootVars(css) {
   const start = css.indexOf(':root {');
@@ -40,21 +30,6 @@ function loadRootVars(css) {
     vars[m[1]] = m[2].trim();
   }
   return vars;
-}
-
-// WCAG 2.x relative luminance and contrast ratio (1.4.3 text, 1.4.11 objects).
-function luminance(hex) {
-  const c = hex.replace('#', '');
-  assert.match(hex, /^#[0-9a-f]{6}$/i, `contrast helper expects #rrggbb, got ${hex}`);
-  const [r, g, b] = [0, 2, 4]
-    .map((i) => parseInt(c.slice(i, i + 2), 16) / 255)
-    .map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-function contrast(fgHex, bgHex) {
-  const [l1, l2] = [luminance(fgHex), luminance(bgHex)].sort((a, b) => b - a);
-  return (l1 + 0.05) / (l2 + 0.05);
 }
 
 function sectionAfter(text, marker) {

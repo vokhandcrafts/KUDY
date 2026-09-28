@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/runMap";
 import { useRunState, useRunSurface } from "../../controllers/run/runSurfaceController";
 import { BackButton } from "../../components/back-button";
+import { PressableSurface } from "../../components/pressable-surface";
 import { tokens } from "../../components/design-tokens";
 import { LoadingIndicator } from "../../components/loading-indicator";
 import {
@@ -32,14 +33,16 @@ import { useServices } from "../_layout";
 
 const OSM_ATTRIBUTION_URL = "https://www.openstreetmap.org/copyright";
 
-// The marker fills use only the approved tokens (G06.07 canon); a status is
-// a word first — the color is the second channel (G06.06 contrast rules).
+// UX 04 (issue #350): the marker fills are the canon's own marker tokens
+// (color.marker.*), each ≥3:1 against the canon map background (WCAG
+// 1.4.11) — a status is a word first, the color is the second channel
+// (G06.06); test/run-map-contrast.test.mjs guards the configuration.
 const STATUS_COLOR: Record<string, string> = {
-  playing: tokens.colorAccent,
-  played: tokens.colorMuted,
-  available: tokens.colorNoticeBorder,
-  pending: tokens.colorCard,
-  locked: tokens.colorLine,
+  playing: tokens.colorMarkerPlaying,
+  played: tokens.colorMarkerPlayed,
+  available: tokens.colorMarkerAvailable,
+  pending: tokens.colorMarkerPending,
+  locked: tokens.colorMarkerLocked,
 };
 
 const styles = StyleSheet.create({
@@ -59,7 +62,9 @@ const styles = StyleSheet.create({
     marginTop: tokens.spaceS,
   },
   map: {
-    backgroundColor: tokens.colorCard,
+    // UX 04 (issue #350): the canon map background (color.map) — the marker
+    // tokens' contrast pairs are declared against it, not against card white.
+    backgroundColor: tokens.colorMap,
     borderColor: tokens.colorLine,
     borderRadius: tokens.radiusBase,
     borderWidth: 1,
@@ -73,15 +78,28 @@ const styles = StyleSheet.create({
   },
   marker: {
     alignItems: "center",
+    // UX 04 (issue #350, AC4): the marker's touch target keeps the 44dp
+    // floor whatever the label wraps into — the dot plus label normally
+    // exceeds it already.
+    minHeight: 44,
     position: "absolute",
     width: 120,
   },
   dot: {
-    borderColor: tokens.colorInk,
+    // UX 04 (issue #350): the canon marker — size.marker diameter, state
+    // fill, white 2px outline, a soft shadow; the fill carries the ≥3:1
+    // figure contrast, the outline is separation only (visual-language.md
+    // «Маркеры мапы»).
+    borderColor: tokens.colorAccentInk,
     borderRadius: 999,
-    borderWidth: 1,
-    height: 18,
-    width: 18,
+    borderWidth: 2,
+    elevation: 2,
+    height: tokens.markerSize,
+    shadowColor: tokens.colorInk,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    width: tokens.markerSize,
   },
   poi: {
     backgroundColor: tokens.colorBadgeMixed,
@@ -93,13 +111,15 @@ const styles = StyleSheet.create({
   },
   markerLabel: {
     color: tokens.colorInk,
-    fontSize: 11,
+    // UX 04 (issue #350, AC5): the readable 12dp floor for map labels.
+    fontSize: 12,
     marginTop: 2,
     textAlign: "center",
   },
   poiLabel: {
     color: tokens.colorMuted,
-    fontSize: 10,
+    // UX 04 (issue #350, AC5): the readable 12dp floor for map labels.
+    fontSize: 12,
     marginTop: 2,
     textAlign: "center",
   },
@@ -172,9 +192,14 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontBaseSize,
   },
   attribution: {
-    color: tokens.colorMuted,
-    fontSize: 11,
+    alignSelf: "flex-start",
     marginTop: tokens.spaceS,
+  },
+  attributionText: {
+    color: tokens.colorMuted,
+    // UX 04 (issue #350, AC5): the readable 12dp floor applies to the
+    // attribution line as well.
+    fontSize: 12,
   },
   // The history panel (G06.03): one sheet over the map, three heights.
   panel: {
@@ -228,8 +253,14 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontBaseSize,
   },
   progressTrack: {
+    // UX 04 (issue #350, AC2): the canon strip is 6px accent-on-line; the
+    // muted 1px boundary lifts the track's identifying edge to ≥3:1 against
+    // the bar's card background (WCAG 1.4.11) — the line fill alone was 1.5:1.
     backgroundColor: tokens.colorLine,
-    height: 2,
+    borderColor: tokens.colorMuted,
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 6,
     marginTop: tokens.spaceS,
   },
   progressFill: {
@@ -368,6 +399,27 @@ export default function Run() {
     if (run.panel !== "peek") run.dismissPanel();
     else router.back();
   };
+  // UX 04 (issue #350, AC3): while the peek bar is up, its absolute
+  // positioning covers the screen's bottom flow — the attribution lives
+  // inside the bar then, never under it.
+  const peekBarOpen = session !== null && session.phase !== "Ended" && run.panel === "peek";
+  // UX 04 (issue #350, AC4): the ODbL duty — a real Pressable link, one
+  // element rendered either in the flow or as the peek bar's last row.
+  const attribution = (
+    <PressableSurface
+      accessibilityRole="link"
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      onPress={() => {
+        // A failed external open has no in-app surface — the failure is
+        // deliberately silent, the attribution text stays readable either way.
+        void Linking.openURL(OSM_ATTRIBUTION_URL).catch(() => undefined);
+      }}
+      style={styles.attribution}
+      testID="map-attribution"
+    >
+      <Text style={styles.attributionText}>{strings.attribution}</Text>
+    </PressableSurface>
+  );
   return (
     <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Run">
       {/* UX 02 (issue #348): the one back element; from Peek it is the
@@ -439,7 +491,9 @@ export default function Run() {
               onPress={() => run.openCard(marker.stopId)}
               style={[
                 styles.marker,
-                { left: `${marker.nx * 100}%`, top: `${marker.ny * 100}%`, transform: [{ translateX: -60 }, { translateY: -9 }] },
+                // UX 04 (issue #350): the dot centers on the point whatever
+                // the canon markerSize — the label hangs below it.
+                { left: `${marker.nx * 100}%`, top: `${marker.ny * 100}%`, transform: [{ translateX: -60 }, { translateY: -(tokens.markerSize / 2) }] },
               ]}
               testID={`run-marker-${marker.stopId}`}
             >
@@ -452,18 +506,10 @@ export default function Run() {
         </View>
       ) : null}
       <Text style={styles.note}>{strings.schematicNote}</Text>
-      <Text
-        onPress={() => {
-          // A failed external open has no in-app surface — the failure is
-          // deliberately silent, the attribution text stays readable either way.
-          void Linking.openURL(OSM_ATTRIBUTION_URL).catch(() => undefined);
-        }}
-        style={styles.attribution}
-        testID="map-attribution"
-      >
-        {strings.attribution}
-      </Text>
-      {session && session.phase !== "Ended" && run.panel === "peek" ? (
+      {/* UX 04 (issue #350, AC3): the in-flow spot only when the peek bar is
+          down — the bar's own copy replaces it while the bar covers the flow. */}
+      {peekBarOpen ? null : attribution}
+      {peekBarOpen ? (
         // UX 02 (issue #348): the bar's bottom padding keeps its controls
         // above the home-indicator area (AC4).
         <View
@@ -499,6 +545,9 @@ export default function Run() {
               />
             </View>
           ) : null}
+          {/* UX 04 (issue #350, AC3): the ODbL attribution rides the bar —
+              visible and tappable with the bar up, never covered by it. */}
+          {attribution}
         </View>
       ) : null}
       {run.panel !== "peek" ? (
