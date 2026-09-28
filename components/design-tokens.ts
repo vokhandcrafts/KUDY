@@ -25,6 +25,7 @@ export const tokens = {
   spaceS: 8, // space.s
   spaceM: 12, // space.m
   spaceL: 16, // space.l
+  dialogMaxWidth: 400, // dialog.max-width — дыялог, гл. visual-language §4
   fontBaseSize: 16, // font.base-size
   fontWeightStrong: '600', // font.weight-strong
 } as const;

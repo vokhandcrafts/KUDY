@@ -7,10 +7,13 @@
 // dialog of NAV8 and the fail-closed state without ports.
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, renderRouter, screen, within } from "expo-router/testing-library";
+import { act } from "@testing-library/react-native";
+import { Modal } from "react-native";
 
 import Explore from "./(tabs)/explore";
 import Guides from "./city/[id]/guides";
 import RoutePreview from "./route/[id]";
+import { tokens } from "../components/design-tokens";
 import { createServices } from "../controllers/createServices";
 import type { BundlesStore, Readiness } from "../services/contentRepo/types";
 import type { ActivationResult, LayerKey } from "../services/download/types";
@@ -184,7 +187,9 @@ describe("guide preview surface (G06.01.b)", () => {
     expect(download.keys).toEqual(["guide-route-b1"]);
   });
 
-  test("Start of another guide with a live session opens the §4.1 dialog; «Скасаваць» returns unchanged (NAV8)", async () => {
+  // The §4.1 world the NAV8 and UX 06 guards share: the ready Start and the
+  // live session of another guide, so the dialog is open on entry.
+  async function mountedConfirmDialog() {
     serve(CATALOG_FIXTURES);
     const bundles = memoryBundles();
     bundles.setDownloaded(true);
@@ -202,11 +207,42 @@ describe("guide preview surface (G06.01.b)", () => {
       { initialUrl: "/route/guide-route-b1" },
     );
     fireEvent.press(await screen.findByTestId("btn-start"));
-    expect(await screen.findByTestId("confirm-dialog")).toBeTruthy();
+    await screen.findByTestId("confirm-dialog");
+  }
+
+  test("Start of another guide with a live session opens the §4.1 dialog; «Скасаваць» returns unchanged (NAV8)", async () => {
+    await mountedConfirmDialog();
     expect(screen.getByText("Завяршыць «Каралеўская» і пачаць «guide-route-b1»?")).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-confirm-cancel"));
     expect(screen.queryByTestId("confirm-dialog")).toBeNull();
     expect(screen.getByTestId("screen-Route preview")).toBeTruthy();
+  });
+
+  // UX 06 (issue #352) AC1: the dialog is a real modal — a native Modal in
+  // the tree (an in-tree overlay leaves none and the guard fails —
+  // implementation-rules 1), and the system Back closes it in place: the
+  // dialog goes, the preview stays, no walk starts and nothing navigates.
+  test("UX 06 AC1: the §4.1 dialog is a native Modal; the system Back closes it in place", async () => {
+    await mountedConfirmDialog();
+    expect(screen.UNSAFE_queryAllByType(Modal)).toHaveLength(1);
+    act(() => {
+      screen.UNSAFE_queryByType(Modal)?.props.onRequestClose();
+    });
+    expect(screen.queryByTestId("confirm-dialog")).toBeNull();
+    expect(screen.getByTestId("screen-Route preview")).toBeTruthy();
+  });
+
+  // UX 06 (issue #352) AC2: «Скасаваць» is an active action with its own
+  // outline style — no dimmed disabled opacity, the accent outline present.
+  // Reverting the cancel to the disabled copy of the main button fails both
+  // queries (implementation-rules 1).
+  test("UX 06 AC2: «Скасаваць» carries its own outline style, not the disabled look", async () => {
+    await mountedConfirmDialog();
+    const resting = [screen.getByTestId("btn-confirm-cancel").props.style].flat(Infinity);
+    expect(resting.some((s) => s && typeof s === "object" && s.opacity !== undefined)).toBe(false);
+    expect(
+      resting.some((s) => s && typeof s === "object" && s.borderColor === tokens.colorAccent && s.borderWidth === 1),
+    ).toBe(true);
   });
 
   test("Back from the preview returns to the city card it was opened from (NAV9)", async () => {

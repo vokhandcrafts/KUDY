@@ -128,6 +128,11 @@ export interface RunMapStrings {
   // finish — both legal at any moment of a live walk.
   readonly pauseWalk: string;
   readonly endWalk: string;
+  // UX 06 (issue #352): the destructive finish asks first — the dialog's
+  // title and the two actions sit with the other surface words.
+  readonly endConfirmTitle: string;
+  readonly endConfirmAccept: string;
+  readonly endConfirmCancel: string;
   readonly endedTitle: string;
   readonly back: string;
   readonly close: string;
@@ -190,6 +195,9 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     resume: 'Працягнуць',
     pauseWalk: 'Прыпыніць прагулку',
     endWalk: 'Завяршыць прагулку',
+    endConfirmTitle: 'Завяршыць прагулку?',
+    endConfirmAccept: 'Завяршыць',
+    endConfirmCancel: 'Скасаваць',
     endedTitle: 'Прагулка завершана',
     back: '← Назад',
     close: 'Зачыніць',
@@ -235,6 +243,9 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     resume: 'Resume',
     pauseWalk: 'Pause the walk',
     endWalk: 'Finish the walk',
+    endConfirmTitle: 'Finish the walk?',
+    endConfirmAccept: 'Finish',
+    endConfirmCancel: 'Cancel',
     endedTitle: 'Walk finished',
     back: '← Back',
     close: 'Close',
