@@ -329,3 +329,19 @@ describe("guide preview surface (G06.01.b)", () => {
     expect(screen.getByTestId("btn-start")).toBeTruthy();
   });
 });
+
+// UX 07 (issue #353): the loading state shows the shared spinner next to the
+// «Загрузка…» text — a never-resolving catalog fetch holds the preview in
+// loading. Reverting the LoadingIndicator wiring in app/route/[id].tsx turns
+// this red (implementation-rules 1).
+describe("guide preview loading indicator (UX 07)", () => {
+  test("the loading state shows the ActivityIndicator next to the text", async () => {
+    jest.spyOn(global, "fetch").mockImplementation(() => new Promise(() => {}));
+    renderRouter(
+      withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
+      { initialUrl: "/route/guide-route-a1?from=rubric" },
+    );
+    expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
+    expect(screen.getByText("Загрузка…")).toBeTruthy();
+  });
+});
