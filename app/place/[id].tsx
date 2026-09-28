@@ -23,6 +23,7 @@ import { useStoreState } from "../../controllers/useControllerStore";
 import { useServices } from "../_layout";
 import { AccessBadge } from "../../components/guide-card";
 import { BackButton } from "../../components/back-button";
+import { LoadingIndicator } from "../../components/loading-indicator";
 import { PressableSurface } from "../../components/pressable-surface";
 import { screenStyles } from "../../components/screen-styles";
 import { tokens } from "../../components/design-tokens";
@@ -222,9 +223,7 @@ export default function PlaceDetail() {
             {strings.unavailable}
           </Text>
         ) : state.kind === "loading" ? (
-          <Text style={styles.note} testID="place-loading">
-            {strings.loading}
-          </Text>
+          <LoadingIndicator testID="place-loading" text={strings.loading} />
         ) : state.kind === "error" ? (
           <Text style={styles.note} testID="place-error">
             {strings.error}

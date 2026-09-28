@@ -61,3 +61,16 @@ describe("My KUDY guide titles (UX 05)", () => {
     expect(screen.getByText("route-offline")).toBeTruthy();
   });
 });
+
+// UX 07 (issue #353): the loading state shows the shared spinner next to the
+// «Загрузка…» text — a never-resolving history read holds the surface in
+// loading. Reverting the LoadingIndicator wiring in app/(tabs)/my.tsx turns
+// this red (implementation-rules 1).
+describe("My KUDY loading indicator (UX 07)", () => {
+  test("the loading state shows the ActivityIndicator next to the text", async () => {
+    const services = createServices({ sessionHistory: { list: () => new Promise(() => {}) } });
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
+    expect(screen.getByText("Загрузка…")).toBeTruthy();
+  });
+});

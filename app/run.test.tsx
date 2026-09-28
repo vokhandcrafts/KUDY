@@ -303,6 +303,9 @@ describe("run map surface", () => {
     // The loading branch itself, not the unavailable one: the honest
     // «Загрузка…» wording is on the screen while readiness stays pending.
     expect(await screen.findByText("Загрузка…")).toBeTruthy();
+    // UX 07 (issue #353): the loading row carries the shared spinner —
+    // reverting the LoadingIndicator wiring turns this red too.
+    expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
     expect(await screen.findByTestId("btn-run-back")).toBeTruthy();
     expect(within(screen.getByTestId("btn-run-back")).getByText("← Назад")).toBeTruthy();
   });

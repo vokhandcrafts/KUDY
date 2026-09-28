@@ -22,8 +22,8 @@ import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/r
 import { useRunState, useRunSurface } from "../../controllers/run/runSurfaceController";
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
-import {
-  ModalDialog,
+import { LoadingIndicator } from "../../components/loading-indicator";
+import {  ModalDialog,
   ModalDialogAccept,
   ModalDialogCancel,
 } from "../../components/modal-dialog";
@@ -324,7 +324,7 @@ export default function Run() {
         {/* UX 02 (issue #348): the loading state keeps the frame — with the
             native header off there is no other way back (AC2). */}
         <BackButton label={strings.back} testID="btn-run-back" />
-        <Text style={styles.centered}>{strings.loading}</Text>
+        <LoadingIndicator style={styles.centered} text={strings.loading} />
       </View>
     );
   }
