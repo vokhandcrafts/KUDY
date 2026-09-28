@@ -110,17 +110,6 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
-  confirmButton: {
-    alignItems: "center",
-    backgroundColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
-    marginBottom: tokens.spaceS,
-    padding: tokens.spaceM,
-  },
-  confirmButtonText: {
-    color: tokens.colorAccentInk,
-    fontSize: tokens.fontBaseSize,
-  },
 });
 
 function formatDuration(
