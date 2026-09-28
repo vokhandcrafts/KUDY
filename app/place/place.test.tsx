@@ -224,3 +224,19 @@ describe("Place detail surface (G07.02)", () => {
     expect(screen.getByText("Тэйзер моманту s-a5")).toBeTruthy();
   });
 });
+
+// UX 07 (issue #353): the loading state shows the shared spinner next to the
+// «Загрузка…» text — a never-resolving catalog fetch holds the detail in
+// loading. Reverting the LoadingIndicator wiring in app/place/[id].tsx turns
+// this red (implementation-rules 1).
+describe("Place detail loading indicator (UX 07)", () => {
+  test("the loading state shows the ActivityIndicator next to the text", async () => {
+    jest.spyOn(global, "fetch").mockImplementation(() => new Promise(() => {}));
+    renderRouter(
+      withPlaceRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
+      { initialUrl: "/place/place-a1" },
+    );
+    expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
+    expect(screen.getByTestId("place-loading")).toBeTruthy();
+  });
+});

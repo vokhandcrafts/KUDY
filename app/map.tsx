@@ -22,6 +22,7 @@ import {
 import { useServices } from "./_layout";
 import { BackButton } from "../components/back-button";
 import { AccessBadge, StateBanner } from "../components/guide-card";
+import { LoadingIndicator } from "../components/loading-indicator";
 import { PressableSurface } from "../components/pressable-surface";
 import { tokens } from "../components/design-tokens";
 
@@ -203,9 +204,7 @@ export default function Map() {
             <Text style={styles.message}>{strings.unavailable}</Text>
           </View>
         ) : surface.kind === "loading" ? (
-          <Text style={styles.message} testID="nearby-message">
-            {strings.loading}
-          </Text>
+          <LoadingIndicator testID="nearby-message" text={strings.loading} />
         ) : surface.kind === "error" ? (
           <View testID="nearby-error">
             <Text style={styles.message}>{strings.unavailable}</Text>

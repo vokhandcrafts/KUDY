@@ -16,6 +16,7 @@ import { usePreviewController } from "../../controllers/catalog/usePreviewContro
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
 import { AccessBadge, LocalesLine, StateBanner } from "../../components/guide-card";
+import { LoadingIndicator } from "../../components/loading-indicator";
 import {
   ModalDialog,
   ModalDialogAccept,
@@ -171,7 +172,7 @@ export default function RoutePreview() {
           button stay reachable beyond the fold; the §4.1 overlay stays above. */}
       <ScrollView testID="scroll-preview">
         <WalkButton walk={services.walk} />
-        {state.surface.kind === "loading" ? <Text style={styles.unavailable}>Загрузка…</Text> : null}
+        {state.surface.kind === "loading" ? <LoadingIndicator text="Загрузка…" /> : null}
         {state.surface.kind === "unavailable" ? (
           <View testID="preview-unavailable">
             <Text style={styles.unavailable}>Прэв'ю часова недаступны</Text>

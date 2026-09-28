@@ -23,6 +23,7 @@ import { useRunState, useRunSurface } from "../../controllers/run/runSurfaceCont
 import { BackButton } from "../../components/back-button";
 import { PressableSurface } from "../../components/pressable-surface";
 import { tokens } from "../../components/design-tokens";
+import { LoadingIndicator } from "../../components/loading-indicator";
 import {
   ModalDialog,
   ModalDialogAccept,
@@ -355,7 +356,7 @@ export default function Run() {
         {/* UX 02 (issue #348): the loading state keeps the frame — with the
             native header off there is no other way back (AC2). */}
         <BackButton label={strings.back} testID="btn-run-back" />
-        <Text style={styles.centered}>{strings.loading}</Text>
+        <LoadingIndicator style={styles.centered} text={strings.loading} />
       </View>
     );
   }

@@ -285,3 +285,19 @@ describe("Nearby surface (G07.01)", () => {
     expect(ids[ids.length - 1]).toBe("nearby-card-offer-h1-place");
   });
 });
+
+// UX 07 (issue #353): the loading state shows the shared spinner next to the
+// «Загрузка…» text — a never-resolving catalog fetch holds the surface in
+// loading. Reverting the LoadingIndicator wiring in app/map.tsx turns this
+// red (implementation-rules 1).
+describe("Nearby loading indicator (UX 07)", () => {
+  test("the loading state shows the ActivityIndicator next to the text", async () => {
+    jest.spyOn(global, "fetch").mockImplementation(() => new Promise(() => {}));
+    renderRouter(
+      withMapRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
+      { initialUrl: "/map" },
+    );
+    expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
+    expect(screen.getByText("Загрузка…")).toBeTruthy();
+  });
+});

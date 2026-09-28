@@ -20,6 +20,7 @@ import { useStoreState } from "../../controllers/useControllerStore";
 import { useServices } from "../_layout";
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
+import { LoadingIndicator } from "../../components/loading-indicator";
 
 const styles = StyleSheet.create({
   screen: {
@@ -118,7 +119,7 @@ export default function My() {
           </View>
         ) : null}
         {controller !== null && controller.status === "loading" ? (
-          <Text style={styles.unavailable}>Загрузка…</Text>
+          <LoadingIndicator text="Загрузка…" />
         ) : null}
         {controller !== null && controller.status === "ready" ? (
           <MyKudyRows state={controller} catalog={catalog} />
