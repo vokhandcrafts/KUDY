@@ -48,10 +48,10 @@ grep -n "ModalDialog" app/route/\[id\].tsx app/run/\[id\].tsx
 app/route/[id].tsx:20:  ModalDialog,
 app/route/[id].tsx:21:  ModalDialogAccept,
 app/route/[id].tsx:22:  ModalDialogCancel,
-app/route/[id].tsx:281:        <ModalDialog onRequestClose={state.cancelConfirm} testID="confirm-dialog">
-app/route/[id].tsx:285:          <ModalDialogAccept
-app/route/[id].tsx:300:          <ModalDialogCancel
-app/route/[id].tsx:305:        </ModalDialog>
+app/route/[id].tsx:270:        <ModalDialog onRequestClose={state.cancelConfirm} testID="confirm-dialog">
+app/route/[id].tsx:274:          <ModalDialogAccept
+app/route/[id].tsx:289:          <ModalDialogCancel
+app/route/[id].tsx:294:        </ModalDialog>
 app/run/[id].tsx:26:  ModalDialog,
 app/run/[id].tsx:27:  ModalDialogAccept,
 app/run/[id].tsx:28:  ModalDialogCancel,
