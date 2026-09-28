@@ -272,4 +272,16 @@ describe("Nearby surface (G07.01)", () => {
     expect(env.location.currentMode()).toBe("active-guide");
     expect(env.locationPort.activeSubscriptions()).toBe(1);
   });
+
+  // UX 01 (issue #347): the offer list scrolls — every card, the last of the
+  // review order included, renders inside the surface's ScrollView instead
+  // of being cut by the screen edge. Removing the ScrollView drops the
+  // scroll testID and fails this (implementation-rules 1).
+  test("the offer list scrolls: the last review-order card renders inside the ScrollView (UX 01)", async () => {
+    await openNearby();
+    expect(screen.getByTestId("scroll-nearby")).toBeTruthy();
+    const ids = screen.getAllByTestId(/^nearby-card-/).map((card) => card.props.testID);
+    expect(ids).toHaveLength(6);
+    expect(ids[ids.length - 1]).toBe("nearby-card-offer-h1-place");
+  });
 });

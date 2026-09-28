@@ -9,7 +9,7 @@
 // publishes no coordinates).
 import { Link } from "expo-router";
 import { useMemo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import {
   nearbyOrder,
@@ -175,43 +175,47 @@ export default function Map() {
   const note = locationNote(locationView, strings);
   return (
     <View style={{ backgroundColor: tokens.colorPaper, flex: 1, padding: tokens.spaceL }} testID="screen-Map">
-      <Text style={styles.title}>{strings.title}</Text>
-      <Text style={styles.mapNote}>{strings.mapNote}</Text>
-      {surface === null ? (
-        <View testID="nearby-error">
-          <Text style={styles.message}>{strings.unavailable}</Text>
-        </View>
-      ) : surface.kind === "loading" ? (
-        <Text style={styles.message} testID="nearby-message">
-          {strings.loading}
-        </Text>
-      ) : surface.kind === "error" ? (
-        <View testID="nearby-error">
-          <Text style={styles.message}>{strings.unavailable}</Text>
-          <Text style={styles.reason}>{surface.reason}</Text>
-        </View>
-      ) : (
-        <>
-          <Text style={styles.modeHeader} testID="nearby-mode">
-            {locationView.state === "proximity" ? strings.proximityHeader : strings.reviewHeader}
+      {/* UX 01 (issue #347): the offer list scrolls — the last card is
+          reachable beyond the fold, never cut by the screen edge. */}
+      <ScrollView testID="scroll-nearby">
+        <Text style={styles.title}>{strings.title}</Text>
+        <Text style={styles.mapNote}>{strings.mapNote}</Text>
+        {surface === null ? (
+          <View testID="nearby-error">
+            <Text style={styles.message}>{strings.unavailable}</Text>
+          </View>
+        ) : surface.kind === "loading" ? (
+          <Text style={styles.message} testID="nearby-message">
+            {strings.loading}
           </Text>
-          {note ? (
-            <Text style={styles.note} testID="nearby-location-note">
-              {note}
+        ) : surface.kind === "error" ? (
+          <View testID="nearby-error">
+            <Text style={styles.message}>{strings.unavailable}</Text>
+            <Text style={styles.reason}>{surface.reason}</Text>
+          </View>
+        ) : (
+          <>
+            <Text style={styles.modeHeader} testID="nearby-mode">
+              {locationView.state === "proximity" ? strings.proximityHeader : strings.reviewHeader}
             </Text>
-          ) : null}
-          {surface.kind === "ready" && surface.degraded !== null ? (
-            <StateBanner tone="notice" reason={strings.indexDegraded} testID="nearby-degraded" />
-          ) : null}
-          {list.length === 0 ? (
-            <Text style={styles.message} testID="nearby-message">
-              {strings.empty}
-            </Text>
-          ) : (
-            list.map((offer) => <NearbyCard key={offer.offer_id} offer={offer} strings={strings} />)
-          )}
-        </>
-      )}
+            {note ? (
+              <Text style={styles.note} testID="nearby-location-note">
+                {note}
+              </Text>
+            ) : null}
+            {surface.kind === "ready" && surface.degraded !== null ? (
+              <StateBanner tone="notice" reason={strings.indexDegraded} testID="nearby-degraded" />
+            ) : null}
+            {list.length === 0 ? (
+              <Text style={styles.message} testID="nearby-message">
+                {strings.empty}
+              </Text>
+            ) : (
+              list.map((offer) => <NearbyCard key={offer.offer_id} offer={offer} strings={strings} />)
+            )}
+          </>
+        )}
+      </ScrollView>
     </View>
   );
 }

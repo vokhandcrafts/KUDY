@@ -478,4 +478,49 @@ describe("run map surface", () => {
       "resume",
     ]);
   });
+
+  // UX 01 (issue #347): the Full panel's content scrolls — a long transcript
+  // renders inside the panel's ScrollView; the family map stays a fixed flex
+  // child, never a scroll surface (AC5). Removing the ScrollView drops the
+  // scroll testID and fails this (implementation-rules 1).
+  test("UX 01: the full panel's transcript scrolls; the map stays a fixed flex child", async () => {
+    const longTranscript = "Доўгая гісторыя кропкі. ".repeat(400);
+    const files = {
+      ...layerFiles("be"),
+      "bundles/route-map/1/be/base/stops.json": JSON.stringify([
+        {
+          story_id: "story-1",
+          place_id: "place-1",
+          voice_id: "voice-1",
+          tier: "base",
+          duration_s: 60,
+          text: "т",
+          transcript: longTranscript,
+          sources: ["с"],
+        },
+        {
+          story_id: "story-2",
+          place_id: "place-2",
+          voice_id: "voice-1",
+          tier: "base",
+          duration_s: 60,
+          text: "т",
+          transcript: "Транскрыпт порта",
+          sources: ["с"],
+        },
+      ]),
+    };
+    const { session } = makeRunSession();
+    const services = createServices({ bundlesStore: memoryBundles(files), run: { session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    fireEvent.press(screen.getByTestId("run-marker-stop-1"));
+    fireEvent.press(screen.getByTestId("btn-panel-read"));
+    expect(screen.getByTestId("run-panel-full")).toBeTruthy();
+    expect(screen.getByTestId("scroll-run-panel")).toBeTruthy();
+    expect(screen.getByText(longTranscript)).toBeTruthy();
+    // The map's flex layout is untouched: it fills the screen above the
+    // panel, it is not a scroll surface.
+    expect(screen.getByTestId("run-map").props.style).toEqual(expect.objectContaining({ flex: 1 }));
+  });
 });
