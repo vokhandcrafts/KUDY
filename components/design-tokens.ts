@@ -20,7 +20,14 @@ export const tokens = {
   colorNoticeBorder: '#e6c98c', // color.notice.border
   colorErrorBg: '#fdeaea', // color.error.bg
   colorErrorBorder: '#e0a2a2', // color.error.border
+  colorMap: '#eef3ee', // color.map — фон мапы Побач і Run
+  colorMarkerPlaying: '#b3331f', // color.marker.playing
+  colorMarkerPlayed: '#1d6b4f', // color.marker.played
+  colorMarkerAvailable: '#8a610e', // color.marker.available
+  colorMarkerPending: '#646c77', // color.marker.pending
+  colorMarkerLocked: '#67707a', // color.marker.locked
   radiusBase: 10, // radius.base
+  markerSize: 34, // size.marker — дыяметр маркера кропкі
   radiusPill: 99, // radius.pill
   spaceS: 8, // space.s
   spaceM: 12, // space.m

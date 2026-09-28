@@ -607,4 +607,41 @@ describe("run map surface", () => {
     // panel, it is not a scroll surface.
     expect(screen.getByTestId("run-map").props.style).toEqual(expect.objectContaining({ flex: 1 }));
   });
+
+  // UX 04 (issue #350): the ODbL attribution is a real link that rides the
+  // peek bar — the bar's absolute positioning can no longer cover the
+  // screen's bottom flow (AC3), and it announces itself as a link (AC4).
+  // Reverting the attribution to the in-flow Text under the bar fails the
+  // within(bar) lookup (implementation-rules 1).
+  test("UX 04: the attribution is a link inside the peek bar, never under it (AC3/AC4)", async () => {
+    await mountedRunBe();
+    expect(within(screen.getByTestId("run-panel-bar")).getByTestId("map-attribution")).toBeTruthy();
+    expect(screen.getByTestId("map-attribution").props.accessibilityRole).toBe("link");
+    // One attribution on the screen — the in-flow copy yields to the bar's.
+    expect(screen.getAllByTestId("map-attribution")).toHaveLength(1);
+  });
+
+  // UX 04 (issue #350, AC4/AC5): the marker block keeps the 44dp touch-target
+  // floor and the marker/POI labels stay at the readable 12dp minimum.
+  test("UX 04: the marker's touch target is ≥44dp and the map labels are ≥12dp (AC4/AC5)", async () => {
+    await mountedRunBe();
+    const marker = flatStyle(screen.getByTestId("run-marker-stop-1"));
+    expect(marker.width).toBe(120);
+    expect(marker.minHeight).toBeGreaterThanOrEqual(44);
+    expect(flatStyle(screen.getByTestId("run-status-stop-1")).fontSize).toBeGreaterThanOrEqual(12);
+    // UX 05 (issue #351): the POI label is the localized kind word, not the
+    // raw id — the 12dp floor applies to it the same way.
+    expect(flatStyle(screen.getByText("Славутасць")).fontSize).toBeGreaterThanOrEqual(12);
+  });
+
+  // UX 04 (issue #350, AC2): the canon strip — 6px accent on line with the
+  // muted 1px edge that keeps the track identifiable on the card.
+  test("UX 04: the progress strip keeps its canon height and a ≥3:1 edge on the card (AC2)", async () => {
+    const { locationPort, advance } = await mountedRunBe();
+    await soundStop2({ locationPort, advance });
+    const track = flatStyle(screen.getByTestId("run-bar-progress"));
+    expect(track.height).toBe(6);
+    expect(track.borderWidth).toBe(1);
+    expect(track.borderColor).toBe(tokens.colorMuted);
+  });
 });
