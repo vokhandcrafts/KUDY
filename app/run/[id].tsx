@@ -507,8 +507,6 @@ export default function Run() {
       <Text style={styles.note}>{strings.schematicNote}</Text>
       {/* UX 04 (issue #350, AC3): the in-flow spot only when the peek bar is
           down — the bar's own copy replaces it while the bar covers the flow. */}
-      {/* UX 04 (issue #350, AC3): the in-flow spot only when the peek bar is
-          down — the bar's own copy replaces it while the bar covers the flow. */}
       {peekBarOpen ? null : attribution}
       {peekBarOpen ? (
         // UX 02 (issue #348): the bar's bottom padding keeps its controls
