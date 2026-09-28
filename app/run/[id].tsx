@@ -14,6 +14,7 @@
 // The walk itself lives in the run controller the composition root built —
 // this surface owns no GPS, no player and no engine (AC4).
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -21,6 +22,11 @@ import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/r
 import { useRunState, useRunSurface } from "../../controllers/run/runSurfaceController";
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
+import {
+  ModalDialog,
+  ModalDialogAccept,
+  ModalDialogCancel,
+} from "../../components/modal-dialog";
 import { useServices } from "../_layout";
 
 const OSM_ATTRIBUTION_URL = "https://www.openstreetmap.org/copyright";
@@ -268,6 +274,13 @@ const styles = StyleSheet.create({
     color: tokens.colorAccent,
     fontSize: tokens.fontBaseSize,
   },
+  // The finish confirmation's words (UX 06, issue #352) — the shell carries
+  // the card and the two action styles.
+  confirmText: {
+    color: tokens.colorInk,
+    fontSize: tokens.fontBaseSize,
+    marginBottom: tokens.spaceM,
+  },
 });
 
 export default function Run() {
@@ -287,6 +300,10 @@ export default function Run() {
   // status bar and the notch with the native header off (AC4). A hook —
   // before the early returns.
   const insets = useSafeAreaInsets();
+  // UX 06 (issue #352): the destructive finish asks first — the dialog is a
+  // surface-side gate (a hook, before the early returns); the controller's
+  // end() stays the only session write and runs only on the confirmation.
+  const [endConfirm, setEndConfirm] = useState(false);
 
   if (surface === null || surface.status === "unavailable") {
     return (
@@ -388,7 +405,9 @@ export default function Run() {
               <Text style={styles.sessionLabel}>{strings.pauseWalk}</Text>
             </Pressable>
           ) : null}
-          <Pressable onPress={() => run.end()} style={styles.sessionButton} testID="btn-run-end">
+          {/* UX 06 (issue #352) AC3: the destructive finish asks first —
+              the press opens the confirmation, it no longer ends directly. */}
+          <Pressable onPress={() => setEndConfirm(true)} style={styles.sessionButton} testID="btn-run-end">
             <Text style={styles.sessionLabel}>{strings.endWalk}</Text>
           </Pressable>
         </View>
@@ -533,6 +552,28 @@ export default function Run() {
             ) : null}
           </ScrollView>
         </View>
+      ) : null}
+      {endConfirm ? (
+        // UX 06 (issue #352) AC3: the confirmation is a real modal — the
+        // decline (and the system Back, the shell's onRequestClose) leaves
+        // the session active and unchanged; the confirmation runs the same
+        // end() the button used to call.
+        <ModalDialog onRequestClose={() => setEndConfirm(false)} testID="end-confirm-dialog">
+          <Text style={styles.confirmText}>{strings.endConfirmTitle}</Text>
+          <ModalDialogAccept
+            label={strings.endConfirmAccept}
+            onPress={() => {
+              setEndConfirm(false);
+              run.end();
+            }}
+            testID="btn-end-confirm-accept"
+          />
+          <ModalDialogCancel
+            label={strings.endConfirmCancel}
+            onPress={() => setEndConfirm(false)}
+            testID="btn-end-confirm-cancel"
+          />
+        </ModalDialog>
       ) : null}
     </View>
   );

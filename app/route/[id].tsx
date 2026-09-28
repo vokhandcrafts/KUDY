@@ -16,6 +16,11 @@ import { usePreviewController } from "../../controllers/catalog/usePreviewContro
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
 import { AccessBadge, LocalesLine, StateBanner } from "../../components/guide-card";
+import {
+  ModalDialog,
+  ModalDialogAccept,
+  ModalDialogCancel,
+} from "../../components/modal-dialog";
 import { PressableSurface } from "../../components/pressable-surface";
 import { screenStyles } from "../../components/screen-styles";
 import { WalkButton } from "../../components/walk-button";
@@ -100,35 +105,10 @@ const styles = StyleSheet.create({
     color: tokens.colorMuted,
     fontSize: tokens.fontBaseSize,
   },
-  confirmOverlay: {
-    backgroundColor: "rgba(34, 38, 43, 0.4)",
-    flex: 1,
-    justifyContent: "center",
-    padding: tokens.spaceL,
-    ...StyleSheet.absoluteFillObject,
-  },
-  confirmCard: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
-    borderWidth: 1,
-    padding: tokens.spaceL,
-  },
   confirmText: {
     color: tokens.colorInk,
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
-  },
-  confirmButton: {
-    alignItems: "center",
-    backgroundColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
-    marginBottom: tokens.spaceS,
-    padding: tokens.spaceM,
-  },
-  confirmButtonText: {
-    color: tokens.colorAccentInk,
-    fontSize: tokens.fontBaseSize,
   },
 });
 
@@ -283,34 +263,35 @@ export default function RoutePreview() {
         ) : null}
       </ScrollView>
       {state.confirm ? (
-        <View style={styles.confirmOverlay} testID="confirm-dialog">
-          <View style={styles.confirmCard}>
-            <Text style={styles.confirmText}>
-              {`Завяршыць «${state.confirm.liveTitle}» і пачаць «${state.confirm.candidateTitle}»?`}
-            </Text>
-            <PressableSurface
-              onPress={() => {
-                // The confirmed §4.1 switch (NAV8): the flag rides the route
-                // params — the run surface starts through the switch-guide
-                // transaction (the live walk finishes in the same commit the
-                // new row inserts), the dialog state itself carries no write.
-                state.confirmHandover();
-                router.push(`/run/${routeId}?confirmedSwitch=1`);
-              }}
-              style={styles.confirmButton}
-              testID="btn-confirm-start"
-            >
-              <Text style={styles.confirmButtonText}>Завершыць і пачаць</Text>
-            </PressableSurface>
-            <PressableSurface
-              onPress={() => state.cancelConfirm()}
-              style={[styles.confirmButton, styles.mainButtonDisabled]}
-              testID="btn-confirm-cancel"
-            >
-              <Text style={styles.confirmButtonText}>Скасаваць</Text>
-            </PressableSurface>
-          </View>
-        </View>
+        // UX 06 (issue #352) AC1: a real modal — TalkBack reads only the
+        // dialog, and the system Back closes it in place: the shell's
+        // onRequestClose runs the controller's cancel, so no navigation
+        // happens and no walk starts.
+        <ModalDialog onRequestClose={state.cancelConfirm} testID="confirm-dialog">
+          <Text style={styles.confirmText}>
+            {`Завяршыць «${state.confirm.liveTitle}» і пачаць «${state.confirm.candidateTitle}»?`}
+          </Text>
+          <ModalDialogAccept
+            label="Завершыць і пачаць"
+            onPress={() => {
+              // The confirmed §4.1 switch (NAV8): the flag rides the route
+              // params — the run surface starts through the switch-guide
+              // transaction (the live walk finishes in the same commit the
+              // new row inserts), the dialog state itself carries no write.
+              state.confirmHandover();
+              router.push(`/run/${routeId}?confirmedSwitch=1`);
+            }}
+            testID="btn-confirm-start"
+          />
+          {/* UX 06 (issue #352) AC2: «Скасаваць» is an active action with
+              its own outline style — the disabled-looking dimmed copy of
+              the main button is gone. */}
+          <ModalDialogCancel
+            label="Скасаваць"
+            onPress={() => state.cancelConfirm()}
+            testID="btn-confirm-cancel"
+          />
+        </ModalDialog>
       ) : null}
     </View>
   );

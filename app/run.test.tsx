@@ -9,6 +9,8 @@ import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
 import { act } from "@testing-library/react-native";
 
+import { Modal } from "react-native";
+
 import Run from "./run/[id]";
 import { createServices } from "../controllers/createServices";
 import type { RunSessionPorts } from "../controllers/run/runSurfaceController";
@@ -423,13 +425,15 @@ describe("run map surface", () => {
     await waitFor(() => expect(screen.queryByTestId("run-paused")).toBeNull());
 
     // One story heard (stop-2's automatic launch), then the finish — legal
-    // after one story, no route completion required (11 §4.3).
+    // after one story, no route completion required (11 §4.3). UX 06 (issue
+    // #352): the destructive finish asks first, the confirmation ends it.
     await soundStop2({ locationPort, advance });
     act(() => {
       audioPort.finish(1);
     });
     await waitFor(() => expect(textOf("run-status-stop-2")).toBe("Порт — праслухана"));
     fireEvent.press(screen.getByTestId("btn-run-end"));
+    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
     expect(await screen.findByTestId("run-ended")).toBeTruthy();
     // The finished walk has no session actions left — Finished is not a
     // live walk anymore (11 §3.3).
@@ -496,6 +500,44 @@ describe("run map surface", () => {
     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
     expect(await screen.findByText("Сесія недаступная")).toBeTruthy();
     expect(screen.getByTestId("run-unavailable-reason").props.children).toBe("Ужо ёсць жывая прагулка");
+  });
+
+  // UX 06 (issue #352) AC3: the destructive finish asks first; the decline
+  // (and the system Back, the shell's onRequestClose) leaves the session
+  // active and unchanged, the confirmation finishes as before. Reverting
+  // btn-run-end to a direct run.end() fails the first half — the dialog
+  // never appears and the walk ends on the press (implementation-rules 1).
+  test("UX 06 AC3: the finish asks for confirmation; the decline keeps the session", async () => {
+    const { session } = await mountedRunBe();
+
+    // The press opens the confirmation modal, the walk stays live.
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    expect(screen.getByTestId("end-confirm-dialog")).toBeTruthy();
+    expect(screen.UNSAFE_queryAllByType(Modal)).toHaveLength(1);
+    expect(screen.queryByTestId("run-ended")).toBeNull();
+    expect(screen.getByTestId("run-session-actions")).toBeTruthy();
+
+    // The decline closes the dialog and changes nothing.
+    fireEvent.press(screen.getByTestId("btn-end-confirm-cancel"));
+    expect(screen.queryByTestId("end-confirm-dialog")).toBeNull();
+    expect(screen.queryByTestId("run-ended")).toBeNull();
+    expect(screen.getByTestId("run-session-actions")).toBeTruthy();
+
+    // The system Back runs the same decline path through the shell's
+    // onRequestClose — the session is still unchanged.
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    act(() => {
+      screen.UNSAFE_queryByType(Modal)?.props.onRequestClose();
+    });
+    expect(screen.queryByTestId("end-confirm-dialog")).toBeNull();
+    expect(screen.queryByTestId("run-ended")).toBeNull();
+
+    // The confirmation finishes the walk as before — the ended screen, no
+    // session actions left.
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
+    expect(await screen.findByTestId("run-ended")).toBeTruthy();
+    expect(screen.queryByTestId("run-session-actions")).toBeNull();
   });
 
   test("G06.03: the bar's play/pause drives only the audible launch", async () => {
