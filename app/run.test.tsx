@@ -629,7 +629,9 @@ describe("run map surface", () => {
     expect(marker.width).toBe(120);
     expect(marker.minHeight).toBeGreaterThanOrEqual(44);
     expect(flatStyle(screen.getByTestId("run-status-stop-1")).fontSize).toBeGreaterThanOrEqual(12);
-    expect(flatStyle(screen.getByText("cafe")).fontSize).toBeGreaterThanOrEqual(12);
+    // UX 05 (issue #351): the POI label is the localized kind word, not the
+    // raw id — the 12dp floor applies to it the same way.
+    expect(flatStyle(screen.getByText("Славутасць")).fontSize).toBeGreaterThanOrEqual(12);
   });
 
   // UX 04 (issue #350, AC2): the canon strip — 6px accent on line with the
