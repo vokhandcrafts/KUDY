@@ -7,9 +7,10 @@
 // types come in as a type-only import (components takes no runtime imports
 // from the other zones).
 import { Link } from "expo-router";
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 
 import type { CatalogGuideCard, CatalogSurfaceState } from "../controllers/catalog/catalogController.ts";
+import { PressableSurface } from "./pressable-surface";
 import { tokens } from "./design-tokens";
 
 // MVP active city (21 §3.2: у MVP толькі актыўны Гданьск); the surface shows
@@ -153,12 +154,12 @@ export function GuideCardLocales({ card }: { card: CatalogGuideCard }) {
 export function GuideCard({ card, from }: { card: CatalogGuideCard; from?: "city" | "rubric" }) {
   return (
     <Link href={{ pathname: `/route/${card.routeId}`, params: from ? { from } : {} }} asChild>
-      <Pressable style={styles.card} testID={`guide-card-${card.routeId}`}>
+      <PressableSurface style={styles.card} testID={`guide-card-${card.routeId}`}>
         <Text style={styles.cardTitle}>{card.title}</Text>
         {card.summary ? <Text style={styles.cardSummary}>{card.summary}</Text> : null}
         <AccessBadge access={card.access} />
         <GuideCardLocales card={card} />
-      </Pressable>
+      </PressableSurface>
     </Link>
   );
 }
@@ -209,8 +210,10 @@ function GuideCardsList({
   }
   return (
     <View>
-      <Link href={`/city/${ACTIVE_CITY_ID}/guides`} testID="link-guides">
-        <Text style={styles.cardTitle}>{RUBRIC_TITLE}</Text>
+      <Link href={`/city/${ACTIVE_CITY_ID}/guides`} asChild>
+        <PressableSurface accessibilityRole="link" hitSlop={12} testID="link-guides">
+          <Text style={styles.cardTitle}>{RUBRIC_TITLE} →</Text>
+        </PressableSurface>
       </Link>
       <View style={wide ? styles.grid : null}>{cards}</View>
     </View>

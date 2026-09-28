@@ -14,6 +14,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { usePreviewController } from "../../controllers/catalog/usePreviewController";
 import { tokens } from "../../components/design-tokens";
 import { AccessBadge, LocalesLine, StateBanner } from "../../components/guide-card";
+import { PressableSurface } from "../../components/pressable-surface";
 import { WalkButton } from "../../components/walk-button";
 import { useServices } from "../_layout";
 
@@ -261,14 +262,14 @@ export default function RoutePreview() {
                 ))}
               </View>
             ) : null}
-            <Pressable
+            <PressableSurface
               onPress={() => void handleMainButton()}
               disabled={!state.button.enabled || state.busy}
               style={[styles.mainButton, (!state.button.enabled || state.busy) && styles.mainButtonDisabled]}
               testID={state.button.action === "download" ? "btn-download" : "btn-start"}
             >
               <Text style={styles.mainButtonLabel}>{state.button.label}</Text>
-            </Pressable>
+            </PressableSurface>
             {state.button.reason ? (
               <Text style={styles.buttonReason} testID="button-reason">
                 {state.button.reason}
@@ -288,7 +289,7 @@ export default function RoutePreview() {
             <Text style={styles.confirmText}>
               {`Завяршыць «${state.confirm.liveTitle}» і пачаць «${state.confirm.candidateTitle}»?`}
             </Text>
-            <Pressable
+            <PressableSurface
               onPress={() => {
                 // The confirmed §4.1 switch (NAV8): the flag rides the route
                 // params — the run surface starts through the switch-guide
@@ -301,14 +302,14 @@ export default function RoutePreview() {
               testID="btn-confirm-start"
             >
               <Text style={styles.confirmButtonText}>Завершыць і пачаць</Text>
-            </Pressable>
-            <Pressable
+            </PressableSurface>
+            <PressableSurface
               onPress={() => state.cancelConfirm()}
               style={[styles.confirmButton, styles.mainButtonDisabled]}
               testID="btn-confirm-cancel"
             >
               <Text style={styles.confirmButtonText}>Скасаваць</Text>
-            </Pressable>
+            </PressableSurface>
           </View>
         </View>
       ) : null}

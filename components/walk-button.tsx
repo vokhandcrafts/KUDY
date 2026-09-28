@@ -11,9 +11,10 @@
 // no runtime imports from the other zones.
 import { useCallback, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 
 import type { Services } from "../controllers/createServices";
+import { PressableSurface } from "./pressable-surface";
 import { tokens } from "./design-tokens";
 
 const styles = StyleSheet.create({
@@ -44,12 +45,12 @@ export function WalkButton({ walk }: { walk?: Services["walk"] }) {
   );
   if (!live) return null;
   return (
-    <Pressable
+    <PressableSurface
       onPress={() => router.push(`/run/${live.routeId}`)}
       style={styles.button}
       testID="btn-walk-mode"
     >
       <Text style={styles.label}>Прагулка</Text>
-    </Pressable>
+    </PressableSurface>
   );
 }

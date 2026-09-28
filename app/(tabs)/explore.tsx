@@ -11,6 +11,7 @@ import { useCatalogController } from "../../controllers/catalog/useCatalogContro
 import { useServices } from "../_layout";
 import { tokens } from "../../components/design-tokens";
 import { CatalogStateView, CITY_TITLE } from "../../components/guide-card";
+import { PressableSurface } from "../../components/pressable-surface";
 import { WalkButton } from "../../components/walk-button";
 
 const styles = StyleSheet.create({
@@ -35,8 +36,12 @@ export default function Explore() {
     <View style={{ backgroundColor: tokens.colorPaper, flex: 1, padding: tokens.spaceL }} testID="screen-Explore">
       <WalkButton walk={services.walk} />
       <Text style={styles.title}>{CITY_TITLE}</Text>
-      <Link href="/map" testID="link-nearby">
-        <Text style={styles.nearbyLink}>Побач</Text>
+      <Link href="/map" asChild>
+        {/* UX 03 (issue #349): the tappable marker and the role of
+            criterion 2; hitSlop lifts the target to ≥44dp (criterion 3). */}
+        <PressableSurface accessibilityRole="link" hitSlop={12} testID="link-nearby">
+          <Text style={styles.nearbyLink}>Побач →</Text>
+        </PressableSurface>
       </Link>
       <CatalogStateView state={controller?.surface ?? null} variant="city" />
     </View>

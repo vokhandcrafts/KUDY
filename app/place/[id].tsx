@@ -21,6 +21,7 @@ import type { MomentPlayBinding, MomentPlayOutcome } from "../../controllers/mom
 import { useStoreState } from "../../controllers/useControllerStore";
 import { useServices } from "../_layout";
 import { AccessBadge } from "../../components/guide-card";
+import { PressableSurface } from "../../components/pressable-surface";
 import { tokens } from "../../components/design-tokens";
 
 const styles = StyleSheet.create({
@@ -148,8 +149,9 @@ function MomentCard({
         </Text>
       ) : null}
       {live === "paused" ? (
-        <Pressable
+        <PressableSurface
           style={styles.playButton}
+          hitSlop={{ top: 4, bottom: 4 }}
           accessibilityRole="button"
           accessibilityLabel={strings.resumeLabel}
           accessibilityHint={strings.playHint}
@@ -157,10 +159,11 @@ function MomentCard({
           onPress={() => momentPlay.resume()}
         >
           <Text style={styles.playText}>{strings.resumeLabel}</Text>
-        </Pressable>
+        </PressableSurface>
       ) : (
-        <Pressable
+        <PressableSurface
           style={styles.playButton}
+          hitSlop={{ top: 4, bottom: 4 }}
           accessibilityRole="button"
           accessibilityLabel={strings.playLabel}
           accessibilityHint={strings.playHint}
@@ -180,17 +183,18 @@ function MomentCard({
           }}
         >
           <Text style={styles.playText}>{live === null ? strings.playLabel : strings.stopLabel}</Text>
-        </Pressable>
+        </PressableSurface>
       )}
       <Link href={`/route/${moment.routeId}`} asChild>
-        <Pressable
+        <PressableSurface
+          hitSlop={12}
           accessibilityRole="button"
           accessibilityLabel={strings.guideLink}
           accessibilityHint={strings.guideLinkHint}
           testID={`place-moment-guide-${moment.momentId}`}
         >
           <Text style={styles.link}>{strings.guideLink}</Text>
-        </Pressable>
+        </PressableSurface>
       </Link>
     </View>
   );
