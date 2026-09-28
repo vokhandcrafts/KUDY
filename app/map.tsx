@@ -9,7 +9,7 @@
 // publishes no coordinates).
 import { Link } from "expo-router";
 import { useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -22,6 +22,7 @@ import {
 import { useServices } from "./_layout";
 import { BackButton } from "../components/back-button";
 import { AccessBadge, StateBanner } from "../components/guide-card";
+import { PressableSurface } from "../components/pressable-surface";
 import { tokens } from "../components/design-tokens";
 
 const styles = StyleSheet.create({
@@ -115,7 +116,7 @@ function NearbyCard({ offer, strings }: { offer: NearbyOfferFacts; strings: Retu
   if (offer.kind === "guide" && offer.route_id !== null) {
     return (
       <Link href={`/route/${offer.route_id}`} asChild>
-        <Pressable
+        <PressableSurface
           style={styles.card}
           testID={`nearby-card-${offer.offer_id}`}
           accessibilityRole="button"
@@ -123,14 +124,14 @@ function NearbyCard({ offer, strings }: { offer: NearbyOfferFacts; strings: Retu
           accessibilityHint={strings.cardHint}
         >
           {inner}
-        </Pressable>
+        </PressableSurface>
       </Link>
     );
   }
   if (offer.kind === "place" && offer.place_id !== null) {
     return (
       <Link href={`/place/${offer.place_id}`} asChild>
-        <Pressable
+        <PressableSurface
           style={styles.card}
           testID={`nearby-card-${offer.offer_id}`}
           accessibilityRole="button"
@@ -138,7 +139,7 @@ function NearbyCard({ offer, strings }: { offer: NearbyOfferFacts; strings: Retu
           accessibilityHint={strings.cardHint}
         >
           {inner}
-        </Pressable>
+        </PressableSurface>
       </Link>
     );
   }
