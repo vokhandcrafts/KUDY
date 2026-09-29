@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
+import { render } from "@testing-library/react-native";
 import { fireEvent, renderRouter, screen, within } from "expo-router/testing-library";
 
 import My from "./(tabs)/my";
@@ -12,6 +13,7 @@ import Explore from "./(tabs)/explore";
 import Guides from "./city/[id]/guides";
 import { ServicesContext } from "./_layout";
 import { createServices } from "../controllers/createServices";
+import { AccessBadge } from "../components/guide-card";
 import { fixtureText, layoutWith, serve, sha256 } from "../test/render-helpers";
 
 // The real production route components, mounted in the real route tree shape
@@ -201,11 +203,13 @@ describe("city surface on the published catalog (G06.01.a)", () => {
     expect(await screen.findByTestId("guide-card-guide-route-a1")).toBeTruthy();
     expect(screen.getByText("Гісторыі сукнараў: ад мытні да порта")).toBeTruthy();
     expect(screen.getByTestId("badge-access-paid")).toBeTruthy();
+    expect(screen.getByText("Платна")).toBeTruthy();
     expect(screen.getByText("Тэкст: be, en, uk; аўдыё: be, en")).toBeTruthy();
     // The route without an offer stays honest: identifier as the title.
     expect(await screen.findByTestId("guide-card-guide-route-b1")).toBeTruthy();
     expect(screen.getByText("guide-route-b1")).toBeTruthy();
     expect(screen.getByTestId("badge-access-free")).toBeTruthy();
+    expect(screen.getByText("Бясплатна")).toBeTruthy();
     // The rubric section is the chain's entry to the full list (11 §16.1).
     expect(screen.getByTestId("link-guides")).toBeTruthy();
   });
@@ -218,6 +222,21 @@ describe("city surface on the published catalog (G06.01.a)", () => {
     expect(await screen.findByTestId("city-message")).toBeTruthy();
     expect(screen.getByText("не апублікавана")).toBeTruthy();
     expect(screen.queryByTestId("link-guides")).toBeNull();
+  });
+
+  // The badge dictionary covers every contract value: the label is Belarusian,
+  // the testID keeps the raw contract value (21 §3.2, owner consent in #355).
+  // The mixed branch has no card on the city/rubric fixtures (collections
+  // render on the collection surface), so the shared component renders here
+  // directly — a reverted dictionary line fails this test.
+  test("the access badge renders every contract value's label (issue #355)", () => {
+    const labels = { free: "Бясплатна", paid: "Платна", mixed: "Змешана" } as const;
+    for (const access of ["free", "paid", "mixed"] as const) {
+      const { getByTestId, getByText, unmount } = render(<AccessBadge access={access} />);
+      expect(getByTestId(`badge-access-${access}`)).toBeTruthy();
+      expect(getByText(labels[access])).toBeTruthy();
+      unmount();
+    }
   });
 
   test("a failing catalog shows the named reason (11 §7), never invented cards", async () => {

@@ -100,6 +100,7 @@ describe("guide preview surface (G06.01.b)", () => {
     );
     expect(await screen.findByText("Гісторыі сукнараў: ад мытні да порта")).toBeTruthy();
     expect(screen.getByTestId("badge-access-paid")).toBeTruthy();
+    expect(screen.getByText("Платна")).toBeTruthy();
     expect(screen.getByText("Тэкст: be, en, uk; аўдыё: be, en")).toBeTruthy();
     // The offer's estimated_duration range wins over the route document's
     // duration_min when both are published (AC1).
