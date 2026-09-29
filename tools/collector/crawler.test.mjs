@@ -33,7 +33,10 @@ async function crawlSetup(routes, { overrides = {}, fetchPage = httpFetchPage } 
     })
   );
   const snapshotsRoot = path.join(dir, 'snapshots');
-  const handlers = defaultHandlers({ fetchPage });
+  // The fixture server lives on 127.0.0.1 — a loopback host the production
+  // net guard refuses by design (netguard.test.mjs). These suites stand the
+  // guard down; the guard suites below run it for real.
+  const handlers = defaultHandlers({ fetchPage, netGuard: async () => {} });
   // The campaign row is created eagerly (runCampaign's own ensureCampaign is
   // idempotent), so tests can queue extra steps before the first run.
   const { campaignId } = ensureCampaign(db, {
@@ -333,7 +336,7 @@ test('a bare URL in paragraph text reaches the crawl frontier like an anchored o
     sourcePath: file,
     contentHash: sha256Hex(source),
     snapshotsRoot: path.join(dir, 'snapshots'),
-    handlers: defaultHandlers({ fetchPage: httpFetchPage }),
+    handlers: defaultHandlers({ fetchPage: httpFetchPage, netGuard: async () => {} }),
   });
   assert.equal(run.failed, 0, run.stopped ?? '');
 
@@ -360,6 +363,7 @@ test('a redirect outside the fence is audited as a breach and its content discar
   // response URL is another host — the redirect re-check must refuse it.
   const handlers = defaultHandlers({
     fetchPage: async () => ({ html: articleHtml(), finalUrl: 'https://portal.example/redirected' }),
+    netGuard: async () => {},
   });
   const run = await runCampaign(db, parsed.campaign, {
     sourcePath: file,

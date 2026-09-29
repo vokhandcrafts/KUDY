@@ -101,7 +101,10 @@ async function runThrough(s) {
     sourcePath: s.file,
     contentHash: sha256Hex(s.source),
     snapshotsRoot: s.snapshotsRoot,
-    handlers: defaultHandlers({ loadApi: fixtureLoader(s.responses) }),
+    // The recorded fixtures replay a public wiki host; the real net guard
+    // would resolve it over DNS, which no test may touch (netguard.test.mjs
+    // runs the guard for real).
+    handlers: defaultHandlers({ loadApi: fixtureLoader(s.responses), netGuard: async () => {} }),
   });
 }
 
@@ -297,7 +300,7 @@ test('the transport boundary serves only http(s): an unservable url fails the st
     sourcePath: s.file,
     contentHash: sha256Hex(s.source),
     snapshotsRoot: s.snapshotsRoot,
-    handlers: defaultHandlers({ loadApi: async () => null }),
+    handlers: defaultHandlers({ loadApi: async () => null, netGuard: async () => {} }),
   });
   assert.equal(run.failed, 1);
   const failed = s.db.prepare("SELECT error FROM run_log WHERE status = 'failed'").get();
@@ -341,12 +344,29 @@ test('a non-http api endpoint in the campaign fails through the default transpor
     sourcePath: s.file,
     contentHash: sha256Hex(s.source),
     snapshotsRoot: s.snapshotsRoot,
-    handlers: defaultHandlers(),
+    handlers: defaultHandlers({ netGuard: async () => {} }),
   });
   assert.equal(run.failed, 1);
   const failed = s.db.prepare("SELECT error FROM run_log WHERE status = 'failed'").get();
   assert.match(failed.error, /no transport for /);
   assert.match(failed.error, /api\.php/, 'the request url is named');
   assert.match(failed.error, /\(http\/https only\)/);
+  assert.equal(countRows(s.db, 'raw_records'), 0);
+});
+
+test('a loopback api endpoint is refused by the net guard before the transport (G17.16)', async () => {
+  // The production handlers with the real guard: 127.0.0.1 is an IP literal,
+  // so nothing resolves over DNS and the refusal is deterministic.
+  const s = setup({}, { articles: ['Gdańsk'], depth: 1, api: 'http://127.0.0.1/w/api.php' });
+  const run = await runCampaign(s.db, s.campaign, {
+    sourcePath: s.file,
+    contentHash: sha256Hex(s.source),
+    snapshotsRoot: s.snapshotsRoot,
+    handlers: defaultHandlers(),
+  });
+  assert.equal(run.failed, 1);
+  const failed = s.db.prepare("SELECT error FROM run_log WHERE status = 'failed'").get();
+  assert.match(failed.error, /net guard: 127\.0\.0\.1 is a loopback address — request not made/);
+  assert.match(failed.error, /wiki-article 'Gdańsk'/, 'the step context names the work order');
   assert.equal(countRows(s.db, 'raw_records'), 0);
 });

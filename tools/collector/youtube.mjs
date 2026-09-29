@@ -16,6 +16,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { fillYoutubeRecord, sha256Hex, upsertRawRecord } from './store.mjs';
+import { createNetGuard } from './netguard.mjs';
 import { slugify } from './snapshot.mjs';
 
 // VTT → cues: one entry per cue block, inline tags and speaker labels are not
@@ -123,7 +124,7 @@ async function defaultLoadThumbnail(url) {
 
 // The yt-dlp boundary. command defaults to the binary from PATH; tests pass a
 // stub command ([node, stub.js]) and exercise the real spawn/parse path.
-export function createYoutubeFetch({ command = ['yt-dlp'], loadThumbnail = defaultLoadThumbnail } = {}) {
+export function createYoutubeFetch({ command = ['yt-dlp'], loadThumbnail = defaultLoadThumbnail, netGuard = createNetGuard() } = {}) {
   return async function fetchYoutube({ videoId, stagingDir }) {
     const url = `https://www.youtube.com/watch?v=${videoId}`;
     // Phase 1: metadata only — available subtitle languages, nothing written.
@@ -145,6 +146,13 @@ export function createYoutubeFetch({ command = ['yt-dlp'], loadThumbnail = defau
     // Only a collected video stores its cover — a video without usable
     // subtitles goes to the asr-backlog and would throw the fetch away.
     if (selected && info.thumbnail) {
+      // The cover URL comes from the fetched video metadata, not from the
+      // campaign — the same guarded network path as pages and API calls.
+      try {
+        await netGuard(info.thumbnail);
+      } catch (error) {
+        throw new Error(`thumbnail ${info.thumbnail}: ${error.message}`);
+      }
       cover = await loadThumbnail(info.thumbnail);
     }
     return { info, url, selected, cover };

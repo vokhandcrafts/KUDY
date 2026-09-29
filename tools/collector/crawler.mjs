@@ -72,7 +72,7 @@ export function parseCrawlDetail(step) {
   return detail;
 }
 
-export function createCrawler({ fetchPage, auditPath, delayRange }) {
+export function createCrawler({ fetchPage, auditPath, delayRange, netGuard }) {
   const audit = createAuditWriter(auditPath);
   const gate = createPoliteness(delayRange);
   let consecutiveErrors = 0;
@@ -129,6 +129,13 @@ export function createCrawler({ fetchPage, auditPath, delayRange }) {
     if (depth > campaign.fence.depth) {
       throw new Error(`depth ${depth} exceeds the fence depth ${campaign.fence.depth}`);
     }
+
+    // The network-path guard (G17.16): the fence compares hostnames, the guard
+    // checks the address behind them — scheme and every resolved IP. Refusal
+    // is a step failure like any fetch failure (the error series counts it);
+    // it gets no fence-audit line — the audit records fence decisions, the
+    // run_log diagnostic is the refusal's record.
+    await netGuard(url);
 
     // A URL already in the library (the seed page linked back from an article)
     // is skipped without refetching — the snapshot writer's UNIQUE(campaign_id,
