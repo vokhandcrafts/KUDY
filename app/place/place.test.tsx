@@ -174,10 +174,13 @@ describe("Place detail surface (G07.02)", () => {
     await screen.findByTestId("place-moment-m-a1");
 
     // The play tap refuses through the controller's decision — the screen
-    // renders the named reason, the port records no second play.
+    // renders the named reason, the port records no second play. G07.03: the
+    // root's session resolver is wired, finds no live walk to route into and
+    // declines — the named session-refused (the unroutable case stays the
+    // controller-level one without any session entry).
     fireEvent.press(screen.getByTestId("place-moment-play-m-a1"));
     await waitFor(() =>
-      expect(screen.getByTestId("place-moment-refusal-m-a1").props.children).toBe("moment#session-unroutable"),
+      expect(screen.getByTestId("place-moment-refusal-m-a1").props.children).toBe("moment#session-refused"),
     );
     expect(audioPort.commands).toEqual(["play 1:be/base/audio/a.m4a"]);
   });

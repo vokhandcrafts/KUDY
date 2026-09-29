@@ -775,13 +775,16 @@ test('G07.03 (AC3): the moment ends — automation stays suspended, «Праця
   // «Працягнуць гід» sounds nothing by itself; the suspension lifts and the
   // next trigger runs the general conditions: stop-4's zone entry plays.
   controller.getState().guideResume();
-  assert.equal(controller.getState().run.autoplaySuspended, false);
+  const afterResume = controller.getState().run;
+  assert.ok(afterResume.phase === 'Active');
+  assert.equal(afterResume.autoplaySuspended, false);
   assert.deepEqual(world.audioPort.commands.slice(commandsAfterPlay), []);
   fixAt(world, 54.35, 18.6475, 200_000); // 180 s from stop-2 — under the 12 km/h spike gate
   assert.deepEqual(world.audioPort.commands.slice(commandsAfterPlay), [
     'play 3:be/base/audio/story-4.m4a',
   ]);
   run = controller.getState().run;
+  assert.ok(run.phase === 'Active');
   assert.ok(run.playing !== null && run.playing.owner === 'guide');
   assert.deepEqual(run.heard, []); // stop-4's story sounds, not yet finished
 });
@@ -817,6 +820,7 @@ test('G07.03 (AC4): the re-entered Run shows the own audio state — no auto-Sta
   controller.getState().resumeAudio({ kind: 'moment', ref: 'moment-9', seq: 1 });
   assert.deepEqual(world.audioPort.commands.slice(commandsAtPause), ['resume']);
   const resumed = controller.getState().run;
+  assert.ok(resumed.phase !== 'Idle');
   assert.ok(resumed.playing !== null && resumed.playing.owner === 'moment' && !resumed.playing.paused);
   assert.equal(resumed.autoplaySuspended, true);
 });
@@ -825,7 +829,9 @@ test('G07.03: the place-card Stop on a session-owned moment routes to the engine
   const { world, controller } = await routedMomentWorld();
   // The card's live fact: the physical player reports the moment launch the
   // idle controller did not mint (its store stays idle).
-  assert.deepEqual(momentBinding(world).playback().token, { kind: 'moment', ref: 'moment-9', seq: 1 });
+  const playback = momentBinding(world).playback();
+  assert.ok(playback.kind === 'playing' || playback.kind === 'paused');
+  assert.deepEqual(playback.token, { kind: 'moment', ref: 'moment-9', seq: 1 });
   assert.deepEqual(momentBinding(world).store.getState(), { kind: 'idle' });
   const commandsAtPlay = world.audioPort.commands.length;
 
@@ -850,6 +856,7 @@ test('G07.03: the place-card Resume on a session-owned paused moment routes to t
   momentBinding(world).resume();
   assert.deepEqual(world.audioPort.commands.slice(commandsAtPause), ['resume']);
   const run = controller.getState().run;
+  assert.ok(run.phase !== 'Idle');
   assert.ok(run.playing !== null && run.playing.owner === 'moment' && !run.playing.paused);
   assert.equal(run.autoplaySuspended, true); // the moment resume never lifts the session flag
 });
