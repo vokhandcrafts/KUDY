@@ -106,7 +106,7 @@ test('a tampered signature is 401 and changes no rights (issue proof: падро
   const device = randomUUID();
   await seedDeviceWithCache(db, device);
   const event = { id: randomUUID(), type: 'CANCELLATION', app_user_id: device };
-  const request = requestOf(event, { header: 't=1700000000,v1=0000000000000000000000000000000000000000000000000000000000000000' });
+  const request = requestOf(event, { header: `t=1700000000,v1=${'0'.repeat(64)}` });
 
   const answer = await handleWebhook(request, { store: pgliteWebhookRunner(db) });
 
@@ -121,7 +121,7 @@ test('a signature from a foreign secret, a missing or malformed header, and a st
   const rejections = [
     requestOf(base, { secret: 'another-secret' }),
     requestOf(base, { header: null }),
-    requestOf(base, { header: 'v1=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }),
+    requestOf(base, { header: `v1=${'a'.repeat(64)}` }),
     requestOf(base, { header: `t=${Math.floor(NOW_MS / 1000)},v1=short` }),
     requestOf(base, { nowMs: NOW_MS + (300 + 1) * 1000 }),
     requestOf(base, { nowMs: NOW_MS - (300 + 1) * 1000 }),

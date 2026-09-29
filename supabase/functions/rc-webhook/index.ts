@@ -69,9 +69,6 @@ function requestDeps(db: postgres.Sql): WebhookPortDeps {
 function serialize(answer: WebhookAnswer): Response {
   // Empty bodies: RevenueCat reads only the status; no wire codes are
   // invented beyond the 401 the contract names (rc-webhook-core.ts).
-  if (answer.status === 200) {
-    return new Response(null, { status: 200 });
-  }
   return new Response(null, { status: answer.status });
 }
 

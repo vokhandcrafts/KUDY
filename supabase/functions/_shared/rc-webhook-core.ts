@@ -50,8 +50,10 @@ export function verifyWebhookSignature(
 // Corrupt input answers with a rejection, never a thrown error
 // (implementation-rules 14): non-UTF-8 bytes, broken JSON, a missing or
 // non-object `event`, or an id/type outside the shape bounds are all `null`
-// → 400 at the handler, nothing persisted, no rights change.
-export function parseWebhookEvent(rawBody: Uint8Array): Record<string, unknown> | null {
+// → 400 at the handler, nothing persisted, no rights change. On success the
+// id and type are narrowed to the strings the contract keys on, so the
+// callers stay strict-clean without casts.
+export function parseWebhookEvent(rawBody: Uint8Array): { id: string; type: string } & Record<string, unknown> | null {
   let text: string;
   try {
     text = new TextDecoder('utf-8', { fatal: true }).decode(rawBody);
@@ -72,7 +74,7 @@ export function parseWebhookEvent(rawBody: Uint8Array): Record<string, unknown> 
   const type = record['type'];
   if (typeof id !== 'string' || id === '' || id.length > WEBHOOK_ID_MAX_LENGTH) return null;
   if (typeof type !== 'string' || type === '' || type.length > WEBHOOK_TYPE_MAX_LENGTH) return null;
-  return record;
+  return { ...record, id, type };
 }
 
 // The answer of the webhook handler. There is no client on this wire —
@@ -190,23 +192,21 @@ export async function handleWebhook(
   const event = parseWebhookEvent(input.rawBody);
   if (event === null) return { status: 400 };
 
-  const eventId = event['id'];
-  const eventType = event['type'];
   const inserted = await deps.store.persistEvent({
-    eventId,
-    type: eventType,
+    eventId: event.id,
+    type: event.type,
     eventTimestampMs: eventTimestampMs(event),
     payload: event,
   });
   if (inserted) {
     await applyRightsEffects(event, deps);
-    await deps.store.markEffectsApplied(eventId);
+    await deps.store.markEffectsApplied(event.id);
     return { status: 200 };
   }
-  const applied = await deps.store.readEffectsApplied(eventId);
+  const applied = await deps.store.readEffectsApplied(event.id);
   if (applied !== true) {
     await applyRightsEffects(event, deps);
-    await deps.store.markEffectsApplied(eventId);
+    await deps.store.markEffectsApplied(event.id);
   }
   return { status: 200 };
 }
