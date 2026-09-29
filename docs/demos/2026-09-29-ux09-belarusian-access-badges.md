@@ -41,10 +41,12 @@ components/guide-card.tsx:105:  paid: "Платна",
 components/guide-card.tsx:106:  mixed: "Змешана",
 ```
 
-Крытэр 4 — render-тэсты картак і прэв'ю зелёныя; новыя сцвярджэнні
+Крытэр 4 — render-тэсты картак і прэв'ю зелёныя; сцвярджэнні
 `getByText("Платна")` / `getByText("Бясплатна")` ёсць рэверт-гардам
 (AC4): са знятым слоўнікам `app/preview.test.tsx:103` падае — праверана
 адкатам `components/guide-card.tsx` перад push (1 failed на 13).
+Слоўнік пакрыты ва ўсіх трох вітках — фокусны тэст кампанента правярае
+free/paid/mixed разам з testID.
 
 ```sh
 npx jest --config jest.config.js app/navigation.test.tsx app/preview.test.tsx 2>&1 | grep -E "Tests:|Test Suites:"
@@ -52,5 +54,5 @@ npx jest --config jest.config.js app/navigation.test.tsx app/preview.test.tsx 2>
 
 ```output
 Test Suites: 2 passed, 2 total
-Tests:       30 passed, 30 total
+Tests:       31 passed, 31 total
 ```
