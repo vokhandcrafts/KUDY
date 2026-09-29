@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-29 — Смержыць PR #382: фікс jscpd-гейта (закрыццё issue #241)
+Што зрабіць: смержы PR #382 squash-мержам — jscpd-гейт у CI пераведзены на самадастатковы job. Прычына тыднёвых стартавых збояў: GitHub адхіляе cross-repo выклік reusable workflow паміж прыватнымі рэпамі карыстальніцкага акаўнта (0s, без jobs) — пяццю эксперыментамі пацверджана, уключна з кантрольным same-repo выклікам. Праўка `.github/` агентам: issue-workflow §7 агулам яе забараняе — зраблена ў межах #241 па прэцэдэнтах PR #3/#128, канчатковае рашэнне за табой. Дадаткова: у ai-company-infrastructure адкрыты PR #38 з ужудванай у reusable workflow логікай — спатрэбіцца, калі рэпы пераедуць у арганізацыю або рэпа стане публічнай.
+PR: https://github.com/vokhandcrafts/KUDY/pull/382 (issue #241); інфраструктурны PR: https://github.com/vokhandcrafts/ai-company-infrastructure/pull/38
+
 ### 2026-09-29 — Смержыць PR #364 (закрыццё issue #344)
 Што зрабіць: смержы PR #364 squash-мержам — docs-only запіс верыфікацыі, ён закрывае issue #344 (`Closes #344` у целе; сам фікс класа ўжо ў main з PR #357). Пасля мержу знімі пазнаку `agent:running` з issue #344 — фінальную зачыстку робіць мержуючы, не пайплайн.
 PR: https://github.com/vokhandcrafts/KUDY/pull/364 (issue #344)
@@ -52,11 +56,6 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/257 (issue #157, суддзёўс
 ### 2026-09-25 — G05.01.d: рашэнне пра замарозку run-model
 Што зрабіць: вырашыце, ці замарожваць `docs/run-model/` як гістарычную даведку — парытэт даказаны (67/67 сцэнарыяў праз прадакшн `step()`, інварыянты 1–9, 21/21 мутацый), таму README называе гэты перанос выкананым. Калі так — гэта асобная задача ўласніка дакумента (адзіны дазволены спосаб мець run-model файлы).
 PR: https://github.com/vokhandcrafts/KUDY/pull/256 (issue #201)
-
-### 2026-09-25 — jscpd CI (#241): стартавы збой ва ўсіх PR (замяняе запіс ад 2026-09-22)
-Што зрабіць: спачатку праверце налады Actions гэтага рэпазітарыя — дазвол reusable workflows з `vokhandcrafts/ai-company-infrastructure` (Settings → Actions → General → Allow all actions and reusable workflows); runs `jscpd.yml` падаюць на старце (0s, без джобаў) на кожным PR, а дакладная прычына ў #241 яшчэ не дыягнаставаная. Калі налады ў парадку — найпраўдападобней патрабуецца праўка `.github/workflows/jscpd.yml` (пін reusable workflow на `@752dff0` састарэлы пасля мержу інфраструктурнага PR #1): зрабіце яе самі або яўна дазвольце яе агентам (issue-workflow §7 забараняе ім праўку `.github/`). Пасля фіксу дадайце радок `key: jscpd-workflow-startup-failure` у `docs/review-must-flag.md`.
-Issue: https://github.com/vokhandcrafts/KUDY/issues/241
-Run: https://github.com/vokhandcrafts/KUDY/actions/runs/35786797616
 
 ### 2026-09-25 — G05.02.c: прыладавыя праверкі адаптара лакацыі
 Што зрабіць: калі з'явіцца Android-тэлефон — прайсці дзевяць клетак матрыцы G00.01.b, якія абслугоўвае адаптар лакацыі (foreground+dwell, заблакаваны экран, фон, адмова/адкліканне дазволу, GPS-прабел, зняцце з recent apps, force-stop, перазагрузка, battery saver) па кроках з табліцы ў выніковым файле `docs/agent-tasks/results/G05.02.c.md` і запоўніць фактычныя вынікі. Да таго ўсе клеткі застаюцца `not-run` (blocked-external); да мержу нічога рабіць не трэба.

@@ -111,3 +111,16 @@
   рэндэрыць адзін і той жа гід двойчы на Explore і ў рубрыцы «Гіды»;
   negative-тэст праз production loadCatalog мусіць упадаць пры адкате фільтра.
   Выпраўлена: services/catalog/catalogService.ts, projectGuides — issue #324.
+
+- key: jscpd-workflow-startup-failure — пасля любой змены выкліку reusable
+  workflow або кампазітных дзеянняў у `.github/workflows/` правяраецца жывы
+  PR-ран: у ім мае быць рэальная джоба з крокамі, а не стартавы збой на 0s
+  без jobs («This run likely failed because of a workflow file issue»);
+  такі run не стварае check-run, таму лёгка прапусціць у PR UI. Канкрытны
+  клас: cross-repo выклік reusable workflow паміж прыватнымі рэпамі
+  карыстальніцкага (не арганізацыйнага) акаўнта GitHub адхіляецца на старце
+  незаляжна ад зместу выкліканага файла — гейт павінен быць самадастатковым
+  у рэпе, а версія jscpd у CI мусіць супадаць з лакальным гейтам у AGENTS.md.
+  Выпраўлена: .github/workflows/jscpd.yml пераведзена з cross-repo выкліку
+  на self-contained job; ахова ў tools/ci/check-required-checks.mjs —
+  issue #241.
