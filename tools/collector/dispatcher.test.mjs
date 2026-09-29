@@ -240,6 +240,15 @@ test('unknown record filter parameters answer readably, not 500', async (t) => {
   assert.doesNotMatch(hostile.body, /<script>/);
   assert.match(hostile.body, /Невядомы статус «&lt;script&gt;»/);
 
+  // An empty value is no filter: the unfiltered list, no note — a regression
+  // that forwards '' into the WHERE clause would empty the table silently.
+  for (const empty of ['/records?status=', '/records?city=', '/records?status=&city=']) {
+    const response = await get(dispatcher, empty);
+    assert.equal(response.status, 200, empty);
+    assert.ok(response.body.includes(recordA.url), `unfiltered list — ${empty}`);
+    assert.doesNotMatch(response.body, /class="note"/, empty);
+  }
+
   const unknownCity = await get(dispatcher, '/records?city=nowhere');
   assert.equal(unknownCity.status, 200);
   assert.match(unknownCity.body, /Па гэтым фільтры запісаў няма\./);
