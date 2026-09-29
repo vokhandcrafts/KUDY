@@ -307,6 +307,48 @@ test('AC6: every fetched article page produces a raw_records row through the G17
   assert.equal(countRows(fx.db, 'links'), 1);
 });
 
+test('a bare URL in paragraph text reaches the crawl frontier like an anchored one', async (t) => {
+  // The routes are filled after the server starts: the bare URL must carry
+  // the seed's own host:port to be inside the fence.
+  const routes = {};
+  const server = await startFixtureServer(routes);
+  t.after(() => server.close());
+  const second = server.url('/second');
+  routes['/start'] = articleHtml({
+    title: 'Start',
+    body: [
+      `<p>Дэталі: ${second} — музей верфі.</p>`,
+      '<p>Першы дадатковы абзац без спасылак.</p>',
+      '<p>Другі дадатковы абзац без спасылак.</p>',
+      '<p>Трэці дадатковы абзац без спасылак.</p>',
+    ],
+  });
+  routes['/second'] = articlePage('Second', []);
+  const dir = makeTempDir();
+  const { file, source, parsed, db } = openCampaignFixture(
+    dir,
+    campaignYaml({ seeds: `seeds:\n  - ${server.url('/start')}`, delay_s: 'delay_s: [0.05, 0.1]', youtube: 'youtube: []' })
+  );
+  const run = await runCampaign(db, parsed.campaign, {
+    sourcePath: file,
+    contentHash: sha256Hex(source),
+    snapshotsRoot: path.join(dir, 'snapshots'),
+    handlers: defaultHandlers({ fetchPage: httpFetchPage }),
+  });
+  assert.equal(run.failed, 0, run.stopped ?? '');
+
+  const bare = db.prepare('SELECT anchor_text, context FROM links WHERE url = ?').get(second);
+  assert.ok(bare, 'the bare URL is a links row of the article');
+  assert.equal(bare.anchor_text, second);
+  const crawl = db.prepare("SELECT status, detail FROM run_log WHERE kind = 'crawl' AND ref = ?").get(second);
+  assert.ok(crawl, 'the bare URL was enqueued as a crawl step');
+  assert.equal(crawl.status, 'done');
+  assert.ok(
+    db.prepare('SELECT id FROM raw_records WHERE campaign_id = ? AND url = ?').get(run.campaignId, second),
+    'the bare-URL target was fetched and snapshotted like an anchored one'
+  );
+});
+
 test('a redirect outside the fence is audited as a breach and its content discarded', async (t) => {
   const dir = makeTempDir();
   const file = writeCampaignFile(dir, campaignYaml({ seeds: 'seeds:\n  - https://news.example/start', youtube: 'youtube: []' }));
