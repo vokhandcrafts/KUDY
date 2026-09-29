@@ -19,6 +19,7 @@ import {
   checkOfficialProfile,
   checkImportedProfile,
 } from './reader.mjs';
+import { checkGuideHintValues } from './hints/guide-hints.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '..');
@@ -310,4 +311,51 @@ test('examples: moment and media conform; all schema files are valid JSON with $
     const doc = JSON.parse(fs.readFileSync(path.join(schemasDir, file), 'utf8'));
     assert.equal(doc.$schema, 'http://json-schema.org/draft-07/schema#', file);
   }
+});
+
+// G07.04 — nearby-guide hint values (R07): the values file is the proposal
+// awaiting the founder decision (ADR G07.04 §3); each invalid fixture
+// isolates exactly one named rule.
+test('G07.04: the hint values file passes its own schema and named rules', () => {
+  const res = checkGuideHintValues(readJson('contracts/hints/guide-hints.values.v1.json'));
+  assert.ok(res.ok, JSON.stringify(res.errors));
+});
+
+test('G07.04: each invalid values fixture fails on its own named rule', () => {
+  const expected = {
+    'invalid-negative-value.json': ['hint-value-non-positive'],
+    'invalid-missing-cooldown.json': ['hint-cooldown-required'],
+    'invalid-accuracy-exceeds-radius.json': ['hint-accuracy-exceeds-radius'],
+    'invalid-unknown-field.json': ['hint-unknown-field'],
+  };
+  for (const [file, rules] of Object.entries(expected)) {
+    const res = checkGuideHintValues(readJson(`contracts/fixtures/guide-hints/${file}`));
+    assert.ok(!res.ok, `${file} must fail`);
+    for (const rule of rules) {
+      assert.ok(
+        res.errors.some((e) => e.rule === rule),
+        `${file} must fail on ${rule}: ${JSON.stringify(res.errors)}`,
+      );
+    }
+  }
+});
+
+test('G07.04: corrupt values input answers with diagnostics, not a throw', () => {
+  for (const bad of [null, [], 42, 'values', { guide_hints_values_version: 'one' }]) {
+    const res = checkGuideHintValues(bad);
+    assert.ok(!res.ok, `corrupt input must fail: ${JSON.stringify(bad)}`);
+    assert.ok(res.errors.length > 0, `corrupt input must carry a diagnostic: ${JSON.stringify(bad)}`);
+  }
+});
+
+test('G07.04: the accuracy rule gates the radius it serves', () => {
+  const values = readJson('contracts/hints/guide-hints.values.v1.json');
+  const below = { ...values, accepted_accuracy_m: values.proximity_radius_m - 1 };
+  assert.ok(checkGuideHintValues(below).ok, JSON.stringify(checkGuideHintValues(below).errors));
+  const equal = { ...values, accepted_accuracy_m: values.proximity_radius_m };
+  assert.ok(!checkGuideHintValues(equal).ok, 'accuracy equal to the radius must fail');
+  assert.ok(
+    checkGuideHintValues(equal).errors.some((e) => e.rule === 'hint-accuracy-exceeds-radius'),
+    JSON.stringify(checkGuideHintValues(equal).errors),
+  );
 });
