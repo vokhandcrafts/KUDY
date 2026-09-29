@@ -20,6 +20,22 @@
 
 **Без прылады (рашэнне заснавальніка 2026-09-23).** Доказ — на камп'ютары: тэсты, `tsc`, `expo-doctor`, `expo prebuild --platform android --no-install`. Development build на тэлефоне пазначаецца `not-run`.
 
+## Заданні стылёвага пакета G06.10
+
+Шэсць частак радка G06.10 (разбіўка — 🕴🏻Планавальнік 2026-09-29) з [16](../../16_delivery_backlog.md), блок «Дызайн перад рэалізацыяй экранаў». Крыніцы: [бацькоўскі кантэкст G06.10](G06.10.md) (спека, ухвалена квізам заснавальніка), [visual-language](../../design/visual-language.md), дэма `spikes/2026-09-29-style-showcase.html`.
+
+| Частка | Заданне | Issue | Статус |
+|---|---|---|---|
+| G06.10 | Бацькоўскі кантэкст (спека) | [#400](https://github.com/vokhandcrafts/KUDY/issues/400) (эпік) | у бэклозе |
+| [G06.10.a](G06.10.a.md) | Стылёвы пакет у каноне + гард | [#401](https://github.com/vokhandcrafts/KUDY/issues/401) | у бэклозе |
+| [G06.10.b](G06.10.b.md) | Шрыфты Golos Text / Alegreya / Caveat | [#402](https://github.com/vokhandcrafts/KUDY/issues/402), Blocked-by #401 | у бэклозе |
+| [G06.10.c](G06.10.c.md) | Іконкавы слой Lucide | [#403](https://github.com/vokhandcrafts/KUDY/issues/403), Blocked-by #401 | у бэклозе |
+| [G06.10.d](G06.10.d.md) | Вылепленыя кнопкі (полка + апусканне) | [#404](https://github.com/vokhandcrafts/KUDY/issues/404), Blocked-by #401 | у бэклозе |
+| [G06.10.e](G06.10.e.md) | Зярно на паперы | [#405](https://github.com/vokhandcrafts/KUDY/issues/405), Blocked-by #401 | у бэклозе |
+| [G06.10.f](G06.10.f.md) | Жывы прагрэс прагулкі | [#406](https://github.com/vokhandcrafts/KUDY/issues/406), Blocked-by #401 | у бэклозе |
+
+b–f узаемна незалежныя пасля завяршэння a. Файлы радка трапляюць у runner-checkout пасля мержу [PR #399](https://github.com/vokhandcrafts/KUDY/pull/399) — да таго задачы не чаргуюцца. Пазнакі `agent:ready`/`epic`/`prio:*` ставіць толькі аператар.
+
 ## Публікацыя ў GitHub — выкананая 2026-09-23
 
 Адсочвальная задача радка G06.09 — [#202](https://github.com/vokhandcrafts/KUDY/issues/202); кожная частка мае ўласную задачу з `Epic:` і `Blocked-by:`. Пазнакі `agent:ready`/`epic`/`prio:*` не ставіліся — іх ставіць толькі аператар. Перад публікацыяй GitHub правераны на дублікаты; задачы перачытаныя праз API — адкрытыя, без пазнак.
