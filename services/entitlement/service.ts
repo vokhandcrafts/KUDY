@@ -14,9 +14,11 @@
 // the surface promises a cross-platform transfer.
 //
 // Ordering is part of the contract: purchase and restore refuse to run
-// before the store account is linked to a registered device identity — the
-// linking happens here, once per port and deviceId, exactly like the device
-// registration memoizes its inflight round (services/device.ts).
+// before the store account is linked to a registered device identity. The
+// completed link is memoized per port and deviceId (a different deviceId
+// re-links); concurrent first calls may each reach the store — the store's
+// logIn for one app_user_id is idempotent, and only the finished outcome is
+// remembered, unlike the inflight promise memo of services/device.ts.
 import { UUID_PATTERN } from '../device.ts';
 import {
   executorCodeOf,
@@ -46,10 +48,16 @@ function diagnosticOf(deps: EntitlementDeps): (line: string) => void {
 }
 
 // The boundary validation of the device identity: the deviceId must be the
-// UUID shape POST /v1/device issues (G08.01). A corrupt identity is rejected
-// locally with diagnostics — no store call happens (implementation-rules 14).
+// UUID shape POST /v1/device issues (G08.01). A corrupt identity — including
+// a missing identity object — is rejected locally with diagnostics, never a
+// thrown error, and no store call happens (implementation-rules 14).
 function validateIdentity(identity: StoreIdentity): string[] {
-  if (typeof identity.deviceId !== 'string' || !UUID_PATTERN.test(identity.deviceId)) {
+  if (
+    typeof identity !== 'object' ||
+    identity === null ||
+    typeof identity.deviceId !== 'string' ||
+    !UUID_PATTERN.test(identity.deviceId)
+  ) {
     return ['entitlement-link#device-id'];
   }
   return [];

@@ -56,6 +56,10 @@ export class FakeStoreSessionPort implements StoreSessionPort {
     this.purchaseScript = value as StorePurchaseAck;
   }
 
+  restoreResolvesCorrupt(value: unknown): void {
+    this.restoreScript = value as StoreRestoreAck;
+  }
+
   async link(appUserId: string): Promise<StoreLinkAck> {
     this.calls.push(`link ${appUserId}`);
     const script = this.linkScript;

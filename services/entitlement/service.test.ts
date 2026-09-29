@@ -39,6 +39,16 @@ test('a corrupt device identity is invalid-input and no store call happens', asy
   }
 });
 
+test('a missing identity object is invalid-input, not a thrown error', async () => {
+  const port = new FakeStoreSessionPort();
+  const outcome = await ensureStoreLink(depsWith(port), null as never);
+  assert.deepEqual(outcome, {
+    kind: 'invalid-input',
+    diagnostics: ['entitlement-link#device-id'],
+  });
+  assert.deepEqual(port.calls, []);
+});
+
 test('the link carries exactly the registered device_id (app_user_id = device_id)', async () => {
   const port = new FakeStoreSessionPort();
   const outcome = await ensureStoreLink(depsWith(port), { deviceId: DEVICE_A });
@@ -191,6 +201,16 @@ test('restore failures answer in the restore vocabulary, honestly', async () => 
     const outcome = await restoreEntitlements(depsWith(port), { deviceId: DEVICE_A });
     assert.deepEqual(outcome, expected, `RC code ${code}`);
   }
+});
+
+test('a corrupt restore ack is unknown, fail closed', async () => {
+  const port = new FakeStoreSessionPort();
+  port.restoreResolvesCorrupt(null);
+  const outcome = await restoreEntitlements(depsWith(port), { deviceId: DEVICE_A });
+  assert.deepEqual(outcome, {
+    kind: 'unknown',
+    diagnostics: ['entitlement-restore#ack-shape'],
+  });
 });
 
 // --- diagnostics: named lines only, SDK text never leaks ---

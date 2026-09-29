@@ -4,8 +4,8 @@
 // the SDK sends the receipt synchronously, and the server — not the client —
 // verifies the entitlement at the moment of the grant; «Кліент ніколі не
 // сцвярджае, што ён нешта купіў. Ён просіць грант; вырашае сервер, спытаўшы
-// RevenueCat. Лакальны сцяг "купілі" — не крыніца праўды»; «Пры часовым збоі
-// праверкі кліент захоўвае "куплена, доступ рыхтуецца" і прапануе паўтор
+// RevenueCat. Лакальны сцяг «купілі» — не крыніца праўды»; «Пры часовым збоі
+// праверкі кліент захоўвае «куплена, доступ рыхтуецца» і прапануе паўтор
 // праверкі/загрузкі, не паўторную аплату».
 // `09` §5.2 — «Прадукты ROUTE і ROUTE_EXTENSION у сторах ствараюцца як
 // non-consumable one-time purchases»; restore works for the same store on a
