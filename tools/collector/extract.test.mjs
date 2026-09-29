@@ -1,8 +1,9 @@
-// Bare-URL suites (G17.09, issue #366): every test reaches the production
-// extractPage — the same function the seed handler and the crawler call —
-// plus one file:// fixture campaign run through the real CLI
-// (testkit.collectAndClean). The proof of the suite is its revert: removing
-// the bare-URL pass turns every test here red (implementation-rules 1).
+// Bare-URL suites (G17.09, issue #366) and loose/lazy image suites (G17.10,
+// issue #367): every test reaches the production extractPage — the same
+// function the seed handler and the crawler call — plus one file:// fixture
+// campaign run through the real CLI (testkit.collectAndClean). The proof of
+// the suite is its revert: removing the bare-URL pass, the gap scan or the
+// lazy-source chain turns the tests here red (implementation-rules 1).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -156,4 +157,112 @@ test('AC5: the file:// fixture campaign run persists the bare URL row and the ma
   assert.ok(raw.includes('www.gdansk.example') && !raw.includes('[www.gdansk.example'), 'the scheme-less word stays plain text');
   const cleaned = fs.readFileSync(path.join(snapshot, 'cleaned', 'v1.md'), 'utf8');
   assert.ok(cleaned.includes(`[${BARE}](${BARE})`), 'the cleaned document carries the same markdown link');
+});
+
+// G17.10 (issue #367): images standing outside paragraphs and figures and
+// lazy-loaded sources follow the same collection rules as paragraph images —
+// threshold, naming and positions are media.mjs business and stay untouched.
+
+test('G17.10 AC1: an image outside paragraphs and figures lands at its document position', () => {
+  const page = extractPage(
+    [
+      '<title>Yard</title>',
+      '<p>Першы.</p>',
+      '<div class="article-body"><img src="hero-640x400.png" alt="Hero" title="Двор"></div>',
+      '<p>Другі.</p>',
+      '<img src="tail-500x300.png" alt="Tail">',
+      '<p>Трэці.</p>',
+    ].join('\n'),
+    'https://news.example/a'
+  );
+  assert.deepEqual(
+    page.images.map((image) => [image.url, image.alt, image.caption, image.position]),
+    [
+      ['https://news.example/hero-640x400.png', 'Hero', 'Двор', 1],
+      ['https://news.example/tail-500x300.png', 'Tail', null, 2],
+    ],
+    'loose images follow the figure semantics: they render exactly where they stood'
+  );
+  assert.equal(page.text, 'Першы.\n\nДругі.\n\nТрэці.\n', 'loose images never change the text');
+});
+
+test('G17.10 AC1: an image before the first paragraph renders before it, after the last — after it', () => {
+  const leading = extractPage(
+    ['<title>Yard</title>', '<header><img src="hero-640x400.png" alt="Hero"></header>', '<p>Першы.</p>'].join('\n'),
+    'https://news.example/a'
+  );
+  assert.deepEqual(leading.images.map((image) => image.position), [0]);
+  const trailing = extractPage(
+    ['<title>Yard</title>', '<p>Першы.</p>', '<footer><img src="tail-500x300.png" alt="Tail"></footer>'].join('\n'),
+    'https://news.example/a'
+  );
+  assert.deepEqual(trailing.images.map((image) => image.position), [1]);
+});
+
+test('G17.10 AC2: data-src beats the decorative src — the real image, no placeholder duplicate', () => {
+  const page = extractPage(
+    [
+      '<title>Yard</title>',
+      '<p>Тэкст.</p>',
+      '<img src="placeholder-40x20.jpg" data-src="real-800x600.jpg" alt="Lazy">',
+    ].join('\n'),
+    'https://news.example/a'
+  );
+  assert.deepEqual(
+    page.images.map((image) => image.url),
+    ['https://news.example/real-800x600.jpg'],
+    'one occurrence — the real source; the placeholder creates no photo'
+  );
+});
+
+test('G17.10 AC2: a srcset-only image resolves to its largest candidate', () => {
+  const page = (srcset) =>
+    extractPage(['<title>Yard</title>', '<p>Тэкст.</p>', `<img srcset="${srcset}" alt="R">`].join('\n'), 'https://news.example/a');
+  assert.deepEqual(
+    page('small-320w.jpg 320w, large-800w.jpg 800w').images.map((image) => image.url),
+    ['https://news.example/large-800w.jpg'],
+    'the width descriptor decides'
+  );
+  assert.deepEqual(
+    page('cover-1x.jpg 1x, cover-2x.jpg 2x').images.map((image) => image.url),
+    ['https://news.example/cover-2x.jpg'],
+    'the density descriptor decides'
+  );
+  assert.deepEqual(
+    page('first.jpg, second.jpg').images.map((image) => image.url),
+    ['https://news.example/first.jpg'],
+    'a candidate without a descriptor counts as 1x, ties keep the earlier one'
+  );
+  assert.deepEqual(page('  ,,  ').images, [], 'a srcset with no candidates falls through — no image');
+});
+
+test('G17.10 AC2: data-src wins over srcset when both carry the real source', () => {
+  const page = extractPage(
+    ['<title>Yard</title>', '<p>Тэкст.</p>', '<img data-src="lazy-800x600.jpg" srcset="set-400w.jpg 400w" alt="L">'].join('\n'),
+    'https://news.example/a'
+  );
+  assert.deepEqual(page.images.map((image) => image.url), ['https://news.example/lazy-800x600.jpg']);
+  const emptyDataSrc = extractPage(
+    ['<title>Yard</title>', '<p>Тэкст.</p>', '<img data-src="" src="real-800x600.jpg" alt="E">'].join('\n'),
+    'https://news.example/a'
+  );
+  assert.deepEqual(
+    emptyDataSrc.images.map((image) => image.url),
+    ['https://news.example/real-800x600.jpg'],
+    'an empty data-src falls back to the visible src'
+  );
+});
+
+test('G17.10: an <img> inside script, template or noscript bodies is not a page image', () => {
+  const page = extractPage(
+    [
+      '<title>Yard</title>',
+      "<script>document.write('<img src=\"code-800x600.png\">');</script>",
+      '<template><img src="tpl-800x600.png" alt="tpl"></template>',
+      '<noscript><img src="real-800x600.jpg" alt="fallback"></noscript>',
+      '<p>Тэкст.</p>',
+    ].join('\n'),
+    'https://news.example/a'
+  );
+  assert.deepEqual(page.images, [], 'invisible bodies never yield images; noscript repeats the lazy image it falls back for');
 });
