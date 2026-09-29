@@ -120,6 +120,7 @@ test('AC1: a fixture article becomes a raw_records row with source_type=wiki and
   assert.equal(metadata.published_at, '2026-09-24T10:00:00Z', 'the revision timestamp is the page date');
   assert.equal(metadata.author, 'WikiEditor', 'the revision user is the page author');
   assert.equal(metadata.language, null, 'the parse response carries no content language');
+  assert.equal(metadata.source_url, record.url, 'source_url mirrors the record url, beside attribution');
   // Attribution metadata — each field asserted (07's bibliography and the
   // citation rule consume these).
   assert.equal(metadata.attribution.site, 'https://pl.wikipedia.org');

@@ -73,7 +73,15 @@ export function processFetchedPage(
   fs.mkdirSync(mediaDir, { recursive: true });
   fs.writeFileSync(path.join(snapshotDir, 'snapshot.html'), Buffer.from(html, 'utf8'));
   fs.writeFileSync(path.join(snapshotDir, 'text.md'), textBytes);
-  const metadata = { ...page.metadata, ...(metadataOverrides ?? {}), ...(attribution ? { attribution } : {}) };
+  // source_url (G17.11) keeps the snapshot dir readable without the database:
+  // the fetched address travels with the files. Spread last — overrides and
+  // attribution decorate the page, they never displace where it came from.
+  const metadata = {
+    ...page.metadata,
+    ...(metadataOverrides ?? {}),
+    ...(attribution ? { attribution } : {}),
+    source_url: url,
+  };
   fs.writeFileSync(path.join(snapshotDir, 'metadata.json'), `${JSON.stringify(metadata, null, 2)}\n`);
 
   const recordId = randomUUID();

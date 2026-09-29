@@ -80,7 +80,16 @@ test('AC1: the fixture page becomes a snapshot dir; every anchor keeps its targe
     published_at: '2026-09-20',
     author: 'Jan Kowalski',
     language: 'en',
+    source_url: s.seedUrl('article.html'),
   });
+});
+
+test('metadata.json carries source_url — the snapshot reads without the database', async () => {
+  const s = setup();
+  await runThroughLoop(s);
+  const record = s.db.prepare('SELECT url, snapshot_path FROM raw_records').get();
+  const metadata = JSON.parse(fs.readFileSync(path.join(record.snapshot_path, 'metadata.json'), 'utf8'));
+  assert.equal(metadata.source_url, record.url, 'source_url is the address the page was fetched from');
 });
 
 test('AC2: the same fixture twice is one record; snapshots are never rewritten', async () => {
@@ -116,7 +125,7 @@ test('AC2: same text under a different URL is a second row linked to the origina
   });
   const run = await runThroughLoop(s);
   assert.equal(run.done, 2);
-  const rows = s.db.prepare('SELECT url, canonical_url, content_hash FROM raw_records ORDER BY rowid').all();
+  const rows = s.db.prepare('SELECT url, canonical_url, content_hash, snapshot_path FROM raw_records ORDER BY rowid').all();
   assert.equal(rows.length, 2);
   assert.equal(rows[0].url, s.seedUrl('article.html'));
   assert.equal(rows[1].url, s.seedUrl('twin.html'));
@@ -124,6 +133,10 @@ test('AC2: same text under a different URL is a second row linked to the origina
   assert.equal(rows[1].canonical_url, rows[0].canonical_url, 'the twin links to the original via canonical_url');
   assert.equal(rows[0].canonical_url, s.seedUrl('article.html'), 'the original keeps its own address');
   assert.equal(new Set(rows.map((row) => row.content_hash)).size, 1, 'no duplicated text: one hash pair');
+  for (const row of rows) {
+    const metadata = JSON.parse(fs.readFileSync(path.join(row.snapshot_path, 'metadata.json'), 'utf8'));
+    assert.equal(metadata.source_url, row.url, 'every new snapshot carries its own fetched address');
+  }
 });
 
 test('a declared rel=canonical becomes the original record canonical_url', async () => {
