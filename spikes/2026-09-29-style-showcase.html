@@ -1,0 +1,936 @@
+<!doctype html>
+<html lang="be">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KUDY · стыль-прэзентацыя v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Nunito:wght@400;600&family=Golos+Text:wght@400;600&family=Manrope:wght@400;600&family=Rubik:wght@400;600&family=Montserrat:wght@600&family=Inter:wght@400;600&family=Comfortaa:wght@600&family=Unbounded:wght@500;600&family=Lora:wght@500;600&family=Alegreya:wght@600&family=Caveat:wght@600&family=Neucha&family=Marck+Script&family=Bad+Script&family=Amatic+SC:wght@700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css">
+<style>
+  /* Палітра і токены — даслоўна з канона docs/design/visual-language.md */
+  :root {
+    --paper: #faf7f2;
+    --ink: #22262b;
+    --muted: #6b7280;
+    --accent: #1d6b4f;
+    --accent-ink: #ffffff;
+    --card: #ffffff;
+    --line: #d8d2c6;
+    --map: #eef3ee;
+    --radius: 10px;
+    --pill: 99px;
+    --accent-deep: #14503b;
+    --line-deep: #c9c2b4;
+    --badge-free-bg: #e7f2ec;
+    --badge-paid-bg: #fdf1d7;
+    --badge-paid-ink: #8a610e;
+    --badge-mixed-bg: #ece7f8;
+    --err-bg: #fdeaea;
+    --err-ink: #b3331f;
+    --neutral-bg: #eceff1;
+    --neutral-ink: #646c77;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Onest', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 24px 20px 80px; }
+  header.top { padding: 34px 0 6px; }
+  h1 { font-size: 26px; font-weight: 600; margin: 0 0 4px; }
+  .top-sub { color: var(--muted); font-size: 14px; }
+  .toprow { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; }
+  .legend span { font-size: 13px; padding: 3px 12px; border-radius: var(--pill); }
+  .b-yes { background: var(--badge-free-bg); color: var(--accent); }
+  .b-mid { background: var(--badge-paid-bg); color: var(--badge-paid-ink); }
+  .b-no  { background: var(--err-bg); color: var(--err-ink); }
+  .b-now { background: var(--neutral-bg); color: var(--neutral-ink); }
+  .lang { display: flex; gap: 6px; }
+  .lang-btn {
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--line); background: var(--card); color: var(--muted);
+    border-radius: var(--pill); padding: 3px 16px;
+  }
+  .lang-btn.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  section { margin-top: 46px; }
+  h2 { font-size: 20px; font-weight: 600; margin: 0 0 2px; }
+  h2 .num { color: var(--accent); margin-right: 8px; }
+  .sec-sub { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+  h3.grouph { font-size: 15px; font-weight: 600; color: var(--muted); margin: 26px 0 10px; text-transform: uppercase; letter-spacing: .04em; }
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g5 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .opt {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .opt-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .opt-head .name { font-weight: 600; }
+  .opt-note { color: var(--muted); font-size: 13px; margin-top: auto; }
+  .stage {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-height: 96px;
+  }
+
+  /* ——— кнопкі ——— */
+  .btn {
+    font: inherit;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius);
+    padding: 11px 20px;
+    transition: transform .06s ease, box-shadow .06s ease, background .12s ease;
+  }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-flat-p { background: var(--accent); color: var(--accent-ink); }
+  .btn-flat-s { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+  .btn-clay-p { background: var(--accent); color: var(--accent-ink); box-shadow: 0 4px 0 var(--accent-deep); }
+  .btn-clay-p:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-deep); }
+  .btn-clay-s { background: var(--card); color: var(--ink); border: 1px solid var(--line); box-shadow: 0 4px 0 var(--line-deep); }
+  .btn-clay-s:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line-deep); }
+  .btn-soft-p {
+    background: var(--badge-free-bg); color: var(--accent);
+    box-shadow: inset 0 2px 3px rgba(255,255,255,.9), inset 0 -3px 5px rgba(29,107,79,.18),
+                0 6px 12px rgba(29,107,79,.22);
+  }
+  .btn-pill-p { background: var(--accent); color: var(--accent-ink); border-radius: var(--pill); }
+  .btn-pill-s { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: var(--pill); }
+  .btn-outline-p { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
+  .btn-outline-p:active { background: rgba(29,107,79,.08); }
+  .btn-outline-s { background: transparent; color: var(--ink); border: 2px solid var(--line); }
+  .btn-round {
+    width: 50px; height: 50px; padding: 0; border-radius: 50%;
+    background: var(--accent); color: var(--accent-ink);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 24px; box-shadow: 0 3px 0 var(--accent-deep);
+  }
+  .btn-round:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-deep); }
+  .btn-round.sm { width: 42px; height: 42px; font-size: 18px; }
+  .btn-float { background: var(--accent); color: var(--accent-ink); box-shadow: 0 6px 16px rgba(29,107,79,.3); }
+  .btn-float:active { transform: translateY(2px); box-shadow: 0 3px 8px rgba(29,107,79,.3); }
+  .btn-grad { background: linear-gradient(180deg, #2e8a68, var(--accent)); color: var(--accent-ink); }
+  .btn-glass {
+    background: rgba(255,255,255,.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,.75);
+    color: var(--ink);
+  }
+  .stage-glass { background: linear-gradient(120deg, var(--badge-free-bg), var(--badge-paid-bg) 55%, var(--badge-mixed-bg)); }
+
+  /* ——— міні-экран (мок) ——— */
+  .mock {
+    width: 268px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+  }
+  .mock-paper { background: transparent; border: none; padding: 0; }
+  .mock-head { display: flex; justify-content: space-between; align-items: center; }
+  .mock-title { font-weight: 600; font-size: 18px; }
+  .mock-thumb {
+    height: 84px; border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--map), var(--badge-free-bg));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px; color: var(--accent);
+  }
+  .mock-thumb i, .mock-thumb span { line-height: 1; }
+  .mock-name { font-weight: 600; font-size: 15px; }
+  .mock-sub { color: var(--muted); font-size: 13px; }
+  .pill { display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: var(--pill); }
+  .pill-free { background: var(--badge-free-bg); color: var(--accent); }
+  .pill-paid { background: var(--badge-paid-bg); color: var(--badge-paid-ink); }
+  .mock-cta { text-align: center; font-size: 14px; padding: 10px 16px; }
+  .mock-cta:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-deep); }
+  .bubble {
+    background: var(--badge-paid-bg);
+    border: 1px solid #e6c98c;
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    line-height: 1.25;
+  }
+  .bubble.neu { font-family: 'Neucha', cursive; }
+  .bubble .who { font-family: 'Onest', system-ui, sans-serif; font-size: 11px; color: var(--badge-paid-ink); display: block; }
+
+  /* прэсэты */
+  .ps-a .mock, .ps-a .mock-title, .ps-a .mock-name { font-family: system-ui, sans-serif; }
+  .ps-b .mock { font-family: 'Onest', system-ui, sans-serif; }
+  .ps-c .mock { font-family: 'Onest', system-ui, sans-serif; }
+  .ps-c .mock-title, .ps-c .mock-name { font-family: 'Lora', serif; }
+  .ps-d .mock { font-family: 'Nunito', system-ui, sans-serif; }
+  .ps-e .mock { font-family: 'Golos Text', system-ui, sans-serif; }
+  .ps-e .btn { border-radius: 6px; }
+
+  /* ——— іконкі ——— */
+  .icon-row { display: flex; flex-direction: column; gap: 10px; }
+  .icon-set-name { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .icon-cells { display: flex; gap: 6px; flex-wrap: wrap; }
+  .icon-cell {
+    width: 44px; height: 44px; border: 1px solid var(--line); border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    background: var(--card); color: var(--ink);
+  }
+  .icon-cell i, .icon-cell span { line-height: 1; font-style: normal; }
+  .icon-cell svg { width: 22px; height: 22px; stroke-width: 2; }
+  .icon-cell .material-symbols-rounded { font-size: 22px; }
+  .imask {
+    width: 22px; height: 22px; display: block; background: var(--ink);
+    -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat;
+  }
+
+  /* ——— шрыфты ——— */
+  .spec { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; background: var(--card); }
+  .spec-title { font-size: 24px; font-weight: 600; }
+  .spec-body { font-size: 14px; color: var(--muted); margin-top: 4px; }
+  .f-sys   { font-family: system-ui, sans-serif; }
+  .f-onest { font-family: 'Onest', system-ui, sans-serif; }
+  .f-nunito{ font-family: 'Nunito', system-ui, sans-serif; }
+  .f-golos { font-family: 'Golos Text', system-ui, sans-serif; }
+  .f-manrope{ font-family: 'Manrope', system-ui, sans-serif; }
+  .f-rubik { font-family: 'Rubik', system-ui, sans-serif; }
+  .f-mont  { font-family: 'Montserrat', system-ui, sans-serif; }
+  .f-inter { font-family: 'Inter', system-ui, sans-serif; }
+  .f-comf  { font-family: 'Comfortaa', system-ui, sans-serif; }
+  .f-unb   { font-family: 'Unbounded', system-ui, sans-serif; }
+  .f-lora  { font-family: 'Lora', serif; }
+  .f-aleg  { font-family: 'Alegreya', serif; }
+  .f-cav   { font-family: 'Caveat', cursive; }
+  .f-neu   { font-family: 'Neucha', cursive; }
+  .f-marck { font-family: 'Marck Script', cursive; }
+  .f-bad   { font-family: 'Bad Script', cursive; }
+  .f-amat  { font-family: 'Amatic SC', cursive; }
+
+  /* ——— анімацыі ——— */
+  .demo-stage {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--card); padding: 16px; min-height: 150px;
+    display: flex; flex-direction: column; justify-content: center; gap: 10px;
+    position: relative; overflow: hidden;
+  }
+  .replay {
+    align-self: flex-start;
+    font: inherit; font-size: 13px; font-weight: 600;
+    color: var(--accent); background: var(--badge-free-bg);
+    border: none; border-radius: var(--pill); padding: 6px 14px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes popIn { 0% { opacity: 0; transform: scale(.85); } 60% { transform: scale(1.04); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes growW { from { width: 8%; } to { width: 66%; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes ping { 0% { transform: scale(1); opacity: .55; } 100% { transform: scale(2.3); opacity: 0; } }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  .run .a-fade   { animation: fadeUp .28s ease-out both; }
+  .run .a-stag1  { animation: fadeUp .26s ease-out both; }
+  .run .a-stag2  { animation: fadeUp .26s ease-out .06s both; }
+  .run .a-stag3  { animation: fadeUp .26s ease-out .12s both; }
+  .run .a-pop    { animation: popIn .34s cubic-bezier(.34,1.56,.64,1) both; }
+  .run .a-bar    { animation: growW .9s ease-in-out both; }
+  .run .a-dim    { animation: fadeIn .22s ease-out both; }
+  .run .a-mcard  { animation: popIn .28s cubic-bezier(.34,1.56,.64,1) both; }
+  .a-line { opacity: 0; }
+  .run .a-line { opacity: 1; }
+  .demo-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; background: var(--paper); }
+  .demo-card .t { font-weight: 600; font-size: 14px; }
+  .demo-card .s { font-size: 12px; color: var(--muted); }
+  .progress { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .progress > div { height: 100%; background: var(--accent); width: 8%; }
+  .prog-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .marker {
+    position: relative; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 15px;
+    border: 2px solid #fff; box-shadow: 0 2px 6px rgba(34,38,43,.25);
+  }
+  .marker::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--accent); opacity: 0; }
+  .run .marker::after { animation: ping 1.4s ease-out infinite; }
+  .modal-demo { position: relative; min-height: 150px; display: flex; align-items: center; justify-content: center; }
+  .m-dim { position: absolute; inset: 0; background: rgba(0,0,0,.35); opacity: 0; border-radius: var(--radius); }
+  .m-card { position: relative; width: 200px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; opacity: 0; }
+  .m-card .t { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .m-card .s { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .m-card .m-cta { background: var(--accent); color: var(--accent-ink); border-radius: var(--radius); text-align: center; font-size: 13px; font-weight: 600; padding: 7px; }
+  .run .m-dim { opacity: 1; }
+  .run .m-card { opacity: 1; }
+  .skel { border-radius: 6px; background: linear-gradient(90deg, #efe9df 25%, #f8f4ed 40%, #efe9df 60%); background-size: 200% 100%; }
+  .skel.t { height: 14px; width: 60%; }
+  .skel.b { height: 10px; width: 90%; }
+  .skel.c { height: 10px; width: 40%; }
+  .run .skel { animation: shimmer 1.2s linear infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .run .a-fade, .run .a-stag1, .run .a-stag2, .run .a-stag3, .run .a-pop, .run .a-bar, .run .a-dim, .run .a-mcard, .run .skel, .run .marker::after { animation: none; }
+    .run .a-fade, .run .a-stag1, .run .a-stag2, .run .a-stag3 { opacity: 1; }
+    .run .a-bar { width: 66%; }
+    .run .m-dim, .run .m-card { opacity: 1; }
+    .a-line { opacity: 1; }
+    .btn, .mock-cta { transition: none; }
+  }
+
+  /* ——— фон ——— */
+  .bg-panel { border-radius: var(--radius); padding: 20px; display: flex; justify-content: center; align-items: flex-end; min-height: 190px; }
+  .bg-plain { background: var(--paper); border: 1px solid var(--line); }
+  .bg-grain {
+    background-color: var(--paper); border: 1px solid var(--line);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+  .bg-band {
+    background: linear-gradient(180deg, #efe7d7 0%, var(--paper) 38%);
+    border: 1px solid var(--line);
+  }
+  .bg-dots {
+    background-color: var(--paper);
+    background-image: radial-gradient(circle, rgba(29,107,79,.1) 1.2px, transparent 1.4px);
+    background-size: 18px 18px;
+    border: 1px solid var(--line);
+  }
+  .bg-sky {
+    background-color: var(--paper);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='64' viewBox='0 0 480 64'%3E%3Cg fill='%231d6b4f' fill-opacity='0.09'%3E%3Crect x='0' y='34' width='34' height='30'/%3E%3Crect x='40' y='20' width='26' height='44'/%3E%3Crect x='72' y='40' width='30' height='24'/%3E%3Crect x='108' y='12' width='22' height='52'/%3E%3Crect x='136' y='30' width='38' height='34'/%3E%3Crect x='180' y='24' width='24' height='40'/%3E%3Crect x='210' y='44' width='30' height='20'/%3E%3Crect x='246' y='16' width='26' height='48'/%3E%3Crect x='278' y='34' width='34' height='30'/%3E%3Crect x='318' y='26' width='24' height='38'/%3E%3Crect x='348' y='40' width='30' height='24'/%3E%3Crect x='384' y='18' width='22' height='46'/%3E%3Crect x='412' y='34' width='30' height='30'/%3E%3Crect x='448' y='28' width='32' height='36'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: bottom center;
+    border: 1px solid var(--line);
+  }
+  .bg-heavy {
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(180deg, #f3e9d8, var(--paper) 55%, #e9e2d2),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+  }
+
+  footer { margin-top: 56px; border-top: 1px solid var(--line); padding-top: 20px; }
+  .pack { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px; }
+  .pack span { background: var(--badge-free-bg); color: var(--accent); font-size: 13px; font-weight: 600; padding: 5px 14px; border-radius: var(--pill); }
+  .next { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>KUDY · стыль-прэзентацыя v2</h1>
+    <div class="top-sub">Цэлыя наборы (прэсэты) + варыянты па пластах · 2026-09-29 · значэнні — з канона visual-language.md · дадатак мультымоўны (06 §1): пераключы БЕЛ/ENG, каб убачыць узоры па-англійску</div>
+    <div class="toprow">
+      <div class="legend">
+        <span class="b-yes">✅ прапанова</span>
+        <span class="b-mid">🟡 запасны</span>
+        <span class="b-no">❌ не рэкамендую</span>
+        <span class="b-now">⚪ як сёння</span>
+      </div>
+      <div class="lang">
+        <button class="lang-btn active" data-lang="by" type="button">БЕЛ</button>
+        <button class="lang-btn" data-lang="en" type="button">ENG</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1. прэсэты -->
+  <section id="presets">
+    <h2><span class="num">1</span>Наборы (прэсэты) стылю цэлікам</h2>
+    <div class="sec-sub">Пяць суцэльных моваў дызайну на тым жа экране. Выбірай набор — дробныя пласты ніжэй можна перамяшаць.</div>
+    <div class="grid g5">
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">A · Канон сёння</span><span class="b-now">⚪</span></div>
+        <div class="stage bg-plain mock-paper">
+          <div class="mock ps-a mock-paper">
+            <div class="mock-head"><span class="mock-title" data-en="Nearby">Побач</span></div>
+            <div class="mock-thumb"></div>
+            <div class="mock-name" data-en="Amber and quiet">Буршт і цішыня</div>
+            <div class="mock-sub" data-en="Audio guide · 34 min · 6 stops">Аўдыёгід · 34 хв · 6 кропак</div>
+            <div><span class="pill pill-free" data-en="free">бясплатна</span> <span class="pill pill-paid" data-en="new">новы</span></div>
+            <button class="btn btn-flat-p mock-cta" data-en="Start the walk">Пачаць прагулку</button>
+          </div>
+        </div>
+        <div class="opt-note">Базавы мінімалізм: system-ui, плоскія пліты, без дэкору.</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">B · Гліна і папера</span><span class="b-yes">✅</span></div>
+        <div class="stage bg-grain mock-paper">
+          <div class="mock ps-b mock-paper">
+            <div class="mock-head"><span class="mock-title" data-en="Nearby">Побач</span><i class="ph-duotone ph-gear-six" aria-hidden="true"></i></div>
+            <div class="mock-thumb"><i class="ph-duotone ph-map-pin" aria-hidden="true"></i></div>
+            <div class="mock-name" data-en="Amber and quiet">Буршт і цішыня</div>
+            <div class="mock-sub" data-en="Audio guide · 34 min · 6 stops">Аўдыёгід · 34 хв · 6 кропак</div>
+            <div><span class="pill pill-free" data-en="free">бясплатна</span> <span class="pill pill-paid" data-en="new">новы</span></div>
+            <div class="bubble"><span class="who" data-en="dragon">дракон</span><span class="txt" data-en="Hey! Shall we start at the old crane?">Гэй! Пачынаем ля старога крана?</span></div>
+            <button class="btn btn-clay-p mock-cta" data-en="Start the walk">Пачаць прагулку</button>
+          </div>
+        </div>
+        <div class="opt-note">Onest · duotone · вылепленыя кнопкі · зярно · рукапісны дракон. Лепш за ўсіх б'е ў «душэўнасць».</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">C · Часопіс гіда</span><span class="b-mid">🟡</span></div>
+        <div class="stage bg-plain mock-paper">
+          <div class="mock ps-c mock-paper">
+            <div class="mock-head"><span class="mock-title" data-en="Nearby">Побач</span><i data-lucide="settings" aria-hidden="true"></i></div>
+            <div class="mock-thumb"><i data-lucide="map-pin" aria-hidden="true"></i></div>
+            <div class="mock-name" data-en="Amber and quiet">Буршт і цішыня</div>
+            <div class="mock-sub" data-en="Audio guide · 34 min · 6 stops">Аўдыёгід · 34 хв · 6 кропак</div>
+            <div><span class="pill pill-free" data-en="free">бясплатна</span> <span class="pill pill-paid" data-en="new">новы</span></div>
+            <button class="btn btn-outline-p mock-cta" data-en="Start the walk">Пачаць прагулку</button>
+          </div>
+        </div>
+        <div class="opt-note">Серыф Lora ў загалоўках + Lucide + абводкавыя кнопкі. Куратарскі, літаратурны тон.</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">D · Скруглены сусвет</span><span class="b-mid">🟡</span></div>
+        <div class="stage bg-dots mock-paper">
+          <div class="mock ps-d mock-paper">
+            <div class="mock-head"><span class="mock-title" data-en="Nearby">Побач</span><span class="material-symbols-rounded" aria-hidden="true">settings</span></div>
+            <div class="mock-thumb"><span class="material-symbols-rounded" aria-hidden="true">map</span></div>
+            <div class="mock-name" data-en="Amber and quiet">Буршт і цішыня</div>
+            <div class="mock-sub" data-en="Audio guide · 34 min · 6 stops">Аўдыёгід · 34 хв · 6 кропак</div>
+            <div><span class="pill pill-free" data-en="free">бясплатна</span> <span class="pill pill-paid" data-en="new">новы</span></div>
+            <button class="btn btn-pill-p mock-cta" data-en="Start the walk">Пачаць прагулку</button>
+          </div>
+        </div>
+        <div class="opt-note">Nunito · Material Rounded · пілюлі · кропкавы патэрн. Самы сяброўскі; рызыка — выгляд гульні.</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">E · Навігатар</span><span class="b-mid">🟡</span></div>
+        <div class="stage bg-plain mock-paper">
+          <div class="mock ps-e mock-paper">
+            <div class="mock-head"><span class="mock-title" data-en="Nearby">Побач</span><i class="ph-bold ph-gear-six" aria-hidden="true"></i></div>
+            <div class="mock-thumb"><i class="ph-bold ph-map-pin" aria-hidden="true"></i></div>
+            <div class="mock-name" data-en="Amber and quiet">Буршт і цішыня</div>
+            <div class="mock-sub" data-en="Audio guide · 34 min · 6 stops">Аўдыёгід · 34 хв · 6 кропак</div>
+            <div><span class="pill pill-free" data-en="free">бясплатна</span> <span class="pill pill-paid" data-en="new">новы</span></div>
+            <button class="btn btn-flat-p mock-cta" data-en="Start the walk">Пачаць прагулку</button>
+          </div>
+        </div>
+        <div class="opt-note">Golos Text · bold-іконкі · завостраны радыус 6 · без дэкору. Максімум чытэльнасці, менш атмасферы.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 2. кнопкі -->
+  <section id="buttons">
+    <h2><span class="num">2</span>Кнопкі — 9 варыянтаў</h2>
+    <div class="sec-sub">Націсні любую. Полка B/G — цень цямнейшага нацяжэння існуючага колеру, гэта не новы канон-колер.</div>
+    <div class="grid g3">
+      <div class="opt">
+        <div class="opt-head"><span class="name">A · Плоская (канон)</span><span class="b-now">⚪</span></div>
+        <div class="stage">
+          <button class="btn btn-flat-p" data-en="Start">Пачаць</button>
+          <button class="btn btn-flat-s" data-en="Later">Пазней</button>
+        </div>
+        <div class="opt-note">Тое, што ў каноне сёння.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">B · Вылепленая (полка)</span><span class="b-yes">✅</span></div>
+        <div class="stage">
+          <button class="btn btn-clay-p" data-en="Start">Пачаць</button>
+          <button class="btn btn-clay-s" data-en="Later">Пазней</button>
+        </div>
+        <div class="opt-note">Ніжняя «полка» 4px; пры націсканні апускаецца ў полку.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">C · Мяккая гліна</span><span class="b-mid">🟡</span></div>
+        <div class="stage">
+          <button class="btn btn-soft-p" data-en="Start">Пачаць</button>
+        </div>
+        <div class="opt-note">Claymorphism: падвойны цень + падсветка. Пастэль рызыкуе WCAG — толькі як акцэнт.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">D · Пілюля</span><span class="b-mid">🟡</span></div>
+        <div class="stage">
+          <button class="btn btn-pill-p" data-en="Coffee nearby">Кава побач</button>
+          <button class="btn btn-pill-s" data-en="Evening">Увечары</button>
+        </div>
+        <div class="opt-note">Радыус 99 ўжо ёсць у каноне для чыпаў і фільтраў.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">E · Абводкавая</span><span class="b-yes">✅ другарадныя</span></div>
+        <div class="stage">
+          <button class="btn btn-outline-p" data-en="Start">Пачаць</button>
+          <button class="btn btn-outline-s" data-en="Later">Пазней</button>
+        </div>
+        <div class="opt-note">2px акцэнт; добра для «скасаваць»/другасных дзеянняў без заливкі.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">F · Круглая icon-кнопка</span><span class="b-yes">✅ плэер</span></div>
+        <div class="stage">
+          <button class="btn btn-round" aria-label="Прайграць"><i class="ph-fill ph-play" aria-hidden="true"></i></button>
+          <button class="btn btn-round sm" aria-label="Паўза"><i class="ph-fill ph-pause" aria-hidden="true"></i></button>
+        </div>
+        <div class="opt-note">Для Moment-плэера і маркерных дзеянняў; 44–50px цэль дотыку з канона (шкала 40px).</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">G · Плаваючы цень</span><span class="b-mid">🟡</span></div>
+        <div class="stage">
+          <button class="btn btn-float" data-en="Start">Пачаць</button>
+        </div>
+        <div class="opt-note">Мяккі рассеяны цень: «літая», але менш гульнівая за полку B.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">H · Градыент</span><span class="b-no">❌</span></div>
+        <div class="stage">
+          <button class="btn btn-grad" data-en="Start">Пачаць</button>
+        </div>
+        <div class="opt-note">Канон трымае адзін ровны акцэнт; градыент дадае шум і ламае пару кантрасту.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">I · Шкло (glassmorphism)</span><span class="b-no">❌</span></div>
+        <div class="stage stage-glass">
+          <button class="btn btn-glass" data-en="Start">Пачаць</button>
+        </div>
+        <div class="opt-note">Трэба яркі фон пад сабой; на паперы KUDY не працуе і дорага па батарэі.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. іконкі -->
+  <section id="icons">
+    <h2><span class="num">3</span>Іконкі — 10 набораў</h2>
+    <div class="sec-sub">Адны і тыя ж гліфы: кропка · плэй · паўза · абранае · прагулка · фільтр. Усе наборы бясплатныя (MIT/Apache).</div>
+    <div class="grid g3">
+
+      <div class="opt icon-row">
+        <div class="icon-set-name">Phosphor duotone <span class="b-yes">✅</span></div>
+        <div class="icon-cells">
+          <span class="icon-cell"><i class="ph-duotone ph-map-pin"></i></span>
+          <span class="icon-cell"><i class="ph-duotone ph-play"></i></span>
+          <span class="icon-cell"><i class="ph-duotone ph-pause"></i></span>
+          <span class="icon-cell"><i class="ph-duotone ph-heart"></i></span>
+          <span class="icon-cell"><i class="ph-duotone ph-compass"></i></span>
+          <span class="icon-cell"><i class="ph-duotone ph-sliders-horizontal"></i></span>
+        </div>
+        <div class="opt-note">Двухтонавыя — самае «глінянае» адчуванне; 1512 іконак.</div>
+      </div>
+
+      <div class="opt icon-row">
+        <div class="icon-set-name">Phosphor regular <span class="b-mid">🟡</span></div>
+        <div class="icon-cells">
+          <span class="icon-cell"><i class="ph ph-map-pin"></i></span>
+          <span class="icon-cell"><i class="ph ph-play"></i></span>
+          <span class="icon-cell"><i class="ph ph-pause"></i></span>
+          <span class="icon-cell"><i class="ph ph-heart"></i></span>
+          <span class="icon-cell"><i class="ph ph-compass"></i></span>
+          <span class="icon-cell"><i class="ph ph-sliders-horizontal"></i></span>
+        </div>
+        <div class="opt-note">Ціхі варыянт таго ж набору.</div>
+      </div>
+
+      <div class="opt icon-row">
+        <div class="icon-set-name">Phosphor bold <span class="b-mid">🟡</span></div>
+        <div class="icon-cells">
+          <span class="icon-cell"><i class="ph-bold ph-map-pin"></i></span>
+          <span class="icon-cell"><i class="ph-bold ph-play"></i></span>
+          <span class="icon-cell"><i class="ph-bold ph-pause"></i></span>
+          <span class="icon-cell"><i class="ph-bold ph-heart"></i></span>
+          <span class="icon-cell"><i class="ph-bold ph-compass"></i></span>
+          <span class="icon-cell"><i class="ph-bold ph-sliders-horizontal"></i></span>
+        </div>
+        <div class="opt-note">Для дробных памераў і навігацыі.</div>
+      </div>
+
+      <div class="opt icon-row">
+        <div class="icon-set-name">Tabler <span class="b-mid">🟡</span></div>
+        <div class="icon-cells">
+          <span class="icon-cell"><i class="ti ti-map-pin"></i></span>
+          <span class="icon-cell"><i class="ti ti-player-play"></i></span>
+          <span class="icon-cell"><i class="ti ti-player-pause"></i></span>
+          <span class="icon-cell"><i class="ti ti-heart"></i></span>
+          <span class="icon-cell"><i class="ti ti-compass"></i></span>
+          <span class="icon-cell"><i class="ti ti-adjustments-horizontal"></i></span>
+        </div>
+        <div class="opt-note">Акруглы stroke, 5800+ гліфаў; RN: @tabler/icons-react-native 3.48 (MIT).</div>
+      </div>
+
+      <div class="icon-row opt">
+        <div class="icon-set-name">Material Symbols Rounded <span class="b-mid">🟡</span></div>
+        <div class="icon-cells">
+          <span class="icon-cell"><span class="material-symbols-rounded" aria-hidden="true">map</span></span>
+          <span class="icon-cell"><span class="material-symbols-rounded" aria-hidden="true">play_arrow</span></span>
+          <span class="icon-cell"><span class="material-symbols-rounded" aria-hidden="true">pause</span></span>
+          <span class="icon-cell"><span class="material-symbols-rounded" aria-hidden="true">favorite</span></span>
+          <span class="icon-cell"><span class="material-symbols-rounded" aria-hidden="true">explore</span></span>
+          <span class="icon-cell"><span class="material-symbols-rounded" aria-hidden="true">tune</span></span>
+        </div>
+        <div class="opt-note">Apache-2.0; у RN сёння праз @expo/vector-icons (MaterialIcons), з SDK 58 — expo-symbols.</div>
+      </div>
+
+      <div class="opt icon-row">
+        <div class="icon-set-name">Remix Icon <span class="b-mid">🟡</span></div>
+        <div class="icon-cells">
+          <span class="icon-cell"><i class="ri ri-map-pin-2-line"></i></span>
+          <span class="icon-cell"><i class="ri ri-play-line"></i></span>
+          <span class="icon-cell"><i class="ri ri-pause-line"></i></span>
+          <span class="icon-cell"><i class="ri ri-heart-line"></i></span>
+          <span class="icon-cell"><i class="ri ri-compass-3-line"></i></span>
+          <span class="icon-cell"><i class="ri ri-equalizer-line"></i></span>
+        </div>
+        <div class="opt-note">Apache-2.0, line/fill пары; RN: react-native-remix-icon 4.7 (MIT).</div>
+      </div>
+
+      <div class="opt icon-row">
+        <div class="icon-set-name">Lucide <span class="b-mid">🟡</span></div>
+        <div class="icon-cells">
+          <span class="icon-cell"><i data-lucide="map-pin"></i></span>
+          <span class="icon-cell"><i data-lucide="play"></i></span>
+          <span class="icon-cell"><i data-lucide="pause"></i></span>
+          <span class="icon-cell"><i data-lucide="heart"></i></span>
+          <span class="icon-cell"><i data-lucide="compass"></i></span>
+          <span class="icon-cell"><i data-lucide="sliders-horizontal"></i></span>
+        </div>
+        <div class="opt-note">Адзін акруглы outline; строгі і паслядоўны.</div>
+      </div>
+
+      <div class="opt icon-row">
+        <div class="icon-set-name">Feather <span class="b-mid">🟡</span></div>
+        <div class="icon-cells">
+          <span class="icon-cell"><i data-feather="map-pin"></i></span>
+          <span class="icon-cell"><i data-feather="play"></i></span>
+          <span class="icon-cell"><i data-feather="pause"></i></span>
+          <span class="icon-cell"><i data-feather="heart"></i></span>
+          <span class="icon-cell"><i data-feather="compass"></i></span>
+          <span class="icon-cell"><i data-feather="sliders"></i></span>
+        </div>
+        <div class="opt-note">Простыя стрыжнёвыя гліфы; кампактны, але старэе без рэлізоў.</div>
+      </div>
+
+      <div class="opt icon-row">
+        <div class="icon-set-name">Iconoir <span class="b-mid">🟡</span></div>
+        <div class="icon-cells">
+          <span class="icon-cell"><i class="iconoir-map-pin"></i></span>
+          <span class="icon-cell"><i class="iconoir-play"></i></span>
+          <span class="icon-cell"><i class="iconoir-pause"></i></span>
+          <span class="icon-cell"><i class="iconoir-heart"></i></span>
+          <span class="icon-cell"><i class="iconoir-compass"></i></span>
+          <span class="icon-cell"><i class="iconoir-filter"></i></span>
+        </div>
+        <div class="opt-note">MIT, 1500+; тонкі лінейны стыль, але duotone няма.</div>
+      </div>
+
+      <div class="opt icon-row">
+        <div class="icon-set-name">Ionicons <span class="b-now">⚪ нейтральна</span></div>
+        <div class="icon-cells">
+          <span class="icon-cell"><span class="imask" style="--m:url('https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/svg/map.svg')"></span></span>
+          <span class="icon-cell"><span class="imask" style="--m:url('https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/svg/play.svg')"></span></span>
+          <span class="icon-cell"><span class="imask" style="--m:url('https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/svg/pause.svg')"></span></span>
+          <span class="icon-cell"><span class="imask" style="--m:url('https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/svg/heart.svg')"></span></span>
+          <span class="icon-cell"><span class="imask" style="--m:url('https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/svg/compass.svg')"></span></span>
+          <span class="icon-cell"><span class="imask" style="--m:url('https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/svg/options.svg')"></span></span>
+        </div>
+        <div class="opt-note">MIT, скруглены; у RN праз @expo/vector-icons. Стылёва «сістэмны».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 4. шрыфты -->
+  <section id="fonts">
+    <h2><span class="num">4</span>Тэкст і шрыфты — 17 гарнітураў</h2>
+    <div class="sec-sub">Усе — OFL з поўнай беларускай кірыліцай (Ў/ў правераны па пакрыцці) і лацінкай. Загалоўак = вага 600, другі радок = 400.</div>
+
+    <h3 class="grouph">Галоўны UI-шрыфт (замена system-ui)</h3>
+    <div class="grid g3">
+      <div class="opt"><div class="spec"><div class="spec-title f-sys" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-sys" data-en="12 min · 6 stops · stories of amber and quiet">12 хв · 6 кропак · гісторыі пра буршт і цішыню</div></div>
+        <div class="opt-head"><span class="name">System-ui</span><span class="b-now">⚪ сёння</span></div></div>
+      <div class="opt"><div class="spec"><div class="spec-title f-onest" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-onest" data-en="12 min · 6 stops · stories of amber and quiet">12 хв · 6 кропак · гісторыі пра буршт і цішыню</div></div>
+        <div class="opt-head"><span class="name">Onest</span><span class="b-yes">✅</span></div>
+        <div class="opt-note">Гуманістычны, дызайн пад кірыліцу; 88KB/вага.</div></div>
+      <div class="opt"><div class="spec"><div class="spec-title f-nunito" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-nunito" data-en="12 min · 6 stops · stories of amber and quiet">12 хв · 6 кропак · гісторыі пра буршт і цішыню</div></div>
+        <div class="opt-head"><span class="name">Nunito</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Скруглены «friendly»; мягчэйшы, менш стрыманы.</div></div>
+      <div class="opt"><div class="spec"><div class="spec-title f-golos" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-golos" data-en="12 min · 6 stops · stories of amber and quiet">12 хв · 6 кропак · гісторыі пра буршт і цішыню</div></div>
+        <div class="opt-head"><span class="name">Golos Text</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Найлёгкі (62KB/вага), нейтральны.</div></div>
+      <div class="opt"><div class="spec"><div class="spec-title f-manrope" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-manrope" data-en="12 min · 6 stops · stories of amber and quiet">12 хв · 6 кропак · гісторыі пра буршт і цішыню</div></div>
+        <div class="opt-head"><span class="name">Manrope</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Сучасна-геаметрычны; 92KB/вага.</div></div>
+      <div class="opt"><div class="spec"><div class="spec-title f-rubik" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-rubik" data-en="12 min · 6 stops · stories of amber and quiet">12 хв · 6 кропак · гісторыі пра буршт і цішыню</div></div>
+        <div class="opt-head"><span class="name">Rubik</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Лёгка скруглены з характарам; 170KB/вага.</div></div>
+      <div class="opt"><div class="spec"><div class="spec-title f-mont" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-mont" data-en="12 min · 6 stops · stories of amber and quiet">12 хв · 6 кропак · гісторыі пра буршт і цішыню</div></div>
+        <div class="opt-head"><span class="name">Montserrat</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Геаметрычны, шырокі; добры для загалоўкаў, гучны для тэксту.</div></div>
+      <div class="opt"><div class="spec"><div class="spec-title f-inter" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-inter" data-en="12 min · 6 stops · stories of amber and quiet">12 хв · 6 кропак · гісторыі пра буршт і цішыню</div></div>
+        <div class="opt-head"><span class="name">Inter</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Незбураны эталон UI; бліжэй да system-ui, характару мала.</div></div>
+      <div class="opt"><div class="spec"><div class="spec-title f-comf" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-comf" data-en="12 min · 6 stops · stories of amber and quiet">12 хв · 6 кропак · гісторыі пра буршт і цішыню</div></div>
+        <div class="opt-head"><span class="name">Comfortaa</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Вельмі скруглены дыплей; для ўсяго тэксту стамляе.</div></div>
+    </div>
+
+    <h3 class="grouph">Загалоўкі і гісторыі (дыплей і серыф)</h3>
+    <div class="grid g3">
+      <div class="opt"><div class="spec"><div class="spec-title f-unb" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-sys">толькі героічныя блокі і назвы</div></div>
+        <div class="opt-head"><span class="name">Unbounded</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Дызайн NextType (Мінск); 335KB — толькі як акцэнт.</div></div>
+      <div class="opt"><div class="spec"><div class="spec-title f-lora" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-onest">тэкст гісторый чытаецца як кніга</div></div>
+        <div class="opt-head"><span class="name">Lora (серыф)</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Рэдакцыйны тон для назваў гідаў і гісторый — «часопіс гіда».</div></div>
+      <div class="opt"><div class="spec"><div class="spec-title f-aleg" data-en="The old crane wants a walk">Стары кран жадае прагулкі</div><div class="spec-body f-onest">гуманістычны серыф з характарам</div></div>
+        <div class="opt-head"><span class="name">Alegreya (серыф)</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Альтэрнатыва Lora — больш выражаны нахіл і мармуровасць.</div></div>
+    </div>
+
+    <h3 class="grouph">Голас дракона (рукапісныя)</h3>
+    <div class="grid g3">
+      <div class="opt"><div class="spec"><div class="bubble f-cav"><span class="who" data-en="dragon">дракон</span><span class="txt" data-en="This crane hides a story older than the whole street.">За гэтым кранам гісторыя старэйшая за ўсю вуліцу.</span></div></div>
+        <div class="opt-head"><span class="name">Caveat</span><span class="b-yes">✅</span></div>
+        <div class="opt-note">Жывы почырк, вагі 400–700; лепш чытаецца дробна.</div></div>
+      <div class="opt"><div class="spec"><div class="bubble neu f-neu"><span class="who" data-en="dragon">дракон</span><span class="txt" data-en="This crane hides a story older than the whole street.">За гэтым кранам гісторыя старэйшая за ўсю вуліцу.</span></div></div>
+        <div class="opt-head"><span class="name">Neucha</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Спакайнейшая, адна вага.</div></div>
+      <div class="opt"><div class="spec"><div class="bubble f-marck"><span class="who" data-en="dragon">дракон</span><span class="txt" data-en="This crane hides a story older than the whole street.">За гэтым кранам гісторыя старэйшая за ўсю вуліцу.</span></div></div>
+        <div class="opt-head"><span class="name">Marck Script</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Пропісны курсіў; элегантны, але цяжэй чытаецца дробна.</div></div>
+      <div class="opt"><div class="spec"><div class="bubble f-bad"><span class="who" data-en="dragon">дракон</span><span class="txt" data-en="This crane hides a story older than the whole street.">За гэтым кранам гісторыя старэйшая за ўсю вуліцу.</span></div></div>
+        <div class="opt-head"><span class="name">Bad Script</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Танкая ручка; чуллівы, але слабы на дробных памерах.</div></div>
+      <div class="opt"><div class="spec"><div class="bubble f-amat"><span class="who" data-en="dragon">дракон</span><span class="txt" data-en="This crane hides a story older than the whole street.">За гэтым кранам гісторыя старэйшая за ўсю вуліцу.</span></div></div>
+        <div class="opt-head"><span class="name">Amatic SC</span><span class="b-mid">🟡</span></div>
+        <div class="opt-note">Вузкі капітэль-почырк; цікавы для драбнушак-пазнак, не для рэплік.</div></div>
+    </div>
+  </section>
+
+  <!-- 5. анімацыі -->
+  <section id="anim">
+    <h2><span class="num">5</span>Анімацыі тэксту і элементаў — 8 патэрнаў</h2>
+    <div class="sec-sub">Жывыя дэма; «Прайграць» перазапускае. Калі ў сістэме «менш руху» — усе спыняюцца (канон §9).</div>
+    <div class="grid g3">
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">Fade-up: з'яўленне кантэнту</span><span class="b-yes">✅</span></div>
+        <div class="demo-stage" data-demo>
+          <div class="a-fade a-line"><div class="demo-card"><div class="t" data-en="Amber and quiet">Буршт і цішыня</div><div class="s" data-en="Audio guide · 34 min · 6 stops">Аўдыёгід · 34 хв · 6 кропак</div></div></div>
+          <div class="a-fade a-line" style="animation-delay:.08s"><div class="demo-card"><div class="t" data-en="Coffee in the old town">Кава ў старым горадзе</div><div class="s" data-en="collection · 4 places">падборка · 4 месцы</div></div></div>
+        </div>
+        <button class="replay" data-replay><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Прайграць</button>
+        <div class="opt-note">280 мс, зрушэнне 12px — на ўваходзе ў экран.</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">Stagger: спіс картак</span><span class="b-yes">✅</span></div>
+        <div class="demo-stage" data-demo>
+          <div class="a-stag1 a-line"><div class="demo-card"><div class="t" data-en="1 · Crane">1 · Кран</div><div class="s" data-en="available · 40 m">available · 40 м</div></div></div>
+          <div class="a-stag2 a-line"><div class="demo-card"><div class="t" data-en="2 · Gate">2 · Брама</div><div class="s" data-en="pending · 210 m">pending · 210 м</div></div></div>
+          <div class="a-stag3 a-line"><div class="demo-card"><div class="t" data-en="3 · Pier">3 · Прыстань</div><div class="s" data-en="locked · 480 m">locked · 480 м</div></div></div>
+        </div>
+        <button class="replay" data-replay><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Прайграць</button>
+        <div class="opt-note">Крок 60 мс; не болей за 3–4 элементы адначасова.</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">Рэпліка дракона (spring)</span><span class="b-yes">✅</span></div>
+        <div class="demo-stage" data-demo>
+          <div class="a-pop a-line"><div class="bubble f-cav"><span class="who" data-en="dragon">дракон</span><span class="txt" data-en="It smells of amber and rain here. Coming?">Тут пахне бурштам і дажджом. Ідзем?</span></div></div>
+        </div>
+        <button class="replay" data-replay><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Прайграць</button>
+        <div class="opt-note">Лёгкі overshoot 4%; тэкст з'яўляецца цэлікам — без «машынкі».</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">Прагрэс прагулкі</span><span class="b-yes">✅</span></div>
+        <div class="demo-stage" data-demo>
+          <div>
+            <div class="prog-row"><span data-en="Walk">Прагулка</span><span class="a-line a-fade" data-en="2 of 6 stops">2 з 6 кропак</span></div>
+            <div class="progress"><div class="a-bar"></div></div>
+          </div>
+        </div>
+        <button class="replay" data-replay><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Прайграць</button>
+        <div class="opt-note">Паласа 6px з канона; запаўненне цеча, лічба — fade.</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">Пульс маркера</span><span class="b-yes">✅</span></div>
+        <div class="demo-stage" data-demo>
+          <div class="a-fade a-line" style="display:flex;gap:14px;align-items:center;">
+            <div class="marker" data-en="a">а</div>
+            <div><div class="demo-card" style="border:none;background:transparent;padding:0;"><div class="t" data-en="Crane · 40 m">Кран · 40 м</div><div class="s" data-en="available · tap to listen">доступна · націсні, каб пачуць</div></div></div>
+          </div>
+        </div>
+        <button class="replay" data-replay><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Прайграць</button>
+        <div class="opt-note">Кола 34px з канона; літара ўнутры — першая літара стану (канон §5); пульс толькі ў available/playing.</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">Дыялог: зацямненне + з'яўленне</span><span class="b-yes">✅</span></div>
+        <div class="demo-stage modal-demo" data-demo>
+          <div class="m-dim a-dim"></div>
+          <div class="m-card a-mcard"><div class="t" data-en="Finish the walk?">Завяршыць прагулку?</div><div class="s" data-en="Session will be saved in My KUDY">Сесія захаваецца ў My KUDY</div><div class="m-cta" data-en="Finish">Завяршыць</div></div>
+        </div>
+        <button class="replay" data-replay><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Прайграць</button>
+        <div class="opt-note">Backdrop 35% з канона; картка — popIn 280 мс.</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">Шымер-скелетон</span><span class="b-mid">🟡</span></div>
+        <div class="demo-stage" data-demo>
+          <div class="a-fade a-line" style="display:flex;flex-direction:column;gap:8px;">
+            <div class="skel t"></div><div class="skel b"></div><div class="skel c"></div>
+          </div>
+        </div>
+        <button class="replay" data-replay><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Прайграць</button>
+        <div class="opt-note">Альтэрнатыва спінэру (issue #353): паказвае форму кантэнту, што чакаецца.</div>
+      </div>
+
+      <div class="opt">
+        <div class="opt-head"><span class="name">Адлік лічбаў</span><span class="b-mid">🟡</span></div>
+        <div class="demo-stage" data-demo>
+          <div class="a-fade a-line" style="text-align:center;">
+            <div style="font-size:34px;font-weight:600;"><span class="count" data-to="2">0</span><span style="color:var(--muted);font-size:18px;"> / 6</span></div>
+            <div class="s" style="color:var(--muted);font-size:13px;" data-en="stops completed">кропкі прайдзена</div>
+          </div>
+        </div>
+        <button class="replay" data-replay><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Прайграць</button>
+        <div class="opt-note">Гульнёвае пачуццё росту; трымаць рэдкім (ачыўкі, итог дня) — канон 06 §5 супраць «чэк-лісту».</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 6. фон -->
+  <section id="bg">
+    <h2><span class="num">6</span>Бэкграўнд — 6 варыянтаў</h2>
+    <div class="sec-sub">Аднолькавы мок на розных фонах; кантраст тэксту трымаецца ўсюды, акрамя ❌.</div>
+    <div class="grid g3">
+      <div class="opt">
+        <div class="opt-head"><span class="name">A · Чыстая папера</span><span class="b-now">⚪ сёння</span></div>
+        <div class="bg-panel bg-plain"><div class="mock ps-a mock-paper"><div class="mock-thumb"></div><div class="mock-name" data-en="Places nearby">Месцы побач</div><div class="mock-sub" data-en="coffee · restrooms · transport">кава · прыбіральні · транспарт</div></div></div>
+        <div class="opt-note">Базавы выпадак.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">B · Зярно 4–5%</span><span class="b-yes">✅</span></div>
+        <div class="bg-panel bg-grain"><div class="mock ps-b mock-paper"><div class="mock-thumb"></div><div class="mock-name" data-en="Places nearby">Месцы побач</div><div class="mock-sub" data-en="coffee · restrooms · transport">кава · прыбіральні · транспарт</div></div></div>
+        <div class="opt-note">Тонкі шум паверх #faf7f2: адчуваецца папера, 4.5:1 трымаецца.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">C · Цёплая шапка</span><span class="b-mid">🟡</span></div>
+        <div class="bg-panel bg-band"><div class="mock ps-b mock-paper"><div class="mock-thumb"></div><div class="mock-name" data-en="Places nearby">Месцы побач</div><div class="mock-sub" data-en="coffee · restrooms · transport">кава · прыбіральні · транспарт</div></div></div>
+        <div class="opt-note">Цёплая зацяжка зверху экрана растае ў паперу; тэкст ніжэй — на чыстым фоне.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">D · Кропкавы патэрн</span><span class="b-mid">🟡</span></div>
+        <div class="bg-panel bg-dots"><div class="mock ps-d mock-paper"><div class="mock-thumb"></div><div class="mock-name" data-en="Places nearby">Месцы побач</div><div class="mock-sub" data-en="coffee · restrooms · transport">кава · прыбіральні · транспарт</div></div></div>
+        <div class="opt-note">Рэтра-вышыўка; добра толькі на рэдкіх экранах, не пад спісамі.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">E · Скілайн горада</span><span class="b-mid">🟡</span></div>
+        <div class="bg-panel bg-sky"><div class="mock ps-b mock-paper"><div class="mock-thumb"></div><div class="mock-name" data-en="Places nearby">Месцы побач</div><div class="mock-sub" data-en="coffee · restrooms · transport">кава · прыбіральні · транспарт</div></div></div>
+        <div class="opt-note">Лінія дахаў 9% знізу экрана — атмасферна для Express; ніколі не пад карткамі.</div>
+      </div>
+      <div class="opt">
+        <div class="opt-head"><span class="name">F · Тэкстура + градыент</span><span class="b-no">❌</span></div>
+        <div class="bg-panel bg-heavy"><div class="mock ps-b mock-paper"><div class="mock-thumb"></div><div class="mock-name" data-en="Places nearby">Месцы побач</div><div class="mock-sub" data-en="coffee · restrooms · transport">кава · прыбіральні · транспарт</div></div></div>
+        <div class="opt-note">Для параўнання: подпісы чытаюцца цяжэй — гарды канона такое зловяць.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <h2 style="font-size:18px;">Рэкамендаваны пакет (прэсет B + акцэнты)</h2>
+    <div class="pack">
+      <span>Прэсет B «Гліна і папера»</span>
+      <span>Кнопкі B + E + F</span>
+      <span>Phosphor duotone</span>
+      <span>Onest + Caveat</span>
+      <span>Fade-up · stagger · spring · пульс</span>
+      <span>Зярно на паперы</span>
+    </div>
+    <div class="next">
+      Скажы «распілі» — нарэжу атамарныя таскі праз planner (кожнае змяненне ў канон пойдзе праз JSON-блок і гарды).
+      Альбо збяры свой набор па нумарах: напрыклад «прэсет C, кнопкі B+F, шрыфт Lora+Caveat».
+    </div>
+  </footer>
+
+</div>
+
+<script src="https://unpkg.com/lucide@0.544.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/feather-icons@4.29.2/dist/feather.min.js"></script>
+<script>
+  if (window.lucide) lucide.createIcons();
+  if (window.feather) feather.replace();
+
+  // пераключальнік БЕЛ/ENG: узоры кантэнту — дадатак мультымоўны (06 §1)
+  function setLang(lang) {
+    document.querySelectorAll('[data-en]').forEach(function (el) {
+      if (!el.dataset.by) el.dataset.by = el.textContent;
+      el.textContent = lang === 'en' ? el.dataset.en : el.dataset.by;
+    });
+    document.querySelectorAll('.lang-btn').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+  }
+  document.querySelectorAll('.lang-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () { setLang(btn.dataset.lang); });
+  });
+  if (location.hash === '#en') setLang('en');
+
+  // перазапуск дэма-анімацый: здымаем клас, прымусова ператок, вяртаем
+  function replay(stage) {
+    stage.classList.remove('run');
+    void stage.offsetWidth;
+    stage.classList.add('run');
+    var count = stage.querySelector('.count');
+    if (count) runCount(count);
+  }
+  // адлік лічбаў: 0 → data-to за 700 мс
+  function runCount(el) {
+    var to = parseInt(el.dataset.to, 10) || 0;
+    var t0 = null;
+    function step(t) {
+      if (t0 === null) t0 = t;
+      var k = Math.min((t - t0) / 700, 1);
+      el.textContent = Math.round(k * to);
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  document.querySelectorAll('[data-replay]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var stage = btn.parentElement.querySelector('[data-demo]');
+      if (stage) replay(stage);
+    });
+  });
+  // аўтапуск пры адкрыцці — каб «адкрыў і ўбачыў»
+  window.addEventListener('load', function () {
+    document.querySelectorAll('[data-demo]').forEach(function (stage, i) {
+      setTimeout(function () { replay(stage); }, 300 + i * 250);
+    });
+  });
+</script>
+</body>
+</html>
