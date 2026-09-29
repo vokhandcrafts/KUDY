@@ -13,7 +13,10 @@ link completes with a skip note and every refusal lands in the fence audit
 with its reason. The demo serves robots.txt and pages from a local
 127.0.0.1 fixture server (the only network), runs the real campaign loop
 through the production robots transport, and masks the random port the
-server got — everything else is the pipeline's own output:
+server got — everything else is the pipeline's own output. The net guard
+(G17.16) is stood down in the handlers below: the demo's subject is the
+robots gate, and the guard refuses the loopback fixture host by design
+(the guard's own demo is docs/demos/2026-09-29-g1716-netguard.md).
 
 ```sh
 node --input-type=module -e '
@@ -51,7 +54,7 @@ async function crawl(server, seeds) {
     sourcePath: file,
     contentHash: sha256Hex(fs.readFileSync(file, "utf8")),
     snapshotsRoot: dir + "/snapshots",
-    handlers: defaultHandlers({ fetchPage: httpFetchPage }),
+    handlers: defaultHandlers({ fetchPage: httpFetchPage, netGuard: async () => {} }),
   });
   return { run, db, dir };
 }

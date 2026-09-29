@@ -1,0 +1,9 @@
+city: gdansk
+seeds:
+  - http://127.0.0.1:36951/start
+topics: [history]
+fence:
+  depth: 3
+  extra_domains: []
+  delay_s: [0.01, 0.02]
+youtube: []

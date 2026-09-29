@@ -251,6 +251,40 @@ test('a discovered link to a non-http scheme inside the fence is refused at exec
   assert.equal(countRows(fx.db, 'raw_records'), 1, 'only the seed page is stored');
 });
 
+test('a redirect onto a non-public host in the fence is refused before the robots gate touches it', async () => {
+  const fx = campaignSetup(
+    campaignYaml({
+      seeds: 'seeds:\n  - https://news.example/start',
+      extra_domains: 'extra_domains: [10.9.9.9]',
+    })
+  );
+  let robotsLookups = 0;
+  const handlers = defaultHandlers({
+    // The browser already downloaded the redirect destination's bytes (its own
+    // traffic is uncovered) — but the collector's own robots.txt fetch for the
+    // destination host must not go out before the guard vetted the address.
+    fetchPage: async (url) => ({ html: articleHtml(), finalUrl: 'http://10.9.9.9/page' }),
+    fetchRobots: async () => {
+      robotsLookups += 1;
+      return null;
+    },
+    netGuard: createNetGuard({ resolve: publicResolve }),
+  });
+  const run = await runCampaign(fx.db, fx.campaign, {
+    sourcePath: fx.file,
+    contentHash: sha256Hex(fx.source),
+    snapshotsRoot: fx.snapshotsRoot,
+    handlers,
+  });
+  assert.equal(run.failed, 1);
+  // The step's diagnostic carries the step's own URL as the crawl prefix; the
+  // refusal names the redirect destination the guard vetted.
+  const seed = fx.db.prepare("SELECT error FROM run_log WHERE kind = 'seed'").get();
+  assert.match(seed.error, /crawl https:\/\/news\.example\/start: net guard: 10\.9\.9\.9 is a private \(RFC1918\) address — request not made/);
+  assert.equal(robotsLookups, 0, 'no robots.txt fetch reached the redirect host');
+  assert.equal(countRows(fx.db, 'raw_records'), 0, 'the redirected content is not snapshotted');
+});
+
 test('a file:// seed keeps the fixture boundary — the guard is never consulted', async () => {
   const dir = makeTempDir();
   const page = path.join(dir, 'seed-page.html');
