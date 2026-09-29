@@ -36,6 +36,7 @@ import {
   type RunSessionPorts,
   type RunSurfaceState,
 } from './run/runSurfaceController.ts';
+import type { RunControllerState } from './useRunController.ts';
 import { createMyKudyController, type MyKudyState, type SessionHistoryPort } from './myKudyController.ts';
 import type { ControllerStore } from './createControllerStore.ts';
 
@@ -86,9 +87,15 @@ export interface ServicePorts {
   readonly audio?: AudioService;
   // G07.02 — the live session's moment entry (the PreviewRunSessionPort
   // idiom): true iff the live session's engine accepted the moment launch.
-  // Absent in the app build until the run-screen wiring lands; a moment play
-  // over a session-owned player is then a named refusal.
-  readonly sessionMoment?: { readonly playMoment: (momentId: string, storyId: string) => boolean };
+  // G07.03 extends it with the routed manual stop and the live-pause resume
+  // of a session-owned launch (ADR G01.02 §3.4/§3.5). Optional: when absent
+  // the root resolves the one live surface itself — a provider value (the
+  // tests' port-shaped arrangement) overrides the root's resolver.
+  readonly sessionMoment?: {
+    readonly playMoment: (momentId: string, storyId: string, path?: string) => boolean;
+    readonly stopMoment?: () => boolean;
+    readonly resumeMoment?: () => boolean;
+  };
   // G07.02 — an optional deterministic counter for tests; the root mints its
   // own process-wide counter when absent (one counter per process, ADR
   // G01.02 §3.2).
@@ -202,16 +209,65 @@ export function createServices(ports: ServicePorts): Services {
   const catalogService = catalogLoader &&
     catalogSha256 &&
     createCatalogService({ loader: catalogLoader, sha256: catalogSha256 }, { localePreference });
+  // G06.04 — the run surface cache (NAV7): one surface controller per route
+  // for the whole app run, so «Прагулка» returns to the panel position and
+  // the inspected card the person left. The wrapper store below evicts a
+  // surface when its walk stops being the live one (its own End, or a
+  // confirmed switch to another guide) — a stale surface never renders and
+  // a repeat walk opens a fresh one (new session_id, clean sets). The cache
+  // is also G07.03's live-session source: the moment routing resolves the
+  // one live walk here (the one-live-session rule, ADR G01.03 §3.1).
+  const runSurfaces = new Map<string, ControllerStore<RunSurfaceState>>();
   // G07.02 — the process-wide moment counter (ADR G01.02 §3.2: ONE counter
   // over every moment launch) and the one moment play controller over the
   // one audio instance. Both live only with the audio port.
   let momentSeqCounter = 0;
   const rootNextMomentSeq = nextMomentSeq ?? (() => ++momentSeqCounter);
+  // G07.03 — the root's own session routing (ADR G01.02 §3.4/§3.8): the
+  // one-live-session rule (ADR G01.03 §3.1) means the cached surfaces hold
+  // at most one live walk, so the resolver finds it per call — no registry
+  // to keep in step with the engine, no second token mint. A moment token
+  // the idle controller did not mint belongs to this session's engine.
+  const liveSurfaceController = (): ControllerStore<RunControllerState> | null => {
+    for (const surfaceStore of runSurfaces.values()) {
+      const surface = surfaceStore.getState();
+      if (surface.status !== 'ready') continue;
+      const run = surface.controller.getState().run;
+      if (run.phase === 'Active' || run.phase === 'Paused') return surface.controller;
+    }
+    return null;
+  };
+  const rootSessionMoment = {
+    playMoment: (momentId: string, storyId: string, path?: string): boolean => {
+      const controller = liveSurfaceController();
+      return controller !== null && controller.getState().playMoment(momentId, storyId, path);
+    },
+    stopMoment: (): boolean => {
+      const controller = liveSurfaceController();
+      if (controller === null) return false;
+      const run = controller.getState().run;
+      if (run.phase !== 'Active' && run.phase !== 'Paused') return false;
+      const playing = run.playing;
+      if (playing === null || playing.owner !== 'moment' || playing.paused) return false;
+      controller.getState().stopAudio();
+      return true;
+    },
+    resumeMoment: (): boolean => {
+      const controller = liveSurfaceController();
+      if (controller === null) return false;
+      const run = controller.getState().run;
+      if (run.phase !== 'Active' && run.phase !== 'Paused') return false;
+      const playing = run.playing;
+      if (playing === null || playing.owner !== 'moment' || !playing.paused) return false;
+      controller.getState().resumeAudio({ kind: 'moment', ref: playing.momentId, seq: playing.seq });
+      return true;
+    },
+  };
   const momentPlay = audio
     ? createMomentPlayController({
         audio,
         nextSeq: rootNextMomentSeq,
-        sessionMoment,
+        sessionMoment: sessionMoment ?? rootSessionMoment,
         now: now ?? (() => Date.now()),
       })
     : undefined;
@@ -332,13 +388,9 @@ export function createServices(ports: ServicePorts): Services {
           },
         }
       : undefined;
-  // G06.04 — the run surface cache (NAV7): one surface controller per route
-  // for the whole app run, so «Прагулка» returns to the panel position and
-  // the inspected card the person left. The wrapper store below evicts a
-  // surface when its walk stops being the live one (its own End, or a
-  // confirmed switch to another guide) — a stale surface never renders and
-  // a repeat walk opens a fresh one (new session_id, clean sets).
-  const runSurfaces = new Map<string, ControllerStore<RunSurfaceState>>();
+  // G06.04 — the run surface cache (NAV7) is declared above, beside the
+  // moment routing it also serves; the wrapper store below is its only
+  // eviction writer.
   const findCachedSurface = (sessionId: string): string | null => {
     for (const [routeId, store] of runSurfaces) {
       const surface = store.getState();

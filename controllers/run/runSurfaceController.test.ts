@@ -42,6 +42,7 @@ import {
 } from '../../services/db/db.ts';
 import { nodeSqliteDriver } from '../../services/db/test-fixture.ts';
 import { memoryBundles } from '../../test/memory-bundles.ts';
+import { readMomentFacts } from '../../services/contentRepo/momentFacts.ts';
 import type { SqlDriver } from '../../services/db/types.ts';
 
 // The synthetic pinned package: route-map@1, be, paid. Four stops — stop-1
@@ -248,7 +249,16 @@ function mapWorld(files: Record<string, string> = DEFAULT_FILES): World {
     })(),
     grantedTiers: () => granted,
   };
-  const services = createServices({ bundlesStore: memoryBundles(owned), run: { session } });
+  // G07.03 — the ONE audio instance the root owns (ADR G01.02 §3: the same
+  // instance the run sessions hold) and the manual clock the moment
+  // controller's FocusRegain threshold reads; without them the root
+  // constructs no moment controller and the place card has no Play.
+  const services = createServices({
+    bundlesStore: memoryBundles(owned),
+    run: { session },
+    audio: session.audio,
+    now: () => clock.now(),
+  });
   return { services, locationPort, audioPort, clock, driver, granted, files: owned, wakelockCalls, session };
 }
 
@@ -582,4 +592,285 @@ test('G06.04: a refused surface is evicted — the next open re-resolves', async
   assert.equal(reopened.state.status, 'ready');
   const run = reopened.state.controller.getState().run;
   assert.ok(run.phase !== 'Idle'); // the walk started on the re-open
+});
+
+// --- G07.03 (issue #283): Moments during an active Run -----------------------
+//
+// The place card's explicit Play Moment over a live walk routes through the
+// root's session resolver into the live surface's engine — the session and
+// its progress survive, one player, one GPS owner (ADR G01.02 §3.4–§3.8, 11
+// C38–C45). The world passes the ONE audio instance to the root — the shape
+// the device build wires once the G05.03.b adapter lands.
+
+// The place-9 teaser in the pinned package: the manifest sits at the package
+// root (09 §3, G03.04 — optional per package), the audio resolves in the
+// base layer with the same idiom the engine's PlayStory path uses.
+const MOMENT_AUDIO_PATH = `${LAYER}/audio/story-m9.m4a`;
+const MOMENT_FILES: Record<string, string> = {
+  'bundles/route-map/1/moments.json': JSON.stringify([
+    { id: 'moment-9', place_id: 'place-9', story_id: 'story-m9', kind: 'teaser', cooldown_min: 0 },
+  ]),
+  [MOMENT_AUDIO_PATH]: 'm4a',
+  [`${LAYER}/stops.json`]: JSON.stringify([
+    {
+      story_id: 'story-m9',
+      place_id: 'place-9',
+      voice_id: 'voice-1',
+      tier: 'base',
+      duration_s: 30,
+      text: 'Тэйзер порта',
+      sources: ['с'],
+    },
+  ]),
+};
+
+// The live-walk arrangement the moment scenarios share: the walk started,
+// the stop-1 guide launch sounding (the manual pick — deterministic, no
+// dwell), the place-9 teaser fact resolved by the production reader.
+async function momentWorld(): Promise<{
+  world: World;
+  surface: ControllerStore<RunSurfaceState>;
+  controller: ControllerStore<RunControllerState>;
+  teaser: { momentId: string; storyId: string; audioPath: string };
+}> {
+  const world = mapWorld({ ...DEFAULT_FILES, ...MOMENT_FILES });
+  const opened = await openSurface(world);
+  if (opened.state.status !== 'ready') throw new Error('the walk surface never opened');
+  const controller = opened.state.controller;
+  controller.getState().selectStop('stop-1');
+  // The physical fact of the sounding guide launch (the fake's scripted
+  // snapshot — the port's documented test contract).
+  world.audioPort.snapshotValue = { state: 'playing', positionMs: 0, durationMs: 60_000 };
+  const facts = await readMomentFacts(memoryBundles(world.files), { locales: ['be', 'en'] });
+  if (!facts.ok || facts.moments.length !== 1) throw new Error('the fixture offered no teaser');
+  const teaser = facts.moments[0];
+  if (teaser.audioPath === null) throw new Error('the fixture teaser has no audio path');
+  return {
+    world,
+    surface: opened.store,
+    controller,
+    teaser: { momentId: teaser.momentId, storyId: teaser.storyId, audioPath: teaser.audioPath },
+  };
+}
+
+const momentBinding = (world: World): NonNullable<ReturnType<typeof createServices>['moment']> => {
+  const binding = world.services.moment;
+  if (!binding) throw new Error('the root constructed no moment controller');
+  return binding;
+};
+
+// The moment-launching scenarios' shared arrangement: the place card's
+// explicit Play Moment routed through the root resolver — the production
+// path. The caller owns the physical facts and the assertions that follow.
+async function routedMomentWorld(): Promise<{
+  world: World;
+  surface: ControllerStore<RunSurfaceState>;
+  controller: ControllerStore<RunControllerState>;
+}> {
+  const ctx = await momentWorld();
+  assert.deepEqual(
+    momentBinding(ctx.world).play({ momentId: ctx.teaser.momentId, storyId: ctx.teaser.storyId, path: ctx.teaser.audioPath }),
+    { outcome: 'routed' },
+  );
+  return ctx;
+}
+
+test('G07.03 PROOF (AC1): a Play Moment mid-Run keeps the session and its progress; the teaser sounds with its real path', async () => {
+  const { world, controller, teaser } = await momentWorld();
+  const before = controller.getState().run;
+  assert.ok(before.phase === 'Active');
+  assert.deepEqual(before.playing, {
+    owner: 'guide',
+    stopId: 'stop-1',
+    storyId: 'story-1',
+    playId: 1,
+    paused: false,
+  });
+
+  // The place card's explicit Play: routed through the root's resolver into
+  // the live engine — one transition, the resolved teaser path carried.
+  const outcome = momentBinding(world).play({
+    momentId: teaser.momentId,
+    storyId: teaser.storyId,
+    path: teaser.audioPath,
+  });
+  assert.deepEqual(outcome, { outcome: 'routed' });
+
+  // ONE player: the guide stopped by command, the moment launched with the
+  // resolved teaser path. The revert guards: dropping the root resolver
+  // replays this play as `moment#session-unroutable`; dropping the path
+  // carry replays it as the empty `play 2:`.
+  assert.deepEqual(world.audioPort.commands, [
+    'play 1:be/base/audio/story-1.m4a',
+    'stop',
+    `play 2:${MOMENT_AUDIO_PATH}`,
+  ]);
+  assert.deepEqual(world.audioPort.violations, []);
+
+  // The engine mirror: the moment variant; the interrupted guide story is
+  // NOT heard (a command stop is never finished, §3.4); the automation is
+  // suspended until «Працягнуць гід»; the session row is the same one.
+  const after = controller.getState().run;
+  assert.ok(after.phase === 'Active');
+  assert.equal(after.sessionId, before.sessionId);
+  assert.deepEqual(after.playing, {
+    owner: 'moment',
+    momentId: 'moment-9',
+    storyId: 'story-m9',
+    seq: 1,
+    paused: false,
+  });
+  assert.deepEqual(after.heard, before.heard);
+  assert.deepEqual(after.autoFired, before.autoFired);
+  assert.equal(after.autoplaySuspended, true);
+  assert.equal(after.queued, null);
+});
+
+test('G07.03 (AC2): a dwell during the moment sounds nothing — no second audio owner, no GPS touch', async () => {
+  const { world, controller, teaser } = await momentWorld();
+  // The moment routing touches no GPS owner: the resolver holds no location
+  // port and dispatches no location mode or window change (the walk's own
+  // region churn on later fixes is the walk's, not the moment's).
+  const locationCommandsBefore = world.locationPort.commands.length;
+  assert.deepEqual(
+    momentBinding(world).play({ momentId: teaser.momentId, storyId: teaser.storyId, path: teaser.audioPath }),
+    { outcome: 'routed' },
+  );
+  assert.equal(world.locationPort.commands.length, locationCommandsBefore);
+
+  // A fresh fix into stop-4's zone completes its dwell: the automation is
+  // suspended and the player occupied — the attempt is over, no sound.
+  fixAt(world, 54.35, 18.6475, 20_000);
+  assert.deepEqual(world.audioPort.commands, [
+    'play 1:be/base/audio/story-1.m4a',
+    'stop',
+    `play 2:${MOMENT_AUDIO_PATH}`,
+  ]);
+  assert.deepEqual(world.audioPort.violations, []);
+  const run = controller.getState().run;
+  assert.ok(run.phase === 'Active');
+  assert.ok(run.playing !== null && run.playing.owner === 'moment');
+  assert.deepEqual(run.autoFired, ['stop-4']); // the attempt retired, manual access remains
+});
+
+test('G07.03 (AC3): the moment ends — automation stays suspended, «Працягнуць гід» is the only way back', async () => {
+  const { world, controller } = await routedMomentWorld();
+  const commandsAfterPlay = world.audioPort.commands.length;
+
+  // The teaser's physical end: the player frees, nothing sounds by itself,
+  // the teaser never enters heard, the suspension holds.
+  world.audioPort.finish(2);
+  let run = controller.getState().run;
+  assert.ok(run.phase === 'Active');
+  assert.equal(run.playing, null);
+  assert.deepEqual(run.heard, []);
+  assert.equal(run.autoplaySuspended, true);
+  assert.deepEqual(world.audioPort.commands.slice(commandsAfterPlay), []);
+
+  // A dwell after the moment: still suspended — the attempt is over (the
+  // displaced stop keeps manual access), no sound.
+  fixAt(world, 54.3535, 18.651, 20_000);
+  assert.deepEqual(world.audioPort.commands.slice(commandsAfterPlay), []);
+
+  // «Працягнуць гід» sounds nothing by itself; the suspension lifts and the
+  // next trigger runs the general conditions: stop-4's zone entry plays.
+  controller.getState().guideResume();
+  const afterResume = controller.getState().run;
+  assert.ok(afterResume.phase === 'Active');
+  assert.equal(afterResume.autoplaySuspended, false);
+  assert.deepEqual(world.audioPort.commands.slice(commandsAfterPlay), []);
+  fixAt(world, 54.35, 18.6475, 200_000); // 180 s from stop-2 — under the 12 km/h spike gate
+  assert.deepEqual(world.audioPort.commands.slice(commandsAfterPlay), [
+    'play 3:be/base/audio/story-4.m4a',
+  ]);
+  run = controller.getState().run;
+  assert.ok(run.phase === 'Active');
+  assert.ok(run.playing !== null && run.playing.owner === 'guide');
+  assert.deepEqual(run.heard, []); // stop-4's story sounds, not yet finished
+});
+
+test('G07.03 (AC4): the re-entered Run shows the own audio state — no auto-Start, no auto-resume', async () => {
+  const { world, surface, controller } = await routedMomentWorld();
+  // The physical interruption (a call): the moment becomes a live pause.
+  world.audioPort.focusLoss();
+  world.audioPort.snapshotValue = { state: 'paused', positionMs: 4_000, durationMs: 60_000 };
+  const before = controller.getState().run;
+  assert.ok(before.phase === 'Active');
+  const commandsAtPause = world.audioPort.commands.length;
+
+  // The re-entry through «Прагулка»: the NAV7 cache serves the same store —
+  // the engine's audio state is the one left behind, nothing starts itself.
+  const reopened = world.services.run?.create('route-map');
+  assert.ok(reopened !== undefined);
+  assert.equal(reopened, surface);
+  const run = controller.getState().run;
+  assert.ok(run.phase === 'Active');
+  assert.equal(run.sessionId, before.sessionId);
+  assert.deepEqual(run.playing, {
+    owner: 'moment',
+    momentId: 'moment-9',
+    storyId: 'story-m9',
+    seq: 1,
+    paused: true,
+  });
+  assert.equal(world.audioPort.commands.length, commandsAtPause);
+
+  // The panel's resume is the person's tap — the same token continues, the
+  // session flag stays (only «Працягнуць гід» lifts it after Play Moment).
+  controller.getState().resumeAudio({ kind: 'moment', ref: 'moment-9', seq: 1 });
+  assert.deepEqual(world.audioPort.commands.slice(commandsAtPause), ['resume']);
+  const resumed = controller.getState().run;
+  assert.ok(resumed.phase !== 'Idle');
+  assert.ok(resumed.playing !== null && resumed.playing.owner === 'moment' && !resumed.playing.paused);
+  assert.equal(resumed.autoplaySuspended, true);
+});
+
+test('G07.03: the place-card Stop on a session-owned moment routes to the engine (§3.4)', async () => {
+  const { world, controller } = await routedMomentWorld();
+  // The card's live fact: the physical player reports the moment launch the
+  // idle controller did not mint (its store stays idle).
+  const playback = momentBinding(world).playback();
+  assert.ok(playback.kind === 'playing' || playback.kind === 'paused');
+  assert.deepEqual(playback.token, { kind: 'moment', ref: 'moment-9', seq: 1 });
+  assert.deepEqual(momentBinding(world).store.getState(), { kind: 'idle' });
+  const commandsAtPlay = world.audioPort.commands.length;
+
+  // The revert guard: without the stop routing this tap is a silent no-op
+  // and the launch keeps sounding past its Stop button.
+  momentBinding(world).stop();
+  assert.deepEqual(world.audioPort.commands.slice(commandsAtPlay), ['stop']);
+  const run = controller.getState().run;
+  assert.ok(run.phase === 'Active');
+  assert.equal(run.playing, null);
+  assert.equal(run.autoplaySuspended, true);
+  assert.deepEqual(run.heard, []);
+});
+
+test('G07.03: the place-card Resume on a session-owned paused moment routes to the engine (§3.5)', async () => {
+  const { world, controller } = await routedMomentWorld();
+  world.audioPort.focusLoss();
+  world.audioPort.snapshotValue = { state: 'paused', positionMs: 4_000, durationMs: 60_000 };
+  const commandsAtPause = world.audioPort.commands.length;
+
+  // The revert guard: without the resume routing this tap is a silent no-op.
+  momentBinding(world).resume();
+  assert.deepEqual(world.audioPort.commands.slice(commandsAtPause), ['resume']);
+  const run = controller.getState().run;
+  assert.ok(run.phase !== 'Idle');
+  assert.ok(run.playing !== null && run.playing.owner === 'moment' && !run.playing.paused);
+  assert.equal(run.autoplaySuspended, true); // the moment resume never lifts the session flag
+});
+
+test('G07.03: the no-session Moment over the same root still launches on the idle controller', async () => {
+  const world = mapWorld({ ...DEFAULT_FILES, ...MOMENT_FILES });
+  // No surface open — no live session, the resolver has no target and the
+  // idle controller owns the launch (ADR G01.02 §3.8).
+  const outcome = momentBinding(world).play({
+    momentId: 'moment-9',
+    storyId: 'story-m9',
+    path: MOMENT_AUDIO_PATH,
+  });
+  assert.deepEqual(outcome, { outcome: 'started' });
+  assert.deepEqual(world.audioPort.commands, [`play 1:${MOMENT_AUDIO_PATH}`]);
+  assert.deepEqual(world.audioPort.violations, []);
 });

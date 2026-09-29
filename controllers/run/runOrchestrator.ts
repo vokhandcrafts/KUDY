@@ -130,6 +130,10 @@ export class RunOrchestrator {
   private engineState: RunState = initialRunState;
   private pipelineState: PipelineState = initialPipelineState;
   private ownMomentSeq = 0;
+  // G07.03 — the one-shot carry of playMoment's resolved teaser path to the
+  // effect that fires inside the same synchronous dispatch (the engine's
+  // command carries no path — content resolution is not the engine's read).
+  private pendingMomentPath: { seq: number; path: string } | null = null;
 
   constructor(deps: RunOrchestratorDeps) {
     this.location = deps.location;
@@ -312,13 +316,30 @@ export class RunOrchestrator {
     this.dispatch({ type: 'GuideResume' });
   }
 
-  playMoment(momentId: string, storyId: string): void {
+  // G07.03: the live session's moment entry (the sessionMoment port). The
+  // caller that resolved the teaser fact carries its store-relative path —
+  // without it the launch goes out with the empty path of the G05.03.a
+  // boundary, so a real adapter fails it (story_play_failed suspends
+  // automation) — the safe failure, never a silently successful fake. The
+  // boolean is the port's acceptance fact: true iff the engine took the
+  // player for exactly this minted launch (ADR G01.02 §3.4).
+  playMoment(momentId: string, storyId: string, path?: string): boolean {
+    const seq = this.nextMomentSeq();
+    this.pendingMomentPath = path === undefined ? null : { seq, path };
     this.dispatch({
       type: 'PlayMoment',
       momentId,
       storyId,
-      token: { kind: 'moment', ref: momentId, seq: this.nextMomentSeq() },
+      token: { kind: 'moment', ref: momentId, seq },
     });
+    this.pendingMomentPath = null;
+    const state = this.engineState;
+    return (
+      (state.phase === 'Active' || state.phase === 'Paused') &&
+      state.playing !== null &&
+      state.playing.owner === 'moment' &&
+      state.playing.seq === seq
+    );
   }
 
   // The physical channel: raw fixes run the pipeline; only accepted events
@@ -388,13 +409,19 @@ export class RunOrchestrator {
         case 'PlayStory':
           void this.audio.play({ token: command.token, path: command.path });
           break;
-        case 'PlayMoment':
-          // The moment path is a content-resolution concern (G05.05): until a
-          // resolver is injected the launch goes out with an empty path, so a
-          // real adapter fails it (story_play_failed suspends automation) —
-          // the safe failure, never a silently successful fake.
-          void this.audio.play({ token: command.token, path: command.path ?? '' });
+        case 'PlayMoment': {
+          // The moment path is a content-resolution concern (G05.05): the
+          // caller that resolved the teaser fact carries it through the
+          // session routing (G07.03). Without a resolved path the launch
+          // goes out with the empty path, so a real adapter fails it
+          // (story_play_failed suspends automation) — the safe failure,
+          // never a silently successful fake.
+          const pending = this.pendingMomentPath;
+          const carried =
+            pending !== null && pending.seq === command.token.seq ? pending.path : '';
+          void this.audio.play({ token: command.token, path: command.path ?? carried });
           break;
+        }
         case 'StopAudio':
           this.audio.stop();
           break;
