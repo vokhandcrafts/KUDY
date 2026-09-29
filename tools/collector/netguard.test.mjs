@@ -258,14 +258,14 @@ test('a redirect onto a non-public host in the fence is refused before the robot
       extra_domains: 'extra_domains: [10.9.9.9]',
     })
   );
-  let robotsLookups = 0;
+  let robotsHosts = [];
   const handlers = defaultHandlers({
     // The browser already downloaded the redirect destination's bytes (its own
     // traffic is uncovered) — but the collector's own robots.txt fetch for the
     // destination host must not go out before the guard vetted the address.
     fetchPage: async (url) => ({ html: articleHtml(), finalUrl: 'http://10.9.9.9/page' }),
-    fetchRobots: async () => {
-      robotsLookups += 1;
+    fetchRobots: async (robotsUrl) => {
+      robotsHosts.push(new URL(robotsUrl).hostname);
       return null;
     },
     netGuard: createNetGuard({ resolve: publicResolve }),
@@ -281,7 +281,9 @@ test('a redirect onto a non-public host in the fence is refused before the robot
   // refusal names the redirect destination the guard vetted.
   const seed = fx.db.prepare("SELECT error FROM run_log WHERE kind = 'seed'").get();
   assert.match(seed.error, /crawl https:\/\/news\.example\/start: net guard: 10\.9\.9\.9 is a private \(RFC1918\) address — request not made/);
-  assert.equal(robotsLookups, 0, 'no robots.txt fetch reached the redirect host');
+  // The seed host's own robots lookup is the gate working; the redirect host
+  // is never consulted — the guard refused it before the gate ran.
+  assert.deepEqual(robotsHosts, ['news.example'], 'no robots.txt fetch reached the redirect host');
   assert.equal(countRows(fx.db, 'raw_records'), 0, 'the redirected content is not snapshotted');
 });
 
