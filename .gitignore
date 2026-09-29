@@ -30,3 +30,4 @@ tools/collector/runtime/
 # created and removed inside the demo block (implementation-rules 5: a source
 # mirror ships with its ignore entry in the same change)
 .tmp-g0505a-proof/
+kudy-demo-374-*

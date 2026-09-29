@@ -23,7 +23,10 @@ async function loadPlaywright() {
 // Returns { fetchPage, close }. fetchPage(url) resolves { html, finalUrl } —
 // finalUrl is the post-redirect URL, which the crawler re-checks against the
 // fence; fetch failures (navigation error, HTTP ≥ 400) reject with a named
-// diagnostic and count toward the crawl error series.
+// diagnostic and count toward the crawl error series. The network-path guard
+// (netguard.mjs) runs at address selection, before a URL is handed here; the
+// browser resolves and connects itself, so a DNS rebinding between that
+// lookup and the page's own connection stays uncovered (out of scope, G17.16).
 export async function createBrowserFetchPage({ userDataDir = null } = {}) {
   const playwright = await loadPlaywright();
   const executable = playwright.chromium.executablePath();

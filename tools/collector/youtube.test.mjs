@@ -56,7 +56,9 @@ async function youtubeSetup(playlist, { ids = Object.keys(playlist), command = n
   const stubCommand = command ?? writeYtDlpStub(dir, withThumbnail);
   const snapshotsRoot = path.join(dir, 'snapshots');
   const handlers = defaultHandlers({
-    youtubeFetch: createYoutubeFetch({ command: stubCommand }),
+    // The cover URL is the local fixture server (127.0.0.1) — stood down here;
+    // the net-guard suites run it for real.
+    youtubeFetch: createYoutubeFetch({ command: stubCommand, netGuard: async () => {} }),
   });
   return {
     server,
@@ -313,4 +315,20 @@ test('asr-backlog writer appends one JSONL line per deferred video', () => {
   const lines = fs.readFileSync(file, 'utf8').trimEnd().split('\n');
   assert.equal(lines.length, 2);
   assert.deepEqual(Object.keys(JSON.parse(lines[0])), ['video_id', 'url', 'reason', 'collected_at']);
+});
+
+test('a cover URL on a non-public address is refused by the net guard before the fetch (G17.16)', async () => {
+  // The default net guard runs inside createYoutubeFetch; 127.0.0.1 is an IP
+  // literal, so the refusal is deterministic and loadThumbnail — the real
+  // fetch — is never reached. The stub command answers phase 1 only.
+  const dir = makeTempDir();
+  const fetchYoutube = createYoutubeFetch({
+    command: writeYtDlpStub(dir, {
+      dQw4w9WgXcQ: { info: youtubeInfo({ thumbnail: 'http://127.0.0.1:9/cover.jpg' }), vtt: { en: MANUAL_VTT } },
+    }),
+  });
+  await assert.rejects(
+    () => fetchYoutube({ videoId: 'dQw4w9WgXcQ', stagingDir: path.join(dir, 'staging') }),
+    /thumbnail http:\/\/127\.0\.0\.1:9\/cover\.jpg: net guard: 127\.0\.0\.1 is a loopback address — request not made/
+  );
 });

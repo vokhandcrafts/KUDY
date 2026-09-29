@@ -40,6 +40,7 @@ import { defaultSnapshotsRoot, processFetchedPage } from './snapshot.mjs';
 import { CrawlStopError, createCrawler, parseCrawlDetail } from './crawler.mjs';
 import { RobotsBlockedError } from './robots.mjs';
 import { createBrowserFetchPage } from './netfetch.mjs';
+import { createNetGuard } from './netguard.mjs';
 import { createBacklogWriter, createYoutubeFetch, processYoutubeStep } from './youtube.mjs';
 import {
   WIKI_RIGHTS,
@@ -64,6 +65,8 @@ function defaultLoadPage(url) {
 // scheme answers null (the image step turns that into a failed-step
 // diagnostic). Returns bytes, not text. Network image transport stays out of
 // G17.02's scope — live crawls mark image steps failed with this diagnostic.
+// When that transport lands, it must call the net guard (netguard.mjs) before
+// fetching, like every other collector network path.
 function defaultLoadImage(url) {
   if (new URL(url).protocol !== 'file:') return null;
   return fs.readFileSync(fileURLToPath(url));
@@ -91,6 +94,7 @@ export function defaultHandlers({
   fetchRobots,
   youtubeFetch = createYoutubeFetch(),
   loadApi = defaultLoadApi,
+  netGuard = createNetGuard(),
 } = {}) {
   // One crawler per handlers instance — one campaign per runCampaign call, so
   // the politeness gate, the robots.txt cache and the error-series counter
@@ -104,6 +108,7 @@ export function defaultHandlers({
     crawler = createCrawler({
       auditPath: path.join(ctx.snapshotsRoot, ctx.campaignId.slice(0, 12), 'fence-audit.jsonl'),
       delayRange: ctx.campaign.fence.delay_s,
+      netGuard,
       fetchRobots,
       fetchPage:
         fetchPage ??
@@ -177,6 +182,9 @@ export function defaultHandlers({
       const requestUrl = parseRequestUrl(order.api, step.ref);
       let payload;
       try {
+        // The api endpoint is a campaign-configured address — guarded like a
+        // seed before the transport touches it.
+        await netGuard(requestUrl);
         payload = await ctx.loadApi(requestUrl);
       } catch (error) {
         throw new Error(`wiki-article '${step.ref}': ${requestUrl}: ${error.message}`);
@@ -220,6 +228,7 @@ export function defaultHandlers({
       const requestUrl = categoryMembersRequestUrl(order.api, step.ref);
       let payload;
       try {
+        await netGuard(requestUrl);
         payload = await ctx.loadApi(requestUrl);
       } catch (error) {
         throw new Error(`wiki-category '${step.ref}': ${requestUrl}: ${error.message}`);

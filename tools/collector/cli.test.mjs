@@ -1,20 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ERROR_SERIES_LIMIT } from './crawler.mjs';
 import {
   articleHtml,
-  articlePage,
   campaignYaml,
   collectAndClean,
   makeTempDir,
   rawRecord,
   seedCampaign,
-  skipWithoutBrowser,
-  startFixtureServer,
   writeCampaignFile,
 } from './testkit.mjs';
 import { getRawRecord, openStore, upsertRawRecord } from './store.mjs';
@@ -23,28 +20,6 @@ const cliPath = fileURLToPath(new URL('./collector.mjs', import.meta.url));
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], { encoding: 'utf8' });
-}
-
-// Async CLI run for tests that keep a live fixture server in this process:
-// spawnSync would block this event loop and the server could never answer the
-// browser's requests from the CLI's child process. Chunks are collected as
-// buffers and decoded once at close — `encoding` is a spawnSync-only option,
-// and per-chunk decoding would split a multibyte character at a chunk boundary.
-function runCliAsync(args) {
-  return new Promise((resolve) => {
-    const child = spawn(process.execPath, [cliPath, ...args]);
-    const stdout = [];
-    const stderr = [];
-    child.stdout.on('data', (chunk) => { stdout.push(chunk); });
-    child.stderr.on('data', (chunk) => { stderr.push(chunk); });
-    child.on('close', (status) =>
-      resolve({
-        status,
-        stdout: Buffer.concat(stdout).toString('utf8'),
-        stderr: Buffer.concat(stderr).toString('utf8'),
-      })
-    );
-  });
 }
 
 test('init creates the schema and reports the database path', () => {
@@ -177,59 +152,30 @@ test('a rejected run converts to the exit-2 diagnostic path (the main().catch gu
   }
 });
 
-// Shared arrangement for the CLI crawl-run tests: a fixture server with a
-// one-seed campaign on it, the run going through the real CLI while the
-// server answers from this process (runCliAsync keeps the event loop free).
-async function cliCrawlSetup(routes, { overrides = {} } = {}) {
-  const server = await startFixtureServer(routes);
+test('run on an error series prints the stopped diagnostic on stderr and still exits 0', () => {
+  // The net guard (G17.16) refuses loopback seeds before any request — here
+  // the series is driven by those refusals through the unmodified production
+  // path. Three consecutive failures stop the run inside runCampaign while the
+  // fourth seed stays queued (pending, not drained).
   const dir = makeTempDir();
+  const seeds = ['http://127.0.0.1/a', 'http://127.0.0.1/b', 'http://127.0.0.1/c', 'http://127.0.0.1/d'];
   const file = writeCampaignFile(
     dir,
-    campaignYaml({ seeds: `seeds:\n  - ${server.url('/start')}`, delay_s: 'delay_s: [0.05, 0.1]', ...overrides })
+    campaignYaml({
+      seeds: `seeds:\n${seeds.map((url) => `  - ${url}`).join('\n')}`,
+      delay_s: 'delay_s: [0.05, 0.1]',
+    })
   );
-  return { server, run: () => runCliAsync(['run', '--campaign', file, '--db', path.join(dir, 'db.sqlite')]) };
-}
-
-test('run on an error series prints the stopped diagnostic on stderr and still exits 0', async (t) => {
-  if (!(await skipWithoutBrowser(t))) return;
-  const fx = await cliCrawlSetup({
-    // Seed and /d exist; /a, /b, /c are absent → three consecutive 404s stop
-    // the run inside runCampaign while /d stays queued (pending, not drained).
-    '/start': articlePage('Start', [['/a', 'first'], ['/b', 'second'], ['/c', 'third'], ['/d', 'fourth']]),
-    '/d': articlePage('Fourth', []),
-  });
-  t.after(() => fx.server.close());
-
-  const result = await fx.run();
+  const result = runCli(['run', '--campaign', file, '--db', path.join(dir, 'db.sqlite')]);
   assert.equal(result.status, 0, result.stderr);
   assert.match(
     result.stderr,
     new RegExp(
       `collector: run stopped — error series: ${ERROR_SERIES_LIMIT} consecutive crawl failures, ` +
-        `last at ${fx.server.url('/c')} \\(HTTP 404\\)`
+        `last at http://127\\.0\\.0\\.1/c \\(net guard: 127\\.0\\.0\\.1 is a loopback address — request not made\\)`
     )
   );
-  assert.match(result.stdout, /steps done 1, failed 3, running 0, pending 1/);
-});
-
-test('run whose every seed is robots-refused prints the stop diagnostic on stderr and exits 0', async (t) => {
-  // The robots refusal precedes the page fetch, so this run never launches
-  // the browser — no skipWithoutBrowser guard here (must-flag
-  // missing-cli-stop-test: the stderr stop line needs its own CLI-level case).
-  const fx = await cliCrawlSetup({
-    '/robots.txt': 'User-agent: *\nDisallow: /',
-    '/start': articlePage('Start', []),
-  });
-  t.after(() => fx.server.close());
-
-  const result = await fx.run();
-  assert.equal(result.status, 0, result.stderr);
-  assert.match(
-    result.stderr,
-    /collector: run stopped — all 1 http\(s\) seed\(s\) refused by robots\.txt — run stopped, nothing collected/
-  );
-  assert.match(result.stdout, /steps done 0, failed 1, running 0, pending 0/);
-  assert.deepEqual(fx.server.requests.map((r) => r.path), ['/robots.txt'], 'no page fetch reached the host');
+  assert.match(result.stdout, /steps done 0, failed 3, running 0, pending 1/);
 });
 
 test('unknown command and missing --campaign answer with usage, exit 2', () => {

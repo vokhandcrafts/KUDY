@@ -234,7 +234,11 @@ export async function crawlSetup(routes, { overrides = {}, fetchPage = httpFetch
     })
   );
   const snapshotsRoot = path.join(dir, 'snapshots');
-  const handlers = defaultHandlers({ fetchPage, fetchRobots });
+  // The fixture server lives on 127.0.0.1 — a loopback host the production
+  // net guard refuses by design (netguard.test.mjs). Suites that stand the
+  // guard down run the crawl pipeline against the fixture host; the guard's
+  // own suites run it for real.
+  const handlers = defaultHandlers({ fetchPage, fetchRobots, netGuard: async () => {} });
   // The campaign row is created eagerly (runCampaign's own ensureCampaign is
   // idempotent), so tests can queue extra steps before the first run.
   const { campaignId } = ensureCampaign(db, {

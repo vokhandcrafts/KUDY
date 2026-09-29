@@ -76,7 +76,7 @@ export function parseCrawlDetail(step) {
   return detail;
 }
 
-export function createCrawler({ fetchPage, auditPath, delayRange, fetchRobots }) {
+export function createCrawler({ fetchPage, auditPath, delayRange, netGuard, fetchRobots }) {
   const audit = createAuditWriter(auditPath);
   const gate = createPoliteness(delayRange);
   // One robots gate per crawler — one campaign per run, so the robots.txt
@@ -140,6 +140,13 @@ export function createCrawler({ fetchPage, auditPath, delayRange, fetchRobots })
       throw new Error(`depth ${depth} exceeds the fence depth ${campaign.fence.depth}`);
     }
 
+    // The network-path guard (G17.16): the fence compares hostnames, the guard
+    // checks the address behind them — scheme and every resolved IP. Refusal
+    // is a step failure like any fetch failure (the error series counts it);
+    // it gets no fence-audit line — the audit records fence decisions, the
+    // run_log diagnostic is the refusal's record.
+    await netGuard(url);
+
     // A URL already in the library (the seed page linked back from an article)
     // is skipped without refetching — the snapshot writer's UNIQUE(campaign_id,
     // url) would turn the fetch into 'duplicate-url' file work anyway.
@@ -184,7 +191,12 @@ export function createCrawler({ fetchPage, auditPath, delayRange, fetchRobots })
     // The same re-check for the robots gate: a redirect from an allowed path
     // onto a disallowed one of the same host must discard the downloaded
     // bytes, not snapshot them — «не запытвае шляхі, забароненыя паўзуку»
-    // holds for the redirect's destination too.
+    // holds for the redirect's destination too. The net guard vets the
+    // destination first: robots(finalUrl) fetches that host's robots.txt — a
+    // request like any other, so a redirect onto a non-public host fails the
+    // step before the gate touches the host. (The browser's own subresource
+    // traffic behind a redirect stays uncovered — see the netfetch comment.)
+    await netGuard(finalUrl);
     const redirectVerdict = await robots(finalUrl);
     if (!redirectVerdict.allowed) {
       audit({ url: finalUrl, decision: 'robots-denied', fetched: true, reason: redirectVerdict.reason });
