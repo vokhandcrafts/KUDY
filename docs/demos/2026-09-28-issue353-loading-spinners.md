@@ -18,16 +18,16 @@ for f in "app/route/[id].tsx" app/map.tsx "app/(tabs)/my.tsx" "app/run/[id].tsx"
 ```
 
 ```output
-app/route/[id].tsx:19:import { LoadingIndicator } from "../../components/loading-indicator";
-app/route/[id].tsx:175:        {state.surface.kind === "loading" ? <LoadingIndicator text="Загрузка…" /> : null}
+app/route/[id].tsx:23:import { LoadingIndicator } from "../../components/loading-indicator";
+app/route/[id].tsx:199:        {state.surface.kind === "loading" ? <LoadingIndicator text={strings.loading} /> : null}
 app/map.tsx:25:import { LoadingIndicator } from "../components/loading-indicator";
-app/map.tsx:207:          <LoadingIndicator testID="nearby-message" text={strings.loading} />
+app/map.tsx:214:          <LoadingIndicator testID="nearby-message" text={strings.loading} />
 app/(tabs)/my.tsx:23:import { LoadingIndicator } from "../../components/loading-indicator";
-app/(tabs)/my.tsx:122:          <LoadingIndicator text="Загрузка…" />
+app/(tabs)/my.tsx:151:          <LoadingIndicator text={strings.loading} />
 app/run/[id].tsx:26:import { LoadingIndicator } from "../../components/loading-indicator";
-app/run/[id].tsx:359:        <LoadingIndicator style={styles.centered} text={strings.loading} />
-app/place/[id].tsx:26:import { LoadingIndicator } from "../../components/loading-indicator";
-app/place/[id].tsx:226:          <LoadingIndicator testID="place-loading" text={strings.loading} />
+app/run/[id].tsx:395:        <LoadingIndicator style={styles.centered} text={strings.loading} />
+app/place/[id].tsx:27:import { LoadingIndicator } from "../../components/loading-indicator";
+app/place/[id].tsx:234:          <LoadingIndicator testID="place-loading" text={strings.loading} />
 ```
 
 Крытэр 2 — індыкатар у loading-стане бачны рэндэр-тэстам і падае пры
@@ -53,7 +53,7 @@ node_modules/.bin/jest app/run.test.tsx -t "the loading state keeps the back ele
 
 ```output
 Test Suites: 1 passed, 1 total
-Tests:       17 skipped, 1 passed, 18 total
+Tests:       21 skipped, 1 passed, 22 total
 ```
 
 My KUDY: неарушальная чытанка гісторыі трымае паверхню ў loading-стане —
@@ -66,7 +66,7 @@ node_modules/.bin/jest app/my.test.tsx -t "loading state shows the ActivityIndic
 
 ```output
 Test Suites: 1 passed, 1 total
-Tests:       2 skipped, 1 passed, 3 total
+Tests:       3 skipped, 1 passed, 4 total
 ```
 
 Побач: «вечны» каталогавы fetch трымае паверхню ў loading-стане — той жа

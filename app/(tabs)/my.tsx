@@ -10,7 +10,7 @@
 // when the surface returns.
 import { useCallback } from "react";
 import { useFocusEffect } from "expo-router";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { CatalogSurfaceState } from "../../controllers/catalog/catalogController";
@@ -21,6 +21,9 @@ import { useServices } from "../_layout";
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
 import { LoadingIndicator } from "../../components/loading-indicator";
+import { PressableSurface } from "../../components/pressable-surface";
+import { ScaledText } from "../../components/scaled-text";
+import { uiStrings } from "../../components/ui-strings";
 
 const styles = StyleSheet.create({
   screen: {
@@ -62,13 +65,22 @@ const styles = StyleSheet.create({
     color: tokens.colorMuted,
     fontSize: tokens.fontBaseSize,
   },
+  // G06.05 (AC4): the named retry of a failed history read — the manual
+  // exit, styled like the catalog's retry.
+  retryButton: {
+    alignSelf: "flex-start",
+    borderColor: tokens.colorAccent,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    marginTop: tokens.spaceS,
+    paddingHorizontal: tokens.spaceM,
+    paddingVertical: tokens.spaceS,
+  },
+  retryLabel: {
+    color: tokens.colorAccent,
+    fontSize: tokens.fontBaseSize,
+  },
 });
-
-const STATE_LABEL: Record<string, string> = {
-  active: "актыўная",
-  paused: "прыпыненая",
-  finished: "завершаная",
-};
 
 // The local calendar day of a durable timestamp (UX 05, issue #351): the
 // day the walk happened in the user's zone. The earlier deterministic UTC
@@ -101,28 +113,45 @@ export default function My() {
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4).
   const insets = useSafeAreaInsets();
+  // G06.05 (issue #280, AC1): the surface's words come from the shared
+  // catalog in the display locale.
+  const strings = uiStrings(services.locale);
   return (
     <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-My KUDY">
       {/* UX 02 (issue #348): the surface's one back element (AC2), fixed
           above the scrolling history so it stays reachable. */}
-      <BackButton label="← Назад" testID="btn-my-back" />
+      <BackButton label={strings.back} testID="btn-my-back" />
       {/* UX 01 (issue #347): the history list scrolls — long finished-run
           lists stay reachable beyond the fold. */}
       <ScrollView testID="scroll-my">
-        <Text style={styles.title}>My KUDY</Text>
+        <ScaledText style={styles.title}>{strings.myKudy}</ScaledText>
         {controller === null || controller.status === "unavailable" ? (
           // No member (the db adapter has not landed) and a failed read are
           // the same honest surface: no history is invented either way.
-          <View testID="my-unavailable">
-            <Text style={styles.unavailable}>Гісторыя недаступная</Text>
-            {controller !== null ? <Text style={styles.rowLine}>{controller.reason}</Text> : null}
+          // G06.05 (AC4): with a store behind the surface the failed read
+          // gets its named retry; without a store there is no exit yet —
+          // the honest state stays.
+          <View testID="my-unavailable" accessibilityLiveRegion="polite">
+            <ScaledText style={styles.unavailable}>{strings.historyUnavailable}</ScaledText>
+            {controller !== null ? <ScaledText style={styles.rowLine}>{controller.reason}</ScaledText> : null}
+            {historyStore ? (
+              <PressableSurface
+                accessibilityRole="button"
+                accessibilityLabel={strings.retry}
+                onPress={() => void historyStore.getState().refresh()}
+                style={styles.retryButton}
+                testID="btn-my-retry"
+              >
+                <ScaledText style={styles.retryLabel}>{strings.retry}</ScaledText>
+              </PressableSurface>
+            ) : null}
           </View>
         ) : null}
         {controller !== null && controller.status === "loading" ? (
-          <LoadingIndicator text="Загрузка…" />
+          <LoadingIndicator text={strings.loading} />
         ) : null}
         {controller !== null && controller.status === "ready" ? (
-          <MyKudyRows state={controller} catalog={catalog} />
+          <MyKudyRows state={controller} catalog={catalog} strings={strings} />
         ) : null}
       </ScrollView>
     </View>
@@ -132,9 +161,11 @@ export default function My() {
 function MyKudyRows({
   state,
   catalog,
+  strings,
 }: {
   state: Extract<MyKudyState, { status: "ready" }>;
   catalog: CatalogSurfaceState | null;
+  strings: ReturnType<typeof uiStrings>;
 }) {
   // UX 05 (issue #351): the title comes verbatim from the catalog's ready
   // projection (the last valid cache of an offline catalog counts); no
@@ -151,35 +182,43 @@ function MyKudyRows({
   const finished = state.rows.filter((row) => row.state === "finished");
   return (
     <View>
-      <Text style={styles.section} testID="my-live-section">
-        Бягучая прагулка
-      </Text>
+      <ScaledText style={styles.section} testID="my-live-section">
+        {strings.currentWalk}
+      </ScaledText>
       {live.length > 0 ? (
         live.map((row) => (
           <View key={row.sessionId} style={styles.row} testID={`my-session-${row.sessionId}`}>
-            <Text style={styles.rowTitle}>{guideTitle(row.routeId)}</Text>
-            <Text style={styles.rowLine}>
-              {`${STATE_LABEL[row.state] ?? row.state} — з ${localDay(row.startedAt)} — праслышана: ${row.heard.length}`}
-            </Text>
+            <ScaledText style={styles.rowTitle}>{guideTitle(row.routeId)}</ScaledText>
+            <ScaledText style={styles.rowLine}>
+              {strings.liveRowLine(
+                strings.stateLabel[row.state] ?? row.state,
+                localDay(row.startedAt),
+                row.heard.length,
+              )}
+            </ScaledText>
           </View>
         ))
       ) : (
-        <Text style={styles.rowLine}>Бягучай прагулкі няма</Text>
+        <ScaledText style={styles.rowLine}>{strings.noCurrentWalk}</ScaledText>
       )}
-      <Text style={styles.section} testID="my-history-section">
-        Папярэднія праходы
-      </Text>
+      <ScaledText style={styles.section} testID="my-history-section">
+        {strings.pastWalks}
+      </ScaledText>
       {finished.length > 0 ? (
         finished.map((row) => (
           <View key={row.sessionId} style={styles.row} testID={`my-session-${row.sessionId}`}>
-            <Text style={styles.rowTitle}>{guideTitle(row.routeId)}</Text>
-            <Text style={styles.rowLine}>
-              {`${localDay(row.startedAt)} — ${row.finishedAt === null ? "—" : localDay(row.finishedAt)} — праслышана: ${row.heard.length}`}
-            </Text>
+            <ScaledText style={styles.rowTitle}>{guideTitle(row.routeId)}</ScaledText>
+            <ScaledText style={styles.rowLine}>
+              {strings.pastRowLine(
+                localDay(row.startedAt),
+                row.finishedAt === null ? null : localDay(row.finishedAt),
+                row.heard.length,
+              )}
+            </ScaledText>
           </View>
         ))
       ) : (
-        <Text style={styles.rowLine}>Папярэдніх праходаў няма</Text>
+        <ScaledText style={styles.rowLine}>{strings.noPastWalks}</ScaledText>
       )}
     </View>
   );

@@ -174,10 +174,13 @@ describe("Place detail surface (G07.02)", () => {
     await screen.findByTestId("place-moment-m-a1");
 
     // The play tap refuses through the controller's decision — the screen
-    // renders the named reason, the port records no second play.
+    // renders the refusal's own words (G06.05: the raw code never shows),
+    // the port records no second play.
     fireEvent.press(screen.getByTestId("place-moment-play-m-a1"));
     await waitFor(() =>
-      expect(screen.getByTestId("place-moment-refusal-m-a1").props.children).toBe("moment#session-unroutable"),
+      expect(screen.getByTestId("place-moment-refusal-m-a1").props.children).toBe(
+        "Тэйзер не гучыць у прагулцы — запусціце яго тут яшчэ раз",
+      ),
     );
     expect(audioPort.commands).toEqual(["play 1:be/base/audio/a.m4a"]);
   });

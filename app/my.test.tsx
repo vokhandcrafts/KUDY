@@ -6,7 +6,7 @@
 // suite covers only the scroll surface, implementation-rules 1 — removing
 // the ScrollView drops the testID and fails).
 import { describe, expect, test } from "@jest/globals";
-import { renderRouter, screen } from "expo-router/testing-library";
+import { fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
 
 import My from "./(tabs)/my";
 import { createServices } from "../controllers/createServices";
@@ -73,4 +73,25 @@ describe("My KUDY loading indicator (UX 07)", () => {
     expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
     expect(screen.getByText("Загрузка…")).toBeTruthy();
   });
+});
+
+// G06.05 (issue #280, AC4): a failed history read is not a dead end — the
+// named retry re-runs the controller's refresh, and a recovered read renders
+// the rows (implementation-rules 1: removing the retry turns this red).
+test("G06.05: the unavailable history offers the named retry and recovers", async () => {
+  const rows = [finishedRow(1)];
+  let calls = 0;
+  const list = async (): Promise<SessionRow[]> => {
+    calls += 1;
+    // The boot read and the focus read both fail — the retry press is the
+    // third read, and it is the one that recovers.
+    if (calls < 3) throw new Error("db busy");
+    return rows;
+  };
+  const services = createServices({ sessionHistory: { list } });
+  renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+  expect(await screen.findByTestId("my-unavailable")).toBeTruthy();
+  fireEvent.press(screen.getByTestId("btn-my-retry"));
+  await waitFor(() => expect(screen.getByTestId("my-session-walk-render-1")).toBeTruthy());
+  expect(calls).toBe(3);
 });

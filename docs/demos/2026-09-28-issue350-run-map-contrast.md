@@ -43,7 +43,7 @@ node_modules/.bin/jest app/run.test.tsx 2>&1 | grep -E "^(Test Suites:|Tests:)"
 
 ```output
 Test Suites: 1 passed, 1 total
-Tests:       18 passed, 18 total
+Tests:       22 passed, 22 total
 ```
 
 Эксперымент па зняцці фіксу (implementation-rules 1) выкананы ў гэтай

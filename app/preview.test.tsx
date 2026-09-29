@@ -11,6 +11,7 @@ import { act } from "@testing-library/react-native";
 import { Modal } from "react-native";
 
 import Explore from "./(tabs)/explore";
+import My from "./(tabs)/my";
 import Guides from "./city/[id]/guides";
 import RoutePreview from "./route/[id]";
 import { tokens } from "../components/design-tokens";
@@ -344,5 +345,79 @@ describe("guide preview loading indicator (UX 07)", () => {
     );
     expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
     expect(screen.getByText("Загрузка…")).toBeTruthy();
+  });
+});
+
+// G06.05 (issue #280) — the preview's a11y contract and the honest download
+// failure: the main button is a named, stateful button for the screen
+// reader; a failed activation is a named banner with a retry and, for
+// insufficient space, the exit to the storage surface — never a dead end.
+describe("G06.05 preview a11y and failure exits (issue #280)", () => {
+  test("AC1: the main button is a button with its label and the disabled state", async () => {
+    serve(CATALOG_FIXTURES);
+    renderRouter(withPreviewRoutes(createServices({
+      catalogOrigin: "https://catalog.test",
+      catalogSha256: sha256,
+      bundlesStore: memoryBundles().store,
+      downloadLayer: recordingDownload().downloadLayer,
+    })), { initialUrl: "/route/guide-route-b1" });
+    const button = await screen.findByTestId("btn-download");
+    expect(button.props.accessibilityRole).toBe("button");
+    expect(button.props.accessibilityLabel).toBe("Загрузіць");
+    expect(button.props.accessibilityState).toEqual({ disabled: false });
+  });
+
+  test("AC4: insufficient space is a named failure with the retry and the storage exit", async () => {
+    serve(CATALOG_FIXTURES);
+    renderRouter(
+      {
+        "_layout": layoutWith(createServices({
+          catalogOrigin: "https://catalog.test",
+          catalogSha256: sha256,
+          bundlesStore: memoryBundles().store,
+          downloadLayer: async (key) => ({
+            status: "insufficient-space" as const,
+            key,
+            needed: 30 * 1048576,
+            free: 1048576,
+          }),
+        })),
+        "(tabs)/my": My,
+        "(tabs)/explore": Explore,
+        "route/[id]": RoutePreview,
+      },
+      { initialUrl: "/route/guide-route-b1" },
+    );
+    fireEvent.press(await screen.findByTestId("btn-download"));
+    await screen.findByTestId("download-error-banner");
+    expect(screen.getByText("Збой загрузкі")).toBeTruthy();
+    expect(screen.getByText("не хапае месца: патрэбна яшчэ 30 МБ")).toBeTruthy();
+    // The two manual exits of AC4: the named retry and the storage surface.
+    expect(screen.getByTestId("btn-download-retry").props.accessibilityLabel).toBe("Паўтарыць");
+    fireEvent.press(screen.getByTestId("btn-download-storage"));
+    expect(await screen.findByTestId("screen-My KUDY")).toBeTruthy();
+  });
+
+  test("AC4: the failed catalog load gets its named retry — one press re-runs the refresh", async () => {
+    serve({});
+    renderRouter(withPreviewRoutes(createServices({
+      catalogOrigin: "https://catalog.test",
+      catalogSha256: sha256,
+    })), { initialUrl: "/explore" });
+    await screen.findByTestId("catalog-error");
+    // The load recovers without a remount: the second mock answers, the
+    // retry re-runs the controller's refresh and the cards render.
+    serve(CATALOG_FIXTURES);
+    fireEvent.press(screen.getByTestId("catalog-retry"));
+    expect(await screen.findByTestId("guide-card-guide-route-a1")).toBeTruthy();
+  });
+
+  test("AC1: the live walk's button is a named button (Прагулка)", async () => {
+    renderRouter(withPreviewRoutes(createServices({
+      runSession: { liveSession: () => ({ routeId: "route-map", title: "Каралеўская" }) },
+    })), { initialUrl: "/explore" });
+    const button = await screen.findByTestId("btn-walk-mode");
+    expect(button.props.accessibilityRole).toBe("button");
+    expect(button.props.accessibilityLabel).toBe("Прагулка");
   });
 });

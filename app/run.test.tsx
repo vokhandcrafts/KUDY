@@ -84,6 +84,7 @@ const ROUTE_JSON = JSON.stringify({
       place_id: "place-1",
       access_tier: "base",
       story_base_id: "story-1",
+      story_extended_id: "story-1x",
       preview: { name: { be: "Мытня", en: "Customs" } },
     },
     {
@@ -118,10 +119,17 @@ const STOPS_JSON = JSON.stringify([
   { story_id: "story-1", place_id: "place-1", voice_id: "voice-1", tier: "base", duration_s: 60, text: "т", transcript: "Транскрыпт мытні", sources: ["с"] },
   { story_id: "story-2", place_id: "place-2", voice_id: "voice-1", tier: "base", duration_s: 60, text: "т", transcript: "Транскрыпт порта", sources: ["с"] },
 ]);
+// G06.05 (issue #280, AC3): the extended layer's own story facts — the
+// transcript switch's second source (read only when the pin carries the
+// tier).
+const EXTENDED_STOPS_JSON = JSON.stringify([
+  { story_id: "story-1x", place_id: "place-1", voice_id: "voice-1", tier: "extended", duration_s: 90, text: "т", transcript: "Транскрыпт дадатковай гісторыі", sources: ["с"] },
+]);
 const layerFiles = (locale: string): Record<string, string> => ({
   [`bundles/route-map/1/${locale}/base/route.json`]: ROUTE_JSON,
   [`bundles/route-map/1/${locale}/base/places.json`]: PLACES_JSON,
   [`bundles/route-map/1/${locale}/base/stops.json`]: STOPS_JSON,
+  [`bundles/route-map/1/${locale}/extended/stops.json`]: EXTENDED_STOPS_JSON,
 });
 
 // The BundlesStore over an in-memory file map — the same seam the device
@@ -646,5 +654,123 @@ describe("run map surface", () => {
     expect(track.height).toBe(6);
     expect(track.borderWidth).toBe(1);
     expect(track.borderColor).toBe(tokens.colorMuted);
+  });
+});
+
+// G06.05 (issue #280) — accessibility and honest failure states: the denied
+// GPS banner with its manual exit (11 §7), the failed-play announcement, the
+// restored walk's note with its lost tier, and the story-layer transcript
+// switch. Every assertion here is the reverted-line check of its fix
+// (implementation-rules 1): removing the banner, the label or the switch
+// turns its test red.
+describe("G06.05 accessibility and honest failures (issue #280)", () => {
+  // A world whose recovery read always answers with the live row — the
+  // restart-recovery path (09 §9.1), the only one that can pin the extended
+  // tier. The base layer's stop-1 carries the extended story id.
+  function restoredWorld(tier: Tier[], extendedLayerStatus: "ready" | "incomplete") {
+    const row = {
+      sessionId: "walk-restored",
+      routeId: "route-map",
+      version: "1",
+      locale: "be",
+      tier,
+      state: "active" as const,
+      startedAt: 0,
+      finishedAt: null,
+      lastStopId: null,
+      heard: ["story-2"],
+      autoFired: [],
+      playSeq: 0,
+    };
+    const recovery: RunSessionPorts["recovery"] = {
+      read: async () => ({
+        row,
+        routeId: "route-map",
+        version: "1",
+        layers: [
+          {
+            tier: "base" as Tier,
+            status: "ready" as const,
+            stops: [
+              { stopId: "stop-1", lat: 54.352, lng: 18.648, radius: 30, storyBaseId: "story-1", storyExtendedId: "story-1x" },
+              { stopId: "stop-2", lat: 54.3535, lng: 18.651, radius: 30, storyBaseId: "story-2" },
+            ],
+          },
+          { tier: "extended" as Tier, status: extendedLayerStatus, stops: [] },
+        ],
+      }),
+    };
+    return makeRunSession({ recovery });
+  }
+
+  test("AC4: a denied GPS renders the contract banner; manual play still launches the audio", async () => {
+    const env = makeRunSession({ permission: "denied" });
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session: env.session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    // The named line of 11 §7 — the wording is the contract's own, the hint
+    // names the manual path (the manual mode is a full path, not an
+    // emergency).
+    await screen.findByTestId("run-gps-denied");
+    expect(screen.getByText("Аўтаматычныя гісторыі не працуюць — я не бачу вашай пазіцыі")).toBeTruthy();
+    expect(screen.getByText("Кожная гісторыя запускаецца рукамі з карткі кропкі")).toBeTruthy();
+    // The manual exit end-to-end: the card's play button launches the story
+    // through the engine's UserSelectedStory path — no GPS involved.
+    fireEvent.press(screen.getByTestId("run-marker-stop-1"));
+    await screen.findByTestId("run-panel-half");
+    expect(screen.getByTestId("btn-card-play").props.accessibilityRole).toBe("button");
+    fireEvent.press(screen.getByTestId("btn-card-play"));
+    await waitFor(() =>
+      expect(env.audioPort.commands.some((command) => command.startsWith("play "))).toBe(true),
+    );
+  });
+
+  test("AC5: a failed story play is announced — the suspended banner names the manual path", async () => {
+    const world = makeRunSession();
+    await mountedRunSoundingStop2(world);
+    // The sounding source fails: the engine suspends the automation, and the
+    // surface announces it instead of silently reverting the marker.
+    const playCommand = world.audioPort.commands.find((command) => command.startsWith("play "));
+    const key = Number(playCommand!.slice("play ".length).split(":")[0]);
+    act(() => {
+      world.audioPort.fail(key, "decode-failed");
+    });
+    await screen.findByTestId("run-autoplay-suspended");
+    expect(screen.getByText("Аўтаматычныя гісторыі прыпыненыя")).toBeTruthy();
+    expect(screen.getByText("Кожная гісторыя запускаецца рукамі з карткі кропкі")).toBeTruthy();
+    // The label set stays complete: the same surface still reads in EN (AC1).
+    expect(screen.getByTestId("btn-run-end").props.accessibilityRole).toBe("button");
+  });
+
+  test("AC4: the restored walk announces itself and names the lost tier", async () => {
+    const env = restoredWorld(["base" as Tier, "extended" as Tier], "incomplete");
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session: env.session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-restored");
+    expect(screen.getByText("Прагулка працягнута са захаванай сесіі")).toBeTruthy();
+    // The §3.7 report: the extended layer did not verify — the note says so.
+    expect(screen.getByText("Дадатковы ярус недаступны ў адноўленай сесіі")).toBeTruthy();
+  });
+
+  test("AC3/AC4: the card switches story layers, shows each transcript and plays the extended story", async () => {
+    const env = restoredWorld(["base" as Tier, "extended" as Tier], "ready");
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session: env.session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    fireEvent.press(screen.getByTestId("run-marker-stop-1"));
+    await screen.findByTestId("run-panel-half");
+    fireEvent.press(screen.getByTestId("btn-panel-read"));
+    await screen.findByTestId("run-panel-full");
+    // The base story's transcript first; the switch names both layers.
+    expect(screen.getByText("Транскрыпт мытні")).toBeTruthy();
+    expect(screen.getByTestId("btn-story-base").props.accessibilityState).toEqual({ selected: true });
+    expect(screen.getByTestId("btn-story-extended").props.accessibilityState).toEqual({ selected: false });
+    fireEvent.press(screen.getByTestId("btn-story-extended"));
+    await waitFor(() => expect(screen.getByText("Транскрыпт дадатковай гісторыі")).toBeTruthy());
+    expect(screen.getByTestId("btn-story-extended").props.accessibilityState).toEqual({ selected: true });
+    // The extended story is hand-playable too — its tier is in the pin.
+    fireEvent.press(screen.getByTestId("btn-card-play"));
+    await waitFor(() =>
+      expect(env.audioPort.commands.some((command) => command.startsWith("play "))).toBe(true),
+    );
   });
 });

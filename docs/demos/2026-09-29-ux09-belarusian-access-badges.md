@@ -15,38 +15,38 @@
 <!-- showboat-id: ux09-belarusian-access-badges -->
 
 Крытэр 2 — бэйдж паказвае беларускія словы; адзін слоўнік у агульным
-кампаненце бэйджа, testID застаюцца кантрактнымі (AC2, AC3):
+кампаненце (з G06.05 #280 — у `components/ui-strings.ts` з EN-пары
+побач; бэйдж рэндэрыць слова праз `uiStrings(locale).access`), testID
+застаюцца кантрактнымі (AC2, AC3):
 
 ```sh
-grep -n "ACCESS_LABELS\|badge-access-" components/guide-card.tsx
+grep -n "access: { free\|badge-access-" components/ui-strings.ts components/guide-card.tsx
 ```
 
 ```output
-103:const ACCESS_LABELS: Record<CatalogGuideCard["access"], string> = {
-112:    <View style={[styles.badge, tone]} testID={`badge-access-${access}`}>
-113:      <Text style={styles.badgeText}>{ACCESS_LABELS[access]}</Text>
+components/ui-strings.ts:82:    access: { free: "Бясплатна", paid: "Платна", mixed: "Змешана" },
+components/ui-strings.ts:122:    access: { free: "Free", paid: "Paid", mixed: "Mixed" },
+components/guide-card.tsx:174:      testID={`badge-access-${access}`}
 ```
 
 Крытэр 3 — копій па экранах няма: беларускія словы бэйджа жывуць толькі
-у слоўніку кампанента, ніводны экран не мае ўласнай мапы (AC3, jscpd
+у слоўніку `ui-strings.ts`, ніводны экран не мае ўласнай мапы (AC3, jscpd
 без новых дубляў):
 
 ```sh
-grep -rn "Бясплатна\|Платна\|Змешана" --include="*.tsx" app/ components/ | grep -v "\.test\."
+grep -rn "Бясплатна\|Платна\|Змешана" --include="*.tsx" --include="*.ts" app/ components/ | grep -v "\.test\."
 ```
 
 ```output
-components/guide-card.tsx:104:  free: "Бясплатна",
-components/guide-card.tsx:105:  paid: "Платна",
-components/guide-card.tsx:106:  mixed: "Змешана",
+components/ui-strings.ts:82:    access: { free: "Бясплатна", paid: "Платна", mixed: "Змешана" },
 ```
 
 Крытэр 4 — render-тэсты картак і прэв'ю зелёныя; сцвярджэнні
 `getByText("Платна")` / `getByText("Бясплатна")` ёсць рэверт-гардам
-(AC4): са знятым слоўнікам `app/preview.test.tsx:103` падае — праверана
-адкатам `components/guide-card.tsx` перад push (1 failed на 13).
+(AC4): са знятым слоўнікам падае — праверана адкатам перад push.
 Слоўнік пакрыты ва ўсіх трох вітках — фокусны тэст кампанента правярае
-free/paid/mixed разам з testID.
+free/paid/mixed разам з testID; G06.05 дадаў assertions бэйджу і ў
+preview/run-сьюты.
 
 ```sh
 npx jest --config jest.config.js app/navigation.test.tsx app/preview.test.tsx 2>&1 | grep -E "Tests:|Test Suites:"
@@ -54,5 +54,5 @@ npx jest --config jest.config.js app/navigation.test.tsx app/preview.test.tsx 2>
 
 ```output
 Test Suites: 2 passed, 2 total
-Tests:       31 passed, 31 total
+Tests:       35 passed, 35 total
 ```

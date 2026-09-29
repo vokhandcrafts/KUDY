@@ -93,6 +93,21 @@ export interface PlaceDetailStrings {
   durationUnit: string;
   textLabel: string;
   audioLabel: string;
+  // G06.05 (issue #280, AC4/AC5): the named moment refusals and the play
+  // failure's words — a refusal states the reason and the way out, a raw
+  // diagnostic code never shows alone. An unknown reason renders as-is.
+  readonly refusalText: Record<
+    'moment#audio-unpublished' | 'moment#session-unroutable' | 'moment#session-refused',
+    string
+  >;
+  readonly playFailed: string;
+  readonly playFailedHint: string;
+}
+
+// The refusal's rendered word: the known map, else the raw reason itself
+// (the runMapReason idiom).
+export function placeRefusalText(refusal: string, strings: PlaceDetailStrings): string {
+  return strings.refusalText[refusal as keyof PlaceDetailStrings['refusalText']] ?? refusal;
 }
 
 const STRINGS: Record<'be' | 'en', PlaceDetailStrings> = {
@@ -116,6 +131,13 @@ const STRINGS: Record<'be' | 'en', PlaceDetailStrings> = {
     durationUnit: 'хв',
     textLabel: 'Тэкст',
     audioLabel: 'аўдыё',
+    refusalText: {
+      'moment#audio-unpublished': 'Гук тэйзера не апублікаваны',
+      'moment#session-unroutable': 'Тэйзер не гучыць у прагулцы — запусціце яго тут яшчэ раз',
+      'moment#session-refused': 'Тэйзер зараз не запускаецца — паспрабуйце яшчэ раз',
+    },
+    playFailed: 'Гук не пачаўся',
+    playFailedHint: 'Паспрабуйце запусціць яшчэ раз',
   },
   en: {
     loading: 'Loading…',
@@ -137,6 +159,13 @@ const STRINGS: Record<'be' | 'en', PlaceDetailStrings> = {
     durationUnit: 'min',
     textLabel: 'Text',
     audioLabel: 'audio',
+    refusalText: {
+      'moment#audio-unpublished': 'The teaser audio is not published',
+      'moment#session-unroutable': 'The teaser cannot sound inside a walk — play it here again',
+      'moment#session-refused': 'The teaser cannot start right now — try again',
+    },
+    playFailed: 'The audio did not start',
+    playFailedHint: 'Try starting it again',
   },
 };
 
