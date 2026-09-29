@@ -57,11 +57,16 @@ async function get(dispatcher, requestPath) {
 // A's falls back to the URL. The card fixture (G17.14): A has a full snapshot
 // on disk (metadata with attribution, text.md with an image whose file
 // exists), B's metadata.json is corrupt and its text.md references an image
-// that is not there, E's snapshot dir is empty; C and D carry no snapshot. D's
-// url embeds the video id of the failed youtube step, E's /wiki/ url maps back
-// to the wiki-article step's ref, A's url is the failed seed's ref and the
-// `recordId:`-prefixed image step's owner — the four ref shapes the card's
-// step log matches.
+// that is not there plus one hostile non-media ref, E's snapshot dir is empty;
+// C and D carry no snapshot; F's snapshot sits outside the snapshots root
+// (every image must answer the containment note even though its file exists,
+// and its attribution carries a non-http contributors_url); G is a web record
+// whose url embeds the same video id as D — the step log must stay empty,
+// because the youtube ref match is scoped to youtube records. D's url embeds
+// the video id of the failed youtube step, E's /wiki/ url maps back to the
+// wiki-article step's ref, A's url is the failed seed's ref and the
+// `recordId:`-prefixed image step's owner — the ref shapes the card's step
+// log matches.
 function buildStoreFixture(dir) {
   const dbPath = path.join(dir, 'db.sqlite');
   const db = openStore(dbPath);
@@ -101,7 +106,33 @@ function buildStoreFixture(dir) {
   const snapshotB = path.join(snapshotsRoot, 'c10000000000', 'museum-beef1234');
   fs.mkdirSync(snapshotB, { recursive: true });
   fs.writeFileSync(path.join(snapshotB, 'metadata.json'), 'не-JSON');
-  fs.writeFileSync(path.join(snapshotB, 'text.md'), '![заставка](media/museum-img-1.png)\n_Від музея_\n');
+  fs.writeFileSync(
+    path.join(snapshotB, 'text.md'),
+    '![заставка](media/museum-img-1.png)\n_Від музея_\n\n![хак](../etc/passwd)\n\n![хак-2](media/../../etc/passwd)\n'
+  );
+  // F's snapshot deliberately lives outside the snapshots root: the text and
+  // metadata are readable from the row's own path, but no image may become a
+  // /media URL.
+  const snapshotF = path.join(dir, 'outside-snapshot');
+  fs.mkdirSync(path.join(snapshotF, 'media'), { recursive: true });
+  fs.writeFileSync(
+    path.join(snapshotF, 'metadata.json'),
+    `${JSON.stringify(
+      {
+        title: 'Па-за коранем',
+        attribution: {
+          site: 'https://pl.wikipedia.org',
+          revision_id: '99',
+          contributors_url: 'javascript:alert(1)',
+          license: 'CC BY-SA',
+        },
+      },
+      null,
+      2
+    )}\n`
+  );
+  fs.writeFileSync(path.join(snapshotF, 'text.md'), '![заставка](media/outside-img-1.png)\n_Від звонку_\n');
+  fs.writeFileSync(path.join(snapshotF, 'media', 'outside-img-1.png'), pngBytes(10, 10));
   const snapshotE = path.join(snapshotsRoot, 'c2', 'gdansk-fedc9876');
   fs.mkdirSync(snapshotE, { recursive: true });
   const recordA = rawRecord({
@@ -141,6 +172,22 @@ function buildStoreFixture(dir) {
     media_dir: path.join(snapshotE, 'media'),
   });
   upsertRawRecord(db, recordE);
+  const recordF = rawRecord({
+    campaignId: 'c2',
+    url: 'https://news.example/outside',
+    status: 'raw',
+    city: 'krakow',
+    snapshot_path: snapshotF,
+    media_dir: path.join(snapshotF, 'media'),
+  });
+  upsertRawRecord(db, recordF);
+  const recordG = rawRecord({
+    campaignId: 'c2',
+    url: 'http://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    status: 'raw',
+    city: 'krakow',
+  });
+  upsertRawRecord(db, recordG);
   for (const link of [
     { rawRecordId: recordA.id, anchorText: 'history', url: 'https://news.example/rel-1', context: 'p1' },
     { rawRecordId: recordA.id, anchorText: 'cranes', url: 'https://news.example/rel-2', context: 'p2' },
@@ -189,7 +236,7 @@ function buildStoreFixture(dir) {
   claimStep(db, doneWiki.id, now);
   completeStep(db, doneWiki.id, now, 'wrote Gdańsk');
   db.close();
-  return { dbPath, recordA, recordB, recordC, recordD, recordE };
+  return { dbPath, recordA, recordB, recordC, recordD, recordE, recordF, recordG };
 }
 
 test('overview page shows per-campaign counts and journal diagnostics', async (t) => {
@@ -376,7 +423,7 @@ test('record card shows snapshot text with the image at its position, links and 
 
 test('the card step log matches steps by url, record prefix, video id and wiki title', async (t) => {
   const dir = makeTempDir();
-  const { dbPath, recordA, recordC, recordD, recordE } = buildStoreFixture(dir);
+  const { dbPath, recordA, recordC, recordD, recordE, recordG } = buildStoreFixture(dir);
   const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
   t.after(() => dispatcher.close());
 
@@ -406,21 +453,30 @@ test('the card step log matches steps by url, record prefix, video id and wiki t
   // C has no steps of its own — a readable empty row, not silence.
   const cardC = await get(dispatcher, `/record?id=${recordC.id}`);
   assert.match(cardC.body, /Крокаў для гэтага запіса ў журнале няма\./);
+
+  // G is a web record whose url embeds the same video id as D's youtube step:
+  // the ref match is scoped to the source type, so no step row appears (the
+  // url itself still shows in the metadata table).
+  const cardG = await get(dispatcher, `/record?id=${recordG.id}`);
+  assert.match(cardG.body, /Крокаў для гэтага запіса ў журнале няма\./);
+  assert.ok(!cardG.body.includes('<code>youtube</code>'), 'a web record must not inherit the youtube step');
 });
 
 test('missing snapshot files render readable notes and the server stays up', async (t) => {
   const dir = makeTempDir();
-  const { dbPath, recordB, recordC, recordE } = buildStoreFixture(dir);
+  const { dbPath, recordB, recordC, recordE, recordF } = buildStoreFixture(dir);
   const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
   t.after(() => dispatcher.close());
 
-  // B: text.md references an image whose file is gone, metadata.json is
-  // corrupt — two notes on the card, status still 200; the heading comes from
-  // the search index, not from the unreadable metadata.
+  // B: text.md references an image whose file is gone plus a hostile non-media
+  // ref, metadata.json is corrupt — notes on the card, status still 200; the
+  // heading comes from the search index, not from the unreadable metadata.
   const cardB = await get(dispatcher, `/record?id=${recordB.id}`);
   assert.equal(cardB.status, 200);
   assert.match(cardB.body, /<h2>Назва запіса B<\/h2>/);
   assert.match(cardB.body, /Выява адсутнічае на дыску: <code>media\/museum-img-1\.png<\/code> — подпіс: /);
+  assert.match(cardB.body, /Нераспазнаная спасылка на выяву: <code>\.\.\/etc\/passwd<\/code>\./);
+  assert.match(cardB.body, /Нераспазнаная спасылка на выяву: <code>media\/\.\.\/\.\.\/etc\/passwd<\/code>\./);
   assert.match(cardB.body, /Метаданыя здымку не прачытаны: няма ці пашкоджаны <code>metadata\.json<\/code>/);
 
   // C carries no snapshot at all.
@@ -432,6 +488,21 @@ test('missing snapshot files render readable notes and the server stays up', asy
   const cardE = await get(dispatcher, `/record?id=${recordE.id}`);
   assert.equal(cardE.status, 200);
   assert.match(cardE.body, /няма ні <code>text\.md<\/code>, ні <code>transcript\.md<\/code>/);
+
+  // F's snapshot lives outside the snapshots root: the file exists, but no
+  // image may become a /media URL — the containment note renders instead, the
+  // text and metadata still show, and the attribution's non-http
+  // contributors_url arrives as text, never as an anchor.
+  const cardF = await get(dispatcher, `/record?id=${recordF.id}`);
+  assert.equal(cardF.status, 200);
+  assert.match(cardF.body, /<h2>Па-за коранем<\/h2>/);
+  assert.match(
+    cardF.body,
+    /Снапшот па-за тэчкай даных — выяву паказаць нельга: <code>media\/outside-img-1\.png<\/code>/
+  );
+  assert.ok(!cardF.body.includes('Выява адсутнічае'), 'the file exists — only the URL is refused');
+  assert.match(cardF.body, /<code>javascript:alert\(1\)<\/code>/);
+  assert.doesNotMatch(cardF.body, /<a href="javascript:/);
 
   // The server answers the list page normally afterwards.
   const records = await get(dispatcher, '/records');

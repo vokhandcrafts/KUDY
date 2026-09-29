@@ -373,20 +373,26 @@ function parseCardParams(query) {
 }
 
 // The record's steps: only the run_log rows whose ref carries this record —
-// the seed/crawl step by its url, the youtube step by the video id inside the
-// url, the wiki-article step by the title the record's /wiki/ url maps back
-// to, and the image/clean steps by their `recordId:`-prefixed refs. Every
-// other journal row belongs to the campaign, not to this record.
+// the seed/crawl step by its url, the image/clean steps by their
+// `recordId:`-prefixed refs, and — scoped to the source type that step kind
+// produces — the youtube step by the video id inside the record's url and the
+// wiki-article step by the title the /wiki/ url maps back to. A web record
+// whose url merely looks like either (watch?v=, /wiki/…) stays with its own
+// steps. Every other journal row belongs to the campaign, not to this record.
 function recordSteps(db, record) {
   const refs = [record.url];
-  try {
-    const videoId = new URL(record.url).searchParams.get('v');
-    if (videoId) refs.push(videoId);
-  } catch {
-    // Unparseable url: the literal and prefix matches still apply.
+  if (record.source_type === 'youtube') {
+    try {
+      const videoId = new URL(record.url).searchParams.get('v');
+      if (videoId) refs.push(videoId);
+    } catch {
+      // Unparseable url: the literal and prefix matches still apply.
+    }
   }
-  const wikiTitle = wikiTitleFromUrl(record.url);
-  if (wikiTitle) refs.push(wikiTitle);
+  if (record.source_type === 'wiki') {
+    const wikiTitle = wikiTitleFromUrl(record.url);
+    if (wikiTitle) refs.push(wikiTitle);
+  }
   return db
     .prepare(
       `SELECT kind, ref, status, error, finished_at FROM run_log
@@ -540,8 +546,13 @@ function metadataRowsHtml(record, metadata) {
   if (attribution) {
     const parts = [attribution.site, attribution.license].filter(Boolean).map((part) => escapeHtml(String(part)));
     const revision = attribution.revision_id ? `, рэвізія ${escapeHtml(String(attribution.revision_id))}` : '';
+    const contributors = attribution.contributors_url
+      ? clickableUrl(String(attribution.contributors_url))
+      : null;
     const history = attribution.contributors_url
-      ? ` — <a href="${escapeHtml(String(attribution.contributors_url))}">гісторыя рэвізій</a>`
+      ? contributors
+        ? ` — <a href="${escapeHtml(contributors)}">гісторыя рэвізій</a>`
+        : ` — <code>${escapeHtml(String(attribution.contributors_url))}</code>`
       : '';
     rows.push(row('Атрыбуцыя', `${parts.join(', ')}${revision}${history}`));
   }
