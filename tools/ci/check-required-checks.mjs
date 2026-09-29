@@ -61,23 +61,36 @@ if (!/tools\/collector/.test(pkg.scripts?.test ?? '')) {
   failures.push('npm test glob does not include tools/collector');
 }
 
-// Issue #241 revert guard — the jscpd gate must stay wired to a full-SHA pin
-// of the company reusable workflow and never again to the pre-fix ref
-// 752dff0: at that SHA the reusable workflow declared the malformed action
-// reference `uses: $/.github/actions/jscpd`, so GitHub rejected the file at
-// start time — every PR's jscpd run failed at 0s with no jobs and no
-// check-run, and the gate silently never ran. Reverting the pin to that ref
+// Issue #241 revert guard — the jscpd gate must stay self-contained. The
+// reusable workflow in vokhandcrafts/ai-company-infrastructure cannot be
+// called from this repository: both repos are private and user-owned, and
+// GitHub rejects cross-repo reusable-workflow calls between private
+// user-account repositories at startup with zero jobs, so the gate silently
+// never ran. A return to that call pattern (or losing the real npx command)
 // must turn this committed check red (implementation-rules 1).
-const JSCPD_BROKEN_REF = '752dff081b8d910ee9763ae73283748185e8af00';
-const jscpdUses = fs
-  .readFileSync('.github/workflows/jscpd.yml', 'utf8')
-  .match(/uses:\s*vokhandcrafts\/ai-company-infrastructure\/\.github\/workflows\/jscpd\.yml@([0-9a-f]+)/);
-if (!jscpdUses) {
-  failures.push('jscpd.yml does not call the company reusable jscpd workflow');
-} else if (jscpdUses[1].length !== 40) {
-  failures.push('jscpd.yml pins the reusable workflow to a short or mutable ref — use a full 40-hex SHA');
-} else if (jscpdUses[1] === JSCPD_BROKEN_REF) {
-  failures.push('jscpd.yml pins the pre-fix ref 752dff0 (workflow-file startup failure, issue #241)');
+const jscpdWorkflow = fs.readFileSync('.github/workflows/jscpd.yml', 'utf8');
+if (/uses:\s*vokhandcrafts\/ai-company-infrastructure\//.test(jscpdWorkflow)) {
+  failures.push(
+    'jscpd.yml calls the cross-repo reusable workflow again — private user-account repos cannot call it (issue #241: startup failure, zero jobs)'
+  );
+}
+if (!/npx\s+--yes\s+jscpd@/.test(jscpdWorkflow)) {
+  failures.push('jscpd.yml does not run npx --yes jscpd@ — the CI gate is absent');
+}
+if (!/persistent-credentials|persist-credentials:\s*false/.test(jscpdWorkflow)) {
+  failures.push('jscpd.yml checkout does not set persist-credentials: false');
+}
+const workflowVersion = (jscpdWorkflow.match(/jscpd@([0-9]+\.[0-9]+\.[0-9]+)/) || [])[1];
+const agentsText = fs.readFileSync('AGENTS.md', 'utf8');
+const localVersion = (agentsText.match(/jscpd@([0-9]+\.[0-9]+\.[0-9]+)/) || [])[1];
+if (!workflowVersion) {
+  failures.push('jscpd.yml has no pinned jscpd version');
+} else if (!localVersion) {
+  failures.push('AGENTS.md has no pinned local jscpd version to compare against');
+} else if (workflowVersion !== localVersion) {
+  failures.push(
+    `jscpd version drift: CI runs jscpd@${workflowVersion}, the local pre-push gate (AGENTS.md) pins jscpd@${localVersion} — update both in one commit`
+  );
 }
 
 if (failures.length > 0) {

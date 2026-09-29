@@ -6,7 +6,51 @@ permissions:
   contents: read
 jobs:
   jscpd:
-    # Pin must be a full SHA of a verified post-fix commit; 752dff0 is the
-    # known-broken pre-fix ref (issue #241) — guarded in
-    # tools/ci/check-required-checks.mjs.
-    uses: vokhandcrafts/ai-company-infrastructure/.github/workflows/jscpd.yml@47d7ca7927316845cab723fa48616855e916eca1
+    # Self-contained copy of the company jscpd gate. The reusable workflow in
+    # vokhandcrafts/ai-company-infrastructure cannot be called from here: both
+    # repositories are private and user-owned, and GitHub rejects cross-repo
+    # reusable-workflow calls between private user-account repositories at
+    # startup with zero jobs ("workflow file issue", issue #241 — runs
+    # 36047891013, 36583038462, 36587670194; the same-repo control call
+    # succeeds). Gate logic mirrors standards/jscpd/run.sh there; keep the two
+    # in sync in the same commit. Guarded in tools/ci/check-required-checks.mjs.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Detect duplicated code
+        shell: bash
+        env:
+          INPUT_PATH: "."
+        run: |
+          set -euo pipefail
+
+          COMPANY_CONFIG=$(mktemp /tmp/company-jscpd.XXXXXX.json)
+          # Company default (ai-company-infrastructure standards/jscpd/.jscpd.json),
+          # base64-embedded: a cross-repo caller cannot read that repository's
+          # files at runtime. Regenerate with base64 -w0 on the source file.
+          echo 'ewogICJ0aHJlc2hvbGQiOiAwLAogICJtaW5MaW5lcyI6IDgsCiAgIm1pblRva2VucyI6IDcwLAogICJtb2RlIjogIm1pbGQiLAogICJnaXRpZ25vcmUiOiB0cnVlLAogICJhYnNvbHV0ZSI6IHRydWUsCiAgInJlcG9ydGVycyI6IFsiY29uc29sZSJdLAogICJjcm9zc0Zvcm1hdHMiOiAianMtdHMiLAogICJmb3JtYXQiOiBbCiAgICAiamF2YXNjcmlwdCIsCiAgICAianN4IiwKICAgICJ0eXBlc2NyaXB0IiwKICAgICJ0c3giLAogICAgImNzcyIsCiAgICAic2NzcyIsCiAgICAic2FzcyIsCiAgICAibGVzcyIsCiAgICAidnVlIiwKICAgICJzdmVsdGUiCiAgXSwKICAiaWdub3JlIjogWwogICAgIioqL25vZGVfbW9kdWxlcy8qKiIsCiAgICAiKiovZGlzdC8qKiIsCiAgICAiKiovYnVpbGQvKioiLAogICAgIioqL2NvdmVyYWdlLyoqIiwKICAgICIqKi8ubmV4dC8qKiIsCiAgICAiKiovLm51eHQvKioiLAogICAgIioqLy50dXJiby8qKiIsCiAgICAiKiovLm91dHB1dC8qKiIsCiAgICAiKiovb3V0LyoqIiwKICAgICIqKi92ZW5kb3IvKioiLAogICAgIioqLy5naXQvKioiLAogICAgIioqLy52ZXJjZWwvKioiLAogICAgIioqL3N0b3J5Ym9vay1zdGF0aWMvKioiLAogICAgIioqL2dlbmVyYXRlZC8qKiIsCiAgICAiKiovKi5taW4uanMiLAogICAgIioqLyoubWluLmNzcyIsCiAgICAiKiovcGFja2FnZS1sb2NrLmpzb24iLAogICAgIioqL3lhcm4ubG9jayIsCiAgICAiKiovcG5wbS1sb2NrLnlhbWwiLAogICAgIioqL2J1bi5sb2NrIiwKICAgICIqKi9idW4ubG9ja2IiCiAgXQp9Cg==' | base64 -d > "$COMPANY_CONFIG"
+
+          SCAN_PATH="${INPUT_PATH:-.}"
+          CONFIG=""
+          if [[ -f .jscpd.json ]]; then
+            CONFIG=".jscpd.json"
+          fi
+          if [[ ! -f "$CONFIG" ]]; then
+            CONFIG="$COMPANY_CONFIG"
+          fi
+
+          cmd=(npx --yes jscpd@5.1.2 --config "$CONFIG" --no-tips)
+          read -r -a paths <<< "$SCAN_PATH"
+          cmd+=("${paths[@]}")
+
+          printf '+'
+          printf ' %q' "${cmd[@]}"
+          printf '\n'
+          exec "${cmd[@]}"
