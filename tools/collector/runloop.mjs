@@ -11,6 +11,11 @@
 // read from disk by the default loader, no fence, no network — and every other
 // scheme stays progress-only, exactly as in G17.01.a.
 //
+// G17.15 puts the robots.txt gate inside that crawler: every http(s) seed and
+// crawl step is robots-checked before its fetch (refusals are audited with a
+// reason). A run whose every http(s) seed is refused ends with the
+// all-seeds-blocked stop diagnostic below — never as an empty success.
+//
 // A CrawlStopError (error series, crawler.mjs) stops the whole run: the step
 // is marked failed with the diagnostic, the remaining queue stays untouched,
 // and runCampaign reports `stopped` so the CLI can surface it.
@@ -33,6 +38,7 @@ import {
 import { processImageStep } from './media.mjs';
 import { defaultSnapshotsRoot, processFetchedPage } from './snapshot.mjs';
 import { CrawlStopError, createCrawler, parseCrawlDetail } from './crawler.mjs';
+import { RobotsBlockedError } from './robots.mjs';
 import { createBrowserFetchPage } from './netfetch.mjs';
 import { createBacklogWriter, createYoutubeFetch, processYoutubeStep } from './youtube.mjs';
 import {
@@ -80,12 +86,16 @@ export function defaultHandlers({
   loadPage = defaultLoadPage,
   loadImage = defaultLoadImage,
   fetchPage = null,
+  // No default here: undefined falls through to createRobotsGate's own
+  // production transport (robots.mjs defaultFetchRobots); tests inject one.
+  fetchRobots,
   youtubeFetch = createYoutubeFetch(),
   loadApi = defaultLoadApi,
 } = {}) {
   // One crawler per handlers instance — one campaign per runCampaign call, so
-  // the politeness gate and the error-series counter span exactly one run. The
-  // audit log lives in the campaign's run dir next to its snapshots.
+  // the politeness gate, the robots.txt cache and the error-series counter
+  // span exactly one run. The audit log lives in the campaign's run dir next
+  // to its snapshots.
   let crawler = null;
   let browser = null;
   let backlog = null;
@@ -94,6 +104,7 @@ export function defaultHandlers({
     crawler = createCrawler({
       auditPath: path.join(ctx.snapshotsRoot, ctx.campaignId.slice(0, 12), 'fence-audit.jsonl'),
       delayRange: ctx.campaign.fence.delay_s,
+      fetchRobots,
       fetchPage:
         fetchPage ??
         ((url) => {
@@ -273,7 +284,7 @@ export async function runCampaign(
   for (const ref of campaign.youtube) enqueueStep(db, campaignId, 'youtube', ref, now);
   for (const url of campaign.seeds) enqueueStep(db, campaignId, 'seed', url, now);
 
-  const counts = { campaignId, done: 0, failed: 0, stopped: null };
+  const counts = { campaignId, done: 0, failed: 0, stopped: null, robotsBlockedSeeds: 0 };
   const ctx = { db, campaign, campaignId, now, snapshotsRoot, loadImage: handlers.loadImage, loadApi: handlers.loadApi };
   // The loop drains: a seed, crawl or wiki-category handler enqueues new steps
   // mid-run, so the claimable list is re-read until nothing is left — one
@@ -308,12 +319,23 @@ export async function runCampaign(
         const message = error instanceof Error ? error.message : String(error);
         failStep(db, step.id, message, now);
         counts.failed += 1;
+        if (error instanceof RobotsBlockedError) counts.robotsBlockedSeeds += 1;
         if (error instanceof CrawlStopError) {
           counts.stopped = message;
           break outer;
         }
       }
     }
+  }
+  // G17.15: every http(s) seed refused by robots.txt and nothing collected —
+  // the run ends with a readable stop diagnostic, not an empty «successful»
+  // run. Mixed campaigns (file:// seeds, youtube or wiki work done) ran real
+  // work, so only the fully-refused case reports the stop.
+  const httpSeedCount = new Set(
+    campaign.seeds.filter((url) => /^https?:$/.test(new URL(url).protocol))
+  ).size;
+  if (httpSeedCount > 0 && counts.robotsBlockedSeeds === httpSeedCount && counts.done === 0) {
+    counts.stopped = `all ${httpSeedCount} http(s) seed(s) refused by robots.txt — run stopped, nothing collected`;
   }
   await handlers.close?.();
   return counts;

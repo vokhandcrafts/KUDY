@@ -9,7 +9,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseCampaign } from './campaign.mjs';
-import { openStore, sha256Hex } from './store.mjs';
+import { ensureCampaign, openStore, sha256Hex } from './store.mjs';
+import { defaultHandlers, runCampaign } from './runloop.mjs';
 
 export function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'collector-test-'));
@@ -207,6 +208,54 @@ export async function httpFetchPage(url) {
   const response = await fetch(url, { redirect: 'follow' });
   if (response.status >= 400) throw new Error(`HTTP ${response.status}`);
   return { html: await response.text(), finalUrl: response.url };
+}
+
+// Shared arrangement for the crawl suites (crawler.test.mjs, robots.test.mjs):
+// fixture server + campaign on it + a run() bound to the production pipeline
+// with the test fetchPage. Default politeness is fast; suites override
+// delay_s. fetchRobots stays undefined unless a suite injects one — the
+// production robots transport (robots.mjs) serves robots.txt from the fixture
+// server routes like any real host would.
+export async function crawlSetup(routes, { overrides = {}, fetchPage = httpFetchPage, fetchRobots } = {}) {
+  const server = await startFixtureServer(routes);
+  const dir = makeTempDir();
+  // A seeds override may be a function of the fixture server's url() — a
+  // multi-seed campaign needs the port the server actually got.
+  const { seeds: seedOverride, ...rest } = overrides;
+  const seeds = typeof seedOverride === 'function' ? seedOverride((p) => server.url(p)) : seedOverride;
+  const { file, source, parsed, db } = openCampaignFixture(
+    dir,
+    campaignYaml({
+      seeds: `seeds:\n  - ${server.url('/start')}`,
+      delay_s: 'delay_s: [0.05, 0.1]',
+      youtube: 'youtube: []',
+      ...rest,
+      ...(seedOverride !== undefined ? { seeds } : {}),
+    })
+  );
+  const snapshotsRoot = path.join(dir, 'snapshots');
+  const handlers = defaultHandlers({ fetchPage, fetchRobots });
+  // The campaign row is created eagerly (runCampaign's own ensureCampaign is
+  // idempotent), so tests can queue extra steps before the first run.
+  const { campaignId } = ensureCampaign(db, {
+    campaign: parsed.campaign,
+    sourcePath: file,
+    contentHash: sha256Hex(source),
+  });
+  const fx = {
+    server,
+    dir,
+    db,
+    handlers,
+    snapshotsRoot,
+    campaignId,
+    run: (campaign = parsed.campaign) =>
+      runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source), snapshotsRoot, handlers }),
+    auditPath: (campaignId) => path.join(snapshotsRoot, campaignId.slice(0, 12), 'fence-audit.jsonl'),
+    auditText: (campaignId) => fs.readFileSync(path.join(snapshotsRoot, campaignId.slice(0, 12), 'fence-audit.jsonl'), 'utf8'),
+    recordUrls: () => db.prepare('SELECT url FROM raw_records ORDER BY url').all().map((row) => row.url),
+  };
+  return fx;
 }
 
 // Skip guard for suites that drive real chromium (the netfetch live suite,

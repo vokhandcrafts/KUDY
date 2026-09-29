@@ -14,48 +14,8 @@ import { parseCampaign } from './campaign.mjs';
 import { ERROR_SERIES_LIMIT, MIN_ARTICLE_PARAGRAPHS, createPoliteness, parseCrawlDetail } from './crawler.mjs';
 import { createAuditWriter, fenceHosts, hostAllowed, serializeAuditLine } from './fence.mjs';
 import { defaultHandlers, runCampaign } from './runloop.mjs';
-import { countRows, enqueueStep, ensureCampaign, openStore, sha256Hex, stepStatusCounts } from './store.mjs';
-import { articleHtml, articlePage, campaignYaml, httpFetchPage, makeTempDir, openCampaignFixture, startFixtureServer, writeCampaignFile } from './testkit.mjs';
-
-// Shared arrangement: fixture server + campaign on it + a run() bound to the
-// production pipeline with the test fetchPage. Default politeness is fast;
-// the AC5 test overrides delay_s.
-async function crawlSetup(routes, { overrides = {}, fetchPage = httpFetchPage } = {}) {
-  const server = await startFixtureServer(routes);
-  const dir = makeTempDir();
-  const { file, source, parsed, db } = openCampaignFixture(
-    dir,
-    campaignYaml({
-      seeds: `seeds:\n  - ${server.url('/start')}`,
-      delay_s: 'delay_s: [0.05, 0.1]',
-      youtube: 'youtube: []',
-      ...overrides,
-    })
-  );
-  const snapshotsRoot = path.join(dir, 'snapshots');
-  const handlers = defaultHandlers({ fetchPage });
-  // The campaign row is created eagerly (runCampaign's own ensureCampaign is
-  // idempotent), so tests can queue extra steps before the first run.
-  const { campaignId } = ensureCampaign(db, {
-    campaign: parsed.campaign,
-    sourcePath: file,
-    contentHash: sha256Hex(source),
-  });
-  const fx = {
-    server,
-    dir,
-    db,
-    handlers,
-    snapshotsRoot,
-    campaignId,
-    run: (campaign = parsed.campaign) =>
-      runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source), snapshotsRoot, handlers }),
-    auditPath: (campaignId) => path.join(snapshotsRoot, campaignId.slice(0, 12), 'fence-audit.jsonl'),
-    auditText: (campaignId) => fs.readFileSync(path.join(snapshotsRoot, campaignId.slice(0, 12), 'fence-audit.jsonl'), 'utf8'),
-    recordUrls: () => db.prepare('SELECT url FROM raw_records ORDER BY url').all().map((row) => row.url),
-  };
-  return fx;
-}
+import { countRows, enqueueStep, openStore, sha256Hex, stepStatusCounts } from './store.mjs';
+import { articleHtml, articlePage, campaignYaml, crawlSetup, httpFetchPage, makeTempDir, openCampaignFixture, startFixtureServer, writeCampaignFile } from './testkit.mjs';
 
 // The AC4 series scenarios share their shape: the run stops at the third
 // consecutive failure with the series diagnostic, and a resumed run processes
@@ -272,8 +232,13 @@ test('AC5: timestamps of two consecutive requests to the same host differ by at 
 
   const run = await fx.run();
   assert.equal(run.failed, 0, run.stopped ?? '');
-  assert.equal(fx.server.requests.length, 2);
-  const gap = fx.server.requests[1].at - fx.server.requests[0].at;
+  // G17.15: the robots.txt request is the host's first request of the run and
+  // is politeness-gated like a page fetch, so every consecutive pair of the
+  // three requests (robots.txt, /start, /second) waits out the minimum.
+  assert.equal(fx.server.requests.length, 3);
+  const robotsGap = fx.server.requests[1].at - fx.server.requests[0].at;
+  assert.ok(robotsGap >= 250, `first page request arrived ${robotsGap}ms after robots.txt, minimum is 250ms`);
+  const gap = fx.server.requests[2].at - fx.server.requests[1].at;
   assert.ok(gap >= 250, `second request arrived after ${gap}ms, minimum is 250ms`);
 });
 
@@ -358,8 +323,11 @@ test('a redirect outside the fence is audited as a breach and its content discar
   const db = openStore(path.join(dir, 'db.sqlite'));
   // The fake fetcher plays the browser: the fetch itself succeeds, but the
   // response URL is another host — the redirect re-check must refuse it.
+  // The seed host is not served here, so the robots transport is stubbed to
+  // «missing» (allow all) — the robots gate is another test's subject.
   const handlers = defaultHandlers({
     fetchPage: async () => ({ html: articleHtml(), finalUrl: 'https://portal.example/redirected' }),
+    fetchRobots: async () => null,
   });
   const run = await runCampaign(db, parsed.campaign, {
     sourcePath: file,
@@ -387,7 +355,9 @@ test('a discovered URL that is already registered is skipped without refetching'
   const run = await fx.run();
   assert.equal(run.failed, 0, run.stopped ?? '');
   assert.deepEqual(fx.recordUrls(), [fx.server.url('/loop'), fx.server.url('/start')].sort());
-  assert.equal(fx.server.requests.length, 2, '/start was fetched once — by its seed step, not again');
+  // Three requests: robots.txt (once per run), then each page fetched exactly
+  // once — /start by its seed step, /loop by its crawl step.
+  assert.equal(fx.server.requests.length, 3, '/start was fetched once — by its seed step, not again');
   const back = fx.db.prepare("SELECT status, detail FROM run_log WHERE kind = 'crawl' AND ref = ?").get(fx.server.url('/start'));
   assert.equal(back.status, 'done');
   assert.match(back.detail, /skipped: URL already registered/);
@@ -440,6 +410,19 @@ test('fence audit lines are literal-grep friendly: pinned order, single space, J
   const parsed = JSON.parse(serializeAuditLine({ url: 'https://a.example/"quoted", path', decision: 'allowed', fetched: true }));
   assert.deepEqual(Object.keys(parsed), ['url', 'decision', 'fetched']);
   assert.equal(parsed.url, 'https://a.example/"quoted", path');
+  // G17.15: robots refusals carry a trailing reason field; the three-field
+  // prefix stays byte-identical with the pinned shape above.
+  const robotsLine = serializeAuditLine({
+    url: 'https://a.example/x',
+    decision: 'robots-denied',
+    fetched: false,
+    reason: 'robots.txt of a.example disallows /x',
+  });
+  assert.equal(
+    robotsLine,
+    '{"url": "https://a.example/x", "decision": "robots-denied", "fetched": false, "reason": "robots.txt of a.example disallows /x"}'
+  );
+  assert.deepEqual(Object.keys(JSON.parse(robotsLine)), ['url', 'decision', 'fetched', 'reason']);
 });
 
 test('fence audit writer appends one JSONL line per event', () => {
