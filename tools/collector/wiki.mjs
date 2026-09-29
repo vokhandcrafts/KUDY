@@ -51,14 +51,22 @@ export function wikiHistoryUrl(api, title) {
   return url.href;
 }
 
+// One call per article: query+rvparse answers the parsed HTML and the revision
+// metadata together (action=parse no longer returns parse.revisions — live
+// pl.wikipedia 2026-09-29 answered only pageid/text/title, which failed every
+// article step of the G17.08 pilot). rvparse is deprecated but functional; if
+// it is ever removed the parser below answers a named diagnostic, not a
+// silently empty record.
 export function parseRequestUrl(api, title) {
   const url = new URL(api);
   url.search = '';
-  url.searchParams.set('action', 'parse');
+  url.searchParams.set('action', 'query');
   url.searchParams.set('format', 'json');
   url.searchParams.set('formatversion', '2');
-  url.searchParams.set('prop', 'text|revisions');
-  url.searchParams.set('page', title);
+  url.searchParams.set('titles', title);
+  url.searchParams.set('prop', 'revisions');
+  url.searchParams.set('rvprop', 'ids|timestamp|user|content');
+  url.searchParams.set('rvparse', '1');
   return url.href;
 }
 
@@ -90,23 +98,29 @@ export function parseArticleResponse(payload, title) {
     const info = json.error.info ?? 'no info';
     throw new Error(`wiki api error for '${title}': ${code} — ${info}`);
   }
-  const parse = json?.parse;
-  if (!parse) throw new Error(`wiki api response for '${title}': missing 'parse' section`);
-  if (typeof parse.title !== 'string' || parse.title === '') {
-    throw new Error(`wiki api response for '${title}': missing normalized title (parse.title)`);
+  const pages = json?.query?.pages;
+  if (!Array.isArray(pages) || pages.length === 0) {
+    throw new Error(`wiki api response for '${title}': missing query.pages`);
   }
-  if (typeof parse.text !== 'string' || parse.text.trim() === '') {
-    throw new Error(`wiki api response for '${parse.title}': missing article HTML (parse.text)`);
+  const page = pages[0];
+  if (page && typeof page === 'object' && page.missing != null) {
+    throw new Error(`wiki api error for '${title}': missingtitle — the requested page does not exist`);
   }
-  const revision = Array.isArray(parse.revisions) ? parse.revisions[0] : undefined;
+  if (!page || typeof page.title !== 'string' || page.title === '') {
+    throw new Error(`wiki api response for '${title}': missing normalized title (query.pages[].title)`);
+  }
+  const revision = Array.isArray(page.revisions) ? page.revisions[0] : undefined;
   // == null: a null revid (not just an absent one) is corrupt input too — the
   // attribution record must never carry revision_id null silently.
   if (!revision || revision.revid == null) {
-    throw new Error(`wiki api response for '${parse.title}': missing revision metadata (parse.revisions)`);
+    throw new Error(`wiki api response for '${page.title}': missing revision metadata (query.revisions)`);
+  }
+  if (typeof revision.content !== 'string' || revision.content.trim() === '') {
+    throw new Error(`wiki api response for '${page.title}': missing article HTML (query.revisions content)`);
   }
   return {
-    title: parse.title,
-    html: parse.text,
+    title: page.title,
+    html: revision.content,
     revisionId: revision.revid,
     revisionTimestamp: revision.timestamp ?? null,
     revisionUser: revision.user ?? null,
@@ -168,11 +182,11 @@ export function wikiAttribution(api, article) {
   };
 }
 
-// action=parse (prop=text) answers an article-body fragment, not a full
-// document; extractPage needs a <title> to identify the page. The wrapper
-// carries the API's normalized title. Content language is not part of the
-// parse response, so metadata.language stays null (absent metadata is null —
-// the G17.01.b convention).
+// The MediaWiki api (action=query&prop=revisions&rvparse=1) answers an
+// article-body fragment, not a full document; extractPage needs a <title> to
+// identify the page. The wrapper carries the API's normalized title. Content
+// language is not part of the response, so metadata.language stays null
+// (absent metadata is null — the G17.01.b convention).
 export function wikiDocument(article) {
   return `<html><head><title>${article.title}</title></head><body>${article.html}</body></html>`;
 }

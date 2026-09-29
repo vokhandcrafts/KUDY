@@ -33,7 +33,7 @@
 
 ## Падказкі пра гіды побач
 
-guide_nearby_shown → guide_nearby_opened → route_preview → session_started, звязаныя suggestion_id да прэв'ю і пачатку сесіі, калі пераход прыйшоў з падказкі. guide_nearby_dismissed — адмова, не памылка. Ручныя Moments і камерцыйныя прапановы не змешваюцца з гэтай лейкай. shown толькі пры фактычнай бачнасці; лакальны ліміт працуе без сервернай аналітыкі. Схема — `09`, разд. 20; правілы — R07 у `15`.
+guide_nearby_shown → guide_nearby_opened → route_preview → session_started, звязаныя suggestion_id да прэв'ю і пачатку сесіі, калі пераход прыйшоў з падказкі. guide_nearby_dismissed — адмова, не памылка. Ручныя Moments і камерцыйныя прапановы не змешваюцца з гэтай лейкай. shown толькі пры фактычнай бачнасці; лакальны ліміт працуе без сервернай аналітыкі. Схема — `09`, разд. 20; правілы — R07 у `15`; прынятыя лікі — [ADR G07.04](architecture/decisions/G07.04-guide-hints.md), машынначытальныя значэнні — [`contracts/hints/guide-hints.values.v1.json`](../contracts/hints/guide-hints.values.v1.json).
 
 ## Непублічныя водгукі і якасць падбору
 

@@ -368,10 +368,30 @@ test('G07.04: non-finite numbers answer with a named diagnostic', () => {
     for (const bad of [NaN, Infinity, -Infinity]) {
       const res = checkGuideHintValues({ ...values, [field]: bad });
       assert.ok(!res.ok, `${field}=${bad} must fail`);
+      assert.equal(
+        res.errors.filter((e) => e.rule === 'hint-value-non-finite').length,
+        1,
+        `${field}=${bad} must name exactly one non-finite path: ${JSON.stringify(res.errors)}`,
+      );
       assert.ok(
-        res.errors.some((e) => e.rule === 'hint-value-non-finite'),
-        `${field}=${bad} must fail on hint-value-non-finite: ${JSON.stringify(res.errors)}`,
+        res.errors.some((e) => e.rule === 'hint-value-non-finite' && e.path === `$.${field}`),
+        `${field}=${bad} must fail on hint-value-non-finite naming $.${field}: ${JSON.stringify(res.errors)}`,
       );
     }
   }
+});
+
+test('G07.04: both number fields non-finite are each named (#391)', () => {
+  const values = readJson('contracts/hints/guide-hints.values.v1.json');
+  const res = checkGuideHintValues({
+    ...values,
+    proximity_radius_m: NaN,
+    accepted_accuracy_m: Infinity,
+  });
+  assert.ok(!res.ok, 'both fields non-finite must fail');
+  assert.deepEqual(
+    res.errors.filter((e) => e.rule === 'hint-value-non-finite').map((e) => e.path),
+    ['$.proximity_radius_m', '$.accepted_accuracy_m'],
+    JSON.stringify(res.errors),
+  );
 });

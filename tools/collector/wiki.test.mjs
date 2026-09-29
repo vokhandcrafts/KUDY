@@ -22,8 +22,9 @@ import { campaignYaml, makeTempDir, writeCampaignFile } from './testkit.mjs';
 
 const API = 'https://pl.wikipedia.org/w/api.php';
 
-// Article body as action=parse (prop=text, formatversion=2) answers it: a
-// fragment of <p> blocks with /wiki/ relative anchors — no full document.
+// Article body as action=query (prop=revisions, rvparse=1, formatversion=2)
+// answers it: a fragment of <p> blocks with /wiki/ relative anchors — no full
+// document — inside the current revision's content.
 const GDANSK_HTML = [
   '<div class="mw-parser-output">',
   '<p><b>Gdańsk</b> is a city on the <a href="/wiki/Baltic_Sea" title="Baltic Sea">Baltic coast</a>.</p>',
@@ -36,8 +37,14 @@ const MINIMAL_HTML = '<p>One paragraph of text.</p>';
 
 function articleResponse({ title, html = GDANSK_HTML, revid = 97531, timestamp = '2026-09-24T10:00:00Z', user = 'WikiEditor' } = {}) {
   return JSON.stringify({
-    parse: { title, pageid: 7351, revid, text: html, revisions: [{ revid, timestamp, user }] },
+    query: {
+      pages: [{ ns: 0, title, pageid: 7351, revisions: [{ revid, timestamp, user, content: html }] }],
+    },
   });
+}
+
+function missingPageResponse(title) {
+  return JSON.stringify({ query: { pages: [{ ns: 0, title, missing: true }] } });
 }
 
 function membersResponse({ articles = [], subcategories = [], more = false } = {}) {
@@ -54,17 +61,15 @@ function membersResponse({ articles = [], subcategories = [], more = false } = {
   return JSON.stringify(payload);
 }
 
-function errorResponse(code, info) {
-  return JSON.stringify({ error: { code, info } });
-}
-
 // The transport tests inject: recorded responses keyed by
-// 'parse:<title>' / 'members:<category>'. A request without a fixture throws,
+// 'article:<title>' / 'members:<category>'. A request without a fixture throws,
 // so a test bug is visible as a failed step, not a silent empty run.
 function fixtureLoader(responses) {
   return async (url) => {
     const params = new URL(url).searchParams;
-    const key = params.get('action') === 'parse' ? `parse:${params.get('page')}` : `members:${params.get('cmtitle')}`;
+    let key;
+    if (params.get('action') === 'query' && params.get('prop') === 'revisions') key = `article:${params.get('titles')}`;
+    else if (params.get('list') === 'categorymembers') key = `members:${params.get('cmtitle')}`;
     if (!(key in responses)) throw new Error(`no fixture for ${key}`);
     return responses[key];
   };
@@ -104,13 +109,15 @@ async function runThrough(s) {
     snapshotsRoot: s.snapshotsRoot,
     // The recorded fixtures replay a public wiki host; the real net guard
     // would resolve it over DNS, which no test may touch (netguard.test.mjs
-    // runs the guard for real).
-    handlers: defaultHandlers({ loadApi: fixtureLoader(s.responses), netGuard: async () => {} }),
+    // runs the guard for real). The no-op sleep keeps the politeness gate's
+    // recorded waits out of the test clock — the gate itself is asserted
+    // separately below.
+    handlers: defaultHandlers({ loadApi: fixtureLoader(s.responses), netGuard: async () => {}, sleep: () => Promise.resolve() }),
   });
 }
 
 test('AC1: a fixture article becomes a raw_records row with source_type=wiki and every attribution field', async () => {
-  const s = setup({ 'parse:Gdańsk': articleResponse({ title: 'Gdańsk' }) }, { articles: ['Gdańsk'], depth: 1 });
+  const s = setup({ 'article:Gdańsk': articleResponse({ title: 'Gdańsk' }) }, { articles: ['Gdańsk'], depth: 1 });
   const run = await runThrough(s);
   assert.equal(run.failed, 0);
   assert.equal(countRows(s.db, 'raw_records'), 1);
@@ -145,7 +152,7 @@ test('AC1: a fixture article becomes a raw_records row with source_type=wiki and
 });
 
 test('AC3: rights=licensed is set automatically for wiki sources (reverting the mapping fails this test)', async () => {
-  const s = setup({ 'parse:Gdańsk': articleResponse({ title: 'Gdańsk' }) }, { articles: ['Gdańsk'], depth: 1 });
+  const s = setup({ 'article:Gdańsk': articleResponse({ title: 'Gdańsk' }) }, { articles: ['Gdańsk'], depth: 1 });
   await runThrough(s);
   const record = s.db.prepare('SELECT rights, source_type FROM raw_records').get();
   // The literal is the spec value («Правы»: MediaWiki-сайты — licensed,
@@ -163,8 +170,8 @@ test('AC2: category expansion fetches member articles and in-topic subcategories
         subcategories: ['Category:Historia Gdańska'],
       }),
       'members:Category:Historia Gdańska': membersResponse({ articles: ['Westerplatte'] }),
-      'parse:Stocznia Gdańska': articleResponse({ title: 'Stocznia Gdańska', html: MINIMAL_HTML }),
-      'parse:Westerplatte': articleResponse({ title: 'Westerplatte', html: MINIMAL_HTML }),
+      'article:Stocznia Gdańska': articleResponse({ title: 'Stocznia Gdańska', html: MINIMAL_HTML }),
+      'article:Westerplatte': articleResponse({ title: 'Westerplatte', html: MINIMAL_HTML }),
     },
     { categories: ['Category:Architektura Gdańska'], depth: 2, topics: 'topics: [architektura, historia]' }
   );
@@ -207,8 +214,8 @@ test('AC2 negative: the depth limit stops subcategory expansion — the note nam
 test('AC4: a missing title fails its own step with a diagnostic; the run completes', async () => {
   const s = setup(
     {
-      'parse:Gdańsk': articleResponse({ title: 'Gdańsk' }),
-      'parse:NotExist': errorResponse('missingtitle', "The article title you requested doesn't exist"),
+      'article:Gdańsk': articleResponse({ title: 'Gdańsk' }),
+      'article:NotExist': missingPageResponse('NotExist'),
     },
     { articles: ['Gdańsk', 'NotExist'], depth: 1 }
   );
@@ -231,8 +238,8 @@ test('AC4: a missing title fails its own step with a diagnostic; the run complet
 test('the same article listed directly and found in a category is one record; a re-run adds nothing', async () => {
   const s = setup(
     {
-      'parse:Gdańsk': articleResponse({ title: 'Gdańsk' }),
-      'parse:Gdansk': articleResponse({ title: 'Gdańsk' }),
+      'article:Gdańsk': articleResponse({ title: 'Gdańsk' }),
+      'article:Gdansk': articleResponse({ title: 'Gdańsk' }),
       'members:Category:Historia Gdańska': membersResponse({ articles: ['Gdansk'] }),
     },
     { articles: ['Gdańsk'], categories: ['Category:Historia Gdańska'], depth: 1, topics: 'topics: [historia]' }
@@ -258,7 +265,7 @@ test('the same article listed directly and found in a category is one record; a 
 test('a category with more member batches completes with a note instead of silent truncation', async () => {
   const s = setup(
     {
-      'parse:Gdańsk': articleResponse({ title: 'Gdańsk' }),
+      'article:Gdańsk': articleResponse({ title: 'Gdańsk' }),
       'members:Category:Historia Gdańska': membersResponse({ articles: ['Gdańsk'], more: true }),
     },
     { categories: ['Category:Historia Gdańska'], depth: 1, topics: 'topics: [historia]' }
@@ -272,36 +279,77 @@ test('a category with more member batches completes with a note instead of silen
 test('corrupt api payloads fail their own steps with diagnostics, never a crash', async () => {
   const s = setup(
     {
-      'parse:Bad JSON': 'not json at all {',
-      'parse:No revisions': JSON.stringify({ parse: { title: 'X', text: '<p>Text.</p>' } }),
-      'parse:Null revid': JSON.stringify({ parse: { title: 'X', text: '<p>Text.</p>', revisions: [{ revid: null }] } }),
-      'parse:No HTML': JSON.stringify({ parse: { title: 'X', revisions: [{ revid: 1 }] } }),
+      'article:Bad JSON': 'not json at all {',
+      'article:Api error': JSON.stringify({ error: { code: 'readapidenied', info: 'You need read permission' } }),
+      'article:No pages': JSON.stringify({ query: {} }),
+      'article:No revisions': JSON.stringify({ query: { pages: [{ title: 'X' }] } }),
+      'article:Null revid': JSON.stringify({ query: { pages: [{ title: 'X', revisions: [{ revid: null, content: '<p>Text.</p>' }] }] } }),
+      'article:No HTML': JSON.stringify({ query: { pages: [{ title: 'X', revisions: [{ revid: 1, timestamp: '2026-09-24T10:00:00Z', user: 'W' }] }] } }),
       'members:Category:Bad': JSON.stringify({ query: {} }),
       'members:Category:Broken member': JSON.stringify({ query: { categorymembers: [{ ns: 0 }] } }),
     },
-    { articles: ['Bad JSON', 'No revisions', 'Null revid', 'No HTML'], categories: ['Category:Bad', 'Category:Broken member'], depth: 2, topics: 'topics: [bad, broken]' }
+    {
+      articles: ['Bad JSON', 'Api error', 'No pages', 'No revisions', 'Null revid', 'No HTML'],
+      categories: ['Category:Bad', 'Category:Broken member'],
+      depth: 2,
+      topics: 'topics: [bad, broken]',
+    }
   );
   const run = await runThrough(s);
-  assert.equal(run.failed, 6);
+  assert.equal(run.failed, 8);
   const errors = s.db.prepare("SELECT error FROM run_log WHERE status = 'failed'").all().map((row) => row.error).join('\n');
   assert.match(errors, /not valid JSON/);
-  assert.match(errors, /missing revision metadata \(parse\.revisions\)/);
-  assert.match(errors, /missing article HTML \(parse\.text\)/);
+  assert.match(errors, /readapidenied/);
+  assert.match(errors, /missing query\.pages/);
+  assert.match(errors, /missing revision metadata \(query\.revisions\)/);
+  assert.match(errors, /missing article HTML \(query\.revisions content\)/);
   assert.match(errors, /missing query\.categorymembers/);
   assert.match(errors, /member without ns\/title/);
   assert.equal(countRows(s.db, 'raw_records'), 0);
+});
+
+test('wiki api calls keep the campaign politeness delay between requests (G17.08: live 429 without it)', async () => {
+  const sleeps = [];
+  const dir = makeTempDir();
+  const file = writeCampaignFile(dir, wikiYaml({ articles: ['Gdańsk', 'Westerplatte'], depth: 1 }));
+  const source = fs.readFileSync(file, 'utf8');
+  const parsed = parseCampaign(source);
+  assert.ok(parsed.ok, parsed.diagnostics?.join('\n'));
+  const db = openStore(path.join(dir, 'db.sqlite'));
+  const run = await runCampaign(db, parsed.campaign, {
+    sourcePath: file,
+    contentHash: sha256Hex(source),
+    snapshotsRoot: path.join(dir, 'snapshots'),
+    handlers: defaultHandlers({
+      loadApi: fixtureLoader({
+        'article:Gdańsk': articleResponse({ title: 'Gdańsk', html: MINIMAL_HTML }),
+        'article:Westerplatte': articleResponse({ title: 'Westerplatte', html: MINIMAL_HTML }),
+      }),
+      netGuard: async () => {},
+      sleep: (ms) => {
+        sleeps.push(ms);
+        return Promise.resolve();
+      },
+    }),
+  });
+  assert.equal(run.failed, 0);
+  // testkit fence delay_s is [2, 5]: the first same-host call answers at once,
+  // the second waits a drawn delay — a reverted gate records no wait at all.
+  assert.equal(sleeps.length, 1);
+  assert.ok(sleeps[0] >= 2000 && sleeps[0] <= 5000, `the wait follows the campaign delay range, got ${sleeps[0]}`);
+  assert.equal(countRows(db, 'raw_records'), 2);
 });
 
 test('the transport boundary serves only http(s): an unservable url fails the step with a diagnostic', async () => {
   assert.equal(await defaultHandlers().loadApi('file:///tmp/fixture.json'), null, 'file:// is not a wiki transport');
   assert.equal(await defaultHandlers().loadApi('ftp://files.example/w/api.php'), null);
 
-  const s = setup({ 'parse:Gdańsk': articleResponse({ title: 'Gdańsk' }) }, { articles: ['Gdańsk'], depth: 1 });
+  const s = setup({ 'article:Gdańsk': articleResponse({ title: 'Gdańsk' }) }, { articles: ['Gdańsk'], depth: 1 });
   const run = await runCampaign(s.db, s.campaign, {
     sourcePath: s.file,
     contentHash: sha256Hex(s.source),
     snapshotsRoot: s.snapshotsRoot,
-    handlers: defaultHandlers({ loadApi: async () => null, netGuard: async () => {} }),
+    handlers: defaultHandlers({ loadApi: async () => null, netGuard: async () => {}, sleep: () => Promise.resolve() }),
   });
   assert.equal(run.failed, 1);
   const failed = s.db.prepare("SELECT error FROM run_log WHERE status = 'failed'").get();
@@ -317,7 +365,7 @@ test('a category member outside ns 0/14 is skipped with a note; the category its
         articles: ['Stocznia Gdańska'],
         subcategories: ['Category:Historia Gdańska'],
       }),
-      'parse:Stocznia Gdańska': articleResponse({ title: 'Stocznia Gdańska', html: MINIMAL_HTML }),
+      'article:Stocznia Gdańska': articleResponse({ title: 'Stocznia Gdańska', html: MINIMAL_HTML }),
     },
     { categories: ['Category:Architektura Gdańska'], depth: 1, topics: 'topics: [architektura]' }
   );

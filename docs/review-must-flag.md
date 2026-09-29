@@ -124,3 +124,13 @@
   Выпраўлена: .github/workflows/jscpd.yml пераведзена з cross-repo выкліку
   на self-contained job; ахова ў tools/ci/check-required-checks.mjs —
   issue #241.
+
+- key: partial-non-finite-diagnostic-path — калі іменаванае правіла
+  валідацыі ахоплівае некалькі палёў уводу (finite-gate над парой лікавых
+  палёў), яно выпускае па адной дыягностыцы на кожнае парушанае поле са сваім
+  path, а не зводзіць усе парушэнні ў адзін запіс са шляхам першага поля:
+  калі абодва палі не-канечныя адначасова, другое поле застаецца
+  неіменаваным, хоць fail-closed (ok: false) захоўваецца. negative-тэст праз
+  праграмны ўвод мусіць іменаваць абодва шляхі і ўпадаць пры адкате правіла.
+  Выпраўлена: contracts/hints/guide-hints.mjs, checkGuideHintValues —
+  issue #391.
