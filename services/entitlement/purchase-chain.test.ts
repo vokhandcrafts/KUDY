@@ -18,7 +18,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { createPurchaseChain, type PurchaseChainDeps } from './purchase-chain.ts';
+import { createPurchaseChain, type PurchaseChainDeps, type UnlockInput } from './purchase-chain.ts';
 import { FakeStoreSessionPort, rcError } from './fake-port.ts';
 import { scriptedGrant, type ScriptedGrant } from './grant-fake.ts';
 import { createAccessPort } from '../download/access.ts';
@@ -256,6 +256,18 @@ test('criterion 3 (disk truth): a ready product whose layer regressed re-activat
 
 test('boundary: a corrupt request is invalid-input before any store, grant or filesystem call', async () => {
   await withRoot(async (rig) => {
+    // The request-shape rule isolated: not an object at all — no memo
+    // lookup, no store, no grant, a named local answer (implementation-
+    // rules 14: the guard's own failing-on-removal negative test).
+    const shape = await rig.chain.unlock(null as unknown as UnlockInput);
+    assert.deepEqual(shape, {
+      kind: 'invalid-input',
+      state: 'not-owned',
+      diagnostics: ['chain#request-shape'],
+    });
+    assert.deepEqual(rig.storePort.calls, []);
+    assert.deepEqual(rig.grant.requested, []);
+
     const outcome = await rig.chain.unlock({
       identity: { deviceId: DEVICE },
       productId: 'com.kudy.route.gdansk extended',
@@ -300,5 +312,42 @@ test('boundary: a corrupt request is invalid-input before any store, grant or fi
       diagnostics: ['chain#layer-key', 'chain#lock'],
     });
     assert.equal(rig.chain.stateOf(PRODUCT), 'ready');
+  });
+});
+
+test('concurrent unlocks of one product share one chain run — the store, the grant and the activation run once', { timeout: 10_000 }, async () => {
+  await withRoot(async (rig) => {
+    // The store session holds every purchase open (a slow payment sheet).
+    // Every open purchase is collected, so the release below resolves them
+    // all — a missing in-flight memo must show up as a crisp store-call
+    // count failure, never as a hung suite.
+    const pending: Array<(ack: { productId: string }) => void> = [];
+    rig.storePort.purchaseResolves(
+      () =>
+        new Promise((resolve) => {
+          pending.push(resolve);
+        }),
+    );
+    const input = await unlockInput();
+    const first = rig.chain.unlock(input);
+    const second = rig.chain.unlock(input);
+    while (!rig.storePort.calls.some((call) => call.startsWith('purchase'))) {
+      await Promise.resolve();
+    }
+    for (const resolve of pending.splice(0)) resolve({ productId: PRODUCT });
+    const [a, b] = await Promise.all([first, second]);
+    assert.equal(a.kind, 'ready');
+    assert.equal(b.kind, 'ready');
+    // Exactly one store transaction and one grant — the second caller
+    // awaited the same chain run instead of starting its own.
+    assert.deepEqual(rig.storePort.calls, [`link ${DEVICE}`, `purchase ${PRODUCT}`]);
+    assert.equal(rig.grant.requested.length, 1);
+    assert.equal(rig.chain.stateOf(PRODUCT), 'ready');
+
+    // A settled run frees the product: the sequential retry runs a fresh
+    // chain — and the complete layer re-activates with zero fetches and
+    // zero new grants (the disk truth), never a memoized old promise.
+    assert.equal((await rig.chain.unlock(input)).kind, 'ready');
+    assert.equal(rig.grant.requested.length, 1);
   });
 });

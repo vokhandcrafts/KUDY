@@ -111,103 +111,138 @@ export interface PurchaseChain {
 
 // The per-product state of one chain instance, in memory (see the header:
 // the durable truth is the server's; the store's non-consumable protection
-// covers the across-restart path).
+// covers the across-restart path). The in-flight memo of a running unlock
+// (the services/device.ts idiom) keeps the promise only while it runs, so a
+// double-tap never reaches the store, the grant or the same staging path
+// twice — a settled unlock frees the product and a later call runs a fresh
+// chain, which is exactly the retry semantics.
 export function createPurchaseChain(deps: PurchaseChainDeps): PurchaseChain {
   const states = new Map<string, PurchaseChainState>();
+  const inflight = new Map<string, Promise<UnlockOutcome>>();
   const diagnostic = (line: string): void => deps.onDiagnostics?.(line);
   const stateOf = (productId: string): PurchaseChainState => states.get(productId) ?? 'not-owned';
 
+  async function runUnlock(input: UnlockInput): Promise<UnlockOutcome> {
+    if (input === null || typeof input !== 'object') {
+      return { kind: 'invalid-input', state: 'not-owned', diagnostics: ['chain#request-shape'] };
+    }
+    // Boundary validation before any side effect (implementation-rules
+    // 14): the identity shape (the UUID POST /v1/device issues), the
+    // product id (the same pattern the store session enforces — the
+    // single copy exported from service.ts) and the layer key (the
+    // shared contentRepo guard). A corrupt request is a named local
+    // answer; the store, the grant and the filesystem are untouched.
+    const diagnostics: string[] = [];
+    if (
+      typeof input.identity !== 'object' ||
+      input.identity === null ||
+      typeof input.identity.deviceId !== 'string' ||
+      !UUID_PATTERN.test(input.identity.deviceId)
+    ) {
+      diagnostics.push('chain#device-id');
+    }
+    if (typeof input.productId !== 'string' || !PRODUCT_ID_PATTERN.test(input.productId)) {
+      diagnostics.push('chain#product-id');
+    }
+    const key: LayerKey = {
+      routeId: input.key?.routeId ?? '',
+      version: input.key?.version ?? '',
+      locale: input.key?.locale ?? '',
+      tier: input.key?.tier ?? '',
+    };
+    if (validateKey(key).length > 0) diagnostics.push('chain#layer-key');
+    // The lock is validated through the activation core's own prologue —
+    // the same guard the grant client and activate() trust — so a corrupt
+    // lock is refused before the purchase, never after the user has paid.
+    const parsed = parseActivationInput({ ...key, lock: input.lock });
+    if (parsed.invalid) diagnostics.push('chain#lock');
+    if (diagnostics.length > 0) {
+      return { kind: 'invalid-input', state: stateOf(input.productId), diagnostics };
+    }
+    const identity: StoreIdentity = input.identity;
+    const productId: string = input.productId;
+    const { lock } = input;
+
+    // The purchase leg (criterion 1). From 'paid'/'ready' the store is
+    // never called again: the owned fact stands whatever the download
+    // answered, and the retry below is a download, not a Buy. The
+    // 'not-owned' pass takes the store's own honest answer: a finished
+    // transaction — or the store's own «не бярэм грошай другі раз»
+    // (already-owned) — marks the product paid; every other kind is
+    // passed through untouched and the purchase path stays available.
+    if (stateOf(productId) === 'not-owned') {
+      const outcome = await purchaseNonConsumable({ store: deps.store }, identity, productId);
+      diagnostic(`chain:purchase kind=${outcome.kind}`);
+      if (outcome.kind !== 'transaction-finished' && outcome.kind !== 'already-owned') {
+        return { kind: 'purchase-not-finished', state: 'not-owned', outcome };
+      }
+      states.set(productId, 'paid');
+    } else {
+      diagnostic(`chain:purchase-skip state=${stateOf(productId)}`);
+    }
+
+    // The download leg: grant + staging + per-file hash + atomic rename,
+    // through the production activation core. The signed-URL source
+    // re-mints expired portions and re-grants a 403 url_expired mid-flight
+    // (09 §5.1) — criterion 2 without any second purchase. Only the core's
+    // own 'complete' — every file hash-verified and renamed — turns the
+    // state ready (criterion 3); the AccessReady event is the commit's
+    // own emission through the port, never the chain's.
+    const fetch = createGrantFetchSource({ key, entries: parsed.entries }, deps.grant);
+    const result = await activate(
+      { ...key, lock },
+      {
+        store: deps.bundlesStore,
+        fetch,
+        sha256: deps.sha256,
+        driver: deps.driver,
+        access: deps.access,
+      },
+    );
+    diagnostic(`chain:activation status=${result.status}`);
+    if (result.status === 'complete') {
+      states.set(productId, 'ready');
+      return { kind: 'ready', state: 'ready' };
+    }
+    // Every failure category — partial, hash-mismatch, insufficient-space,
+    // invalid-input, cancelled — keeps the owned fact: the state lands on
+    // 'paid' (from 'ready' too: the disk truth regressed, so the verified
+    // access is gone until a retry completes), and the next action is the
+    // download retry.
+    states.set(productId, 'paid');
+    return { kind: 'download-incomplete', state: 'paid', result };
+  }
+
   return {
     stateOf,
-    async unlock(input: UnlockInput): Promise<UnlockOutcome> {
-      if (input === null || typeof input !== 'object') {
-        return { kind: 'invalid-input', state: 'not-owned', diagnostics: ['chain#request-shape'] };
+    unlock(input: UnlockInput): Promise<UnlockOutcome> {
+      // The in-flight memo keyed by the product (the services/device.ts
+      // idiom): concurrent unlocks of one product share the same chain run —
+      // the store session, the grant and the staging path are
+      // single-consumer. The memo holds the promise only while it runs; a
+      // settled unlock (any outcome) frees the product, so a later call runs
+      // a fresh chain — the retry semantics never change. A request-shaped
+      // unlock input is needed even to find the memo: anything else is the
+      // named local invalid-input answer, with nothing running at all.
+      const productId =
+        input !== null && typeof input === 'object' && typeof input.productId === 'string'
+          ? input.productId
+          : null;
+      const running = productId !== null ? inflight.get(productId) : undefined;
+      if (running !== undefined) return running;
+      const run = runUnlock(input);
+      if (productId !== null) {
+        inflight.set(productId, run);
+        void run.then(
+          () => {
+            if (inflight.get(productId) === run) inflight.delete(productId);
+          },
+          () => {
+            if (inflight.get(productId) === run) inflight.delete(productId);
+          },
+        );
       }
-      // Boundary validation before any side effect (implementation-rules
-      // 14): the identity shape (the UUID POST /v1/device issues), the
-      // product id (the same pattern the store session enforces — the
-      // single copy exported from service.ts) and the layer key (the
-      // shared contentRepo guard). A corrupt request is a named local
-      // answer; the store, the grant and the filesystem are untouched.
-      const diagnostics: string[] = [];
-      if (
-        typeof input.identity !== 'object' ||
-        input.identity === null ||
-        typeof input.identity.deviceId !== 'string' ||
-        !UUID_PATTERN.test(input.identity.deviceId)
-      ) {
-        diagnostics.push('chain#device-id');
-      }
-      if (typeof input.productId !== 'string' || !PRODUCT_ID_PATTERN.test(input.productId)) {
-        diagnostics.push('chain#product-id');
-      }
-      const key: LayerKey = {
-        routeId: input.key?.routeId ?? '',
-        version: input.key?.version ?? '',
-        locale: input.key?.locale ?? '',
-        tier: input.key?.tier ?? '',
-      };
-      if (validateKey(key).length > 0) diagnostics.push('chain#layer-key');
-      // The lock is validated through the activation core's own prologue —
-      // the same guard the grant client and activate() trust — so a corrupt
-      // lock is refused before the purchase, never after the user has paid.
-      const parsed = parseActivationInput({ ...key, lock: input.lock });
-      if (parsed.invalid) diagnostics.push('chain#lock');
-      if (diagnostics.length > 0) {
-        return { kind: 'invalid-input', state: stateOf(input.productId), diagnostics };
-      }
-      const identity: StoreIdentity = input.identity;
-      const productId: string = input.productId;
-      const { lock } = input;
-
-      // The purchase leg (criterion 1). From 'paid'/'ready' the store is
-      // never called again: the owned fact stands whatever the download
-      // answered, and the retry below is a download, not a Buy. The
-      // 'not-owned' pass takes the store's own honest answer: a finished
-      // transaction — or the store's own «не бярэм грошай другі раз»
-      // (already-owned) — marks the product paid; every other kind is
-      // passed through untouched and the purchase path stays available.
-      if (stateOf(productId) === 'not-owned') {
-        const outcome = await purchaseNonConsumable({ store: deps.store }, identity, productId);
-        diagnostic(`chain:purchase kind=${outcome.kind}`);
-        if (outcome.kind !== 'transaction-finished' && outcome.kind !== 'already-owned') {
-          return { kind: 'purchase-not-finished', state: 'not-owned', outcome };
-        }
-        states.set(productId, 'paid');
-      } else {
-        diagnostic(`chain:purchase-skip state=${stateOf(productId)}`);
-      }
-
-      // The download leg: grant + staging + per-file hash + atomic rename,
-      // through the production activation core. The signed-URL source
-      // re-mints expired portions and re-grants a 403 url_expired mid-flight
-      // (09 §5.1) — criterion 2 without any second purchase. Only the core's
-      // own 'complete' — every file hash-verified and renamed — turns the
-      // state ready (criterion 3); the AccessReady event is the commit's
-      // own emission through the port, never the chain's.
-      const fetch = createGrantFetchSource({ key, entries: parsed.entries }, deps.grant);
-      const result = await activate(
-        { ...key, lock },
-        {
-          store: deps.bundlesStore,
-          fetch,
-          sha256: deps.sha256,
-          driver: deps.driver,
-          access: deps.access,
-        },
-      );
-      diagnostic(`chain:activation status=${result.status}`);
-      if (result.status === 'complete') {
-        states.set(productId, 'ready');
-        return { kind: 'ready', state: 'ready' };
-      }
-      // Every failure category — partial, hash-mismatch, insufficient-space,
-      // invalid-input, cancelled — keeps the owned fact: the state lands on
-      // 'paid' (from 'ready' too: the disk truth regressed, so the verified
-      // access is gone until a retry completes), and the next action is the
-      // download retry.
-      states.set(productId, 'paid');
-      return { kind: 'download-incomplete', state: 'paid', result };
+      return run;
     },
   };
 }
