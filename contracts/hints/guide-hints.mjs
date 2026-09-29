@@ -33,10 +33,16 @@ export function checkGuideHintValues(doc) {
       // The schema minimum cannot see NaN/±Infinity (every comparison is
       // false) — the finite gate is the only guard for the two number fields.
       if (!Number.isFinite(radius) || !Number.isFinite(accuracy)) {
-        errors.push({
-          rule: 'hint-value-non-finite',
-          path: Number.isFinite(radius) ? '$.accepted_accuracy_m' : '$.proximity_radius_m',
-        });
+        // One entry per non-finite field: a diagnostic with a single path
+        // must not collapse two violations into the first one (#391).
+        for (const [value, path] of [
+          [radius, '$.proximity_radius_m'],
+          [accuracy, '$.accepted_accuracy_m'],
+        ]) {
+          if (!Number.isFinite(value)) {
+            errors.push({ rule: 'hint-value-non-finite', path });
+          }
+        }
       } else if (accuracy >= radius) {
         errors.push({ rule: 'hint-accuracy-exceeds-radius', path: '$.accepted_accuracy_m' });
       }
