@@ -31,6 +31,7 @@ import { runCampaign } from './runloop.mjs';
 import { cleanCampaign } from './clean.mjs';
 import { exportReviewBundle } from './review.mjs';
 import { basketRows, exportDraft, searchLibrary } from './library.mjs';
+import { DEFAULT_PORT, startDispatcher } from './dispatcher.mjs';
 
 const usage = `usage: node tools/collector/collector.mjs <command> [options]
 
@@ -46,6 +47,8 @@ commands:
                                       collect fragments for the draft export
   export-draft --out <file>           write the markdown draft from the basket;
                                       exported records move cleaned -> used
+  dispatch [--port N]                 serve the read-only local dispatcher page
+                                      (Агляд) on 127.0.0.1; default port 8767
   status                              print stored counts
 
 options:
@@ -112,6 +115,7 @@ export async function main(argv) {
         query: { type: 'string' },
         record: { type: 'string', multiple: true },
         out: { type: 'string' },
+        port: { type: 'string' },
       },
       args: argv,
     });
@@ -120,7 +124,7 @@ export async function main(argv) {
     fail(error.message, 2);
   }
   const [command] = parsed.positionals;
-  if (!command || !['init', 'run', 'status', 'clean', 'export-review', 'search', 'basket', 'export-draft'].includes(command)) {
+  if (!command || !['init', 'run', 'status', 'clean', 'export-review', 'search', 'basket', 'export-draft', 'dispatch'].includes(command)) {
     console.error(usage);
     fail(`unknown command '${command ?? ''}'`, 2);
   }
@@ -258,6 +262,25 @@ export async function main(argv) {
     const outPath = path.resolve(parsed.values.out);
     const result = exportDraft(db, { outPath });
     console.log(`collector: draft at ${outPath} — ${result.fragments} fragment(s), ${result.transitioned} moved to used`);
+    return;
+  }
+
+  // Dispatcher (G17.12): a read-only page over the store, for the human
+  // editor. A missing database file is fine — the page renders the empty
+  // state; an existing but unusable one answers with the shared exit-2
+  // diagnostic inside startDispatcher. The listening handle keeps the
+  // process alive after main resolves.
+  if (command === 'dispatch') {
+    let port = DEFAULT_PORT;
+    if (parsed.values.port !== undefined) {
+      if (!/^\d+$/.test(parsed.values.port) || Number(parsed.values.port) < 1 || Number(parsed.values.port) > 65535) {
+        fail(`invalid --port '${parsed.values.port}' — use a number from 1 to 65535`, 2);
+      }
+      port = Number(parsed.values.port);
+    }
+    const snapshotsRoot = path.join(path.dirname(dbPath), 'snapshots');
+    const { port: listeningPort } = await startDispatcher({ dbPath, snapshotsRoot, port });
+    console.log(`collector: dispatcher reading http://127.0.0.1:${listeningPort} (db: ${dbPath})`);
     return;
   }
 
