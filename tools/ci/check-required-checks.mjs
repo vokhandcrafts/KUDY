@@ -77,7 +77,7 @@ if (/uses:\s*vokhandcrafts\/ai-company-infrastructure\//.test(jscpdWorkflow)) {
 if (!/npx\s+--yes\s+jscpd@/.test(jscpdWorkflow)) {
   failures.push('jscpd.yml does not run npx --yes jscpd@ — the CI gate is absent');
 }
-if (!/persistent-credentials|persist-credentials:\s*false/.test(jscpdWorkflow)) {
+if (!/persist-credentials:\s*false/.test(jscpdWorkflow)) {
   failures.push('jscpd.yml checkout does not set persist-credentials: false');
 }
 const workflowVersion = (jscpdWorkflow.match(/jscpd@([0-9]+\.[0-9]+\.[0-9]+)/) || [])[1];
