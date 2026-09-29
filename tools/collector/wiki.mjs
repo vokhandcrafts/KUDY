@@ -19,6 +19,26 @@ export function wikiArticleUrl(api, title) {
   return `${new URL(api).origin}/wiki/${encodeURIComponent(title.replaceAll(' ', '_'))}`;
 }
 
+// The inverse of wikiArticleUrl for the dispatcher's record card: a record URL
+// of the <origin>/wiki/<title> form maps back to the ref the wiki-article step
+// was enqueued with, so the card can list the step that produced the record.
+// Anything else — and a path with un-decodable escapes — answers null.
+export function wikiTitleFromUrl(url) {
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  if (!parsed.pathname.startsWith('/wiki/')) return null;
+  try {
+    const title = decodeURIComponent(parsed.pathname.slice('/wiki/'.length)).replaceAll('_', ' ');
+    return title === '' ? null : title;
+  } catch {
+    return null;
+  }
+}
+
 // Contributors page for the attribution record: MediaWiki keeps index.php in
 // the same directory as api.php; the revision history is the contributors
 // list.

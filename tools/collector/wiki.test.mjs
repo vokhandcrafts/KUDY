@@ -5,6 +5,7 @@ import path from 'node:path';
 import { defaultHandlers, runCampaign } from './runloop.mjs';
 import { countRows, openStore, sha256Hex } from './store.mjs';
 import { parseCampaign } from './campaign.mjs';
+import { wikiArticleUrl, wikiTitleFromUrl } from './wiki.mjs';
 import { campaignYaml, makeTempDir, writeCampaignFile } from './testkit.mjs';
 
 // G17.04 acceptance suite (docs/agent-tasks/collection/G17.04.md) over the
@@ -369,4 +370,24 @@ test('a loopback api endpoint is refused by the net guard before the transport (
   assert.match(failed.error, /net guard: 127\.0\.0\.1 is a loopback address — request not made/);
   assert.match(failed.error, /wiki-article 'Gdańsk'/, 'the step context names the work order');
   assert.equal(countRows(s.db, 'raw_records'), 0);
+});
+
+// The dispatcher's record card finds a record's wiki-article step by mapping
+// the record url back to the step's ref (G17.14): the round trip with
+// wikiArticleUrl must hold, and anything that is not a /wiki/ url — including
+// input with un-decodable escapes — answers null instead of throwing.
+test('wikiTitleFromUrl inverts wikiArticleUrl and rejects other urls', () => {
+  const api = 'https://pl.wikipedia.org/w/api.php';
+  for (const title of ['Gdańsk', 'Stocznia Gdańska']) {
+    assert.equal(wikiTitleFromUrl(wikiArticleUrl(api, title)), title);
+  }
+  // Underscores are the url spelling of spaces (wikiArticleUrl), so the
+  // inverse normalizes them back — the direction is lossy by design.
+  assert.equal(wikiTitleFromUrl(wikiArticleUrl(api, 'a_b')), 'a b');
+  assert.equal(wikiTitleFromUrl('https://news.example/a'), null);
+  assert.equal(wikiTitleFromUrl('https://pl.wikipedia.org/wiki/'), null);
+  assert.equal(wikiTitleFromUrl('https://pl.wikipedia.org/w/api.php'), null);
+  assert.equal(wikiTitleFromUrl('not a url'), null);
+  assert.equal(wikiTitleFromUrl('https://pl.wikipedia.org/wiki/%zz'), null);
+>>>>>>> origin/main
 });
