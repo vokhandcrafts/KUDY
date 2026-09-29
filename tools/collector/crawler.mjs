@@ -76,9 +76,12 @@ export function parseCrawlDetail(step) {
   return detail;
 }
 
-export function createCrawler({ fetchPage, auditPath, delayRange, netGuard, fetchRobots }) {
+export function createCrawler({ fetchPage, auditPath, delayRange, netGuard, fetchRobots, gate: sharedGate }) {
   const audit = createAuditWriter(auditPath);
-  const gate = createPoliteness(delayRange);
+  // An injected gate lets one run share one per-host clock between the crawl
+  // and the wiki api calls (G17.08 pilot: two independent gates doubled the
+  // request rate against pl.wikipedia.org and drew live HTTP 429s).
+  const gate = sharedGate ?? createPoliteness(delayRange);
   // One robots gate per crawler — one campaign per run, so the robots.txt
   // cache spans exactly one run (G17.15: «robots.txt кэшуецца на адзін прагон»).
   const robots = createRobotsGate({ fetchRobots, gate });

@@ -1,0 +1,37 @@
+# Пілотная кампанія Гданьск (G17.08, issue #163, спецыфікацыя docs/24_web_collection.md «Пілот»).
+# Навінны партал адкладзены ўладарам (#153, «пакуль без навін»), таму пілот ідзе
+# на дзвюх сям'ях крыніц: Вікіпедыя (MediaWiki API, licensed CC BY-SA) і
+# YouTube з ручнымі субтытрамі. Сід — старонка пра горад (рака Мотлава);
+# навінны сід дадасца асобнай кампаніяй пасля выбару партала ўладарам.
+# Відэа адабраныя 2026-09-29 праз yt-dlp: у кожнага непусты блок ручных
+# субтытраў (`subtitles`, не `automatic_captions`).
+city: gdansk
+seeds:
+  - https://pl.wikipedia.org/wiki/Mot%C5%82awa
+topics: [history, architecture, shipyard, solidarity]
+fence: { depth: 1, extra_domains: [], delay_s: [2, 5] }
+wiki:
+  api: https://pl.wikipedia.org/w/api.php
+  articles:
+    - Gdańsk
+    - Stocznia Gdańska
+    - Westerplatte
+    - Bazylika Konkatedralna Wniebowzięcia Najświętszej Maryi Panny w Gdańsku
+    - Długi Targ
+    - Europejskie Centrum Solidarności
+    - Ulica Mariacka w Gdańsku
+    - Fontanna Neptuna w Gdańsku
+    - Twierdza Wisłoujście
+    - Oliwa (Gdańsk)
+    - Główne Miasto
+    - Wyspa Spichrzów
+  depth: 1
+youtube:
+  - 8CRfJX3sxgU   # „Gdańsk 1939”, Muzeum II Wojny Światowej w Gdańsku — pl
+  - f0-n_nWOYOQ   # DW Travel: Gdańsk і рух Solidarności — en
+  - kW_0Aq57K9g   # Robert Makłowicz: „Gdańsk, miasto wolności” — pl/en/uk
+  - HCp0Zr6Si-Y   # Europejskie Centrum Solidarności: The Gdańsk Shipyard — en-GB/pl
+  - d0Syna3h3_8   # Before You Go: Gdansk Travel Guide — en-US
+  - R408ojguihE   # Ben Robson: 72 Hours In Gdańsk — en-GB
+  - h-gooq1aFD4   # Historia bez cenzury: Hanza, statki, Solidarność — pl
+  - PcBnEIXGqls   # Stary Ziomek i Morze: Gdański Titanic і Schichau — pl/en-US/de

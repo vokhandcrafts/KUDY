@@ -37,7 +37,7 @@ import {
 } from './store.mjs';
 import { processImageStep } from './media.mjs';
 import { defaultSnapshotsRoot, processFetchedPage } from './snapshot.mjs';
-import { CrawlStopError, createCrawler, parseCrawlDetail } from './crawler.mjs';
+import { CrawlStopError, createCrawler, createPoliteness, parseCrawlDetail } from './crawler.mjs';
 import { RobotsBlockedError } from './robots.mjs';
 import { createBrowserFetchPage } from './netfetch.mjs';
 import { createNetGuard } from './netguard.mjs';
@@ -95,6 +95,7 @@ export function defaultHandlers({
   youtubeFetch = createYoutubeFetch(),
   loadApi = defaultLoadApi,
   netGuard = createNetGuard(),
+  sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 } = {}) {
   // One crawler per handlers instance — one campaign per runCampaign call, so
   // the politeness gate, the robots.txt cache and the error-series counter
@@ -103,6 +104,16 @@ export function defaultHandlers({
   let crawler = null;
   let browser = null;
   let backlog = null;
+  let politeness = null;
+  // One per-host politeness clock for the whole run (spec: «затрымка 2–5 с
+  // паміж запытамі да аднаго хоста»), shared by the crawl and the wiki api
+  // calls — the G17.08 pilot saw live HTTP 429s while two independent gates
+  // let the crawl and the api fire at the same host concurrently.
+  function politenessFor(ctx) {
+    if (politeness) return politeness;
+    politeness = createPoliteness(ctx.campaign.fence.delay_s, { sleep });
+    return politeness;
+  }
   function crawlerFor(ctx) {
     if (crawler) return crawler;
     crawler = createCrawler({
@@ -110,6 +121,7 @@ export function defaultHandlers({
       delayRange: ctx.campaign.fence.delay_s,
       netGuard,
       fetchRobots,
+      gate: politenessFor(ctx),
       fetchPage:
         fetchPage ??
         ((url) => {
@@ -180,6 +192,7 @@ export function defaultHandlers({
       }
       if (!order.api) throw new Error(`wiki-article '${step.ref}': work order without api`);
       const requestUrl = parseRequestUrl(order.api, step.ref);
+      await politenessFor(ctx)(new URL(requestUrl).hostname);
       let payload;
       try {
         // The api endpoint is a campaign-configured address — guarded like a
@@ -226,6 +239,7 @@ export function defaultHandlers({
         throw new Error(`wiki-category '${step.ref}': work order without api/depth`);
       }
       const requestUrl = categoryMembersRequestUrl(order.api, step.ref);
+      await politenessFor(ctx)(new URL(requestUrl).hostname);
       let payload;
       try {
         await netGuard(requestUrl);
