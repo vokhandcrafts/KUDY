@@ -194,6 +194,9 @@ test('an unresolvable seed fails with a readable diagnostic; a public seed still
       // without discovering further hosts.
       return { html: articlePage('Second', []), finalUrl: url };
     },
+    // The robots gate is another test's subject — missing robots.txt allows
+    // everything, and the guard's own suites run it for real.
+    fetchRobots: async () => null,
     netGuard: createNetGuard({
       resolve: async (host) => {
         if (host === 'missing.example') {
@@ -231,6 +234,7 @@ test('a discovered link to a non-http scheme inside the fence is refused at exec
   });
   const handlers = defaultHandlers({
     fetchPage: async (url) => ({ html: startPage, finalUrl: url }),
+    fetchRobots: async () => null,
     netGuard: createNetGuard({ resolve: publicResolve }),
   });
   const run = await runCampaign(fx.db, fx.campaign, {

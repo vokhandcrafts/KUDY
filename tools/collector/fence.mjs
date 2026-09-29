@@ -44,10 +44,14 @@ export function hostAllowed(url, allowedHosts) {
 // («Пілот» criterion 1 — 0 pages outside allowed hosts): fixed field order
 // (url, decision, fetched), one space after each colon, JSON-string-escaped
 // url — so `grep '"decision": "denied", "fetched": true'` over the file stays
-// meaningful forever. decision is 'allowed' | 'denied' (the host fence);
-// fetched says whether this run downloaded bytes for the URL.
-export function serializeAuditLine({ url, decision, fetched }) {
-  return `{"url": ${JSON.stringify(url)}, "decision": ${JSON.stringify(decision)}, "fetched": ${fetched}}`;
+// meaningful forever. decision is 'allowed' | 'denied' (the host fence) |
+// 'robots-denied' (the robots.txt gate, G17.15); fetched says whether this run
+// downloaded bytes for the URL. The optional trailing reason carries the
+// robots refusal's readable cause; lines without it stay byte-identical with
+// the pinned three-field shape.
+export function serializeAuditLine({ url, decision, fetched, reason }) {
+  const base = `{"url": ${JSON.stringify(url)}, "decision": ${JSON.stringify(decision)}, "fetched": ${fetched}`;
+  return reason === undefined ? `${base}}` : `${base}, "reason": ${JSON.stringify(reason)}}`;
 }
 
 // Append-only JSONL writer: one line per fence event, flushed synchronously so
@@ -55,11 +59,11 @@ export function serializeAuditLine({ url, decision, fetched }) {
 export function createAuditWriter(auditPath) {
   const dir = path.dirname(auditPath);
   let madeDir = false;
-  return function audit({ url, decision, fetched }) {
+  return function audit({ url, decision, fetched, reason }) {
     if (!madeDir) {
       fs.mkdirSync(dir, { recursive: true });
       madeDir = true;
     }
-    fs.appendFileSync(auditPath, `${serializeAuditLine({ url, decision, fetched })}\n`);
+    fs.appendFileSync(auditPath, `${serializeAuditLine({ url, decision, fetched, reason })}\n`);
   };
 }

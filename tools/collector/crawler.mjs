@@ -1,19 +1,23 @@
 // The crawl pipeline (G17.02): one URL per step, walked inside the fence.
 // Discovered links are audited and enqueued (kind 'crawl', hop depth in the
 // step detail); every executed step is fence-checked again, politeness-delayed
-// per host, fetched through the injected fetchPage boundary, classified by the
-// article heuristic and handed to the G17.01.b snapshot writer — the same
-// processFetchedPage path the file:// seed handler uses (no test shortcut).
+// per host, robots-gated (G17.15), fetched through the injected fetchPage
+// boundary, classified by the article heuristic and handed to the G17.01.b
+// snapshot writer — the same processFetchedPage path the file:// seed handler
+// uses (no test shortcut).
 //
 // The fence audit log gets one line per event: a DENIED line when discovery
 // meets an outside host (the URL is never enqueued), an ALLOWED line when a
 // URL's fetch is decided (fetched true — bytes downloaded; false — the URL was
-// already registered or the attempt failed). The pilot criterion «0 pages
-// outside allowed hosts» is a grep for denied lines with fetched:true — there
-// are none unless the fence itself is broken.
+// already registered or the attempt failed), a ROBOTS-DENIED line (with the
+// reason field) when the robots.txt gate refuses the URL — no bytes are
+// downloaded for it. The pilot criterion «0 pages outside allowed hosts» is a
+// grep for denied lines with fetched:true — there are none unless the fence
+// itself is broken.
 import { extractPage } from './extract.mjs';
 import { createAuditWriter, fenceHosts, hostnameOf, hostAllowed } from './fence.mjs';
 import { enqueueStep } from './store.mjs';
+import { RobotsBlockedError, createRobotsGate } from './robots.mjs';
 import { processFetchedPage } from './snapshot.mjs';
 
 // «Ветлівасць: спыненне па серыі памылак» — N consecutive failed crawl steps
@@ -72,9 +76,12 @@ export function parseCrawlDetail(step) {
   return detail;
 }
 
-export function createCrawler({ fetchPage, auditPath, delayRange, netGuard }) {
+export function createCrawler({ fetchPage, auditPath, delayRange, netGuard, fetchRobots }) {
   const audit = createAuditWriter(auditPath);
   const gate = createPoliteness(delayRange);
+  // One robots gate per crawler — one campaign per run, so the robots.txt
+  // cache spans exactly one run (G17.15: «robots.txt кэшуецца на адзін прагон»).
+  const robots = createRobotsGate({ fetchRobots, gate });
   let consecutiveErrors = 0;
 
   // Discovery: a link met on a fetched article. Outside hosts are audited
@@ -103,7 +110,10 @@ export function createCrawler({ fetchPage, auditPath, delayRange, netGuard }) {
       consecutiveErrors = 0;
       return outcome;
     } catch (error) {
-      if (error instanceof CrawlStopError) throw error;
+      // A robots refusal is the robots contract working, not a crawl failure:
+      // it neither feeds the error series nor stops the run (the seed refusals
+      // surface through runCampaign's all-seeds-blocked epilogue instead).
+      if (error instanceof CrawlStopError || error instanceof RobotsBlockedError) throw error;
       consecutiveErrors += 1;
       if (consecutiveErrors >= ERROR_SERIES_LIMIT) {
         throw new CrawlStopError(
@@ -148,6 +158,18 @@ export function createCrawler({ fetchPage, auditPath, delayRange, netGuard }) {
       return `skipped: URL already registered as ${registered.id.slice(0, 8)}`;
     }
 
+    // The robots.txt gate (G17.15): a disallowed path is never fetched and the
+    // refusal lands in the audit with its reason. The seed refusal fails the
+    // step loudly — the seed is the author's explicit choice; a discovered
+    // link's refusal completes the step with a note — that is the robots
+    // contract working, not an error. depth 0 is the seed's hop depth.
+    const verdict = await robots(url);
+    if (!verdict.allowed) {
+      audit({ url, decision: 'robots-denied', fetched: false, reason: verdict.reason });
+      if (depth === 0) throw new RobotsBlockedError(`${verdict.reason} — seed not fetched`);
+      return `skipped: ${verdict.reason} — not fetched`;
+    }
+
     await gate(hostnameOf(url));
     let html;
     let finalUrl;
@@ -165,6 +187,15 @@ export function createCrawler({ fetchPage, auditPath, delayRange, netGuard }) {
     if (!hostAllowed(finalUrl, allowed)) {
       audit({ url: finalUrl, decision: 'denied', fetched: true });
       throw new Error(`redirected outside the fence to ${finalUrl} — content discarded`);
+    }
+    // The same re-check for the robots gate: a redirect from an allowed path
+    // onto a disallowed one of the same host must discard the downloaded
+    // bytes, not snapshot them — «не запытвае шляхі, забароненыя паўзуку»
+    // holds for the redirect's destination too.
+    const redirectVerdict = await robots(finalUrl);
+    if (!redirectVerdict.allowed) {
+      audit({ url: finalUrl, decision: 'robots-denied', fetched: true, reason: redirectVerdict.reason });
+      throw new Error(`redirected to ${finalUrl} — ${redirectVerdict.reason} — content discarded`);
     }
 
     // The heuristic classifies before the snapshot writer runs: a page that
