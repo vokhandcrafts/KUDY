@@ -38,7 +38,7 @@ export class FakeStoreSessionPort implements StoreSessionPort {
     this.linkScript = () => Promise.reject(thrown);
   }
 
-  purchaseResolves(ack: StorePurchaseAck): void {
+  purchaseResolves(ack: StorePurchaseAck | (() => Promise<StorePurchaseAck>)): void {
     this.purchaseScript = ack;
   }
 

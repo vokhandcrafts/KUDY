@@ -351,3 +351,33 @@ test('concurrent unlocks of one product share one chain run — the store, the g
     assert.equal(rig.grant.requested.length, 1);
   });
 });
+
+test('overlapping unlocks of one product with different layers are different requests — each runs its own chain', async () => {
+  await withRoot(async (rig) => {
+    rig.storePort.purchaseResolves({ productId: PRODUCT });
+    // A retry of the base layer arrives while an extended unlock is in
+    // flight: not the same request — both layers activate, the store sees
+    // two purchase calls (its own non-consumable protection decides what
+    // the second one charges), and both identities reach the port.
+    const base = rig.chain.unlock(await unlockInput());
+    const extended = rig.chain.unlock({
+      identity: { deviceId: DEVICE },
+      productId: PRODUCT,
+      key: { ...KEY, tier: 'extended' },
+      lock: await lockFrom(GOOD_SOURCES),
+    });
+    const [a, b] = await Promise.all([base, extended]);
+    assert.equal(a.kind, 'ready');
+    assert.equal(b.kind, 'ready');
+    assert.deepEqual(rig.storePort.calls, [
+      `link ${DEVICE}`,
+      `purchase ${PRODUCT}`,
+      `purchase ${PRODUCT}`,
+    ]);
+    assert.equal(rig.grant.requested.length, 2);
+    assert.deepEqual(
+      rig.events.map((event) => event.tier).sort(),
+      ['base', 'extended'],
+    );
+  });
+});

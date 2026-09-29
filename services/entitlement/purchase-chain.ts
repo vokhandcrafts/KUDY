@@ -216,29 +216,39 @@ export function createPurchaseChain(deps: PurchaseChainDeps): PurchaseChain {
   return {
     stateOf,
     unlock(input: UnlockInput): Promise<UnlockOutcome> {
-      // The in-flight memo keyed by the product (the services/device.ts
-      // idiom): concurrent unlocks of one product share the same chain run —
-      // the store session, the grant and the staging path are
-      // single-consumer. The memo holds the promise only while it runs; a
-      // settled unlock (any outcome) frees the product, so a later call runs
-      // a fresh chain — the retry semantics never change. A request-shaped
-      // unlock input is needed even to find the memo: anything else is the
-      // named local invalid-input answer, with nothing running at all.
-      const productId =
+      // The in-flight memo (the services/device.ts idiom), keyed by the
+      // product AND the layer identity: concurrent unlocks of the same
+      // product/layer pair share one chain run — the store session, the
+      // grant and the staging path are single-consumer. Overlapping unlocks
+      // of one product with DIFFERENT layers are not the same request: each
+      // runs its own chain (the store's non-consumable protection answers
+      // already-owned for the second charge), so a retry of v1 and a v2
+      // arrival never swallow each other's result. The memo holds the
+      // promise only while it runs; a settled unlock (any outcome) frees
+      // its key, so a later call runs a fresh chain — the retry semantics
+      // never change. A request-shaped input is needed even to find the
+      // memo: anything else is the named local invalid-input answer, with
+      // nothing running at all.
+      const memoKey =
         input !== null && typeof input === 'object' && typeof input.productId === 'string'
-          ? input.productId
+          ? `${input.productId}#${JSON.stringify([
+              input.key?.routeId,
+              input.key?.version,
+              input.key?.locale,
+              input.key?.tier,
+            ])}`
           : null;
-      const running = productId !== null ? inflight.get(productId) : undefined;
+      const running = memoKey !== null ? inflight.get(memoKey) : undefined;
       if (running !== undefined) return running;
       const run = runUnlock(input);
-      if (productId !== null) {
-        inflight.set(productId, run);
+      if (memoKey !== null) {
+        inflight.set(memoKey, run);
         void run.then(
           () => {
-            if (inflight.get(productId) === run) inflight.delete(productId);
+            if (inflight.get(memoKey) === run) inflight.delete(memoKey);
           },
           () => {
-            if (inflight.get(productId) === run) inflight.delete(productId);
+            if (inflight.get(memoKey) === run) inflight.delete(memoKey);
           },
         );
       }
