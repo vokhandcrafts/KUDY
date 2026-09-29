@@ -193,7 +193,15 @@ function notFound(response, why) {
 // (tools/serve-static.mjs, AR-2) decodes the URL and re-normalizes against the
 // root with the platform separator — anything that escapes comes back null.
 async function serveDataFile(snapshotsRoot, pathname, response) {
-  const file = resolveStaticFile(snapshotsRoot, pathname.slice(MEDIA_PREFIX.length));
+  let file;
+  try {
+    file = resolveStaticFile(snapshotsRoot, pathname.slice(MEDIA_PREFIX.length));
+  } catch {
+    // Corrupt percent-encoding in the URL (e.g. /media/%zz) — same verdict as
+    // the sibling createStaticServer: a 404, never a thrown URIError.
+    notFound(response, 'невядомы адрас');
+    return;
+  }
   if (file === null) {
     notFound(response, 'шлях выйшаў за межы тэчкі даных');
     return;
@@ -216,8 +224,12 @@ async function handleRequest(db, snapshotsRoot, request, response) {
     return;
   }
   if (url.pathname === '/') {
+    // The body is computed before any header is written: a store that exists
+    // but cannot be queried (a zero-byte file, a foreign schema) must reach
+    // the 500 path below as a readable diagnostic, not hang the response.
+    const body = renderOverview(overviewData(db));
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-    response.end(renderOverview(overviewData(db)));
+    response.end(body);
     return;
   }
   if (url.pathname === MEDIA_PREFIX || url.pathname.startsWith(`${MEDIA_PREFIX}/`)) {
@@ -252,6 +264,8 @@ export async function startDispatcher({ dbPath, snapshotsRoot, port = DEFAULT_PO
       if (!response.headersSent) {
         response.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' });
         response.end(`dispatcher: ${error.message}`);
+      } else {
+        response.destroy(error);
       }
     });
   });

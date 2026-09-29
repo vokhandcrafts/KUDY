@@ -205,6 +205,32 @@ test('the dispatcher binds the loopback interface on the default port', async (t
   assert.equal(dispatcher.port, DEFAULT_PORT);
 });
 
+test('a store file that cannot be queried answers a named diagnostic, not a hang', async (t) => {
+  const dir = makeTempDir();
+  const dbPath = path.join(dir, 'zero.sqlite');
+  fs.writeFileSync(dbPath, '');
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  // The timeout proves the request settles: a regression that writes the
+  // response head before computing the body hangs here until the signal.
+  const response = await fetch(`http://127.0.0.1:${dispatcher.port}/`, { signal: AbortSignal.timeout(5000) });
+  const body = await response.text();
+  assert.equal(response.status, 500);
+  assert.match(body, /^dispatcher: /);
+});
+
+test('corrupt percent-encoding on the media route is a 404, not a thrown URIError', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath } = buildStoreFixture(dir);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const response = await rawRequest(dispatcher.port, '/media/%zz');
+  assert.equal(response.status, 404);
+  assert.match(response.body, /невядомы адрас/);
+});
+
 test('a busy port answers with a named diagnostic, not a crash', async (t) => {
   const dir = makeTempDir();
   const first = await startDispatcher({
