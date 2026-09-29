@@ -180,7 +180,7 @@ test('production surface tokens stay verbatim with the canon (G06.01.a)', () => 
   // comment; the guard fails when a value drifts from the canon or the
   // anchor is dropped.
   const stringEntries = [...source.matchAll(/(\w+):\s*'([^']+)',\s*\/\/\s*([\w.-]+)/g)];
-  const numberEntries = [...source.matchAll(/(\w+):\s*(\d+),\s*\/\/\s*([\w.-]+)/g)];
+  const numberEntries = [...source.matchAll(/(\w+):\s*(\d+(?:\.\d+)?),\s*\/\/\s*([\w.-]+)/g)];
   assert.ok(stringEntries.length + numberEntries.length >= 20, 'the surface token file must keep its canon-anchored entries');
   for (const [, key, value, tokenName] of stringEntries) {
     const token = canon.tokens[tokenName];
@@ -190,7 +190,9 @@ test('production surface tokens stay verbatim with the canon (G06.01.a)', () => 
   for (const [, key, value, tokenName] of numberEntries) {
     const token = canon.tokens[tokenName];
     assert.ok(token, `${key}: canon token ${tokenName} must exist`);
-    assert.equal(parseInt(token.value, 10), parseInt(value, 10), `${key}: value must equal canon ${tokenName}`);
+    // The big-text factor is the one fractional canon value — the comparison
+    // is numeric on purpose (G06.05, font.big-text-factor 1.25).
+    assert.equal(parseFloat(token.value), parseFloat(value), `${key}: value must equal canon ${tokenName}`);
   }
 });
 

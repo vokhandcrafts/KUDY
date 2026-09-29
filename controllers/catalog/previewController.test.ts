@@ -129,28 +129,28 @@ describe('derivePreviewButton — the Download/Start meaning table (09 §6.5, 11
 
   it('not_downloaded downloads; without the download port it states the reason', () => {
     const enabled = derivePreviewButton({ ...base, layer: { state: 'not_downloaded', missingCount: null } });
-    assert.deepEqual([enabled.action, enabled.enabled, enabled.label], ['download', true, 'Загрузіць']);
+    assert.deepEqual([enabled.action, enabled.enabled, enabled.label], ['download', true, 'download']);
     const disabled = derivePreviewButton({
       ...base,
       canDownload: false,
       layer: { state: 'not_downloaded', missingCount: null },
     });
     assert.equal(disabled.enabled, false);
-    assert.equal(disabled.reason, 'загрузка недаступная на гэтай зборцы');
+    assert.equal(disabled.reason, 'preview#download-unavailable');
   });
 
   it('partial and stale keep the Download meaning and name the detail', () => {
     const partial = derivePreviewButton({ ...base, layer: { state: 'partial', missingCount: 3 } });
     assert.equal(partial.action, 'download');
-    assert.equal(partial.detail, 'не хапае файлаў: 3');
+    assert.deepEqual(partial.detail, { kind: 'missing-files', count: 3 });
     const stale = derivePreviewButton({ ...base, layer: { state: 'stale', missingCount: null } });
     assert.equal(stale.action, 'download');
-    assert.equal(stale.detail, 'даступна абнаўленне');
+    assert.deepEqual(stale.detail, { kind: 'stale' });
   });
 
   it('a ready package with a ready verdict starts', () => {
     const button = derivePreviewButton({ ...base, layer: { state: 'ready', missingCount: null }, verify: READY });
-    assert.deepEqual([button.action, button.enabled, button.label], ['start', true, 'Пачаць']);
+    assert.deepEqual([button.action, button.enabled, button.label], ['start', true, 'start']);
   });
 
   it('a verify failure leaves Start unavailable with the reason (AC5, 11 §7)', () => {
@@ -177,7 +177,7 @@ describe('derivePreviewButton — the Download/Start meaning table (09 §6.5, 11
       verify: verify[0],
     });
     assert.equal(frozen.enabled, false);
-    assert.equal(frozen.reason, 'загрузка недаступная на гэтай зборцы');
+    assert.equal(frozen.reason, 'preview#download-unavailable');
   });
 
   it('an access-locked verdict never starts', () => {
@@ -188,7 +188,7 @@ describe('derivePreviewButton — the Download/Start meaning table (09 §6.5, 11
     });
     assert.equal(button.action, 'start');
     assert.equal(button.enabled, false);
-    assert.equal(button.reason, 'патрэбна пакупка');
+    assert.equal(button.reason, 'preview#purchase-required');
   });
 
   it('a paid preview without the entitlement does not start and buys nothing (AC2, NAV6)', () => {
@@ -199,13 +199,13 @@ describe('derivePreviewButton — the Download/Start meaning table (09 §6.5, 11
       verify: READY,
       canDownload: true,
     });
-    assert.deepEqual([button.action, button.enabled, button.reason], ['start', false, 'патрэбна пакупка']);
+    assert.deepEqual([button.action, button.enabled, button.reason], ['start', false, 'preview#purchase-required']);
   });
 
   it('no disk truth keeps the button fail-closed, never fictional', () => {
     const button = derivePreviewButton({ ...base, layer: null });
     assert.equal(button.enabled, false);
-    assert.equal(button.reason, 'стан пакета невядомы: сховішча недаступнае');
+    assert.equal(button.reason, 'preview#storage-unknown');
   });
 });
 
@@ -224,7 +224,7 @@ describe('preview controller', () => {
       [controller.getState().button.action, controller.getState().button.enabled],
       ['start', false],
     );
-    assert.equal(controller.getState().button.reason, 'стан пакета невядомы: сховішча недаступнае');
+    assert.equal(controller.getState().button.reason, 'preview#storage-unknown');
   });
 
   it('Download flips to Start from the refreshed inventory, never from the activation result (Proof)', async () => {
@@ -248,7 +248,7 @@ describe('preview controller', () => {
     await controller.getState().download();
     assert.deepEqual(download.keys, ['r-1']);
     const button = controller.getState().button;
-    assert.deepEqual([button.action, button.enabled, button.label], ['start', true, 'Пачаць']);
+    assert.deepEqual([button.action, button.enabled, button.label], ['start', true, 'start']);
     assert.equal(inventory.calls, 2, 'the flip re-read the inventory facts');
   });
 
@@ -272,7 +272,10 @@ describe('preview controller', () => {
     );
     await waitUntil(() => controller.getState().surface.kind === 'ready');
     await controller.getState().download();
-    assert.equal(controller.getState().downloadError, 'transfer interrupted');
+    // G06.05: the reason line is the named word, the thrown diagnostic
+    // survives as the muted detail.
+    assert.equal(controller.getState().downloadError, 'Збой загрузкі');
+    assert.equal(controller.getState().downloadDetail, 'transfer interrupted');
     assert.equal(controller.getState().busy, false);
   });
 
@@ -355,7 +358,7 @@ describe('preview controller', () => {
       'r-1',
     );
     await waitUntil(() => controller.getState().surface.kind === 'ready');
-    assert.equal(controller.getState().button.reason, 'патрэбна пакупка');
+    assert.equal(controller.getState().button.reason, 'preview#purchase-required');
     assert.equal(await controller.getState().start(), 'blocked');
   });
 
@@ -378,7 +381,7 @@ describe('preview controller', () => {
     await waitUntil(() => controller.getState().surface.kind === 'unavailable');
     const surface = controller.getState().surface;
     assert.ok(surface.kind === 'unavailable');
-    assert.equal(surface.reason, 'гід не апублікаваны');
+    assert.equal(surface.reason, 'preview#not-published');
   });
 
   it('a superseded refresh never overwrites the newer result', async () => {
@@ -410,5 +413,60 @@ describe('asSourceSurface', () => {
     for (const value of [null, undefined, 42, '', 'rubric ', 'CITY']) {
       assert.equal(asSourceSurface(value), null);
     }
+  });
+});
+
+// G06.05 (issue #280, AC4): a non-complete activation is a named failure —
+// insufficient-space carries the storage exit, hash-mismatch names the
+// damaged package, a cancelled run is not a failure at all. The button's
+// own flip still follows the inventory facts, never the result (the Proof).
+describe('G06.05: the download failure surfaces with its exits', () => {
+  it('insufficient-space is named with the megabytes and the storage exit', async () => {
+    const controller = createPreviewController(
+      makePorts(FULL_LOADER, {
+        inventory: fakeInventory([{ state: 'not_downloaded', missingCount: null }]),
+        download: {
+          activate: async (key) => ({ status: 'insufficient-space', key, needed: 30 * 1048576, free: 1048576 }),
+        },
+      }),
+      'r-1',
+    );
+    await waitUntil(() => controller.getState().surface.kind === 'ready');
+    await controller.getState().download();
+    assert.equal(controller.getState().downloadError, 'Збой загрузкі');
+    assert.equal(controller.getState().downloadDetail, 'не хапае месца: патрэбна яшчэ 30 МБ');
+    assert.equal(controller.getState().downloadStorageExit, true);
+    assert.equal(controller.getState().busy, false);
+  });
+
+  it('hash-mismatch names the damaged package without the storage exit', async () => {
+    const controller = createPreviewController(
+      makePorts(FULL_LOADER, {
+        inventory: fakeInventory([{ state: 'not_downloaded', missingCount: null }]),
+        download: {
+          activate: async (key) => ({ status: 'hash-mismatch', key, paths: ['stops.json'], fetched: 0, diagnostics: [] }),
+        },
+      }),
+      'r-1',
+    );
+    await waitUntil(() => controller.getState().surface.kind === 'ready');
+    await controller.getState().download();
+    assert.equal(controller.getState().downloadError, 'Збой загрузкі');
+    assert.equal(controller.getState().downloadDetail, 'пакет пашкоджаны: патрэбна паўторная загрузка');
+    assert.equal(controller.getState().downloadStorageExit, false);
+  });
+
+  it('a cancelled activation is not a failure — nothing surfaces', async () => {
+    const controller = createPreviewController(
+      makePorts(FULL_LOADER, {
+        inventory: fakeInventory([{ state: 'not_downloaded', missingCount: null }]),
+        download: { activate: async (key) => ({ status: 'cancelled', key, fetched: 0 }) },
+      }),
+      'r-1',
+    );
+    await waitUntil(() => controller.getState().surface.kind === 'ready');
+    await controller.getState().download();
+    assert.equal(controller.getState().downloadError, null);
+    assert.equal(controller.getState().busy, false);
   });
 });

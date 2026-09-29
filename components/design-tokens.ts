@@ -36,4 +36,5 @@ export const tokens = {
   fontBaseSize: 16, // font.base-size
   fontTitleSize: 18, // font.size-title — памер загалоўка экрана
   fontWeightStrong: '600', // font.weight-strong
+  fontBigTextFactor: 1.25, // font.big-text-factor
 } as const;

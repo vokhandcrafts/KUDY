@@ -9,9 +9,13 @@
 // recorded source kept in the controller state.
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import {
+  previewReasonText,
+  previewStrings,
+} from "../../controllers/catalog/previewController";
 import { usePreviewController } from "../../controllers/catalog/usePreviewController";
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
@@ -23,11 +27,28 @@ import {
   ModalDialogCancel,
 } from "../../components/modal-dialog";
 import { PressableSurface } from "../../components/pressable-surface";
+import { ScaledText } from "../../components/scaled-text";
 import { screenStyles } from "../../components/screen-styles";
+import { uiStrings } from "../../components/ui-strings";
 import { WalkButton } from "../../components/walk-button";
 import { useServices } from "../_layout";
 
 const styles = StyleSheet.create({
+  // G06.05 (AC4): the download banner's named retry and the storage exit —
+  // a failed download is never a dead end.
+  downloadRetry: {
+    alignSelf: "flex-start",
+    borderColor: tokens.colorAccent,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    marginTop: tokens.spaceS,
+    paddingHorizontal: tokens.spaceM,
+    paddingVertical: tokens.spaceS,
+  },
+  downloadRetryLabel: {
+    color: tokens.colorAccent,
+    fontSize: tokens.fontBaseSize,
+  },
   summary: {
     color: tokens.colorMuted,
     fontSize: tokens.fontBaseSize,
@@ -113,15 +134,6 @@ const styles = StyleSheet.create({
   },
 });
 
-function formatDuration(
-  estimated: { min_minutes: number; max_minutes: number } | null,
-  durationMin: number | null,
-): string | null {
-  if (estimated) return `Час: ад ${estimated.min_minutes} да ${estimated.max_minutes} хв`;
-  if (durationMin !== null) return `Час: ${durationMin} хв`;
-  return null;
-}
-
 export default function RoutePreview() {
   const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
   const router = useRouter();
@@ -138,6 +150,18 @@ export default function RoutePreview() {
   // status bar and the notch with the native header off (AC4). A hook —
   // before the early returns.
   const insets = useSafeAreaInsets();
+  // G06.05 (issue #280, AC1): the surface and the button's words in the
+  // display locale (the button's codes live in the controller).
+  const strings = uiStrings(services.locale);
+  const pstrings = previewStrings(services.locale);
+  const formatDuration = (
+    estimated: { min_minutes: number; max_minutes: number } | null,
+    durationMin: number | null,
+  ): string | null => {
+    if (estimated) return strings.durationRange(estimated.min_minutes, estimated.max_minutes);
+    if (durationMin !== null) return strings.durationMinutes(durationMin);
+    return null;
+  };
 
   if (!controller) {
     return (
@@ -147,8 +171,8 @@ export default function RoutePreview() {
       >
         {/* UX 02 (issue #348): even the unavailable state keeps the frame —
             with the native header off there is no other way back (AC2). */}
-        <BackButton label="← Назад" testID="btn-preview-back" />
-        <Text style={styles.unavailable}>Каталог недаступны</Text>
+        <BackButton label={strings.back} testID="btn-preview-back" />
+        <ScaledText style={styles.unavailable}>{strings.catalogUnavailable}</ScaledText>
       </View>
     );
   }
@@ -167,75 +191,121 @@ export default function RoutePreview() {
     <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Route preview">
       {/* UX 02 (issue #348): the back sits in the frame above the scroll —
           reachable while the stops list is scrolled (AC2). */}
-      <BackButton label="← Назад" testID="btn-preview-back" />
+      <BackButton label={strings.back} testID="btn-preview-back" />
       {/* UX 01 (issue #347): the surface scrolls — every stop and the main
           button stay reachable beyond the fold; the §4.1 overlay stays above. */}
       <ScrollView testID="scroll-preview">
-        <WalkButton walk={services.walk} />
-        {state.surface.kind === "loading" ? <LoadingIndicator text="Загрузка…" /> : null}
+        <WalkButton walk={services.walk} locale={services.locale} />
+        {state.surface.kind === "loading" ? <LoadingIndicator text={strings.loading} /> : null}
         {state.surface.kind === "unavailable" ? (
           <View testID="preview-unavailable">
-            <Text style={styles.unavailable}>Прэв'ю часова недаступны</Text>
-            <Text style={styles.buttonDetail}>{state.surface.reason}</Text>
+            <ScaledText style={styles.unavailable}>{strings.previewUnavailable}</ScaledText>
+            {/* G06.05 (AC1): the named code renders its word; an unknown
+                diagnostic renders as-is — honest, never invented. */}
+            <ScaledText style={styles.buttonDetail}>
+              {previewReasonText(state.surface.reason, pstrings)}
+            </ScaledText>
           </View>
         ) : null}
         {state.surface.kind === "ready" ? (
           <View>
-            <Text style={screenStyles.title}>{state.surface.preview.title}</Text>
+            <ScaledText style={screenStyles.title}>{state.surface.preview.title}</ScaledText>
             {state.surface.preview.summary ? (
-              <Text style={styles.summary}>{state.surface.preview.summary}</Text>
+              <ScaledText style={styles.summary}>{state.surface.preview.summary}</ScaledText>
             ) : null}
-            <AccessBadge access={state.surface.preview.access} />
+            <AccessBadge access={state.surface.preview.access} locale={services.locale} />
             <LocalesLine
               textLocales={state.surface.preview.textLocales}
               audioLocales={state.surface.preview.audioLocales}
               localesKnown={state.surface.preview.localesKnown}
               testID="preview-locales"
+              locale={services.locale}
             />
             {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin) ? (
-              <Text style={styles.fact} testID="preview-duration">
+              <ScaledText style={styles.fact} testID="preview-duration">
                 {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin)}
-              </Text>
+              </ScaledText>
             ) : null}
             {state.surface.preview.stops ? (
-              <Text style={styles.fact} testID="preview-counts">
-                {`Кропкі: ${state.surface.preview.stops.length}`}
-              </Text>
+              <ScaledText style={styles.fact} testID="preview-counts">
+                {strings.stopsCount(state.surface.preview.stops.length)}
+              </ScaledText>
             ) : null}
             {state.surface.preview.baseSizeBytes !== null ? (
-              <Text style={styles.fact} testID="preview-size">
-                {`Памер: ${Math.max(1, Math.round(state.surface.preview.baseSizeBytes / 1048576))} МБ`}
-              </Text>
+              <ScaledText style={styles.fact} testID="preview-size">
+                {strings.sizeMb(Math.max(1, Math.round(state.surface.preview.baseSizeBytes / 1048576)))}
+              </ScaledText>
             ) : null}
             {state.surface.preview.access === "paid" && state.surface.preview.freeStopCount !== null ? (
-              <Text style={styles.fact} testID="preview-free-stop-count">
-                {`Кропак бясплатна: ${state.surface.preview.freeStopCount}`}
-              </Text>
+              <ScaledText style={styles.fact} testID="preview-free-stop-count">
+                {strings.freeStopsCount(state.surface.preview.freeStopCount)}
+              </ScaledText>
             ) : null}
             {state.surface.degraded ? (
               <StateBanner
                 tone="notice"
-                reason="Частка звестак часова недаступная"
+                reason={strings.degradedData}
                 detail={state.surface.degraded}
                 testID="preview-banner"
               />
             ) : null}
             {state.downloadError ? (
-              <StateBanner tone="error" reason="Збой загрузкі" detail={state.downloadError} testID="download-error" />
+              // G06.05 (AC4/AC5): the named failure — reason, muted detail,
+              // the named retry and, for insufficient-space, the honest exit
+              // to the storage surface. Never a dead end; the banner is a
+              // live region like every other state banner.
+              <View testID="download-error">
+                <StateBanner
+                  tone="error"
+                  reason={state.downloadError}
+                  detail={state.downloadDetail ?? undefined}
+                  testID="download-error-banner"
+                />
+                <PressableSurface
+                  accessibilityRole="button"
+                  accessibilityLabel={pstrings.retry}
+                  disabled={state.busy}
+                  onPress={() => void handleMainButton()}
+                  style={styles.downloadRetry}
+                  testID="btn-download-retry"
+                >
+                  <ScaledText style={styles.downloadRetryLabel}>{pstrings.retry}</ScaledText>
+                </PressableSurface>
+                {state.downloadStorageExit ? (
+                  <PressableSurface
+                    accessibilityRole="button"
+                    accessibilityLabel={pstrings.storageExit}
+                    onPress={() => router.push("/my")}
+                    style={styles.downloadRetry}
+                    testID="btn-download-storage"
+                  >
+                    <ScaledText style={styles.downloadRetryLabel}>{pstrings.storageExit}</ScaledText>
+                  </PressableSurface>
+                ) : null}
+              </View>
             ) : null}
             {state.surface.preview.stops ? (
               <View style={styles.stops} testID="preview-stops">
                 {state.surface.preview.stops.map((stop) => (
                   <View key={stop.stopId} style={styles.stopRow} testID={`stop-${stop.stopId}`}>
-                    <Text style={styles.stopName}>{stop.name ?? `Кропка ${stop.position + 1}`}</Text>
+                    <ScaledText style={styles.stopName}>
+                      {stop.name ?? strings.stopNumber(stop.position + 1)}
+                    </ScaledText>
                     {/* UX 05 (issue #351): the place's human title from the
                         catalog, never the raw place id — with no published
                         title the line is hidden, nothing is invented. */}
-                    {stop.placeName ? <Text style={styles.stopPlace}>{stop.placeName}</Text> : null}
-                    {stop.announce ? <Text style={styles.stopAnnounce}>{stop.announce}</Text> : null}
+                    {stop.placeName ? <ScaledText style={styles.stopPlace}>{stop.placeName}</ScaledText> : null}
+                    {stop.announce ? <ScaledText style={styles.stopAnnounce}>{stop.announce}</ScaledText> : null}
                     {stop.locked ? (
-                      <View style={styles.lockBadge} testID={`stop-locked-${stop.stopId}`}>
-                        <Text style={styles.lockBadgeText}>🔒</Text>
+                      // G06.05 (AC1): the 🔒 is decoration — the screen
+                      // reader gets the word, never the glyph alone.
+                      <View
+                        accessible={true}
+                        accessibilityLabel={strings.locked}
+                        style={styles.lockBadge}
+                        testID={`stop-locked-${stop.stopId}`}
+                      >
+                        <ScaledText style={styles.lockBadgeText}>🔒</ScaledText>
                       </View>
                     ) : null}
                   </View>
@@ -243,22 +313,25 @@ export default function RoutePreview() {
               </View>
             ) : null}
             <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={pstrings.label[state.button.label]}
+              accessibilityState={{ disabled: !state.button.enabled || state.busy }}
               onPress={() => void handleMainButton()}
               disabled={!state.button.enabled || state.busy}
               style={[styles.mainButton, (!state.button.enabled || state.busy) && styles.mainButtonDisabled]}
               testID={state.button.action === "download" ? "btn-download" : "btn-start"}
             >
-              <Text style={styles.mainButtonLabel}>{state.button.label}</Text>
+              <ScaledText style={styles.mainButtonLabel}>{pstrings.label[state.button.label]}</ScaledText>
             </PressableSurface>
             {state.button.reason ? (
-              <Text style={styles.buttonReason} testID="button-reason">
-                {state.button.reason}
-              </Text>
+              <ScaledText style={styles.buttonReason} testID="button-reason">
+                {previewReasonText(state.button.reason, pstrings)}
+              </ScaledText>
             ) : null}
             {state.button.detail ? (
-              <Text style={styles.buttonDetail} testID="button-detail">
-                {state.button.detail}
-              </Text>
+              <ScaledText style={styles.buttonDetail} testID="button-detail">
+                {pstrings.detail(state.button.detail)}
+              </ScaledText>
             ) : null}
           </View>
         ) : null}
@@ -269,11 +342,11 @@ export default function RoutePreview() {
         // onRequestClose runs the controller's cancel, so no navigation
         // happens and no walk starts.
         <ModalDialog onRequestClose={state.cancelConfirm} testID="confirm-dialog">
-          <Text style={styles.confirmText}>
-            {`Завяршыць «${state.confirm.liveTitle}» і пачаць «${state.confirm.candidateTitle}»?`}
-          </Text>
+          <ScaledText style={styles.confirmText}>
+            {strings.switchConfirm(state.confirm.liveTitle, state.confirm.candidateTitle)}
+          </ScaledText>
           <ModalDialogAccept
-            label="Завершыць і пачаць"
+            label={strings.switchAccept}
             onPress={() => {
               // The confirmed §4.1 switch (NAV8): the flag rides the route
               // params — the run surface starts through the switch-guide
@@ -288,7 +361,7 @@ export default function RoutePreview() {
               its own outline style — the disabled-looking dimmed copy of
               the main button is gone. */}
           <ModalDialogCancel
-            label="Скасаваць"
+            label={strings.cancel}
             onPress={() => state.cancelConfirm()}
             testID="btn-confirm-cancel"
           />

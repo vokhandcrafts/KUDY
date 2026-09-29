@@ -23,7 +23,7 @@ node_modules/.bin/jest --config jest.config.js app/preview.test.tsx app/my.test.
 
 ```output
 Test Suites: 4 passed, 4 total
-Tests:       43 passed, 43 total
+Tests:       61 passed, 61 total
 Snapshots:   0 total
 ```
 

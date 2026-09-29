@@ -6,10 +6,11 @@
 // (screens-and-transitions: Back — навігацыя, не каманда). Lives in
 // components/, not app/: expo-router treats every app/ file as a route
 // (issue #339) — the WalkButton precedent.
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 
 import { tokens } from "./design-tokens";
+import { ScaledText } from "./scaled-text";
 
 const styles = StyleSheet.create({
   touch: {
@@ -44,7 +45,7 @@ export function BackButton({
       style={styles.touch}
       testID={testID}
     >
-      <Text style={styles.label}>{label}</Text>
+      <ScaledText style={styles.label}>{label}</ScaledText>
     </Pressable>
   );
 }

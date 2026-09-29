@@ -11,11 +11,12 @@
 // the run surface's `playback` idiom), never a services import.
 import { Link, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   placeDetailStrings,
+  placeRefusalText,
   type MomentFact,
 } from "../../controllers/place/placeDetailController";
 import type { MomentPlayBinding, MomentPlayOutcome } from "../../controllers/moment/momentPlayController";
@@ -25,6 +26,7 @@ import { AccessBadge } from "../../components/guide-card";
 import { BackButton } from "../../components/back-button";
 import { LoadingIndicator } from "../../components/loading-indicator";
 import { PressableSurface } from "../../components/pressable-surface";
+import { ScaledText } from "../../components/scaled-text";
 import { screenStyles } from "../../components/screen-styles";
 import { tokens } from "../../components/design-tokens";
 
@@ -124,17 +126,19 @@ function MomentCard({
   const live = momentLiveState(momentPlay.playback(), moment.momentId);
   return (
     <View style={styles.card} testID={`place-moment-${moment.momentId}`}>
-      <Text style={styles.cardLabel}>{strings.teaserLabel}</Text>
-      {moment.teaserText !== null ? <Text style={styles.cardBody}>{moment.teaserText}</Text> : null}
+      <ScaledText style={styles.cardLabel}>{strings.teaserLabel}</ScaledText>
+      {moment.teaserText !== null ? <ScaledText style={styles.cardBody}>{moment.teaserText}</ScaledText> : null}
       {live !== null ? (
-        <Text style={styles.live} testID={`place-moment-live-${moment.momentId}`}>
+        <ScaledText style={styles.live} testID={`place-moment-live-${moment.momentId}`}>
           {live === "paused" ? strings.paused : strings.nowPlaying}
-        </Text>
+        </ScaledText>
       ) : null}
       {refusal !== null ? (
-        <Text style={styles.refusal} testID={`place-moment-refusal-${moment.momentId}`}>
-          {refusal}
-        </Text>
+        // G06.05 (AC4/AC5): the named refusal — the reason and the way out in
+        // words, a raw diagnostic code never shows alone.
+        <ScaledText style={styles.refusal} testID={`place-moment-refusal-${moment.momentId}`}>
+          {placeRefusalText(refusal, strings)}
+        </ScaledText>
       ) : null}
       {live === "paused" ? (
         <PressableSurface
@@ -146,7 +150,7 @@ function MomentCard({
           testID={`place-moment-resume-${moment.momentId}`}
           onPress={() => momentPlay.resume()}
         >
-          <Text style={styles.playText}>{strings.resumeLabel}</Text>
+          <ScaledText style={styles.playText}>{strings.resumeLabel}</ScaledText>
         </PressableSurface>
       ) : (
         <PressableSurface
@@ -170,7 +174,7 @@ function MomentCard({
             setRefusal("refused" in outcome ? outcome.refused : null);
           }}
         >
-          <Text style={styles.playText}>{live === null ? strings.playLabel : strings.stopLabel}</Text>
+          <ScaledText style={styles.playText}>{live === null ? strings.playLabel : strings.stopLabel}</ScaledText>
         </PressableSurface>
       )}
       <Link href={`/route/${moment.routeId}`} asChild>
@@ -181,7 +185,7 @@ function MomentCard({
           accessibilityHint={strings.guideLinkHint}
           testID={`place-moment-guide-${moment.momentId}`}
         >
-          <Text style={styles.link}>{strings.guideLink}</Text>
+          <ScaledText style={styles.link}>{strings.guideLink}</ScaledText>
         </PressableSurface>
       </Link>
     </View>
@@ -201,9 +205,13 @@ export default function PlaceDetail() {
   const state = useStoreState(binding?.store);
   const momentPlay = services.moment ?? null;
   // Subscribed so the cards re-render on launch/focus changes; the physical
-  // fact itself is re-read per render through the binding.
-  useStoreState(momentPlay?.store);
-  const strings = placeDetailStrings("be");
+  // fact itself is re-read per render through the binding. G06.05 (AC4/AC5):
+  // the play failure is a named state now — the note with the way out
+  // renders beside the cards, not a silent revert to idle.
+  const momentState = useStoreState(momentPlay?.store);
+  const playFailure = momentState !== null && momentState.kind === "failed" ? momentState : null;
+  // G06.05 (issue #280, AC1): the display locale, not a hard-code.
+  const strings = placeDetailStrings(services.locale);
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4).
   const insets = useSafeAreaInsets();
@@ -217,43 +225,52 @@ export default function PlaceDetail() {
       {/* UX 01 (issue #347): the detail scrolls — the last moment card is
           reachable beyond the fold. */}
       <ScrollView testID="scroll-place">
-        <Text style={screenStyles.title}>{title}</Text>
+        <ScaledText style={screenStyles.title}>{title}</ScaledText>
         {state === null ? (
-          <Text style={styles.note} testID="place-unavailable">
+          <ScaledText style={styles.note} testID="place-unavailable">
             {strings.unavailable}
-          </Text>
+          </ScaledText>
         ) : state.kind === "loading" ? (
           <LoadingIndicator testID="place-loading" text={strings.loading} />
         ) : state.kind === "error" ? (
-          <Text style={styles.note} testID="place-error">
+          <ScaledText style={styles.note} testID="place-error">
             {strings.error}
-          </Text>
+          </ScaledText>
         ) : (
           <>
             {facts === null ? (
-              <Text style={styles.note} testID="place-nofacts">
+              <ScaledText style={styles.note} testID="place-nofacts">
                 {strings.noFacts}
-              </Text>
+              </ScaledText>
             ) : (
               <>
-                {facts.summary !== null ? <Text style={styles.summary}>{facts.summary}</Text> : null}
+                {facts.summary !== null ? <ScaledText style={styles.summary}>{facts.summary}</ScaledText> : null}
                 <View style={{ marginBottom: tokens.spaceM }}>
-                  <AccessBadge access={facts.access} />
+                  <AccessBadge access={facts.access} locale={services.locale} />
                 </View>
-                <Text style={styles.facts}>
+                <ScaledText style={styles.facts}>
                   {strings.textLabel}: {facts.text_locales.length > 0 ? facts.text_locales.join(", ") : "—"};{" "}
                   {strings.audioLabel}: {facts.audio_locales.length > 0 ? facts.audio_locales.join(", ") : "—"}
-                </Text>
+                </ScaledText>
               </>
             )}
+            {/* G06.05 (AC4/AC5): the play failure is named, announced, and its
+                exit is the play button itself — the note says so, nothing is
+                silently swallowed. */}
+            {playFailure !== null && momentPlay !== null ? (
+              <View testID="place-play-failed" accessibilityLiveRegion="polite">
+                <ScaledText style={styles.refusal}>{strings.playFailed}</ScaledText>
+                <ScaledText style={styles.note}>{strings.playFailedHint}</ScaledText>
+              </View>
+            ) : null}
             {state.moments.length === 0 ? (
-              <Text style={styles.note} testID="place-moments-empty">
+              <ScaledText style={styles.note} testID="place-moments-empty">
                 {strings.empty}
-              </Text>
+              </ScaledText>
             ) : momentPlay === null ? (
-              <Text style={styles.note} testID="place-no-play">
+              <ScaledText style={styles.note} testID="place-no-play">
                 {strings.unavailable}
-              </Text>
+              </ScaledText>
             ) : (
               state.moments.map((moment) => (
                 <MomentCard key={moment.momentId} moment={moment} momentPlay={momentPlay} strings={strings} />

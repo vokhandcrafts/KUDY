@@ -29,6 +29,7 @@ import {
   ModalDialogAccept,
   ModalDialogCancel,
 } from "../../components/modal-dialog";
+import { ScaledText } from "../../components/scaled-text";
 import { useServices } from "../_layout";
 
 const OSM_ATTRIBUTION_URL = "https://www.openstreetmap.org/copyright";
@@ -133,6 +134,35 @@ const styles = StyleSheet.create({
   },
   pausedText: {
     color: tokens.colorInk,
+    fontSize: tokens.fontBaseSize,
+  },
+  // G06.05 (AC4/AC5): the degradation banners share the paused banner's
+  // notice box; their hint lines render muted below the primary word.
+  bannerDetailText: {
+    color: tokens.colorMuted,
+    fontSize: tokens.fontBaseSize,
+    marginTop: tokens.spaceS,
+  },
+  // The card's story-layer switch (AC3): the two tabs read as one group.
+  layerRow: {
+    flexDirection: "row",
+    gap: tokens.spaceS,
+    marginTop: tokens.spaceS,
+  },
+  layerTab: {
+    alignItems: "center",
+    borderColor: tokens.colorLine,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    flex: 1,
+    paddingVertical: tokens.spaceS,
+    paddingHorizontal: tokens.spaceM,
+  },
+  layerTabActive: {
+    borderColor: tokens.colorAccent,
+  },
+  layerLabel: {
+    color: tokens.colorAccent,
     fontSize: tokens.fontBaseSize,
   },
   // The session menu (G06.04): the walk's pause and finish beside each
@@ -336,16 +366,22 @@ export default function Run() {
   // surface-side gate (a hook, before the early returns); the controller's
   // end() stays the only session write and runs only on the confirmation.
   const [endConfirm, setEndConfirm] = useState(false);
+  // G06.05 (AC3): the card's story-layer switch bookkeeping — the switch
+  // belongs to one card, another opened card starts back on the base story.
+  const [layerByStop, setLayerByStop] = useState<{ stopId: string | null; layer: "base" | "extended" }>({
+    stopId: null,
+    layer: "base",
+  });
 
   if (surface === null || surface.status === "unavailable") {
     return (
       <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Run">
         <BackButton label={strings.back} testID="btn-run-back" />
-        <Text style={styles.centered}>{strings.unavailableTitle}</Text>
+        <ScaledText style={styles.centered}>{strings.unavailableTitle}</ScaledText>
         {surface !== null ? (
-          <Text style={styles.reason} testID="run-unavailable-reason">
+          <ScaledText style={styles.reason} testID="run-unavailable-reason">
             {runMapReason(surface.reason, strings)}
-          </Text>
+          </ScaledText>
         ) : null}
       </View>
     );
@@ -382,16 +418,41 @@ export default function Run() {
     (playback.kind === "playing" || playback.kind === "paused") && playback.durationMs > 0
       ? Math.min(1, Math.max(0, playback.positionMs / playback.durationMs))
       : 0;
-  // The inspected card's transcript (11 §3.2): the base story the pinned
-  // layer's stops.json names for the stop. A locked card shows none; a
-  // story without a readable transcript keeps the honest pending note —
-  // never invented text.
+  // G06.05 (AC3): the inspected card's transcript — the base story and, when
+  // the stop carries one and the pin has the extended tier, the extended
+  // story behind the card's own switch. A story without a readable
+  // transcript keeps the honest pending note — never invented text.
+  const inspectedStop = inspectedMarker
+    ? (surface.stops.find((stop) => stop.stopId === inspectedMarker.stopId) ?? null)
+    : null;
+  const baseStoryId = inspectedStop?.storyBaseId;
+  const extendedStoryId = inspectedStop?.storyExtendedId;
+  const hasExtended =
+    extendedStoryId !== undefined &&
+    surface.storiesExtended.some((story) => story.storyId === extendedStoryId);
+  const storyLayer = layerByStop.stopId === run.inspected ? layerByStop.layer : "base";
+  const activeLayer = hasExtended ? storyLayer : "base";
+  const activeStoryId = activeLayer === "extended" ? extendedStoryId : baseStoryId;
+  // The engine's own accessibility rule (ADR G01.01 §4.2, core/engine/state):
+  // the stop is accessible and the story's tier is available — the manual
+  // play button renders only for a story the engine would actually launch,
+  // never a silent refusal.
+  const storyPlayable = (storyId: string | undefined): boolean => {
+    if (session === null || storyId === undefined || inspectedMarker === null) return false;
+    const stop = session.stops.find((candidate) => candidate.stopId === inspectedMarker.stopId);
+    if (stop === undefined) return false;
+    const tier = stop.storyExtendedId === storyId ? "extended" : "base";
+    return session.accessibleStopIds.includes(stop.stopId) && session.tierAvailable.includes(tier);
+  };
   const inspectedTranscript = (() => {
     if (!inspectedMarker || inspectedMarker.status === "locked") return null;
-    const storyId = surface.facts.find((fact) => fact.stopId === inspectedMarker.stopId)?.storyBaseId;
-    if (storyId === undefined) return null;
-    return surface.stories.find((story) => story.storyId === storyId)?.transcript ?? null;
+    if (activeStoryId === undefined) return null;
+    const source = activeLayer === "extended" ? surface.storiesExtended : surface.stories;
+    return source.find((story) => story.storyId === activeStoryId)?.transcript ?? null;
   })();
+  // G06.05 (AC4/AC5): the location service's live status — the honest
+  // degradation banners of 11 §7 read it per render.
+  const locationStatus = surface.locationStatus();
   // ✕ and Back dismiss identically (AC1, 11 §2 — "адно і тое ж"); from Peek
   // the Back button is the navigation out of Run — it never stops the audio
   // and never changes the session (AC4).
@@ -417,7 +478,7 @@ export default function Run() {
       style={styles.attribution}
       testID="map-attribution"
     >
-      <Text style={styles.attributionText}>{strings.attribution}</Text>
+      <ScaledText style={styles.attributionText}>{strings.attribution}</ScaledText>
     </PressableSurface>
   );
   return (
@@ -426,22 +487,60 @@ export default function Run() {
           navigation out of Run, from an open card it dismisses the card —
           the controller's backOrDismiss (AC2). */}
       <BackButton label={strings.back} onPress={backOrDismiss} testID="btn-run-back" />
+      {/* G06.05 (AC4/AC5): the honest degradation banners of 11 §7 — every
+          state names itself, carries its manual exit and is announced (a
+          live region), never a modal, never a mascot. */}
+      {run.recovery.status === "restored" ? (
+        <View style={styles.pausedBanner} testID="run-restored" accessibilityLiveRegion="polite">
+          <ScaledText style={styles.pausedText}>{strings.restoredTitle}</ScaledText>
+          {run.recovery.unavailableTiers.length > 0 ? (
+            <ScaledText style={styles.bannerDetailText}>{strings.tierUnavailable}</ScaledText>
+          ) : null}
+        </View>
+      ) : null}
+
+      {locationStatus.state === "stalled" ? (
+        <View style={styles.pausedBanner} testID="run-gps-stalled" accessibilityLiveRegion="polite">
+          <ScaledText style={styles.pausedText}>{strings.gpsStalled}</ScaledText>
+          <ScaledText style={styles.bannerDetailText}>{strings.gpsStalledDetail}</ScaledText>
+        </View>
+      ) : null}
+      {session !== null &&
+      session.phase === "Active" &&
+      session.autoplaySuspended &&
+      locationStatus.state !== "permission-denied" &&
+      locationStatus.state !== "stalled" ? (
+        // The suspended automation (11 §2.1: focus loss, story_play_failed,
+        // a moment's takeover) — the honest note with the manual path.
+        <View style={styles.pausedBanner} testID="run-autoplay-suspended" accessibilityLiveRegion="polite">
+          <ScaledText style={styles.pausedText}>{strings.autoplaySuspendedTitle}</ScaledText>
+          <ScaledText style={styles.bannerDetailText}>{strings.manualPlayHint}</ScaledText>
+        </View>
+      ) : null}
+      {locationStatus.state === "permission-denied" ? (
+        <View style={styles.pausedBanner} testID="run-gps-denied" accessibilityLiveRegion="polite">
+          <ScaledText style={styles.pausedText}>{strings.deniedGps}</ScaledText>
+          <ScaledText style={styles.bannerDetailText}>{strings.manualPlayHint}</ScaledText>
+        </View>
+      ) : null}
       {run.run.phase === "Paused" ? (
-        <View style={styles.pausedBanner} testID="run-paused">
-          <Text style={styles.pausedText}>{strings.pausedTitle}</Text>
-          <Pressable
+        <View style={styles.pausedBanner} testID="run-paused" accessibilityLiveRegion="polite">
+          <ScaledText style={styles.pausedText}>{strings.pausedTitle}</ScaledText>
+          <PressableSurface
+            accessibilityRole="button"
+            accessibilityLabel={strings.resume}
             onPress={() => run.resumeSession()}
             style={styles.resumeButton}
             testID="btn-run-resume"
           >
-            <Text style={styles.resumeLabel}>{strings.resume}</Text>
-          </Pressable>
+            <ScaledText style={styles.resumeLabel}>{strings.resume}</ScaledText>
+          </PressableSurface>
         </View>
       ) : null}
       {run.run.phase === "Ended" ? (
-        <Text style={styles.centered} testID="run-ended">
+        <ScaledText style={styles.centered} testID="run-ended" accessibilityLiveRegion="polite">
           {strings.endedTitle}
-        </Text>
+        </ScaledText>
       ) : null}
       {session && session.phase !== "Ended" ? (
         // The session menu of 11 §4.2/§4.3 (G06.04): the whole-walk pause
@@ -450,19 +549,27 @@ export default function Run() {
         // the way back. Neither touches the audio's own play/pause.
         <View style={styles.sessionActions} testID="run-session-actions">
           {session.phase === "Active" ? (
-            <Pressable
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={strings.pauseWalk}
               onPress={() => run.pauseSession()}
               style={styles.sessionButton}
               testID="btn-run-pause"
             >
-              <Text style={styles.sessionLabel}>{strings.pauseWalk}</Text>
-            </Pressable>
+              <ScaledText style={styles.sessionLabel}>{strings.pauseWalk}</ScaledText>
+            </PressableSurface>
           ) : null}
           {/* UX 06 (issue #352) AC3: the destructive finish asks first —
               the press opens the confirmation, it no longer ends directly. */}
-          <Pressable onPress={() => setEndConfirm(true)} style={styles.sessionButton} testID="btn-run-end">
-            <Text style={styles.sessionLabel}>{strings.endWalk}</Text>
-          </Pressable>
+          <PressableSurface
+            accessibilityRole="button"
+            accessibilityLabel={strings.endWalk}
+            onPress={() => setEndConfirm(true)}
+            style={styles.sessionButton}
+            testID="btn-run-end"
+          >
+            <ScaledText style={styles.sessionLabel}>{strings.endWalk}</ScaledText>
+          </PressableSurface>
         </View>
       ) : null}
       {view.markers.length > 0 ? (
@@ -486,6 +593,7 @@ export default function Run() {
           {view.markers.map((marker) => (
             <Pressable
               key={marker.stopId}
+              accessibilityRole="button"
               accessibilityHint={strings.markerHint}
               accessibilityLabel={`${marker.name}, ${strings.status[marker.status]}`}
               onPress={() => run.openCard(marker.stopId)}
@@ -498,14 +606,14 @@ export default function Run() {
               testID={`run-marker-${marker.stopId}`}
             >
               <View style={[styles.dot, { backgroundColor: STATUS_COLOR[marker.status] }]} />
-              <Text style={styles.markerLabel} testID={`run-status-${marker.stopId}`}>
+              <ScaledText style={styles.markerLabel} testID={`run-status-${marker.stopId}`}>
                 {`${marker.name} — ${strings.status[marker.status]}`}
-              </Text>
+              </ScaledText>
             </Pressable>
           ))}
         </View>
       ) : null}
-      <Text style={styles.note}>{strings.schematicNote}</Text>
+      <ScaledText style={styles.note}>{strings.schematicNote}</ScaledText>
       {/* UX 04 (issue #350, AC3): the in-flow spot only when the peek bar is
           down — the bar's own copy replaces it while the bar covers the flow. */}
       {peekBarOpen ? null : attribution}
@@ -517,23 +625,24 @@ export default function Run() {
           testID="run-panel-bar"
         >
           <View style={styles.barRow}>
-            <Text style={styles.barTitle} testID="run-bar-title">
+            <ScaledText style={styles.barTitle} testID="run-bar-title">
               {playingName ? `${strings.nowPlayingLabel}: ${playingName}` : strings.nothingPlaying}
-            </Text>
+            </ScaledText>
             {playingGuide ? (
               // The bar's control is the guide launch's only: a moment
               // launch (G07) resumes through its own path, never through
               // this button — the controller's guide-token rebuild must not
               // become a silent no-op behind a visible control.
               <Pressable
+                accessibilityRole="button"
                 accessibilityLabel={playingGuide.paused ? strings.playAudio : strings.pauseAudio}
                 onPress={() => (playingGuide.paused ? run.resumeCurrentAudio() : run.pauseAudio())}
                 style={styles.barControl}
                 testID="btn-bar-playpause"
               >
-                <Text style={styles.barControlLabel}>
+                <ScaledText style={styles.barControlLabel}>
                   {playingGuide.paused ? strings.playAudio : strings.pauseAudio}
-                </Text>
+                </ScaledText>
               </Pressable>
             ) : null}
           </View>
@@ -567,37 +676,99 @@ export default function Run() {
           <ScrollView testID="scroll-run-panel">
             {playingGuide && run.inspected !== playingGuide.stopId ? (
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${strings.nowPlayingLabel}: ${playingName ?? ""}`}
                 onPress={() => run.openCard(playingGuide.stopId)}
                 style={styles.nowPlayingRow}
                 testID="run-nowplaying-row"
               >
-                <Text style={styles.nowPlayingText}>
+                <ScaledText style={styles.nowPlayingText}>
                   {`${strings.nowPlayingLabel}: ${playingName}`}
-                </Text>
+                </ScaledText>
               </Pressable>
             ) : null}
             {inspectedMarker ? (
               <View style={styles.preview} testID="run-preview">
-                <Text style={styles.previewName}>{inspectedMarker.name}</Text>
-                <Text style={styles.previewStatus}>{strings.status[inspectedMarker.status]}</Text>
+                <ScaledText style={styles.previewName}>{inspectedMarker.name}</ScaledText>
+                <ScaledText style={styles.previewStatus}>{strings.status[inspectedMarker.status]}</ScaledText>
+                {/* G06.05 (AC4): the manual play — the GPS-denied row's exit
+                    (11 §7: every story plays by hand). The button renders
+                    only for a story the engine would actually launch; the
+                    launch itself is the engine's UserSelectedStory path. */}
+                {session !== null &&
+                session.phase === "Active" &&
+                inspectedMarker.status !== "locked" &&
+                storyPlayable(activeStoryId) ? (
+                  <PressableSurface
+                    accessibilityRole="button"
+                    accessibilityLabel={strings.playAudio}
+                    accessibilityHint={strings.playStoryHint}
+                    onPress={() => activeStoryId !== undefined && run.selectStory(inspectedMarker.stopId, activeStoryId)}
+                    style={styles.readButton}
+                    testID="btn-card-play"
+                  >
+                    <ScaledText style={styles.readLabel}>{strings.playAudio}</ScaledText>
+                  </PressableSurface>
+                ) : null}
+                {run.panel === "full" && hasExtended ? (
+                  // G06.05 (AC3): the story-layer switch — every story's
+                  // transcript is reachable, the base one is not the only
+                  // one. The switch belongs to this card only.
+                  <View style={styles.layerRow} testID="run-story-layers">
+                    <PressableSurface
+                      accessibilityRole="button"
+                      accessibilityLabel={strings.storyBase}
+                      accessibilityState={{ selected: activeLayer === "base" }}
+                      onPress={() => setLayerByStop({ stopId: inspectedMarker.stopId, layer: "base" })}
+                      style={[styles.layerTab, activeLayer === "base" && styles.layerTabActive]}
+                      testID="btn-story-base"
+                    >
+                      <ScaledText style={styles.layerLabel}>{strings.storyBase}</ScaledText>
+                    </PressableSurface>
+                    <PressableSurface
+                      accessibilityRole="button"
+                      accessibilityLabel={strings.storyExtended}
+                      accessibilityState={{ selected: activeLayer === "extended" }}
+                      onPress={() => setLayerByStop({ stopId: inspectedMarker.stopId, layer: "extended" })}
+                      style={[styles.layerTab, activeLayer === "extended" && styles.layerTabActive]}
+                      testID="btn-story-extended"
+                    >
+                      <ScaledText style={styles.layerLabel}>{strings.storyExtended}</ScaledText>
+                    </PressableSurface>
+                  </View>
+                ) : null}
                 {run.panel === "full" ? (
                   // The transcript belongs to the inspected card (11 §3.2), not
                   // to the audible story. The pinned layer's stops.json names
                   // it; a story without a readable transcript keeps the honest
                   // pending note — never invented text.
                   <View testID="run-transcript">
-                    <Text style={styles.transcriptHeading}>{strings.transcript}</Text>
-                    <Text style={styles.transcriptBody}>{inspectedTranscript ?? strings.transcriptPending}</Text>
+                    <ScaledText style={styles.transcriptHeading}>{strings.transcript}</ScaledText>
+                    <ScaledText style={styles.transcriptBody}>
+                      {inspectedTranscript ?? strings.transcriptPending}
+                    </ScaledText>
                   </View>
                 ) : null}
                 {run.panel === "half" ? (
-                  <Pressable onPress={() => run.expandPanel()} style={styles.readButton} testID="btn-panel-read">
-                    <Text style={styles.readLabel}>{strings.readMore}</Text>
-                  </Pressable>
+                  <PressableSurface
+                    accessibilityRole="button"
+                    accessibilityLabel={strings.readMore}
+                    onPress={() => run.expandPanel()}
+                    style={styles.readButton}
+                    testID="btn-panel-read"
+                  >
+                    <ScaledText style={styles.readLabel}>{strings.readMore}</ScaledText>
+                  </PressableSurface>
                 ) : null}
-                <Pressable onPress={() => run.dismissPanel()} style={styles.closeButton} testID="btn-panel-close">
-                  <Text style={styles.closeLabel}>{strings.close}</Text>
-                </Pressable>
+                <PressableSurface
+                  accessibilityRole="button"
+                  accessibilityLabel={strings.close}
+                  onPress={() => run.dismissPanel()}
+                  style={styles.closeButton}
+                  testID="btn-panel-close"
+                >
+                  <ScaledText style={styles.closeLabel}>{strings.close}</ScaledText>
+                </PressableSurface>
               </View>
             ) : null}
           </ScrollView>
@@ -609,7 +780,7 @@ export default function Run() {
         // the session active and unchanged; the confirmation runs the same
         // end() the button used to call.
         <ModalDialog onRequestClose={() => setEndConfirm(false)} testID="end-confirm-dialog">
-          <Text style={styles.confirmText}>{strings.endConfirmTitle}</Text>
+          <ScaledText style={styles.confirmText}>{strings.endConfirmTitle}</ScaledText>
           <ModalDialogAccept
             label={strings.endConfirmAccept}
             onPress={() => {

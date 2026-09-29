@@ -175,6 +175,21 @@ export interface RunMapStrings {
   // this per-locale dictionary. A kind without an entry renders no label at
   // all — the raw value never shows, nothing is invented.
   readonly poiKind: Record<string, string>;
+  // G06.05 (issue #280): the honest degradation banners of 11 §7 — the
+  // denied/stalled GPS lines (the denied wording is the contract's own), the
+  // manual-play hint (the manual mode is a full path, not an emergency), the
+  // suspended-automation note, the restored-session note with its tier loss,
+  // and the card's story-layer words for the transcript switch.
+  readonly deniedGps: string;
+  readonly gpsStalled: string;
+  readonly gpsStalledDetail: string;
+  readonly manualPlayHint: string;
+  readonly autoplaySuspendedTitle: string;
+  readonly restoredTitle: string;
+  readonly tierUnavailable: string;
+  readonly storyBase: string;
+  readonly storyExtended: string;
+  readonly playStoryHint: string;
 }
 
 // The refusal's rendered word: the known map, else the raw reason itself.
@@ -230,6 +245,16 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     poiKind: {
       sight: 'Славутасць',
     },
+    deniedGps: 'Аўтаматычныя гісторыі не працуюць — я не бачу вашай пазіцыі',
+    gpsStalled: 'Пазіцыя састарэлая',
+    gpsStalledDetail: 'Аўтазапуск і чарга заблакаваныя',
+    manualPlayHint: 'Кожная гісторыя запускаецца рукамі з карткі кропкі',
+    autoplaySuspendedTitle: 'Аўтаматычныя гісторыі прыпыненыя',
+    restoredTitle: 'Прагулка працягнута са захаванай сесіі',
+    tierUnavailable: 'Дадатковы ярус недаступны ў адноўленай сесіі',
+    storyBase: 'Асноўная гісторыя',
+    storyExtended: 'Дадатковая гісторыя',
+    playStoryHint: 'Запускае гук гэтай гісторыі',
   },
   en: {
     status: {
@@ -278,6 +303,16 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     poiKind: {
       sight: 'Sight',
     },
+    deniedGps: 'Automatic stories are off — I cannot see your position',
+    gpsStalled: 'Position is stale',
+    gpsStalledDetail: 'Autoplay and the queue are blocked',
+    manualPlayHint: 'Every story plays by hand from the point card',
+    autoplaySuspendedTitle: 'Automatic stories are suspended',
+    restoredTitle: 'Walk continued from the saved session',
+    tierUnavailable: 'Extended tier unavailable in the restored session',
+    storyBase: 'Base story',
+    storyExtended: 'Extended story',
+    playStoryHint: 'Plays this story aloud',
   },
 };
 
