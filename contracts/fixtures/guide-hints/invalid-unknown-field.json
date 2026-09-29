@@ -1,0 +1,9 @@
+{
+  "guide_hints_values_version": 1,
+  "proximity_radius_m": 300,
+  "accepted_accuracy_m": 100,
+  "fix_freshness_s": 30,
+  "dwell_s": 20,
+  "foreground_cooldown_s": 3600,
+  "audio_trigger_radius_m": 40
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Лікі падказак гідаў побач (R07)",
+  "description": "Канфігурацыйныя лікі кантракта G07.04: парог блізкасці, дапушчальная accuracy, свежасць фіксу, dwell і foreground-cooldown. Прычыны пачатковых лікаў — ADR G07.04 (docs/architecture/decisions/G07.04-guide-hints.md); да прыняцця заснавальнікам значэнні — прапанова; палявая каліброўка — G11.02. Аўдыё-радыус кропкі сюды не ўваходзіць: R07 забараняе выкарыстоўваць яго як рэкламны радыус, таму слоўнік закрыты (additionalProperties: false).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "guide_hints_values_version",
+    "proximity_radius_m",
+    "accepted_accuracy_m",
+    "fix_freshness_s",
+    "dwell_s",
+    "foreground_cooldown_s"
+  ],
+  "properties": {
+    "guide_hints_values_version": { "const": 1 },
+    "proximity_radius_m": { "type": "number", "minimum": 1 },
+    "accepted_accuracy_m": { "type": "number", "minimum": 1 },
+    "fix_freshness_s": { "type": "integer", "minimum": 1 },
+    "dwell_s": { "type": "integer", "minimum": 1 },
+    "foreground_cooldown_s": { "type": "integer", "minimum": 1 }
+  }
+}
