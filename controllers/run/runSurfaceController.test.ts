@@ -659,6 +659,22 @@ const momentBinding = (world: World): NonNullable<ReturnType<typeof createServic
   return binding;
 };
 
+// The moment-launching scenarios' shared arrangement: the place card's
+// explicit Play Moment routed through the root resolver — the production
+// path. The caller owns the physical facts and the assertions that follow.
+async function routedMomentWorld(): Promise<{
+  world: World;
+  surface: ControllerStore<RunSurfaceState>;
+  controller: ControllerStore<RunControllerState>;
+}> {
+  const ctx = await momentWorld();
+  assert.deepEqual(
+    momentBinding(ctx.world).play({ momentId: ctx.teaser.momentId, storyId: ctx.teaser.storyId, path: ctx.teaser.audioPath }),
+    { outcome: 'routed' },
+  );
+  return ctx;
+}
+
 test('G07.03 PROOF (AC1): a Play Moment mid-Run keeps the session and its progress; the teaser sounds with its real path', async () => {
   const { world, controller, teaser } = await momentWorld();
   const before = controller.getState().run;
@@ -738,11 +754,7 @@ test('G07.03 (AC2): a dwell during the moment sounds nothing — no second audio
 });
 
 test('G07.03 (AC3): the moment ends — automation stays suspended, «Працягнуць гід» is the only way back', async () => {
-  const { world, controller, teaser } = await momentWorld();
-  assert.deepEqual(
-    momentBinding(world).play({ momentId: teaser.momentId, storyId: teaser.storyId, path: teaser.audioPath }),
-    { outcome: 'routed' },
-  );
+  const { world, controller } = await routedMomentWorld();
   const commandsAfterPlay = world.audioPort.commands.length;
 
   // The teaser's physical end: the player frees, nothing sounds by itself,
@@ -775,11 +787,7 @@ test('G07.03 (AC3): the moment ends — automation stays suspended, «Праця
 });
 
 test('G07.03 (AC4): the re-entered Run shows the own audio state — no auto-Start, no auto-resume', async () => {
-  const { world, surface, controller, teaser } = await momentWorld();
-  assert.deepEqual(
-    momentBinding(world).play({ momentId: teaser.momentId, storyId: teaser.storyId, path: teaser.audioPath }),
-    { outcome: 'routed' },
-  );
+  const { world, surface, controller } = await routedMomentWorld();
   // The physical interruption (a call): the moment becomes a live pause.
   world.audioPort.focusLoss();
   world.audioPort.snapshotValue = { state: 'paused', positionMs: 4_000, durationMs: 60_000 };
@@ -814,11 +822,7 @@ test('G07.03 (AC4): the re-entered Run shows the own audio state — no auto-Sta
 });
 
 test('G07.03: the place-card Stop on a session-owned moment routes to the engine (§3.4)', async () => {
-  const { world, controller, teaser } = await momentWorld();
-  assert.deepEqual(
-    momentBinding(world).play({ momentId: teaser.momentId, storyId: teaser.storyId, path: teaser.audioPath }),
-    { outcome: 'routed' },
-  );
+  const { world, controller } = await routedMomentWorld();
   // The card's live fact: the physical player reports the moment launch the
   // idle controller did not mint (its store stays idle).
   assert.deepEqual(momentBinding(world).playback().token, { kind: 'moment', ref: 'moment-9', seq: 1 });
@@ -837,11 +841,7 @@ test('G07.03: the place-card Stop on a session-owned moment routes to the engine
 });
 
 test('G07.03: the place-card Resume on a session-owned paused moment routes to the engine (§3.5)', async () => {
-  const { world, controller, teaser } = await momentWorld();
-  assert.deepEqual(
-    momentBinding(world).play({ momentId: teaser.momentId, storyId: teaser.storyId, path: teaser.audioPath }),
-    { outcome: 'routed' },
-  );
+  const { world, controller } = await routedMomentWorld();
   world.audioPort.focusLoss();
   world.audioPort.snapshotValue = { state: 'paused', positionMs: 4_000, durationMs: 60_000 };
   const commandsAtPause = world.audioPort.commands.length;
