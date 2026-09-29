@@ -61,6 +61,25 @@ if (!/tools\/collector/.test(pkg.scripts?.test ?? '')) {
   failures.push('npm test glob does not include tools/collector');
 }
 
+// Issue #241 revert guard — the jscpd gate must stay wired to a full-SHA pin
+// of the company reusable workflow and never again to the pre-fix ref
+// 752dff0: at that SHA the reusable workflow declared the malformed action
+// reference `uses: $/.github/actions/jscpd`, so GitHub rejected the file at
+// start time — every PR's jscpd run failed at 0s with no jobs and no
+// check-run, and the gate silently never ran. Reverting the pin to that ref
+// must turn this committed check red (implementation-rules 1).
+const JSCPD_BROKEN_REF = '752dff081b8d910ee9763ae73283748185e8af00';
+const jscpdUses = fs
+  .readFileSync('.github/workflows/jscpd.yml', 'utf8')
+  .match(/uses:\s*vokhandcrafts\/ai-company-infrastructure\/\.github\/workflows\/jscpd\.yml@([0-9a-f]+)/);
+if (!jscpdUses) {
+  failures.push('jscpd.yml does not call the company reusable jscpd workflow');
+} else if (jscpdUses[1].length !== 40) {
+  failures.push('jscpd.yml pins the reusable workflow to a short or mutable ref — use a full 40-hex SHA');
+} else if (jscpdUses[1] === JSCPD_BROKEN_REF) {
+  failures.push('jscpd.yml pins the pre-fix ref 752dff0 (workflow-file startup failure, issue #241)');
+}
+
 if (failures.length > 0) {
   console.error('guard-required-checks: FAIL');
   for (const failure of failures) console.error(`- ${failure}`);

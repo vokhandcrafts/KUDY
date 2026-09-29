@@ -109,3 +109,15 @@
   рэндэрыць адзін і той жа гід двойчы на Explore і ў рубрыцы «Гіды»;
   negative-тэст праз production loadCatalog мусіць упадаць пры адкате фільтра.
   Выпраўлена: services/catalog/catalogService.ts, projectGuides — issue #324.
+
+- key: jscpd-workflow-startup-failure — пасля любой змены выкліку reusable
+  workflow у `.github/workflows/` (пін, шлях, уваходы) правяраецца жывы
+  PR-ран: у ім мае быць рэальная джоба з крокамі, а не стартавы збой на 0s
+  без jobs («This run likely failed because of a workflow file issue»);
+  такі run не стварае check-run, таму лёгка прапусціць у PR UI. Пін reusable
+  workflow трымаецца на поўным 40-знаковым SHA праверанага каміта, не на
+  зменлівым ref.
+  Выпраўлена: .github/workflows/jscpd.yml, пін пераключаны з 752dff0
+  (на ім у reusable workflow быў зламаны радок `uses: $/...` — стартавы
+  збой ва ўсіх PR) на 9558bda пасля мержу ai-company-infrastructure#1;
+  ахова піна ў tools/ci/check-required-checks.mjs — issue #241.
