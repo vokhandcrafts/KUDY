@@ -1,8 +1,9 @@
-// Dispatcher suite (G17.12): the read-only local page over the store. The
-// fixture database is built through the production store functions, then
-// closed; the suite boots the real dispatcher on an ephemeral port and fetches
-// the pages — no route is stubbed (implementation-rules 15). Assertions are on
-// rendered content, so reverting the feature turns the suite red.
+// Dispatcher suite (G17.12, «Запісы» — G17.13): the read-only local pages over
+// the store. The fixture database is built through the production store
+// functions, then closed; the suite boots the real dispatcher on an ephemeral
+// port and fetches the pages — no route is stubbed (implementation-rules 15).
+// Assertions are on rendered content, so reverting the feature turns the suite
+// red.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import http from 'node:http';
@@ -15,6 +16,7 @@ import {
   claimStep,
   enqueueStep,
   failStep,
+  insertLink,
   insertMedia,
   openStore,
   sha256Hex,
@@ -47,8 +49,12 @@ async function get(dispatcher, requestPath) {
   return { status: response.status, body: await response.text(), type: response.headers.get('content-type') };
 }
 
-// Two campaigns with records in every status, a photo, a failed crawl step and
-// a failed youtube step — everything the overview page claims to show.
+// Two campaigns with records in every status, a photo, links, a failed crawl
+// step and a failed youtube step — everything the overview and the records
+// pages claim to show. The records fixture (G17.13): c1's two records are
+// gdansk with two links on A and one on B, c2's record is krakow with none;
+// only B has a cleaned version, so its title comes from the search index and
+// A's falls back to the URL.
 function buildStoreFixture(dir) {
   const dbPath = path.join(dir, 'db.sqlite');
   const db = openStore(dbPath);
@@ -59,8 +65,23 @@ function buildStoreFixture(dir) {
   ).run();
   const recordA = rawRecord({ campaignId: 'c1', url: 'https://news.example/a', status: 'raw' });
   upsertRawRecord(db, recordA);
-  upsertRawRecord(db, rawRecord({ campaignId: 'c1', url: 'https://news.example/b', status: 'cleaned' }));
-  upsertRawRecord(db, rawRecord({ campaignId: 'c2', url: 'https://news.example/c', status: 'used' }));
+  const recordB = rawRecord({ campaignId: 'c1', url: 'https://news.example/b', status: 'cleaned' });
+  upsertRawRecord(db, recordB);
+  const recordC = rawRecord({ campaignId: 'c2', url: 'https://news.example/c', status: 'used', city: 'krakow' });
+  upsertRawRecord(db, recordC);
+  for (const link of [
+    { rawRecordId: recordA.id, anchorText: 'history', url: 'https://news.example/rel-1', context: 'p1' },
+    { rawRecordId: recordA.id, anchorText: 'cranes', url: 'https://news.example/rel-2', context: 'p2' },
+    { rawRecordId: recordB.id, anchorText: 'museum', url: 'https://news.example/rel-3', context: 'p1' },
+  ]) {
+    insertLink(db, link);
+  }
+  db.prepare('INSERT INTO cleaned_fts (raw_record_id, version, title, body) VALUES (?, ?, ?, ?)').run(
+    recordB.id,
+    1,
+    'Назва запіса B',
+    'тэкст ачышчанага дакумента'
+  );
   insertMedia(db, {
     rawRecordId: recordA.id,
     position: 1,
@@ -88,7 +109,7 @@ function buildStoreFixture(dir) {
   claimStep(db, failedYoutube.id, now);
   failStep(db, failedYoutube.id, 'binary not found — install yt-dlp', now);
   db.close();
-  return { dbPath, recordA };
+  return { dbPath, recordA, recordB, recordC };
 }
 
 test('overview page shows per-campaign counts and journal diagnostics', async (t) => {
@@ -132,9 +153,105 @@ test('missing database file and missing snapshots dir render the empty state', a
   assert.equal(response.status, 200);
   assert.match(response.body, /Яшчэ нічога не сабрана — запусціце <code>run --campaign/);
   assert.match(response.body, /Журнал пусты\./);
+  const records = await get(dispatcher, '/records');
+  assert.equal(records.status, 200);
+  assert.match(records.body, /Яшчэ нічога не сабрана — запусціце <code>run --campaign/);
   // The read-only server must not have created anything on disk.
   assert.equal(fs.existsSync(path.join(dir, 'absent.sqlite')), false);
   assert.equal(fs.existsSync(path.join(dir, 'snapshots')), false);
+});
+
+test('records page lists every record with counts, rights and the card link', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath, recordA, recordB } = buildStoreFixture(dir);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const response = await get(dispatcher, '/records');
+  assert.equal(response.status, 200);
+  assert.match(response.type, /^text\/html; charset=utf-8/);
+  // Every record of every campaign, each row linking to its card page (task 06).
+  assert.match(response.body, new RegExp(`href="/record\\?id=${recordA.id}"`));
+  assert.match(response.body, new RegExp(`href="/record\\?id=${recordB.id}"`));
+  // Title from the search index for the cleaned record; URL fallback for the raw one.
+  assert.match(response.body, /Назва запіса B/);
+  assert.match(response.body, />https:\/\/news\.example\/a<\/a>/);
+  // Source, status and rights show the Belarusian word next to the raw key.
+  assert.match(response.body, /навіны <span class="key">\(news\)<\/span>/);
+  assert.match(response.body, /ачышчана <span class="key">\(cleaned\)<\/span>/);
+  assert.match(response.body, /выкарыстана <span class="key">\(used\)<\/span>/);
+  assert.match(response.body, /толькі даследаванне <span class="key">\(research_only\)<\/span>/);
+  // Photo and link counts: A — 1 фота / 2 спасылкі, B — 0/1, C — 0/0.
+  assert.match(response.body, /<td>1<\/td><td>2<\/td>/);
+  assert.match(response.body, /<td>0<\/td><td>1<\/td>/);
+  assert.match(response.body, /<td>0<\/td><td>0<\/td>/);
+  // The filter bar offers every city present in the store.
+  assert.match(response.body, /Горад: <a href="\/records"[^>]*>усе<\/a>/);
+  assert.match(response.body, /<a href="\/records\?city=gdansk"[^>]*>gdansk<\/a>/);
+  assert.match(response.body, /<a href="\/records\?city=krakow"[^>]*>krakow<\/a>/);
+  assert.doesNotMatch(response.body, /class="note"/);
+});
+
+test('status and city URL filters narrow the records list and stay shareable', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath, recordA, recordB, recordC } = buildStoreFixture(dir);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const raw = await get(dispatcher, '/records?status=raw');
+  assert.equal(raw.status, 200);
+  assert.ok(raw.body.includes(recordA.url), 'raw record listed');
+  assert.ok(!raw.body.includes(`href="/record?id=${recordB.id}"`), 'cleaned record filtered out');
+  assert.ok(!raw.body.includes(recordC.url), 'used record filtered out');
+  assert.match(raw.body, /<a href="\/records\?status=raw" class="on">сыравіна \(raw\)<\/a>/);
+
+  const krakow = await get(dispatcher, '/records?city=krakow');
+  assert.ok(krakow.body.includes(recordC.url), 'krakow record listed');
+  assert.ok(!krakow.body.includes(recordA.url), 'gdansk record filtered out');
+  assert.match(krakow.body, /<a href="\/records\?city=krakow" class="on">krakow<\/a>/);
+
+  const both = await get(dispatcher, '/records?status=cleaned&city=gdansk');
+  assert.ok(both.body.includes(`href="/record?id=${recordB.id}"`), 'cleaned gdansk record listed');
+  assert.ok(!both.body.includes(recordA.url), 'raw gdansk record filtered out');
+  // The address bar is the shareable state; the bar's links carry the same
+  // full state, so a colleague opens the filtered view as-is.
+  assert.match(both.body, /href="\/records\?status=cleaned&amp;city=gdansk" class="on"/);
+});
+
+test('unknown record filter parameters answer readably, not 500', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath, recordA } = buildStoreFixture(dir);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const unknownParam = await get(dispatcher, '/records?banana=1');
+  assert.equal(unknownParam.status, 200);
+  assert.match(unknownParam.body, /Невядомы параметр «banana» — ігнаруецца; вядомыя: status, city\./);
+  assert.ok(unknownParam.body.includes(recordA.url), 'the list still renders, unfiltered');
+
+  const unknownStatus = await get(dispatcher, '/records?status=banana');
+  assert.equal(unknownStatus.status, 200);
+  assert.match(unknownStatus.body, /Невядомы статус «banana» — вядомыя: raw, cleaned, used; фільтр статусу не прыменены\./);
+  assert.ok(unknownStatus.body.includes(recordA.url), 'the unfiltered list is shown');
+
+  // A hostile status value arrives escaped as text, never as markup.
+  const hostile = await get(dispatcher, '/records?status=%3Cscript%3E');
+  assert.equal(hostile.status, 200);
+  assert.doesNotMatch(hostile.body, /<script>/);
+  assert.match(hostile.body, /Невядомы статус «&lt;script&gt;»/);
+
+  // An empty value is no filter: the unfiltered list, no note — a regression
+  // that forwards '' into the WHERE clause would empty the table silently.
+  for (const empty of ['/records?status=', '/records?city=', '/records?status=&city=']) {
+    const response = await get(dispatcher, empty);
+    assert.equal(response.status, 200, empty);
+    assert.ok(response.body.includes(recordA.url), `unfiltered list — ${empty}`);
+    assert.doesNotMatch(response.body, /class="note"/, empty);
+  }
+
+  const unknownCity = await get(dispatcher, '/records?city=nowhere');
+  assert.equal(unknownCity.status, 200);
+  assert.match(unknownCity.body, /Па гэтым фільтры запісаў няма\./);
 });
 
 test('no request writes to the database or the snapshots tree', async (t) => {
