@@ -45,7 +45,10 @@ export interface DeviceIdentity {
   deviceSecret: string;
 }
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+// The deviceId shape POST /v1/device issues (09 §5). Exported for the
+// sibling boundaries that re-validate a device identity at their own edge —
+// the pattern stays single-sourced here (jscpd gate).
+export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 function defaultTransport(): DeviceRegistrationTransport {
   return {
