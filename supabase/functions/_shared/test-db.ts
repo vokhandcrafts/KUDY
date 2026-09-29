@@ -15,6 +15,13 @@ import {
   GRANT_PRODUCT_LOOKUP_SQL,
   type GrantSqlRunner,
 } from './grant-core.ts';
+import {
+  WEBHOOK_CACHE_INVALIDATE_SQL,
+  WEBHOOK_EVENT_EFFECTS_READ_SQL,
+  WEBHOOK_EVENT_INSERT_SQL,
+  WEBHOOK_EVENT_MARK_APPLIED_SQL,
+  type WebhookSqlRunner,
+} from './rc-webhook-core.ts';
 
 export interface StepRunner {
   query(sql: string, params?: unknown[]): Promise<unknown>;
@@ -60,10 +67,18 @@ export const GRANT_ROUTE_KEY_MIGRATION_STEPS: MigrationStep[] = [
   (db) => db.query('create unique index grant_products_route_key_idx on grant_products (route_key)'),
 ];
 
+export const WEBHOOK_MIGRATION_STEPS: MigrationStep[] = [
+  (db) => db.query('create table webhook_events ( event_id text primary key, type text not null, event_at timestamptz, received_at timestamptz not null default now(), payload jsonb not null, effects_applied boolean not null default false )'),
+  (db) => db.query('alter table webhook_events enable row level security'),
+  (db) => db.query('revoke all on webhook_events from anon, authenticated'),
+  (db) => db.query('grant select, insert, update, delete on webhook_events to service_role'),
+];
+
 export const MIGRATIONS: Array<{ file: string; steps: MigrationStep[] }> = [
   { file: '20260922120000_device_tables_rls.sql', steps: DEVICE_MIGRATION_STEPS },
   { file: '20260926120000_grant_products.sql', steps: GRANT_MIGRATION_STEPS },
   { file: '20260926130000_grant_products_route_key.sql', steps: GRANT_ROUTE_KEY_MIGRATION_STEPS },
+  { file: '20260930000000_webhook_events.sql', steps: WEBHOOK_MIGRATION_STEPS },
 ];
 
 export async function freshMigratedDatabase(): Promise<PGlite> {
@@ -99,6 +114,33 @@ export function pgliteGrantRunner(db: PGlite): GrantSqlRunner {
     },
     async capCache(deviceId, cap) {
       await db.query(GRANT_CACHE_CAP_SQL, [deviceId, cap]);
+    },
+  };
+}
+
+// The SQL runner the webhook core's store port runs against in tests: PGlite
+// instead of postgres.js, the same pinned statements — proving the insert-on-
+// conflict idempotency and the cache invalidation against real Postgres.
+export function pgliteWebhookRunner(db: PGlite): WebhookSqlRunner {
+  return {
+    async persistEvent(input) {
+      const result = await db.query(
+        WEBHOOK_EVENT_INSERT_SQL,
+        [input.eventId, input.type, input.eventTimestampMs, JSON.stringify(input.payload)],
+      );
+      return (result.rows as Array<Record<string, unknown>>).length > 0;
+    },
+    async readEffectsApplied(eventId) {
+      const result = await db.query(WEBHOOK_EVENT_EFFECTS_READ_SQL, [eventId]);
+      const row = (result.rows as Array<Record<string, unknown>>)[0];
+      if (!row) return null;
+      return row['effects_applied'] === true;
+    },
+    async markEffectsApplied(eventId) {
+      await db.query(WEBHOOK_EVENT_MARK_APPLIED_SQL, [eventId]);
+    },
+    async invalidateEntitlementCache(deviceId) {
+      await db.query(WEBHOOK_CACHE_INVALIDATE_SQL, [deviceId]);
     },
   };
 }
