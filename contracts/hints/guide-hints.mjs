@@ -23,14 +23,23 @@ export function checkGuideHintValues(doc) {
     } else if (NAMED_BY_KEYWORD[e.keyword]) {
       errors.push({ rule: NAMED_BY_KEYWORD[e.keyword], path: e.path });
     } else {
-      errors.push({ rule: e.rule, path: e.path });
+      errors.push({ rule: e.keyword, path: e.path });
     }
   }
   if (doc && typeof doc === 'object' && !Array.isArray(doc)) {
     const radius = doc.proximity_radius_m;
     const accuracy = doc.accepted_accuracy_m;
-    if (typeof radius === 'number' && typeof accuracy === 'number' && accuracy >= radius) {
-      errors.push({ rule: 'hint-accuracy-exceeds-radius', path: '$.accepted_accuracy_m' });
+    if (typeof radius === 'number' && typeof accuracy === 'number') {
+      // The schema minimum cannot see NaN/±Infinity (every comparison is
+      // false) — the finite gate is the only guard for the two number fields.
+      if (!Number.isFinite(radius) || !Number.isFinite(accuracy)) {
+        errors.push({
+          rule: 'hint-value-non-finite',
+          path: Number.isFinite(radius) ? '$.accepted_accuracy_m' : '$.proximity_radius_m',
+        });
+      } else if (accuracy >= radius) {
+        errors.push({ rule: 'hint-accuracy-exceeds-radius', path: '$.accepted_accuracy_m' });
+      }
     }
   }
   return { ok: errors.length === 0, errors };

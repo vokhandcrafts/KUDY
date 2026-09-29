@@ -359,3 +359,19 @@ test('G07.04: the accuracy rule gates the radius it serves', () => {
     JSON.stringify(checkGuideHintValues(equal).errors),
   );
 });
+
+test('G07.04: non-finite numbers answer with a named diagnostic', () => {
+  // JSON cannot carry NaN/±Infinity, so this rule has no fixture file — the
+  // corrupt input is only reachable programmatically.
+  const values = readJson('contracts/hints/guide-hints.values.v1.json');
+  for (const field of ['proximity_radius_m', 'accepted_accuracy_m']) {
+    for (const bad of [NaN, Infinity, -Infinity]) {
+      const res = checkGuideHintValues({ ...values, [field]: bad });
+      assert.ok(!res.ok, `${field}=${bad} must fail`);
+      assert.ok(
+        res.errors.some((e) => e.rule === 'hint-value-non-finite'),
+        `${field}=${bad} must fail on hint-value-non-finite: ${JSON.stringify(res.errors)}`,
+      );
+    }
+  }
+});
