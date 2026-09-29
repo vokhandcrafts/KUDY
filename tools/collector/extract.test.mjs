@@ -90,6 +90,15 @@ test('«https://» with nothing address-shaped after it stays plain text', () =>
   assert.equal(page.text, 'Прэфікс схемы https:// без адраса, і https://. таксама.\n');
 });
 
+test('an unbalanced opening parenthesis inside the address leaves the paragraph plain', () => {
+  const page = extractPage(
+    articleHtml({ body: [paragraph('Гл. https://y.com/a_(b — тэкст.')] }),
+    'https://news.example/a'
+  );
+  assert.deepEqual(page.links, [], 'the broken address creates no link row');
+  assert.equal(page.text, 'Гл. https://y.com/a_(b — тэкст.\n', 'the text stays byte-for-byte plain');
+});
+
 test('AC2: an anchored link is not re-wrapped — no nested markdown, no duplicate row', () => {
   const page = extractPage(
     articleHtml({

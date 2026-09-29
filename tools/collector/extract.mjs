@@ -87,16 +87,18 @@ function extractImgTags(fragment, baseUrl) {
 }
 
 // Bare URLs written as plain text («Гл. https://example.org/museum») are
-// links like anchored ones (docs/24_web_collection.md «Спасылкі»): the
-// address enters the links table — the anchor is the address itself, the
-// context is the paragraph — and from the same rows the crawler frontier,
-// while the text keeps the address visible as a markdown link. The pass runs
-// after the anchor pass and skips existing [label](url) spans: an anchored
-// link already covers the addresses in its own label and target, and
-// re-wrapping them would nest the markdown and duplicate the row (a known
-// regex limitation stands: a label holding both square brackets and a URL
-// escapes the span). Scheme-less addresses («www.…», «example.org») never
-// match — the pattern requires the http(s):// prefix.
+// links like anchored ones (docs/24_web_collection.md, «Пашпарт запісу
+// (RawRecord)»: сырая копія захоўвае «спіс спасылак (тэкст-анкер + адрас +
+// кантэкстны абзац)»): the address enters the links table — the anchor is
+// the address itself, the context is the paragraph — and from the same rows
+// the crawler frontier, while the text keeps the address visible as a
+// markdown link. The pass runs after the anchor pass and skips existing
+// [label](url) spans: an anchored link already covers the addresses in its
+// own label and target, and re-wrapping them would nest the markdown and
+// duplicate the row (a known regex limitation stands: a label holding both
+// square brackets and a URL escapes the span). Scheme-less addresses
+// («www.…», «example.org») never match — the pattern requires the http(s)://
+// prefix.
 const BARE_URL = /https?:\/\/[^\s<>"'[\]]+/gi;
 const MARKDOWN_LINK = /\[[^\]]*\]\([^)]*\)/g;
 
@@ -123,8 +125,10 @@ function bareUrlSegment(segment, links) {
 
 // Trailing sentence punctuation and an unbalanced closing parenthesis stay
 // outside the address («(гл. https://example.org/x.)»), GFM-autolink style;
-// a balanced «(…)» inside the address stays. «https://» with nothing
-// address-shaped after it is plain text, not a link.
+// a balanced «(…)» inside the address stays. A token still carrying an
+// unbalanced «(» is left as plain text: its markdown wrapper would not
+// render as a link and the visible paragraph would show raw markup.
+// «https://» with nothing address-shaped after it is plain text too.
 function bareUrlToken(match) {
   let url = match;
   for (;;) {
@@ -136,6 +140,7 @@ function bareUrlToken(match) {
       break;
     }
   }
+  if ((url.match(/\(/g) ?? []).length !== (url.match(/\)/g) ?? []).length) return null;
   return /^https?:\/\/./i.test(url) ? url : null;
 }
 
