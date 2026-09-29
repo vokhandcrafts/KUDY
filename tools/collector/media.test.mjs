@@ -278,6 +278,85 @@ test('probeImage reads exact dimensions from container headers and rejects anyth
   assert.equal(probeImage('not bytes'), null);
 });
 
+// G17.10 (issue #367): images standing outside paragraphs and figures and
+// lazy-loaded sources (data-src/srcset) go through the same pipeline — the
+// 150 px rule, the media table, the markdown position — while the decorative
+// placeholder never becomes a second photo and the small container logo stays
+// a rule case, not a failure.
+
+test('G17.10: a loose and a lazy image are saved, positioned and idempotent; the placeholder and the small logo are not', async () => {
+  const dir = makeTempDir();
+  const url = (name) => pathToFileURL(path.join(dir, name)).href;
+  const fx = imageFixture(
+    dir,
+    [
+      P('Paragraph zero.'),
+      `<div class="article-body"><img src="${url('hero-640x400.png')}" alt="Hero" title="The yard"></div>`,
+      P('Paragraph one.'),
+      `<img src="${url('placeholder-40x20.jpg')}" data-src="${url('lazy-800x600.png')}" alt="Lazy">`,
+      P(`Paragraph two with <img src="${url('inline-300x200.png')}" alt="Inline"> inside.`),
+      `<img srcset="${url('small-320.png')} 320w, ${url('large-800.png')} 800w" alt="Responsive">`,
+      P('Paragraph three.'),
+      `<footer><img src="${url('icon-100x90.png')}" alt="logo"></footer>`,
+    ],
+    {
+      imageFiles: {
+        'hero-640x400.png': pngBytes(640, 400),
+        'lazy-800x600.png': pngBytes(800, 600),
+        'inline-300x200.png': pngBytes(300, 200),
+        'large-800.png': pngBytes(800, 500),
+        'icon-100x90.png': pngBytes(100, 90),
+        // placeholder-40x20.jpg and small-320.png are deliberately absent: a
+        // step for either would fail the run and the assertions below.
+      },
+    }
+  );
+  const options = { sourcePath: fx.file, contentHash: sha256Hex(fx.source), snapshotsRoot: fx.snapshotsRoot };
+  const run = await runCampaign(fx.db, fx.campaign, options);
+  assert.equal(run.failed, 0, 'the placeholder and the small logo are rule cases, not failures');
+
+  const rows = mediaRows(fx.db);
+  const slug = 'gdansk-shipyard-turns-into-a-museum';
+  assert.deepEqual(
+    rows.map((row) => [row.file, row.position]),
+    [
+      [`${slug}-img-01.png`, 1],
+      [`${slug}-img-02.png`, 2],
+      [`${slug}-img-03.png`, 3],
+      [`${slug}-img-04.png`, 3],
+    ],
+    'document order: hero between p0/p1, lazy real source between p1/p2, inline after p2, srcset largest after it'
+  );
+  assert.deepEqual(
+    rows.map((row) => row.source_url),
+    [url('hero-640x400.png'), url('lazy-800x600.png'), url('inline-300x200.png'), url('large-800.png')],
+    'every saved row carries the real source — the placeholder and the small candidate are nowhere'
+  );
+  const details = imageSteps(fx.db).map((step) => step.detail ?? '').join('\n');
+  assert.ok(!details.includes('placeholder-40x20.jpg'), 'the decorative src created no image step');
+  assert.ok(!details.includes('small-320.png'), 'the small srcset candidate created no image step');
+  const skipped = imageSteps(fx.db).find((step) => step.detail?.includes('skipped'));
+  assert.match(skipped.detail, /icon-100x90\.png/, 'the container logo went through the same 150 px rule');
+
+  const record = fx.db.prepare("SELECT snapshot_path, media_dir FROM raw_records WHERE source_type = 'web'").get();
+  assert.deepEqual(
+    fs.readdirSync(record.media_dir).sort(),
+    [`${slug}-img-01.png`, `${slug}-img-02.png`, `${slug}-img-03.png`, `${slug}-img-04.png`],
+    'four files on disk'
+  );
+  const blocks = fs.readFileSync(path.join(record.snapshot_path, 'text.md'), 'utf8').trim().split('\n\n');
+  assert.ok(blocks[1].startsWith('![Hero](media/'), 'the loose hero renders between p0 and p1');
+  assert.ok(blocks[3].startsWith('![Lazy](media/'), 'the lazy real source renders between p1 and p2');
+  assert.ok(blocks[6].startsWith('![Responsive](media/'), 'the srcset largest candidate renders after the inline image');
+
+  const textBefore = fs.readFileSync(path.join(record.snapshot_path, 'text.md'), 'utf8');
+  const stepsBefore = imageSteps(fx.db).map((step) => [step.ref, step.status]);
+  await runCampaign(fx.db, fx.campaign, options);
+  assert.equal(mediaRows(fx.db).length, 4, 'a second run adds nothing — idempotency unchanged');
+  assert.equal(fs.readFileSync(path.join(record.snapshot_path, 'text.md'), 'utf8'), textBefore, 'text.md untouched');
+  assert.deepEqual(imageSteps(fx.db).map((step) => [step.ref, step.status]), stepsBefore);
+});
+
 test('extractPage: image sources resolve against the page, captions come from figcaption, srcless tags are skipped', () => {
   const base = 'https://news.example/gdansk/yard.html';
   const page = extractPage(

@@ -60,14 +60,18 @@ function declaredCanonical(html, baseUrl) {
 }
 
 // Attribute order inside an <img> tag varies, so each attribute is matched
-// against the whole tag string (the metaContent idiom). An img without a src
-// is markup garbage, not a fetchable image — skipped entirely; a src that
-// cannot resolve against the page URL is kept raw and fails later at load
-// time with a diagnostic (the «broken image URL» case).
+// against the whole tag string (the metaContent idiom). The source resolves
+// through the lazy-loading chain (G17.10): data-src first, then srcset, then
+// the visible src — when data-src/srcset carries the real image, src is its
+// decorative placeholder and never becomes a second photo. An img without a
+// resolvable source is markup garbage, not a fetchable image — skipped
+// entirely; a source that cannot resolve against the page URL is kept raw
+// and fails later at load time with a diagnostic (the «broken image URL»
+// case).
 function extractImgTags(fragment, baseUrl) {
   const images = [];
   for (const tag of fragment.match(/<img\b[^>]*>/gi) ?? []) {
-    const src = tag.match(/\bsrc\s*=\s*"([^"]*)"/i)?.[1];
+    const src = imgSource(tag);
     if (src === undefined || src.trim() === '') continue;
     const alt = tag.match(/\balt\s*=\s*"([^"]*)"/i)?.[1];
     const title = tag.match(/\btitle\s*=\s*"([^"]*)"/i)?.[1];
@@ -84,6 +88,41 @@ function extractImgTags(fragment, baseUrl) {
     });
   }
   return images;
+}
+
+// One attribute matched against the whole tag — attribute order varies. The
+// plain src pattern would also match inside data-src, so the fallback carries
+// a (?<!-) lookbehind guard, and the chain reads data-src and srcset first:
+// the visible src loses to the real lazy source.
+function imgSource(tag) {
+  const dataSrc = tag.match(/\bdata-src\s*=\s*"([^"]*)"/i)?.[1];
+  if (dataSrc !== undefined && dataSrc.trim() !== '') return dataSrc;
+  const srcset = tag.match(/\bsrcset\s*=\s*"([^"]*)"/i)?.[1];
+  if (srcset !== undefined && srcset.trim() !== '') {
+    const url = largestSrcsetCandidate(srcset);
+    if (url !== null) return url;
+  }
+  return tag.match(/\b(?<!-)src\s*=\s*"([^"]*)"/i)?.[1];
+}
+
+// srcset lists candidates with width (480w) or density (2x) descriptors; the
+// largest is the real content image, a candidate without a descriptor counts
+// as 1x, ties keep the earlier candidate. Known regex limitation: a comma
+// inside a srcset URL splits it — the truncated URL then fails at load time
+// with a diagnostic and the run continues.
+function largestSrcsetCandidate(srcset) {
+  const candidates = srcset
+    .split(',')
+    .map((part) => {
+      const url = part.trim().split(/\s+/)[0];
+      const descriptor = part.trim().slice(url.length).trim();
+      const width = descriptor.match(/^(\d+)w$/i)?.[1];
+      const density = descriptor.match(/^(\d+(?:\.\d+)?)x$/i)?.[1];
+      return { url, score: width !== undefined ? Number(width) : density !== undefined ? Number(density) : 1 };
+    })
+    .filter((candidate) => candidate.url !== '');
+  if (candidates.length === 0) return null;
+  return candidates.reduce((best, candidate) => (candidate.score > best.score ? candidate : best)).url;
 }
 
 // Bare URLs written as plain text («Гл. https://example.org/museum») are
@@ -154,15 +193,35 @@ export function extractPage(html, baseUrl) {
     throw extractError('missing-title', 'missing <title> — the page cannot be identified');
   }
 
-  // One document-order walk over paragraphs and standalone <figure> blocks.
-  // Images carry the index of the text.md block they are placed before
-  // (media.position, docs/24_web_collection.md «Фота»): an image inside a
-  // text paragraph renders after that paragraph's text, a figure between
-  // paragraphs renders exactly where it stood. Known regex limitation,
-  // unchanged by G17.02: <p> inside <figure> is not extracted.
+  // One document-order walk over paragraphs and standalone <figure> blocks,
+  // plus the segments between them: an image standing directly in the page's
+  // containers — outside <p> and <figure> (G17.10) — renders exactly where it
+  // stood, so it follows the figure semantics (position = the count of
+  // paragraphs collected so far). Images carry the index of the text.md block
+  // they are placed before (media.position, docs/24_web_collection.md
+  // «Фота»): an image inside a text paragraph renders after that paragraph's
+  // text, a figure between paragraphs renders exactly where it stood. Known
+  // regex limitation, unchanged by G17.02: <p> inside <figure> is not
+  // extracted.
   const paragraphs = [];
   const images = [];
-  for (const block of html.match(/<p\b[^>]*>[\s\S]*?<\/p>|<figure\b[^>]*>[\s\S]*?<\/figure>/gi) ?? []) {
+  const collectLooseImages = (segment) => {
+    // Script, style and template bodies never render — an <img> written
+    // inside them is code, not a page image. <noscript> repeats the very lazy
+    // image it falls back for (the same address as data-src), so scanning it
+    // would double every lazy photo.
+    const visible = segment.replace(/<(script|style|template|noscript)\b[^>]*>[\s\S]*?<\/\1>/gi, '');
+    for (const image of extractImgTags(visible, baseUrl)) {
+      image.position = paragraphs.length;
+      images.push(image);
+    }
+  };
+  const BLOCK = /<p\b[^>]*>[\s\S]*?<\/p>|<figure\b[^>]*>[\s\S]*?<\/figure>/gi;
+  let cursor = 0;
+  for (const match of html.matchAll(BLOCK)) {
+    collectLooseImages(html.slice(cursor, match.index));
+    cursor = match.index + match[0].length;
+    const block = match[0];
     const inner = block.slice(block.indexOf('>') + 1, block.lastIndexOf('<'));
     const isFigure = /^<figure/i.test(block);
     const blockImages = extractImgTags(inner, baseUrl);
@@ -212,6 +271,7 @@ export function extractPage(html, baseUrl) {
       paragraphs.push({ text, links });
     }
   }
+  collectLooseImages(html.slice(cursor));
   if (paragraphs.length === 0) {
     throw extractError('no-article-text', 'no paragraph text found — not an article page');
   }
