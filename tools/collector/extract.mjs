@@ -86,6 +86,59 @@ function extractImgTags(fragment, baseUrl) {
   return images;
 }
 
+// Bare URLs written as plain text («Гл. https://example.org/museum») are
+// links like anchored ones (docs/24_web_collection.md «Спасылкі»): the
+// address enters the links table — the anchor is the address itself, the
+// context is the paragraph — and from the same rows the crawler frontier,
+// while the text keeps the address visible as a markdown link. The pass runs
+// after the anchor pass and skips existing [label](url) spans: an anchored
+// link already covers the addresses in its own label and target, and
+// re-wrapping them would nest the markdown and duplicate the row (a known
+// regex limitation stands: a label holding both square brackets and a URL
+// escapes the span). Scheme-less addresses («www.…», «example.org») never
+// match — the pattern requires the http(s):// prefix.
+const BARE_URL = /https?:\/\/[^\s<>"'[\]]+/gi;
+const MARKDOWN_LINK = /\[[^\]]*\]\([^)]*\)/g;
+
+function collectBareUrls(text, links) {
+  let out = '';
+  let at = 0;
+  for (const span of text.matchAll(MARKDOWN_LINK)) {
+    out += bareUrlSegment(text.slice(at, span.index), links) + span[0];
+    at = span.index + span[0].length;
+  }
+  return out + bareUrlSegment(text.slice(at), links);
+}
+
+function bareUrlSegment(segment, links) {
+  return segment.replace(BARE_URL, (match) => {
+    const url = bareUrlToken(match);
+    if (url === null) return match;
+    links.push({ anchor: url, url });
+    // The trimmed-off tail (a dot, an unbalanced parenthesis) is visible text
+    // — it stays in the paragraph, after the link.
+    return `[${url}](${url})` + match.slice(url.length);
+  });
+}
+
+// Trailing sentence punctuation and an unbalanced closing parenthesis stay
+// outside the address («(гл. https://example.org/x.)»), GFM-autolink style;
+// a balanced «(…)» inside the address stays. «https://» with nothing
+// address-shaped after it is plain text, not a link.
+function bareUrlToken(match) {
+  let url = match;
+  for (;;) {
+    if (/[.,;:!?]$/.test(url)) {
+      url = url.slice(0, -1);
+    } else if (url.endsWith(')') && (url.match(/\(/g) ?? []).length < (url.match(/\)/g) ?? []).length) {
+      url = url.slice(0, -1);
+    } else {
+      break;
+    }
+  }
+  return /^https?:\/\/./i.test(url) ? url : null;
+}
+
 export function extractPage(html, baseUrl) {
   if (typeof html !== 'string' || html.trim() === '') {
     throw extractError('empty-document', 'empty document — nothing to extract');
@@ -122,23 +175,26 @@ export function extractPage(html, baseUrl) {
       continue;
     }
     const links = [];
-    const text = collapse(
-      decodeEntities(
-        inner
-          .replace(/<a\b[^>]*\bhref\s*=\s*"([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (match, href, anchorHtml) => {
-            const label = collapse(decodeEntities(anchorHtml.replace(/<[^>]+>/g, '')));
-            if (label === '') return '';
-            try {
-              const resolved = new URL(decodeEntities(href), baseUrl).href;
-              links.push({ anchor: label, url: resolved });
-              return `[${label}](${resolved})`;
-            } catch {
-              return label; // an unresolvable href keeps its text, loses the link
-            }
-          })
-          .replace(/<br\s*\/?>/gi, ' ')
-          .replace(/<[^>]+>/g, '')
-      )
+    const text = collectBareUrls(
+      collapse(
+        decodeEntities(
+          inner
+            .replace(/<a\b[^>]*\bhref\s*=\s*"([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (match, href, anchorHtml) => {
+              const label = collapse(decodeEntities(anchorHtml.replace(/<[^>]+>/g, '')));
+              if (label === '') return '';
+              try {
+                const resolved = new URL(decodeEntities(href), baseUrl).href;
+                links.push({ anchor: label, url: resolved });
+                return `[${label}](${resolved})`;
+              } catch {
+                return label; // an unresolvable href keeps its text, loses the link
+              }
+            })
+            .replace(/<br\s*\/?>/gi, ' ')
+            .replace(/<[^>]+>/g, '')
+        )
+      ),
+      links
     );
     for (const image of blockImages) {
       // Inside a text paragraph the image renders after its text — one block
