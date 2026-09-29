@@ -37,7 +37,9 @@
   YouTube-калектара (cue-less VTT праз пайплайн, runJson без JSON, parseVtt) —
   issue #264; tools/collector/clean.test.mjs — пашкоджаны metadata.json
   (абарваны JSON і валідны не-аб'ект) і ахова «rules drop every block»
-  праз cleanCampaign — PR #271.
+  праз cleanCampaign — PR #271; tools/collector/dispatcher.test.mjs —
+  дэфензіўны catch вакол new URL(record.url) у картцы запіса дыспетчара
+  (youtube-запіс з url-не-URL → адказ 200 і пусты журнал) — issue #383.
 
 - key: stale-skip-count — лічыльнік пропушчанага ў зводцы мае адлюстроўваць
   актуальны стан, а не гістарычны: пасля ўдачнай паўторнай спробы запіс

@@ -462,6 +462,35 @@ test('the card step log matches steps by url, record prefix, video id and wiki t
   assert.ok(!cardG.body.includes('<code>youtube</code>'), 'a web record must not inherit the youtube step');
 });
 
+test('a youtube record whose url is not a URL renders the card with an empty journal', async (t) => {
+  const dir = makeTempDir();
+  const dbPath = path.join(dir, 'db.sqlite');
+  const db = openStore(dbPath);
+  seedCampaign(db, 'c1');
+  const record = rawRecord({ campaignId: 'c1', url: 'не-URL', source_type: 'youtube' });
+  upsertRawRecord(db, record);
+  // The campaign journal holds a youtube step by video id: the card must not
+  // claim it, because the corrupt url yields no id — and without the defensive
+  // catch around new URL(record.url) in recordSteps the request itself fails.
+  enqueueStep(db, 'c1', 'youtube', 'dQw4w9WgXcQ', '2026-09-23T00:00:00.000Z');
+  db.close();
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const response = await get(dispatcher, `/record?id=${record.id}`);
+  assert.equal(response.status, 200);
+  assert.match(response.type, /^text\/html; charset=utf-8/);
+  assert.match(response.body, /Крокаў для гэтага запіса ў журнале няма\./);
+  assert.ok(!response.body.includes('dQw4w9WgXcQ'), 'the video-id step stays out of the corrupt card');
+  // The corrupt url renders as text — the card is a reading place, not a
+  // launcher.
+  assert.match(response.body, /<th>Крыніца<\/th><td><code>не-URL<\/code><\/td>/);
+
+  // The server answers the next request normally.
+  const records = await get(dispatcher, '/records');
+  assert.equal(records.status, 200);
+});
+
 test('missing snapshot files render readable notes and the server stays up', async (t) => {
   const dir = makeTempDir();
   const { dbPath, recordB, recordC, recordE, recordF } = buildStoreFixture(dir);
