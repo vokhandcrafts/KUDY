@@ -270,7 +270,11 @@ export interface RunControllerState {
   readonly stopAudio: () => void;
   readonly resumeAudio: (token: PlayToken) => void;
   readonly guideResume: () => void;
-  readonly playMoment: (momentId: string, storyId: string) => void;
+  // G07.03: the live session's moment entry (the sessionMoment port of the
+  // no-session controller). The path is the teaser fact the caller resolved;
+  // the boolean is the engine's acceptance — true iff the player was taken
+  // for exactly this launch (ADR G01.02 §3.4).
+  readonly playMoment: (momentId: string, storyId: string, path?: string) => boolean;
   // The panel actions of G06.03 (11 §2): dismiss is always "one position
   // down" (Full → Half → Peek) and identical for the panel's ✕ and the
   // screen Back (AC1) — from Peek the Back button is navigation, the
@@ -465,7 +469,7 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
     stopAudio: () => orchestrator.stopAudio(),
     resumeAudio: (token) => orchestrator.resumeAudio(token),
     guideResume: () => orchestrator.guideResume(),
-    playMoment: (momentId, storyId) => orchestrator.playMoment(momentId, storyId),
+    playMoment: (momentId, storyId, path) => orchestrator.playMoment(momentId, storyId, path),
     openCard: (stopId) => {
       const current = store?.getState();
       if (!current) return;

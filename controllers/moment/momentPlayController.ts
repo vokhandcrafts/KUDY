@@ -64,12 +64,19 @@ export interface MomentPlayDeps {
   // session ports (RunSessionPorts.nextMomentSeq) — two counters could mint
   // the same token value for two different launches.
   readonly nextSeq: () => number;
-  // The live session's moment entry: returns true iff the session's engine
-  // accepted the launch (the takeover happened). Absent or false while a
-  // session-owned launch holds the player is a named refusal — the
-  // controller never plays over a session-owned player.
+  // The live session's moment entry (G07.03): playMoment returns true iff
+  // the session's engine accepted the launch (the takeover happened); the
+  // resolved teaser path rides along — content resolution is the caller's,
+  // the engine reads no manifest. stopMoment/resumeMoment route the manual
+  // stop and the live-pause resume of a session-owned moment launch back to
+  // the same engine (§3.4/§3.5 — the ownership decisions stay the session's,
+  // this controller never commands over a launch it did not mint). Absent
+  // or false while a session-owned launch holds the player is a named
+  // refusal on play — the controller never plays over a session-owned player.
   readonly sessionMoment?: {
-    readonly playMoment: (momentId: string, storyId: string) => boolean;
+    readonly playMoment: (momentId: string, storyId: string, path?: string) => boolean;
+    readonly stopMoment?: () => boolean;
+    readonly resumeMoment?: () => boolean;
   };
   // §3.7: the threshold is measured from the physical FocusLoss fact — one
   // clock, injected; the controller never reads a clock of its own.
@@ -153,7 +160,7 @@ export function createMomentPlayController(deps: MomentPlayDeps): MomentPlayBind
       // controller did not mint): the takeover is the engine's own
       // transition (§3.4) — routed through the live session or refused.
       if (!deps.sessionMoment) return { refused: 'moment#session-unroutable' };
-      if (!deps.sessionMoment.playMoment(input.momentId, input.storyId)) {
+      if (!deps.sessionMoment.playMoment(input.momentId, input.storyId, input.path)) {
         return { refused: 'moment#session-refused' };
       }
       // The engine took the player; the takeover stops the previous source
@@ -176,16 +183,36 @@ export function createMomentPlayController(deps: MomentPlayDeps): MomentPlayBind
   }
 
   function stop(): void {
-    if (store.getState().kind !== 'playing') return;
-    deps.audio.stop();
-    focusLostAt = null;
-    store.setState({ kind: 'idle' }, true);
+    const current = store.getState();
+    if (current.kind === 'playing') {
+      deps.audio.stop();
+      focusLostAt = null;
+      store.setState({ kind: 'idle' }, true);
+      return;
+    }
+    // G07.03: a session-owned moment launch this controller did not mint —
+    // the manual stop is the session engine's own decision (§3.4), routed
+    // back to it, never a second command over the one player. A guide-owned
+    // launch is not this card's to stop.
+    const physical = deps.audio.playbackState();
+    if (physical.kind === 'playing' && physical.token?.kind === 'moment') {
+      deps.sessionMoment?.stopMoment?.();
+    }
   }
 
   function resume(): void {
     const current = store.getState();
-    if (current.kind !== 'playing' || !current.paused) return;
-    deps.audio.resume(current.token);
+    if (current.kind === 'playing' && current.paused) {
+      deps.audio.resume(current.token);
+      return;
+    }
+    // G07.03: the session-owned moment's live pause — the engine's
+    // ResumeAudio continues the same token and never touches the session
+    // flag (§3.5). Routed; a refused resume is a service no-op.
+    const physical = deps.audio.playbackState();
+    if (physical.kind === 'paused' && physical.token?.kind === 'moment') {
+      deps.sessionMoment?.resumeMoment?.();
+    }
   }
 
   return { store, play, stop, resume, playback: () => deps.audio.playbackState() };
