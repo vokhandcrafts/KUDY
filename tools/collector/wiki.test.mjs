@@ -389,5 +389,4 @@ test('wikiTitleFromUrl inverts wikiArticleUrl and rejects other urls', () => {
   assert.equal(wikiTitleFromUrl('https://pl.wikipedia.org/w/api.php'), null);
   assert.equal(wikiTitleFromUrl('not a url'), null);
   assert.equal(wikiTitleFromUrl('https://pl.wikipedia.org/wiki/%zz'), null);
->>>>>>> origin/main
 });
