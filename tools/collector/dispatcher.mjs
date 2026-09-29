@@ -6,15 +6,18 @@
 // and URL-carried filters. Zero dependencies (node:http + node:sqlite). The
 // store is opened with readOnly: true, so no request can write to the database
 // even if the code grows one — and nothing on the request path writes files:
-// the only file route reads below the snapshots root, contained by the repo
-// idiom in tools/serve-static.mjs (AR-2). The record card page is the
-// neighbouring task 06 of the dispatcher series.
+// the file routes read below the snapshots root, contained by the repo idiom
+// in tools/serve-static.mjs (AR-2). The record card (G17.14, /record?id=…) is
+// the editor's reading place for one record: snapshot text with images at
+// their positions and captions, the link table, the metadata and the record's
+// own journal steps.
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import fs from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { resolveStaticFile } from '../serve-static.mjs';
+import { wikiTitleFromUrl } from './wiki.mjs';
 
 export const DEFAULT_PORT = 8767;
 
@@ -142,16 +145,28 @@ function campaignRowHtml(campaign) {
   );
 }
 
-function stepRowHtml(step) {
+// One journal row for both readers of run_log — the overview (with the
+// campaign's city column) and the record card (the record is known, the column
+// would be a constant) — so the two tables never drift apart.
+function stepRowHtml(step, { withCity = true } = {}) {
   return (
     '<tr>' +
     `<td>${escapeHtml(step.finishedAt ?? '—')}</td>` +
-    `<td>${escapeHtml(step.city)}</td>` +
+    (withCity ? `<td>${escapeHtml(step.city)}</td>` : '') +
     `<td><code>${escapeHtml(step.kind)}</code>: ${escapeHtml(step.ref)}</td>` +
     `<td>${escapeHtml(step.statusBe)}</td>` +
     `<td class="diagnostic">${escapeHtml(step.error ?? '—')}</td>` +
     '</tr>'
   );
+}
+
+function stepsTableHtml(steps, { withCity, empty }) {
+  const head = `<tr><th>Час</th>${withCity ? '<th>Кампанія</th>' : ''}<th>Крок</th><th>Стан</th><th>Дыягностыка</th></tr>`;
+  const rows =
+    steps.length > 0
+      ? steps.map((step) => stepRowHtml(step, { withCity })).join('\n')
+      : `<tr><td colspan="${withCity ? 5 : 4}" class="empty">${empty}</td></tr>`;
+  return `<table>\n${head}\n${rows}\n</table>`;
 }
 
 // The empty-store sentence is shared by the overview and the records list so
@@ -180,6 +195,10 @@ function pageShell(active, body) {
   p.nav a, p.filters a { margin-right: 0.75rem; }
   p.nav a.on, p.filters a.on { font-weight: bold; }
   p.note { color: #8a6d3b; background: #fcf8e3; border: 1px solid #faebcc; padding: 0.35rem 0.7rem; }
+  p.text { max-width: 46rem; }
+  figure { margin: 1rem 0; }
+  figure img { max-width: 32rem; height: auto; border: 1px solid #bbb; }
+  figcaption { color: #555; font-size: 0.9rem; }
 </style>
 </head>
 <body>
@@ -194,10 +213,6 @@ ${body}
 export function renderOverview({ campaigns, recentSteps }) {
   const campaignRows =
     campaigns.length > 0 ? campaigns.map(campaignRowHtml).join('\n') : `<tr><td colspan="7" class="empty">${EMPTY_LIBRARY_MESSAGE}</td></tr>`;
-  const stepRows =
-    recentSteps.length > 0
-      ? recentSteps.map(stepRowHtml).join('\n')
-      : '<tr><td colspan="5" class="empty">Журнал пусты.</td></tr>';
   return pageShell(
     'overview',
     `<h2>Кампаніі</h2>
@@ -206,10 +221,7 @@ export function renderOverview({ campaigns, recentSteps }) {
 ${campaignRows}
 </table>
 <h2>Апошнія крокі журналу</h2>
-<table>
-<tr><th>Час</th><th>Кампанія</th><th>Крок</th><th>Стан</th><th>Дыягностыка</th></tr>
-${stepRows}
-</table>`
+${stepsTableHtml(recentSteps, { withCity: true, empty: 'Журнал пусты.' })}`
   );
 }
 
@@ -326,8 +338,14 @@ function recordRowHtml(record) {
   );
 }
 
+// Readable notes (unknown parameters, missing files) render the same on every
+// read-only page.
+function notesHtml(notes) {
+  return notes.map((note) => `<p class="note">${escapeHtml(note)}</p>`).join('\n');
+}
+
 export function renderRecords({ records, cities, status, city, notes }) {
-  const noteHtml = notes.map((note) => `<p class="note">${escapeHtml(note)}</p>`).join('\n');
+  const noteHtml = notesHtml(notes);
   const rows =
     records.length > 0
       ? records.map(recordRowHtml).join('\n')
@@ -342,6 +360,279 @@ ${recordsFilterBar({ status, city, cities })}
 ${rows}
 </table>`
   );
+}
+
+// --- Картка запіса (G17.14, /record?id=…) ---
+
+const CARD_PARAMS = ['id'];
+
+function parseCardParams(query) {
+  const unknown = [...new Set(query.keys())].filter((key) => !CARD_PARAMS.includes(key));
+  const notes = unknown.map((key) => `Невядомы параметр «${key}» — ігнаруецца; вядомы: id.`);
+  return { id: query.get('id') || undefined, notes };
+}
+
+// The record's steps: only the run_log rows whose ref carries this record —
+// the seed/crawl step by its url, the image/clean steps by their
+// `recordId:`-prefixed refs, and — scoped to the source type that step kind
+// produces — the youtube step by the video id inside the record's url and the
+// wiki-article step by the title the /wiki/ url maps back to. A web record
+// whose url merely looks like either (watch?v=, /wiki/…) stays with its own
+// steps. Every other journal row belongs to the campaign, not to this record.
+function recordSteps(db, record) {
+  const refs = [record.url];
+  if (record.source_type === 'youtube') {
+    try {
+      const videoId = new URL(record.url).searchParams.get('v');
+      if (videoId) refs.push(videoId);
+    } catch {
+      // Unparseable url: the literal and prefix matches still apply.
+    }
+  }
+  if (record.source_type === 'wiki') {
+    const wikiTitle = wikiTitleFromUrl(record.url);
+    if (wikiTitle) refs.push(wikiTitle);
+  }
+  return db
+    .prepare(
+      `SELECT kind, ref, status, error, finished_at FROM run_log
+       WHERE campaign_id = ? AND (ref IN (${refs.map(() => '?').join(', ')}) OR ref LIKE ?)
+       ORDER BY id`
+    )
+    .all(record.campaign_id, ...refs, `${record.id}:%`)
+    .map((row) => ({
+      kind: row.kind,
+      ref: row.ref,
+      status: row.status,
+      statusBe: STEP_STATUS_BE[row.status] ?? row.status,
+      error: row.error,
+      finishedAt: row.finished_at,
+    }));
+}
+
+// An anchor renders clickable only for schemes a browser may follow from a
+// local page; anything else — and unparseable input — stays plain text: the
+// card is a reading place, not a launcher.
+function clickableUrl(url) {
+  try {
+    return ['http:', 'https:', 'mailto:'].includes(new URL(url).protocol) ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+// The archive text.md's image form: `![alt](media/file)` written by the media
+// steps (media.mjs), with the caption as an emphasis line under it. The file
+// name is our own slug charset; anything else never becomes a path or a URL.
+const IMAGE_LINE = /^!\[([^\]]*)\]\(([^)]+)\)$/;
+const CAPTION_LINE = /^_(.+)_$/;
+const MEDIA_FILE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+
+function paragraphHtml(block) {
+  const escaped = escapeHtml(block);
+  // The block is escaped first, so both the link text and the href are safe as
+  // rendered; an anchor whose href survives as-is is exactly that, escaped.
+  const html = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (link, text, href) =>
+    clickableUrl(href) === null ? link : `<a href="${href}">${text}</a>`
+  );
+  return `<p class="text">${html}</p>`;
+}
+
+function figureHtml(block, snapshotDir, mediaBase) {
+  const lines = block.split('\n');
+  const match = lines[0].match(IMAGE_LINE);
+  if (!match) return null;
+  const [, alt, ref] = match;
+  const file = ref.startsWith('media/') ? ref.slice('media/'.length) : null;
+  const caption = lines
+    .slice(1)
+    .map((line) => line.match(CAPTION_LINE)?.[1] ?? null)
+    .filter((line) => line !== null)
+    .join(' ');
+  if (file === null || !MEDIA_FILE.test(file)) {
+    return `<p class="note">Нераспазнаная спасылка на выяву: <code>${escapeHtml(ref)}</code>.</p>`;
+  }
+  if (mediaBase === null) {
+    return `<p class="note">Снапшот па-за тэчкай даных — выяву паказаць нельга: <code>media/${escapeHtml(file)}</code>.</p>`;
+  }
+  let present = false;
+  try {
+    present = fs.statSync(path.join(snapshotDir, 'media', file)).isFile();
+  } catch {
+    present = false;
+  }
+  if (!present) {
+    return `<p class="note">Выява адсутнічае на дыску: <code>media/${escapeHtml(file)}</code>${
+      caption ? ` — подпіс: ${escapeHtml(caption)}` : ''
+    }.</p>`;
+  }
+  return (
+    '<figure>' +
+    `<img src="/media/${mediaBase}/media/${encodeURIComponent(file)}" alt="${escapeHtml(alt)}">` +
+    (caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : '') +
+    '</figure>'
+  );
+}
+
+// The snapshot text rendered block by block — the raw archive, not the cleaned
+// versions (those are separate artifacts for guide assembly). An article
+// snapshot keeps text.md, a youtube one transcript.md; a missing text is a
+// note, the rest of the card still shows.
+function textHtml(snapshotDir, mediaBase) {
+  if (snapshotDir === null) {
+    return '<p class="note">Здымак не запісаны — тэксту здымку няма.</p>';
+  }
+  let text = null;
+  for (const name of ['text.md', 'transcript.md']) {
+    try {
+      text = fs.readFileSync(path.join(snapshotDir, name), 'utf8');
+      break;
+    } catch {
+      // Try the next text form; the note below names both.
+    }
+  }
+  if (text === null) {
+    return `<p class="note">Тэкст здымку не прачытаны: няма ні <code>text.md</code>, ні <code>transcript.md</code> у <code>${escapeHtml(
+      snapshotDir
+    )}</code>.</p>`;
+  }
+  const blocks = (text.endsWith('\n') ? text.slice(0, -1) : text).split('\n\n').filter((block) => block !== '');
+  if (blocks.length === 0) return '<p class="note">Тэкст здымку пусты.</p>';
+  return blocks
+    .map((block) =>
+      block.startsWith('![') ? (figureHtml(block, snapshotDir, mediaBase) ?? paragraphHtml(block)) : paragraphHtml(block)
+    )
+    .join('\n');
+}
+
+// The snapshot dir's path below the snapshots root, as the /media route
+// addresses it. A snapshot_path that leaves the root (a corrupt row) answers
+// null — images render as notes, the page stays up.
+function mediaUrlBase(snapshotsRoot, snapshotDir) {
+  const rel = path.relative(snapshotsRoot, snapshotDir);
+  if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) return null;
+  return rel.split(path.sep).map(encodeURIComponent).join('/');
+}
+
+// The metadata block: the passport columns (source, collected date, rights)
+// plus what metadata.json carries — publication date, author, language and,
+// when the snapshot has one, the wiki attribution. Everything optional renders
+// only when present («калі ёсць»).
+function metadataRowsHtml(record, metadata) {
+  const row = (label, value) => `<tr><th>${label}</th><td>${value}</td></tr>`;
+  const url = clickableUrl(record.url);
+  const rows = [
+    row(
+      'Крыніца',
+      url ? `<a href="${escapeHtml(url)}">${escapeHtml(record.url)}</a>` : `<code>${escapeHtml(record.url)}</code>`
+    ),
+  ];
+  if (record.canonical_url && record.canonical_url !== record.url) {
+    rows.push(row('Кананічны адрас', `<code>${escapeHtml(record.canonical_url)}</code>`));
+  }
+  rows.push(row('Дата збору', escapeHtml(record.collected_at ?? '—')));
+  const published = metadata?.published_at ?? metadata?.upload_date ?? null;
+  if (published) rows.push(row('Дата публікацыі', escapeHtml(String(published))));
+  const author = metadata?.author ?? metadata?.channel ?? null;
+  if (author) rows.push(row('Аўтар', escapeHtml(String(author))));
+  if (metadata?.language) rows.push(row('Мова', escapeHtml(String(metadata.language))));
+  rows.push(
+    row(
+      'Правы',
+      `${escapeHtml(RIGHTS_BE[record.rights] ?? record.rights)} <span class="key">(${escapeHtml(record.rights)})</span>`
+    )
+  );
+  const attribution = metadata?.attribution;
+  if (attribution) {
+    const parts = [attribution.site, attribution.license].filter(Boolean).map((part) => escapeHtml(String(part)));
+    const revision = attribution.revision_id ? `, рэвізія ${escapeHtml(String(attribution.revision_id))}` : '';
+    const contributors = attribution.contributors_url
+      ? clickableUrl(String(attribution.contributors_url))
+      : null;
+    const history = attribution.contributors_url
+      ? contributors
+        ? ` — <a href="${escapeHtml(contributors)}">гісторыя рэвізій</a>`
+        : ` — <code>${escapeHtml(String(attribution.contributors_url))}</code>`
+      : '';
+    rows.push(row('Атрыбуцыя', `${parts.join(', ')}${revision}${history}`));
+  }
+  return `<table>\n${rows.join('\n')}\n</table>`;
+}
+
+function linksTableHtml(links) {
+  const rows = links.map((link) => {
+    const url = clickableUrl(link.url);
+    const urlCell = url
+      ? `<a href="${escapeHtml(url)}">${escapeHtml(link.url)}</a>`
+      : `<code>${escapeHtml(link.url)}</code>`;
+    return `<tr><td>${escapeHtml(link.anchor_text)}</td><td>${urlCell}</td><td class="diagnostic">${escapeHtml(
+      link.context ?? '—'
+    )}</td></tr>`;
+  });
+  const body =
+    links.length > 0
+      ? rows.join('\n')
+      : '<tr><td colspan="3" class="empty">Спасылак у запіса няма.</td></tr>';
+  return `<table>\n<tr><th>Анкер</th><th>Адрас</th><th>Кантэкст абзаца</th></tr>\n${body}\n</table>`;
+}
+
+// The card's data: the passport row with the search-index title, the snapshot
+// files read from disk (metadata may be unreadable — a note, not an error),
+// the record's links and its journal steps.
+function recordData(db, snapshotsRoot, query) {
+  const { id, notes } = parseCardParams(query);
+  if (!db || !id) return { kind: 'missing-record', id, notes };
+  const record = db
+    .prepare(
+      `SELECT r.*, f.title AS fts_title FROM raw_records r
+       LEFT JOIN cleaned_fts f ON f.raw_record_id = r.id WHERE r.id = ?`
+    )
+    .get(id);
+  if (!record) return { kind: 'missing-record', id, notes };
+  const snapshotDir = record.snapshot_path ?? null;
+  const mediaBase = snapshotDir ? mediaUrlBase(snapshotsRoot, snapshotDir) : null;
+  let metadata = null;
+  let metadataNote = null;
+  if (snapshotDir) {
+    try {
+      metadata = JSON.parse(fs.readFileSync(path.join(snapshotDir, 'metadata.json'), 'utf8'));
+    } catch {
+      metadataNote = `<p class="note">Метаданыя здымку не прачытаны: няма ці пашкоджаны <code>metadata.json</code> у <code>${escapeHtml(
+        snapshotDir
+      )}</code>.</p>`;
+    }
+  }
+  const links = db
+    .prepare('SELECT anchor_text, url, context FROM links WHERE raw_record_id = ? ORDER BY id')
+    .all(record.id);
+  return { kind: 'record', notes, record, snapshotDir, mediaBase, metadata, metadataNote, links, steps: recordSteps(db, record) };
+}
+
+export function renderRecordCard(data) {
+  if (data.kind === 'missing-record') {
+    const reason = data.id
+      ? `Запіс <code>${escapeHtml(data.id)}</code> у сховішчы не знойдзены.`
+      : 'Картка запіса патрабуе параметр <code>id</code>.';
+    return {
+      status: 404,
+      body: pageShell('records', `${notesHtml(data.notes)}\n<p class="note">${reason}</p>`),
+    };
+  }
+  const { record, metadata } = data;
+  const title = record.fts_title ?? metadata?.title ?? record.url;
+  const body = `
+<h2>${escapeHtml(String(title))}</h2>
+${notesHtml(data.notes)}
+<h3>Метаданыя</h3>
+${metadataRowsHtml(record, metadata)}
+${data.metadataNote ?? ''}
+<h3>Тэкст запіса</h3>
+${textHtml(data.snapshotDir, data.mediaBase)}
+<h3>Спасылкі</h3>
+${linksTableHtml(data.links)}
+<h3>Журнал крокаў</h3>
+${stepsTableHtml(data.steps, { withCity: false, empty: 'Крокаў для гэтага запіса ў журнале няма.' })}`;
+  return { status: 200, body: pageShell('records', body) };
 }
 
 // The one file route: reads below the snapshots root only. resolveStaticFile
@@ -392,6 +683,13 @@ async function handleRequest(db, snapshotsRoot, request, response) {
     const body = renderRecords(recordsData(db, url.searchParams));
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     response.end(body);
+    return;
+  }
+  if (url.pathname === '/record') {
+    // Same body-before-head order as the other pages.
+    const card = renderRecordCard(recordData(db, snapshotsRoot, url.searchParams));
+    response.writeHead(card.status, { 'content-type': 'text/html; charset=utf-8' });
+    response.end(card.body);
     return;
   }
   if (url.pathname === MEDIA_PREFIX || url.pathname.startsWith(`${MEDIA_PREFIX}/`)) {
