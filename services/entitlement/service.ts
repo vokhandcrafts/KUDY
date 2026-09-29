@@ -157,8 +157,10 @@ export async function ensureStoreLink(
 // The local boundary rule for product identifiers: store product ids are
 // reverse-DNS style ASCII tokens; anything else is rejected before any store
 // call. Corrupt input yields diagnostics, never a store round-trip
-// (implementation-rules 14).
-const PRODUCT_ID_PATTERN = /^[A-Za-z0-9._-]{1,200}$/;
+// (implementation-rules 14). Exported as the single copy the purchase chain
+// (purchase-chain.ts) validates the same boundary with — no second pattern
+// to drift (implementation-rules 3).
+export const PRODUCT_ID_PATTERN = /^[A-Za-z0-9._-]{1,200}$/;
 
 /**
  * Purchase one non-consumable product (09 §5.2), honestly: the closed
