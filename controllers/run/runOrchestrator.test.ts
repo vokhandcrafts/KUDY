@@ -17,6 +17,9 @@ import { LocationService } from '../../services/location/service.ts';
 import { FakeLocationOsPort } from '../../services/location/fake-port.ts';
 import { AudioService } from '../../services/audio/service.ts';
 import { FakeAudioPlayerPort } from '../../services/audio/fake-port.ts';
+import { createAccessPort, emitAccessReady, type DownloadAccessPort } from '../../services/download/access.ts';
+
+const utf8 = (text: string) => new TextEncoder().encode(text);
 
 const RADIUS = 20;
 const STOPS: RunStop[] = [
@@ -51,7 +54,7 @@ interface Harness {
   orchestrator: RunOrchestrator;
 }
 
-function harness(): Harness {
+function harness(options: { access?: DownloadAccessPort } = {}): Harness {
   const clock = new ManualClock();
   const locationPort = new FakeLocationOsPort();
   const location = new LocationService({
@@ -69,6 +72,7 @@ function harness(): Harness {
     pipelineConfig: { dwellMs: 0 },
     route: { routeId: 'route-1', version: 'v1', locale: 'be', tier: ['base'] },
     stops: STOPS,
+    access: options.access,
   });
   orchestrator.start('walk-1');
   return { clock, locationPort, audioPort, orchestrator };
@@ -373,4 +377,84 @@ test('G06.04 retire: a foreign id or an already ended session is a no-op', () =>
   const audioAtEnd = h.audioPort.commands.length;
   h.orchestrator.retire('walk-1'); // already Ended — nothing again
   assert.equal(h.audioPort.commands.length, audioAtEnd);
+});
+
+// G08.04 (issue #291) — the purchase chain's delivery into the live walk.
+// The composition root hands ONE access port to both the activation core and
+// the orchestrator (ADR G01.03 §3.5); these scenarios drive the real
+// emitAccessReady through that port into the real engine. The unlock's
+// engine rules themselves (same-version keeps heard, no autoplay; another
+// version mixes nothing in) are the reducer's contract — G05.01.a criterion
+// 5 in core/engine/reducer.test.ts; here the chain's event travels the
+// production delivery path.
+const ACCESS_ROUTE_DOC = {
+  route_id: 'route-1',
+  version: 'v1',
+  city_id: 'city-1',
+  access: 'paid',
+  stops: [
+    { id: 'a', position: 0, place_id: 'place-1', access_tier: 'base' },
+    { id: 'b', position: 1, place_id: 'place-2', access_tier: 'extended' },
+  ],
+};
+
+function accessHarness(): Harness & { access: DownloadAccessPort } {
+  const access = createAccessPort();
+  const h = harness({ access });
+  return { ...h, access };
+}
+
+test('G08.04 criterion 4: the same-version unlock reaches the live walk through the access port — availability widens, heard stays, nothing plays', async () => {
+  const h = accessHarness();
+  // A walked stop with finished audio: the heard fact the unlock must keep.
+  deliver(h, 0, 0);
+  h.audioPort.finish(1);
+  const session = live(h);
+  assert.deepEqual(session.heard, ['a']);
+  const playsBefore = h.audioPort.commands.filter((command) => command.startsWith('play')).length;
+  const windowBefore = h.locationPort.regionPushes;
+
+  await emitAccessReady(
+    h.access,
+    { routeId: 'route-1', version: 'v1', locale: 'be', tier: 'extended' },
+    async () => utf8(JSON.stringify(ACCESS_ROUTE_DOC)),
+  );
+
+  const after = live(h);
+  assert.deepEqual(after.tierAvailable, ['base', 'extended']);
+  assert.deepEqual(after.heard, ['a']); // the unlock never rewrites progress
+  assert.equal(
+    h.audioPort.commands.filter((command) => command.startsWith('play')).length,
+    playsBefore,
+  ); // and never starts the audio itself
+  assert.ok(h.locationPort.regionPushes > windowBefore); // the window was rebuilt
+});
+
+test('G08.04 criterion 5: another version (a new release) never mixes into the open guide', async () => {
+  const h = accessHarness();
+  deliver(h, 0, 0);
+  h.audioPort.finish(1);
+  const session = live(h);
+  const tierBefore = [...session.tierAvailable];
+  const heardBefore = [...session.heard];
+  const windowBefore = h.locationPort.regionPushes;
+
+  // The v2 release was downloaded and committed under its own package key;
+  // its AccessReady reaches the same port — and the pinned v1 walk ignores
+  // it entirely (ADR G01.03 §3.5: the identity must match the session).
+  await emitAccessReady(
+    h.access,
+    { routeId: 'route-1', version: 'v2', locale: 'be', tier: 'extended' },
+    async () => utf8(JSON.stringify({ ...ACCESS_ROUTE_DOC, version: 'v2' })),
+  );
+  await emitAccessReady(
+    h.access,
+    { routeId: 'route-other', version: 'v1', locale: 'be', tier: 'extended' },
+    async () => utf8(JSON.stringify({ ...ACCESS_ROUTE_DOC, route_id: 'route-other' })),
+  );
+
+  const after = live(h);
+  assert.deepEqual(after.tierAvailable, tierBefore);
+  assert.deepEqual(after.heard, heardBefore);
+  assert.equal(h.locationPort.regionPushes, windowBefore); // no window rebuild either
 });
