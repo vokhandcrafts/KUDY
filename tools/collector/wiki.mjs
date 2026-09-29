@@ -182,11 +182,11 @@ export function wikiAttribution(api, article) {
   };
 }
 
-// action=parse (prop=text) answers an article-body fragment, not a full
-// document; extractPage needs a <title> to identify the page. The wrapper
-// carries the API's normalized title. Content language is not part of the
-// parse response, so metadata.language stays null (absent metadata is null —
-// the G17.01.b convention).
+// The MediaWiki api (action=query&prop=revisions&rvparse=1) answers an
+// article-body fragment, not a full document; extractPage needs a <title> to
+// identify the page. The wrapper carries the API's normalized title. Content
+// language is not part of the response, so metadata.language stays null
+// (absent metadata is null — the G17.01.b convention).
 export function wikiDocument(article) {
   return `<html><head><title>${article.title}</title></head><body>${article.html}</body></html>`;
 }

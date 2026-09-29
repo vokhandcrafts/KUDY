@@ -34,6 +34,11 @@ seeds:
   - https://…            # навінны партал, старонка пра горад
 topics: [architecture, history]
 fence: { depth: 3, extra_domains: [], delay_s: [2, 5] }
+wiki:                    # неабавязкова: вікі-крыніцы ідуць праз MediaWiki API міма паўзуку (гл. «Вікі»)
+  api: https://pl.wikipedia.org/w/api.php
+  articles: [Gdańsk]
+  categories: []
+  depth: 1
 youtube: [<ідэнтыфікатары відэа>]
 browser_user_data_dir: <шлях да профілю браўзера>  # неабавязкова: профіль з сесіяй лагіну для сайтаў з уваходам
 ```
