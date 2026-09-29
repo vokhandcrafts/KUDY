@@ -10,6 +10,10 @@
 // route/tier mapping of /v1/grant): a rights table the client must never
 // touch.
 //
+// G08.06 — `webhook_events` (the optional /v1/rc-webhook bookkeeping) joins
+// the guard set: RevenueCat-side payloads are written only by the service
+// role and are never client-readable.
+//
 // Shape notes: the migration literals live once in test-db.ts and the sync
 // guard compares them against the committed supabase/migrations/*.sql files.
 // The statement-shape guards parse the replayed statements; they never build
@@ -26,7 +30,7 @@ import { freshMigratedDatabase, MIGRATIONS } from './test-db.ts';
 
 const migrationsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'migrations');
 
-const SERVER_TABLES = ['devices', 'entitlement_cache', 'event_log', 'device_registration_rate', 'grant_products'];
+const SERVER_TABLES = ['devices', 'entitlement_cache', 'event_log', 'device_registration_rate', 'grant_products', 'webhook_events'];
 
 function normalize(sql: string): string {
   return sql
@@ -191,6 +195,24 @@ test('service role writes through; device delete cascades to cache and events', 
   const cache = await db.query('select count(*)::int as count from entitlement_cache');
   assert.equal(events.rows[0]?.count, 0, 'event_log must cascade on device delete (09 §5)');
   assert.equal(cache.rows[0]?.count, 0, 'entitlement_cache must cascade on device delete (09 §5)');
+});
+
+test('webhook_events is invisible to anon and writable only by the service role', async () => {
+  const db = await freshMigratedDatabase();
+  await db.query('set role service_role');
+  await db.query(
+    "insert into webhook_events (event_id, type, event_at, payload) values ('8f0d0f1c-0000-4000-8000-000000000001', 'TEST', now(), jsonb_build_object())",
+  );
+  await db.query('reset role');
+
+  await db.query('set role anon');
+  await assert.rejects(db.query('select * from webhook_events'), /permission denied/i);
+  await db.query('reset role');
+  await db.query('grant select on webhook_events to anon');
+  await db.query('set role anon');
+  const visible = await db.query('select count(*)::int as count from webhook_events');
+  assert.equal(visible.rows[0]?.count, 0, 'webhook rows must stay invisible under RLS with no policy');
+  await db.query('reset role');
 });
 
 test('rate counter table bumps attempts per (ip_hash, window_start)', async () => {
