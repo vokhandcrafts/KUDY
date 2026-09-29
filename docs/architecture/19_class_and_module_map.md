@@ -22,7 +22,6 @@
 |---|---|---|---|
 | [G01.02](../16_delivery_backlog.md) (P02) — уладальнік гуку | пераключэнне Run ↔ ручны Moment, токен запуску, фон | tagged callbacks `services/audio` (поўны набор) | G05.03, G07.02–G07.03 |
 | G01.04 — навігацыя Горад → Гіды | пераходы, вяртанне ў Run, пустыя станы | маршруты `app/`, `useCatalogController` | G06.01+, G02.01 |
-| G01.05 — табліца падзей | allowlist падзей/памылак, абавязковыя палі | `EmitEvent(type, payload)` payload-тыпы | G09.01+ |
 | G00.01.b/.c — прыладавыя доказы GPS/аўдыё | фактычныя OS-абмежаванні | канфіг watchdog, абяцанні фону | G05.02, G05.03, G00.04 |
 | G00.02.c — рашэнне пра карту (ADR напісаны, **не прыняты**) | спосаб офлайну, пастаўшчык тайлаў | `services/map` рэалізацыя | G06.02, G00.04 |
 | G00.03.c/.d — рэальныя sandbox-пакупкі | store-факты | `services/entitlement` production | G08.03+ |
@@ -150,7 +149,7 @@ type RunCommand =
   | { type: 'SetGeofenceWindow'; stopIds: StopId[] } | { type: 'ClearGeofences' }
   | { type: 'ScheduleTimer'; id: string; ms: number } | { type: 'CancelTimer'; id: string }
   | { type: 'PersistProgress' }
-  | { type: 'EmitEvent'; payload: EventPayload }                  // allowlist — G01.05 (адкрыта)
+  | { type: 'EmitEvent'; payload: EventPayload }                  // allowlist — contracts/events/event-table.v1.json (ADR G01.05, прыняты 2026-09-29)
   | { type: 'ShowArrivalCard'; stopId: StopId };
 
 function step(previous: RunState, event: RunEvent, now: number, config: EngineConfig):

@@ -224,7 +224,7 @@ Current, tombstones і mutation-дэдуплікацыя захоўваюцца 
 
 ## 7. Назіранні пра падбор
 
-G01.05 пашырае існуючы allowlist падзей: `discovery_offer_shown`, `discovery_offer_opened` з `{discovery_revision, offer_id, kind, content_locale, surface}` і апцыянальным бакетам часу. `surface = discovery | collection`. Няма каардынат, saved preference profile або сырых выбараў усіх інтарэсаў. `event_id` і transport — існуючы G09.
+G01.05 пашырае існуючы allowlist падзей: `discovery_offer_shown`, `discovery_offer_opened` — палёўны склад payload, слоўнік `surface` і апцыянальны бакет часу фіксуе табліца падзей ([ADR G01.05](decisions/G01.05-event-table.md), файл `contracts/events/event-table.v1.json`). Няма каардынат, saved preference profile або сырых выбараў усіх інтарэсаў. `event_id` і transport — існуючы G09.
 
 Shown залічваецца пры фактычнай бачнасці, адзін раз на offer у foreground-паказе паверхні. Адкрыццё гіда далей ідзе ў існуючы route_preview; не выдаваць адкрыццё за пакупку, Start або наведванне. У consent-denied стане выбар працуе, events не адпраўляюцца. Feedback не дублюецца ў events. Колькасць паказаў і ацэнак не лічыцца адной поўнай выбаркай.
 
