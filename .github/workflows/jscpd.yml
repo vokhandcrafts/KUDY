@@ -9,4 +9,4 @@ jobs:
     # Pin must be a full SHA of a verified post-fix commit; 752dff0 is the
     # known-broken pre-fix ref (issue #241) — guarded in
     # tools/ci/check-required-checks.mjs.
-    uses: vokhandcrafts/ai-company-infrastructure/.github/workflows/jscpd.yml@9558bda54654785a07856f77a706ec09b3315a20
+    uses: vokhandcrafts/ai-company-infrastructure/.github/workflows/jscpd.yml@47d7ca7927316845cab723fa48616855e916eca1
