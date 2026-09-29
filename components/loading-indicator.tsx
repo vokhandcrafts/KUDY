@@ -3,9 +3,10 @@
 // Every loading state renders this component instead of a bare Text (the
 // issue forbids five copies). Lives in components/, not app/: expo-router
 // treats every app/ file as a route (issue #339).
-import { ActivityIndicator, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { ActivityIndicator, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { tokens } from "./design-tokens";
+import { ScaledText } from "./scaled-text";
 
 const styles = StyleSheet.create({
   row: {
@@ -30,9 +31,11 @@ export function LoadingIndicator({
   testID?: string;
 }) {
   return (
-    <View style={[styles.row, style]} testID={testID}>
+    // G06.05 (AC1): the row is announced with the state text — the spinner
+    // itself is decorative and stays silent.
+    <View accessible={true} accessibilityLabel={text} style={[styles.row, style]} testID={testID}>
       <ActivityIndicator color={tokens.colorMuted} size="small" testID="loading-indicator" />
-      <Text style={styles.text}>{text}</Text>
+      <ScaledText style={styles.text}>{text}</ScaledText>
     </View>
   );
 }

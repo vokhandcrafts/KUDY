@@ -5,15 +5,20 @@
 // the assembled preview of demo-g0601b-preview.mjs (the assembly demo lives
 // in services/, this table beside the controller — controllers/
 // value-imports services/ only in the composition root, 19 §2.2).
+// G06.05 (issue #280): the derivation produces verbatim codes; the words
+// render through previewStrings per locale (the runMapReason idiom), the
+// display locale here is the composition root's first preference.
 // Deterministic: fixed inputs, no clocks, no randomness.
-import { derivePreviewButton } from './previewController.ts';
+import { derivePreviewButton, previewReasonText, previewStrings } from './previewController.ts';
 
+const strings = previewStrings('be');
 const READY_VERIFY = { status: 'ready', routeId: 'r', version: '1', tier: 'base', tierAvailable: ['base'] };
 
 const buttonLine = (name, button) =>
   console.log(
-    `button ${name}: action=${button.action} enabled=${button.enabled} label="${button.label}"` +
-      ` reason=${button.reason ?? '-'} detail=${button.detail ?? '-'}`,
+    `button ${name}: action=${button.action} enabled=${button.enabled} label="${strings.label[button.label]}"` +
+      ` reason=${button.reason ? previewReasonText(button.reason, strings) : '-'}` +
+      ` detail=${button.detail ? strings.detail(button.detail) : '-'}`,
   );
 
 // A paid guide without an entitlement: Start disabled with its reason —

@@ -5,23 +5,18 @@
 // G07.01 (issue #281) adds the «Побач» entry (Journey 3: Explore / кнопка
 // «Побач»; NAV3 — the button works from the empty city too).
 import { Link } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCatalogController } from "../../controllers/catalog/useCatalogController";
 import { useServices } from "../_layout";
 import { tokens } from "../../components/design-tokens";
-import { CatalogStateView, CITY_TITLE } from "../../components/guide-card";
+import { CityCatalogBody } from "../../components/guide-card";
 import { PressableSurface } from "../../components/pressable-surface";
-import { WalkButton } from "../../components/walk-button";
+import { ScaledText } from "../../components/scaled-text";
+import { uiStrings } from "../../components/ui-strings";
 
 const styles = StyleSheet.create({
-  title: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontTitleSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceM,
-  },
   nearbyLink: {
     color: tokens.colorInk,
     fontSize: tokens.fontBaseSize,
@@ -37,6 +32,9 @@ export default function Explore() {
   // the status bar and the notch — the top safe-area inset is the screen's
   // own (AC4).
   const insets = useSafeAreaInsets();
+  // G06.05 (issue #280, AC1): the shared words in the display locale; the
+  // failed catalog load gets its named retry (AC4).
+  const strings = uiStrings(services.locale);
   return (
     <View
       style={{
@@ -47,16 +45,27 @@ export default function Explore() {
       }}
       testID="screen-Explore"
     >
-      <WalkButton walk={services.walk} />
-      <Text style={styles.title}>{CITY_TITLE}</Text>
-      <Link href="/map" asChild>
-        {/* UX 03 (issue #349): the tappable marker and the role of
-            criterion 2; hitSlop lifts the target to ≥44dp (criterion 3). */}
-        <PressableSurface accessibilityRole="link" hitSlop={12} testID="link-nearby">
-          <Text style={styles.nearbyLink}>Побач →</Text>
-        </PressableSurface>
-      </Link>
-      <CatalogStateView state={controller?.surface ?? null} variant="city" />
+      <CityCatalogBody
+        walk={services.walk}
+        catalog={controller?.surface ?? null}
+        onRetry={controller ? () => void controller.refresh() : undefined}
+        variant="city"
+        locale={services.locale}
+        middle={
+          <Link href="/map" asChild>
+            {/* UX 03 (issue #349): the tappable marker and the role of
+                criterion 2; hitSlop lifts the target to ≥44dp (criterion 3). */}
+            <PressableSurface
+              accessibilityRole="link"
+              accessibilityLabel={strings.nearby}
+              hitSlop={12}
+              testID="link-nearby"
+            >
+              <ScaledText style={styles.nearbyLink}>{strings.nearby}</ScaledText>
+            </PressableSurface>
+          </Link>
+        }
+      />
     </View>
   );
 }

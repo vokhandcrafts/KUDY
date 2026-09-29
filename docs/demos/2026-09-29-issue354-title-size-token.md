@@ -24,20 +24,21 @@ grep -n "fontTitleSize" components/design-tokens.ts
 37:  fontTitleSize: 18, // font.size-title — памер загалоўка экрана
 ```
 
-Крытэр 2 — усе шэсць экранаў ўжываюць токен: Explore, My KUDY, Побач,
-«Гіды», а агульны `screenStyles.title` — яшчэ і прэв'ю маршруту
-з дэталямі месца.
+Крытэр 2 — усе шэсць экранаў ўжываюць токен: My KUDY, Побач, а агульны
+`screenStyles.title` — прэв'ю маршруту з дэталямі месца; загалоўкі Explore
+і «Гіды» з G06.05 (#280) жывуць у агульным `CityCatalogBody`
+(`components/guide-card.tsx`), таму ў самых экранах больш няма ніякага
+памеру загалоўка.
 
 ```sh
-for f in "app/(tabs)/explore.tsx" "app/(tabs)/my.tsx" app/map.tsx "app/city/[id]/guides.tsx" components/screen-styles.ts; do grep -Hn "fontTitleSize" "$f"; done
+for f in "app/(tabs)/my.tsx" app/map.tsx components/screen-styles.ts components/guide-card.tsx; do grep -Hn "fontTitleSize" "$f"; done
 ```
 
 ```output
-app/(tabs)/explore.tsx:21:    fontSize: tokens.fontTitleSize,
-app/(tabs)/my.tsx:33:    fontSize: tokens.fontTitleSize,
-app/map.tsx:32:    fontSize: tokens.fontTitleSize,
-app/city/[id]/guides.tsx:21:    fontSize: tokens.fontTitleSize,
+app/(tabs)/my.tsx:36:    fontSize: tokens.fontTitleSize,
+app/map.tsx:34:    fontSize: tokens.fontTitleSize,
 components/screen-styles.ts:17:    fontSize: tokens.fontTitleSize,
+components/guide-card.tsx:121:    fontSize: tokens.fontTitleSize,
 ```
 
 Крытэр 3 — guard-тэст design-tokens зелёны: канон ↔ код сінхронныя, а

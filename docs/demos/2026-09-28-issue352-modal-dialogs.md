@@ -24,7 +24,7 @@ node_modules/.bin/jest app/preview.test.tsx -t "UX 06" 2>&1 | grep -E "^(Test Su
 
 ```output
 Test Suites: 1 passed, 1 total
-Tests:       10 skipped, 2 passed, 12 total
+Tests:       15 skipped, 2 passed, 17 total
 ```
 
 ```sh
@@ -33,7 +33,7 @@ node_modules/.bin/jest app/run.test.tsx -t "UX 06" 2>&1 | grep -E "^(Test Suites
 
 ```output
 Test Suites: 1 passed, 1 total
-Tests:       14 skipped, 1 passed, 15 total
+Tests:       21 skipped, 1 passed, 22 total
 ```
 
 Праводка дыялога: адна абалонка на абодва экраны, кнопкі дыялогаў —
@@ -45,20 +45,20 @@ grep -n "ModalDialog" app/route/\[id\].tsx app/run/\[id\].tsx
 ```
 
 ```output
-app/route/[id].tsx:20:  ModalDialog,
-app/route/[id].tsx:21:  ModalDialogAccept,
-app/route/[id].tsx:22:  ModalDialogCancel,
-app/route/[id].tsx:270:        <ModalDialog onRequestClose={state.cancelConfirm} testID="confirm-dialog">
-app/route/[id].tsx:274:          <ModalDialogAccept
-app/route/[id].tsx:289:          <ModalDialogCancel
-app/route/[id].tsx:294:        </ModalDialog>
-app/run/[id].tsx:26:  ModalDialog,
-app/run/[id].tsx:27:  ModalDialogAccept,
-app/run/[id].tsx:28:  ModalDialogCancel,
-app/run/[id].tsx:561:        <ModalDialog onRequestClose={() => setEndConfirm(false)} testID="end-confirm-dialog">
-app/run/[id].tsx:563:          <ModalDialogAccept
-app/run/[id].tsx:571:          <ModalDialogCancel
-app/run/[id].tsx:576:        </ModalDialog>
+app/route/[id].tsx:25:  ModalDialog,
+app/route/[id].tsx:26:  ModalDialogAccept,
+app/route/[id].tsx:27:  ModalDialogCancel,
+app/route/[id].tsx:344:        <ModalDialog onRequestClose={state.cancelConfirm} testID="confirm-dialog">
+app/route/[id].tsx:348:          <ModalDialogAccept
+app/route/[id].tsx:363:          <ModalDialogCancel
+app/route/[id].tsx:368:        </ModalDialog>
+app/run/[id].tsx:28:  ModalDialog,
+app/run/[id].tsx:29:  ModalDialogAccept,
+app/run/[id].tsx:30:  ModalDialogCancel,
+app/run/[id].tsx:782:        <ModalDialog onRequestClose={() => setEndConfirm(false)} testID="end-confirm-dialog">
+app/run/[id].tsx:784:          <ModalDialogAccept
+app/run/[id].tsx:792:          <ModalDialogCancel
+app/run/[id].tsx:797:        </ModalDialog>
 ```
 
 Эксперымент па зняцці фіксаў (implementation-rules 1) выкананы ў гэтай

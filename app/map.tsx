@@ -9,7 +9,7 @@
 // publishes no coordinates).
 import { Link } from "expo-router";
 import { useMemo } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -24,6 +24,8 @@ import { BackButton } from "../components/back-button";
 import { AccessBadge, StateBanner } from "../components/guide-card";
 import { LoadingIndicator } from "../components/loading-indicator";
 import { PressableSurface } from "../components/pressable-surface";
+import { ScaledText } from "../components/scaled-text";
+import { uiStrings } from "../components/ui-strings";
 import { tokens } from "../components/design-tokens";
 
 const styles = StyleSheet.create({
@@ -99,15 +101,23 @@ function cardFacts(offer: NearbyOfferFacts, strings: ReturnType<typeof nearbyStr
   return locales;
 }
 
-function NearbyCard({ offer, strings }: { offer: NearbyOfferFacts; strings: ReturnType<typeof nearbyStrings> }) {
+function NearbyCard({
+  offer,
+  strings,
+  locale,
+}: {
+  offer: NearbyOfferFacts;
+  strings: ReturnType<typeof nearbyStrings>;
+  locale: string;
+}) {
   const title = offer.title ?? offer.route_id ?? offer.place_id ?? offer.offer_id;
   const label = `${title}, ${offer.access}`;
   const inner = (
     <>
-      <Text style={styles.cardTitle}>{title}</Text>
-      {offer.summary ? <Text style={styles.cardSummary}>{offer.summary}</Text> : null}
-      <AccessBadge access={offer.access} />
-      <Text style={styles.facts}>{cardFacts(offer, strings)}</Text>
+      <ScaledText style={styles.cardTitle}>{title}</ScaledText>
+      {offer.summary ? <ScaledText style={styles.cardSummary}>{offer.summary}</ScaledText> : null}
+      <AccessBadge access={offer.access} locale={locale} />
+      <ScaledText style={styles.facts}>{cardFacts(offer, strings)}</ScaledText>
     </>
   );
   // Guide offers lead to the guide preview, place offers to the place detail
@@ -145,12 +155,9 @@ function NearbyCard({ offer, strings }: { offer: NearbyOfferFacts; strings: Retu
     );
   }
   return (
-    <View
-      style={styles.card}
-      testID={`nearby-card-${offer.offer_id}`}
-      accessibilityLabel={label}
-      accessibilityHint={strings.cardHint}
-    >
+    // G06.05 (AC1): an offer without a published target is text, not a
+    // button — no tappable-looking hint on a card that does nothing.
+    <View style={styles.card} testID={`nearby-card-${offer.offer_id}`} accessibilityLabel={label}>
       {inner}
     </View>
   );
@@ -193,42 +200,44 @@ export default function Map() {
       {/* UX 02 (issue #348): the Nearby surface gains its one back element —
           it never had one (AC2); the label is hosted by the shared
           component's <Text> (the #344 class guard). */}
-      <BackButton label="← Назад" testID="btn-map-back" />
+      <BackButton label={uiStrings(services.locale).back} testID="btn-map-back" />
       {/* UX 01 (issue #347): the offer list scrolls — the last card is
           reachable beyond the fold, never cut by the screen edge. */}
       <ScrollView testID="scroll-nearby">
-        <Text style={styles.title}>{strings.title}</Text>
-        <Text style={styles.mapNote}>{strings.mapNote}</Text>
+        <ScaledText style={styles.title}>{strings.title}</ScaledText>
+        <ScaledText style={styles.mapNote}>{strings.mapNote}</ScaledText>
         {surface === null ? (
           <View testID="nearby-error">
-            <Text style={styles.message}>{strings.unavailable}</Text>
+            <ScaledText style={styles.message}>{strings.unavailable}</ScaledText>
           </View>
         ) : surface.kind === "loading" ? (
           <LoadingIndicator testID="nearby-message" text={strings.loading} />
         ) : surface.kind === "error" ? (
           <View testID="nearby-error">
-            <Text style={styles.message}>{strings.unavailable}</Text>
-            <Text style={styles.reason}>{surface.reason}</Text>
+            <ScaledText style={styles.message}>{strings.unavailable}</ScaledText>
+            <ScaledText style={styles.reason}>{surface.reason}</ScaledText>
           </View>
         ) : (
           <>
-            <Text style={styles.modeHeader} testID="nearby-mode">
+            <ScaledText style={styles.modeHeader} testID="nearby-mode">
               {locationView.state === "proximity" ? strings.proximityHeader : strings.reviewHeader}
-            </Text>
+            </ScaledText>
             {note ? (
-              <Text style={styles.note} testID="nearby-location-note">
+              <ScaledText style={styles.note} testID="nearby-location-note">
                 {note}
-              </Text>
+              </ScaledText>
             ) : null}
             {surface.kind === "ready" && surface.degraded !== null ? (
               <StateBanner tone="notice" reason={strings.indexDegraded} testID="nearby-degraded" />
             ) : null}
             {list.length === 0 ? (
-              <Text style={styles.message} testID="nearby-message">
+              <ScaledText style={styles.message} testID="nearby-message">
                 {strings.empty}
-              </Text>
+              </ScaledText>
             ) : (
-              list.map((offer) => <NearbyCard key={offer.offer_id} offer={offer} strings={strings} />)
+              list.map((offer) => (
+                <NearbyCard key={offer.offer_id} offer={offer} strings={strings} locale={locale} />
+              ))
             )}
           </>
         )}

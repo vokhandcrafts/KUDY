@@ -86,13 +86,28 @@ export interface PreviewPorts {
 
 // The one main button (09 §6.5): exactly one meaning at a time. `enabled`
 // false carries its reason — a disabled action states why (11 §7); the
-// purchase is never triggered from the preview (NAV6, D06).
+// purchase is never triggered from the preview (NAV6, D06). G06.05 (issue
+// #280, AC1): the label, reason and detail are verbatim codes — the words
+// live in previewStrings per locale, the runMapReason idiom.
+export type PreviewButtonAction = 'download' | 'start';
+export type PreviewReason =
+  | 'preview#purchase-required'
+  | 'preview#storage-unknown'
+  | 'preview#verify-unavailable'
+  | 'preview#download-unavailable'
+  | 'preview#not-published';
+export type PreviewDetail =
+  | { readonly kind: 'damaged' }
+  | { readonly kind: 'incomplete' }
+  | { readonly kind: 'missing-files'; readonly count: number }
+  | { readonly kind: 'stale' };
+
 export interface PreviewButton {
-  readonly action: 'download' | 'start' | null;
+  readonly action: PreviewButtonAction | null;
   readonly enabled: boolean;
-  readonly label: string;
-  readonly reason: string | null;
-  readonly detail: string | null;
+  readonly label: PreviewButtonAction;
+  readonly reason: PreviewReason | null;
+  readonly detail: PreviewDetail | null;
 }
 
 export interface PreviewButtonInput {
@@ -107,24 +122,27 @@ export interface PreviewButtonInput {
   readonly canDownload: boolean;
 }
 
-const DOWNLOAD_LABEL = 'Загрузіць';
-const START_LABEL = 'Пачаць';
-
 // The pure Download/Start derivation (the Proof target: reverting this
 // derivation — e.g. an always-Start table — fails the meaning tests).
 export function derivePreviewButton(input: PreviewButtonInput): PreviewButton {
   // AC2 (NAV6, D06): the paid preview does not start and buys nothing — the
   // button is disabled with its reason shown.
   if (input.access === 'paid' && !input.granted) {
-    return { action: 'start', enabled: false, label: START_LABEL, reason: 'патрэбна пакупка', detail: null };
+    return {
+      action: 'start',
+      enabled: false,
+      label: 'start',
+      reason: 'preview#purchase-required',
+      detail: null,
+    };
   }
   // No inventory port — no disk truth: fail closed, never a fictional state.
   if (!input.layer) {
     return {
       action: 'start',
       enabled: false,
-      label: START_LABEL,
-      reason: 'стан пакета невядомы: сховішча недаступнае',
+      label: 'start',
+      reason: 'preview#storage-unknown',
       detail: null,
     };
   }
@@ -133,16 +151,22 @@ export function derivePreviewButton(input: PreviewButtonInput): PreviewButton {
       return {
         action: 'start',
         enabled: false,
-        label: START_LABEL,
-        reason: 'праверка пакета недаступная',
+        label: 'start',
+        reason: 'preview#verify-unavailable',
         detail: null,
       };
     }
     if (input.verify.status === 'ready') {
-      return { action: 'start', enabled: true, label: START_LABEL, reason: null, detail: null };
+      return { action: 'start', enabled: true, label: 'start', reason: null, detail: null };
     }
     if (input.verify.status === 'access-locked') {
-      return { action: 'start', enabled: false, label: START_LABEL, reason: 'патрэбна пакупка', detail: null };
+      return {
+        action: 'start',
+        enabled: false,
+        label: 'start',
+        reason: 'preview#purchase-required',
+        detail: null,
+      };
     }
     // incomplete | needs-recovery: a verify failure leaves Start unavailable
     // with the reason shown (AC5, 11 §7); Download stays the repair path —
@@ -150,28 +174,26 @@ export function derivePreviewButton(input: PreviewButtonInput): PreviewButton {
     return {
       action: 'download',
       enabled: input.canDownload,
-      label: DOWNLOAD_LABEL,
-      reason: input.canDownload ? null : 'загрузка недаступная на гэтай зборцы',
+      label: 'download',
+      reason: input.canDownload ? null : 'preview#download-unavailable',
       detail:
-        input.verify.status === 'needs-recovery'
-          ? 'пакет пашкоджаны: патрэбна паўторная загрузка'
-          : 'пакет няпоўны',
+        input.verify.status === 'needs-recovery' ? { kind: 'damaged' } : { kind: 'incomplete' },
     };
   }
   // not_downloaded | partial | stale — the package is not fully on disk.
-  const detail =
+  const detail: PreviewDetail | null =
     input.layer.state === 'partial'
       ? input.layer.missingCount !== null
-        ? `не хапае файлаў: ${input.layer.missingCount}`
-        : 'загрузка няпоўная'
+        ? { kind: 'missing-files', count: input.layer.missingCount }
+        : { kind: 'incomplete' }
       : input.layer.state === 'stale'
-        ? 'даступна абнаўленне'
+        ? { kind: 'stale' }
         : null;
   return {
     action: 'download',
     enabled: input.canDownload,
-    label: DOWNLOAD_LABEL,
-    reason: input.canDownload ? null : 'загрузка недаступная на гэтай зборцы',
+    label: 'download',
+    reason: input.canDownload ? null : 'preview#download-unavailable',
     detail,
   };
 }
@@ -186,13 +208,89 @@ export interface PreviewControllerState {
   // The §4.1 dialog of NAV8: the live walk's title and the candidate's.
   readonly confirm: { readonly liveTitle: string; readonly candidateTitle: string } | null;
   readonly busy: boolean;
+  // G06.05 (issue #280, AC4): the named download failure — the banner's
+  // reason line, its muted detail and whether the honest manual exit is the
+  // storage surface (insufficient-space). A cancelled activation is not a
+  // failure — nothing is set.
   readonly downloadError: string | null;
+  readonly downloadDetail: string | null;
+  readonly downloadStorageExit: boolean;
   refresh(): Promise<void>;
   recordSource(source: string | null): void;
   download(): Promise<void>;
   start(): Promise<'handover' | 'confirm' | 'blocked'>;
   confirmHandover(): void;
   cancelConfirm(): void;
+}
+
+// The preview's words, per the display locale (the runMapStrings idiom: the
+// codes above are the contract, these are the words; an unknown locale
+// falls back to Belarusian, the app's first preference).
+export interface PreviewStrings {
+  readonly label: Record<PreviewButtonAction, string>;
+  readonly reason: Record<PreviewReason, string>;
+  readonly detail: (detail: PreviewDetail) => string;
+  readonly downloadFailed: string;
+  readonly storageFullDetail: (mb: number) => string;
+  readonly storageExit: string;
+  readonly retry: string;
+}
+
+const PREVIEW_STRINGS: Record<'be' | 'en', PreviewStrings> = {
+  be: {
+    label: { download: 'Загрузіць', start: 'Пачаць' },
+    reason: {
+      'preview#purchase-required': 'патрэбна пакупка',
+      'preview#storage-unknown': 'стан пакета невядомы: сховішча недаступнае',
+      'preview#verify-unavailable': 'праверка пакета недаступная',
+      'preview#download-unavailable': 'загрузка недаступная на гэтай зборцы',
+      'preview#not-published': 'гід не апублікаваны',
+    },
+    detail: (detail) =>
+      detail.kind === 'damaged'
+        ? 'пакет пашкоджаны: патрэбна паўторная загрузка'
+        : detail.kind === 'missing-files'
+          ? `не хапае файлаў: ${detail.count}`
+          : detail.kind === 'stale'
+            ? 'даступна абнаўленне'
+            : 'пакет няпоўны',
+    downloadFailed: 'Збой загрузкі',
+    storageFullDetail: (mb) => `не хапае месца: патрэбна яшчэ ${mb} МБ`,
+    storageExit: 'Вызваліць месца ў My KUDY',
+    retry: 'Паўтарыць',
+  },
+  en: {
+    label: { download: 'Download', start: 'Start' },
+    reason: {
+      'preview#purchase-required': 'purchase required',
+      'preview#storage-unknown': 'package state unknown: storage unavailable',
+      'preview#verify-unavailable': 'package verification unavailable',
+      'preview#download-unavailable': 'download unavailable in this build',
+      'preview#not-published': 'guide not published',
+    },
+    detail: (detail) =>
+      detail.kind === 'damaged'
+        ? 'package damaged: re-download needed'
+        : detail.kind === 'missing-files'
+          ? `missing files: ${detail.count}`
+          : detail.kind === 'stale'
+            ? 'an update is available'
+            : 'package incomplete',
+    downloadFailed: 'Download failed',
+    storageFullDetail: (mb) => `not enough space: ${mb} MB more needed`,
+    storageExit: 'Free up space in My KUDY',
+    retry: 'Retry',
+  },
+};
+
+export function previewStrings(locale: string): PreviewStrings {
+  return locale === 'en' ? PREVIEW_STRINGS.en : PREVIEW_STRINGS.be;
+}
+
+// The refusal's rendered word: the known map, else the raw reason itself
+// (the runMapReason idiom — an unknown diagnostic shows as-is, honest).
+export function previewReasonText(reason: string, strings: PreviewStrings): string {
+  return strings.reason[reason as PreviewReason] ?? reason;
 }
 
 // The base layer locale the button's facts ask about: the first preferred
@@ -248,13 +346,15 @@ export function createPreviewController(
       button: {
         action: null,
         enabled: false,
-        label: START_LABEL,
-        reason: 'стан пакета невядомы: сховішча недаступнае',
+        label: 'start',
+        reason: 'preview#storage-unknown',
         detail: null,
       },
       confirm: null,
       busy: false,
       downloadError: null,
+      downloadDetail: null,
+      downloadStorageExit: false,
       refresh: async () => {
         const run = ++seq;
         const next: PreviewLoadState = await ports.service.loadPreview(routeId, previous);
@@ -267,7 +367,10 @@ export function createPreviewController(
           return;
         }
         if (next.kind === 'not-published') {
-          set({ surface: { kind: 'unavailable', reason: 'гід не апублікаваны' }, button: get().button });
+          set({
+            surface: { kind: 'unavailable', reason: 'preview#not-published' },
+            button: get().button,
+          });
           return;
         }
         set({ surface: { kind: 'unavailable', reason: next.reason }, button: get().button });
@@ -292,20 +395,47 @@ export function createPreviewController(
           return;
         }
         const preview = state.surface.preview;
-        set({ busy: true, downloadError: null });
+        const strings = previewStrings(preference[0] ?? 'be');
+        set({ busy: true, downloadError: null, downloadDetail: null, downloadStorageExit: false });
+        let result: ActivationResult;
         try {
-          await ports.download.activate({
+          result = await ports.download.activate({
             routeId,
             version: preview.version,
             locale: layerLocale(preview, preference),
             tier: 'base',
           });
         } catch (error) {
-          set({ busy: false, downloadError: error instanceof Error ? error.message : String(error) });
+          set({
+            busy: false,
+            downloadError: strings.downloadFailed,
+            downloadDetail: error instanceof Error ? error.message : String(error),
+          });
           return;
         }
-        // The flip comes from the refreshed inventory facts, not from the
-        // activation result — the state follows the inventory (the Proof).
+        // G06.05 (issue #280, AC4): a non-complete activation is a named
+        // failure, not a silent button flip — insufficient-space carries the
+        // storage exit, a cancelled run is not a failure at all. The button's
+        // own flip still comes from the refreshed inventory facts, never
+        // from the result (the Proof).
+        if (result.status !== 'complete') {
+          if (result.status === 'cancelled') {
+            set({ busy: false });
+            return;
+          }
+          set({
+            busy: false,
+            downloadError: strings.downloadFailed,
+            downloadDetail:
+              result.status === 'insufficient-space'
+                ? strings.storageFullDetail(Math.max(1, Math.round(result.needed / 1048576)))
+                : result.status === 'hash-mismatch'
+                  ? strings.detail({ kind: 'damaged' })
+                  : null,
+            downloadStorageExit: result.status === 'insufficient-space',
+          });
+          return;
+        }
         const button = await deriveButton(preview);
         set({ busy: false, button });
       },

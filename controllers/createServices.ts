@@ -99,6 +99,9 @@ export interface ServicePorts {
 }
 
 export interface Services {
+  // G06.05 (issue #280): the display locale the string catalogs render in —
+  // the first preference (L02's selection UI replaces the constant later).
+  readonly locale: string;
   readonly contentRepo:
     | {
         readonly evaluatePackage: (input: EvaluateInput) => Promise<Readiness>;
@@ -303,11 +306,19 @@ export function createServices(ports: ServicePorts): Services {
             // inspected's), read from the same layer directory as the map
             // facts. A damaged stops.json never blocks the walk — the card
             // renders its honest pending word; the engine's truth is the
-            // walk, not the card.
+            // walk, not the card. G06.05 (issue #280, AC3): the extended
+            // layer's stories are read beside the base ones when the pin
+            // carries the tier — the card's transcript switch needs both.
             const stories = await readRunStoryFacts(
               bundlesStore,
               `bundles/${routeId}/${version}/${locale}/base`,
             );
+            const storiesExtended = tier.includes('extended')
+              ? await readRunStoryFacts(
+                  bundlesStore,
+                  `bundles/${routeId}/${version}/${locale}/extended`,
+                )
+              : { ok: true as const, stories: [] };
             return {
               kind: 'pinned',
               version,
@@ -316,6 +327,7 @@ export function createServices(ports: ServicePorts): Services {
               stops: facts.stops,
               places: facts.places,
               stories: stories.ok ? stories.stories : [],
+              storiesExtended: storiesExtended.ok ? storiesExtended.stories : [],
             };
           },
         }
@@ -369,6 +381,7 @@ export function createServices(ports: ServicePorts): Services {
     },
   };
   return {
+    locale: localePreference[0] ?? 'be',
     contentRepo: packageStore && {
       evaluatePackage: (input) => evaluatePackage(packageStore, input),
     },

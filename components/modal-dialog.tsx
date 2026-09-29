@@ -6,9 +6,10 @@
 // the two actions; the surfaces own the words. Lives in components/, not
 // app/: expo-router treats every app/ file as a route (issue #339).
 import type { ReactNode } from "react";
-import { Modal, StyleSheet, Text, View } from "react-native";
+import { Modal, StyleSheet, View } from "react-native";
 
 import { PressableSurface } from "./pressable-surface";
+import { ScaledText } from "./scaled-text";
 import { tokens } from "./design-tokens";
 
 // 40% ink alpha — a derived shade of color.ink (#22262b), see the file head
@@ -69,9 +70,15 @@ export function ModalDialog({
   testID: string;
 }) {
   return (
+    // The animation stays "none" — the reduced-motion contract of G06.05
+    // (AC2): the app's dialogs never animate, so the OS reduce-motion
+    // setting has nothing to turn off (test/components pin this; adding
+    // motion here must come with an AccessibilityInfo gate).
     <Modal animationType="none" onRequestClose={onRequestClose} testID={testID} transparent>
       <View style={styles.overlay}>
-        <View style={styles.card}>{children}</View>
+        <View accessibilityViewIsModal={true} style={styles.card}>
+          {children}
+        </View>
       </View>
     </Modal>
   );
@@ -87,8 +94,8 @@ export function ModalDialogAccept({
   testID: string;
 }) {
   return (
-    <PressableSurface onPress={onPress} style={styles.accept} testID={testID}>
-      <Text style={styles.acceptLabel}>{label}</Text>
+    <PressableSurface accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={styles.accept} testID={testID}>
+      <ScaledText style={styles.acceptLabel}>{label}</ScaledText>
     </PressableSurface>
   );
 }
@@ -103,8 +110,8 @@ export function ModalDialogCancel({
   testID: string;
 }) {
   return (
-    <PressableSurface onPress={onPress} style={styles.cancel} testID={testID}>
-      <Text style={styles.cancelLabel}>{label}</Text>
+    <PressableSurface accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={styles.cancel} testID={testID}>
+      <ScaledText style={styles.cancelLabel}>{label}</ScaledText>
     </PressableSurface>
   );
 }

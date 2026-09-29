@@ -11,11 +11,13 @@
 // no runtime imports from the other zones.
 import { useCallback, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet } from "react-native";
 
 import type { Services } from "../controllers/createServices";
 import { PressableSurface } from "./pressable-surface";
 import { tokens } from "./design-tokens";
+import { ScaledText } from "./scaled-text";
+import { uiStrings } from "./ui-strings";
 
 const styles = StyleSheet.create({
   button: {
@@ -32,7 +34,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export function WalkButton({ walk }: { walk?: Services["walk"] }) {
+export function WalkButton({ walk, locale = "be" }: { walk?: Services["walk"]; locale?: string }) {
   const router = useRouter();
   const [live, setLive] = useState(() => walk?.liveSession() ?? null);
   useFocusEffect(
@@ -44,13 +46,16 @@ export function WalkButton({ walk }: { walk?: Services["walk"] }) {
     }, [walk]),
   );
   if (!live) return null;
+  const label = uiStrings(locale).walk;
   return (
     <PressableSurface
+      accessibilityRole="button"
+      accessibilityLabel={label}
       onPress={() => router.push(`/run/${live.routeId}`)}
       style={styles.button}
       testID="btn-walk-mode"
     >
-      <Text style={styles.label}>Прагулка</Text>
+      <ScaledText style={styles.label}>{label}</ScaledText>
     </PressableSurface>
   );
 }

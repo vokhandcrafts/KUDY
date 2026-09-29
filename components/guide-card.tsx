@@ -7,17 +7,22 @@
 // types come in as a type-only import (components takes no runtime imports
 // from the other zones).
 import { Link } from "expo-router";
-import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import type { ReactNode } from "react";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 
 import type { CatalogGuideCard, CatalogSurfaceState } from "../controllers/catalog/catalogController.ts";
+import type { Services } from "../controllers/createServices.ts";
 import { PressableSurface } from "./pressable-surface";
 import { tokens } from "./design-tokens";
+import { ScaledText } from "./scaled-text";
+import { uiStrings } from "./ui-strings";
+import { LoadingIndicator } from "./loading-indicator";
+import { WalkButton } from "./walk-button";
 
 // MVP active city (21 §3.2: у MVP толькі актыўны Гданьск); the surface shows
 // the city name per NAV3, and the rubric route carries the city id.
 export const CITY_TITLE = "Гданьск";
 export const ACTIVE_CITY_ID = "gdansk";
-export const RUBRIC_TITLE = "Гіды";
 
 // The scheme's responsive split (screens-and-transitions.md, Explore row):
 // one column below 821 px, two columns at 821 px and above.
@@ -94,23 +99,83 @@ const styles = StyleSheet.create({
     color: tokens.colorInk,
     fontSize: 12,
   },
+  // G06.05 (AC4): the named retry of the failed catalog load — the manual
+  // exit styled like the other outlined actions (the walk button's frame).
+  retryButton: {
+    alignSelf: "flex-start",
+    borderColor: tokens.colorAccent,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    marginTop: tokens.spaceS,
+    paddingHorizontal: tokens.spaceM,
+    paddingVertical: tokens.spaceS,
+  },
+  retryLabel: {
+    color: tokens.colorAccent,
+    fontSize: tokens.fontBaseSize,
+  },
+  // The city surfaces' shared title (the two screens' own style was the
+  // same object — G06.05 moved the body into CityCatalogBody).
+  cityTitle: {
+    color: tokens.colorInk,
+    fontSize: tokens.fontTitleSize,
+    fontWeight: tokens.fontWeightStrong,
+    marginBottom: tokens.spaceM,
+  },
 });
+
+// The city surfaces' shared body (G06.05): the walk-mode button, the city
+// title, the caller's middle slot (the «Побач» link on Explore, nothing on
+// the Guides rubric) and the catalog state with the named retry — one copy
+// for both screens (implementation-rules 8: the sibling clone the copy-paste
+// gate caught became this component). `middle` stays a prop, not a flag:
+// the surfaces keep deciding their own chains.
+export function CityCatalogBody({
+  walk,
+  catalog,
+  onRetry,
+  variant,
+  locale,
+  middle = null,
+}: {
+  walk?: Services["walk"];
+  catalog: CatalogSurfaceState | null;
+  onRetry?: () => void;
+  variant: "city" | "rubric";
+  locale: string;
+  middle?: ReactNode;
+}) {
+  return (
+    <>
+      <WalkButton walk={walk} locale={locale} />
+      <ScaledText style={styles.cityTitle}>{CITY_TITLE}</ScaledText>
+      {middle}
+      <CatalogStateView state={catalog} variant={variant} locale={locale} onRetry={onRetry} />
+    </>
+  );
+}
 
 // The tariff is a badge on the card, never a separate rubric (11 §16.1, 20
 // §6). The contract value stays free|paid|mixed (21 §3.2 — schemas, index and
 // the testID are untouched); the label renders it in the interface language
-// (the app has one, Belarusian) per the owner consent recorded in issue #355.
-const ACCESS_LABELS: Record<CatalogGuideCard["access"], string> = {
-  free: "Бясплатна",
-  paid: "Платна",
-  mixed: "Змешана",
-};
-
-export function AccessBadge({ access }: { access: CatalogGuideCard["access"] }) {
+// per the owner consent recorded in issue #355 — G06.05 adds the EN pair.
+export function AccessBadge({
+  access,
+  locale = "be",
+}: {
+  access: CatalogGuideCard["access"];
+  locale?: string;
+}) {
   const tone = access === "paid" ? styles.badgePaid : access === "mixed" ? styles.badgeMixed : null;
+  const label = uiStrings(locale).access[access];
   return (
-    <View style={[styles.badge, tone]} testID={`badge-access-${access}`}>
-      <Text style={styles.badgeText}>{ACCESS_LABELS[access]}</Text>
+    <View
+      style={[styles.badge, tone]}
+      testID={`badge-access-${access}`}
+      accessible={true}
+      accessibilityLabel={label}
+    >
+      <ScaledText style={styles.badgeText}>{label}</ScaledText>
     </View>
   );
 }
@@ -124,33 +189,36 @@ export function LocalesLine({
   audioLocales,
   localesKnown,
   testID,
+  locale = "be",
 }: {
   textLocales: readonly string[];
   audioLocales: readonly string[];
   localesKnown: boolean;
   testID?: string;
+  locale?: string;
 }) {
+  const strings = uiStrings(locale);
   if (!localesKnown) {
     return (
-      <Text style={styles.locales} testID={testID}>
-        {`Мовы: ${textLocales.join(", ")}`}
-      </Text>
+      <ScaledText style={styles.locales} testID={testID}>
+        {strings.languagesLine(textLocales)}
+      </ScaledText>
     );
   }
-  const audio = audioLocales.length > 0 ? `; аўдыё: ${audioLocales.join(", ")}` : "";
   return (
-    <Text style={styles.locales} testID={testID}>
-      {`Тэкст: ${textLocales.join(", ")}${audio}`}
-    </Text>
+    <ScaledText style={styles.locales} testID={testID}>
+      {strings.textAudioLine(textLocales, audioLocales)}
+    </ScaledText>
   );
 }
 
-export function GuideCardLocales({ card }: { card: CatalogGuideCard }) {
+export function GuideCardLocales({ card, locale = "be" }: { card: CatalogGuideCard; locale?: string }) {
   return (
     <LocalesLine
       textLocales={card.textLocales}
       audioLocales={card.audioLocales}
       localesKnown={card.localesKnown}
+      locale={locale}
     />
   );
 }
@@ -158,15 +226,31 @@ export function GuideCardLocales({ card }: { card: CatalogGuideCard }) {
 // One guide card (the ordinary card kind of the canon): the same card on the
 // city surface and in the rubric leads to the same preview (D02, 11 §16.1).
 // `from` records the opening surface for NAV9 (11 §16.2: every preview
-// opening has a source surface Back returns to).
-export function GuideCard({ card, from }: { card: CatalogGuideCard; from?: "city" | "rubric" }) {
+// opening has a source surface Back returns to). G06.05: the card is a
+// button to the screen reader, its label names the guide and the access —
+// the badge alone never carries the tariff.
+export function GuideCard({
+  card,
+  from,
+  locale = "be",
+}: {
+  card: CatalogGuideCard;
+  from?: "city" | "rubric";
+  locale?: string;
+}) {
+  const strings = uiStrings(locale);
   return (
     <Link href={{ pathname: `/route/${card.routeId}`, params: from ? { from } : {} }} asChild>
-      <PressableSurface style={styles.card} testID={`guide-card-${card.routeId}`}>
-        <Text style={styles.cardTitle}>{card.title}</Text>
-        {card.summary ? <Text style={styles.cardSummary}>{card.summary}</Text> : null}
-        <AccessBadge access={card.access} />
-        <GuideCardLocales card={card} />
+      <PressableSurface
+        accessibilityRole="button"
+        accessibilityLabel={`${card.title}, ${strings.access[card.access]}`}
+        style={styles.card}
+        testID={`guide-card-${card.routeId}`}
+      >
+        <ScaledText style={styles.cardTitle}>{card.title}</ScaledText>
+        {card.summary ? <ScaledText style={styles.cardSummary}>{card.summary}</ScaledText> : null}
+        <AccessBadge access={card.access} locale={locale} />
+        <GuideCardLocales card={card} locale={locale} />
       </PressableSurface>
     </Link>
   );
@@ -174,7 +258,8 @@ export function GuideCard({ card, from }: { card: CatalogGuideCard; from?: "city
 
 // The honest-state banner (the notice/error pairs of the canon): the named
 // state in the primary line, the technical reason (if any) muted below —
-// never mascot-only (a11y-плашка screens.md).
+// never mascot-only (a11y-плашка screens.md). G06.05: the banner is a live
+// region — a state change is announced, not silently repainted (AC5).
 export function StateBanner({
   tone,
   reason,
@@ -187,9 +272,13 @@ export function StateBanner({
   testID: string;
 }) {
   return (
-    <View style={[styles.banner, tone === "error" ? styles.bannerError : styles.bannerNotice]} testID={testID}>
-      <Text style={styles.bannerText}>{reason}</Text>
-      {detail ? <Text style={styles.bannerDetail}>{detail}</Text> : null}
+    <View
+      accessibilityLiveRegion="polite"
+      style={[styles.banner, tone === "error" ? styles.bannerError : styles.bannerNotice]}
+      testID={testID}
+    >
+      <ScaledText style={styles.bannerText}>{reason}</ScaledText>
+      {detail ? <ScaledText style={styles.bannerDetail}>{detail}</ScaledText> : null}
     </View>
   );
 }
@@ -200,9 +289,11 @@ export function StateBanner({
 function GuideCardsList({
   guides,
   variant,
+  locale,
 }: {
   guides: readonly CatalogGuideCard[];
   variant: "city" | "rubric";
+  locale: string;
 }) {
   const wide = isWide(useWindowDimensions().width);
   // The NAV9 source surface follows the variant: the city card and the
@@ -210,7 +301,7 @@ function GuideCardsList({
   const from = variant === "rubric" ? "rubric" : "city";
   const cards = guides.map((card) => (
     <View key={card.routeId} style={wide ? styles.gridColumn : null}>
-      <GuideCard card={card} from={from} />
+      <GuideCard card={card} from={from} locale={locale} />
     </View>
   ));
   if (variant === "rubric") {
@@ -219,8 +310,13 @@ function GuideCardsList({
   return (
     <View>
       <Link href={`/city/${ACTIVE_CITY_ID}/guides`} asChild>
-        <PressableSurface accessibilityRole="link" hitSlop={12} testID="link-guides">
-          <Text style={styles.cardTitle}>{RUBRIC_TITLE} →</Text>
+        <PressableSurface
+          accessibilityRole="link"
+          accessibilityLabel={uiStrings(locale).guidesLink}
+          hitSlop={12}
+          testID="link-guides"
+        >
+          <ScaledText style={styles.cardTitle}>{uiStrings(locale).guidesLink}</ScaledText>
         </PressableSurface>
       </Link>
       <View style={wide ? styles.grid : null}>{cards}</View>
@@ -233,9 +329,9 @@ function GuideCardsList({
 // without discovery).
 export function CityMessage({ text }: { text: string }) {
   return (
-    <Text style={styles.locales} testID="city-message">
+    <ScaledText style={styles.locales} testID="city-message">
       {text}
-    </Text>
+    </ScaledText>
   );
 }
 
@@ -246,20 +342,38 @@ export function CityMessage({ text }: { text: string }) {
 // (21 §3.3) with the technical reason as a secondary detail; the no-cache
 // error is the normal city page without discovery, its reason muted — never
 // the primary message; the empty ready city is NAV3's «не апублікавана».
+// G06.05 (AC4): the error branch carries the named retry — a failed load is
+// not a dead end, the controller's refresh is one press away.
 export function CatalogStateView({
   state,
   variant,
+  locale = "be",
+  onRetry,
 }: {
   state: CatalogSurfaceState | null;
   variant: "city" | "rubric";
+  locale?: string;
+  onRetry?: () => void;
 }) {
-  if (state === null) return <CityMessage text="Каталог недаступны" />;
-  if (state.kind === "loading") return <CityMessage text="Загрузка…" />;
+  const strings = uiStrings(locale);
+  if (state === null) return <CityMessage text={strings.catalogUnavailable} />;
+  if (state.kind === "loading") return <LoadingIndicator text={strings.loading} testID="city-message" />;
   if (state.kind === "error") {
     return (
       <View testID="catalog-error">
-        <CityMessage text="Каталог часова недаступны" />
-        <Text style={styles.locales}>{state.reason}</Text>
+        <CityMessage text={strings.catalogTemporarilyUnavailable} />
+        <ScaledText style={styles.locales}>{state.reason}</ScaledText>
+        {onRetry ? (
+          <PressableSurface
+            accessibilityRole="button"
+            accessibilityLabel={strings.retry}
+            onPress={onRetry}
+            style={styles.retryButton}
+            testID="catalog-retry"
+          >
+            <ScaledText style={styles.retryLabel}>{strings.retry}</ScaledText>
+          </PressableSurface>
+        ) : null}
       </View>
     );
   }
@@ -268,14 +382,14 @@ export function CatalogStateView({
       <View>
         <StateBanner
           tone="notice"
-          reason="Папярэдні валідны кэш"
+          reason={strings.validCache}
           detail={state.reason}
           testID="catalog-banner"
         />
-        <GuideCardsList guides={state.guides} variant={variant} />
+        <GuideCardsList guides={state.guides} variant={variant} locale={locale} />
       </View>
     );
   }
-  if (state.guides.length === 0) return <CityMessage text="не апублікавана" />;
-  return <GuideCardsList guides={state.guides} variant={variant} />;
+  if (state.guides.length === 0) return <CityMessage text={strings.notPublished} />;
+  return <GuideCardsList guides={state.guides} variant={variant} locale={locale} />;
 }
