@@ -54,7 +54,14 @@ async function get(dispatcher, requestPath) {
 // pages claim to show. The records fixture (G17.13): c1's two records are
 // gdansk with two links on A and one on B, c2's record is krakow with none;
 // only B has a cleaned version, so its title comes from the search index and
-// A's falls back to the URL.
+// A's falls back to the URL. The card fixture (G17.14): A has a full snapshot
+// on disk (metadata with attribution, text.md with an image whose file
+// exists), B's metadata.json is corrupt and its text.md references an image
+// that is not there, E's snapshot dir is empty; C and D carry no snapshot. D's
+// url embeds the video id of the failed youtube step, E's /wiki/ url maps back
+// to the wiki-article step's ref, A's url is the failed seed's ref and the
+// `recordId:`-prefixed image step's owner — the four ref shapes the card's
+// step log matches.
 function buildStoreFixture(dir) {
   const dbPath = path.join(dir, 'db.sqlite');
   const db = openStore(dbPath);
@@ -63,12 +70,77 @@ function buildStoreFixture(dir) {
     `INSERT INTO campaigns (id, city, source_path, content_hash, seeds, topics, fence, youtube, created_at)
      VALUES ('c2', 'krakow', 'other.yaml', 'hash', '[]', '[]', '{}', '[]', '2026-09-23T00:00:00.000Z')`
   ).run();
-  const recordA = rawRecord({ campaignId: 'c1', url: 'https://news.example/a', status: 'raw' });
+  const snapshotsRoot = path.join(dir, 'snapshots');
+  const snapshotA = path.join(snapshotsRoot, 'c10000000000', 'article-a-ab12cd34');
+  fs.mkdirSync(path.join(snapshotA, 'media'), { recursive: true });
+  fs.writeFileSync(
+    path.join(snapshotA, 'metadata.json'),
+    `${JSON.stringify(
+      {
+        title: 'Верф Гданьска',
+        published_at: '2026-09-20',
+        author: 'Jan Kowalski',
+        language: 'pl',
+        attribution: {
+          site: 'https://pl.wikipedia.org',
+          revision_id: '12345',
+          contributors_url: 'https://pl.wikipedia.org/w/index.php?title=Gda%C5%84sk&action=history',
+          license: 'CC BY-SA',
+        },
+        source_url: 'https://news.example/a',
+      },
+      null,
+      2
+    )}\n`
+  );
+  fs.writeFileSync(
+    path.join(snapshotA, 'text.md'),
+    'Першы абзац пра верф.\n\n![Stocznia](media/article-a-img-1.png)\n_Stocznia Gdańska, 1980_\n\nДругі абзац са [спасылкай](https://news.example/x).\n'
+  );
+  fs.writeFileSync(path.join(snapshotA, 'media', 'article-a-img-1.png'), pngBytes(640, 400));
+  const snapshotB = path.join(snapshotsRoot, 'c10000000000', 'museum-beef1234');
+  fs.mkdirSync(snapshotB, { recursive: true });
+  fs.writeFileSync(path.join(snapshotB, 'metadata.json'), 'не-JSON');
+  fs.writeFileSync(path.join(snapshotB, 'text.md'), '![заставка](media/museum-img-1.png)\n_Від музея_\n');
+  const snapshotE = path.join(snapshotsRoot, 'c2', 'gdansk-fedc9876');
+  fs.mkdirSync(snapshotE, { recursive: true });
+  const recordA = rawRecord({
+    campaignId: 'c1',
+    url: 'https://news.example/a',
+    status: 'raw',
+    snapshot_path: snapshotA,
+    media_dir: path.join(snapshotA, 'media'),
+  });
   upsertRawRecord(db, recordA);
-  const recordB = rawRecord({ campaignId: 'c1', url: 'https://news.example/b', status: 'cleaned' });
+  const recordB = rawRecord({
+    campaignId: 'c1',
+    url: 'https://news.example/b',
+    status: 'cleaned',
+    snapshot_path: snapshotB,
+    media_dir: path.join(snapshotB, 'media'),
+  });
   upsertRawRecord(db, recordB);
   const recordC = rawRecord({ campaignId: 'c2', url: 'https://news.example/c', status: 'used', city: 'krakow' });
   upsertRawRecord(db, recordC);
+  const recordD = rawRecord({
+    campaignId: 'c2',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    status: 'raw',
+    city: 'krakow',
+    source_type: 'youtube',
+  });
+  upsertRawRecord(db, recordD);
+  const recordE = rawRecord({
+    campaignId: 'c2',
+    url: 'https://pl.wikipedia.org/wiki/Gda%C5%84sk',
+    status: 'raw',
+    city: 'krakow',
+    source_type: 'wiki',
+    rights: 'licensed',
+    snapshot_path: snapshotE,
+    media_dir: path.join(snapshotE, 'media'),
+  });
+  upsertRawRecord(db, recordE);
   for (const link of [
     { rawRecordId: recordA.id, anchorText: 'history', url: 'https://news.example/rel-1', context: 'p1' },
     { rawRecordId: recordA.id, anchorText: 'cranes', url: 'https://news.example/rel-2', context: 'p2' },
@@ -104,12 +176,20 @@ function buildStoreFixture(dir) {
   const doneImage = db.prepare("SELECT id FROM run_log WHERE kind = 'image'").get();
   claimStep(db, doneImage.id, now);
   completeStep(db, doneImage.id, now, 'wrote article-a-img-1.png');
+  enqueueStep(db, 'c1', 'image', `${recordA.id}:0`, now);
+  const cardImage = db.prepare("SELECT id FROM run_log WHERE kind = 'image' AND ref LIKE ?").get(`${recordA.id}:%`);
+  claimStep(db, cardImage.id, now);
+  completeStep(db, cardImage.id, now, 'wrote article-a-img-1.png');
   enqueueStep(db, 'c2', 'youtube', 'dQw4w9WgXcQ', now);
   const failedYoutube = db.prepare("SELECT id FROM run_log WHERE kind = 'youtube'").get();
   claimStep(db, failedYoutube.id, now);
   failStep(db, failedYoutube.id, 'binary not found — install yt-dlp', now);
+  enqueueStep(db, 'c2', 'wiki-article', 'Gdańsk', now);
+  const doneWiki = db.prepare("SELECT id FROM run_log WHERE kind = 'wiki-article'").get();
+  claimStep(db, doneWiki.id, now);
+  completeStep(db, doneWiki.id, now, 'wrote Gdańsk');
   db.close();
-  return { dbPath, recordA, recordB, recordC };
+  return { dbPath, recordA, recordB, recordC, recordD, recordE };
 }
 
 test('overview page shows per-campaign counts and journal diagnostics', async (t) => {
@@ -252,6 +332,129 @@ test('unknown record filter parameters answer readably, not 500', async (t) => {
   const unknownCity = await get(dispatcher, '/records?city=nowhere');
   assert.equal(unknownCity.status, 200);
   assert.match(unknownCity.body, /Па гэтым фільтры запісаў няма\./);
+});
+
+test('record card shows snapshot text with the image at its position, links and metadata', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath, recordA } = buildStoreFixture(dir);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const response = await get(dispatcher, `/record?id=${recordA.id}`);
+  assert.equal(response.status, 200);
+  assert.match(response.type, /^text\/html; charset=utf-8/);
+  // The heading falls back to metadata.json — record A has no search-index row.
+  assert.match(response.body, /<h2>Верф Гданьска<\/h2>/);
+  // The snapshot text renders block by block: paragraphs with inline anchors,
+  // the image at its archive position with the caption under it, served
+  // through the /media route.
+  assert.match(response.body, /<p class="text">Першы абзац пра верф\.<\/p>/);
+  assert.match(
+    response.body,
+    /<figure><img src="\/media\/c10000000000\/article-a-ab12cd34\/media\/article-a-img-1\.png" alt="Stocznia"><figcaption>Stocznia Gdańska, 1980<\/figcaption><\/figure>/
+  );
+  assert.match(response.body, /Другі абзац са <a href="https:\/\/news\.example\/x">спасылкай<\/a>\./);
+  // The link table: anchor, address, paragraph context.
+  assert.match(
+    response.body,
+    /<td>history<\/td><td><a href="https:\/\/news\.example\/rel-1">https:\/\/news\.example\/rel-1<\/a><\/td><td class="diagnostic">p1<\/td>/
+  );
+  assert.match(response.body, /<td>cranes<\/td><td><a href="https:\/\/news\.example\/rel-2">/);
+  // Metadata: source, collected and published dates, author, language, rights,
+  // and the attribution whenever metadata.json carries one.
+  assert.match(response.body, /<th>Крыніца<\/th><td><a href="https:\/\/news\.example\/a">https:\/\/news\.example\/a<\/a><\/td>/);
+  assert.match(response.body, /<th>Дата збору<\/th><td>2026-09-23T00:00:00\.000Z<\/td>/);
+  assert.match(response.body, /<th>Дата публікацыі<\/th><td>2026-09-20<\/td>/);
+  assert.match(response.body, /<th>Аўтар<\/th><td>Jan Kowalski<\/td>/);
+  assert.match(response.body, /<th>Мова<\/th><td>pl<\/td>/);
+  assert.match(response.body, /<th>Правы<\/th><td>толькі даследаванне <span class="key">\(research_only\)<\/span><\/td>/);
+  assert.match(
+    response.body,
+    /<th>Атрыбуцыя<\/th><td>https:\/\/pl\.wikipedia\.org, CC BY-SA, рэвізія 12345 — <a href="https:\/\/pl\.wikipedia\.org\/w\/index\.php\?title=Gda%C5%84sk&amp;action=history">гісторыя рэвізій<\/a><\/td>/
+  );
+});
+
+test('the card step log matches steps by url, record prefix, video id and wiki title', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath, recordA, recordC, recordD, recordE } = buildStoreFixture(dir);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  // A: the failed seed (ref = record url) and the done image (ref prefixed
+  // with the record id); the campaign's other image step stays out. The time
+  // cell rides in the same assertion — a snake_case row field left unmapped
+  // would render the '—' fallback here.
+  const cardA = await get(dispatcher, `/record?id=${recordA.id}`);
+  assert.match(
+    cardA.body,
+    /<tr><td>2026-09-23T00:00:00\.000Z<\/td><td><code>seed<\/code>: https:\/\/news\.example\/a<\/td><td>упаў<\/td><td class="diagnostic">HTTP 503: backend unavailable<\/td><\/tr>/
+  );
+  assert.match(cardA.body, new RegExp(`<td><code>image</code>: ${recordA.id}:0</td><td>гатова</td>`));
+  assert.ok(!cardA.body.includes('https://news.example/a#img-1'), "another step's ref stays out of the card");
+
+  // D: the failed youtube step via the video id inside the record url.
+  const cardD = await get(dispatcher, `/record?id=${recordD.id}`);
+  assert.match(
+    cardD.body,
+    /<td><code>youtube<\/code>: dQw4w9WgXcQ<\/td><td>упаў<\/td><td class="diagnostic">binary not found — install yt-dlp<\/td>/
+  );
+
+  // E: the wiki-article step via the /wiki/ title the record url maps back to.
+  const cardE = await get(dispatcher, `/record?id=${recordE.id}`);
+  assert.match(cardE.body, /<td><code>wiki-article<\/code>: Gdańsk<\/td><td>гатова<\/td>/);
+
+  // C has no steps of its own — a readable empty row, not silence.
+  const cardC = await get(dispatcher, `/record?id=${recordC.id}`);
+  assert.match(cardC.body, /Крокаў для гэтага запіса ў журнале няма\./);
+});
+
+test('missing snapshot files render readable notes and the server stays up', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath, recordB, recordC, recordE } = buildStoreFixture(dir);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  // B: text.md references an image whose file is gone, metadata.json is
+  // corrupt — two notes on the card, status still 200; the heading comes from
+  // the search index, not from the unreadable metadata.
+  const cardB = await get(dispatcher, `/record?id=${recordB.id}`);
+  assert.equal(cardB.status, 200);
+  assert.match(cardB.body, /<h2>Назва запіса B<\/h2>/);
+  assert.match(cardB.body, /Выява адсутнічае на дыску: <code>media\/museum-img-1\.png<\/code> — подпіс: /);
+  assert.match(cardB.body, /Метаданыя здымку не прачытаны: няма ці пашкоджаны <code>metadata\.json<\/code>/);
+
+  // C carries no snapshot at all.
+  const cardC = await get(dispatcher, `/record?id=${recordC.id}`);
+  assert.equal(cardC.status, 200);
+  assert.match(cardC.body, /Здымак не запісаны — тэксту здымку няма\./);
+
+  // E's snapshot dir exists but is empty: neither text form nor metadata.
+  const cardE = await get(dispatcher, `/record?id=${recordE.id}`);
+  assert.equal(cardE.status, 200);
+  assert.match(cardE.body, /няма ні <code>text\.md<\/code>, ні <code>transcript\.md<\/code>/);
+
+  // The server answers the list page normally afterwards.
+  const records = await get(dispatcher, '/records');
+  assert.equal(records.status, 200);
+});
+
+test('unknown record id, missing id and unknown parameter answer readably', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath } = buildStoreFixture(dir);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const absent = await get(dispatcher, '/record?id=absent-id');
+  assert.equal(absent.status, 404);
+  assert.match(absent.body, /Запіс <code>absent-id<\/code> у сховішчы не знойдзены\./);
+
+  const noId = await get(dispatcher, '/record');
+  assert.equal(noId.status, 404);
+  assert.match(noId.body, /патрабуе параметр <code>id<\/code>/);
+
+  const extra = await get(dispatcher, '/record?id=absent-id&banana=1');
+  assert.equal(extra.status, 404);
+  assert.match(extra.body, /Невядомы параметр «banana» — ігнаруецца; вядомы: id\./);
 });
 
 test('no request writes to the database or the snapshots tree', async (t) => {
