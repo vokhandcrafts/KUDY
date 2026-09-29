@@ -181,6 +181,15 @@ export function createCrawler({ fetchPage, auditPath, delayRange, fetchRobots })
       audit({ url: finalUrl, decision: 'denied', fetched: true });
       throw new Error(`redirected outside the fence to ${finalUrl} — content discarded`);
     }
+    // The same re-check for the robots gate: a redirect from an allowed path
+    // onto a disallowed one of the same host must discard the downloaded
+    // bytes, not snapshot them — «не запытвае шляхі, забароненыя паўзуку»
+    // holds for the redirect's destination too.
+    const redirectVerdict = await robots(finalUrl);
+    if (!redirectVerdict.allowed) {
+      audit({ url: finalUrl, decision: 'robots-denied', fetched: true, reason: redirectVerdict.reason });
+      throw new Error(`redirected to ${finalUrl} — ${redirectVerdict.reason} — content discarded`);
+    }
 
     // The heuristic classifies before the snapshot writer runs: a page that
     // carries no article text (menu, catalog, service page) is skipped; only

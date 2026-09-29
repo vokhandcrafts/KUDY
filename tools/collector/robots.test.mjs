@@ -9,7 +9,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ROBOTS_AGENT, parseRobotsTxt } from './robots.mjs';
-import { articlePage, crawlSetup } from './testkit.mjs';
+import { articleHtml, articlePage, crawlSetup } from './testkit.mjs';
 
 test('the collector crawl identity is the one constant the gate and the docs share', () => {
   assert.equal(ROBOTS_AGENT, 'KUDY-collector');
@@ -142,6 +142,36 @@ test('AC4: a campaign whose every seed is robots-blocked stops with a readable d
   }
   assert.equal(fx.recordUrls().length, 0, 'an empty run, reported as stopped — never as a success');
   assert.deepEqual(fx.server.requests.map((r) => r.path), ['/robots.txt'], 'no page fetch reached the host');
+});
+
+test('a redirect onto a same-host robots-disallowed path is a breach — content discarded, audit says fetched', async (t) => {
+  const fx = await crawlSetup(
+    {
+      '/robots.txt': 'User-agent: *\nDisallow: /secret',
+      '/secret': articlePage('Secret', []),
+    },
+    // The fetcher plays a browser that followed the seed's redirect onto the
+    // robots-disallowed path of the same host: the bytes are downloaded, so
+    // the finalUrl re-check must discard them and audit the breach.
+    { fetchPage: async (url) => ({ html: articleHtml(), finalUrl: url.replace(/\/start$/, '/secret') }) }
+  );
+  t.after(() => fx.server.close());
+
+  const run = await fx.run();
+  assert.equal(run.done, 0);
+  assert.equal(run.failed, 1);
+  const seed = fx.db.prepare("SELECT error FROM run_log WHERE kind = 'seed'").get();
+  assert.match(
+    seed.error,
+    /redirected to .*\/secret — robots\.txt of 127\.0\.0\.1 disallows \/secret — content discarded/
+  );
+  assert.equal(fx.recordUrls().length, 0, 'the redirected content is not snapshotted');
+  assert.ok(
+    fx.auditText(run.campaignId).includes(
+      `{"url": "${fx.server.url('/secret')}", "decision": "robots-denied", "fetched": true, "reason": "robots.txt of 127.0.0.1 disallows /secret"}`
+    ),
+    `robots-denied fetched:true audit line missing in:\n${fx.auditText(run.campaignId)}`
+  );
 });
 
 test('AC5: robots.txt is fetched once per host per run — the cache spans the run', async (t) => {
