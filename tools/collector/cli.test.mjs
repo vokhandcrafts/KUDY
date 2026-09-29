@@ -177,31 +177,59 @@ test('a rejected run converts to the exit-2 diagnostic path (the main().catch gu
   }
 });
 
+// Shared arrangement for the CLI crawl-run tests: a fixture server with a
+// one-seed campaign on it, the run going through the real CLI while the
+// server answers from this process (runCliAsync keeps the event loop free).
+async function cliCrawlSetup(routes, { overrides = {} } = {}) {
+  const server = await startFixtureServer(routes);
+  const dir = makeTempDir();
+  const file = writeCampaignFile(
+    dir,
+    campaignYaml({ seeds: `seeds:\n  - ${server.url('/start')}`, delay_s: 'delay_s: [0.05, 0.1]', ...overrides })
+  );
+  return { server, run: () => runCliAsync(['run', '--campaign', file, '--db', path.join(dir, 'db.sqlite')]) };
+}
+
 test('run on an error series prints the stopped diagnostic on stderr and still exits 0', async (t) => {
   if (!(await skipWithoutBrowser(t))) return;
-  const dir = makeTempDir();
-  const server = await startFixtureServer({
+  const fx = await cliCrawlSetup({
     // Seed and /d exist; /a, /b, /c are absent → three consecutive 404s stop
     // the run inside runCampaign while /d stays queued (pending, not drained).
     '/start': articlePage('Start', [['/a', 'first'], ['/b', 'second'], ['/c', 'third'], ['/d', 'fourth']]),
     '/d': articlePage('Fourth', []),
   });
-  t.after(() => server.close());
-  const file = writeCampaignFile(
-    dir,
-    campaignYaml({ seeds: `seeds:\n  - ${server.url('/start')}`, delay_s: 'delay_s: [0.05, 0.1]' })
-  );
+  t.after(() => fx.server.close());
 
-  const result = await runCliAsync(['run', '--campaign', file, '--db', path.join(dir, 'db.sqlite')]);
+  const result = await fx.run();
   assert.equal(result.status, 0, result.stderr);
   assert.match(
     result.stderr,
     new RegExp(
       `collector: run stopped — error series: ${ERROR_SERIES_LIMIT} consecutive crawl failures, ` +
-        `last at ${server.url('/c')} \\(HTTP 404\\)`
+        `last at ${fx.server.url('/c')} \\(HTTP 404\\)`
     )
   );
   assert.match(result.stdout, /steps done 1, failed 3, running 0, pending 1/);
+});
+
+test('run whose every seed is robots-refused prints the stop diagnostic on stderr and exits 0', async (t) => {
+  // The robots refusal precedes the page fetch, so this run never launches
+  // the browser — no skipWithoutBrowser guard here (must-flag
+  // missing-cli-stop-test: the stderr stop line needs its own CLI-level case).
+  const fx = await cliCrawlSetup({
+    '/robots.txt': 'User-agent: *\nDisallow: /',
+    '/start': articlePage('Start', []),
+  });
+  t.after(() => fx.server.close());
+
+  const result = await fx.run();
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(
+    result.stderr,
+    /collector: run stopped — all 1 http\(s\) seed\(s\) refused by robots\.txt — run stopped, nothing collected/
+  );
+  assert.match(result.stdout, /steps done 0, failed 1, running 0, pending 0/);
+  assert.deepEqual(fx.server.requests.map((r) => r.path), ['/robots.txt'], 'no page fetch reached the host');
 });
 
 test('unknown command and missing --campaign answer with usage, exit 2', () => {
