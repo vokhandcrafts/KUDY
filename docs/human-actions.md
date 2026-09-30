@@ -17,6 +17,9 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-30 — Смержыць PR #420: даслоўная цытата канона ў results G06.10.b (issue #412)
+Змержы PR #420 squash-мержам пасля зелёнага CI — ён закрывае issue #412: цытата радка канона `fontLicenses.*.selfHost` у results G06.10.b замененая на даслоўную, у must-flag дададзены клас `canon-quote-truncated`. Пасля мержу знімі лэйбл `agent:running` з issue #412.
+PR: https://github.com/vokhandcrafts/KUDY/pull/420 (issue: https://github.com/vokhandcrafts/KUDY/issues/412)
 ### 2026-09-30 — Перабудаваць development build перад прыладным тэстам (G06.10.f)
 У PR #419 з'явіўся першы натыўны модуль анімацыі (`react-native-reanimated` + `react-native-worklets`) — стары dev-client APK на эмулятары/прыладзе яго не мае і экран Run упадзе. Перабудуй dev-кліент (`npx expo run:android`) перад чарговым прыладным прагонам.
 PR: https://github.com/vokhandcrafts/KUDY/pull/419 (issue: https://github.com/vokhandcrafts/KUDY/issues/406)
