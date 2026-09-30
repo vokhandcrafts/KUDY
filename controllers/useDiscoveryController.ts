@@ -6,7 +6,8 @@
 // receives valid types). The state has no Run, purchase, GPS or audio ports —
 // a collection cannot start a Run or change an entitlement (D07, 21 §2).
 // Analytics: the allowlisted discovery_offer_* events (event-table.v1.json)
-// with exactly the five payload fields — no time_bucket (decision-required) —
+// with exactly the five payload fields — no time_bucket (optional per the
+// table, not wired in this release) —
 // local recording is the port's concern; without a port the choice works and
 // nothing is emitted (consent-denied behavior, 21 §7).
 import { createControllerStore, type ControllerStore } from './createControllerStore.ts';
