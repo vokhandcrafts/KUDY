@@ -16,6 +16,12 @@ import type { ActivationResult, LayerKey } from '../services/download/types.ts';
 import { createOriginCatalogLoader } from '../services/catalog/loader.ts';
 import { createCatalogService } from '../services/catalog/catalogService.ts';
 import { createCatalogController, type CatalogControllerState } from './catalog/catalogController.ts';
+import { loadDiscoveryIndex, type DiscoverySnapshotStore } from '../services/contentRepo/discoveryIndex.ts';
+import {
+  createDiscoveryController,
+  type DiscoveryAnalyticsPort,
+  type DiscoveryControllerState,
+} from './useDiscoveryController.ts';
 import {
   createPreviewController,
   type PreviewControllerState,
@@ -120,6 +126,12 @@ export interface ServicePorts {
   // sending consent-gated — the consented sender is G09's and joins later
   // behind this same seam).
   readonly events?: TelemetryPort;
+  // G15.03 — the derived discovery snapshot store (zone A) and the analytics
+  // port. Each stays absent until its device adapter lands (the same honest
+  // unavailable pattern as the catalog digest): without them the discovery
+  // service is not constructed and the surfaces render their named state.
+  readonly discoverySnapshot?: DiscoverySnapshotStore;
+  readonly discoveryAnalytics?: DiscoveryAnalyticsPort;
 }
 
 export interface Services {
@@ -208,6 +220,15 @@ export interface Services {
         readonly create: (routeId: string) => ControllerStore<CommerceControllerState>;
       }
     | undefined;
+  // G15.03 — the discovery controller: the human choice and the index state
+  // (21 §2). Constructed only when the origin, the digest and the snapshot
+  // ports all landed; otherwise the surfaces render their honest unavailable
+  // state — no inert fake controller stands in.
+  readonly discovery:
+    | {
+        readonly controller: ControllerStore<DiscoveryControllerState>;
+      }
+    | undefined;
 }
 
 export function createServices(ports: ServicePorts): Services {
@@ -227,6 +248,8 @@ export function createServices(ports: ServicePorts): Services {
     now,
     commerce,
     events,
+    discoverySnapshot,
+    discoveryAnalytics,
   } = ports;
   const catalogLoader = catalogOrigin ? createOriginCatalogLoader(catalogOrigin) : undefined;
   // MVP display-locale order: Belarusian first (21 §3.2 allowlist; the
@@ -237,6 +260,14 @@ export function createServices(ports: ServicePorts): Services {
   const catalogService = catalogLoader &&
     catalogSha256 &&
     createCatalogService({ loader: catalogLoader, sha256: catalogSha256 }, { localePreference });
+  // G15.03 — the verified index service: the same origin loader and digest
+  // the catalog uses, plus the derived snapshot store (zone A). The
+  // controller is constructed only over the complete port set.
+  const discoveryService = catalogLoader &&
+    catalogSha256 &&
+    discoverySnapshot && {
+      load: () => loadDiscoveryIndex({ loader: catalogLoader, sha256: catalogSha256, snapshot: discoverySnapshot }),
+    };
   // G06.04 — the run surface cache (NAV7): one surface controller per route
   // for the whole app run, so «Прагулка» returns to the panel position and
   // the inspected card the person left. The wrapper store below evicts a
@@ -553,6 +584,13 @@ export function createServices(ports: ServicePorts): Services {
           telemetry: events,
           routeId,
         }),
+    },
+    discovery: discoveryService && {
+      controller: createDiscoveryController({
+        service: discoveryService,
+        criteriaLocale: localePreference[0],
+        ...(discoveryAnalytics ? { analytics: discoveryAnalytics } : {}),
+      }),
     },
   };
 }

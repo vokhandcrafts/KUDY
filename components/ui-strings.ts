@@ -56,6 +56,23 @@ export interface UiStrings {
   readonly switchConfirm: (liveTitle: string, candidateTitle: string) => string;
   readonly switchAccept: string;
   readonly cancel: string;
+  // G15.03 (issue #70) — the discovery surfaces' chrome words (BE/EN): the
+  // Explore entry, the honest states and the labeled facts of the offer
+  // cards. The maps' fallback in the screens is the raw contract value — an
+  // unknown reason, difference or season renders verbatim, never dropped.
+  readonly whatToDo: string;
+  readonly discoveryTitle: string;
+  readonly discoveryUnavailable: string;
+  readonly discoveryTemporarilyUnavailable: string;
+  readonly discoveryEmpty: string;
+  readonly discoveryAlternatives: string;
+  readonly collectionUnavailable: string;
+  readonly collectionUnresolved: string;
+  readonly timeUnlimited: string;
+  readonly timeCap: (minutes: number) => string;
+  readonly seasonName: Record<string, string>;
+  readonly reasonText: Record<string, string>;
+  readonly differenceText: Record<string, string>;
 }
 
 const STRINGS: Record<"be" | "en", UiStrings> = {
@@ -100,6 +117,31 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
     switchConfirm: (liveTitle, candidateTitle) => `Завяршыць «${liveTitle}» і пачаць «${candidateTitle}»?`,
     switchAccept: "Завершыць і пачаць",
     cancel: "Скасаваць",
+    whatToDo: "Чым заняцца →",
+    discoveryTitle: "Чым заняцца",
+    discoveryUnavailable: "Падбор недаступны",
+    discoveryTemporarilyUnavailable: "Падбор зараз недаступны",
+    discoveryEmpty: "Нічога дакладна не падыходзіць — пасмякчыце выбар або паглядзіце іншыя варыянты.",
+    discoveryAlternatives: "Іншыя варыянты",
+    collectionUnavailable: "Падборка недаступная",
+    collectionUnresolved: "Некаторыя члены падборкі пакуль не апублікаваныя.",
+    timeUnlimited: "Без абмежавання",
+    timeCap: (minutes) =>
+      minutes === 60 ? "Да гадзіны" : minutes === 120 ? "Да дзвюх гадзін" : minutes === 240 ? "На паўдня" : `Да ${minutes} хв`,
+    seasonName: { spring: "Вясна", summer: "Лета", autumn: "Восень", winter: "Зіма" },
+    reasonText: {
+      editorial: "рэдакцыйны выбар",
+      theme_match: "тэма",
+      within_time: "падыходзіць па часе",
+      season_recommended: "рэкамендавана на гэты сезон",
+    },
+    differenceText: {
+      duration_unknown: "час не ацэнены",
+      over_time: "даўжэй за запыт",
+      theme_mismatch: "іншая тэма",
+      season_unassessed: "сезон не ацэнены",
+      season_not_recommended: "не для гэтага сезону",
+    },
   },
   en: {
     back: "← Back",
@@ -142,6 +184,31 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
     switchConfirm: (liveTitle, candidateTitle) => `Finish “${liveTitle}” and start “${candidateTitle}”?`,
     switchAccept: "Finish and start",
     cancel: "Cancel",
+    whatToDo: "What to do →",
+    discoveryTitle: "What to do",
+    discoveryUnavailable: "Discovery unavailable",
+    discoveryTemporarilyUnavailable: "Discovery is temporarily unavailable",
+    discoveryEmpty: "Nothing matches exactly — relax the choice or look at the other options.",
+    discoveryAlternatives: "Other options",
+    collectionUnavailable: "Collection unavailable",
+    collectionUnresolved: "Some collection members are not published yet.",
+    timeUnlimited: "No limit",
+    timeCap: (minutes) =>
+      minutes === 60 ? "Up to an hour" : minutes === 120 ? "Up to two hours" : minutes === 240 ? "Half a day" : `Up to ${minutes} min`,
+    seasonName: { spring: "Spring", summer: "Summer", autumn: "Autumn", winter: "Winter" },
+    reasonText: {
+      editorial: "editorial pick",
+      theme_match: "theme",
+      within_time: "fits the time",
+      season_recommended: "recommended for the season",
+    },
+    differenceText: {
+      duration_unknown: "duration not assessed",
+      over_time: "longer than asked",
+      theme_mismatch: "different theme",
+      season_unassessed: "season not assessed",
+      season_not_recommended: "not for this season",
+    },
   },
 };
 
