@@ -292,10 +292,10 @@ export default function RoutePreview() {
                   <PressableSurface
                     accessibilityRole="button"
                     accessibilityLabel={pstrings.storageExit}
-                  onPress={() => router.push("/my")}
-                  style={styles.downloadRetry}
-                  shelf="line"
-                  testID="btn-download-storage"
+                    onPress={() => router.push("/my")}
+                    style={styles.downloadRetry}
+                    shelf="line"
+                    testID="btn-download-storage"
                   >
                     <ScaledText style={styles.downloadRetryLabel}>{pstrings.storageExit}</ScaledText>
                   </PressableSurface>
