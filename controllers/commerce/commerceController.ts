@@ -44,8 +44,12 @@ import type { PurchaseOutcome } from '../../services/entitlement/types.ts';
 // G08.03 service) and the purchase-chain state when those adapters exist;
 // absent, the preview renders no offer — fail closed, the idiom of every
 // optional port (never a fictional state). The port owns the state behind
-// both members: `purchase` performs the store leg and `stateOf` answers the
-// post-outcome fact of the same instance.
+// both members: its own `purchase` MUST update whatever fact its `stateOf`
+// answers — a finished store leg lands 'paid' (the §8 words show, the offer
+// never returns). Wiring `stateOf` to the G08.04 chain while calling
+// `purchaseNonConsumable` directly leaves the finished leg invisible to
+// `stateOf` and re-offers a paid product — that wiring is wrong by this
+// contract, not by the controller's.
 export interface CommercePort {
   // The honest client-side purchase state of one product (G08.04's
   // PurchaseChainState, verbatim).

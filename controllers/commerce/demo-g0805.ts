@@ -48,9 +48,11 @@ const shown = events.filter((event) => event.type === 'extension_offer_shown');
 const line2 = `mount events ${mountEvents}; layout ×2 → shown ${shown.length} (offer_id ${String(shown[0]?.offer_id)})`;
 
 await state.buy();
-const firstError = controller.getState().attempt.kind === 'error' ? controller.getState().attempt.reason : 'none';
+const firstAttempt = controller.getState().attempt;
+const firstError = firstAttempt.kind === 'error' ? firstAttempt.reason : 'none';
 await state.tryAgain();
-const secondError = controller.getState().attempt.kind === 'error' ? controller.getState().attempt.reason : 'none';
+const secondAttempt = controller.getState().attempt;
+const secondError = secondAttempt.kind === 'error' ? secondAttempt.reason : 'none';
 const line3 = `error ×2 → ${firstError}, ${secondError}; exits try-again+continue-free; purchases ${purchaseCalls}`;
 
 controller.getState().continueFree();

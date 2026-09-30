@@ -1,10 +1,10 @@
 // G08.05 (issue #292) — the quiet upgrade offer card of the guide preview
 // (11 C26: «Спакойная прапанова ўнізе апісання»; the visual-language card:
 // radius 10, the line border, the token rhythm). The card itself buys
-// nothing — D06/NAV6: «Націск на платную прапанову… адкрывае прэв'ю; ён не
-// купляє», «Пакупка, загрузка і Start — асобныя дзеянні» — the Buy press
-// inside is the separate explicit action. The «Не цяпер» press is the
-// decline the controller respects (AC4). The onLayout callback is the
+// nothing — D06/NAV6: «Націск на платную прапанову… адкрывае прэв'ю; ён
+// не купляе», «Пакупка, загрузка і Start — асобныя дзеянні» — the Buy
+// press inside is the separate explicit action. The «Не цяпер» press is
+// the decline the controller respects (AC4). The onLayout callback is the
 // render fact the impression event counts (AC3) — never the mount alone.
 // Lives in components/, not app/: expo-router treats every app/ file as a
 // route (issue #339).
