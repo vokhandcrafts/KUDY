@@ -39,6 +39,12 @@ import {
 import type { RunControllerState } from './useRunController.ts';
 import { createMyKudyController, type MyKudyState, type SessionHistoryPort } from './myKudyController.ts';
 import type { ControllerStore } from './createControllerStore.ts';
+import {
+  createCommerceController,
+  type CommerceControllerState,
+  type CommercePort,
+  type TelemetryPort,
+} from './commerce/commerceController.ts';
 
 export interface ServicePorts {
   // The package store is the seam services/contentRepo already defines
@@ -103,6 +109,17 @@ export interface ServicePorts {
   // G07.02 — the clock the FocusRegain threshold reads (§3.7); the root
   // defaults to the wall clock when absent.
   readonly now?: () => number;
+  // G08.05 (issue #292) — the commerce seam (G08.04 Рашэнне 1: the chain's
+  // consumer). The root resolves it from the store session (the G08.03
+  // service) and the purchase-chain state when those adapters exist;
+  // absent, the preview renders no offer — fail closed, the idiom of every
+  // optional port here.
+  readonly commerce?: CommercePort;
+  // G08.05 — the local telemetry recorder behind the commerce events (the
+  // G01.05 table's recording policy verbatim: local_recording always,
+  // sending consent-gated — the consented sender is G09's and joins later
+  // behind this same seam).
+  readonly events?: TelemetryPort;
 }
 
 export interface Services {
@@ -182,6 +199,15 @@ export interface Services {
   // launch lives here). Exists only with the audio port; the playback state
   // survives navigation — the place detail and the Run panel both read it.
   readonly moment: MomentPlayBinding | undefined;
+  // G08.05 — the commerce controller factory: one store per opened route
+  // (the preview controller idiom), over the commerce and telemetry ports.
+  // The offer's only home is the preview surface (11 C26) — the Run surface
+  // never constructs one.
+  readonly commerce:
+    | {
+        readonly create: (routeId: string) => ControllerStore<CommerceControllerState>;
+      }
+    | undefined;
 }
 
 export function createServices(ports: ServicePorts): Services {
@@ -199,6 +225,8 @@ export function createServices(ports: ServicePorts): Services {
     sessionMoment,
     nextMomentSeq,
     now,
+    commerce,
+    events,
   } = ports;
   const catalogLoader = catalogOrigin ? createOriginCatalogLoader(catalogOrigin) : undefined;
   // MVP display-locale order: Belarusian first (21 §3.2 allowlist; the
@@ -516,5 +544,15 @@ export function createServices(ports: ServicePorts): Services {
         }),
     },
     moment: momentPlay,
+    // G08.05 — the commerce store per opened route (the preview idiom);
+    // exists only with the commerce port — the honest absence otherwise.
+    commerce: commerce && {
+      create: (routeId) =>
+        createCommerceController({
+          port: commerce,
+          telemetry: events,
+          routeId,
+        }),
+    },
   };
 }

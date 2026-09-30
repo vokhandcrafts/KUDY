@@ -158,6 +158,10 @@ export interface GuidePreview {
   // route.json `access` verbatim (route.schema.json: free_base | paid);
   // null when the route document is unavailable.
   readonly routeAccess: 'free_base' | 'paid' | null;
+  // route.json `product_id_route` verbatim (route.schema.json) — the store
+  // product the commerce offer purchases (G08.05); null when the document
+  // did not publish it or is unavailable (no invented product id).
+  readonly productId: string | null;
   // The recommended route time: the offer's estimated_duration range when
   // published, else the route document's duration_min (AC1).
   readonly estimatedDuration: CatalogOfferFacts['estimated_duration'];

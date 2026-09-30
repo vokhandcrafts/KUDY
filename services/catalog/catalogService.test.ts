@@ -543,6 +543,43 @@ describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
     assert.equal(state.preview.degradedRouteDoc, 'route-doc-corrupt');
   });
 
+  // G08.05 (implementation-rules 14): the commerce fact's own negative tests
+  // — one violation per fixture. A valid document whose product_id_route
+  // alone is corrupt (129 chars, then a non-string) stays published: only
+  // the commerce fact fails closed to null, the route access survives.
+  it('a bad product_id_route isolates the commerce fact: productId null, the document alive', async () => {
+    const doc = (productId: unknown) =>
+      JSON.stringify({
+        route_id: 'guide-route-b1',
+        version: '3',
+        city_id: 'gdansk',
+        access: 'free_base',
+        duration_min: 35,
+        published: true,
+        stops: [],
+        product_id_route: productId,
+      });
+    const tooLong = await loadPreview(
+      { loader: previewLoader(true, { 'bundle/guide-route-b1/3/route.json': doc('a'.repeat(129)) }), sha256 },
+      opts,
+      'guide-route-b1',
+      null,
+    );
+    assert.ok(tooLong.kind === 'ready');
+    assert.equal(tooLong.preview.productId, null);
+    assert.equal(tooLong.preview.routeAccess, 'free_base');
+    assert.equal(tooLong.preview.degradedRouteDoc, null);
+    const notAString = await loadPreview(
+      { loader: previewLoader(true, { 'bundle/guide-route-b1/3/route.json': doc(42) }), sha256 },
+      opts,
+      'guide-route-b1',
+      null,
+    );
+    assert.ok(notAString.kind === 'ready');
+    assert.equal(notAString.preview.productId, null);
+    assert.equal(notAString.preview.routeAccess, 'free_base');
+  });
+
   it('per-row identity faults drop the row and keep the valid ones, without a degradation note', async () => {
     const partial = JSON.stringify({
       route_id: 'guide-route-b1',
@@ -681,6 +718,7 @@ describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
       localesKnown: false,
       access: 'free' as const,
       routeAccess: 'free_base' as const,
+      productId: null,
       estimatedDuration: null,
       durationMin: 35,
       freeStopCount: null,

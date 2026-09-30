@@ -450,6 +450,7 @@ export async function loadCatalog(
 // crash or an invention).
 interface RouteDocFacts {
   routeAccess: 'free_base' | 'paid' | null;
+  productId: string | null;
   durationMin: number | null;
   freeStopCount: number | null;
   stops: PreviewStop[] | null;
@@ -458,6 +459,7 @@ interface RouteDocFacts {
 
 const ROUTE_DOC_UNAVAILABLE: RouteDocFacts = {
   routeAccess: null,
+  productId: null,
   durationMin: null,
   freeStopCount: null,
   stops: null,
@@ -540,6 +542,15 @@ async function loadRouteDoc(
     return { ...ROUTE_DOC_UNAVAILABLE, degraded: 'route-doc-corrupt' };
   }
   const routeAccess = isRouteAccess(v.access) ? v.access : null;
+  // The store product the commerce offer purchases (route.schema.json
+  // product_id_route, 1..128 chars): the route document's own fact, never
+  // derived from the route id; a fault leaves null and no offer renders.
+  const productId =
+    typeof v.product_id_route === 'string' &&
+    v.product_id_route.length >= 1 &&
+    v.product_id_route.length <= 128
+      ? v.product_id_route
+      : null;
   const durationMin =
     typeof v.duration_min === 'number' && Number.isInteger(v.duration_min) &&
     v.duration_min >= 1 && v.duration_min <= 1440
@@ -561,6 +572,7 @@ async function loadRouteDoc(
     Array.isArray(v.stops) && v.stops.length > 0 && stops !== null && stops.length === 0;
   return {
     routeAccess,
+    productId,
     durationMin,
     freeStopCount,
     stops: allRowsDropped ? null : stops,
@@ -622,6 +634,7 @@ export async function loadPreview(
       localesKnown: card.localesKnown,
       access: card.access,
       routeAccess: doc.routeAccess,
+      productId: doc.productId,
       estimatedDuration: card.estimatedDuration,
       durationMin: doc.durationMin,
       freeStopCount: doc.freeStopCount,
