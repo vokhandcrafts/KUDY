@@ -31,23 +31,31 @@ import { screenStyles } from "../../components/screen-styles";
 import { tokens } from "../../components/design-tokens";
 
 const styles = StyleSheet.create({
+  // G06.10.b: the interface text renders the UI family (canon §3, Golos
+  // Text); the strong styles take the named 600 face. While the faces load
+  // (and in tests without them) the unknown family names fall back to the
+  // system font — weights and sizes hold.
   summary: {
     color: tokens.colorMuted,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceS,
   },
   facts: {
     color: tokens.colorMuted,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
   note: {
     color: tokens.colorMuted,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
   refusal: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
@@ -61,22 +69,26 @@ const styles = StyleSheet.create({
   },
   cardLabel: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUiStrong,
     fontSize: tokens.fontBaseSize,
     fontWeight: tokens.fontWeightStrong,
     marginBottom: tokens.spaceS,
   },
   cardBody: {
     color: tokens.colorMuted,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceS,
   },
   live: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceS,
   },
   link: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUiStrong,
     fontSize: tokens.fontBaseSize,
     fontWeight: tokens.fontWeightStrong,
     marginTop: tokens.spaceS,
@@ -92,6 +104,7 @@ const styles = StyleSheet.create({
   },
   playText: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUiStrong,
     fontSize: tokens.fontBaseSize,
     fontWeight: tokens.fontWeightStrong,
   },

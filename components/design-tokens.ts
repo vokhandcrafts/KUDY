@@ -13,6 +13,10 @@ export const tokens = {
   colorAccentInk: '#ffffff', // color.accent-ink — тэкст на акцэнце
   colorCard: '#ffffff', // color.card — фон картак
   colorLine: '#d8d2c6', // color.line — межы картак
+  // G06.10.d (issue #404) — палкі вылепленых кнопак: цяменшае нацяжэнне
+  // існуючых колераў (канон §2), не новыя брэнд-колеры.
+  colorShelfAccent: '#154f3a', // color.shelf.accent — полка вылепленай primary-кнопкі
+  colorShelfLine: '#c9c1b1', // color.shelf.line — полка вылепленай звычайнай кнопкі
   colorBadgePaid: '#fdf1d7', // color.badge.paid
   colorBadgeFree: '#e7f2ec', // color.badge.free
   colorBadgeMixed: '#ece7f8', // color.badge.mixed
@@ -37,4 +41,14 @@ export const tokens = {
   fontTitleSize: 18, // font.size-title — памер загалоўка экрана
   fontWeightStrong: '600', // font.weight-strong
   fontBigTextFactor: 1.25, // font.big-text-factor
+  // G06.10.b (issue #402) — the font-family mirror: the named per-weight
+  // faces the @expo-google-fonts packages export, one family per weight
+  // (React Native cannot pick a weight inside a family — the Android
+  // workaround). Values are not the canon CSS chains verbatim; the guard
+  // pins each entry to its licensed canon family instead (test
+  // design-tokens.test.mjs, G06.10.b).
+  fontFamilyUi: 'GolosText_400Regular', // font.family-ui
+  fontFamilyUiStrong: 'GolosText_600SemiBold', // font.family-ui
+  fontFamilyDisplay: 'Alegreya_600SemiBold', // font.family-display
+  fontFamilyDragon: 'Caveat_400Regular', // font.family-dragon
 } as const;

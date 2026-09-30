@@ -18,7 +18,7 @@ import { tokens } from "../components/design-tokens";
 import { createServices } from "../controllers/createServices";
 import type { BundlesStore, Readiness } from "../services/contentRepo/types";
 import type { ActivationResult, LayerKey } from "../services/download/types";
-import { fixtureText, layoutWith, serve, sha256, CATALOG_FIXTURES, CATALOG_POINTER } from "../test/render-helpers";
+import { fixtureText, flatStyle, layoutWith, serve, sha256, CATALOG_FIXTURES, CATALOG_POINTER } from "../test/render-helpers";
 import type { CommerceEventRecord, CommercePort } from "../controllers/commerce/commerceController";
 import type { PurchaseOutcome } from "../services/entitlement/types";
 
@@ -80,6 +80,31 @@ function recordingDownload(): { downloadLayer: (key: LayerKey) => Promise<Activa
       return { status: "complete", key, verified: 1, bytes: 1, fetched: 1, diagnostics: [] };
     },
   };
+}
+
+// The insufficient-space failure arrange (G06.05 AC4): the download port
+// answers with the honest storage deficit — the failure-exit test and the
+// G06.10.d secondary-shelf test render this same state (jscpd: one copy).
+function renderInsufficientSpacePreview() {
+  return renderRouter(
+    {
+      "_layout": layoutWith(createServices({
+        catalogOrigin: "https://catalog.test",
+        catalogSha256: sha256,
+        bundlesStore: memoryBundles().store,
+        downloadLayer: async (key) => ({
+          status: "insufficient-space" as const,
+          key,
+          needed: 30 * 1048576,
+          free: 1048576,
+        }),
+      })),
+      "(tabs)/my": My,
+      "(tabs)/explore": Explore,
+      "route/[id]": RoutePreview,
+    },
+    { initialUrl: "/route/guide-route-b1" },
+  );
 }
 
 function liveSessionOf(routeId: string | null) {
@@ -371,25 +396,7 @@ describe("G06.05 preview a11y and failure exits (issue #280)", () => {
 
   test("AC4: insufficient space is a named failure with the retry and the storage exit", async () => {
     serve(CATALOG_FIXTURES);
-    renderRouter(
-      {
-        "_layout": layoutWith(createServices({
-          catalogOrigin: "https://catalog.test",
-          catalogSha256: sha256,
-          bundlesStore: memoryBundles().store,
-          downloadLayer: async (key) => ({
-            status: "insufficient-space" as const,
-            key,
-            needed: 30 * 1048576,
-            free: 1048576,
-          }),
-        })),
-        "(tabs)/my": My,
-        "(tabs)/explore": Explore,
-        "route/[id]": RoutePreview,
-      },
-      { initialUrl: "/route/guide-route-b1" },
-    );
+    renderInsufficientSpacePreview();
     fireEvent.press(await screen.findByTestId("btn-download"));
     await screen.findByTestId("download-error-banner");
     expect(screen.getByText("Збой загрузкі")).toBeTruthy();
@@ -585,5 +592,102 @@ describe("G08.05 quiet commerce offer (issue #292)", () => {
     );
     expect(await screen.findByText("патрэбна пакупка")).toBeTruthy();
     expect(screen.queryByTestId("upgrade-offer")).toBeNull();
+describe("guide preview font layer (G06.10.b)", () => {
+  test("the title renders the display family and the metadata/body the UI family, through the token mirror (AC1, AC4)", async () => {
+    // jest-expo loads no font files: the assertions below run against the
+    // not-yet-loaded faces — the readable render is the system-ui fallback
+    // (AC4), the family values are the mirror's, never hardcoded strings.
+    serve(CATALOG_FIXTURES);
+    renderRouter(
+      withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
+      { initialUrl: "/route/guide-route-a1?from=rubric" },
+    );
+    const title = await screen.findByText("Гісторыі сукнараў: ад мытні да порта");
+    expect(flatStyle(title).fontFamily).toBe(tokens.fontFamilyDisplay);
+    // The big-text multiplier applies to the new families (AC4).
+    expect(title.props.maxFontSizeMultiplier).toBe(tokens.fontBigTextFactor);
+    const duration = screen.getByTestId("preview-duration");
+    expect(flatStyle(duration).fontFamily).toBe(tokens.fontFamilyUi);
+    // The Proof: pointing the mirror's UI family back to system-ui fails this
+    // assertion directly — the surface consumes the mirror's named face, not
+    // the fallback name.
+    expect(flatStyle(duration).fontFamily).not.toBe("system-ui");
+    expect(duration.props.maxFontSizeMultiplier).toBe(tokens.fontBigTextFactor);
+    // Strong interface text takes the named 600 face of the UI family.
+    expect(flatStyle(screen.getByText("Мытня")).fontFamily).toBe(tokens.fontFamilyUiStrong);
+    // Body text (the stop's announce) renders the UI family too.
+    expect(flatStyle(screen.getByText("Першая гісторыя маршруту сукнараў.")).fontFamily).toBe(
+      tokens.fontFamilyUi,
+    );
+  });
+
+  test("the dragon-voice token resolves to the Caveat family (AC3)", () => {
+    // The face is loaded by the root (components/fonts.ts); its first
+    // interface surface is the dragon hint card (G07.04) — not this task.
+    expect(tokens.fontFamilyDragon.startsWith("Caveat")).toBe(true);
+  });
+});
+
+// G06.10.d (issue #404) — the clay buttons: the one main action of the
+// screen carries the accent shelf of the canon tokens (through the token
+// mirror — a hardcoded literal in the surfaces fails these assertions),
+// the secondary actions take the line shade, and the disabled contract
+// (canon §5: opacity 0.5, no dip, the reason next to the button) holds.
+describe("guide preview clay buttons (G06.10.d)", () => {
+  test("the primary action renders the accent shelf from the token mirror; the text pair is unchanged", async () => {
+    serve(CATALOG_FIXTURES);
+    renderRouter(withPreviewRoutes(createServices({
+      catalogOrigin: "https://catalog.test",
+      catalogSha256: sha256,
+      bundlesStore: memoryBundles().store,
+      downloadLayer: recordingDownload().downloadLayer,
+    })), { initialUrl: "/route/guide-route-b1" });
+    const button = await screen.findByTestId("btn-download");
+    const style = flatStyle(button);
+    expect(style.borderBottomWidth).toBe(4);
+    expect(style.borderBottomColor).toBe(tokens.colorShelfAccent);
+    // The text-on-accent pair (canon §2) is untouched by the shelf.
+    const label = within(button).getByText("Загрузіць");
+    expect(flatStyle(label).color).toBe(tokens.colorAccentInk);
+  });
+
+  test("the disabled primary keeps opacity 0.5, never dips, and the reason stays next to the button", async () => {
+    serve(CATALOG_FIXTURES);
+    renderRouter(
+      withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
+      { initialUrl: "/route/guide-route-a1?from=rubric" },
+    );
+    const button = await screen.findByTestId("btn-start");
+    const resting = flatStyle(button);
+    expect(resting.opacity).toBe(0.5);
+    expect(resting.transform).toBeUndefined();
+    expect(resting.borderBottomWidth).toBe(4);
+    // A disabled press fires no dip: the style holds its resting shape.
+    fireEvent.press(button);
+    expect(flatStyle(screen.getByTestId("btn-start")).transform).toBeUndefined();
+    expect(screen.getByText("патрэбна пакупка")).toBeTruthy();
+  });
+
+  test("the secondary actions render the line shade from the token mirror", async () => {
+    serve(CATALOG_FIXTURES);
+    renderInsufficientSpacePreview();
+    fireEvent.press(await screen.findByTestId("btn-download"));
+    await screen.findByTestId("download-error-banner");
+    const retry = flatStyle(screen.getByTestId("btn-download-retry"));
+    expect(retry.borderBottomWidth).toBe(4);
+    expect(retry.borderBottomColor).toBe(tokens.colorShelfLine);
+    const storage = flatStyle(screen.getByTestId("btn-download-storage"));
+    expect(storage.borderBottomWidth).toBe(4);
+    expect(storage.borderBottomColor).toBe(tokens.colorShelfLine);
+  });
+
+  test("the live walk's primary carries the accent shelf", async () => {
+    renderRouter(withPreviewRoutes(createServices({
+      runSession: { liveSession: () => ({ routeId: "route-map", title: "Каралеўская" }) },
+    })), { initialUrl: "/explore" });
+    const button = await screen.findByTestId("btn-walk-mode");
+    const style = flatStyle(button);
+    expect(style.borderBottomWidth).toBe(4);
+    expect(style.borderBottomColor).toBe(tokens.colorShelfAccent);
   });
 });
