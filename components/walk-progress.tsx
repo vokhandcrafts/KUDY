@@ -148,6 +148,11 @@ export function WalkProgress({
         <View style={styles.figureRow}>
           {figures.previous !== null ? (
             <Animated.Text
+              // The outgoing layer is the cross-fade's memory, not content:
+              // it sits at opacity 0 after the swap, so the screen-reader
+              // tree must not reach the stale word (the paper-surface idiom).
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
               style={[styles.figure, styles.figureLayer, previousFigureStyle]}
               testID={`${figureTestID}-previous`}
             >
