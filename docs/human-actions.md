@@ -17,6 +17,9 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-09-30 — Перабудаваць development build перад прыладным тэстам (G06.10.f)
+У PR #419 з'явіўся першы натыўны модуль анімацыі (`react-native-reanimated` + `react-native-worklets`) — стары dev-client APK на эмулятары/прыладзе яго не мае і экран Run упадзе. Перабудуй dev-кліент (`npx expo run:android`) перад чарговым прыладным прагонам.
+PR: https://github.com/vokhandcrafts/KUDY/pull/419 (issue: https://github.com/vokhandcrafts/KUDY/issues/406)
 ### 2026-09-30 — Рашэнне па AC4 у issue #403 (G06.10.c, іконкі)
 Адкажы на blocked-каментар у issue #403: прыняць render-узровень як выкананне крытэра 4 (жывыя скрыншоты прэв'ю немагчымыя без digest-порта прылады і L02 — гл. каментар) з пераносам скрыншотаў у будучую задачу, альбо дай іншую пастанову. Пасля адказу знімі agent:blocked — пайплайн (суддзя + мерж PR #417) даб'е задачу сам.
 PR: https://github.com/vokhandcrafts/KUDY/pull/417 (issue: https://github.com/vokhandcrafts/KUDY/issues/403)
