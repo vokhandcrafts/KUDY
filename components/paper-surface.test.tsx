@@ -27,7 +27,7 @@ function renderSurface() {
   );
 }
 
-type HostNode = { props?: { testID?: string; style?: unknown } } | null;
+type HostNode = { props?: { testID?: string; style?: unknown; source?: unknown } } | null;
 
 function mergedStyle(node: HostNode): Record<string, unknown> {
   return Object.assign(

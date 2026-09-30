@@ -91,23 +91,27 @@ test('paper grain fixes its token, opacity and allowed and forbidden places (G06
 
 test('the paper grain is consumed only by the canon-allowed places (G06.10.e)', () => {
   // The canon paperGrain lists are prose (§2 and the machine block); the
-  // machine side of the allowed-places rule walks the app imports: exactly
-  // the two calm screens consume the shared wrapper — the Run panel, the
-  // map and every other surface stay clean. A new consumer (or a forbidden
-  // screen taking the grain) fails the list.
+  // machine side of the allowed-places rule walks the imports of both UI
+  // zones: exactly the two calm screens (and the wrapper's own suite)
+  // consume the shared wrapper — the Run panel, the map and every other
+  // surface stay clean. An indirect consumer (a component embedding the
+  // wrapper) imports it too, so the walk sees it; a new consumer outside
+  // the list fails the assertion.
   const importers = [];
   const scan = (dir) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const filePath = join(dir, entry.name);
       if (entry.isDirectory()) scan(filePath);
-      else if (/\.(tsx|ts)$/.test(entry.name) &&
+      else if (/\.(tsx|ts)$/.test(entry.name) && entry.name !== 'paper-surface.tsx' &&
         /from "[^"]*paper-surface"/.test(readFileSync(filePath, 'utf8'))) {
         importers.push(filePath.slice(root.length + 1));
       }
     }
   };
   scan(join(root, 'app'));
-  assert.deepEqual(importers.sort(), ['app/(tabs)/explore.tsx', 'app/(tabs)/my.tsx'],
+  scan(join(root, 'components'));
+  assert.deepEqual(importers.sort(),
+    ['app/(tabs)/explore.tsx', 'app/(tabs)/my.tsx', 'components/paper-surface.test.tsx'],
     'the paper grain wrapper is allowed on the two calm screens only');
 });
 
