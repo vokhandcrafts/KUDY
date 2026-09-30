@@ -89,6 +89,28 @@ test('paper grain fixes its token, opacity and allowed and forbidden places (G06
   assert.ok(grain.forbidden.some((p) => p.includes('тэкст')), 'forbidden places must name dense body text');
 });
 
+test('the paper grain is consumed only by the canon-allowed places (G06.10.e)', () => {
+  // The canon paperGrain lists are prose (§2 and the machine block); the
+  // machine side of the allowed-places rule walks the app imports: exactly
+  // the two calm screens consume the shared wrapper — the Run panel, the
+  // map and every other surface stay clean. A new consumer (or a forbidden
+  // screen taking the grain) fails the list.
+  const importers = [];
+  const scan = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const filePath = join(dir, entry.name);
+      if (entry.isDirectory()) scan(filePath);
+      else if (/\.(tsx|ts)$/.test(entry.name) &&
+        /from "[^"]*paper-surface"/.test(readFileSync(filePath, 'utf8'))) {
+        importers.push(filePath.slice(root.length + 1));
+      }
+    }
+  };
+  scan(join(root, 'app'));
+  assert.deepEqual(importers.sort(), ['app/(tabs)/explore.tsx', 'app/(tabs)/my.tsx'],
+    'the paper grain wrapper is allowed on the two calm screens only');
+});
+
 test('canon fixes the component inventory: three card kinds, buttons, panel, dragon, scale', () => {
   assert.deepEqual(canon.cardKinds, ['base', 'hint', 'moment'], 'exactly three card kinds');
   for (const doc of ['Карткі', 'Кнопкі і чыпы', 'Панэль Run', 'Маркеры мапы', 'Дракон', 'Шкала ацэнак', 'Назвы станаў', 'Чытэльнасць']) {
@@ -226,6 +248,19 @@ test('production surface tokens stay verbatim with the canon (G06.01.a)', () => 
     assert.equal(value, token.value, `${key}: value must equal canon ${tokenName}`);
   }
   for (const [, key, value, tokenName] of numberEntries) {
+    // G06.10.e: the grain layer opacity is anchored to the canon rule —
+    // texture.paper-grain's value describes the tile asset, the approved
+    // range lives in paperGrain.opacity.
+    if (tokenName === 'texture.paper-grain') {
+      const range = canon.paperGrain.opacity.match(/(\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)/);
+      assert.ok(range, 'canon paperGrain.opacity must keep the a–b% range form');
+      const opacity = parseFloat(value);
+      assert.ok(
+        opacity * 100 >= parseFloat(range[1]) && opacity * 100 <= parseFloat(range[2]),
+        `${key}: layer opacity ${value} must stay in the canon range ${range[1]}–${range[2]}%`,
+      );
+      continue;
+    }
     const token = canon.tokens[tokenName];
     assert.ok(token, `${key}: canon token ${tokenName} must exist`);
     // The big-text factor is the one fractional canon value — the comparison

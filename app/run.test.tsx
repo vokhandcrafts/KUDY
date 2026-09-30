@@ -801,3 +801,17 @@ describe("G06.05 accessibility and honest failures (issue #280)", () => {
     );
   });
 });
+
+// G06.10.e (issue #405): the Run panel is a canon-forbidden grain place —
+// the painted tree never carries the grain layer (the import walk in
+// test/design-tokens.test.mjs is the source-side guard). Granting Run the
+// grain turns this red.
+describe("Run paper grain (G06.10.e)", () => {
+  test("the run surface never mounts the grain layer", async () => {
+    await mountedRunBe();
+    // Neither the a11y tree (default queries) nor the render tree carries
+    // the layer on Run.
+    expect(screen.queryByTestId("paper-grain")).toBeNull();
+    expect(screen.queryByTestId("paper-grain", { includeHiddenElements: true })).toBeNull();
+  });
+});

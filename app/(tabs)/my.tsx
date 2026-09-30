@@ -21,13 +21,13 @@ import { useServices } from "../_layout";
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
 import { LoadingIndicator } from "../../components/loading-indicator";
+import { PaperSurface } from "../../components/paper-surface";
 import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
 import { uiStrings } from "../../components/ui-strings";
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: tokens.colorPaper,
     flex: 1,
     padding: tokens.spaceL,
   },
@@ -117,7 +117,9 @@ export default function My() {
   // catalog in the display locale.
   const strings = uiStrings(services.locale);
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-My KUDY">
+    // G06.10.e (issue #405): the calm surface's paper — the shared wrapper
+    // layers the canon grain over the unchanged paper token.
+    <PaperSurface style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-My KUDY">
       {/* UX 02 (issue #348): the surface's one back element (AC2), fixed
           above the scrolling history so it stays reachable. */}
       <BackButton label={strings.back} testID="btn-my-back" />
@@ -154,7 +156,7 @@ export default function My() {
           <MyKudyRows state={controller} catalog={catalog} strings={strings} />
         ) : null}
       </ScrollView>
-    </View>
+    </PaperSurface>
   );
 }
 

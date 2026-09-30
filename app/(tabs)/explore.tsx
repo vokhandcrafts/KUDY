@@ -5,13 +5,14 @@
 // G07.01 (issue #281) adds the «Побач» entry (Journey 3: Explore / кнопка
 // «Побач»; NAV3 — the button works from the empty city too).
 import { Link } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCatalogController } from "../../controllers/catalog/useCatalogController";
 import { useServices } from "../_layout";
 import { tokens } from "../../components/design-tokens";
 import { CityCatalogBody } from "../../components/guide-card";
+import { PaperSurface } from "../../components/paper-surface";
 import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
 import { uiStrings } from "../../components/ui-strings";
@@ -36,10 +37,10 @@ export default function Explore() {
   // failed catalog load gets its named retry (AC4).
   const strings = uiStrings(services.locale);
   return (
-    <View
+    // G06.10.e (issue #405): the calm surface's paper — the shared wrapper
+    // layers the canon grain over the unchanged paper token.
+    <PaperSurface
       style={{
-        backgroundColor: tokens.colorPaper,
-        flex: 1,
         padding: tokens.spaceL,
         paddingTop: insets.top + tokens.spaceL,
       }}
@@ -66,6 +67,6 @@ export default function Explore() {
           </Link>
         }
       />
-    </View>
+    </PaperSurface>
   );
 }
