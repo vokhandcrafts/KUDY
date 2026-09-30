@@ -592,6 +592,9 @@ describe("G08.05 quiet commerce offer (issue #292)", () => {
     );
     expect(await screen.findByText("патрэбна пакупка")).toBeTruthy();
     expect(screen.queryByTestId("upgrade-offer")).toBeNull();
+  });
+});
+
 describe("guide preview font layer (G06.10.b)", () => {
   test("the title renders the display family and the metadata/body the UI family, through the token mirror (AC1, AC4)", async () => {
     // jest-expo loads no font files: the assertions below run against the
