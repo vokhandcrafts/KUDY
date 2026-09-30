@@ -4,6 +4,8 @@
 // :root custom property of the prototype CSS must resolve to a canon token
 // (overrides recorded with a reason), state names must stay verbatim with
 // their canonical sources, and the suite itself must stay wired into npm test.
+// G06.10.a: every font family token carries a complete rights record
+// (fontLicenses) and the paper grain fixes its token, opacity and places.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -53,6 +55,38 @@ test('every canon token has a non-empty value and a use rule', () => {
   for (const key of ['color.paper', 'color.ink', 'color.accent', 'font.family', 'radius.base', 'space.m']) {
     assert.ok(canon.tokens[key], `canon must fix the ${key} token`);
   }
+});
+
+test('every font family token carries a complete rights record (G06.10.a)', () => {
+  const records = canon.fontLicenses;
+  assert.ok(records && typeof records === 'object', 'canon must carry fontLicenses records');
+  const familyTokens = Object.keys(canon.tokens).filter((n) => n.startsWith('font.family-'));
+  assert.deepEqual(Object.keys(records).sort(), [...familyTokens].sort(),
+    'every font family token must have exactly one license record');
+  for (const [name, record] of Object.entries(records)) {
+    for (const field of ['family', 'license', 'embedding', 'source', 'selfHost', 'licenseText']) {
+      const value = record[field];
+      assert.ok(typeof value === 'string' && value.trim() !== '',
+        `${name}: license record field ${field} must be non-empty`);
+    }
+    assert.match(record.license, /OFL 1\.1/, `${name}: license must be OFL 1.1`);
+    for (const field of ['source', 'licenseText']) {
+      assert.match(record[field], /^https:\/\//, `${name}: ${field} must be an https link`);
+    }
+    assert.ok(canon.tokens[name].value.startsWith(record.family),
+      `${name}: token value must name the licensed family first`);
+  }
+});
+
+test('paper grain fixes its token, opacity and allowed and forbidden places (G06.10.a)', () => {
+  const grain = canon.paperGrain;
+  assert.ok(grain && typeof grain === 'object', 'canon must carry the paperGrain rule');
+  assert.ok(canon.tokens[grain.token], `grain token ${grain.token} must exist`);
+  assert.match(grain.opacity, /4[–-]5/, 'grain opacity must stay in the approved 4–5% range');
+  assert.ok(Array.isArray(grain.allowed) && grain.allowed.length > 0, 'allowed places must be listed');
+  assert.ok(Array.isArray(grain.forbidden) && grain.forbidden.length > 0, 'forbidden places must be listed');
+  assert.ok(grain.forbidden.some((p) => p.includes('Run')), 'forbidden places must name Run (never on Run)');
+  assert.ok(grain.forbidden.some((p) => p.includes('тэкст')), 'forbidden places must name dense body text');
 });
 
 test('canon fixes the component inventory: three card kinds, buttons, panel, dragon, scale', () => {

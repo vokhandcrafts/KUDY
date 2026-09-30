@@ -36,6 +36,24 @@ production-экранаў G06.01+ і для прататыпа G06.08: асоб�
 `paid/free/mixed/lock` адрозніваюцца фонам, тэкст пазнакі — асноўны
 `color.ink`.
 
+Два паўтоны-полкі кнопак (ухвалена квізам заснавальніка 2026-09-29) —
+цяменшае нацяжэнне існуючых колераў, не новыя брэнд-колеры:
+`color.shelf.accent` выводзіцца з `color.accent`, `color.shelf.line` — з
+`color.line` адным правілам: тон і насычанасць HSL трымаюцца, светлата
+менш на 7 працэнтных пунктаў. Полка — дэкаратыўны пласт пад кнопкай:
+тэкст на ёй не жыве, таму кантрастнай пары для паліў канон не задае
+(правіла §10 пра пары для новых колераў тут не ўжываецца дакладна з
+гэтай прычыны); тэкставая пара `accent-ink`/`accent` застаецца
+нязменнай.
+
+Зярно паперы (`texture.paper-grain`) — згенераваны тайлавы асет
+непразрыстасцю 4–5% паверх `color.paper`; значэнне паперы не мяняецца,
+таму ўсе кантрастныя пары застаюцца вымеранымі. Дазволенае месца — фон
+спакойных экранаў Explore і My KUDY. Забароненыя месцы: панэль Run,
+мапа і ўсякае размяшчэнне пад шчыльным тэкстам (спісы, табліцы,
+доўгія апісанні). Поўны спіс дазволенага і забароненага — у машынным
+блоку (`paperGrain`).
+
 ## 3. Шрыфты і правы на выкарыстанне
 
 - Канонавы стэк — **system-ui, sans-serif**: інтэрфейс малюе сістэмнымі
@@ -51,6 +69,33 @@ production-экранаў G06.01+ і для прататыпа G06.08: асоб�
 - **Буйны тэкст** (a11y-плашка `screens.md`: ≥ 1.2× базавага): канонавы
   множнік 1.25× → 20px. Draft-значэнне 19px (1.1875×) перазапісанае як
   ніжэй за плашку — гл. «Дадатак», `cssOverrides`.
+
+### Ухвалены шрыфтавы пакет (квіз заснавальніка 2026-09-29)
+
+Да сістэмнага стэку дадаюцца тры сям'і; правілы гэтага раздзела
+дзейнічаюць на іх даслоўна: ліцэнзія дазваляе ўбудоўванне ў прадукт
+(лічбавае выкарыстанне), файлы self-host у рэпазітары і бандляцца з
+дадаткам, знешняе падцягванне (CDN, runtime Google Fonts) забароненае.
+Поўныя запісы правоў — у машынным блоку (`fontLicenses`); гард падае
+пры шрыфтавым токене без запісу правоў. Пакуль файлы не падключаныя
+(G06.10.b), інтэрфейс малюецца сістэмным стэкам — токен `font.family`
+гэтым допісам не мяняецца.
+
+- **Golos Text** — UI-санс усяго інтэрфейсу. Ліцэнзія OFL 1.1,
+  убудоўванне дазволенае. Аўтары Alexandra Korolkova і Vitaly Kuzmin,
+  выпушчана Paratype; афіцыйная крыніца —
+  https://github.com/googlefonts/golos-text, тэкст ліцэнзіі — OFL.txt
+  у тым жа рэпазітары.
+- **Alegreya** — дыплей-серыф, толькі назвы гідаў і гісторый.
+  Ліцэнзія OFL 1.1, убудоўванне дазволенае. Аўтар Juan Pablo del
+  Peral (Huerta Tipográfica); афіцыйная крыніца —
+  https://github.com/huertatipografica/Alegreya, тэкст ліцэнзіі —
+  OFL.txt у тым жа рэпазітары.
+- **Caveat** — голас дракона: толькі рэплікі і падказкі дракона,
+  ніколі інтэрфейсны тэкст. Ліцэнзія OFL 1.1, убудоўванне дазволенае.
+  Аўтар Pablo Impallari (Impallari Type); афіцыйная крыніца —
+  https://github.com/googlefonts/caveat, тэкст ліцэнзіі — OFL.txt у
+  тым жа рэпазітары.
 
 ## 4. Інтэрвалы, радыусы і памеры
 
@@ -188,6 +233,8 @@ mascot-only (a11y-плашка `screens.md`).
     "color.accent-ink":       { "value": "#ffffff", "use": "тэкст і гліфы на акцэнце і на маркерных заливках" },
     "color.card":             { "value": "#ffffff", "use": "фон картак, кнопак, панэлі Run і верхняй стужкі" },
     "color.line":             { "value": "#d8d2c6", "use": "межы картак, падзяляльнікі табліц, трэк прагрэсу" },
+    "color.shelf.accent":     { "value": "#154f3a", "use": "полка вылепленай primary-кнопкі — цяменшае нацяжэнне color.accent" },
+    "color.shelf.line":       { "value": "#c9c1b1", "use": "полка вылепленай звычайнай кнопкі — цяменшае нацяжэнне color.line" },
     "color.map":              { "value": "#eef3ee", "use": "фон мапы Побач і Run" },
     "color.street":           { "value": "#dfe7df", "use": "вуліцы на мапе" },
     "color.person":           { "value": "#1f5aa8", "use": "кропка пазіцыі карыстальніка" },
@@ -211,6 +258,9 @@ mascot-only (a11y-плашка `screens.md`).
     "color.badge.lock":       { "value": "#eceff1", "use": "фон пазнакі замка" },
     "color.note":             { "value": "#fffbe8", "use": "фон дэма-стужкі прататыпа" },
     "font.family":            { "value": "system-ui, sans-serif", "use": "усё тэкставае; правы — раздзел 3" },
+    "font.family-ui":         { "value": "Golos Text, system-ui, sans-serif", "use": "інтэрфейсны тэкст; fallback system-ui да падключэння файлаў; правы — раздзел 3" },
+    "font.family-display":    { "value": "Alegreya, serif", "use": "толькі назвы гідаў і гісторый; правы — раздзел 3" },
+    "font.family-dragon":     { "value": "Caveat, cursive", "use": "толькі рэплікі і падказкі дракона, ніколі інтэрфейсны тэкст; правы — раздзел 3" },
     "font.base-size":         { "value": "16px", "use": "базавы памер тэксту" },
     "font.line-height":       { "value": "1.45", "use": "міжрадковая адлегласць" },
     "font.weight-regular":    { "value": "400", "use": "звычайнае начарканне" },
@@ -232,6 +282,7 @@ mascot-only (a11y-плашка `screens.md`).
     "size.progress":          { "value": "6px", "use": "вышыня паласы прагрэсу" },
     "size.scale-button":      { "value": "40px", "use": "шырыня кнопкі шкалы ацэнак" },
     "panel.body-max-height":  { "value": "320px", "use": "межа пракруткі цела панэлі Run" },
+    "texture.paper-grain":    { "value": "згенераваны тайлавы асет, непразрыстасць 4–5% паверх color.paper", "use": "фон спакойных экранаў (Explore, My KUDY); дазволеныя і забароненыя месцы — у paperGrain" },
     "dialog.max-width":       { "value": "400px", "use": "максімальная шырыня дыялога" }
   },
   "cardKinds": ["base", "hint", "moment"],
@@ -327,6 +378,44 @@ mascot-only (a11y-плашка `screens.md`).
       "draftValue": "19px",
       "reason": "19px = 1.1875× базавага — ніжэй за плашку a11y ≥ 1.2×; 20px = 1.25×"
     }
-  ]
+  ],
+  "fontLicenses": {
+    "font.family-ui": {
+      "family": "Golos Text",
+      "license": "OFL 1.1",
+      "embedding": "дазволена — убудоўванне ў прадукт (лічбавае выкарыстанне)",
+      "source": "https://github.com/googlefonts/golos-text",
+      "selfHost": "файлы self-host у рэпазітары і бандляцца з дадаткам (G06.10.b); знешняе падцягванне (CDN, runtime Google Fonts) забароненае",
+      "licenseText": "https://github.com/googlefonts/golos-text/blob/main/OFL.txt"
+    },
+    "font.family-display": {
+      "family": "Alegreya",
+      "license": "OFL 1.1",
+      "embedding": "дазволена — убудоўванне ў прадукт (лічбавае выкарыстанне)",
+      "source": "https://github.com/huertatipografica/Alegreya",
+      "selfHost": "файлы self-host у рэпазітары і бандляцца з дадаткам (G06.10.b); знешняе падцягванне (CDN, runtime Google Fonts) забароненае",
+      "licenseText": "https://github.com/huertatipografica/Alegreya/blob/master/OFL.txt"
+    },
+    "font.family-dragon": {
+      "family": "Caveat",
+      "license": "OFL 1.1",
+      "embedding": "дазволена — убудоўванне ў прадукт (лічбавае выкарыстанне)",
+      "source": "https://github.com/googlefonts/caveat",
+      "selfHost": "файлы self-host у рэпазітары і бандляцца з дадаткам (G06.10.b); знешняе падцягванне (CDN, runtime Google Fonts) забароненае",
+      "licenseText": "https://github.com/googlefonts/caveat/blob/main/OFL.txt"
+    }
+  },
+  "paperGrain": {
+    "token": "texture.paper-grain",
+    "opacity": "4–5%",
+    "allowed": [
+      "фон экранаў Explore і My KUDY (паверх color.paper)"
+    ],
+    "forbidden": [
+      "панэль Run",
+      "мапа і картаграфічныя паверхні",
+      "пад шчыльным тэкстам (спісы, табліцы, доўгія апісанні)"
+    ]
+  }
 }
 ```
