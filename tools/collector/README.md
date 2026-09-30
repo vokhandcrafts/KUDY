@@ -19,6 +19,7 @@ MediaWiki API, міма паўзука (гл. «Вікі»). G17.06 дадае �
 ## Каманды
 
 ```sh
+npm run collector:dispatch                       # кароткі запуск чытэльнага дыспетчара з кораня рэпы (127.0.0.1:8767)
 node tools/collector/collector.mjs init                          # стварыць схему сховішча
 node tools/collector/collector.mjs run --campaign campaigns/gdansk-2026-09.yaml
 node tools/collector/collector.mjs clean --campaign campaigns/gdansk-2026-09.yaml

@@ -678,3 +678,15 @@ test('the dispatch command validates --port before serving', async (t) => {
     assert.match(run.stderr, /invalid --port/, `--port ${port}`);
   }
 });
+
+// The short root command from the collector README's «Каманды» is npm wiring
+// over the documented CLI command; retargeting or removing it turns this red.
+test('the root npm script collector:dispatch points at the dispatch CLI command', () => {
+  const pkgPath = fileURLToPath(new URL('../../package.json', import.meta.url));
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  assert.equal(
+    pkg.scripts['collector:dispatch'],
+    'node tools/collector/collector.mjs dispatch',
+    'collector:dispatch must raise the dispatcher through the documented CLI command'
+  );
+});
