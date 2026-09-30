@@ -283,6 +283,7 @@ export default function RoutePreview() {
                   disabled={state.busy}
                   onPress={() => void handleMainButton()}
                   style={styles.downloadRetry}
+                  shelf="line"
                   testID="btn-download-retry"
                 >
                   <ScaledText style={styles.downloadRetryLabel}>{pstrings.retry}</ScaledText>
@@ -291,9 +292,10 @@ export default function RoutePreview() {
                   <PressableSurface
                     accessibilityRole="button"
                     accessibilityLabel={pstrings.storageExit}
-                    onPress={() => router.push("/my")}
-                    style={styles.downloadRetry}
-                    testID="btn-download-storage"
+                  onPress={() => router.push("/my")}
+                  style={styles.downloadRetry}
+                  shelf="line"
+                  testID="btn-download-storage"
                   >
                     <ScaledText style={styles.downloadRetryLabel}>{pstrings.storageExit}</ScaledText>
                   </PressableSurface>
@@ -335,6 +337,10 @@ export default function RoutePreview() {
               onPress={() => void handleMainButton()}
               disabled={!state.button.enabled || state.busy}
               style={[styles.mainButton, (!state.button.enabled || state.busy) && styles.mainButtonDisabled]}
+              // G06.10.d (issue #404): the one main action of the screen is
+              // the clay primary — the accent shelf; the dip rides the
+              // shared wrapper (a disabled press never dips).
+              shelf="accent"
               testID={state.button.action === "download" ? "btn-download" : "btn-start"}
             >
               <ScaledText style={styles.mainButtonLabel}>{pstrings.label[state.button.label]}</ScaledText>

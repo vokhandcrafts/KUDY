@@ -53,6 +53,9 @@ export function WalkButton({ walk, locale = "be" }: { walk?: Services["walk"]; l
       accessibilityLabel={label}
       onPress={() => router.push(`/run/${live.routeId}`)}
       style={styles.button}
+      // G06.10.d (issue #404): the walk entry is a primary action — the
+      // accent shelf of the clay button.
+      shelf="accent"
       testID="btn-walk-mode"
     >
       <ScaledText style={styles.label}>{label}</ScaledText>
