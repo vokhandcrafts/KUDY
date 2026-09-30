@@ -289,7 +289,9 @@ export default function RoutePreview() {
               // G06.10.c (issue #403): the first icon application — the
               // metadata row. The row is one accessibility element carrying
               // the fact once; the icon's own required label satisfies the
-              // §9 contract if it ever renders outside the row.
+              // §9 contract if it ever renders outside the row. The row's
+              // label lifts null to undefined: RN's accessibilityLabel takes
+              // no null — the ternary above guarantees a string here.
               <View
                 accessible={true}
                 accessibilityLabel={formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin) ?? undefined}
