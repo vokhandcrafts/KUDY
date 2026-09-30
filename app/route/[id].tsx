@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
   },
   factRowLabel: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
   },
   stops: {
@@ -296,7 +297,10 @@ export default function RoutePreview() {
                 testID="preview-duration"
               >
                 <CanonIcon glyph={ClockIcon} label={strings.durationLabel} />
-                <ScaledText style={styles.factRowLabel}>
+                {/* The fact text carries its own testID: the row is the one
+                    accessibility element (G06.10.c), the font contract of
+                    G06.10.b reads the text inside it. */}
+                <ScaledText style={styles.factRowLabel} testID="preview-duration-text">
                   {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin)}
                 </ScaledText>
               </View>
@@ -309,7 +313,7 @@ export default function RoutePreview() {
                 testID="preview-counts"
               >
                 <CanonIcon glyph={MapPinIcon} label={strings.stopsLabel} />
-                <ScaledText style={styles.factRowLabel}>
+                <ScaledText style={styles.factRowLabel} testID="preview-counts-text">
                   {strings.stopsCount(state.surface.preview.stops.length)}
                 </ScaledText>
               </View>
