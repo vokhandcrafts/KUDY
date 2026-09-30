@@ -70,16 +70,14 @@ export function layoutWith(services: Services) {
 
 // The flattened style of a rendered element: the screens merge their frame
 // styles into arrays (inset + base spacing), the guards read the effective
-// value (UX 02, issue #348).
+// value (UX 02, issue #348). Deep-flat: surfaces hand the shared pressable
+// composed arrays and the wrapper appends its own layers (G06.10.d), so one
+// level is not always enough — React Native paints the fully merged picture.
 export function flatStyle(element: { props: { style?: unknown } }): Record<string, unknown> {
-  const style = element.props.style;
-  if (Array.isArray(style)) {
-    return Object.assign(
-      {},
-      ...style.filter((part) => part !== null && part !== undefined),
-    ) as Record<string, unknown>;
-  }
-  return (style ?? {}) as Record<string, unknown>;
+  const style = [element.props.style]
+    .flat(Infinity)
+    .filter((part) => part !== null && part !== undefined && typeof part === "object");
+  return Object.assign({}, ...style) as Record<string, unknown>;
 }
 
 // UX 02 (issue #348) — the full route tree for the navigation-frame guards

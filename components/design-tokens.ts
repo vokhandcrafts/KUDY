@@ -13,6 +13,10 @@ export const tokens = {
   colorAccentInk: '#ffffff', // color.accent-ink — тэкст на акцэнце
   colorCard: '#ffffff', // color.card — фон картак
   colorLine: '#d8d2c6', // color.line — межы картак
+  // G06.10.d (issue #404) — палкі вылепленых кнопак: цяменшае нацяжэнне
+  // існуючых колераў (канон §2), не новыя брэнд-колеры.
+  colorShelfAccent: '#154f3a', // color.shelf.accent — полка вылепленай primary-кнопкі
+  colorShelfLine: '#c9c1b1', // color.shelf.line — полка вылепленай звычайнай кнопкі
   colorBadgePaid: '#fdf1d7', // color.badge.paid
   colorBadgeFree: '#e7f2ec', // color.badge.free
   colorBadgeMixed: '#ece7f8', // color.badge.mixed
