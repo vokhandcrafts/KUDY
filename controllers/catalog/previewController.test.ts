@@ -407,7 +407,7 @@ describe('preview controller', () => {
 
 describe('asSourceSurface', () => {
   it('accepts the registry surfaces and rejects everything else', () => {
-    for (const value of ['city', 'rubric', 'collection', 'hint']) {
+    for (const value of ['city', 'rubric', 'discovery', 'collection', 'hint']) {
       assert.equal(asSourceSurface(value), value);
     }
     for (const value of [null, undefined, 42, '', 'rubric ', 'CITY']) {

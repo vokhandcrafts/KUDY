@@ -24,6 +24,11 @@ import { WalkButton } from "./walk-button";
 export const CITY_TITLE = "Гданьск";
 export const ACTIVE_CITY_ID = "gdansk";
 
+// G15.03 (issue #70) — the MVP display-locale order for the discovery
+// surfaces' label pick (the same order the composition root passes its
+// services; one value here so the screens never invent a second order).
+export const DISPLAY_LOCALES: readonly string[] = ["be", "en"];
+
 // The scheme's responsive split (screens-and-transitions.md, Explore row):
 // one column below 821 px, two columns at 821 px and above.
 export function isWide(width: number): boolean {
@@ -123,6 +128,11 @@ const styles = StyleSheet.create({
     marginBottom: tokens.spaceM,
   },
 });
+
+// G15.03 (issue #70) — the ordinary card style of the canon (visual-language
+// §5 «card»), exported for the discovery surfaces: the same card kind, never
+// a new look (новы выгляд — допіс у канон, не мясцовая стылізацыя).
+export const cardStyle = styles.card;
 
 // The city surfaces' shared body (G06.05): the walk-mode button, the city
 // title, the caller's middle slot (the «Побач» link on Explore, nothing on
@@ -228,14 +238,15 @@ export function GuideCardLocales({ card, locale = "be" }: { card: CatalogGuideCa
 // `from` records the opening surface for NAV9 (11 §16.2: every preview
 // opening has a source surface Back returns to). G06.05: the card is a
 // button to the screen reader, its label names the guide and the access —
-// the badge alone never carries the tariff.
+// the badge alone never carries the tariff. G15.03 widens the source set
+// with the discovery surfaces — the same card, the same preview.
 export function GuideCard({
   card,
   from,
   locale = "be",
 }: {
   card: CatalogGuideCard;
-  from?: "city" | "rubric";
+  from?: "city" | "rubric" | "discovery" | "collection";
   locale?: string;
 }) {
   const strings = uiStrings(locale);

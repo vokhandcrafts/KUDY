@@ -4,6 +4,8 @@
 // CatalogStateView; the surface decides nothing about what exists.
 // G07.01 (issue #281) adds the «Побач» entry (Journey 3: Explore / кнопка
 // «Побач»; NAV3 — the button works from the empty city too).
+// G15.03 (issue #70) adds the «Чым заняцца» selector entry — Explore →
+// Discovery result; the results never replace the city (20 §3, D04).
 import { Link } from "expo-router";
 import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,13 +20,26 @@ import { ScaledText } from "../../components/scaled-text";
 import { uiStrings } from "../../components/ui-strings";
 
 const styles = StyleSheet.create({
-  nearbyLink: {
+  middleLink: {
     color: tokens.colorInk,
     fontSize: tokens.fontBaseSize,
     fontWeight: tokens.fontWeightStrong,
     marginBottom: tokens.spaceM,
   },
 });
+
+// One middle-slot entry (G07.01's «Побач», G15.03's «Чым заняцца»): the
+// tappable marker and the role of UX 03 (issue #349) — hitSlop lifts the
+// target to ≥44dp; the href and the word stay the surface's own.
+function SurfaceLink({ href, label, testID }: { href: string; label: string; testID: string }) {
+  return (
+    <Link href={href} asChild>
+      <PressableSurface accessibilityRole="link" accessibilityLabel={label} hitSlop={12} testID={testID}>
+        <ScaledText style={styles.middleLink}>{label}</ScaledText>
+      </PressableSurface>
+    </Link>
+  );
+}
 
 export default function Explore() {
   const services = useServices();
@@ -53,18 +68,10 @@ export default function Explore() {
         variant="city"
         locale={services.locale}
         middle={
-          <Link href="/map" asChild>
-            {/* UX 03 (issue #349): the tappable marker and the role of
-                criterion 2; hitSlop lifts the target to ≥44dp (criterion 3). */}
-            <PressableSurface
-              accessibilityRole="link"
-              accessibilityLabel={strings.nearby}
-              hitSlop={12}
-              testID="link-nearby"
-            >
-              <ScaledText style={styles.nearbyLink}>{strings.nearby}</ScaledText>
-            </PressableSurface>
-          </Link>
+          <>
+            <SurfaceLink href="/map" label={strings.nearby} testID="link-nearby" />
+            <SurfaceLink href="/discovery" label={strings.whatToDo} testID="link-discovery" />
+          </>
         }
       />
     </PaperSurface>

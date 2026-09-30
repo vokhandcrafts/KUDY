@@ -18,12 +18,13 @@ import type { InventoryState, Readiness, Tier } from '../../services/contentRepo
 import type { ActivationResult, LayerKey } from '../../services/download/types.ts';
 
 // The surface the preview was opened from (11 §16.2): the MVP chain knows
-// the city card and the «Гіды» rubric; the collection and the R07 hint join
-// when their surfaces land (G15, G07.02, G07.04) — the registry already
-// accepts them. An unrecognized value records nothing (no unvalidated echo).
-export type SourceSurface = 'city' | 'rubric' | 'collection' | 'hint';
+// the city card and the «Гіды» rubric; the collection, the discovery result
+// and the R07 hint join when their surfaces land (G15, G07.02, G07.04) —
+// the registry already accepts them. An unrecognized value records nothing
+// (no unvalidated echo).
+export type SourceSurface = 'city' | 'rubric' | 'discovery' | 'collection' | 'hint';
 
-const SOURCE_SURFACES: readonly SourceSurface[] = ['city', 'rubric', 'collection', 'hint'];
+const SOURCE_SURFACES: readonly SourceSurface[] = ['city', 'rubric', 'discovery', 'collection', 'hint'];
 
 export function asSourceSurface(value: unknown): SourceSurface | null {
   return typeof value === 'string' && (SOURCE_SURFACES as readonly string[]).includes(value)
