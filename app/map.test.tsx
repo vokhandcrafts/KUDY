@@ -301,3 +301,18 @@ describe("Nearby loading indicator (UX 07)", () => {
     expect(screen.getByText("Загрузка…")).toBeTruthy();
   });
 });
+
+// G06.10.e (issue #405): the map is a canon-forbidden grain place — the
+// painted tree never carries the grain layer (the import walk in
+// test/design-tokens.test.mjs is the source-side guard). Granting the map
+// the grain turns this red.
+describe("Map paper grain (G06.10.e)", () => {
+  test("the map surface never mounts the grain layer", async () => {
+    renderRouter(withMapRoutes(createServices({})), { initialUrl: "/map" });
+    expect(await screen.findByTestId("screen-Map")).toBeTruthy();
+    // Neither the a11y tree (default queries) nor the render tree carries
+    // the layer on the map.
+    expect(screen.queryByTestId("paper-grain")).toBeNull();
+    expect(screen.queryByTestId("paper-grain", { includeHiddenElements: true })).toBeNull();
+  });
+});

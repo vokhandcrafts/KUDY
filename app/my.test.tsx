@@ -10,7 +10,8 @@ import { fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-li
 
 import My from "./(tabs)/my";
 import { createServices } from "../controllers/createServices";
-import { CATALOG_FIXTURES, layoutWith, serve, sha256 } from "../test/render-helpers";
+import { tokens } from "../components/design-tokens";
+import { CATALOG_FIXTURES, flatStyle, layoutWith, serve, sha256 } from "../test/render-helpers";
 import type { SessionRow } from "../services/db/types";
 
 const finishedRow = (n: number): SessionRow => ({
@@ -94,4 +95,21 @@ test("G06.05: the unavailable history offers the named retry and recovers", asyn
   fireEvent.press(screen.getByTestId("btn-my-retry"));
   await waitFor(() => expect(screen.getByTestId("my-session-walk-render-1")).toBeTruthy());
   expect(calls).toBe(3);
+});
+
+// G06.10.e (issue #405): the calm surface carries the paper grain over the
+// unchanged paper — the wrapper's layer sits under the scrolling history.
+// Removing the wrapper from the screen turns this red (implementation-rules 1).
+describe("My KUDY paper grain (G06.10.e)", () => {
+  test("the surface renders the grain layer over the unchanged paper", async () => {
+    renderRouter({ _layout: layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("screen-My KUDY")).toBeTruthy();
+    // The grain is in the render tree but never in the a11y tree — the
+    // default query (which walks the accessibility tree) misses it.
+    expect(screen.queryByTestId("paper-grain")).toBeNull();
+    expect(screen.getByTestId("paper-grain", { includeHiddenElements: true })).toBeTruthy();
+    expect(flatStyle(screen.getByTestId("screen-My KUDY")).backgroundColor).toBe(tokens.colorPaper);
+    // The content above the grain: the history list is mounted.
+    expect(screen.getByTestId("scroll-my")).toBeTruthy();
+  });
 });

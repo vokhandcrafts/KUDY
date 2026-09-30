@@ -51,4 +51,8 @@ export const tokens = {
   fontFamilyUiStrong: 'GolosText_600SemiBold', // font.family-ui
   fontFamilyDisplay: 'Alegreya_600SemiBold', // font.family-display
   fontFamilyDragon: 'Caveat_400Regular', // font.family-dragon
+  // G06.10.e (issue #405) — the grain layer opacity over the paper: the
+  // canon keeps the approved range in the paperGrain rule, so the guard
+  // pins this mirror entry to that range, not to the token value string.
+  texturePaperGrainOpacity: 0.05, // texture.paper-grain
 } as const;

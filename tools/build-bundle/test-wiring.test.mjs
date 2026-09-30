@@ -35,6 +35,7 @@ test('guard: npm test enumerates every committed suite outside spikes', () => {
       (script.includes('tools/build-bundle/*.test.mjs') && suite.startsWith('tools/build-bundle/')) ||
       (script.includes('tools/metro-config/*.test.mjs') && suite.startsWith('tools/metro-config/')) ||
       (script.includes('tools/docs-ledger/*.test.mjs') && suite.startsWith('tools/docs-ledger/')) ||
+      (script.includes('tools/design/*.test.mjs') && suite.startsWith('tools/design/')) ||
       (script.includes('tools/validate/*.test.mjs') && suite.startsWith('tools/validate/')) ||
       (script.includes('tools/publish-catalog/*.test.mjs') && suite.startsWith('tools/publish-catalog/')) ||
       (script.includes('tools/collector/*.test.mjs') && suite.startsWith('tools/collector/')) ||
