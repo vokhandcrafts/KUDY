@@ -30,6 +30,7 @@ import {
   ModalDialogCancel,
 } from "../../components/modal-dialog";
 import { ScaledText } from "../../components/scaled-text";
+import { WalkProgress } from "../../components/walk-progress";
 import { useServices } from "../_layout";
 
 const OSM_ATTRIBUTION_URL = "https://www.openstreetmap.org/copyright";
@@ -282,20 +283,11 @@ const styles = StyleSheet.create({
     color: tokens.colorAccent,
     fontSize: tokens.fontBaseSize,
   },
-  progressTrack: {
-    // UX 04 (issue #350, AC2): the canon strip is 6px accent-on-line; the
-    // muted 1px boundary lifts the track's identifying edge to ≥3:1 against
-    // the bar's card background (WCAG 1.4.11) — the line fill alone was 1.5:1.
-    backgroundColor: tokens.colorLine,
-    borderColor: tokens.colorMuted,
-    borderRadius: 999,
-    borderWidth: 1,
-    height: 6,
+  progressGap: {
+    // G06.10.f (issue #406): the strip's canon visuals (6px accent on line,
+    // the muted edge) live in the walk-progress component — the bar keeps
+    // only its own layout gap.
     marginTop: tokens.spaceS,
-  },
-  progressFill: {
-    backgroundColor: tokens.colorAccent,
-    height: "100%",
   },
   nowPlayingRow: {
     borderColor: tokens.colorNoticeBorder,
@@ -647,12 +639,15 @@ export default function Run() {
             ) : null}
           </View>
           {playing ? (
-            <View style={styles.progressTrack} testID="run-bar-progress">
-              <View
-                style={[styles.progressFill, { width: `${Math.round(stripProgress * 100)}%` }]}
-                testID="run-bar-progress-fill"
-              />
-            </View>
+            // G06.10.f (issue #406): the living line — the fill eases to
+            // each new value on the reanimated base, and with the system
+            // reduce-motion setting on it lands instantly (canon §9).
+            <WalkProgress
+              fillTestID="run-bar-progress-fill"
+              progress={stripProgress}
+              style={styles.progressGap}
+              testID="run-bar-progress"
+            />
           ) : null}
           {/* UX 04 (issue #350, AC3): the ODbL attribution rides the bar —
               visible and tappable with the bar up, never covered by it. */}

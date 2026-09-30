@@ -6,6 +6,9 @@
 // card. Reverting any of those to the pre-fix values (a white pending dot,
 // the notice-border available, a line-only track) turns this red.
 // The suite is wired into npm test (implementation-rules 1 and 7).
+// G06.10.f (issue #406): the strip's canon visuals moved to the
+// walk-progress component — the strip guard follows the single home, the
+// intent is unchanged.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -18,6 +21,7 @@ import { loadCanon } from './design-canon.mjs';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const tokensPath = join(root, 'components/design-tokens.ts');
 const screenPath = join(root, 'app/run/[id].tsx');
+const stripPath = join(root, 'components/walk-progress.tsx');
 
 // The anchored entries of components/design-tokens.ts: TS key → canon token
 // name → hex, the same anchoring the design-tokens guard pins.
@@ -33,10 +37,11 @@ function loadSurfaceTokens() {
 const canon = loadCanon();
 const surfaceTokens = loadSurfaceTokens();
 const screen = readFileSync(screenPath, 'utf8');
+const strip = readFileSync(stripPath, 'utf8');
 
-function styleBlock(name) {
-  const match = screen.match(new RegExp(`(?:^|\\s)${name}:\\s*\\{[^{}]*\\}`));
-  assert.ok(match, `app/run/[id].tsx must keep its ${name} style block`);
+function styleBlock(source, home, name) {
+  const match = source.match(new RegExp(`(?:^|\\s)${name}:\\s*\\{[^{}]*\\}`));
+  assert.ok(match, `${home} must keep its ${name} style block`);
   return match[0];
 }
 
@@ -49,7 +54,7 @@ function tokenOf(block, property) {
 }
 
 test('the Run map background is the canon color.map, not card white', () => {
-  const entry = tokenOf(styleBlock('map'), 'backgroundColor');
+  const entry = tokenOf(styleBlock(screen, 'app/run/[id].tsx', 'map'), 'backgroundColor');
   assert.equal(entry.canon, 'color.map',
     `styles.map.backgroundColor must resolve to canon color.map, got ${entry.canon}`);
 });
@@ -85,16 +90,18 @@ test('every marker fill keeps ≥3:1 against the canon map background (WCAG 1.4.
 });
 
 test('the peek bar progress strip stays identifiable on the card (≥3:1 edge)', () => {
+  // G06.10.f (issue #406): the strip lives in the walk-progress component —
+  // the guard reads its `track` and `fill` blocks there.
   const card = surfaceTokens.get('colorCard').hex;
-  const track = styleBlock('progressTrack');
+  const track = styleBlock(strip, 'components/walk-progress.tsx', 'track');
   const edge = tokenOf(track, 'borderColor');
   const edgeRatio = contrast(edge.hex, card);
   assert.ok(edgeRatio >= 3,
-    `progressTrack border ${edge.hex} on card ${card}: ${edgeRatio.toFixed(2)}:1 < 3:1`);
-  const fill = tokenOf(styleBlock('progressFill'), 'backgroundColor');
+    `track border ${edge.hex} on card ${card}: ${edgeRatio.toFixed(2)}:1 < 3:1`);
+  const fill = tokenOf(styleBlock(strip, 'components/walk-progress.tsx', 'fill'), 'backgroundColor');
   const fillRatio = contrast(fill.hex, card);
   assert.ok(fillRatio >= 3,
-    `progressFill ${fill.hex} on card ${card}: ${fillRatio.toFixed(2)}:1 < 3:1`);
+    `fill ${fill.hex} on card ${card}: ${fillRatio.toFixed(2)}:1 < 3:1`);
 });
 
 test('guard is wired into npm test (implementation-rules 1 and 7)', () => {
