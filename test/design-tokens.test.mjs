@@ -217,6 +217,10 @@ test('production surface tokens stay verbatim with the canon (G06.01.a)', () => 
   const numberEntries = [...source.matchAll(/(\w+):\s*(\d+(?:\.\d+)?),\s*\/\/\s*([\w.-]+)/g)];
   assert.ok(stringEntries.length + numberEntries.length >= 20, 'the surface token file must keep its canon-anchored entries');
   for (const [, key, value, tokenName] of stringEntries) {
+    // G06.10.b: the font-family mirror entries are anchored to the canon
+    // token but hold the named per-weight face React Native loads, not the
+    // canon CSS chain — the G06.10.b test below pins them instead.
+    if (tokenName.startsWith('font.family-')) continue;
     const token = canon.tokens[tokenName];
     assert.ok(token, `${key}: canon token ${tokenName} must exist`);
     assert.equal(value, token.value, `${key}: value must equal canon ${tokenName}`);
@@ -228,6 +232,34 @@ test('production surface tokens stay verbatim with the canon (G06.01.a)', () => 
     // is numeric on purpose (G06.05, font.big-text-factor 1.25).
     assert.equal(parseFloat(token.value), parseFloat(value), `${key}: value must equal canon ${tokenName}`);
   }
+});
+
+test('surface font-family mirror stays anchored to the licensed canon families (G06.10.b)', () => {
+  const source = readFileSync(join(root, 'components/design-tokens.ts'), 'utf8');
+  const fontEntries = [...source.matchAll(/(\w+):\s*'([^']+)',\s*\/\/\s*(font\.family-[\w-]+)/g)];
+  assert.ok(fontEntries.length >= 4, 'the font mirror must keep its canon-anchored entries');
+  // The canon weights are the only weights the named faces may carry.
+  const weights = ['font.weight-regular', 'font.weight-strong'].map(
+    (n) => parseFloat(canon.tokens[n].value),
+  );
+  for (const [, key, value, tokenName] of fontEntries) {
+    const record = canon.fontLicenses[tokenName];
+    assert.ok(record, `${key}: ${tokenName} must carry a rights record (canon fontLicenses)`);
+    const family = record.family.replace(/\s+/g, '');
+    assert.ok(value.startsWith(family),
+      `${key}: value ${value} must render the licensed family ${record.family}`);
+    const weight = value.match(/(\d+)/);
+    assert.ok(weight && weights.includes(parseFloat(weight[1])),
+      `${key}: named weight in ${value} must be a canon weight (${weights.join(' / ')})`);
+  }
+  // Every approved family ships in the mirror — the dragon voice included —
+  // and no mirror entry drifts to an unlicensed family.
+  const familyTokens = Object.keys(canon.tokens).filter((n) => n.startsWith('font.family-'));
+  assert.deepEqual(
+    [...new Set(fontEntries.map(([, , , tokenName]) => tokenName))].sort(),
+    [...familyTokens].sort(),
+    'the mirror must cover exactly the canon family tokens',
+  );
 });
 
 test('surface styles consume the canon title token — no hardcoded title size (UX 08)', () => {

@@ -37,4 +37,14 @@ export const tokens = {
   fontTitleSize: 18, // font.size-title — памер загалоўка экрана
   fontWeightStrong: '600', // font.weight-strong
   fontBigTextFactor: 1.25, // font.big-text-factor
+  // G06.10.b (issue #402) — the font-family mirror: the named per-weight
+  // faces the @expo-google-fonts packages export, one family per weight
+  // (React Native cannot pick a weight inside a family — the Android
+  // workaround). Values are not the canon CSS chains verbatim; the guard
+  // pins each entry to its licensed canon family instead (test
+  // design-tokens.test.mjs, G06.10.b).
+  fontFamilyUi: 'GolosText_400Regular', // font.family-ui
+  fontFamilyUiStrong: 'GolosText_600SemiBold', // font.family-ui
+  fontFamilyDisplay: 'Alegreya_600SemiBold', // font.family-display
+  fontFamilyDragon: 'Caveat_400Regular', // font.family-dragon
 } as const;

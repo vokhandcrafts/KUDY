@@ -52,7 +52,8 @@
       ],
       "@maplibre/maplibre-react-native",
       "expo-asset",
-      "expo-router"
+      "expo-router",
+      "expo-font"
     ]
   }
 }
