@@ -11,6 +11,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ClockIcon from "lucide-react-native/icons/clock";
+import MapPinIcon from "lucide-react-native/icons/map-pin";
 
 import {
   offerStrings,
@@ -22,6 +24,7 @@ import {
 import { usePreviewController } from "../../controllers/catalog/usePreviewController";
 import { useStoreState } from "../../controllers/useControllerStore";
 import { BackButton } from "../../components/back-button";
+import { CanonIcon } from "../../components/canon-icon";
 import { tokens } from "../../components/design-tokens";
 import { AccessBadge, LocalesLine, StateBanner } from "../../components/guide-card";
 import { LoadingIndicator } from "../../components/loading-indicator";
@@ -70,6 +73,20 @@ const styles = StyleSheet.create({
     fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginTop: tokens.spaceS,
+  },
+  // G06.10.c (issue #403): the wrapped facts own the row's spacing — the
+  // icon (canon tokens, deep import) sits beside the fact text, and the row
+  // is the one accessibility element announcing the fact once.
+  factRow: {
+    alignItems: "center",
+    columnGap: tokens.spaceS,
+    flexDirection: "row",
+    marginTop: tokens.spaceS,
+  },
+  factRowLabel: {
+    color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUi,
+    fontSize: tokens.fontBaseSize,
   },
   stops: {
     marginTop: tokens.spaceM,
@@ -269,14 +286,39 @@ export default function RoutePreview() {
               locale={services.locale}
             />
             {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin) ? (
-              <ScaledText style={styles.fact} testID="preview-duration">
-                {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin)}
-              </ScaledText>
+              // G06.10.c (issue #403): the first icon application — the
+              // metadata row. The row is one accessibility element carrying
+              // the fact once; the icon's own required label satisfies the
+              // §9 contract if it ever renders outside the row. The row's
+              // label lifts null to undefined: RN's accessibilityLabel takes
+              // no null — the ternary above guarantees a string here.
+              <View
+                accessible={true}
+                accessibilityLabel={formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin) ?? undefined}
+                style={styles.factRow}
+                testID="preview-duration"
+              >
+                <CanonIcon glyph={ClockIcon} label={strings.durationLabel} />
+                {/* The fact text carries its own testID: the row is the one
+                    accessibility element (G06.10.c), the font contract of
+                    G06.10.b reads the text inside it. */}
+                <ScaledText style={styles.factRowLabel} testID="preview-duration-text">
+                  {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin)}
+                </ScaledText>
+              </View>
             ) : null}
             {state.surface.preview.stops ? (
-              <ScaledText style={styles.fact} testID="preview-counts">
-                {strings.stopsCount(state.surface.preview.stops.length)}
-              </ScaledText>
+              <View
+                accessible={true}
+                accessibilityLabel={strings.stopsCount(state.surface.preview.stops.length)}
+                style={styles.factRow}
+                testID="preview-counts"
+              >
+                <CanonIcon glyph={MapPinIcon} label={strings.stopsLabel} />
+                <ScaledText style={styles.factRowLabel} testID="preview-counts-text">
+                  {strings.stopsCount(state.surface.preview.stops.length)}
+                </ScaledText>
+              </View>
             ) : null}
             {state.surface.preview.baseSizeBytes !== null ? (
               <ScaledText style={styles.fact} testID="preview-size">

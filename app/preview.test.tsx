@@ -9,6 +9,7 @@ import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, renderRouter, screen, within } from "expo-router/testing-library";
 import { act } from "@testing-library/react-native";
 import { Modal } from "react-native";
+import { Svg } from "react-native-svg";
 
 import Explore from "./(tabs)/explore";
 import My from "./(tabs)/my";
@@ -134,6 +135,15 @@ describe("guide preview surface (G06.01.b)", () => {
     // duration_min when both are published (AC1).
     expect(screen.getByText("Час: ад 45 да 75 хв")).toBeTruthy();
     expect(screen.getByText("Кропкі: 2")).toBeTruthy();
+    // G06.10.c (issue #403): the metadata row carries the icon layer — the
+    // clock beside the duration fact, the map-pin beside the stops count.
+    // Each row is one accessibility element announcing the fact once.
+    const durationRow = screen.getByTestId("preview-duration");
+    expect(durationRow.props.accessibilityLabel).toBe("Час: ад 45 да 75 хв");
+    expect(within(durationRow).UNSAFE_getByType(Svg).props.className).toBe("lucide lucide-clock");
+    const countsRow = screen.getByTestId("preview-counts");
+    expect(countsRow.props.accessibilityLabel).toBe("Кропкі: 2");
+    expect(within(countsRow).UNSAFE_getByType(Svg).props.className).toBe("lucide lucide-map-pin");
     expect(screen.getByText("Памер: 50 МБ")).toBeTruthy();
     expect(screen.getByText("Кропак бясплатна: 1")).toBeTruthy();
     // The paid start is disabled with its reason; pressing it starts no run
@@ -609,13 +619,15 @@ describe("guide preview font layer (G06.10.b)", () => {
     expect(flatStyle(title).fontFamily).toBe(tokens.fontFamilyDisplay);
     // The big-text multiplier applies to the new families (AC4).
     expect(title.props.maxFontSizeMultiplier).toBe(tokens.fontBigTextFactor);
-    const duration = screen.getByTestId("preview-duration");
-    expect(flatStyle(duration).fontFamily).toBe(tokens.fontFamilyUi);
+    // G06.10.c (issue #403): the fact's testID stays on the row (the one
+    // accessibility element); the font contract reads the fact TEXT inside it.
+    const durationText = screen.getByTestId("preview-duration-text");
+    expect(flatStyle(durationText).fontFamily).toBe(tokens.fontFamilyUi);
     // The Proof: pointing the mirror's UI family back to system-ui fails this
     // assertion directly — the surface consumes the mirror's named face, not
     // the fallback name.
-    expect(flatStyle(duration).fontFamily).not.toBe("system-ui");
-    expect(duration.props.maxFontSizeMultiplier).toBe(tokens.fontBigTextFactor);
+    expect(flatStyle(durationText).fontFamily).not.toBe("system-ui");
+    expect(durationText.props.maxFontSizeMultiplier).toBe(tokens.fontBigTextFactor);
     // Strong interface text takes the named 600 face of the UI family.
     expect(flatStyle(screen.getByText("Мытня")).fontFamily).toBe(tokens.fontFamilyUiStrong);
     // Body text (the stop's announce) renders the UI family too.

@@ -43,6 +43,11 @@ export interface UiStrings {
   readonly sizeMb: (mb: number) => string;
   readonly freeStopsCount: (count: number) => string;
   readonly stopNumber: (position: number) => string;
+  // The metadata-row icon words (G06.10.c, issue #403): the standalone
+  // screen-reader label the icon contract requires — the fact line next to
+  // the icon carries the value.
+  readonly durationLabel: string;
+  readonly stopsLabel: string;
   // The locked stop's badge word — the 🔒 never reads alone (AC1: the
   // screen-reader label is a word, the glyph is decoration).
   readonly locked: string;
@@ -87,6 +92,8 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
     sizeMb: (mb) => `Памер: ${mb} МБ`,
     freeStopsCount: (count) => `Кропак бясплатна: ${count}`,
     stopNumber: (position) => `Кропка ${position}`,
+    durationLabel: "Працягласць",
+    stopsLabel: "Кропкі",
     locked: "Зачынена",
     durationRange: (minMinutes, maxMinutes) => `Час: ад ${minMinutes} да ${maxMinutes} хв`,
     durationMinutes: (minutes) => `Час: ${minutes} хв`,
@@ -127,6 +134,8 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
     sizeMb: (mb) => `Size: ${mb} MB`,
     freeStopsCount: (count) => `Free stops: ${count}`,
     stopNumber: (position) => `Stop ${position}`,
+    durationLabel: "Duration",
+    stopsLabel: "Stops",
     locked: "Locked",
     durationRange: (minMinutes, maxMinutes) => `Time: ${minMinutes}–${maxMinutes} min`,
     durationMinutes: (minutes) => `Time: ${minutes} min`,

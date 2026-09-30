@@ -8,4 +8,13 @@ process.env.TZ = "America/Anchorage";
 module.exports = {
   preset: "jest-expo",
   testMatch: ["<rootDir>/app/**/*.test.tsx", "<rootDir>/components/**/*.test.tsx"],
+  // G06.10.c (issue #403): jest reads the "react-native" export condition,
+  // which hands lucide-react-native's deep icon imports their ESM .mjs build —
+  // an extension babel-jest's transform pattern never matches. The CJS build
+  // of the same glyph is a drop-in for the test run; Metro keeps the device
+  // bundle on the ESM condition. The guard is canon-icon.test.tsx itself:
+  // drop this mapping and the suite dies on the ESM parse error.
+  moduleNameMapper: {
+    "^lucide-react-native/icons/(.*)$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/icons/$1.js",
+  },
 };

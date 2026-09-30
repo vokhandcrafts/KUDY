@@ -25,6 +25,10 @@ tools/build-bundle/build/
 # G17.01.a: collector runtime database (default --db location), never tracked
 tools/collector/runtime/
 
+# G06.10.c: agent-session scratch (demo artifacts, captured logs — e.g. the
+# metro-smoke bundle the G06.10.c demo regenerates), never tracked
+.scratch/
+
 
 # G05.05.a: the showboat demo's temporary mutation copy of the source trees,
 # created and removed inside the demo block (implementation-rules 5: a source
