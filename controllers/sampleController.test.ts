@@ -41,7 +41,8 @@ test('criterion 2: without the port the root constructs no contentRepo (the app 
   // city-mode walk fact and the My KUDY history as the fifth and sixth
   // with G06.04, the nearby binding as the seventh with G07.01, the place
   // factory and the one moment controller as the eighth and ninth with
-  // G07.02; the display locale joined as the tenth member with G06.05).
+  // G07.02; the display locale joined as the tenth member with G06.05; the
+  // commerce factory as the eleventh with G08.05).
   assert.deepEqual(services, {
     locale: 'be',
     contentRepo: undefined,
@@ -53,6 +54,7 @@ test('criterion 2: without the port the root constructs no contentRepo (the app 
     nearby: undefined,
     place: undefined,
     moment: undefined,
+    commerce: undefined,
   });
 });
 

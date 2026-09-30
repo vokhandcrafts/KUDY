@@ -19,6 +19,8 @@ import { createServices } from "../controllers/createServices";
 import type { BundlesStore, Readiness } from "../services/contentRepo/types";
 import type { ActivationResult, LayerKey } from "../services/download/types";
 import { fixtureText, layoutWith, serve, sha256, CATALOG_FIXTURES, CATALOG_POINTER } from "../test/render-helpers";
+import type { CommerceEventRecord, CommercePort } from "../controllers/commerce/commerceController";
+import type { PurchaseOutcome } from "../services/entitlement/types";
 
 const STOP_PLACE_CATALOG_TEXT = fixtureText("catalog-discovery-stop-places.json");
 const STOP_PLACE_INDEX_TEXT = fixtureText("index-stop-places.json");
@@ -419,5 +421,169 @@ describe("G06.05 preview a11y and failure exits (issue #280)", () => {
     const button = await screen.findByTestId("btn-walk-mode");
     expect(button.props.accessibilityRole).toBe("button");
     expect(button.props.accessibilityLabel).toBe("Прагулка");
+  });
+});
+
+// G08.05 (issue #292) — the quiet commerce offer on the preview: the
+// impression follows the render fact, not the mount (AC3); the decline is
+// respected (AC4); repeated purchase errors keep both exits and the app
+// keeps working (AC2, `11` C28); the §8 words follow the finished store
+// leg; the absent port renders nothing (fail closed). The Run-surface
+// absence of the card is proven in app/run.test.tsx (C26).
+describe("G08.05 quiet commerce offer (issue #292)", () => {
+  function commerceRig(outcome: PurchaseOutcome = { kind: "store-problem", code: "E_STORE" }) {
+    const events: CommerceEventRecord[] = [];
+    const purchases: string[] = [];
+    // The port owns the state: only its own finished purchase answers paid —
+    // a failed attempt leaves the chain at not-owned (G08.04's criterion 1).
+    const succeeded = outcome.kind === "transaction-finished" || outcome.kind === "already-owned";
+    let purchased = false;
+    const commerce: CommercePort = {
+      stateOf: () => (purchased ? "paid" : "not-owned"),
+      purchase: async (productId) => {
+        purchases.push(productId);
+        if (succeeded) purchased = true;
+        return outcome;
+      },
+    };
+    const telemetry = { record: (event: CommerceEventRecord) => void events.push(event) };
+    return { events, purchases, commerce, telemetry };
+  }
+
+  // The render fact (AC3): RN dispatches onLayout after the actual layout —
+  // the test drives the same callback through the host props.
+  const fireLayout = (testID: string) => {
+    act(() => {
+      screen.getByTestId(testID).props.onLayout?.({
+        nativeEvent: { layout: { x: 0, y: 0, width: 100, height: 100 } },
+      });
+    });
+  };
+
+  test("the paid preview shows the quiet offer; the impression is the render fact (AC1, AC3)", async () => {
+    serve(CATALOG_FIXTURES);
+    const rig = commerceRig();
+    renderRouter(
+      withPreviewRoutes(
+        createServices({
+          catalogOrigin: "https://catalog.test",
+          catalogSha256: sha256,
+          commerce: rig.commerce,
+          events: rig.telemetry,
+        }),
+      ),
+      { initialUrl: "/route/guide-route-a1?from=rubric" },
+    );
+    expect(await screen.findByTestId("upgrade-offer")).toBeTruthy();
+    expect(screen.getByText("Купіць")).toBeTruthy();
+    expect(screen.getByText("Не цяпер")).toBeTruthy();
+    // The mount alone records nothing — the layout fact has not arrived.
+    expect(rig.events).toHaveLength(0);
+    fireLayout("upgrade-offer");
+    fireLayout("upgrade-offer");
+    const shown = rig.events.filter((event) => event.type === "extension_offer_shown");
+    expect(shown).toHaveLength(1);
+    expect(shown[0].route_id).toBe("guide-route-a1");
+    expect(typeof shown[0].offer_id).toBe("string");
+    expect(shown[0].schema_version).toBe(1);
+  });
+
+  test("the decline is respected: the card is gone and buys nothing (AC4)", async () => {
+    serve(CATALOG_FIXTURES);
+    const rig = commerceRig();
+    renderRouter(
+      withPreviewRoutes(
+        createServices({
+          catalogOrigin: "https://catalog.test",
+          catalogSha256: sha256,
+          commerce: rig.commerce,
+          events: rig.telemetry,
+        }),
+      ),
+      { initialUrl: "/route/guide-route-a1" },
+    );
+    await screen.findByTestId("upgrade-offer");
+    fireLayout("upgrade-offer");
+    fireEvent.press(screen.getByTestId("btn-upgrade-dismiss"));
+    expect(screen.queryByTestId("upgrade-offer")).toBeNull();
+    // The re-sync the screen runs per surface change brings nothing back;
+    // the store was never called.
+    await act(async () => {});
+    expect(screen.queryByTestId("upgrade-offer")).toBeNull();
+    expect(rig.purchases).toHaveLength(0);
+  });
+
+  test("repeated errors keep both exits; Continue free returns to the working offer (AC2, C28)", async () => {
+    serve(CATALOG_FIXTURES);
+    const rig = commerceRig();
+    renderRouter(
+      withPreviewRoutes(
+        createServices({
+          catalogOrigin: "https://catalog.test",
+          catalogSha256: sha256,
+          commerce: rig.commerce,
+          events: rig.telemetry,
+        }),
+      ),
+      { initialUrl: "/route/guide-route-a1" },
+    );
+    fireEvent.press(await screen.findByTestId("btn-upgrade-buy"));
+    expect(await screen.findByTestId("purchase-error-dialog")).toBeTruthy();
+    expect(screen.getByText("Пакупка не скончылася")).toBeTruthy();
+    // Both exits of C28 — and they return with the second error too.
+    expect(screen.getByTestId("btn-purchase-retry")).toBeTruthy();
+    expect(screen.getByTestId("btn-purchase-continue-free")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("btn-purchase-retry"));
+    await screen.findByTestId("purchase-error-dialog");
+    expect(screen.getByTestId("btn-purchase-retry")).toBeTruthy();
+    expect(screen.getByTestId("btn-purchase-continue-free")).toBeTruthy();
+    // Continue free: the dialog closes, the app stays on the preview with
+    // the quiet offer, no point and no state lost.
+    fireEvent.press(screen.getByTestId("btn-purchase-continue-free"));
+    expect(screen.queryByTestId("purchase-error-dialog")).toBeNull();
+    expect(screen.getByTestId("upgrade-offer")).toBeTruthy();
+    expect(rig.purchases).toHaveLength(2);
+    const failed = rig.events.filter((event) => event.type === "purchase_failed");
+    expect(failed).toHaveLength(2);
+    for (const event of failed) expect(event.reason).toBe("payment_failed");
+  });
+
+  test("the finished purchase shows the §8 words and the offer never returns", async () => {
+    serve(CATALOG_FIXTURES);
+    const rig = commerceRig({ kind: "transaction-finished", productId: "route_a1_prod" });
+    renderRouter(
+      withPreviewRoutes(
+        createServices({
+          catalogOrigin: "https://catalog.test",
+          catalogSha256: sha256,
+          commerce: rig.commerce,
+          events: rig.telemetry,
+        }),
+      ),
+      { initialUrl: "/route/guide-route-a1" },
+    );
+    fireEvent.press(await screen.findByTestId("btn-upgrade-buy"));
+    expect(await screen.findByTestId("preview-purchased-pending")).toBeTruthy();
+    expect(screen.getByText("Куплена · трэба загрузіць")).toBeTruthy();
+    expect(screen.queryByTestId("upgrade-offer")).toBeNull();
+    const started = rig.events.filter((event) => event.type === "purchase_started");
+    expect(started).toHaveLength(1);
+    // The join rule: the purchase came from the offer — the started event
+    // carries its offer_id.
+    const accepted = rig.events.find((event) => event.type === "extension_offer_accepted");
+    expect(started[0].offer_id).toBe(accepted?.offer_id);
+    expect(rig.events.some((event) => event.type === "purchase_succeeded")).toBe(true);
+  });
+
+  test("without the commerce port the paid preview renders no offer (fail closed)", async () => {
+    serve(CATALOG_FIXTURES);
+    renderRouter(
+      withPreviewRoutes(
+        createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 }),
+      ),
+      { initialUrl: "/route/guide-route-a1" },
+    );
+    expect(await screen.findByText("патрэбна пакупка")).toBeTruthy();
+    expect(screen.queryByTestId("upgrade-offer")).toBeNull();
   });
 });

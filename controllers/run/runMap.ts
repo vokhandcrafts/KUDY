@@ -122,6 +122,9 @@ export function runMapView(
 // the app's first preference).
 export interface RunMapStrings {
   readonly status: Record<StopStatus, string>;
+  // G08.05 (AC5, 11 §16.4): the locked card's honest next step — available
+  // after purchase, no content revealed.
+  readonly lockedHint: string;
   readonly pausedTitle: string;
   readonly resume: string;
   // The session menu of 11 §4.2/§4.3 (G06.04): the whole-walk pause and the
@@ -206,6 +209,7 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
       pending: 'чакае',
       locked: 'зачынена',
     },
+    lockedHint: 'Даступна пасля куплі',
     pausedTitle: 'Прагулка прыпынена',
     resume: 'Працягнуць',
     pauseWalk: 'Прыпыніць прагулку',
@@ -264,6 +268,7 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
       pending: 'pending',
       locked: 'locked',
     },
+    lockedHint: 'Available after purchase',
     pausedTitle: 'Walk paused',
     resume: 'Resume',
     pauseWalk: 'Pause the walk',

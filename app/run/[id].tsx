@@ -691,6 +691,14 @@ export default function Run() {
               <View style={styles.preview} testID="run-preview">
                 <ScaledText style={styles.previewName}>{inspectedMarker.name}</ScaledText>
                 <ScaledText style={styles.previewStatus}>{strings.status[inspectedMarker.status]}</ScaledText>
+                {inspectedMarker.status === "locked" ? (
+                  // G08.05 (AC5, 11 §16.4): the honest locked state —
+                  // available after purchase, never a content reveal
+                  // (NAV5/N7); no commerce action lives on the Run surface.
+                  <ScaledText style={styles.previewStatus} testID="run-locked-hint">
+                    {strings.lockedHint}
+                  </ScaledText>
+                ) : null}
                 {/* G06.05 (AC4): the manual play — the GPS-denied row's exit
                     (11 §7: every story plays by hand). The button renders
                     only for a story the engine would actually launch; the

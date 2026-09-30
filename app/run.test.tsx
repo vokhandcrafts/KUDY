@@ -281,6 +281,33 @@ describe("run map surface", () => {
     expect(audioPort.commands).toEqual([]);
   });
 
+  // G08.05 (AC5, 11 §16.4): the locked card states the honest next step —
+  // available after purchase — and nothing else: no story text, no
+  // transcript, no commerce action (NAV5/N7; the extended story's text is
+  // not in the free package at all, so there is nothing to leak).
+  test("G08.05 AC5: the locked card keeps the honest available-after-purchase state", async () => {
+    await mountedRunBe();
+    fireEvent.press(screen.getByTestId("run-marker-stop-3"));
+    expect(screen.getByTestId("run-preview")).toBeTruthy();
+    expect(screen.getByTestId("run-locked-hint")).toBeTruthy();
+    expect(screen.getByText("Даступна пасля куплі")).toBeTruthy();
+    // No commerce on the Run surface (C26) and no play for the locked point.
+    expect(screen.queryByTestId("upgrade-offer")).toBeNull();
+    expect(screen.queryByTestId("btn-card-play")).toBeNull();
+  });
+
+  // G08.05 (AC1, `11` C26): «у Run яна не паказваецца ў Peek або падчас
+  // аўдыё» — the offer's only home is the preview; while the walk's audio
+  // sounds, no commerce renders anywhere on the surface, panel open or not.
+  test("G08.05 AC1/C26: no quiet offer anywhere under sounding audio", async () => {
+    const world = makeRunSession();
+    await mountedRunSoundingStop2(world);
+    expect(screen.queryAllByTestId("upgrade-offer")).toEqual([]);
+    fireEvent.press(screen.getByTestId("run-marker-stop-3"));
+    expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+    expect(screen.queryAllByTestId("upgrade-offer")).toEqual([]);
+  });
+
   test("AC5: the words follow the walk's pinned locale, with screen-reader labels", async () => {
     const { session } = makeRunSession();
     const services = createServices({ bundlesStore: memoryBundles(layerFiles("en")), run: { session } });

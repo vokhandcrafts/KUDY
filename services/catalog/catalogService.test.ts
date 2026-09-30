@@ -681,6 +681,7 @@ describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
       localesKnown: false,
       access: 'free' as const,
       routeAccess: 'free_base' as const,
+      productId: null,
       estimatedDuration: null,
       durationMin: 35,
       freeStopCount: null,

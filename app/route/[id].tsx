@@ -8,15 +8,19 @@
 // the preview was opened from (NAV9) — expo-router's stack pop, with the
 // recorded source kept in the controller state.
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import {
+  offerStrings,
+} from "../../controllers/commerce/commerceController";
 import {
   previewReasonText,
   previewStrings,
 } from "../../controllers/catalog/previewController";
 import { usePreviewController } from "../../controllers/catalog/usePreviewController";
+import { useStoreState } from "../../controllers/useControllerStore";
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
 import { AccessBadge, LocalesLine, StateBanner } from "../../components/guide-card";
@@ -30,6 +34,7 @@ import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
 import { screenStyles } from "../../components/screen-styles";
 import { uiStrings } from "../../components/ui-strings";
+import { UpgradeOffer } from "../../components/upgrade-offer";
 import { WalkButton } from "../../components/walk-button";
 import { useServices } from "../_layout";
 
@@ -132,6 +137,14 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
+  // G08.05: the §8 state line after the store leg finished — «Куплена ·
+  // трэба загрузіць», the muted honest fact under the description.
+  purchasedPending: {
+    color: tokens.colorMuted,
+    fontSize: tokens.fontBaseSize,
+    marginBottom: tokens.spaceM,
+    marginTop: tokens.spaceS,
+  },
 });
 
 export default function RoutePreview() {
@@ -140,6 +153,15 @@ export default function RoutePreview() {
   const services = useServices();
   const routeId = typeof id === "string" && id.length > 0 ? id : "";
   const controller = usePreviewController(routeId ? services.preview : undefined, routeId);
+  // G08.05 (issue #292): the commerce controller per opened route (the
+  // preview idiom). Absent without the commerce port — the preview renders
+  // no offer, the fail-closed rule of every optional service member.
+  const commerceStore = useMemo(
+    () => (routeId && services.commerce ? services.commerce.create(routeId) : undefined),
+    [services.commerce, routeId],
+  );
+  const commerce = useStoreState(commerceStore);
+  const ostrings = offerStrings(services.locale);
   useEffect(() => {
     // NAV9: the opening records its source surface; an unrecognized value
     // records nothing (no unvalidated echo, 21 §3.2).
@@ -154,6 +176,15 @@ export default function RoutePreview() {
   // display locale (the button's codes live in the controller).
   const strings = uiStrings(services.locale);
   const pstrings = previewStrings(services.locale);
+  // G08.05: the load fact the offer derivation consumes — the access kind
+  // and the route document's product_id_route. Called per surface change;
+  // the derivation is idempotent.
+  const readyPreview = controller?.surface.kind === "ready" ? controller.surface.preview : null;
+  useEffect(() => {
+    if (commerce && readyPreview) {
+      commerce.sync({ access: readyPreview.access, productId: readyPreview.productId });
+    }
+  }, [commerce, readyPreview]);
   const formatDuration = (
     estimated: { min_minutes: number; max_minutes: number } | null,
     durationMin: number | null,
@@ -284,6 +315,32 @@ export default function RoutePreview() {
                 ) : null}
               </View>
             ) : null}
+            {commerce?.offer === "offered" ? (
+              // G08.05 (AC1): the quiet offer at the bottom of the
+              // description (11 C26) — available before the first listen,
+              // never rendered on the Run surface. The card buys nothing
+              // (D06/NAV6): the Buy press inside is the separate explicit
+              // action, and the layout callback is the impression fact
+              // (AC3), never the mount alone.
+              <UpgradeOffer
+                title={ostrings.offerTitle}
+                body={ostrings.offerBody}
+                buyLabel={ostrings.buy}
+                dismissLabel={ostrings.dismiss}
+                busy={commerce.busy}
+                onBuy={() => void commerce.buy()}
+                onDismiss={() => commerce.dismiss()}
+                onRendered={() => commerce.markRendered()}
+              />
+            ) : null}
+            {commerce?.offer === "paid" ? (
+              // G08.05: the `11` §8 verbatim state after the store leg —
+              // «Куплена · трэба загрузіць», the honest store fact; the
+              // server grant still decides the right (09 §5.1).
+              <ScaledText style={styles.purchasedPending} testID="preview-purchased-pending">
+                {ostrings.purchasedPending}
+              </ScaledText>
+            ) : null}
             {state.surface.preview.stops ? (
               <View style={styles.stops} testID="preview-stops">
                 {state.surface.preview.stops.map((stop) => (
@@ -364,6 +421,26 @@ export default function RoutePreview() {
             label={strings.cancel}
             onPress={() => state.cancelConfirm()}
             testID="btn-confirm-cancel"
+          />
+        </ModalDialog>
+      ) : null}
+      {commerce?.attempt.kind === "error" ? (
+        // G08.05 (AC2, 11 C28): «Памылка пакупкі пакідае абодва выхады —
+        // Try again і Continue free — і не губляе кропку». A real modal
+        // like the §4.1 dialog (UX 06); both exits render for every error
+        // and the system Back runs Continue free.
+        <ModalDialog onRequestClose={commerce.continueFree} testID="purchase-error-dialog">
+          <ScaledText style={styles.confirmText}>{ostrings.errorTitle}</ScaledText>
+          <ScaledText style={styles.confirmText}>{ostrings.errorBody}</ScaledText>
+          <ModalDialogAccept
+            label={ostrings.tryAgain}
+            onPress={() => void commerce.tryAgain()}
+            testID="btn-purchase-retry"
+          />
+          <ModalDialogCancel
+            label={ostrings.continueFree}
+            onPress={commerce.continueFree}
+            testID="btn-purchase-continue-free"
           />
         </ModalDialog>
       ) : null}
