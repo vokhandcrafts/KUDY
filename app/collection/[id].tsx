@@ -141,6 +141,13 @@ export default function Collection() {
     ready !== null && collectionId !== undefined
       ? ready.index.collections.find((candidate) => candidate.collection_id === collectionId) ?? null
       : null;
+  // A remount is a new foreground presentation of the surface (21 §7) — the
+  // controller restarts its per-presentation shown dedupe with it. The
+  // services construct before the first render, so the first state is final.
+  useEffect(() => {
+    if (state !== null) state.beginPresentation("collection");
+    // Runs once per mount by design: the presentation boundary.
+  }, []);
   // The member cards' shown events (surface «collection») — the same
   // allowlisted payload, deduped by the controller.
   useEffect(() => {

@@ -241,6 +241,13 @@ export default function Discovery() {
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4).
   const insets = useSafeAreaInsets();
+  // A remount is a new foreground presentation of the surface (21 §7) — the
+  // controller restarts its per-presentation shown dedupe with it. The
+  // services construct before the first render, so the first state is final.
+  useEffect(() => {
+    if (state !== null) state.beginPresentation("discovery");
+    // Runs once per mount by design: the presentation boundary.
+  }, []);
   // The shown event fires for the offers actually rendered; the controller
   // dedupes per surface presentation (21 §7: shown once per foreground view).
   useEffect(() => {

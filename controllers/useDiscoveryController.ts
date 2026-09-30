@@ -40,7 +40,8 @@ export const SEASONS: readonly DiscoverySeason[] = ['spring', 'summer', 'autumn'
 
 // The event payload allowlist is exact (event-table.v1.json
 // «exact-discovery-payload»): these five fields, nothing else — and no
-// time_bucket, which the table marks decision-required.
+// time_bucket, which the table lists as optional and this release does not
+// wire.
 export interface DiscoveryOfferEvent {
   readonly discovery_revision: string;
   readonly offer_id: string;
@@ -103,6 +104,10 @@ export interface DiscoveryControllerState {
   setSeason(season: DiscoverySeason | null): void;
   showAlternatives(): void;
   refresh(): Promise<void>;
+  // A remount (or any re-entry) is a new foreground presentation of the
+  // surface (21 §7: shown is credited once per offer per presentation) — the
+  // per-presentation dedupe restarts with it.
+  beginPresentation(surface: 'discovery' | 'collection'): void;
   recordShown(offers: readonly DiscoveryOffer[], surface: 'discovery' | 'collection'): void;
   recordOpened(offer: DiscoveryOffer, surface: 'discovery' | 'collection'): void;
 }
@@ -225,6 +230,16 @@ export function createDiscoveryController(deps: DiscoveryDeps): ControllerStore<
 
       showAlternatives: () => set({ alternativesShown: true }),
 
+      beginPresentation: (surface) => {
+        // The shown keys are `revision:surface:offer_id`; the revision and the
+        // offer id carry no colon (SAFE_ID), so the middle segment identifies
+        // the surface — dropping its keys restarts the per-presentation
+        // dedupe.
+        for (const key of shown) {
+          if (key.includes(`:${surface}:`)) shown.delete(key);
+        }
+      },
+
       refresh: async () => {
         const run = ++seq;
         if (get().surface.kind !== 'loading') set({ refreshing: true });
@@ -242,7 +257,10 @@ export function createDiscoveryController(deps: DiscoveryDeps): ControllerStore<
           // The event kind enum is guide | place — a collection offer has no
           // shown/opened event in this release (event-table.v1.json).
           if (offer.ref.kind !== 'guide' && offer.ref.kind !== 'place') continue;
-          const key = `${surface}:${offer.offer_id}`;
+          // The key carries the revision: a refresh delivering a new revision
+          // is a new content presentation — the same offer re-emits with the
+          // revision it was shown under (21 §7).
+          const key = `${state.surface.revision}:${surface}:${offer.offer_id}`;
           if (shown.has(key)) continue;
           shown.add(key);
           analytics.offerShown({

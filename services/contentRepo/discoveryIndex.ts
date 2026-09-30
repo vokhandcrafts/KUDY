@@ -61,6 +61,77 @@ const MAX_MEMBERS = 50;
 // 21 §3.2 identifiers and revision: ≤ 64 chars of [a-z0-9._-].
 const SAFE_ID = /^[a-z0-9._-]{1,64}$/;
 
+const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
+const ACCESS_VALUES = ['free', 'paid', 'mixed'];
+
+// A non-empty localized map (21 §3.2 LocalizedText): at least one published
+// string — the display pick falls back to "any published text", which needs
+// one to exist.
+function isLocalizedText(value: unknown): value is Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const texts = Object.values(value);
+  return texts.length > 0 && texts.every((text) => typeof text === 'string' && text.length > 0);
+}
+
+function isSafeId(value: unknown): value is string {
+  return typeof value === 'string' && SAFE_ID.test(value);
+}
+
+function isNonEmptyBounded(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0 && value.length <= 64;
+}
+
+// The ref kinds the contract names (21 §3.2): the kind's own id is a SAFE_ID
+// (it interpolates into surface hrefs), the version pair is a bounded string
+// (disk paths re-check it through isSafeSegment at the download boundary).
+function isOfferRef(value: unknown): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const ref = value as Record<string, unknown>;
+  if (ref.kind === 'guide') return isSafeId(ref.route_id) && isNonEmptyBounded(ref.version);
+  if (ref.kind === 'place') return isSafeId(ref.place_id) && isNonEmptyBounded(ref.content_version);
+  if (ref.kind === 'collection') return isSafeId(ref.collection_id) && isNonEmptyBounded(ref.content_version);
+  return false;
+}
+
+// The element shapes the surfaces read directly (localized pick, badges,
+// locale lines, control derivation): a pin-valid index with a corrupt element
+// answers with a named rule here instead of throwing in a render or in the
+// fire-and-forget boot (implementation-rules 14 — diagnostics, never a
+// crash). Fields the selector fail-closes on per offer stay the selector's
+// own gate (G15.01).
+function isOfferShape(offer: unknown): boolean {
+  if (!offer || typeof offer !== 'object' || Array.isArray(offer)) return false;
+  const o = offer as Record<string, unknown>;
+  if (!isSafeId(o.offer_id) || !isOfferRef(o.ref)) return false;
+  if (typeof o.city_id !== 'string' || o.city_id.length === 0) return false;
+  if (typeof o.editorial_order !== 'number' || !Number.isFinite(o.editorial_order)) return false;
+  if (!Array.isArray(o.themes) || !o.themes.every((theme) => typeof theme === 'string')) return false;
+  if (!Array.isArray(o.season_recommendations)) return false;
+  for (const recommendation of o.season_recommendations) {
+    if (!recommendation || typeof recommendation !== 'object' || Array.isArray(recommendation)) return false;
+    const rec = recommendation as Record<string, unknown>;
+    if (typeof rec.season !== 'string' || !SEASONS.includes(rec.season)) return false;
+    if (!isLocalizedText(rec.reason)) return false;
+  }
+  if (!o.localized || typeof o.localized !== 'object' || Array.isArray(o.localized)) return false;
+  if (!isLocalizedText((o.localized as Record<string, unknown>).title)) return false;
+  if (!o.availability || typeof o.availability !== 'object' || Array.isArray(o.availability)) return false;
+  const availability = o.availability as Record<string, unknown>;
+  if (!Array.isArray(availability.text_locales) || !availability.text_locales.every((l) => typeof l === 'string')) {
+    return false;
+  }
+  if (!Array.isArray(availability.audio_locales) || !availability.audio_locales.every((l) => typeof l === 'string')) {
+    return false;
+  }
+  return ACCESS_VALUES.includes(o.access as string);
+}
+
+function isThemeShape(theme: unknown): boolean {
+  if (!theme || typeof theme !== 'object' || Array.isArray(theme)) return false;
+  const t = theme as Record<string, unknown>;
+  return isSafeId(t.id) && isLocalizedText(t.labels);
+}
+
 function validateIndex(doc: unknown): { ok: true; index: DiscoveryIndexV1 } | { ok: false; rule: string } {
   if (!doc || typeof doc !== 'object' || Array.isArray(doc)) return { ok: false, rule: 'index-type' };
   const v = doc as Record<string, unknown>;
@@ -70,13 +141,22 @@ function validateIndex(doc: unknown): { ok: true; index: DiscoveryIndexV1 } | { 
   if (typeof v.revision !== 'string' || !SAFE_ID.test(v.revision)) return { ok: false, rule: 'index-revision' };
   if (typeof v.city_id !== 'string' || v.city_id.length === 0) return { ok: false, rule: 'index-city' };
   if (!Array.isArray(v.themes) || v.themes.length > MAX_THEMES) return { ok: false, rule: 'index-themes' };
+  for (const theme of v.themes) {
+    if (!isThemeShape(theme)) return { ok: false, rule: 'index-theme-shape' };
+  }
   if (!Array.isArray(v.offers) || v.offers.length > MAX_OFFERS) return { ok: false, rule: 'index-offers-limit' };
+  for (const offer of v.offers) {
+    if (!isOfferShape(offer)) return { ok: false, rule: 'index-offer-shape' };
+  }
   if (!Array.isArray(v.collections) || v.collections.length > MAX_COLLECTIONS) {
     return { ok: false, rule: 'index-collections-limit' };
   }
   for (const collection of v.collections) {
     if (!collection || typeof collection !== 'object' || Array.isArray(collection)) {
       return { ok: false, rule: 'index-collection-type' };
+    }
+    if (!isSafeId((collection as Record<string, unknown>).collection_id)) {
+      return { ok: false, rule: 'index-collection-shape' };
     }
     const members = (collection as { members?: unknown }).members;
     if (!Array.isArray(members) || members.length > MAX_MEMBERS) {

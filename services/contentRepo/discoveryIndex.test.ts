@@ -190,6 +190,26 @@ describe('loadDiscoveryIndex — faults keep the last valid snapshot', () => {
     assert.ok(state.kind === 'ready' && state.stale === true && state.reason === 'index-offers-limit');
   });
 
+  it('a pin-valid index with a corrupt theme element answers index-theme-shape, never throws', async () => {
+    const broken = JSON.parse(VALID_INDEX) as { themes: unknown[] };
+    broken.themes = [null, ...broken.themes];
+    const catalog = await catalogPinning(JSON.stringify(broken));
+    const state = await loadDiscoveryIndex(
+      depsFromPaths({ 'catalog.json': catalog, [POINTER_PATH]: JSON.stringify(broken) }, memorySnapshot()),
+    );
+    assert.ok(state.kind === 'unavailable' && state.reason === 'index-theme-shape');
+  });
+
+  it('a pin-valid index with a malformed offer element answers index-offer-shape, never throws', async () => {
+    const broken = JSON.parse(VALID_INDEX) as { offers: Array<Record<string, unknown>> };
+    delete broken.offers[0].availability;
+    const catalog = await catalogPinning(JSON.stringify(broken));
+    const state = await loadDiscoveryIndex(
+      depsFromPaths({ 'catalog.json': catalog, [POINTER_PATH]: JSON.stringify(broken) }, memorySnapshot()),
+    );
+    assert.ok(state.kind === 'unavailable' && state.reason === 'index-offer-shape');
+  });
+
   it('a corrupt snapshot answers unavailable instead of rendering garbage', async () => {
     const snapshot = memorySnapshot(new TextEncoder().encode('{half-written'));
     const state = await loadDiscoveryIndex(depsFromPaths({}, snapshot));

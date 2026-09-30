@@ -198,6 +198,26 @@ describe('useDiscoveryController — analytics allowlist (event-table.v1.json)',
     assert.equal(spy.shown[2].surface, 'collection');
   });
 
+  it('a remount (beginPresentation) re-emits shown for the same revision, scoped to its surface', async () => {
+    const spy = analyticsSpy();
+    const controller = controllerOver({ 'catalog.json': CATALOG, [POINTER]: INDEX }, memorySnapshot(), spy.port);
+    const state = await booted(controller);
+    assert.ok(state.surface.kind === 'ready');
+    const offers = offersById(state.surface.index);
+    const batch = [offers.get('offer-b1-guide')!, offers.get('offer-a1-place')!];
+    controller.getState().recordShown(batch, 'discovery');
+    controller.getState().recordShown(batch, 'collection');
+    assert.equal(spy.shown.length, 4);
+    // The remount restarts only its own surface's per-presentation dedupe
+    // (21 §7: shown once per offer per foreground presentation); the same
+    // revision re-emits because the key carries it.
+    controller.getState().beginPresentation('discovery');
+    controller.getState().recordShown(batch, 'discovery');
+    assert.equal(spy.shown.length, 6);
+    controller.getState().recordShown(batch, 'discovery');
+    assert.equal(spy.shown.length, 6);
+  });
+
   it('opened carries the exact allowlisted payload for the tapped offer', async () => {
     const spy = analyticsSpy();
     const controller = controllerOver({ 'catalog.json': CATALOG, [POINTER]: INDEX }, memorySnapshot(), spy.port);
