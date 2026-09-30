@@ -34,6 +34,10 @@ import { WalkButton } from "../../components/walk-button";
 import { useServices } from "../_layout";
 
 const styles = StyleSheet.create({
+  // G06.10.b: the interface text renders the UI family (canon §3, Golos
+  // Text); the strong styles take the named 600 face. While the faces load
+  // (and in tests without them) the unknown family names fall back to the
+  // system font — weights and sizes hold.
   // G06.05 (AC4): the download banner's named retry and the storage exit —
   // a failed download is never a dead end.
   downloadRetry: {
@@ -47,15 +51,18 @@ const styles = StyleSheet.create({
   },
   downloadRetryLabel: {
     color: tokens.colorAccent,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
   },
   summary: {
     color: tokens.colorMuted,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
   fact: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginTop: tokens.spaceS,
   },
@@ -72,16 +79,19 @@ const styles = StyleSheet.create({
   },
   stopName: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUiStrong,
     fontSize: tokens.fontBaseSize,
     fontWeight: tokens.fontWeightStrong,
   },
   stopPlace: {
     color: tokens.colorMuted,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: 12,
     marginTop: 2,
   },
   stopAnnounce: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginTop: tokens.spaceS,
   },
@@ -96,6 +106,7 @@ const styles = StyleSheet.create({
   },
   lockBadgeText: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: 12,
   },
   mainButton: {
@@ -110,25 +121,30 @@ const styles = StyleSheet.create({
   },
   mainButtonLabel: {
     color: tokens.colorAccentInk,
+    fontFamily: tokens.fontFamilyUiStrong,
     fontSize: tokens.fontBaseSize,
     fontWeight: tokens.fontWeightStrong,
   },
   buttonReason: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginTop: tokens.spaceS,
   },
   buttonDetail: {
     color: tokens.colorMuted,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: 12,
     marginTop: 2,
   },
   unavailable: {
     color: tokens.colorMuted,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
   },
   confirmText: {
     color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUi,
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },

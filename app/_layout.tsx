@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { createContext, useContext, useMemo } from "react";
 import { createServices, type ServicePorts, type Services } from "../controllers/createServices";
+import { useAppFonts } from "../components/fonts";
 
 // Device ports: adapters arrive with their owning tasks (G05.02.c location,
 // G05.03.b audio, TR-10 filesystem); until then the app build passes the
@@ -33,6 +34,9 @@ export function useServices(): Services {
 
 export default function RootLayout() {
   const services = useMemo(() => createServices(devicePorts), []);
+  // G06.10.b: the approved families load once here, ungated — surfaces render
+  // their system-ui fallback while loading and never wait for the faces.
+  useAppFonts();
   return (
     <ServicesContext.Provider value={services}>
       {/* UX 02 (issue #348): the native header is off — it printed raw route

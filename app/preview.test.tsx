@@ -18,7 +18,7 @@ import { tokens } from "../components/design-tokens";
 import { createServices } from "../controllers/createServices";
 import type { BundlesStore, Readiness } from "../services/contentRepo/types";
 import type { ActivationResult, LayerKey } from "../services/download/types";
-import { fixtureText, layoutWith, serve, sha256, CATALOG_FIXTURES, CATALOG_POINTER } from "../test/render-helpers";
+import { fixtureText, flatStyle, layoutWith, serve, sha256, CATALOG_FIXTURES, CATALOG_POINTER } from "../test/render-helpers";
 
 const STOP_PLACE_CATALOG_TEXT = fixtureText("catalog-discovery-stop-places.json");
 const STOP_PLACE_INDEX_TEXT = fixtureText("index-stop-places.json");
@@ -419,5 +419,41 @@ describe("G06.05 preview a11y and failure exits (issue #280)", () => {
     const button = await screen.findByTestId("btn-walk-mode");
     expect(button.props.accessibilityRole).toBe("button");
     expect(button.props.accessibilityLabel).toBe("Прагулка");
+  });
+});
+
+describe("guide preview font layer (G06.10.b)", () => {
+  test("the title renders the display family and the metadata/body the UI family, through the token mirror (AC1, AC4)", async () => {
+    // jest-expo loads no font files: the assertions below run against the
+    // not-yet-loaded faces — the readable render is the system-ui fallback
+    // (AC4), the family values are the mirror's, never hardcoded strings.
+    serve(CATALOG_FIXTURES);
+    renderRouter(
+      withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
+      { initialUrl: "/route/guide-route-a1?from=rubric" },
+    );
+    const title = await screen.findByText("Гісторыі сукнараў: ад мытні да порта");
+    expect(flatStyle(title).fontFamily).toBe(tokens.fontFamilyDisplay);
+    // The big-text multiplier applies to the new families (AC4).
+    expect(title.props.maxFontSizeMultiplier).toBe(tokens.fontBigTextFactor);
+    const duration = screen.getByTestId("preview-duration");
+    expect(flatStyle(duration).fontFamily).toBe(tokens.fontFamilyUi);
+    // The Proof: pointing the mirror's UI family back to system-ui fails this
+    // assertion directly — the surface consumes the mirror's named face, not
+    // the fallback name.
+    expect(flatStyle(duration).fontFamily).not.toBe("system-ui");
+    expect(duration.props.maxFontSizeMultiplier).toBe(tokens.fontBigTextFactor);
+    // Strong interface text takes the named 600 face of the UI family.
+    expect(flatStyle(screen.getByText("Мытня")).fontFamily).toBe(tokens.fontFamilyUiStrong);
+    // Body text (the stop's announce) renders the UI family too.
+    expect(flatStyle(screen.getByText("Першая гісторыя маршруту сукнараў.")).fontFamily).toBe(
+      tokens.fontFamilyUi,
+    );
+  });
+
+  test("the dragon-voice token resolves to the Caveat family (AC3)", () => {
+    // The face is loaded by the root (components/fonts.ts); its first
+    // interface surface is the dragon hint card (G07.04) — not this task.
+    expect(tokens.fontFamilyDragon.startsWith("Caveat")).toBe(true);
   });
 });
