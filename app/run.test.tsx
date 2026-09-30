@@ -18,6 +18,13 @@ import type { BundlesStore, Readiness, Tier } from "../services/contentRepo/type
 import { FakeLocationOsPort } from "../services/location/fake-port";
 import { flatStyle, layoutWith, makeRunSession } from "../test/render-helpers";
 import { tokens } from "../components/design-tokens";
+import * as Reanimated from "react-native-reanimated";
+
+// G06.10.f (issue #406): the reduce-motion seam — the controllable stub of
+// the jest stand-in (test/reanimated-mock.js), read live by the component.
+const reducedMotionStub = Reanimated.useReducedMotion as unknown as {
+  mockReturnValue: (value: boolean) => void;
+};
 
 // UX 02 (issue #348): the frame's insets are pinned to the same fake the
 // safe-area guard uses — the panel's bottom padding assertions below read
@@ -813,5 +820,67 @@ describe("Run paper grain (G06.10.e)", () => {
     // the layer on Run.
     expect(screen.queryByTestId("paper-grain")).toBeNull();
     expect(screen.queryByTestId("paper-grain", { includeHiddenElements: true })).toBeNull();
+  });
+});
+
+// G06.10.f (issue #406) — the living progress: the bar's fill eases to each
+// new value on the reanimated base, and with the system reduce-motion
+// setting on (the stand-in's stub here, the base's system-aware mode on
+// device) it lands instantly. The drive is the G06.03 one — an honest
+// snapshot from the fake port — with the bar kept mounted through a pause
+// press, the re-render the effect needs (a card tap would unmount the bar
+// and the remount would land at its own value, by design).
+
+// One progress change, landed on the mounted bar: the fake port's snapshot
+// is rewritten to the honest offset (stop-2's 6s source) and a bar press
+// re-renders the strip — the press flips the play/pause label, which is the
+// wait the re-render is anchored to.
+async function landProgress(
+  audioPort: ReturnType<typeof makeRunSession>["audioPort"],
+  positionMs: number,
+  barLabel: string,
+): Promise<void> {
+  audioPort.snapshotValue = { state: "playing", positionMs, durationMs: 6000 };
+  fireEvent.press(screen.getByTestId("btn-bar-playpause"));
+  await waitFor(() => expect(within(screen.getByTestId("btn-bar-playpause")).getByText(barLabel)).toBeTruthy());
+}
+
+describe("G06.10.f live walk progress (issue #406)", () => {
+  afterEach(() => {
+    reducedMotionStub.mockReturnValue(false);
+    jest.restoreAllMocks();
+  });
+
+  // AC1: a change eases — withTiming carries the shared pace; reverting the
+  // fill to the static percent-width style turns this red (the Proof).
+  test("AC1: the bar's fill eases to each new value — withTiming carries the pace", async () => {
+    const { locationPort, audioPort, advance } = await mountedRunBe();
+    const spy = jest.spyOn(Reanimated, "withTiming");
+    await soundStop2({ locationPort, advance });
+    spy.mockClear();
+
+    await landProgress(audioPort, 1500, "Граць");
+    expect(spy).toHaveBeenCalledWith(25, expect.objectContaining({ duration: 400 }));
+
+    await landProgress(audioPort, 4500, "Паўза");
+    expect(spy).toHaveBeenCalledWith(75, expect.objectContaining({ duration: 400 }));
+    // The stand-in lands animations instantly, so the final-state assertion
+    // reads the eased-to value right off the mounted strip.
+    expect(flatStyle(screen.getByTestId("run-bar-progress-fill")).width).toBe("75%");
+  });
+
+  // AC2: with reduce-motion on, the change applies the final width
+  // immediately — no transition values anywhere; stripping the
+  // reduce-motion branch turns this red (the Proof).
+  test("AC2: with reduce-motion on, the change lands instantly — no transition values", async () => {
+    reducedMotionStub.mockReturnValue(true);
+    const { locationPort, audioPort, advance } = await mountedRunBe();
+    const spy = jest.spyOn(Reanimated, "withTiming");
+    await soundStop2({ locationPort, advance });
+    spy.mockClear();
+
+    await landProgress(audioPort, 1500, "Граць");
+    expect(flatStyle(screen.getByTestId("run-bar-progress-fill")).width).toBe("25%");
+    expect(spy).not.toHaveBeenCalled();
   });
 });
