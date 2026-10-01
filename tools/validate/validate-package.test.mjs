@@ -491,6 +491,60 @@ test('robustness: nested non-arrays in discovery yield diagnostics, not a crash'
   assert.ok(result.errors.filter((e) => e.rule === 'type').length >= 3, JSON.stringify(result.errors));
 });
 
+// G14.04.b (issue #303): availability claims are facts of the package tree,
+// never promises — the planned text-only `uk` passes on a draft package,
+// «гатовае» без файлаў fails with a named rule.
+test('G14.04.b: uk as a claimed text locale passes on a draft package (published: false)', () => {
+  const result = validatePackage(copiedTree((d) => {
+    const index = readJson(d, 'discovery.json');
+    index.offers[0].availability = { text_locales: ['be', 'en', 'uk'], audio_locales: ['be', 'en'] };
+    writeJson(d, 'discovery.json', index);
+  }));
+  assert.deepEqual(result, { ok: true, errors: [], warnings: [] }, JSON.stringify(result.errors));
+});
+
+test('G14.04.b: a claimed text locale without its stops.json is text-locale-without-files', () => {
+  const result = validatePackage(copiedTree((d) => {
+    const index = readJson(d, 'discovery.json');
+    index.offers[0].availability = { text_locales: ['be', 'en', 'uk'], audio_locales: ['be', 'en'] };
+    writeJson(d, 'discovery.json', index);
+    fs.rmSync(path.join(d, 'uk'), { recursive: true, force: true });
+  }));
+  assert.ok(!result.ok);
+  assert.deepEqual(rules(result, 'text-locale-without-files'), [
+    { severity: 'error', rule: 'text-locale-without-files', path: 'discovery.json#offers[0].availability.text_locales#uk' },
+  ], JSON.stringify(result.errors));
+  assert.deepEqual(result.errors.filter((e) => e.rule !== 'text-locale-without-files'), [], JSON.stringify(result.errors));
+});
+
+test('G14.04.b: a claimed audio locale without its audio files is audio-locale-without-files', () => {
+  const result = validatePackage(copiedTree((d) => {
+    const index = readJson(d, 'discovery.json');
+    index.offers[0].availability = { text_locales: ['be', 'en', 'uk'], audio_locales: ['be', 'en', 'uk'] };
+    writeJson(d, 'discovery.json', index);
+  }));
+  assert.ok(!result.ok);
+  assert.deepEqual(rules(result, 'audio-locale-without-files'), [
+    { severity: 'error', rule: 'audio-locale-without-files', path: 'discovery.json#offers[0].availability.audio_locales#uk' },
+  ], JSON.stringify(result.errors));
+  assert.deepEqual(result.errors.filter((e) => e.rule !== 'audio-locale-without-files'), [], JSON.stringify(result.errors));
+});
+
+test('G14.04.b: a corrupt availability shape yields a type diagnostic, not a crash', () => {
+  for (const availability of ['uk', ['be'], 7]) {
+    const result = validatePackage(copiedTree((d) => {
+      const index = readJson(d, 'discovery.json');
+      index.offers[0].availability = availability;
+      writeJson(d, 'discovery.json', index);
+    }));
+    assert.ok(!result.ok);
+    assert.ok(
+      rules(result, 'type').some((e) => e.path === 'discovery.json#offers[0].availability#$'),
+      JSON.stringify(result.errors),
+    );
+  }
+});
+
 test('guard: the suite is wired into npm test (implementation-rules 7)', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(REPO, 'package.json'), 'utf8'));
   assert.match(pkg.scripts.test, /tools\/validate\/\*\.test\.mjs/);

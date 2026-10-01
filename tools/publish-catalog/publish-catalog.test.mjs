@@ -30,9 +30,10 @@ async function readJson(file) {
 // returns a fresh staging tree built by the real packager. The discovery
 // offer/collection refs follow the guide, otherwise the packager refuses the
 // foreign-ref build.
-async function makeStaging({ version, routeId, revision } = {}) {
+async function makeStaging({ version, routeId, revision, mutateAuthor } = {}) {
   const author = await tempDir('kudy-pub-author-');
   await fsp.cp(fixtureDir, author, { recursive: true });
+  if (mutateAuthor) await mutateAuthor(author);
   const routeFile = path.join(author, 'route.json');
   const route = await readJson(routeFile);
   if (version !== undefined) route.version = version;
@@ -329,4 +330,25 @@ test('parity: the published entry and pointer match deriveInterimCatalog', async
   const interim = deriveInterimCatalog(path.join(staging, 'public'));
   assert.deepEqual(catalog.routes, interim.routes);
   assert.deepEqual(catalog.discovery_index, interim.discovery_index);
+});
+
+// G14.04.b (issue #303): 09 §8 — a locale exists in the catalog when its
+// base stops.json is published; the catalog shows `uk` by content fact only,
+// never by promise.
+test('G14.04.b: the catalog lists uk only when its base stops.json is published', async () => {
+  const { staging } = await makeStaging();
+  const target = await tempDir('kudy-pub-target-uk-');
+  await publishCatalog({ staging, target, now: NOW });
+  const catalog = await readJson(targetFile(target, 'catalog.json'));
+  const entry = catalog.routes.find((r) => r.route_id === 'demo-route-a1');
+  assert.deepEqual(entry.locales, ['be', 'en', 'uk']);
+
+  const { staging: withoutUk } = await makeStaging({
+    mutateAuthor: async (author) => fsp.rm(path.join(author, 'uk'), { recursive: true, force: true }),
+  });
+  const target2 = await tempDir('kudy-pub-target-nouk-');
+  await publishCatalog({ staging: withoutUk, target: target2, now: NOW });
+  const catalog2 = await readJson(targetFile(target2, 'catalog.json'));
+  const entry2 = catalog2.routes.find((r) => r.route_id === 'demo-route-a1');
+  assert.deepEqual(entry2.locales, ['be', 'en']);
 });

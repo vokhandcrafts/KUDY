@@ -307,6 +307,22 @@ export function validatePackage(dir, options = {}) {
     if (doc) schemaCheck('public-projection.schema.json', doc, rel, errors);
   }
 
+  // G14.04.b (issue #303): the locale facts of this tree, derived with the
+  // same rules build-bundle applies when it computes the index (09 §8:
+  // «каталог паказвае наяўныя локалі па факце» — publication is per-locale,
+  // the fact here is the shipped base/stops.json; an audio locale when its
+  // base audio carries files). Any top-level directory passes these matches;
+  // the packager additionally narrows to its own allowlist, so this fact set
+  // is only the wider one — it errs toward rejections, never false passes.
+  const textFacts = new Set();
+  const audioFacts = new Set();
+  for (const rel of files) {
+    const textM = rel.match(/^([^/]+)\/base\/stops\.json$/);
+    if (textM) textFacts.add(textM[1]);
+    const audioM = rel.match(/^([^/]+)\/base\/audio\/.+\.m4a$/);
+    if (audioM) audioFacts.add(audioM[1]);
+  }
+
   // Ids and duplicates. A place ref may pin a content_version, so places map
   // id -> versions; voices, themes, collections and stops need plain sets.
   const placeVersions = new Map();
@@ -422,6 +438,22 @@ export function validatePackage(dir, options = {}) {
         if (route.duration_min < min_minutes || route.duration_min > max_minutes) {
           diag(errors, 'error', 'guide-duration-not-in-range', `${at}.estimated_duration`);
         }
+      }
+      // G14.04.b (issue #303): availability is computed from shipped content,
+      // never promised (21 §3.2 «вылічаецца з апублікаванага зместу») — a
+      // claimed locale without its files in this tree is «гатовае» без файлаў.
+      const availability = offer.availability;
+      if (availability === undefined || availability === null) {
+        // No claim — the packager computes the triples for the assembled index.
+      } else if (typeof availability !== 'object' || Array.isArray(availability)) {
+        diag(errors, 'error', 'type', `${at}.availability#$`);
+      } else {
+        new Set(asArray(availability.text_locales, `${at}.availability.text_locales`, errors)).forEach((locale) => {
+          if (!textFacts.has(locale)) diag(errors, 'error', 'text-locale-without-files', `${at}.availability.text_locales#${locale}`);
+        });
+        new Set(asArray(availability.audio_locales, `${at}.availability.audio_locales`, errors)).forEach((locale) => {
+          if (!audioFacts.has(locale)) diag(errors, 'error', 'audio-locale-without-files', `${at}.availability.audio_locales#${locale}`);
+        });
       }
     });
     collections.forEach((c, i) => {
