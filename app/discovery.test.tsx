@@ -87,6 +87,9 @@ describe("Discovery result surface", () => {
     expect(
       analytics.events.some((event) => event.surface === "discovery" && event.offer_id === "offer-b1-guide"),
     ).toBe(true);
+    // G15.04: the en-only place never rendered for the be query — and it
+    // never even reached the shown port: only actually visible offers emit.
+    expect(analytics.events.some((event) => event.offer_id === "offer-e1-place")).toBe(false);
   });
 
   test("a narrow query shows the honest empty message with labeled alternatives (D04)", async () => {
