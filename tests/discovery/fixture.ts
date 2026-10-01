@@ -56,7 +56,7 @@ export function syntheticIndex(revision: string): DiscoveryIndexV1 {
             en: "The full guild history in one walk.",
             uk: "Повна історія цеху за один маршрут.",
           },
-          conditions: { be: "большасць шляху на вуліцы", en: "most of the way is outdoors", uk: "більшаість шляху надвор'ям" },
+          conditions: { be: "большасць шляху на вуліцы", en: "most of the way is outdoors", uk: "більшість шляху надвор'ям" },
         },
         estimated_duration: { min_minutes: 60, max_minutes: 90, basis: "author_estimate" },
         season_recommendations: [],
