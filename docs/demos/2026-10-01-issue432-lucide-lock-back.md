@@ -82,11 +82,11 @@ Tests:       1 failed, 3 skipped, 4 total
 і кропкі; `02-place-back.png` — дэталь месца «Двор сукнараў»: той самы
 вобраз Назаду (стрэлка + слова), які раней быў тут голым «Назад» без
 стрэлкі. Працэдура: эмулятар kudy-test (1080×2400), фейкавы каталог
-(untracked dev-scafолд 2026-09-28: `.scratch/fake-catalog/serve.mjs` на
+(untracked дэв-скафолд 2026-09-28: `.scratch/fake-catalog/serve.mjs` на
 8787, Metro з worktree з `EXPO_PUBLIC_FAKE_CATALOG=1` на `--port 8082`,
 `adb reverse tcp:8082 tcp:8082`, запуск
 `kudy://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8082`); далей
 deep-лінкі `kudy://route/guide-port` і `kudy://place/place-dvoryk`; экран
-здымае `adb exec-out screencap -p`. Scafолд у дыф PR не ўваходзіць: без
+здымае `adb exec-out screencap -p`. Скафолд у дыф PR не ўваходзіць: без
 `EXPO_PUBLIC_FAKE_CATALOG=1` каталог вяртаецца ў сумленны «Каталог
 недаступны» (прадуктовая ўмова `app/_layout.tsx`).
