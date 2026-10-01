@@ -721,11 +721,13 @@ function insertCampaignRow(db, id, sourcePath, transport) {
 }
 
 // The common arrangement of the «Як парсіць» tests: one campaign row with its
-// campaign file on disk and the real dispatcher over the store.
-async function startTransportDispatcher(t, dir, { name, profile = false, transport }) {
+// campaign file on disk and the real dispatcher over the store. yamlTransport
+// lets a test diverge the file from the row — the row is what the last run
+// used, and the store upsert would never create that divergence itself.
+async function startTransportDispatcher(t, dir, { name, profile = false, transport, yamlTransport = null }) {
   const dbPath = path.join(dir, 'db.sqlite');
   const db = openStore(dbPath);
-  const campaignYamlPath = writeCampaignYaml(dir, name, { profile, transport });
+  const campaignYamlPath = writeCampaignYaml(dir, name, { profile, transport: yamlTransport ?? transport });
   insertCampaignRow(db, 'c1', campaignYamlPath, transport);
   db.close();
   const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
@@ -740,6 +742,7 @@ test('the «Як парсіць» block shows the transport from the store row, 
   const { dispatcher, campaignYamlPath } = await startTransportDispatcher(t, dir, {
     name: 'direct.yaml',
     transport: 'direct',
+    yamlTransport: 'tor',
   });
 
   const response = await get(dispatcher, '/');
