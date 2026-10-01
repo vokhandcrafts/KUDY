@@ -16,7 +16,8 @@ import PlaceDetail from "./place/[id]";
 import { ServicesContext } from "./_layout";
 import { createServices } from "../controllers/createServices";
 import type { DiscoveryOfferEvent } from "../controllers/useDiscoveryController";
-import { CATALOG_POINTER, fixtureText, layoutWith, serve, sha256 } from "../test/render-helpers";
+import { CATALOG_POINTER, flatStyle, fixtureText, layoutWith, serve, sha256 } from "../test/render-helpers";
+import { tokens } from "../components/design-tokens";
 
 // The published fixtures (fixtures/discovery-contract): the catalog pointer
 // declares the index's size and sha256, so the served texts pass the real
@@ -128,5 +129,24 @@ describe("Collection card (падборка)", () => {
     expect(screen.getByTestId("badge-access-mixed")).toBeTruthy();
     // A collection has no audio: the listen button does not exist (21 §3.2).
     expect(screen.queryByText(/паслухаць/i)).toBeNull();
+  });
+});
+
+describe("Font roles (issue #435)", () => {
+  test("the rubric title renders the UI family — the display serif is for guide and story names only (canon §3)", async () => {
+    renderDiscovery("/discovery");
+    const title = await screen.findByText("Чым заняцца");
+    expect(flatStyle(title).fontFamily).toBe(tokens.fontFamilyUi);
+  });
+
+  test("the collection title renders the UI family too (canon §3: a collection is not a guide or a story name)", async () => {
+    renderDiscovery("/collection/collection-f1");
+    expect(await screen.findByTestId("screen-Collection")).toBeTruthy();
+    // The guide member card may carry the same title string — every match
+    // on this surface stays on the UI family; the display serif for the
+    // guide's name lives only on the route preview title.
+    for (const title of screen.getAllByText("Адзін дзень сукнара")) {
+      expect(flatStyle(title).fontFamily).toBe(tokens.fontFamilyUi);
+    }
   });
 });
