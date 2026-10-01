@@ -30,7 +30,7 @@ import { freshMigratedDatabase, MIGRATIONS } from './test-db.ts';
 
 const migrationsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'migrations');
 
-const SERVER_TABLES = ['devices', 'entitlement_cache', 'event_log', 'device_registration_rate', 'grant_products', 'webhook_events'];
+const SERVER_TABLES = ['devices', 'entitlement_cache', 'event_log', 'device_registration_rate', 'grant_products', 'webhook_events', 'event_send_rate'];
 
 function normalize(sql: string): string {
   return sql
@@ -105,6 +105,16 @@ test('guard: cascade deletes are declared on both device-owned tables', () => {
       `${table} must cascade on device delete (09 §5)`,
     );
   }
+});
+
+test('guard: the events rate counter is device-owned and cascades on device delete (G09.02)', () => {
+  const create = replayedStatements().find((s) => s.startsWith('create table ') && tableOf(s, 2) === 'event_send_rate');
+  assert.ok(create, 'event_send_rate must exist in the migration');
+  assert.match(
+    create!,
+    /references devices \(device_id\) on delete cascade/,
+    'event_send_rate must cascade on device delete (09 §5 DELETE /v1/device)',
+  );
 });
 
 test('guard: nothing is granted to anon or authenticated anywhere in the migrations', () => {

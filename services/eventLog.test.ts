@@ -16,28 +16,12 @@ import path from 'node:path';
 import test from 'node:test';
 
 import { DbError, openDatabase } from './db/db.ts';
-import { nodeSqliteDriver, nodeSqliteFileDriver } from './db/test-fixture.ts';
-import type { EventInput, SqlDriver } from './db/types.ts';
+import { nodeSqliteFileDriver } from './db/test-fixture.ts';
+import type { SqlDriver } from './db/types.ts';
+import { eventFactory, openFreshEventStore } from './eventLog-test-fixture.ts';
 import { emitEvent, flushEvents, type OutgoingEvent } from './eventLog.ts';
 
-function openFresh(): SqlDriver {
-  const driver = nodeSqliteDriver();
-  openDatabase(driver);
-  return driver;
-}
-
-let seq = 0;
-function event(overrides: Partial<EventInput> = {}): EventInput {
-  seq += 1;
-  return {
-    eventId: `11111111-1111-4111-8111-${String(seq).padStart(12, '0')}`,
-    type: 'app_open',
-    at: 1_700_000_000_000 + seq,
-    schemaVersion: 1,
-    payload: JSON.stringify({}),
-    ...overrides,
-  };
-}
+const event = eventFactory('11111111-1111-4111-8111-');
 
 function queuedRows(driver: SqlDriver, type: string): number {
   return Number(driver.prepare('SELECT COUNT(*) AS n FROM event_queue WHERE type = ?').get(type)!.n);
@@ -53,7 +37,7 @@ async function capture(driver: SqlDriver): Promise<OutgoingEvent[]> {
 }
 
 test('criterion 1: a failed send resends the same event_ids; success drains the queue', async () => {
-  const driver = openFresh();
+  const driver = openFreshEventStore();
   emitEvent(driver, event());
   emitEvent(driver, event());
 
@@ -79,7 +63,7 @@ test('criterion 1: a failed send resends the same event_ids; success drains the 
 });
 
 test('criterion 2: a new playback is a new event — distinct ids never merge into one credit', async () => {
-  const driver = openFresh();
+  const driver = openFreshEventStore();
   emitEvent(
     driver,
     event({
@@ -143,7 +127,7 @@ test('criterion 3: kill/restart mid-queue loses neither unsent nor credited even
 });
 
 test('criterion 4: a failing sender never blocks recording — error surfaces, queue keeps working', async () => {
-  const driver = openFresh();
+  const driver = openFreshEventStore();
   const first = event();
   const second = event();
   emitEvent(driver, first);
@@ -159,7 +143,7 @@ test('criterion 4: a failing sender never blocks recording — error surfaces, q
 });
 
 test('criterion 5: a manual Play carries trigger manual and produces no stop_reached', async () => {
-  const driver = openFresh();
+  const driver = openFreshEventStore();
   emitEvent(
     driver,
     event({
@@ -178,7 +162,7 @@ test('criterion 5: a manual Play carries trigger manual and produces no stop_rea
 });
 
 test('emitEvent: a repeated event_id lands once through the service too', () => {
-  const driver = openFresh();
+  const driver = openFreshEventStore();
   const one = event();
   emitEvent(driver, one);
   emitEvent(driver, one);
@@ -186,7 +170,7 @@ test('emitEvent: a repeated event_id lands once through the service too', () => 
 });
 
 test('the flush batch is bounded: a queue larger than the chunk goes out in order, nothing re-sent', async () => {
-  const driver = openFresh();
+  const driver = openFreshEventStore();
   const ids: string[] = [];
   for (let i = 0; i < 300; i += 1) {
     const one = event({ at: 1_700_000_000_000 + i });
@@ -206,7 +190,7 @@ test('the flush batch is bounded: a queue larger than the chunk goes out in orde
 });
 
 test('emit refuses a payload that is not a JSON object — named diagnostic, nothing stored', () => {
-  const driver = openFresh();
+  const driver = openFreshEventStore();
   const corrupt = ['{broken', '5', '[1,2]', 'null'];
   for (const payload of corrupt) {
     assert.throws(
@@ -221,7 +205,7 @@ test('emit refuses a payload that is not a JSON object — named diagnostic, not
 });
 
 test('flush surfaces a corrupt stored row as a named diagnostic and sends nothing', async () => {
-  const driver = openFresh();
+  const driver = openFreshEventStore();
   emitEvent(driver, event());
   driver.prepare('UPDATE event_queue SET payload = ?').run('{broken');
   let senderCalled = false;

@@ -74,11 +74,19 @@ export const WEBHOOK_MIGRATION_STEPS: MigrationStep[] = [
   (db) => db.query('grant select, insert, update, delete on webhook_events to service_role'),
 ];
 
+export const EVENT_SEND_RATE_MIGRATION_STEPS: MigrationStep[] = [
+  (db) => db.query('create table event_send_rate ( device_id uuid not null references devices (device_id) on delete cascade, window_start timestamptz not null, attempts integer not null default 0, primary key (device_id, window_start) )'),
+  (db) => db.query('alter table event_send_rate enable row level security'),
+  (db) => db.query('revoke all on event_send_rate from anon, authenticated'),
+  (db) => db.query('grant select, insert, update, delete on event_send_rate to service_role'),
+];
+
 export const MIGRATIONS: Array<{ file: string; steps: MigrationStep[] }> = [
   { file: '20260922120000_device_tables_rls.sql', steps: DEVICE_MIGRATION_STEPS },
   { file: '20260926120000_grant_products.sql', steps: GRANT_MIGRATION_STEPS },
   { file: '20260926130000_grant_products_route_key.sql', steps: GRANT_ROUTE_KEY_MIGRATION_STEPS },
   { file: '20260930000000_webhook_events.sql', steps: WEBHOOK_MIGRATION_STEPS },
+  { file: '20261001000000_event_send_rate.sql', steps: EVENT_SEND_RATE_MIGRATION_STEPS },
 ];
 
 export async function freshMigratedDatabase(): Promise<PGlite> {
