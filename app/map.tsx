@@ -11,6 +11,8 @@ import { Link, useRouter } from "expo-router";
 import { useMemo } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import MapPinIcon from "lucide-react-native/icons/map-pin";
+import RouteIcon from "lucide-react-native/icons/route";
 
 import {
   nearbyOrder,
@@ -21,6 +23,7 @@ import {
 } from "../controllers/nearby/nearbySurfaceController";
 import { useServices } from "./_layout";
 import { BackButton } from "../components/back-button";
+import { CanonIcon } from "../components/canon-icon";
 import { AccessBadge, StateBanner } from "../components/guide-card";
 import { GuideHintMount } from "../components/GuideHintCard";
 import { LoadingIndicator } from "../components/loading-indicator";
@@ -81,6 +84,11 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceS,
   },
+  cardMeta: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: tokens.spaceS,
+  },
   facts: {
     color: tokens.colorMuted,
     fontSize: tokens.fontBaseSize,
@@ -113,11 +121,20 @@ function NearbyCard({
 }) {
   const title = offer.title ?? offer.route_id ?? offer.place_id ?? offer.offer_id;
   const label = `${title}, ${offer.access}`;
+  // UX 09 (issue #434): the offer kind is readable at a glance — a route
+  // marker names the guide (a multi-stop walk), map-pin names the one place.
+  // The type word rides the marker element for the screen reader (canon §9);
+  // the glyph itself stays decoration.
+  const TypeGlyph = offer.kind === "guide" ? RouteIcon : MapPinIcon;
+  const typeLabel = offer.kind === "guide" ? strings.guideLabel : strings.placeLabel;
   const inner = (
     <>
       <ScaledText style={styles.cardTitle}>{title}</ScaledText>
       {offer.summary ? <ScaledText style={styles.cardSummary}>{offer.summary}</ScaledText> : null}
-      <AccessBadge access={offer.access} locale={locale} />
+      <View style={styles.cardMeta}>
+        <AccessBadge access={offer.access} locale={locale} />
+        <CanonIcon glyph={TypeGlyph} label={typeLabel} testID={`nearby-type-${offer.kind}`} />
+      </View>
       <ScaledText style={styles.facts}>{cardFacts(offer, strings)}</ScaledText>
     </>
   );
