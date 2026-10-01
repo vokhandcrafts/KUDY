@@ -349,7 +349,7 @@ describe("run map surface", () => {
     // reverting the LoadingIndicator wiring turns this red too.
     expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
     expect(await screen.findByTestId("btn-run-back")).toBeTruthy();
-    expect(within(screen.getByTestId("btn-run-back")).getByText("← Назад")).toBeTruthy();
+    expect(within(screen.getByTestId("btn-run-back")).getByText("Назад")).toBeTruthy();
   });
 
   test("G06.03 AC1: Back and the card's ✕ dismiss the panel identically", async () => {
@@ -364,7 +364,7 @@ describe("run map surface", () => {
     // UX 02 (issue #348): the back's label lives in a <Text> — the #344 guard
     // (within().getByText() reaches only <Text> hosts, a reverted bare string
     // fails here).
-    expect(within(screen.getByTestId("btn-run-back")).getByText("← Назад")).toBeTruthy();
+    expect(within(screen.getByTestId("btn-run-back")).getByText("Назад")).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-run-back"));
     expect(screen.queryByTestId("run-panel-half")).toBeNull();
     expect(screen.getByTestId("run-panel-bar")).toBeTruthy();

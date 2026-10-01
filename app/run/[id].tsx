@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/runMap";
 import { useRunState, useRunSurface } from "../../controllers/run/runSurfaceController";
 import { BackButton } from "../../components/back-button";
+import { uiStrings } from "../../components/ui-strings";
 import { GuideHintMount } from "../../components/GuideHintCard";
 import { PressableSurface } from "../../components/pressable-surface";
 import { tokens } from "../../components/design-tokens";
@@ -350,6 +351,10 @@ export default function Run() {
   const ready = surface?.status === "ready" ? surface : null;
   const run = useRunState(ready?.controller ?? null);
   const strings = runMapStrings(ready?.locale ?? "be");
+  // G06.10 (issue #432): the back word is the shared chrome catalog's, in the
+  // run session's own display locale — the run map dictionary holds no copy
+  // of it (one back image, one dictionary).
+  const back = uiStrings(ready?.locale ?? "be").back;
 
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4). A hook —
@@ -369,7 +374,7 @@ export default function Run() {
   if (surface === null || surface.status === "unavailable") {
     return (
       <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Run">
-        <BackButton label={strings.back} testID="btn-run-back" />
+        <BackButton label={back} testID="btn-run-back" />
         <ScaledText style={styles.centered}>{strings.unavailableTitle}</ScaledText>
         {surface !== null ? (
           <ScaledText style={styles.reason} testID="run-unavailable-reason">
@@ -384,7 +389,7 @@ export default function Run() {
       <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Run">
         {/* UX 02 (issue #348): the loading state keeps the frame — with the
             native header off there is no other way back (AC2). */}
-        <BackButton label={strings.back} testID="btn-run-back" />
+        <BackButton label={back} testID="btn-run-back" />
         <LoadingIndicator style={styles.centered} text={strings.loading} />
       </View>
     );
@@ -479,7 +484,7 @@ export default function Run() {
       {/* UX 02 (issue #348): the one back element; from Peek it is the
           navigation out of Run, from an open card it dismisses the card —
           the controller's backOrDismiss (AC2). */}
-      <BackButton label={strings.back} onPress={backOrDismiss} testID="btn-run-back" />
+      <BackButton label={back} onPress={backOrDismiss} testID="btn-run-back" />
       {/* G06.05 (AC4/AC5): the honest degradation banners of 11 §7 — every
           state names itself, carries its manual exit and is announced (a
           live region), never a modal, never a mascot. */}

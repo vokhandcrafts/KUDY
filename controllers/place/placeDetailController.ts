@@ -89,7 +89,6 @@ export interface PlaceDetailStrings {
   guideLinkHint: string;
   playHint: string;
   noAudio: string;
-  back: string;
   durationUnit: string;
   textLabel: string;
   audioLabel: string;
@@ -127,7 +126,6 @@ const STRINGS: Record<'be' | 'en', PlaceDetailStrings> = {
     guideLinkHint: "Адкрывае прэв'ю гіда, не запуск прагулкі.",
     playHint: 'Яўны Play тэйзера праз адзіны плэер.',
     noAudio: 'Аўдыё тэйзера не апублікавана',
-    back: 'Назад',
     durationUnit: 'хв',
     textLabel: 'Тэкст',
     audioLabel: 'аўдыё',
@@ -155,7 +153,6 @@ const STRINGS: Record<'be' | 'en', PlaceDetailStrings> = {
     guideLinkHint: "Opens the guide's preview, never a walk start.",
     playHint: 'Explicit teaser play through the single player.',
     noAudio: 'The teaser audio is not published',
-    back: 'Back',
     durationUnit: 'min',
     textLabel: 'Text',
     audioLabel: 'audio',

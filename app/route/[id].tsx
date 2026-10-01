@@ -12,6 +12,7 @@ import { useEffect, useMemo } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ClockIcon from "lucide-react-native/icons/clock";
+import LockIcon from "lucide-react-native/icons/lock";
 import MapPinIcon from "lucide-react-native/icons/map-pin";
 
 import {
@@ -125,11 +126,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     paddingHorizontal: tokens.spaceS,
     paddingVertical: 2,
-  },
-  lockBadgeText: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: 12,
   },
   mainButton: {
     alignItems: "center",
@@ -414,15 +410,19 @@ export default function RoutePreview() {
                     {stop.placeName ? <ScaledText style={styles.stopPlace}>{stop.placeName}</ScaledText> : null}
                     {stop.announce ? <ScaledText style={styles.stopAnnounce}>{stop.announce}</ScaledText> : null}
                     {stop.locked ? (
-                      // G06.05 (AC1): the 🔒 is decoration — the screen
-                      // reader gets the word, never the glyph alone.
+                      // G06.05 (AC1) + G06.10 (issue #432): the badge renders
+                      // the Lucide lock — the emoji glyph is gone from the
+                      // markup; the screen reader still gets the word, never
+                      // the glyph alone (the factRow idiom: the row is the
+                      // one accessibility element, the icon's own required
+                      // label covers a rendering outside the row).
                       <View
                         accessible={true}
                         accessibilityLabel={strings.locked}
                         style={styles.lockBadge}
                         testID={`stop-locked-${stop.stopId}`}
                       >
-                        <ScaledText style={styles.lockBadgeText}>🔒</ScaledText>
+                        <CanonIcon glyph={LockIcon} label={strings.locked} />
                       </View>
                     ) : null}
                   </View>
