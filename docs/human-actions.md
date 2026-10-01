@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-01 — Правядзі uk-рэв'ю трох новых драфтаў першага гіда (G14.04.c)
+Што зрабіць: ты — названы uk-рэв'юер-носьбіт (§6.4 uk-release-scope). Праглядзі `authoring/gdansk/review/gdansk-{townhall-base-uk,artushof-base-uk,stmary-uk}.review.md` (кожны факт побач з цытатай і локатарам), правер uk-формы ўласных назваў (табліца ў `docs/agent-tasks/results/G14.04.c.md`) і паставь пазнакі claims (`mark` з `mark_by`/`mark_at`) ды рашэнні рэвю (`review.decision`) у драфтах — без гэтага пераклад не прыняты. Пры заўвагах паправі тэкст драфтаў у тым жа каміце.
+PR: дадасца пасля адкрыцця (issue: https://github.com/vokhandcrafts/KUDY/issues/304)
+
 ### 2026-10-01 — Смержыць PR #455: рашэнні §6 uk-release-scope улітыя ў дакумент (закрывае #302)
 Што зрабіць: змержы PR #455 squash-мержам пасля зелёнага CI — ён улікае пяць прынятых рашэнняў раздзела 6 даслоўна ў `uk-release-scope.md` і пры мержы закрые issue #302. Гэта follow-up да G14.04.b (PR #454 змержаны), дзе гэты крок паводле каментара ў #302 належыў выканаўцу задачы, але быў зразуметы занадта позна.
 PR: https://github.com/vokhandcrafts/KUDY/pull/455 (issue: https://github.com/vokhandcrafts/KUDY/issues/302)
