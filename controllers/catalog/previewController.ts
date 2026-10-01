@@ -241,11 +241,11 @@ const PREVIEW_STRINGS: Record<'be' | 'en', PreviewStrings> = {
   be: {
     label: { download: 'Загрузіць', start: 'Пачаць' },
     reason: {
-      'preview#purchase-required': 'патрэбна пакупка',
-      'preview#storage-unknown': 'стан пакета невядомы: сховішча недаступнае',
-      'preview#verify-unavailable': 'праверка пакета недаступная',
-      'preview#download-unavailable': 'загрузка недаступная на гэтай зборцы',
-      'preview#not-published': 'гід не апублікаваны',
+      'preview#purchase-required': 'Патрэбна пакупка.',
+      'preview#storage-unknown': 'Сховішча недаступнае.',
+      'preview#verify-unavailable': 'Праверка недаступная.',
+      'preview#download-unavailable': 'Загрузка недаступная на гэтай зборцы.',
+      'preview#not-published': 'Гід не апублікаваны.',
     },
     detail: (detail) =>
       detail.kind === 'damaged'
@@ -255,7 +255,7 @@ const PREVIEW_STRINGS: Record<'be' | 'en', PreviewStrings> = {
           : detail.kind === 'stale'
             ? 'даступна абнаўленне'
             : 'пакет няпоўны',
-    downloadFailed: 'Збой загрузкі',
+    downloadFailed: 'Збой загрузкі.',
     storageFullDetail: (mb) => `не хапае месца: патрэбна яшчэ ${mb} МБ`,
     storageExit: 'Вызваліць месца ў KUDY',
     retry: 'Паўтарыць',
@@ -263,11 +263,11 @@ const PREVIEW_STRINGS: Record<'be' | 'en', PreviewStrings> = {
   en: {
     label: { download: 'Download', start: 'Start' },
     reason: {
-      'preview#purchase-required': 'purchase required',
-      'preview#storage-unknown': 'package state unknown: storage unavailable',
-      'preview#verify-unavailable': 'package verification unavailable',
-      'preview#download-unavailable': 'download unavailable in this build',
-      'preview#not-published': 'guide not published',
+      'preview#purchase-required': 'Purchase required.',
+      'preview#storage-unknown': 'Storage unavailable.',
+      'preview#verify-unavailable': 'Verification unavailable.',
+      'preview#download-unavailable': 'Download unavailable in this build.',
+      'preview#not-published': 'Guide not published.',
     },
     detail: (detail) =>
       detail.kind === 'damaged'
@@ -277,7 +277,7 @@ const PREVIEW_STRINGS: Record<'be' | 'en', PreviewStrings> = {
           : detail.kind === 'stale'
             ? 'an update is available'
             : 'package incomplete',
-    downloadFailed: 'Download failed',
+    downloadFailed: 'Download failed.',
     storageFullDetail: (mb) => `not enough space: ${mb} MB more needed`,
     storageExit: 'Free up space in KUDY',
     retry: 'Retry',

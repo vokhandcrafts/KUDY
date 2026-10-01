@@ -39,12 +39,16 @@ node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON c
 ```
 
 ```output
-button paid-no-entitlement: action=start enabled=false label="Пачаць" reason=патрэбна пакупка detail=-
+button paid-no-entitlement: action=start enabled=false label="Пачаць" reason=Патрэбна пакупка. detail=-
 button not_downloaded: action=download enabled=true label="Загрузіць" reason=- detail=-
 button partial: action=download enabled=true label="Загрузіць" reason=- detail=не хапае файлаў: 3
 button ready-verified: action=start enabled=true label="Пачаць" reason=- detail=-
 button verify-failure: action=download enabled=true label="Загрузіць" reason=- detail=пакет пашкоджаны: патрэбна паўторная загрузка
 ```
+
+(Перазахоплена 2026-10-01 у PR #444: G06.10 #433 прывёў слоўнікі прычын да
+правіла «загалоўная літара + кропка» — paid-радок чытаецца як фраза; muted
+detail з дыягностыкай не змяніўся.)
 
 Рэндэр-тэсты экрана (`app/preview.test.tsx`, jest) праходзяць той самы
 вытворчы шлях праз мок fetch з тымі фікстурамі: метаданыя AC1, платны гейт

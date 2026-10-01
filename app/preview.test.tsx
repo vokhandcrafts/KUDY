@@ -148,7 +148,7 @@ describe("guide preview surface (G06.01.b)", () => {
     expect(screen.getByText("Кропак бясплатна: 1")).toBeTruthy();
     // The paid start is disabled with its reason; pressing it starts no run
     // and triggers no purchase — nothing navigates, no dialog appears.
-    expect(screen.getByText("патрэбна пакупка")).toBeTruthy();
+    expect(screen.getByText("Патрэбна пакупка.")).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-start"));
     expect(screen.queryByTestId("confirm-dialog")).toBeNull();
     expect(screen.getByTestId("screen-Route preview")).toBeTruthy();
@@ -193,7 +193,7 @@ describe("guide preview surface (G06.01.b)", () => {
       withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
       { initialUrl: "/route/guide-route-b1" },
     );
-    expect(await screen.findByText("стан пакета невядомы: сховішча недаступнае")).toBeTruthy();
+    expect(await screen.findByText("Сховішча недаступнае.")).toBeTruthy();
     expect(screen.queryByTestId("btn-download")).toBeNull();
   });
 
@@ -317,7 +317,7 @@ describe("guide preview surface (G06.01.b)", () => {
       { initialUrl: "/route/no-such-route" },
     );
     expect(await screen.findByTestId("preview-unavailable")).toBeTruthy();
-    expect(screen.getByText("гід не апублікаваны")).toBeTruthy();
+    expect(screen.getByText("Гід не апублікаваны.")).toBeTruthy();
   });
 
   // UX 01 (issue #347): the surface scrolls — twelve stops and the main
@@ -409,7 +409,7 @@ describe("G06.05 preview a11y and failure exits (issue #280)", () => {
     renderInsufficientSpacePreview();
     fireEvent.press(await screen.findByTestId("btn-download"));
     await screen.findByTestId("download-error-banner");
-    expect(screen.getByText("Збой загрузкі")).toBeTruthy();
+    expect(screen.getByText("Збой загрузкі.")).toBeTruthy();
     expect(screen.getByText("не хапае месца: патрэбна яшчэ 30 МБ")).toBeTruthy();
     // The two manual exits of AC4: the named retry and the storage surface
     // (issue #426: the exit's words name the surface «KUDY» — reverting the
@@ -605,7 +605,7 @@ describe("G08.05 quiet commerce offer (issue #292)", () => {
       ),
       { initialUrl: "/route/guide-route-a1" },
     );
-    expect(await screen.findByText("патрэбна пакупка")).toBeTruthy();
+    expect(await screen.findByText("Патрэбна пакупка.")).toBeTruthy();
     expect(screen.queryByTestId("upgrade-offer")).toBeNull();
   });
 });
@@ -685,7 +685,7 @@ describe("guide preview clay buttons (G06.10.d)", () => {
     // A disabled press fires no dip: the style holds its resting shape.
     fireEvent.press(button);
     expect(flatStyle(screen.getByTestId("btn-start")).transform).toBeUndefined();
-    expect(screen.getByText("патрэбна пакупка")).toBeTruthy();
+    expect(screen.getByText("Патрэбна пакупка.")).toBeTruthy();
   });
 
   test("the secondary actions render the line shade from the token mirror", async () => {

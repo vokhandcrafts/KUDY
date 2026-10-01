@@ -182,7 +182,7 @@ describe("Place detail surface (G07.02)", () => {
     fireEvent.press(screen.getByTestId("place-moment-play-m-a1"));
     await waitFor(() =>
       expect(screen.getByTestId("place-moment-refusal-m-a1").props.children).toBe(
-        "Тэйзер зараз не запускаецца — паспрабуйце яшчэ раз",
+        "Тэйзер зараз не запускаецца — паспрабуйце яшчэ раз.",
       )
     );
     expect(audioPort.commands).toEqual(["play 1:be/base/audio/a.m4a"]);

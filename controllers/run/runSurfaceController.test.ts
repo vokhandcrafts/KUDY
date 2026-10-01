@@ -494,8 +494,8 @@ test('BE/EN: the surface locale is the walk pin, the words follow it', async () 
   assert.equal(runMapStrings('be').status.played, 'праслухана');
   assert.equal(runMapStrings('en').status.played, 'played');
   assert.equal(runMapStrings('fr').status.played, 'праслухана'); // allowlist fallback
-  assert.equal(runMapStrings('en').reasonText['package-incomplete'], 'Package incomplete');
-  assert.equal(runMapStrings('be').reasonText['package-incomplete'], 'Пакет не поўны');
+  assert.equal(runMapStrings('en').reasonText['package-incomplete'], 'Guide incomplete.');
+  assert.equal(runMapStrings('be').reasonText['package-incomplete'], 'Гід не поўны.');
 });
 
 // G06.04 (issue #63) — the run surface cache (NAV7): «Прагулка» returns to
