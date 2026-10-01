@@ -1,6 +1,7 @@
 // G15.04 demo driver — runs from the repo root; prints the acceptance facts.
 import { pathToFileURL } from "node:url";
-const load = (rel) => import(pathToFileURL(rel));
+type SuiteEvent = { type: string; payload: Record<string, unknown> };
+const load = (rel: string) => import(pathToFileURL(rel).href);
 
 const { syntheticIndex, publish, mutableLoader, syntheticFiles, memorySnapshot, bootedDiscovery, queueAnalyticsPort, sha256, POINTER_R1, POINTER_R2, REVISION_R1, REVISION_R2 } = await load("tests/discovery/fixture.ts");
 const { offersById } = await load("controllers/useDiscoveryController.ts");
@@ -16,14 +17,14 @@ const R2 = publish(syntheticIndex(REVISION_R2), POINTER_R2);
 const store = await bootedDiscovery({ loader: mutableLoader(syntheticFiles(R1)).loader });
 let s = store.getState().surface;
 const byId = offersById(s.index);
-console.log("D01 revision:", s.revision, "exact:", s.result.exact.map((m) => m.offer_id).join(","));
+console.log("D01 revision:", s.revision, "exact:", s.result.exact.map((m: { offer_id: string }) => m.offer_id).join(","));
 store.getState().setTimeLimit(60);
 s = store.getState().surface;
-console.log("D03 exact@60:", s.result.exact.map((m) => m.offer_id).join(","));
-console.log("D03 alts:", s.result.alternatives.map((m) => m.offer_id + ":" + m.differences.join("+")).join(","));
+console.log("D03 exact@60:", s.result.exact.map((m: { offer_id: string }) => m.offer_id).join(","));
+console.log("D03 alts:", s.result.alternatives.map((m: { offer_id: string; differences: readonly string[] }) => m.offer_id + ":" + m.differences.join("+")).join(","));
 store.getState().setSeason("winter");
 s = store.getState().surface;
-console.log("D05 exact@winter:", s.result.exact.length, "guide90:", s.result.alternatives.find((m) => m.offer_id === "offer-g15-guide-90").differences.join(","));
+console.log("D05 exact@winter:", s.result.exact.length, "guide90:", s.result.alternatives.find((m: { offer_id: string }) => m.offer_id === "offer-g15-guide-90").differences.join(","));
 const guide = byId.get("offer-g15-guide-90");
 console.log("L01 text:", guide.availability.text_locales.join("/"), "audio:", guide.availability.audio_locales.join("/"));
 
@@ -49,11 +50,11 @@ const ready = analyticsStore.getState().surface;
 const shownGuide = offersById(ready.index).get("offer-g15-guide-90");
 const shownPlace = offersById(ready.index).get("offer-g15-place-30");
 analyticsStore.getState().recordShown([shownGuide, shownPlace], "discovery");
-const batches = [];
-const noopFlush = await flushAnalytics(driver, async (events) => void batches.push(events));
+const batches: SuiteEvent[][] = [];
+const noopFlush = await flushAnalytics(driver, async (events: SuiteEvent[]) => void batches.push(events));
 console.log("flush-no-consent marked:", noopFlush, "batches:", batches.length);
 setAnalyticsConsent(driver, "granted");
-const grantedFlush = await flushAnalytics(driver, async (events) => void batches.push(events));
+const grantedFlush = await flushAnalytics(driver, async (events: SuiteEvent[]) => void batches.push(events));
 console.log("flush-granted marked:", grantedFlush, "types:", batches[0].map((e) => e.type).join(","), "payload-keys:", Object.keys(batches[0][0].payload).sort().join(","));
 
 // D07: discovery operations never touch the live session row.
