@@ -17,6 +17,14 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-01 — Вырашы лёс кода G17.17: issue #407 закрыта без дастаўкі
+Што зрабіць: issue #407 закрыта 29.09, але яе рэалізацыя (паўзук спасылак са старонак без артыкульнага тэксту — змены ў `tools/collector/crawler.mjs` і `extract.mjs` з тэстамі) існуе толькі незакомічанай у галоўным чэкаўце — гэтай копіі няма ні ў адной галінцы, ні ў main. Скажы агенту зрабіць ратавальны PR з новай галінкі ад main (код + правілы `.gitignore`/AGENTS пра parsed-content), альбо адкінь код.
+PR: няма (issue: https://github.com/vokhandcrafts/KUDY/issues/407)
+
+### 2026-10-01 — Закрый завершаныя эпікі #400/#346/#154 і паглядзі лэйбл #283
+Што зрабіць: усе даччыныя задачы закрытыя — закрый эпік #400 (G06.10, дзеці #401–#406), эпік #346 (дызайн-выпраўленні, дзеці #347–#355) і эпік #154 (G17, задачы закрытыя). Заразом паглядзі закрытую #283: на ёй вісяць лэйбл agent:ready — зняць ці пакінуць, рашэнне аператара.
+PR: няма (issues: https://github.com/vokhandcrafts/KUDY/issues/400, https://github.com/vokhandcrafts/KUDY/issues/346, https://github.com/vokhandcrafts/KUDY/issues/154, https://github.com/vokhandcrafts/KUDY/issues/283)
+
 ### 2026-09-30 — Смержыць PR #420: даслоўная цытата канона ў results G06.10.b (issue #412)
 Змержы PR #420 squash-мержам пасля зелёнага CI — ён закрывае issue #412: цытата радка канона `fontLicenses.*.selfHost` у results G06.10.b замененая на даслоўную, у must-flag дададзены клас `canon-quote-truncated`. Пасля мержу знімі лэйбл `agent:running` з issue #412.
 PR: https://github.com/vokhandcrafts/KUDY/pull/420 (issue: https://github.com/vokhandcrafts/KUDY/issues/412)
