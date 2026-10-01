@@ -61,7 +61,7 @@ Tests:       1 failed, 1 total
 Крытэр 3 — жывыя скрыншоты. Захаваныя ў `.scratch/issue-428/screens/`
 (untracked, як у дэме `2026-10-01-issue431-grain-tiling.md`):
 `after-cold-1.png` — халодны старт (суроўны +not-found, статус-бар таксама
-цытальны), `after-explore.png`, `after-my.png` — пасля фікса (маршруты
+чытэльны), `after-explore.png`, `after-my.png` — пасля фікса (маршруты
 `/explore` і `/my`; экран /my у інтэрфейсе называецца «KUDY»). Працэдура
 жывой праверкі: эмулятар kudy-test (1080×2400), `adb reverse tcp:8082
 tcp:8082`, метро з worktree (`npx expo start --port 8082 --dev-client`),
