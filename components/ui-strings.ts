@@ -13,6 +13,10 @@ export type AccessKind = "free" | "paid" | "mixed";
 export interface UiStrings {
   readonly back: string;
   readonly backToCity: string;
+  // The unknown deep link's words (issue #427): the honest message and the
+  // hint that names where the catalog is — the screen never renders dev text.
+  readonly notFoundTitle: string;
+  readonly notFoundHint: string;
   readonly loading: string;
   readonly walk: string;
   readonly nearby: string;
@@ -82,6 +86,8 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
   be: {
     back: "← Назад",
     backToCity: "← Горад",
+    notFoundTitle: "Такога экрана няма",
+    notFoundHint: "Каталог чакае — вяртайцеся да яго кнопкай «← Назад».",
     loading: "Загрузка…",
     walk: "Прагулка",
     nearby: "Побач →",
@@ -150,6 +156,8 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
   en: {
     back: "← Back",
     backToCity: "← City",
+    notFoundTitle: "No such screen",
+    notFoundHint: "The catalog is waiting — use «← Back» to return to it.",
     loading: "Loading…",
     walk: "Walk",
     nearby: "Nearby →",
