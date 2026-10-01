@@ -17,6 +17,7 @@ import type {
   BundleAssetRow,
   BundleAssetStatus,
   EventInput,
+  EventQueueRow,
   SessionProgress,
   SessionRow,
   SessionStartInput,
@@ -374,6 +375,49 @@ export function appendEvent(driver: SqlDriver, event: EventInput): void {
          ON CONFLICT(event_id) DO NOTHING`,
       )
       .run(event.eventId, event.type, event.at, event.schemaVersion, event.payload);
+  });
+}
+
+// G09.01: the pending tail of the queue in stable dispatch order — the
+// event's own clock, event_id as the tie-break, so a restart cannot reorder
+// the batch. Sent rows are never re-sent (09 §10: one event = one credit; a
+// batch whose ack was lost resends with the same event_id and the server
+// dedupes it).
+function toEventQueueRow(row: Record<string, SqlValue>): EventQueueRow {
+  return {
+    eventId: String(row.event_id),
+    type: String(row.type),
+    at: Number(row.at),
+    schemaVersion: Number(row.schema_version),
+    payload: String(row.payload),
+    sent: Number(row.sent) === 1,
+  };
+}
+
+export function listPendingEvents(driver: SqlDriver): EventQueueRow[] {
+  return driver
+    .prepare(
+      `SELECT event_id, type, at, schema_version, payload, sent
+       FROM event_queue
+       WHERE sent = 0
+       ORDER BY at, event_id`,
+    )
+    .all()
+    .map(toEventQueueRow);
+}
+
+// One transaction marks the acknowledged batch; a crash before the commit
+// leaves the rows pending and the next flush resends them unchanged. The
+// sent = 0 guard keeps the return value the honest "marked now" count —
+// SQLite would otherwise report a matched-but-already-marked row as changed.
+export function markEventsSent(driver: SqlDriver, eventIds: string[]): number {
+  if (eventIds.length === 0) return 0;
+  return inTransaction(driver, () => {
+    const placeholders = eventIds.map(() => '?').join(', ');
+    const result = driver
+      .prepare(`UPDATE event_queue SET sent = 1 WHERE event_id IN (${placeholders}) AND sent = 0`)
+      .run(...eventIds);
+    return Number(result.changes);
   });
 }
 
