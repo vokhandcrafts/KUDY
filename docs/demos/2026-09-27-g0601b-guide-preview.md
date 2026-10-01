@@ -46,7 +46,7 @@ button ready-verified: action=start enabled=true label="Пачаць" reason=- d
 button verify-failure: action=download enabled=true label="Загрузіць" reason=- detail=пакет пашкоджаны: патрэбна паўторная загрузка
 ```
 
-(Перазахоплена 2026-10-01 у PR #443: G06.10 #433 прывёў слоўнікі прычын да
+(Перазахоплена 2026-10-01 у PR #444: G06.10 #433 прывёў слоўнікі прычын да
 правіла «загалоўная літара + кропка» — paid-радок чытаецца як фраза; muted
 detail з дыягностыкай не змяніўся.)
 
