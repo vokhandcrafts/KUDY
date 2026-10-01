@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { countRows, enqueueStep, insertMedia, openStore, upsertRawRecord } from './store.mjs';
+import { countRows, ensureCampaign, enqueueStep, insertMedia, openStore, upsertRawRecord } from './store.mjs';
 import { makeTempDir, rawRecord, seedCampaign } from './testkit.mjs';
 
 // Verbatim from docs/24_web_collection.md «Пашпарт запісу (RawRecord)», in the
@@ -109,4 +109,56 @@ test('AC (G17.03): a pre-G17.03 database is migrated in place by openStore', () 
   assert.equal(insertMedia(db, media), true);
   assert.equal(insertMedia(db, media), false, 'the unique index rejects a duplicate (raw_record_id, file)');
   assert.equal(countRows(db, 'media'), 1);
+});
+
+// G17.19: the campaign row carries the chosen transport — the read-only
+// dispatcher (G17.20) reads it from the store, not from the YAML. A repeated
+// registration of the same campaign file (same identity) never duplicates the
+// row; an edited transport refreshes the row instead of going stale.
+test('AC5 (G17.19): transport is stored on the campaign row, refreshed on re-run, never duplicated', () => {
+  const db = openStore(path.join(makeTempDir(), 'db.sqlite'));
+  const campaign = {
+    city: 'gdansk',
+    seeds: ['https://news.example/gdansk'],
+    topics: [],
+    fence: { depth: 1, extra_domains: [], delay_s: [2, 5] },
+    youtube: [],
+    transport: 'tor',
+  };
+  const sourcePath = path.join(makeTempDir(), 'campaign.yaml');
+  ensureCampaign(db, { campaign, sourcePath, contentHash: 'hash-1' });
+  assert.equal(countRows(db, 'campaigns'), 1);
+  assert.equal(db.prepare('SELECT transport FROM campaigns').get().transport, 'tor');
+
+  // Same file, edited transport: the identity holds, the row refreshes.
+  ensureCampaign(db, { campaign: { ...campaign, transport: 'direct' }, sourcePath, contentHash: 'hash-2' });
+  assert.equal(countRows(db, 'campaigns'), 1, 'a repeated run never duplicates the campaign');
+  assert.equal(db.prepare('SELECT transport FROM campaigns').get().transport, 'direct');
+});
+
+// G17.19: a database written by the pre-G17.19 schema (campaigns without the
+// transport column) keeps working: openStore migrates it in place and the
+// existing rows read as the direct transport they always were.
+test('AC5 (G17.19): a pre-G17.19 database gains the transport column on open', () => {
+  const dbPath = path.join(makeTempDir(), 'old-schema.sqlite');
+  const legacy = new DatabaseSync(dbPath);
+  legacy.exec(`
+    CREATE TABLE campaigns (
+      id TEXT PRIMARY KEY, city TEXT NOT NULL, source_path TEXT NOT NULL UNIQUE,
+      content_hash TEXT NOT NULL, seeds TEXT NOT NULL, topics TEXT NOT NULL,
+      fence TEXT NOT NULL, youtube TEXT NOT NULL, created_at TEXT NOT NULL
+    );
+  `);
+  legacy
+    .prepare(
+      `INSERT INTO campaigns (id, city, source_path, content_hash, seeds, topics, fence, youtube, created_at)
+       VALUES ('c1', 'gdansk', 'campaign.yaml', 'hash', '[]', '[]', '{}', '[]', '2026-09-23T00:00:00.000Z')`
+    )
+    .run();
+  legacy.close();
+
+  const db = openStore(dbPath);
+  const columns = db.prepare('PRAGMA table_info(campaigns)').all().map((column) => column.name);
+  assert.ok(columns.includes('transport'), 'the transport column exists after the migration');
+  assert.equal(db.prepare('SELECT transport FROM campaigns WHERE id = ?').get('c1').transport, 'direct');
 });

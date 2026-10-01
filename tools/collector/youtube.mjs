@@ -18,6 +18,7 @@ import { randomUUID } from 'node:crypto';
 import { fillYoutubeRecord, sha256Hex, upsertRawRecord } from './store.mjs';
 import { createNetGuard } from './netguard.mjs';
 import { slugify } from './snapshot.mjs';
+import { createTorDispatcher, torDownDiagnostic } from './transport.mjs';
 
 // VTT → cues: one entry per cue block, inline tags and speaker labels are not
 // content — stripped; whitespace collapsed. NOTE/STYLE/REGION blocks skipped.
@@ -113,8 +114,15 @@ function runCommand(command, args) {
   });
 }
 
-async function defaultLoadThumbnail(url) {
-  const response = await fetch(url);
+async function defaultLoadThumbnail(url, { dispatcher = null } = {}) {
+  let response;
+  try {
+    response = await fetch(url, dispatcher ? { dispatcher } : undefined);
+  } catch (error) {
+    // Connection-level failure under the Tor transport — the daemon is the
+    // first suspect; site-level statuses below mean the proxy worked.
+    throw dispatcher ? torDownDiagnostic(error) : error;
+  }
   if (response.status >= 400) throw new Error(`thumbnail ${url}: HTTP ${response.status}`);
   const ext = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[response.headers.get('content-type')?.split(';')[0]] ??
     (url.match(/\.(jpe?g|png|webp)(?:$|\?)/i)?.[1]?.toLowerCase().replace('jpeg', 'jpg') ?? null);
@@ -122,20 +130,42 @@ async function defaultLoadThumbnail(url) {
   return { bytes: Buffer.from(await response.arrayBuffer()), ext };
 }
 
+// One yt-dlp invocation. Under the Tor transport (proxyArgs non-empty) every
+// command failure carries the transport hint — with all channels behind
+// SOCKS5, a dead daemon is the first suspect; the original message (including
+// the binary-missing install guidance) survives the wrapping.
+function ytDlp(command, proxyArgs, args) {
+  return runCommand(command, [...proxyArgs, ...args]).catch((error) => {
+    if (proxyArgs.length > 0) throw torDownDiagnostic(error);
+    throw error;
+  });
+}
+
 // The yt-dlp boundary. command defaults to the binary from PATH; tests pass a
 // stub command ([node, stub.js]) and exercise the real spawn/parse path.
-export function createYoutubeFetch({ command = ['yt-dlp'], loadThumbnail = defaultLoadThumbnail, netGuard = createNetGuard() } = {}) {
+// proxy (G17.19) is the Tor SOCKS5 URL for --proxy (socks5h — the proxy
+// resolves DNS, transport.mjs); null keeps today's direct invocations
+// byte-identical. The video's cover download rides the same transport through
+// the SOCKS5 dispatcher — a --proxy alone would leave the thumbnail fetch
+// exposing the author's IP.
+export function createYoutubeFetch({ command = ['yt-dlp'], loadThumbnail = defaultLoadThumbnail, netGuard = createNetGuard(), proxy = null } = {}) {
+  const proxyArgs = proxy ? ['--proxy', proxy] : [];
+  let dispatcher = null;
+  async function dispatcherFor() {
+    if (proxy && dispatcher === null) dispatcher = await createTorDispatcher();
+    return dispatcher;
+  }
   return async function fetchYoutube({ videoId, stagingDir }) {
     const url = `https://www.youtube.com/watch?v=${videoId}`;
     // Phase 1: metadata only — available subtitle languages, nothing written.
-    const info = JSON.parse(runJson(await runCommand(command, ['--dump-json', '--skip-download', url])));
+    const info = JSON.parse(runJson(await ytDlp(command, proxyArgs, ['--dump-json', '--skip-download', url])));
     // Phase 2: write exactly the one chosen subtitle file.
     fs.mkdirSync(stagingDir, { recursive: true });
     let selected = null;
     const chosen = pickLanguage(info);
     if (chosen) {
       const template = path.join(stagingDir, videoId);
-      await runCommand(command, [
+      await ytDlp(command, proxyArgs, [
         '--skip-download', '--write-subs', '--write-auto-subs', '--sub-format', 'vtt',
         '--sub-langs', chosen.lang, '-o', template, url,
       ]);
@@ -153,7 +183,7 @@ export function createYoutubeFetch({ command = ['yt-dlp'], loadThumbnail = defau
       } catch (error) {
         throw new Error(`thumbnail ${info.thumbnail}: ${error.message}`);
       }
-      cover = await loadThumbnail(info.thumbnail);
+      cover = await loadThumbnail(info.thumbnail, { dispatcher: await dispatcherFor() });
     }
     return { info, url, selected, cover };
   };

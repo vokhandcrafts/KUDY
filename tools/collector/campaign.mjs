@@ -15,6 +15,7 @@
 // in-topic subcategories). The topic filter itself is the campaign's topics.
 import { z } from 'zod';
 import { parse as parseYaml } from 'yaml';
+import { TRANSPORTS } from './transport.mjs';
 
 export const campaignSchema = z.strictObject({
   city: z.string().min(1),
@@ -30,6 +31,11 @@ export const campaignSchema = z.strictObject({
       .refine(([min, max]) => min <= max, { message: 'delay_s must be [min, max] with min <= max' }),
   }),
   youtube: z.array(z.string().regex(/^[A-Za-z0-9_-]{11}$/)).default([]),
+  // Collection transport (G17.19): 'direct' is the default and every pre-G17.19
+  // campaign file parses unchanged; 'tor' routes all three collection channels
+  // through the SOCKS5 proxy pinned in transport.mjs. Anything else is rejected
+  // here — the diagnostic names the field ("campaign.transport: …").
+  transport: z.enum(TRANSPORTS).default('direct'),
   wiki: z
     .strictObject({
       // The api.php script is what wikiHistoryUrl rewrites to index.php for
