@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-01 — Прагледзь спецыфікацыю даследчай бібліятэкі G19
+Што зрабіць: прагледзь спецыфікацыю `docs/25_content_research.md` і план `docs/superpowers/plans/2026-10-01-content-research.md`; пацвердзі іх або пазнач патрэбныя праўкі. Пасля прагляду і рэв'ю зліце PR дакументаў, каб яны сталі даступнымі выканаўцам; запуск задач і мадэльныя рашэнні G19.08 застаюцца асобным рашэннем.
+PR: https://github.com/vokhandcrafts/KUDY/pull/467 (issue: https://github.com/vokhandcrafts/KUDY/issues/457; эпік: https://github.com/vokhandcrafts/KUDY/issues/456)
+
 ### 2026-10-01 — Правядзі uk-рэв'ю трох новых драфтаў першага гіда (G14.04.c)
 Што зрабіць: ты — названы uk-рэв'юер-носьбіт (§6.4 uk-release-scope). Праглядзі `authoring/gdansk/review/gdansk-{townhall-base-uk,artushof-base-uk,stmary-uk}.review.md` (кожны факт побач з цытатай і локатарам), правер uk-формы ўласных назваў (табліца ў `docs/agent-tasks/results/G14.04.c.md`) і паставь пазнакі claims (`mark` з `mark_by`/`mark_at`) ды рашэнні рэвю (`review.decision`) у драфтах — без гэтага пераклад не прыняты. Пры заўвагах паправі тэкст драфтаў у тым жа каміце.
 PR: https://github.com/vokhandcrafts/KUDY/pull/468 (issue: https://github.com/vokhandcrafts/KUDY/issues/304)
