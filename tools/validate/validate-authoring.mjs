@@ -34,8 +34,11 @@ const SEASONS = new Set(['spring', 'summer', 'autumn', 'winter']);
 const LOCALES = new Set(['be', 'en', 'uk']);
 
 // Causal connectives a fact block may use only when a cited claim itself
-// states the connection (07, risk 4: the «таму што»/«і тады» class).
-const CONNECTIVES = /таму што|з-за гэтага|з-за чаго|праз гэта|у выніку|што прывяло|прывяло да|і тады|дзякуючы|because|therefore/i;
+// states the connection (07, risk 4: the «таму што»/«і тады» class). The uk
+// forms came with the first uk drafts (G14.04.c, issue #304); claims stay be,
+// so a uk connective is always conservative — the claim must state the
+// connection in its own (be) wording.
+export const CONNECTIVES = /таму што|з-за гэтага|з-за чаго|праз гэта|у выніку|што прывяло|прывяло да|і тады|дзякуючы|because|therefore|тому що|через це|в результаті|завдяки|призвело до|і тоді/i;
 
 // G03.02 — the free story must be complete in itself (13 §3: «у наратыве няма
 // рэкламнага закліку купіць пашырэнне»; 13 §4: «Тэкст не абрываецца дзеля

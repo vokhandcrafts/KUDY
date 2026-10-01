@@ -21,10 +21,6 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 Што зрабіць: ты — названы uk-рэв'юер-носьбіт (§6.4 uk-release-scope). Праглядзі `authoring/gdansk/review/gdansk-{townhall-base-uk,artushof-base-uk,stmary-uk}.review.md` (кожны факт побач з цытатай і локатарам), правер uk-формы ўласных назваў (табліца ў `docs/agent-tasks/results/G14.04.c.md`) і паставь пазнакі claims (`mark` з `mark_by`/`mark_at`) ды рашэнні рэвю (`review.decision`) у драфтах — без гэтага пераклад не прыняты. Пры заўвагах паправі тэкст драфтаў у тым жа каміце.
 PR: https://github.com/vokhandcrafts/KUDY/pull/468 (issue: https://github.com/vokhandcrafts/KUDY/issues/304)
 
-### 2026-10-01 — Смержыць PR #455: рашэнні §6 uk-release-scope улітыя ў дакумент (закрывае #302)
-Што зрабіць: змержы PR #455 squash-мержам пасля зелёнага CI — ён улікае пяць прынятых рашэнняў раздзела 6 даслоўна ў `uk-release-scope.md` і пры мержы закрые issue #302. Гэта follow-up да G14.04.b (PR #454 змержаны), дзе гэты крок паводле каментара ў #302 належыў выканаўцу задачы, але быў зразуметы занадта позна.
-PR: https://github.com/vokhandcrafts/KUDY/pull/455 (issue: https://github.com/vokhandcrafts/KUDY/issues/302)
-
 ### 2026-10-01 — Вырашы лёс кода G17.17: issue #407 закрыта без дастаўкі
 Што зрабіць: issue #407 закрыта 29.09, але яе рэалізацыя (паўзук спасылак са старонак без артыкульнага тэксту — змены ў `tools/collector/crawler.mjs` і `extract.mjs` з тэстамі) існуе толькі незакомічанай у галоўным чэкаўце — гэтай копіі няма ні ў адной галінцы, ні ў main. Скажы агенту зрабіць ратавальны PR з новай галінкі ад main (код + правілы `.gitignore`/AGENTS пра parsed-content), альбо адкінь код.
 PR: няма (issue: https://github.com/vokhandcrafts/KUDY/issues/407)

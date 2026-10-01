@@ -23,7 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { validatePackage } from './validate-package.mjs';
-import { validateAuthoring, BASE_PURCHASE, BASE_DANGLE } from './validate-authoring.mjs';
+import { validateAuthoring, BASE_PURCHASE, BASE_DANGLE, CONNECTIVES } from './validate-authoring.mjs';
 import { renderReviewReport } from './authoring-review-report.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -40,6 +40,7 @@ const NEGATIVE = {
   'invalid-unknown-draft-ref': 'unknown-draft-ref',
   'invalid-fact-without-claim': 'fact-without-claim',
   'invalid-unbacked-connection': 'unbacked-connection',
+  'invalid-unbacked-connection-uk': 'unbacked-connection',
   'invalid-rejected-claim-cited': 'rejected-claim-cited',
   'invalid-unmarked-claim-in-approved': 'unmarked-claim-in-approved',
   'invalid-approval-without-reviewer': 'approval-without-reviewer',
@@ -401,6 +402,18 @@ test('g14.04.c criterion 4: the uk drafts are new text, not copies of their be s
     for (const block of uk.blocks) {
       assert.ok(!beTexts.has(block.text), `${id}/${block.block_id} must be new uk text`);
     }
+  }
+});
+
+test('g14.04.c: the connective guard covers uk connectives without false positives', () => {
+  // The uk forms joined CONNECTIVES with the first uk drafts (issue #304);
+  // pinned here so widening or narrowing the patterns fails this suite
+  // (implementation-rules 1).
+  for (const phrase of ['тому що', 'через це', 'в результаті', 'завдяки', 'призвело до', 'і тоді']) {
+    assert.match(phrase, CONNECTIVES, `CONNECTIVES must catch «${phrase}»`);
+  }
+  for (const phrase of ['тому року', 'результат працы', 'і тому віршу']) {
+    assert.doesNotMatch(phrase, CONNECTIVES, `CONNECTIVES must stay narrow: «${phrase}»`);
   }
 });
 
