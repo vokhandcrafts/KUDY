@@ -56,7 +56,7 @@ describe("route placeholders (19 §2.5)", () => {
   // G06.04: My KUDY is a real surface now. Without the history member (the
   // device db adapter is still to land) the root constructs no member and
   // the screen shows its honest unavailable state — no fake history.
-  test("My KUDY without the history member renders its honest unavailable state", async () => {
+  test("KUDY without the history member renders its honest unavailable state", async () => {
     renderRouter({ "_layout": layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
     const myScreen = await screen.findByTestId("screen-KUDY");
     expect(myScreen).toBeTruthy();
@@ -69,7 +69,7 @@ describe("route placeholders (19 §2.5)", () => {
   // The jest workers' zone is pinned to America/Anchorage (jest.config.js),
   // where 1970-01-01T00:00:05Z is already 1969-12-31 — a revert to the UTC
   // day fails this (implementation-rules 1).
-  test("My KUDY shows the live walk and the previous runs (11 §16.2, 03)", async () => {
+  test("KUDY shows the live walk and the previous runs (11 §16.2, 03)", async () => {
     const sessionHistory = {
       list: async () => [
         {

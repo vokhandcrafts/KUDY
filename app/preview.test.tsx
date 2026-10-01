@@ -411,8 +411,13 @@ describe("G06.05 preview a11y and failure exits (issue #280)", () => {
     await screen.findByTestId("download-error-banner");
     expect(screen.getByText("Збой загрузкі")).toBeTruthy();
     expect(screen.getByText("не хапае месца: патрэбна яшчэ 30 МБ")).toBeTruthy();
-    // The two manual exits of AC4: the named retry and the storage surface.
+    // The two manual exits of AC4: the named retry and the storage surface
+    // (issue #426: the exit's words name the surface «KUDY» — reverting the
+    // string fails this assertion, implementation-rules 1).
     expect(screen.getByTestId("btn-download-retry").props.accessibilityLabel).toBe("Паўтарыць");
+    expect(screen.getByTestId("btn-download-storage").props.accessibilityLabel).toBe(
+      "Вызваліць месца ў KUDY",
+    );
     fireEvent.press(screen.getByTestId("btn-download-storage"));
     expect(await screen.findByTestId("screen-KUDY")).toBeTruthy();
   });
