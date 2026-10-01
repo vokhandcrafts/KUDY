@@ -310,9 +310,11 @@ test('the display family renders only guide and history names (canon §3, issue 
   // at the display role, or a screen consuming the display token
   // directly, turns this red.
   const roleSource = readFileSync(join(root, 'components/screen-styles.ts'), 'utf8');
-  assert.match(roleSource, /title:\s*{[^}]*fontFamily:\s*tokens\.fontFamilyUi/,
+  // \b anchors the key start: a future `subtitle:` must not satisfy the
+  // `title:` assertion by substring (pr-review 2026-10-01).
+  assert.match(roleSource, /\btitle:\s*{[^}]*fontFamily:\s*tokens\.fontFamilyUi/,
     'screenStyles.title must render the UI family');
-  assert.match(roleSource, /displayTitle:\s*{[^}]*fontFamily:\s*tokens\.fontFamilyDisplay/,
+  assert.match(roleSource, /\bdisplayTitle:\s*{[^}]*fontFamily:\s*tokens\.fontFamilyDisplay/,
     'screenStyles.displayTitle must render the display family');
   const displayConsumers = [];
   const scan = (dir) => {
