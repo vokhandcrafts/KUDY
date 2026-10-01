@@ -31,6 +31,15 @@ import {
   createNearbySurfaceController,
   type NearbySurfaceBinding,
 } from './nearby/nearbySurfaceController.ts';
+import {
+  createNearbyHintController,
+  type GuideHintPoint,
+  type GuideHintStore,
+  type GuideHintTelemetryPort,
+  type NearbyHintBinding,
+  type NearbyHintRunSource,
+} from './useNearbyController.ts';
+import type { GuideHintValues } from '../services/config.ts';
 import { createPlaceDetailController, type PlaceDetailBinding } from './place/placeDetailController.ts';
 import { readMomentFacts } from '../services/contentRepo/momentFacts.ts';
 import { createMomentPlayController, type MomentPlayBinding, type MomentPlayState } from './moment/momentPlayController.ts';
@@ -132,6 +141,19 @@ export interface ServicePorts {
   // service is not constructed and the surfaces render their named state.
   readonly discoverySnapshot?: DiscoverySnapshotStore;
   readonly discoveryAnalytics?: DiscoveryAnalyticsPort;
+  // G07.05 (issue #284) — the R07 hint seams: the durable guide_hint_state/
+  // guide_hint_last store over services/db (zone B), the public points
+  // projection and the accepted values document (ADR G07.04 §3). The app
+  // foreground fact and the local hint-event recorder are optional sub-seams;
+  // without the fact the controller shows nothing (fail closed). Absent, the
+  // root constructs no hint controller and no surface renders a hint card.
+  readonly guideHints?: {
+    readonly store: GuideHintStore;
+    readonly values: GuideHintValues;
+    readonly points: () => readonly GuideHintPoint[];
+    readonly foreground?: () => boolean;
+    readonly telemetry?: GuideHintTelemetryPort;
+  };
 }
 
 export interface Services {
@@ -229,6 +251,13 @@ export interface Services {
         readonly controller: ControllerStore<DiscoveryControllerState>;
       }
     | undefined;
+  // G07.05 (issue #284) — the ONE R07 hint controller (19 §2.2): the quiet
+  // guide-nearby card over the accepted ADR G07.04 contract, the owner of
+  // the guide_hint_state/guide_hint_last records. Exists only when the
+  // location, audio and catalog services AND the guideHints seams are all
+  // landed — a hint feature without its durable limits, its public points or
+  // its values document is no feature.
+  readonly hints: NearbyHintBinding | undefined;
 }
 
 export function createServices(ports: ServicePorts): Services {
@@ -250,6 +279,7 @@ export function createServices(ports: ServicePorts): Services {
     events,
     discoverySnapshot,
     discoveryAnalytics,
+    guideHints,
   } = ports;
   const catalogLoader = catalogOrigin ? createOriginCatalogLoader(catalogOrigin) : undefined;
   // MVP display-locale order: Belarusian first (21 §3.2 allowlist; the
@@ -330,6 +360,47 @@ export function createServices(ports: ServicePorts): Services {
         now: now ?? (() => Date.now()),
       })
     : undefined;
+  // G07.05 — the resolver's store wrapped into the hint controller's
+  // structural run source, memoized per resolved store: the controller
+  // re-attaches its change subscription only when the live surface changes.
+  let liveRunWrapper: { readonly store: ControllerStore<RunControllerState>; readonly source: NearbyHintRunSource } | null = null;
+  const liveRunSource = (): NearbyHintRunSource | null => {
+    const store = liveSurfaceController();
+    if (store === null) return null;
+    if (liveRunWrapper === null || liveRunWrapper.store !== store) {
+      liveRunWrapper = {
+        store,
+        source: {
+          get run() {
+            return store.getState().run;
+          },
+          subscribe: (listener) => store.subscribe(listener),
+        },
+      };
+    }
+    return liveRunWrapper.source;
+  };
+  // G07.05 (issue #284) — the ONE R07 hint controller (19 §2.2), over the
+  // accepted ADR G07.04 contract. It reads the fixes through the location
+  // service's read-only tap and the live run state through the resolver; the
+  // durable limits, the public points and the values document arrive with
+  // the guideHints seams. The controller exists only with the full seam set —
+  // a hint card without its limits or its previews is no card.
+  const hints =
+    location && audio && catalogService && guideHints
+      ? createNearbyHintController({
+          location,
+          audio,
+          catalog: catalogService,
+          store: guideHints.store,
+          points: guideHints.points,
+          values: guideHints.values,
+          liveRun: liveRunSource,
+          ...(guideHints.foreground ? { foreground: guideHints.foreground } : {}),
+          ...(guideHints.telemetry ? { telemetry: guideHints.telemetry } : {}),
+          ...(now ? { now } : {}),
+        })
+      : undefined;
   // The idle launch facts Start reads (ADR §3.8: Start inherits the sounding
   // moment instead of stopping it) — a paused launch inherits nothing.
   const currentMomentPlay = momentPlay
@@ -539,6 +610,10 @@ export function createServices(ports: ServicePorts): Services {
           },
           localePreference,
           confirmedSwitch: options?.confirmedSwitch,
+          // G07.05 — the R07 carry source: the hint controller's
+          // foreground-window ids move into session scope in the Start
+          // transaction (ADR G01.03 §3.9).
+          ...(hints ? { carryGuideHints: undefined } : {}),
         });
         runSurfaces.set(routeId, store);
         // A refused surface (the walk never started) is not the walk's
@@ -566,6 +641,7 @@ export function createServices(ports: ServicePorts): Services {
           locale: localePreference[0] ?? 'be',
         }),
     },
+    hints,
     place: catalogService && {
       create: (placeId) =>
         createPlaceDetailController({

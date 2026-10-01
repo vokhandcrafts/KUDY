@@ -11,13 +11,18 @@ import {
   checkpointProgress,
   finishSession,
   getLiveSession,
+  listGuidesInHintCooldown,
+  listSessionGuideHints,
   pauseSession,
+  recordGuideHintDismissed,
+  recordGuideHintShown,
   resumeSession,
   startSession,
   switchSession,
 } from '../services/db/db.ts';
 import type { SqlDriver } from '../services/db/types.ts';
 import type { RunSessionStore } from '../controllers/useRunController.ts';
+import type { GuideHintStore } from '../controllers/useNearbyController.ts';
 
 export function sessionStoreOver(driver: SqlDriver): RunSessionStore {
   return {
@@ -51,5 +56,32 @@ export function sessionStoreOver(driver: SqlDriver): RunSessionStore {
     pause: (sessionId, progress) => pauseSession(driver, sessionId, progress),
     resume: (sessionId) => resumeSession(driver, sessionId),
     finish: (sessionId, input) => finishSession(driver, sessionId, input),
+  };
+}
+
+// G07.05 — the db-backed GuideHintStore port the hint suites share (the same
+// wiring rule as sessionStoreOver above): the composition root of the app
+// build implements it over services/db's public API — the nearby controller
+// is the only writer of the R07 rows (09 §20).
+export function hintStoreOver(driver: SqlDriver): GuideHintStore {
+  return {
+    recordShown(input) {
+      recordGuideHintShown(driver, {
+        guideIds: input.guideIds,
+        scope: input.context === 'active' ? 'session' : 'foreground',
+        sessionId: input.sessionId ?? undefined,
+        at: input.at,
+      });
+    },
+    recordDismissed(input) {
+      recordGuideHintDismissed(driver, {
+        guideIds: input.guideIds,
+        scope: input.context === 'active' ? 'session' : 'foreground',
+        sessionId: input.sessionId ?? undefined,
+        at: input.at,
+      });
+    },
+    sessionShown: (sessionId) => listSessionGuideHints(driver, sessionId).map((row) => row.guideId),
+    cooldownBlocked: (nowMs, cooldownMs) => listGuidesInHintCooldown(driver, nowMs, cooldownMs),
   };
 }

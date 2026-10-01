@@ -18,6 +18,8 @@ import type {
   BundleAssetStatus,
   EventInput,
   EventQueueRow,
+  GuideHintRecordInput,
+  GuideHintStateRow,
   SessionProgress,
   SessionRow,
   SessionStartInput,
@@ -30,7 +32,8 @@ import type {
 // asserted by a test): 'migration-failed', 'schema-newer-than-code',
 // 'live-session-exists', 'session-write-failed', 'guide-hint-transfer-failed',
 // 'session-not-found', 'session-not-active', 'session-not-paused',
-// 'session-not-live'.
+// 'session-not-live', 'guide-hint-input-invalid', 'guide-hint-write-failed',
+// 'guide-hint-dismiss-unknown-guide'.
 export class DbError extends Error {
   rule: string;
 
@@ -547,4 +550,119 @@ export function deletePackageAssets(driver: SqlDriver, routeId: string, version:
     const result = statement.run(routeId, version);
     return Number(result.changes);
   });
+}
+
+// R07 hint records (ADR G01.03 §3.9, ADR G07.04 §5) — the nearby controller
+// is the only writer (09 §20: «запіс толькі праз nearby controller»). A shown
+// row per factually presented guide_id plus the guide_hint_last upsert that
+// carries the cross-opening cooldown. The unique session-scope index is the
+// durable backstop of the one-show-per-session limit: a repeat lands as a
+// named write failure, never as a silent second row.
+function guideHintRecordInputOrThrow(input: GuideHintRecordInput): void {
+  if (input.guideIds.length === 0) {
+    throw new DbError('guide-hint-input-invalid', 'a hint record needs at least one guide_id');
+  }
+  if (input.scope === 'session' && (input.sessionId === undefined || input.sessionId === '')) {
+    throw new DbError('guide-hint-input-invalid', 'a session-scope hint record requires the session_id');
+  }
+}
+
+export function recordGuideHintShown(driver: SqlDriver, input: GuideHintRecordInput): void {
+  guideHintRecordInputOrThrow(input);
+  inTransaction(driver, () => {
+    try {
+      for (const guideId of input.guideIds) {
+        driver
+          .prepare(
+            'INSERT INTO guide_hint_state (scope, guide_id, session_id, shown_at) VALUES (?, ?, ?, ?)',
+          )
+          .run(input.scope, guideId, input.sessionId ?? null, input.at);
+      }
+    } catch (error) {
+      throw new DbError('guide-hint-write-failed', `guide hint shown record failed (${String(input.scope)})`, {
+        cause: error,
+      });
+    }
+    for (const guideId of input.guideIds) {
+      driver
+        .prepare(
+          `INSERT INTO guide_hint_last (guide_id, last_shown_at, last_dismissed_at)
+           VALUES (?, ?, NULL)
+           ON CONFLICT(guide_id) DO UPDATE SET last_shown_at = excluded.last_shown_at`,
+        )
+        .run(guideId, input.at);
+    }
+  });
+}
+
+export function recordGuideHintDismissed(driver: SqlDriver, input: GuideHintRecordInput): void {
+  guideHintRecordInputOrThrow(input);
+  inTransaction(driver, () => {
+    // Only rows a shown record created may gain a dismissal — the limits are
+    // facts of presentations (R07), a dismissal of a never-shown guide is a
+    // caller defect, not data.
+    const sessionClause = input.scope === 'session' ? ' AND session_id = ?' : '';
+    const params: SqlValue[] =
+      input.scope === 'session'
+        ? [input.at, input.scope, ...input.guideIds, input.sessionId ?? null]
+        : [input.at, input.scope, ...input.guideIds];
+    let changes = 0;
+    try {
+      changes = Number(
+        driver
+          .prepare(
+            `UPDATE guide_hint_state SET dismissed_at = ?
+             WHERE scope = ? AND guide_id IN (${input.guideIds.map(() => '?').join(', ')})${sessionClause}`,
+          )
+          .run(...params).changes,
+      );
+    } catch (error) {
+      throw new DbError('guide-hint-write-failed', 'guide hint dismissal record failed', { cause: error });
+    }
+    if (changes === 0) {
+      throw new DbError('guide-hint-dismiss-unknown-guide', `no shown row to dismiss for ${String(input.guideIds.length)} guide_id(s)`);
+    }
+    for (const guideId of input.guideIds) {
+      driver
+        .prepare(
+          `INSERT INTO guide_hint_last (guide_id, last_shown_at, last_dismissed_at)
+           VALUES (?, ?, ?)
+           ON CONFLICT(guide_id) DO UPDATE SET last_dismissed_at = excluded.last_dismissed_at`,
+        )
+        .run(guideId, input.at, input.at);
+    }
+  });
+}
+
+export function listSessionGuideHints(driver: SqlDriver, sessionId: string): GuideHintStateRow[] {
+  return driver
+    .prepare(
+      `SELECT guide_id, shown_at, dismissed_at FROM guide_hint_state
+       WHERE scope = 'session' AND session_id = ? ORDER BY shown_at, guide_id`,
+    )
+    .all(sessionId)
+    .map((row) => ({
+      guideId: String(row.guide_id),
+      shownAt: Number(row.shown_at),
+      dismissedAt: row.dismissed_at === null ? null : Number(row.dismissed_at),
+    }));
+}
+
+// The cross-opening cooldown set (ADR G07.04 §3: one foreground_cooldown_s
+// for shown and dismissed): guide_ids whose last shown or dismissed fact is
+// younger than the window. A guide outside the set is free in a new window.
+export function listGuidesInHintCooldown(
+  driver: SqlDriver,
+  nowMs: number,
+  cooldownMs: number,
+): string[] {
+  const cutoff = nowMs - cooldownMs;
+  return driver
+    .prepare(
+      `SELECT guide_id FROM guide_hint_last
+       WHERE last_shown_at > ? OR (last_dismissed_at IS NOT NULL AND last_dismissed_at > ?)
+       ORDER BY guide_id`,
+    )
+    .all(cutoff, cutoff)
+    .map((row) => String(row.guide_id));
 }

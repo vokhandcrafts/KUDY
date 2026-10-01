@@ -23,12 +23,16 @@ import {
   getSession,
   getLiveSession,
   getSetting,
+  listGuidesInHintCooldown,
   listPendingEvents,
+  listSessionGuideHints,
   listSessionHistory,
   markEventsSent,
   openDatabase,
   pauseSession,
   rebuildDerived,
+  recordGuideHintDismissed,
+  recordGuideHintShown,
   replaceBundleAssets,
   resumeSession,
   setSetting,
@@ -482,4 +486,86 @@ test('bundle_asset: replaceBundleAssets rewrites exactly one key and leaves the 
   const live = getLiveSession(driver);
   assert.notEqual(live, null);
   assert.equal(live?.sessionId, '22222222-2222-4222-8222-222222222222');
+});
+
+// G07.05 — the R07 hint records (ADR G01.03 §3.9 tables, ADR G07.04 §5): the
+// nearby controller is the only writer, the unique session-scope index is the
+// durable backstop of the one-show-per-session limit, and guide_hint_last
+// carries the cross-opening cooldown for shown and dismissed alike.
+test('G07.05: a shown record writes the scope row and the cooldown carrier; the session index is the backstop', () => {
+  const driver = nodeSqliteDriver();
+  openDatabase(driver);
+  recordGuideHintShown(driver, { guideIds: ['g1', 'g2'], scope: 'foreground', at: 1_000 });
+  recordGuideHintShown(driver, { guideIds: ['g1'], scope: 'session', sessionId: 's1', at: 2_000 });
+  assert.deepEqual(
+    listSessionGuideHints(driver, 's1').map((row) => row.guideId),
+    ['g1'],
+  );
+  assert.deepEqual(
+    driver.prepare(`SELECT guide_id, shown_at FROM guide_hint_state WHERE scope = 'foreground' ORDER BY guide_id`).all()
+      .map((row) => [String(row.guide_id), Number(row.shown_at)]),
+    [['g1', 1_000], ['g2', 1_000]],
+  );
+  // The second show of the same guide in the same session trips the unique
+  // index — the named write failure, never a silent second row.
+  assert.throws(
+    () => recordGuideHintShown(driver, { guideIds: ['g1'], scope: 'session', sessionId: 's1', at: 3_000 }),
+    (error: unknown) => error instanceof DbError && error.rule === 'guide-hint-write-failed',
+  );
+  // The cooldown carrier holds the newest shown fact per guide.
+  assert.deepEqual(
+    listGuidesInHintCooldown(driver, 2_000, 10_000).map((guideId) => guideId),
+    ['g1', 'g2'],
+  );
+});
+
+test('G07.05: a dismissal updates only an existing shown row and stamps the cooldown carrier', () => {
+  const driver = nodeSqliteDriver();
+  openDatabase(driver);
+  assert.throws(
+    () => recordGuideHintDismissed(driver, { guideIds: ['g1'], scope: 'foreground', at: 1_000 }),
+    (error: unknown) => error instanceof DbError && error.rule === 'guide-hint-dismiss-unknown-guide',
+  );
+  recordGuideHintShown(driver, { guideIds: ['g1'], scope: 'foreground', at: 1_000 });
+  recordGuideHintDismissed(driver, { guideIds: ['g1'], scope: 'foreground', at: 5_000 });
+  assert.deepEqual(
+    listSessionGuideHints(driver, 's1'),
+    [],
+  );
+  const row = driver.prepare(`SELECT dismissed_at FROM guide_hint_state WHERE guide_id = 'g1'`).all()[0];
+  assert.equal(Number(row?.dismissed_at), 5_000);
+  assert.equal(
+    Number(driver.prepare(`SELECT last_dismissed_at FROM guide_hint_last WHERE guide_id = 'g1'`).all()[0]?.last_dismissed_at),
+    5_000,
+  );
+  // The dismissal rides the same cooldown as the show (ADR G07.04 §3).
+  assert.deepEqual(listGuidesInHintCooldown(driver, 6_000, 10_000), ['g1']);
+  assert.deepEqual(listGuidesInHintCooldown(driver, 16_000, 10_000), []);
+});
+
+test('G07.05: the cooldown boundary is exclusive — a guide at exactly the window edge is free', () => {
+  const driver = nodeSqliteDriver();
+  openDatabase(driver);
+  recordGuideHintShown(driver, { guideIds: ['g1'], scope: 'foreground', at: 1_000 });
+  // shown 1_000 + cooldown 1_000 → free again at 2_000, blocked at 1_999.
+  assert.deepEqual(listGuidesInHintCooldown(driver, 1_999, 1_000), ['g1']);
+  assert.deepEqual(listGuidesInHintCooldown(driver, 2_000, 1_000), []);
+});
+
+test('G07.05: invalid hint records answer with named rules, not crashes or rows', () => {
+  const driver = nodeSqliteDriver();
+  openDatabase(driver);
+  assert.throws(
+    () => recordGuideHintShown(driver, { guideIds: [], scope: 'foreground', at: 1 }),
+    (error: unknown) => error instanceof DbError && error.rule === 'guide-hint-input-invalid',
+  );
+  assert.throws(
+    () => recordGuideHintShown(driver, { guideIds: ['g1'], scope: 'session', at: 1 }),
+    (error: unknown) => error instanceof DbError && error.rule === 'guide-hint-input-invalid',
+  );
+  assert.throws(
+    () => recordGuideHintDismissed(driver, { guideIds: ['g1'], scope: 'session', sessionId: 's1', at: 1 }),
+    (error: unknown) => error instanceof DbError && error.rule === 'guide-hint-dismiss-unknown-guide',
+  );
+  assert.deepEqual(driver.prepare('SELECT COUNT(*) AS n FROM guide_hint_state').all()[0]?.n, 0);
 });
