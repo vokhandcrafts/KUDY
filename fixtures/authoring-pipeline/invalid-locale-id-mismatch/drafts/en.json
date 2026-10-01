@@ -1,0 +1,22 @@
+{
+  "draft_id": "en",
+  "locale": "be",
+  "place_id": "place-fixture",
+  "tier": "base",
+  "source_draft_id": null,
+  "title": "Фікстура: ключ en, лакаля be",
+  "blocks": [
+    {
+      "block_id": "b0",
+      "kind": "orientation",
+      "text": "Арыентоўны сказ фікстуры: паглядзіце на фасад."
+    },
+    {
+      "block_id": "b1",
+      "kind": "fact",
+      "claims": ["cl-1"],
+      "text": "Вежа фікстуры будавалася доўга."
+    }
+  ],
+  "review": { "by": null, "at": null, "decision": "pending" }
+}
