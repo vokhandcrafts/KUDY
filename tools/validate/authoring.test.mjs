@@ -44,6 +44,8 @@ const NEGATIVE = {
   'invalid-unmarked-claim-in-approved': 'unmarked-claim-in-approved',
   'invalid-approval-without-reviewer': 'approval-without-reviewer',
   'invalid-translation-copied-review': 'translation-copied-review',
+  'invalid-translation-same-locale': 'translation-same-locale',
+  'invalid-locale-id-mismatch': 'locale-id-mismatch',
   'invalid-duplicate-id': 'duplicate-id',
   'invalid-missing-locator': 'missing-locator',
   'invalid-draft-id-mismatch': 'draft-id-mismatch',
@@ -315,6 +317,91 @@ test('g03.02: the season reason accepts the draft string and the canon localized
   fs.writeFileSync(scenarioFile, scenarioWith({}));
   const empty = validateAuthoring(dir);
   assert.deepEqual(empty.errors.map((e) => e.rule), ['season-recommendation-without-reason'], 'an empty object is no reason');
+});
+
+// --- G14.04.c (issue #304): the uk translation set ---------------------------
+// The first uk guide = the pilot walk's three base stories (owner decision §6.2
+// in issue #302: the paid extension stays out of the first uk release).
+
+const UK_DRAFTS = [
+  { id: 'gdansk-townhall-base-uk', source: 'gdansk-townhall-base-be' },
+  { id: 'gdansk-artushof-base-uk', source: 'gdansk-artushof-base-be' },
+  { id: 'gdansk-stmary-uk', source: 'gdansk-stmary-be' },
+];
+
+test('g14.04.c criterion 1: the uk drafts are complete new drafts of the same claims', () => {
+  for (const { id, source } of UK_DRAFTS) {
+    const uk = JSON.parse(fs.readFileSync(path.join(AUTHORING, 'drafts', `${id}.json`), 'utf8'));
+    const be = JSON.parse(fs.readFileSync(path.join(AUTHORING, 'drafts', `${source}.json`), 'utf8'));
+    assert.equal(uk.locale, 'uk', `${id} declares uk`);
+    assert.equal(uk.source_draft_id, source, `${id} declares its be source`);
+    assert.equal(uk.tier, 'base', `${id} is a base story — the paid layer stays out (uk-release-scope §6.2)`);
+    assert.equal(uk.review.decision, 'pending', `${id} waits for the uk native review (§6.4)`);
+    assert.equal(uk.blocks.length, be.blocks.length, `${id} translates every block of ${source}`);
+    const ukClaims = uk.blocks.filter((b) => b.kind === 'fact').flatMap((b) => b.claims).sort();
+    const beClaims = be.blocks.filter((b) => b.kind === 'fact').flatMap((b) => b.claims).sort();
+    assert.deepEqual(ukClaims, beClaims, `${id} cites the same claims as ${source}`);
+  }
+});
+
+test('g14.04.c criterion 2: uk drafts use the agreed name forms and keep the quiet register', () => {
+  // The agreed uk forms recorded in results/G14.04.c.md; the be forms must not
+  // leak into the uk texts (Memlinc is spelled the same in both languages).
+  const forbidden = [
+    /Данцыг/u, /Гданьск/u, /Касцёл/u, /двор Артуса/u, /Ганзейскі/u,
+    /Тэўтонскі/u, /Торуньскі/u, /Доўгі рынак/u, /Высокая брама/u, /ван Эйку/u,
+    /лікёры/u, /будавалі з 1343/u, /зала, багата/u,
+  ];
+  // The quiet memorial register (tone: memorial keeps a hushed pace and bans
+  // trivia, story.schema.json): no exclamation marks, no trivia clichés — the
+  // machine proxy for the tone the be drafts set.
+  const trivia = /!|цікави[нн]к|до речі|до слова|факт дня|а ви знали|fun fact|did you know/i;
+  for (const { id } of UK_DRAFTS) {
+    const uk = JSON.parse(fs.readFileSync(path.join(AUTHORING, 'drafts', `${id}.json`), 'utf8'));
+    for (const block of uk.blocks) {
+      for (const pattern of forbidden) {
+        assert.doesNotMatch(block.text, pattern, `${id}/${block.block_id} leaked a be form: ${pattern}`);
+      }
+      assert.doesNotMatch(block.text, trivia, `${id}/${block.block_id} broke the quiet register`);
+    }
+  }
+  const titles = {
+    'gdansk-stmary-uk': 'Костел Святої Марії',
+    'gdansk-artushof-base-uk': 'Двір Артура',
+    'gdansk-townhall-base-uk': 'Ратуша на Довгому ринку',
+  };
+  for (const { id } of UK_DRAFTS) {
+    const uk = JSON.parse(fs.readFileSync(path.join(AUTHORING, 'drafts', `${id}.json`), 'utf8'));
+    assert.equal(uk.title, titles[id], `${id} card title must use the agreed uk form`);
+  }
+});
+
+test('g14.04.c criterion 3: the scenario lists the uk drafts; the be stop titles stay be', () => {
+  const scenario = JSON.parse(fs.readFileSync(path.join(AUTHORING, 'scenarios', 'gdansk-first-walk.json'), 'utf8'));
+  const byPlace = new Map(scenario.stops.map((stop) => [stop.place_id, stop]));
+  for (const [placeId, draftId] of [
+    ['place_gdansk_townhall', 'gdansk-townhall-base-uk'],
+    ['place_gdansk_artushof', 'gdansk-artushof-base-uk'],
+    ['place_gdansk_stmary', 'gdansk-stmary-uk'],
+  ]) {
+    assert.ok(byPlace.get(placeId)?.drafts.includes(draftId), `${draftId} must be listed at ${placeId}`);
+  }
+  // AC4: the author's be project document is not bent to uk syntax.
+  assert.deepEqual(
+    scenario.stops.map((stop) => stop.title),
+    ['Ратуша на Доўгім рынку', 'Двор Артуса', 'Касцёл Св. Марыі'],
+  );
+});
+
+test('g14.04.c criterion 4: the uk drafts are new text, not copies of their be sources', () => {
+  for (const { id, source } of UK_DRAFTS) {
+    const uk = JSON.parse(fs.readFileSync(path.join(AUTHORING, 'drafts', `${id}.json`), 'utf8'));
+    const be = JSON.parse(fs.readFileSync(path.join(AUTHORING, 'drafts', `${source}.json`), 'utf8'));
+    const beTexts = new Set(be.blocks.map((block) => block.text));
+    for (const block of uk.blocks) {
+      assert.ok(!beTexts.has(block.text), `${id}/${block.block_id} must be new uk text`);
+    }
+  }
 });
 
 test('corrupt input answers with diagnostics, never a thrown error', () => {

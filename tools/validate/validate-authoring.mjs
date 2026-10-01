@@ -29,6 +29,9 @@ const DATE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 // (season_recommendations, 21 §3.2) verbatim; the empty array means
 // not_assessed.
 const SEASONS = new Set(['spring', 'summer', 'autumn', 'winter']);
+// The locale vocabulary copies contracts/schemas/localized-text.schema.json
+// (propertyNames, G14.04.b) verbatim; used by locale-id-mismatch below.
+const LOCALES = new Set(['be', 'en', 'uk']);
 
 // Causal connectives a fact block may use only when a cited claim itself
 // states the connection (07, risk 4: the «таму што»/«і тады» class).
@@ -343,6 +346,17 @@ export function validateAuthoring(dir) {
     else if (`${draft.draft_id}.json` !== name) diag(errors, 'error', 'draft-id-mismatch', `${at}#draft_id`);
     if (!isId(draft.place_id)) diag(errors, 'error', 'invalid-shape', `${at}#place_id`);
     if (!isText(draft.locale)) diag(errors, 'error', 'invalid-shape', `${at}#locale`);
+    else {
+      // G14.04.c (issue #304): when a draft_id carries a locale-code suffix
+      // (the workspace convention: gdansk-stmary-uk), the suffix must agree
+      // with the locale field — a key naming one language while declaring
+      // another is exactly the locale mixing the task's proof forbids.
+      // Suffixes outside the locale vocabulary (be2, extra) stay legal.
+      const suffix = draft.draft_id.split('-').pop();
+      if (LOCALES.has(suffix) && suffix !== draft.locale) {
+        diag(errors, 'error', 'locale-id-mismatch', `${at}#locale`);
+      }
+    }
     if (!TIERS.has(draft.tier)) diag(errors, 'error', 'invalid-value', `${at}#tier`);
     if (!isText(draft.title)) diag(errors, 'error', 'invalid-shape', `${at}#title`);
     if (draft.source_draft_id !== null && draft.source_draft_id !== undefined) {
@@ -376,6 +390,12 @@ export function validateAuthoring(dir) {
       continue;
     }
     const source = drafts.find((entry) => entry.draft.draft_id === draft.source_draft_id)?.draft;
+    // G14.04.c (issue #304): a translation crosses a language boundary — its
+    // source draft must be in another locale. A same-locale «translation»
+    // mixes languages inside one chain and hides the missing real source.
+    if (isPlainObject(source) && isText(draft.locale) && source.locale === draft.locale) {
+      diag(errors, 'error', 'translation-same-locale', `drafts/${name}#locale#${draft.locale}`);
+    }
     const review = draft.review;
     if (
       isPlainObject(source) &&

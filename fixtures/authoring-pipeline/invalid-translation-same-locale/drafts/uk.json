@@ -1,0 +1,22 @@
+{
+  "draft_id": "uk",
+  "locale": "uk",
+  "place_id": "place-fixture",
+  "tier": "base",
+  "source_draft_id": null,
+  "title": "Фікстура uk",
+  "blocks": [
+    {
+      "block_id": "b0",
+      "kind": "orientation",
+      "text": "Орієнтовне речення фікстури: подивіться на фасад."
+    },
+    {
+      "block_id": "b1",
+      "kind": "fact",
+      "claims": ["cl-1"],
+      "text": "Вежа фікстури поставала довго."
+    }
+  ],
+  "review": { "by": null, "at": null, "decision": "pending" }
+}
