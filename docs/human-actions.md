@@ -19,7 +19,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ### 2026-10-02 — Рэв'юй uk-радкі як носьбіт і смержы PR G14.04.d (закрывае #305)
 Што зрабіць: прачытай uk-радкі ў трох зонах — `components/ui-strings.ts`, пяць кантролер-слоўнікаў (`previewController`, `runMap`, `placeDetailController`, `nearbySurfaceController`, `commerceController`) і `web/lib/i18n/uk.ts` — і папраў мову дзе трэба: рэв'ю носьбіта uk належыць табе па рашэнні 6.4 uk-release-scope. Пасля правак (або без іх) смержы PR squash-мержам пасля зелёнага CI — ён закрые issue #305.
-PR: гэты PR (спасылка з'явіцца пасля стварэння; issue: https://github.com/vokhandcrafts/KUDY/issues/305)
+PR: https://github.com/vokhandcrafts/KUDY/pull/469 (issue: https://github.com/vokhandcrafts/KUDY/issues/305)
 
 ### 2026-10-01 — Вырашы лёс кода G17.17: issue #407 закрыта без дастаўкі
 Што зрабіць: issue #407 закрыта 29.09, але яе рэалізацыя (паўзук спасылак са старонак без артыкульнага тэксту — змены ў `tools/collector/crawler.mjs` і `extract.mjs` з тэстамі) існуе толькі незакомічанай у галоўным чэкаўце — гэтай копіі няма ні ў адной галінцы, ні ў main. Скажы агенту зрабіць ратавальны PR з новай галінкі ад main (код + правілы `.gitignore`/AGENTS пра parsed-content), альбо адкінь код.
