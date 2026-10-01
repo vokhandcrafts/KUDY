@@ -196,7 +196,7 @@ export interface MetricsReport {
   boundaries: {
     analytics_consent: 'granted' | 'revoked' | 'never_asked';
     future_sends_blocked: boolean;
-    /** Latest acknowledged (sent) event time; null = nothing has reached the server. */
+    /** Latest acknowledged (sent) event time within the window; null = no acknowledged row in the window. */
     server_visibility_ends_at: number | null;
     /** Recorded but not yet acknowledged — the offline/pending trace. */
     pending_events: number;
