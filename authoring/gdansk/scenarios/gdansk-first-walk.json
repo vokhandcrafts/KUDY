@@ -10,7 +10,7 @@
       "place_id": "place_gdansk_townhall",
       "title": "Ратуша на Доўгім рынку",
       "walk_minutes": 15,
-      "drafts": ["gdansk-townhall-base-be", "gdansk-townhall-extended-be"],
+      "drafts": ["gdansk-townhall-base-be", "gdansk-townhall-extended-be", "gdansk-townhall-base-uk"],
       "refs": ["src-eb1911-danzig"],
       "season_recommendations": []
     },
@@ -18,7 +18,7 @@
       "place_id": "place_gdansk_artushof",
       "title": "Двор Артуса",
       "walk_minutes": 10,
-      "drafts": ["gdansk-artushof-base-be", "gdansk-artushof-extended-be"],
+      "drafts": ["gdansk-artushof-base-be", "gdansk-artushof-extended-be", "gdansk-artushof-base-uk"],
       "refs": ["src-eb1911-danzig"],
       "season_recommendations": []
     },
@@ -26,7 +26,7 @@
       "place_id": "place_gdansk_stmary",
       "title": "Касцёл Св. Марыі",
       "walk_minutes": 20,
-      "drafts": ["gdansk-stmary-be", "gdansk-stmary-extended-be", "gdansk-stmary-en"],
+      "drafts": ["gdansk-stmary-be", "gdansk-stmary-extended-be", "gdansk-stmary-en", "gdansk-stmary-uk"],
       "refs": ["src-eb1911-danzig"],
       "season_recommendations": []
     }
