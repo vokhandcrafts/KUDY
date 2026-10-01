@@ -28,10 +28,11 @@ function collectTsx(dir: string): string[] {
 // words never match.
 const JSX_TEXT = /(?<=[A-Za-z0-9_}"])>([^<>{}\n]*[A-Za-zА-Яа-яЁёЎўІЇЄҐ][^<>{}\n]*)</g;
 // A string literal on the props the components read as visible/screen-reader
-// words: any Cyrillic value, or any multi-word value (testIDs and single
-// English system words stay out).
+// words: any letter-bearing value fails — a single English word rides no
+// exception (the codebase carries zero literal values on these props; a
+// legit new word belongs to the catalogs).
 const WORD_PROP = /\b(?:label|text|title|hint)\s*=\s*"([^"]*)"/g;
-const CYRILLIC = /[А-Яа-яЁёЎўІЇЄҐіїєґ]/;
+const LETTERS = /[A-Za-zА-Яа-яЁёЎўІЇЄҐіїєґ]/;
 
 describe("no hardcoded words in the rendering zones (G14.04.d AC2)", () => {
   const files = [
@@ -51,9 +52,8 @@ describe("no hardcoded words in the rendering zones (G14.04.d AC2)", () => {
         hits.push(`${file}: JSX text «${match[1]}»`);
       }
       for (const match of source.matchAll(WORD_PROP)) {
-        const value = match[1];
-        if (CYRILLIC.test(value) || /\S\s+\S/.test(value)) {
-          hits.push(`${file}: prop literal «${value}»`);
+        if (LETTERS.test(match[1])) {
+          hits.push(`${file}: prop literal «${match[1]}»`);
         }
       }
     }
