@@ -338,7 +338,7 @@ test('a cover URL on a non-public address is refused by the net guard before the
 // JSONL log, then serves phase 1 (--dump-json → a one-video playlist with an
 // English subtitle) and phase 2 (--write-subs → writes the VTT), like the
 // shared writeYtDlpStub but recording the command boundary.
-function writeArgvYtDlpStub(dir, argvLog, { exitOnDump = false } = {}) {
+function writeArgvYtDlpStub(dir, argvLog, { exitOnDump = false, withThumbnail = false } = {}) {
   const stubPath = path.join(dir, 'yt-dlp-argv-stub.mjs');
   fs.writeFileSync(
     stubPath,
@@ -346,7 +346,7 @@ function writeArgvYtDlpStub(dir, argvLog, { exitOnDump = false } = {}) {
 const args = process.argv.slice(2);
 fs.appendFileSync(${JSON.stringify(argvLog)}, JSON.stringify(args) + '\\n');
 if (args.includes('--dump-json')) {
-  ${exitOnDump ? 'process.exit(3);' : `console.log(JSON.stringify({ id: 'dQw4w9WgXcQ', title: 'Stub video', subtitles: { en: [{ ext: 'vtt' }] } }));
+  ${exitOnDump ? 'process.exit(3);' : `console.log(JSON.stringify({ id: 'dQw4w9WgXcQ', title: 'Stub video',${withThumbnail ? " thumbnail: 'https://img.example/cover.jpg'," : ''} subtitles: { en: [{ ext: 'vtt' }] } }));
   process.exit(0);`}
 }
 if (args.includes('--write-subs')) {
@@ -410,5 +410,25 @@ test('AC6 (G17.19): a yt-dlp failure under tor carries the tor-down hint, origin
   await assert.rejects(
     fetchYoutube({ videoId: 'dQw4w9WgXcQ', stagingDir: path.join(dir, 'staging') }),
     /exited 3.*tor daemon/s
+  );
+});
+
+test('AC6 (G17.19): a cover fetch failure under tor carries the tor-down hint', async (t) => {
+  const dir = makeTempDir();
+  const argvLog = path.join(dir, 'argv.jsonl');
+  const command = writeArgvYtDlpStub(dir, argvLog, { withThumbnail: true });
+  const fetchYoutube = createYoutubeFetch({
+    command,
+    netGuard: async () => {},
+    proxy: TOR_SOCKS5H_PROXY,
+  });
+  // The cover download dies like it does behind a dead SOCKS5 proxy.
+  t.mock.method(globalThis, 'fetch', async () => {
+    throw new Error('fetch failed');
+  });
+
+  await assert.rejects(
+    fetchYoutube({ videoId: 'dQw4w9WgXcQ', stagingDir: path.join(dir, 'staging') }),
+    /fetch failed.*tor daemon/s
   );
 });

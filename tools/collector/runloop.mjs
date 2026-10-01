@@ -140,11 +140,17 @@ export function defaultHandlers({
   }
   // The Tor transport's shared dispatcher (G17.19): created on the first
   // channel use, so direct and file:// campaigns never create a proxy — the
-  // same lazy contract the browser has. One promise per run; a failure stays
-  // unmemoized so the next step retries.
+  // same lazy contract the browser has. One promise per run; a failed
+  // creation is not memoized — the next channel use retries, matching
+  // youtube.mjs's dispatcherFor.
   function dispatcherFor(ctx) {
     if (transportProxy(ctx.campaign) === null) return null;
-    if (dispatcherPromise === null) dispatcherPromise = createTorDispatcher();
+    if (dispatcherPromise === null) {
+      dispatcherPromise = createTorDispatcher().catch((error) => {
+        dispatcherPromise = null;
+        throw error;
+      });
+    }
     return dispatcherPromise;
   }
   function fetchRobotsFor(ctx) {

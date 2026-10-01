@@ -115,7 +115,14 @@ function runCommand(command, args) {
 }
 
 async function defaultLoadThumbnail(url, { dispatcher = null } = {}) {
-  const response = await fetch(url, dispatcher ? { dispatcher } : undefined);
+  let response;
+  try {
+    response = await fetch(url, dispatcher ? { dispatcher } : undefined);
+  } catch (error) {
+    // Connection-level failure under the Tor transport — the daemon is the
+    // first suspect; site-level statuses below mean the proxy worked.
+    throw dispatcher ? torDownDiagnostic(error) : error;
+  }
   if (response.status >= 400) throw new Error(`thumbnail ${url}: HTTP ${response.status}`);
   const ext = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[response.headers.get('content-type')?.split(';')[0]] ??
     (url.match(/\.(jpe?g|png|webp)(?:$|\?)/i)?.[1]?.toLowerCase().replace('jpeg', 'jpg') ?? null);

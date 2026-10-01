@@ -259,6 +259,31 @@ test('AC3 (G17.19): the robots.txt gate rides the SOCKS5 dispatcher under the to
   assert.ok(fetchMock.mock.calls[0].arguments[1]?.dispatcher, 'the robots fetch carries the SOCKS5 dispatcher');
 });
 
+test('AC6 (G17.19): a robots.txt fetch failure under tor carries the tor-down hint', async (t) => {
+  const { file, source, campaign, db } = transportCampaign(makeTempDir(), {
+    seeds: 'seeds:\n  - http://a.example/one',
+    youtube: 'youtube: []',
+    transport: 'transport: tor',
+  });
+  const handlers = offlineHandlers({
+    // Unreachable by construction: the robots gate refuses the seed first.
+    fetchPage: async () => {
+      throw new Error('must not be reached — the robots gate refuses first');
+    },
+  });
+  // The robots.txt request dies like it does behind a dead SOCKS5 proxy; the
+  // gate's «unavailable» reason must carry the tor-down hint (criterion 6 on
+  // the run's most likely failure path — the first request of every host).
+  t.mock.method(globalThis, 'fetch', async () => {
+    throw new Error('fetch failed');
+  });
+
+  const run = await runCampaign(db, campaign, { sourcePath: file, contentHash: sha256Hex(source), handlers });
+  assert.equal(run.failed, 1);
+  const failed = db.prepare("SELECT error FROM run_log WHERE status = 'failed'").get();
+  assert.match(failed.error, /fetch failed.*tor daemon.*seed not fetched/s);
+});
+
 test('live AC3 (G17.19): a tor campaign drives the production browser through the SOCKS5 proxy', async (t) => {
   if (!(await skipWithoutBrowser(t))) return;
   const { file, source, campaign, db } = transportCampaign(makeTempDir(), {
