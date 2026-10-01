@@ -1,8 +1,9 @@
 // G09.05 — remote config: fetch, contract validation, offline cache and the
 // safe default. Sources copied not paraphrased: `09` §5 (GET /v1/config, no
-// auth, the closed field list), `09` §6.2 (the config layer: radius/dwell/
-// cooldowns change without a release), `19` §2.3 (one provider of the
-// numbers, the cache survives offline), issue #295 criteria 3–4.
+// auth, the closed field list), `05` §12 (the canon of "parameters from the
+// server, not constants in code" — radius/dwell/cooldowns change without a
+// release; `09` §6.2 carries the config layer row), `19` §2.3 (one provider
+// of the numbers, the cache survives offline), issue #295 criteria 3–4.
 //
 // Boundary: the contract module (contracts/config/remote-config.mjs) is
 // node-side — its schema reader opens files — so this module takes the

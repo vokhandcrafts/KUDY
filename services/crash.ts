@@ -1,6 +1,6 @@
 // G09.05 — crash reporting core: the closed report shape, the separate
 // consent and the consent-gated submit. Sources: issue #295 criteria 1–2,
-// `09` §7 M7 (crash reporting ships from the first build), `05` разд. 17. The
+// `09` §13 M7 (crash reporting ships from the first build), `05` разд. 17. The
 // closed API list (`09` §5) has no crash endpoint, so the destination is an
 // injected sink port — an external Sentry-class service composes behind it
 // when an account exists (issue notes). Nothing here invents a second queue
