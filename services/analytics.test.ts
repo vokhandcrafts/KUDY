@@ -1,0 +1,260 @@
+// G09.02 — acceptance suite for services/analytics (issue #286). Criteria:
+// 1. no consent — zero sends: the gated flush never reads the queue, never
+//    constructs network work (no pings, no batches) and marks nothing
+//    (fails when the consent check is reverted to a pass-through);
+// 2. refusal/withdrawal stops sending without losing local progress or the
+//    queue — pending rows survive, emit keeps recording locally;
+// plus the consent state contract (closed vocabulary, durable across a
+// restart, corrupt value = named diagnostic) and the wire transport's
+// verbatim mapping + closed error rules.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import test from 'node:test';
+
+import {
+  AnalyticsError,
+  createEventsTransport,
+  flushAnalytics,
+  getAnalyticsConsent,
+  setAnalyticsConsent,
+  type EventsHttpTransport,
+} from './analytics.ts';
+import { DbError, openDatabase } from './db/db.ts';
+import { nodeSqliteFileDriver } from './db/test-fixture.ts';
+import type { SqlDriver } from './db/types.ts';
+import { eventFactory, openFreshEventStore } from './eventLog-test-fixture.ts';
+import { emitEvent, flushEvents, type OutgoingEvent } from './eventLog.ts';
+
+const event = eventFactory('22222222-2222-4222-8222-');
+
+function openFileDriver(): { driver: SqlDriver; file: string; close(): void } {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-analytics-'));
+  const file = path.join(dir, 'zone-b.sqlite');
+  const { driver, close } = nodeSqliteFileDriver(file);
+  openDatabase(driver);
+  return { driver, file, close };
+}
+
+test('criterion 1: no consent asked — zero sends, nothing marked, the queue untouched', async () => {
+  const driver = openFreshEventStore();
+  emitEvent(driver, event());
+  emitEvent(driver, event());
+
+  let calls = 0;
+  const marked = await flushAnalytics(driver, () => {
+    calls += 1;
+    return Promise.resolve();
+  });
+
+  assert.equal(calls, 0, 'the sender must not be invoked without consent — no pings, no batched sends');
+  assert.equal(marked, 0);
+  assert.equal(getAnalyticsConsent(driver), null);
+
+  // Nothing was marked behind the caller's back: a granted flush drains the
+  // very same two events afterwards.
+  setAnalyticsConsent(driver, 'granted');
+  let drained = 0;
+  await flushAnalytics(driver, (batch) => {
+    drained += batch.length;
+    return Promise.resolve();
+  });
+  assert.equal(drained, 2, 'the events queued before the grant are sent by the first granted flush');
+});
+
+test('criterion 1: a refused consent keeps the flush closed the same way', async () => {
+  const driver = openFreshEventStore();
+  emitEvent(driver, event());
+  setAnalyticsConsent(driver, 'revoked');
+
+  let calls = 0;
+  await flushAnalytics(driver, () => {
+    calls += 1;
+    return Promise.resolve();
+  });
+
+  assert.equal(calls, 0);
+});
+
+test('criterion 2: withdrawal stops sending — the queue and the marked progress survive', async () => {
+  const driver = openFreshEventStore();
+  emitEvent(driver, event());
+  setAnalyticsConsent(driver, 'granted');
+
+  const sent: OutgoingEvent[][] = [];
+  assert.equal(await flushAnalytics(driver, (batch) => {
+    sent.push(batch);
+    return Promise.resolve();
+  }), 1);
+  assert.equal(sent.length, 1);
+
+  // Withdrawal: new events queue up but nothing leaves the device.
+  setAnalyticsConsent(driver, 'revoked');
+  emitEvent(driver, event({ type: 'route_preview' }));
+  let callsAfterWithdrawal = 0;
+  await flushAnalytics(driver, () => {
+    callsAfterWithdrawal += 1;
+    return Promise.resolve();
+  });
+  assert.equal(callsAfterWithdrawal, 0);
+
+  // The withdrawn batch is still pending, the granted one stays marked.
+  let calls = 0;
+  await flushEvents(driver, (batch) => {
+    calls += 1;
+    assert.equal(batch.length, 1);
+    assert.equal(batch[0]!.type, 'route_preview');
+    return Promise.resolve();
+  });
+  assert.equal(calls, 1, 'the pending event survived the withdrawal');
+});
+
+test('criterion 2: local recording never depends on consent — emit works after refusal', async () => {
+  const driver = openFreshEventStore();
+  setAnalyticsConsent(driver, 'revoked');
+  emitEvent(driver, event());
+  emitEvent(driver, event({ type: 'session_started' }));
+  // A plain flush (no gate) still drains through an explicit sender — the
+  // consent decision belongs to the send path, not to the queue's storage.
+  assert.equal(await flushEvents(driver, () => Promise.resolve()), 2);
+});
+
+test('consent state: durable across a restart, corrupt value is a named diagnostic', () => {
+  const { driver, file, close } = openFileDriver();
+  assert.equal(getAnalyticsConsent(driver), null);
+  setAnalyticsConsent(driver, 'granted');
+  close();
+  const { driver: reopened } = nodeSqliteFileDriver(file);
+  openDatabase(reopened);
+  assert.equal(getAnalyticsConsent(reopened), 'granted');
+
+  reopened.execSql("update settings set value = 'maybe' where key = 'analytics_consent'");
+  assert.throws(() => getAnalyticsConsent(reopened), (error: unknown) => {
+    assert.ok(error instanceof AnalyticsError);
+    assert.equal((error as AnalyticsError).rule, 'invalid_consent_state');
+    return true;
+  });
+});
+
+function fakeHttp(responses: Array<{ status: number; body: unknown }>): {
+  transport: EventsHttpTransport;
+  requests: Array<{ url: string; body: unknown; headers: Record<string, string> }>;
+} {
+  const requests: Array<{ url: string; body: unknown; headers: Record<string, string> }> = [];
+  let n = 0;
+  return {
+    requests,
+    transport: {
+      async postEvents(url, body, headers) {
+        requests.push({ url, body, headers });
+        const response = responses[Math.min(n, responses.length - 1)]!;
+        n += 1;
+        return response;
+      },
+    },
+  };
+}
+
+function wireDeps(transport: EventsHttpTransport) {
+  return {
+    baseUrl: 'https://example.supabase.co/functions/v1',
+    identity: { deviceId: '33333333-3333-4333-8333-000000000001', deviceSecret: 'secret-value' },
+    transport,
+  };
+}
+
+test('transport: verbatim wire shape — envelope, ISO timestamp, bearer identity', async () => {
+  const { transport, requests } = fakeHttp([{ status: 200, body: { accepted: 1 } }]);
+  const send = createEventsTransport(wireDeps(transport));
+  const queued: OutgoingEvent = {
+    event_id: '44444444-4444-4444-8444-000000000001',
+    type: 'stop_reached',
+    at: 1_700_000_000_123,
+    schema_version: 1,
+    payload: { session_id: 'sess-1', stop_id: 'stop-1' },
+  };
+  await send([queued]);
+
+  assert.equal(requests.length, 1);
+  const { url, body, headers } = requests[0]!;
+  assert.equal(url, 'https://example.supabase.co/functions/v1/events');
+  assert.equal(headers.authorization, 'Bearer secret-value');
+  const envelope = body as { events: Array<Record<string, unknown>> };
+  assert.deepEqual(
+    Object.keys(envelope.events[0]!).sort(),
+    ['at', 'event_id', 'payload', 'schema_version', 'type'],
+    'the wire element carries exactly the queued fields — the transport adds nothing',
+  );
+  assert.equal(envelope.events[0]!['event_id'], queued.event_id);
+  assert.equal(envelope.events[0]!['type'], queued.type);
+  assert.equal(envelope.events[0]!['schema_version'], queued.schema_version);
+  assert.deepEqual(envelope.events[0]!['payload'], queued.payload);
+  assert.equal(envelope.events[0]!['at'], '2023-11-14T22:13:20.123Z');
+});
+
+test('transport: closed error rules — 400 reason, 429, server status, network fault', async () => {
+  const reason = 'events[0].payload.lat: forbidden-coordinates';
+  const bad = fakeHttp([{ status: 400, body: { error: { code: 'invalid_event', reason } } }]);
+  await assert.rejects(createEventsTransport(wireDeps(bad.transport))([]), (error: unknown) => {
+    assert.ok(error instanceof AnalyticsError);
+    assert.equal((error as AnalyticsError).rule, 'invalid_payload');
+    assert.match((error as AnalyticsError).message, /forbidden-coordinates/);
+    return true;
+  });
+
+  const bare = fakeHttp([{ status: 400, body: null }]);
+  await assert.rejects(createEventsTransport(wireDeps(bare.transport))([]), (error: unknown) => {
+    assert.ok(error instanceof AnalyticsError);
+    assert.equal((error as AnalyticsError).rule, 'invalid_payload');
+    return true;
+  });
+
+  const limited = fakeHttp([{ status: 429, body: { error: { code: 'event_rate_limited' } } }]);
+  await assert.rejects(createEventsTransport(wireDeps(limited.transport))([]), (error: unknown) => {
+    assert.ok(error instanceof AnalyticsError);
+    assert.equal((error as AnalyticsError).rule, 'rate_limited');
+    return true;
+  });
+
+  const broken = fakeHttp([{ status: 503, body: { error: { code: 'server_error' } } }]);
+  await assert.rejects(createEventsTransport(wireDeps(broken.transport))([]), (error: unknown) => {
+    assert.ok(error instanceof AnalyticsError);
+    assert.equal((error as AnalyticsError).rule, 'server_error');
+    return true;
+  });
+
+  const network: EventsHttpTransport = {
+    async postEvents() {
+      throw new AnalyticsError('network_failed', 'offline', { cause: new Error('EAI_AGAIN') });
+    },
+  };
+  await assert.rejects(createEventsTransport(wireDeps(network))([]), (error: unknown) => {
+    assert.ok(error instanceof AnalyticsError);
+    assert.equal((error as AnalyticsError).rule, 'network_failed');
+    return true;
+  });
+});
+
+test('transport: a non-finite queued timestamp is a named diagnostic before any network work', async () => {
+  const { transport, requests } = fakeHttp([{ status: 200, body: { accepted: 1 } }]);
+  const send = createEventsTransport(wireDeps(transport));
+  await assert.rejects(send([{ event_id: 'x', type: 'app_open', at: Number.NaN, schema_version: 1, payload: {} }]), (
+    error: unknown,
+  ) => {
+    assert.ok(error instanceof AnalyticsError);
+    assert.equal((error as AnalyticsError).rule, 'invalid_event_time');
+    return true;
+  });
+  assert.equal(requests.length, 0);
+});
+
+test('boundaries: DbError still surfaces through the gated flush (queue integrity diagnostics)', async () => {
+  const driver = openFreshEventStore();
+  driver.execSql("insert into event_queue (event_id, type, at, schema_version, payload) values ('x', 'app_open', 1, 1, 'not-json')");
+  setAnalyticsConsent(driver, 'granted');
+  await assert.rejects(flushAnalytics(driver, () => Promise.resolve()), (error: unknown) => {
+    assert.ok(error instanceof DbError);
+    return true;
+  });
+});
