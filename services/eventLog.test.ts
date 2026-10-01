@@ -185,6 +185,26 @@ test('emitEvent: a repeated event_id lands once through the service too', () => 
   assert.equal(queuedRows(driver, 'app_open'), 1);
 });
 
+test('the flush batch is bounded: a queue larger than the chunk goes out in order, nothing re-sent', async () => {
+  const driver = openFresh();
+  const ids: string[] = [];
+  for (let i = 0; i < 300; i += 1) {
+    const one = event({ at: 1_700_000_000_000 + i });
+    ids.push(one.eventId);
+    emitEvent(driver, one);
+  }
+  const batches: string[][] = [];
+  await flushEvents(driver, (events) => {
+    batches.push(events.map((e) => e.event_id));
+    return Promise.resolve();
+  });
+  // 256 + 44: no driver's bind-parameter limit can wedge the queue, and a
+  // revert to one unbounded batch fails this count
+  assert.equal(batches.length, 2);
+  assert.deepEqual(batches.flat(), ids);
+  assert.equal((await capture(driver)).length, 0);
+});
+
 test('emit refuses a payload that is not a JSON object — named diagnostic, nothing stored', () => {
   const driver = openFresh();
   const corrupt = ['{broken', '5', '[1,2]', 'null'];

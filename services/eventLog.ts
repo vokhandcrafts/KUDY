@@ -19,6 +19,8 @@ import type { EventInput, SqlDriver } from './db/types.ts';
 
 // The wire shape of one queued event, verbatim event-table field names. The
 // payload is the stored JSON, parsed once — the queue never interprets it.
+// Boundary note: `at` leaves the queue in epoch ms (the store's clock); the
+// ISO-8601 conversion the event table defines is the G09.02 transport's job.
 export interface OutgoingEvent {
   event_id: string;
   type: string;
@@ -43,28 +45,38 @@ export function emitEvent(driver: SqlDriver, event: EventInput): void {
   appendEvent(driver, event);
 }
 
-// Flushes the pending tail through the injected sender and marks the
-// acknowledged batch sent in one transaction. A sender that resolved but a
+// The pending tail goes out in bounded chunks: one send call and one sent
+// mark per chunk, so no driver's bind-parameter limit can wedge the queue
+// and a failing chunk leaves the earlier ones marked, the rest pending —
+// the retry resends only what stayed.
+const FLUSH_CHUNK = 256;
+
+// Flushes the pending tail through the injected sender and marks each
+// acknowledged chunk sent in one transaction. A sender that resolved but a
 // process that died before the mark leave the rows pending, and the next
 // flush resends the same event_ids — the stable-id contract the server
 // dedupes against. Returns the number of marked events; an empty queue
 // wakes no transport.
 export async function flushEvents(driver: SqlDriver, send: EventSender): Promise<number> {
   const pending = listPendingEvents(driver);
-  if (pending.length === 0) return 0;
-  await send(
-    pending.map((row) => ({
-      event_id: row.eventId,
-      type: row.type,
-      at: row.at,
-      schema_version: row.schemaVersion,
-      payload: parsePayload(row.payload, `event ${row.eventId}`),
-    })),
-  );
-  return markEventsSent(
-    driver,
-    pending.map((row) => row.eventId),
-  );
+  let marked = 0;
+  for (let start = 0; start < pending.length; start += FLUSH_CHUNK) {
+    const chunk = pending.slice(start, start + FLUSH_CHUNK);
+    await send(
+      chunk.map((row) => ({
+        event_id: row.eventId,
+        type: row.type,
+        at: row.at,
+        schema_version: row.schemaVersion,
+        payload: parsePayload(row.payload, `event ${row.eventId}`),
+      })),
+    );
+    marked += markEventsSent(
+      driver,
+      chunk.map((row) => row.eventId),
+    );
+  }
+  return marked;
 }
 
 function parsePayload(payload: string, source: string): unknown {
