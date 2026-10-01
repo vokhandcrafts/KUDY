@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { createContext, useContext, useMemo } from "react";
 import { createServices, type ServicePorts, type Services } from "../controllers/createServices";
 import { useAppFonts } from "../components/fonts";
@@ -39,6 +40,11 @@ export default function RootLayout() {
   useAppFonts();
   return (
     <ServicesContext.Provider value={services}>
+      {/* Issue #428: the clock and status-bar icons must stay readable on
+          the light paper everywhere — one dark-content config here at the
+          navigation root, no screen sets its own ("dark" resolves to RN's
+          dark-content on both platforms). */}
+      <StatusBar style="dark" />
       {/* UX 02 (issue #348): the native header is off — it printed raw route
           names as titles and duplicated the screens' own back; every screen
           owns its frame (one BackButton, safe-area padding). */}
