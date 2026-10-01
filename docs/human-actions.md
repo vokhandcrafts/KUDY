@@ -17,13 +17,6 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
-### 2026-10-01 — Смержыць PR #447: кропкі ў playFailed/playFailedHint (issue #445)
-Змержы PR #447 squash-мержам — ён закрывае issue #445: кропкі ў `playFailed`/`playFailedHint` (be+en) слоўніка дэталі месца + гард у `controllers/reason-strings.test.ts`. Дробная змена (hook крок 0: адзін runtime-файл + тэст + дэма) — пайплайн не ганяўся, таму мерж уручную пасля ўласнага прагляду. Пасля мержу знімі лэйбл `agent:running` з issue #445.
-PR: https://github.com/vokhandcrafts/KUDY/pull/447 (issue: https://github.com/vokhandcrafts/KUDY/issues/445)
-
-### 2026-10-01 — Смержыць PR #442: чытэльны статус-бар на светлай тэме (issue #428)
-Змержы PR #442 squash-мержам — ён закрывае issue #428: адна канфігурацыя dark-content у корані навігацыі (`app/_layout.tsx`), гард-тэст мантаваньне рэальнага RootLayout, жывыя скрыншоты ў showboat-дэме. Дробная змена (hook крок 0) — пайплайн не ганяўся, таму мерж уручную пасля ўласнага прагляду. Пасля мержу знімі лэйбл `agent:running` з issue #428.
-PR: https://github.com/vokhandcrafts/KUDY/pull/442 (issue: https://github.com/vokhandcrafts/KUDY/issues/428)
 ### 2026-09-30 — Смержыць PR #420: даслоўная цытата канона ў results G06.10.b (issue #412)
 Змержы PR #420 squash-мержам пасля зелёнага CI — ён закрывае issue #412: цытата радка канона `fontLicenses.*.selfHost` у results G06.10.b замененая на даслоўную, у must-flag дададзены клас `canon-quote-truncated`. Пасля мержу знімі лэйбл `agent:running` з issue #412.
 PR: https://github.com/vokhandcrafts/KUDY/pull/420 (issue: https://github.com/vokhandcrafts/KUDY/issues/412)
