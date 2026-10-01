@@ -70,9 +70,9 @@ git checkout -- components/back-button.tsx
 ```
 
 ```output
-Tests:       27 skipped, 1 failed, 28 total
-Tests:       8 skipped, 1 failed, 9 total
-Tests:       3 skipped, 1 failed, 4 total
+Tests:       1 failed, 27 skipped, 28 total
+Tests:       1 failed, 8 skipped, 9 total
+Tests:       1 failed, 3 skipped, 4 total
 ```
 
 Крытэры 1–2 — жывы прагон. Захаваныя ў `.scratch/issue-432/screens/`
