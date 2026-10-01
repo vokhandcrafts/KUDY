@@ -22,6 +22,7 @@ import { fixtureText, layoutWith, serve, sha256 } from "../test/render-helpers";
 // imports are load-bearing: deleting a route file breaks these tests at the
 // file level (task Proof).
 const routes = {
+  "(tabs)/explore": Explore,
   "(tabs)/my": My,
   "city/[id]/guides": Guides,
   "route/[id]": RoutePreview,
@@ -158,9 +159,19 @@ describe("route placeholders (19 §2.5)", () => {
     expect(within(runScreen).getByText("Сесія недаступная")).toBeTruthy();
   });
 
-  test("unknown path renders +not-found, not a crash", async () => {
-    renderRouter(routes, { initialUrl: "/definitely/missing" });
-    expect(await screen.findByTestId("screen-Not found")).toBeTruthy();
+  // Issue #427: the unknown path is a styled app screen — the honest
+  // message, the catalog hint, and the one back element that walks to the
+  // catalog. The root layout must wrap the route: the screen reads the
+  // display locale from the composition root (useServices without the root
+  // throws). Reverting the screen to the raw placeholder fails three ways
+  // here — no title word, no hint word, no back button.
+  test("unknown path renders the styled not-found screen, not a crash", async () => {
+    renderRouter({ "_layout": layoutWith(createServices({})), ...routes }, { initialUrl: "/definitely/missing" });
+    const notFound = await screen.findByTestId("screen-Not found");
+    expect(within(notFound).getByText("Такога экрана няма")).toBeTruthy();
+    expect(within(notFound).getByText("Каталог чакае — вяртайцеся да яго кнопкай «← Назад».")).toBeTruthy();
+    fireEvent.press(within(notFound).getByTestId("btn-not-found-back"));
+    expect(await screen.findByTestId("screen-Explore")).toBeTruthy();
   });
 
   // G06.01.b: the preview is a real surface now; without the catalog ports

@@ -28,6 +28,7 @@ test.each([
   ["place", "/place/p1", "btn-place-back", "Назад", "screen-Place detail"],
   ["run", "/run/r1", "btn-run-back", "← Назад", "screen-Run"],
   ["my", "/my", "btn-my-back", "← Назад", "screen-KUDY"],
+  ["not-found", "/definitely/missing", "btn-not-found-back", "← Назад", "screen-Not found"],
 ])("the %s screen hosts exactly one back and its label lives in a <Text>", async (_name, url, backId, label, screenId) => {
   renderRouter(frameRoutes(), { initialUrl: url });
   expect(await screen.findByTestId(screenId)).toBeTruthy();
