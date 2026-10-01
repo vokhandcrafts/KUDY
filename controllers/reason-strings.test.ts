@@ -4,7 +4,8 @@
 // stay out of the rendered lines (the muted detail lines keep the
 // diagnostics and are not governed here). Guarded over both locales of every
 // source the rule covers — preview's reason map plus the download-failure
-// banner, run's reasonText, place's refusalText; the My history line rides
+// banner, run's reasonText, place's refusalText plus the play-failure line
+// and hint (issue #445); the My history line rides
 // the same rule in components/ui-strings.test.tsx. Reverting any value to
 // the old lowercase or period-less wording fails here
 // (implementation-rules 1).
@@ -41,8 +42,17 @@ test('G06.10 #433: run reason lines read as phrases (be+en)', () => {
 
 test('G06.10 #433: place refusal lines read as phrases (be+en)', () => {
   for (const locale of ['be', 'en']) {
-    for (const [code, line] of Object.entries(placeDetailStrings(locale).refusalText)) {
+    const strings = placeDetailStrings(locale);
+    for (const [code, line] of Object.entries(strings.refusalText)) {
       assert.match(line, PHRASE_RULE, `${locale} ${code}: ${line}`);
     }
+    // Issue #445: the play-failure line and its hint ride the same rule
+    // (judge finding on PR #444 — they had lost the periods).
+    assert.match(strings.playFailed, PHRASE_RULE, `${locale} playFailed: ${strings.playFailed}`);
+    assert.match(
+      strings.playFailedHint,
+      PHRASE_RULE,
+      `${locale} playFailedHint: ${strings.playFailedHint}`,
+    );
   }
 });

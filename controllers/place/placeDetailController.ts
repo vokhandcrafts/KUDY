@@ -136,8 +136,8 @@ const STRINGS: Record<'be' | 'en', PlaceDetailStrings> = {
       'moment#session-unroutable': 'Тэйзер не гучыць у прагулцы — запусціце яго тут яшчэ раз.',
       'moment#session-refused': 'Тэйзер зараз не запускаецца — паспрабуйце яшчэ раз.',
     },
-    playFailed: 'Гук не пачаўся',
-    playFailedHint: 'Паспрабуйце запусціць яшчэ раз',
+    playFailed: 'Гук не пачаўся.',
+    playFailedHint: 'Паспрабуйце запусціць яшчэ раз.',
   },
   en: {
     loading: 'Loading…',
@@ -164,8 +164,8 @@ const STRINGS: Record<'be' | 'en', PlaceDetailStrings> = {
       'moment#session-unroutable': 'The teaser cannot sound inside a walk — play it here again.',
       'moment#session-refused': 'The teaser cannot start right now — try again.',
     },
-    playFailed: 'The audio did not start',
-    playFailedHint: 'Try starting it again',
+    playFailed: 'The audio did not start.',
+    playFailedHint: 'Try starting it again.',
   },
 };
 
