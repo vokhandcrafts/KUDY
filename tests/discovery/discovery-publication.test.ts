@@ -19,6 +19,7 @@ import {
   sha256,
   syntheticFiles,
   syntheticIndex,
+  type Publication,
   POINTER_R1,
   POINTER_R2,
   REVISION_R1,
@@ -27,8 +28,6 @@ import {
 
 const R1 = publish(syntheticIndex(REVISION_R1), POINTER_R1);
 const R2 = publish(syntheticIndex(REVISION_R2), POINTER_R2);
-
-type Publication = typeof R1;
 
 // One altered character: the same declared size and a stale sha256 in the
 // envelope — exactly what a torn or doctored publication serves.
