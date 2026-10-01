@@ -308,10 +308,12 @@ export function validatePackage(dir, options = {}) {
   }
 
   // G14.04.b (issue #303): the locale facts of this tree, derived with the
-  // same rules build-bundle applies when it computes the index (09 §8: a
-  // locale exists when its base stops.json ships; an audio locale when its
-  // base audio carries files) — so an availability claim can be checked
-  // against the package instead of passing as a promise.
+  // same rules build-bundle applies when it computes the index (09 §8:
+  // «каталог паказвае наяўныя локалі па факце» — publication is per-locale,
+  // the fact here is the shipped base/stops.json; an audio locale when its
+  // base audio carries files). Any top-level directory passes these matches;
+  // the packager additionally narrows to its own allowlist, so this fact set
+  // is only the wider one — it errs toward rejections, never false passes.
   const textFacts = new Set();
   const audioFacts = new Set();
   for (const rel of files) {

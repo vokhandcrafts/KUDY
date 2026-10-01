@@ -4,7 +4,7 @@
 
 <!-- showboat-id: issue-303-locale-facts -->
 
-Availability-тройкі (`text_locales`/`audio_locales`) — гэта факты змешчанага дрэва, не абяцанні (21 §3.2 «вылічаецца з апублікаванага зместу»; 09 §8 «локаля існуе, калі апублікаваны яе base/stops.json»). Дэма на сінтэтычным дрэве-фіксчуры `fixtures/content/demo-route` (`route.json` мае `published: false` — чарнавік, uk ім пададзены без усякага published-статусу):
+Availability-тройкі (`text_locales`/`audio_locales`) — гэта факты змешчанага дрэва, не абяцанні (21 §3.2 «вылічаецца з апублікаванага зместу»; 09 §8: «каталог паказвае наяўныя локалі па факце» — публікацыя пер-лакальная, таму факт тэкставай лакалі тут — апублікаваны `base/stops.json`). Дэма на сінтэтычным дрэве-фіксчуры `fixtures/content/demo-route` (`route.json` мае `published: false` — чарнавік, uk ім пададзены без усякага published-статусу):
 
 1. **Факт:** uk грузіць `uk/base/stops.json` (тэкставая лакаля без аўдыё) — заява `text_locales: [be,en,uk]` на чарнавіку праходзіць валідатар цалкам.
 2. **Абяцанне тэксту:** тая ж заява, але каталога `uk/` у дрэве няма — валідатар адказвае іменаваным правілам `text-locale-without-files` са шляхам да канкрэтнай лакалі.
@@ -84,4 +84,4 @@ uk файлы апублікаваныя: ["be","en","uk"]
 uk файлаў няма:        ["be","en"]
 ```
 
-Доказ, што дэма ганяе прадакшн-модулі: эксперымент на рэверт у сесіі дастаўкі — `git stash push -- tools/validate/validate-package.mjs` перад камітам абарвіў абодва негативных тэсты (`G14.04.b: a claimed …` — чырвоныя пры зеленай астачы сюіту), `git stash pop` вярнуў; тэсты-фіксчуры ў `tools/validate/validate-package.test.mjs` і `tools/publish-catalog/publish-catalog.test.mjs` падаюць пры зняцці праверак.
+Доказ, што дэма ганяе прадакшн-модулі: эксперымент на рэверт у сесіі дастаўкі — `git stash push -- tools/validate/validate-package.mjs` перад камітам абарвіў тры тэсты G14.04.b — тэкст- і аўдыё-негатывы і corrupt-availability (чырвоныя пры зеленай астачы сюіту), `git stash pop` вярнуў; тэсты-фіксчуры ў `tools/validate/validate-package.test.mjs` і `tools/publish-catalog/publish-catalog.test.mjs` падаюць пры зняцці праверак.
