@@ -10,6 +10,7 @@
 // screen-reader labels (criterion 5).
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
+import { Svg } from "react-native-svg";
 
 import Map from "./map";
 import PlaceDetail from "./place/[id]";
@@ -299,6 +300,28 @@ describe("Nearby loading indicator (UX 07)", () => {
     );
     expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
     expect(screen.getByText("Загрузка…")).toBeTruthy();
+  });
+});
+
+// UX 09 (issue #434): the card's offer kind is readable at a glance — the
+// guide card carries the route marker beside the access badge, the place
+// card the map-pin marker, and the marker element names the type for the
+// screen reader (visual-language.md §9 — not a bare glyph). Removing the
+// marker from NearbyCard, swapping the glyph or dropping the type word turns
+// this red (implementation-rules 1).
+describe("Nearby type markers (UX 09)", () => {
+  test("guide cards carry a named route marker, place cards a named map-pin marker", async () => {
+    await openNearby();
+    const guideMarker = within(screen.getByTestId("nearby-card-offer-b1-guide")).getByTestId(
+      "nearby-type-guide",
+    );
+    expect(guideMarker.props.accessibilityLabel).toBe("Гід");
+    expect(within(guideMarker).UNSAFE_getByType(Svg).props.className).toBe("lucide lucide-route");
+    const placeMarker = within(screen.getByTestId("nearby-card-offer-a1-place")).getByTestId(
+      "nearby-type-place",
+    );
+    expect(placeMarker.props.accessibilityLabel).toBe("Месца");
+    expect(within(placeMarker).UNSAFE_getByType(Svg).props.className).toBe("lucide lucide-map-pin");
   });
 });
 

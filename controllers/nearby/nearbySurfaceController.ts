@@ -178,6 +178,10 @@ export interface NearbyStrings {
   readonly indexDegraded: string;
   readonly mapNote: string;
   readonly cardHint: string;
+  // UX 09 (issue #434) — the offer-kind word the card marker carries for the
+  // screen reader (visual-language.md §9: every icon rendering is named).
+  readonly guideLabel: string;
+  readonly placeLabel: string;
   readonly textLabel: string;
   readonly audioLabel: string;
   readonly durationUnit: string;
@@ -198,6 +202,8 @@ const STRINGS: Record<'be' | 'en', NearbyStrings> = {
     indexDegraded: 'Індэкс прапаноў часова недаступны',
     mapNote: 'Карта горада зʼявіцца пасля рашэння пра тайлы',
     cardHint: 'Картка прапановы. Аўдыё не запускаецца.',
+    guideLabel: 'Гід',
+    placeLabel: 'Месца',
     textLabel: 'Тэкст',
     audioLabel: 'аўдыё',
     durationUnit: 'хв',
@@ -216,6 +222,8 @@ const STRINGS: Record<'be' | 'en', NearbyStrings> = {
     indexDegraded: 'The offers index is temporarily unavailable',
     mapNote: 'The city map arrives after the tiles decision',
     cardHint: 'Offer card. Audio does not start.',
+    guideLabel: 'Guide',
+    placeLabel: 'Place',
     textLabel: 'Text',
     audioLabel: 'audio',
     durationUnit: 'min',
