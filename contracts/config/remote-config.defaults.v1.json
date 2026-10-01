@@ -1,0 +1,9 @@
+{
+  "config_schema_version": 1,
+  "trigger_radius_default": 40,
+  "dwell_ms": 6000,
+  "accuracy_gate_m": 40,
+  "moment_cooldown_min": 10,
+  "moments_per_session_max": 2,
+  "min_app_version": 1
+}
