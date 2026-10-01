@@ -86,6 +86,8 @@ export function forbiddenEnforcement(table: EventTableSpec): ForbiddenEnforcemen
 
 // The raw request body cap, measured in bytes before decoding (the grant
 // idiom). 64 KiB bounds even a full 256-event batch of identifier payloads.
+// The cap bounds parsing, not the transport's read — the edge runtime bounds
+// the read; a body beyond the cap is rejected before JSON decoding.
 export const EVENT_MAX_BODY_BYTES = 65_536;
 // Aligned with the client queue's flush chunk (services/eventLog
 // FLUSH_CHUNK = 256): one flush call = one request.
@@ -213,7 +215,7 @@ function validateEvent(
 
   const common = ['event_id', 'type', 'at', 'schema_version'] as const;
   for (const field of common) {
-    const spec = resolveSpec(table, table.common_fields[field] ?? {});
+    const spec = resolveSpec(table.defs, table.common_fields[field] ?? {});
     const verdict = checkValue(table.defs, spec, event[field]);
     if (verdict !== null) return { ok: false, reason: `${path}.${field}: ${verdict}` };
   }
@@ -236,8 +238,8 @@ function validateEvent(
     if (spec === undefined) {
       return { ok: false, reason: `${path}.payload.${key}: unknown-field` };
     }
-    const resolved = resolveSpec(table, spec);
-    if (typeof value === 'string' && /\s/.test(value) && isIdentifierSpec(table, resolved)) {
+    const resolved = resolveSpec(table.defs, spec);
+    if (typeof value === 'string' && /\s/.test(value) && isIdentifierSpec(table.defs, resolved)) {
       // The table's whitespace_value_rule: an identifier-typed string value
       // with whitespace is free text — the specific class, not invalid-value.
       return { ok: false, reason: `${path}.payload.${key}: forbidden-free-text` };
@@ -275,15 +277,15 @@ function forbiddenClass(forbidden: ForbiddenEnforcement, key: string, value: unk
 // `ref` resolves verbatim against the table's defs (the contract suite's
 // fieldSpec idiom): the referenced def's constraints merge under the field's
 // own, so a field may narrow (e.g. required) but never widen its def.
-function resolveSpec(table: EventTableSpec, spec: EventTableFieldSpec): EventTableFieldSpec {
+function resolveSpec(defs: Readonly<Record<string, EventTableFieldSpec>>, spec: EventTableFieldSpec): EventTableFieldSpec {
   if (spec.ref === undefined) return spec;
-  const def = table.defs[spec.ref];
+  const def = defs[spec.ref];
   if (def === undefined) throw new Error(`the event table references an unknown def: ${spec.ref}`);
   return { ...def, ...spec, ref: undefined };
 }
 
-function isIdentifierSpec(table: EventTableSpec, spec: EventTableFieldSpec): boolean {
-  const identifier = table.defs['identifier'];
+function isIdentifierSpec(defs: Readonly<Record<string, EventTableFieldSpec>>, spec: EventTableFieldSpec): boolean {
+  const identifier = defs['identifier'];
   return identifier !== undefined && spec.pattern === identifier.pattern;
 }
 
@@ -304,7 +306,7 @@ function checkValue(defs: Readonly<Record<string, EventTableFieldSpec>>, spec: E
       return `must hold at least ${spec.minItems} item(s)`;
     }
     if (spec.items !== undefined) {
-      const itemSpec = resolveSpec({ defs } as EventTableSpec, spec.items);
+      const itemSpec = resolveSpec(defs, spec.items);
       for (const item of value) {
         const verdict = checkValue(defs, itemSpec, item);
         if (verdict !== null) return `item violation: ${verdict}`;

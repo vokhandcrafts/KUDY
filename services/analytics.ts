@@ -130,6 +130,11 @@ function toWireEvent(event: OutgoingEvent): Record<string, unknown> {
 // carries the server's reason, 429 is rate_limited (the queue stays pending,
 // the caller's next flush retries), any other status is server_error. A
 // resolved promise is the flush's mark signal — only a 200 resolves.
+//
+// A 400 is permanent for that batch — retrying resends the same ids and gets
+// the same answer; what the caller does with an invalid_payload batch (drop,
+// quarantine, DLQ) is the flush-caller's disposition, not this transport's
+// (results G09.02.md — the queue is never silently cleaned here).
 export function createEventsTransport(deps: EventsTransportDeps): EventSender {
   const http = deps.transport ?? defaultHttpTransport();
   return async (events) => {
