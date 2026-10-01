@@ -5,6 +5,12 @@
 // every threshold here, none is restated. The catalog is a plain service
 // port object (not an OS seam). The named tests are the issue's criteria;
 // the PROOF test is the revert guard (implementation-rules 1).
+//
+// G07.06 (issue #287) — the cross-check section at the bottom: the feature-
+// boundary scenarios the criteria suite leaves open (the grouped card, the
+// walk-away re-check, the durable restart legs, the Start carry gating the
+// session, the stale/denied/locked quiet set, the no-consent limits and the
+// commercial-dialog gate).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
@@ -19,6 +25,7 @@ import {
   openDatabase,
   recordGuideHintDismissed,
   recordGuideHintShown,
+  startSession,
 } from '../services/db/db.ts';
 import { nodeSqliteDriver } from '../services/db/test-fixture.ts';
 import type { SqlDriver } from '../services/db/types.ts';
@@ -28,6 +35,7 @@ import {
   type GuideHintEventRecord,
   type GuideHintPoint,
   type GuideHintStore,
+  type GuideHintTelemetryPort,
   type NearbyHintRunSource,
   type NearbyHintState,
 } from './useNearbyController.ts';
@@ -73,6 +81,17 @@ function dwellToReady(world: World): Extract<NearbyHintState, { kind: 'ready' }>
   return state;
 }
 
+// The re-entry ladder every limit check walks after a presentation: the
+// person departs the zone, returns and completes a fresh full dwell.
+function departReturnDwell(world: World): void {
+  world.clock.nowMs += 60_000;
+  world.emitFix(FAR.lat, FAR.lng);
+  world.clock.nowMs += 30_000;
+  world.emitFix(NEAR.lat, NEAR.lng);
+  world.clock.nowMs += 21_000;
+  world.emitFix(NEAR.lat, NEAR.lng);
+}
+
 interface World {
   driver: SqlDriver;
   locationPort: FakeLocationOsPort;
@@ -84,6 +103,7 @@ interface World {
   runListeners: Array<() => void>;
   foregroundRef: { current: boolean };
   clock: { nowMs: number };
+  subscription: number;
   emitFix: (lat: number, lng: number) => void;
   notifyRun: () => void;
   storeState: () => NearbyHintState;
@@ -100,10 +120,13 @@ function makeWorld(options?: {
   run?: RunState;
   foreground?: boolean;
   store?: GuideHintStore;
+  telemetry?: GuideHintTelemetryPort | null;
+  permission?: 'granted' | 'denied';
+  commercialDialogUp?: () => boolean;
 }): World {
   const clock = { nowMs: 10_000 };
   const locationPort = new FakeLocationOsPort();
-  locationPort.permissionState = 'granted';
+  locationPort.permissionState = options?.permission ?? 'granted';
   const location = new LocationService({
     port: locationPort,
     clock: { now: () => clock.nowMs, schedule: () => () => {} },
@@ -147,7 +170,8 @@ function makeWorld(options?: {
     values: VALUES,
     liveRun: () => runSource,
     foreground: () => foregroundRef.current,
-    telemetry: { record: (event) => events.push(event) },
+    commercialDialogUp: options?.commercialDialogUp,
+    telemetry: options?.telemetry === null ? undefined : { record: (event) => events.push(event) },
     now: () => clock.nowMs,
     nextSuggestionSeq: (() => {
       let n = 0;
@@ -168,6 +192,7 @@ function makeWorld(options?: {
     runListeners,
     foregroundRef,
     clock,
+    subscription,
     emitFix: (lat, lng) => locationPort.emitFix(subscription, { lat, lng, accuracy: 10, at: clock.nowMs }),
     notifyRun: () => {
       for (const listener of [...runListeners]) listener();
@@ -392,12 +417,7 @@ test('AC2: durable limits — a shown guide never repeats in the window, dismiss
   const last = world.driver.prepare(`SELECT last_dismissed_at FROM guide_hint_last WHERE guide_id = 'route-near'`).all()[0];
   assert.equal(Number(last?.last_dismissed_at), 31_000);
   // Re-entry after departure: the cooldown (one hour) keeps the card quiet.
-  world.clock.nowMs += 60_000;
-  world.emitFix(FAR.lat, FAR.lng);
-  world.clock.nowMs += 30_000;
-  world.emitFix(NEAR.lat, NEAR.lng);
-  world.clock.nowMs += 21_000;
-  world.emitFix(NEAR.lat, NEAR.lng);
+  departReturnDwell(world);
   const state = world.storeState();
   if (state.kind === 'hidden') assert.equal(state.reason, 'limited');
   assert.notEqual(state.kind, 'ready');
@@ -529,4 +549,255 @@ test('a failed durable dismissal hides the card and sends no dismissed event', a
   assert.equal(state.reason, 'limited');
   // The shown event of the presentation stands; no dismissed event was sent.
   assert.deepEqual(world.events.map((event) => event.type), ['guide_nearby_shown']);
+});
+
+// --- G07.06 cross-checks (issue #287) -----------------------------------------
+
+test('G07.06 AC1: two guides in one zone — one grouped card, one shown episode', async () => {
+  // route-a is inside the radius from the first fix; route-b sits just
+  // outside (333 m) and joins when the person walks one block closer.
+  const world = makeWorld({
+    offers: [offer('route-a'), offer('route-b')],
+    points: [
+      { guideId: 'route-a', lat: NEAR.lat, lng: NEAR.lng },
+      { guideId: 'route-b', lat: NEAR.lat + 0.003, lng: NEAR.lng },
+    ],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const first = dwellToReady(world);
+  assert.deepEqual(first.guides.map((guide) => guide.routeId), ['route-a']);
+  // One block closer: both points are inside now; the card extends — the
+  // same suggestion, the same episode, no second shown event (R07: several
+  // guides merge into ONE card).
+  world.clock.nowMs += 9_000;
+  world.emitFix(NEAR.lat + 0.001, NEAR.lng);
+  const state = world.storeState();
+  assert.equal(state.kind, 'ready');
+  if (state.kind !== 'ready') return;
+  assert.equal(state.suggestionId, first.suggestionId);
+  assert.deepEqual(state.guides.map((guide) => guide.routeId), ['route-a', 'route-b']);
+  assert.deepEqual(world.events.map((event) => event.type), ['guide_nearby_shown']);
+  if (world.events[0].type !== 'guide_nearby_shown') return;
+  assert.deepEqual(world.events[0].shown_guide_ids, ['route-a']);
+  // The joined guide has its durable row and rides the window carry.
+  assert.deepEqual(
+    world.driver
+      .prepare(`SELECT guide_id FROM guide_hint_state WHERE scope = 'foreground' ORDER BY guide_id`)
+      .all()
+      .map((row) => row.guide_id),
+    ['route-a', 'route-b'],
+  );
+  assert.deepEqual(world.binding.foregroundCarry(), ['route-a', 'route-b']);
+});
+
+test('G07.06 AC2: walked away during audio — the deferred card never shows away from the zone', async () => {
+  const world = makeWorld({
+    offers: [offer('route-near')],
+    points: [{ guideId: 'route-near', lat: NEAR.lat, lng: NEAR.lng }],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  dwellToReady(world);
+  // The audio starts and the person walks away while it plays.
+  await world.audio.play({ token: { kind: 'moment', ref: 'm1', seq: 1 }, path: 'bundles/x/audio/story.m4a' });
+  world.audioPort.snapshotValue = { state: 'playing', positionMs: 0, durationMs: 1000 };
+  world.notifyRun();
+  assert.equal(world.storeState().kind, 'hidden');
+  world.clock.nowMs += 4_000;
+  world.emitFix(FAR.lat, FAR.lng);
+  assert.equal(world.storeState().kind, 'hidden');
+  // The audio ends away from the zone: the fresh fix re-checks proximity —
+  // no card then, and none after further fixes either (N4: no stale card).
+  world.audio.stop();
+  world.audioPort.snapshotValue = { state: 'idle', positionMs: 0, durationMs: 0 };
+  world.clock.nowMs += 1_000;
+  world.emitFix(FAR.lat, FAR.lng);
+  assert.equal(world.storeState().kind, 'hidden');
+  world.clock.nowMs += 30_000;
+  world.emitFix(FAR.lat, FAR.lng);
+  const state = world.storeState();
+  if (state.kind === 'hidden') assert.equal(state.reason, 'no-candidates');
+  assert.notEqual(state.kind, 'ready');
+});
+
+test('G07.06 AC3: dismiss, re-entry and a restart over the same database never re-present', async () => {
+  const world = makeWorld({
+    offers: [offer('route-near')],
+    points: [{ guideId: 'route-near', lat: NEAR.lat, lng: NEAR.lng }],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  dwellToReady(world);
+  world.binding.dismiss();
+  assert.equal(world.storeState().kind, 'hidden');
+  // Re-entry: departure, return and a full dwell — the dismissal keeps the
+  // card quiet.
+  departReturnDwell(world);
+  assert.equal(world.storeState().kind, 'hidden');
+  // The restart: a brand-new controller over the same sqlite — the durable
+  // shown/dismissed state outlives the process.
+  const restarted = makeWorld({
+    offers: [offer('route-near')],
+    points: [{ guideId: 'route-near', lat: NEAR.lat, lng: NEAR.lng }],
+    store: dbHintStore(world.driver),
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  restarted.clock.nowMs = world.clock.nowMs;
+  restarted.emitFix(NEAR.lat, NEAR.lng);
+  restarted.clock.nowMs += 21_000;
+  restarted.emitFix(NEAR.lat, NEAR.lng);
+  const state = restarted.storeState();
+  if (state.kind === 'hidden') assert.equal(state.reason, 'limited');
+  assert.notEqual(state.kind, 'ready');
+});
+
+test('G07.06 AC4: Start carries the window limits into the session — they outlive the cooldown there', async () => {
+  const world = makeWorld({
+    offers: [offer('route-a'), offer('route-b')],
+    points: [
+      { guideId: 'route-a', lat: NEAR.lat, lng: NEAR.lng },
+      { guideId: 'route-b', lat: NEAR.lat + 0.001, lng: NEAR.lng },
+    ],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  dwellToReady(world);
+  world.binding.dismiss();
+  assert.deepEqual(world.binding.foregroundCarry(), ['route-a', 'route-b']);
+  // The Start the surface runs — the same transaction carries the window's
+  // shown/dismissed ids into the session scope (the move, not a copy).
+  startSession(world.driver, {
+    sessionId: 'walk-1',
+    routeId: 'route-selected',
+    version: '1',
+    locale: 'be',
+    tier: ['base'],
+    startedAt: world.clock.nowMs,
+    carryGuideHints: world.binding.foregroundCarry(),
+  });
+  assert.deepEqual(
+    world.driver.prepare(`SELECT guide_id FROM guide_hint_state WHERE scope = 'foreground'`).all().map((row) => row.guide_id),
+    [],
+  );
+  assert.deepEqual(
+    listSessionGuideHints(world.driver, 'walk-1').map((row) => row.guideId).sort(),
+    ['route-a', 'route-b'],
+  );
+  // The session, restarted two hours later (the one-hour cooldown is gone),
+  // still keeps the carried guides quiet; the never-presented guide shows.
+  const walked = makeWorld({
+    run: activeRun(),
+    offers: [offer('route-a'), offer('route-other')],
+    points: [
+      { guideId: 'route-a', lat: NEAR.lat, lng: NEAR.lng },
+      { guideId: 'route-other', lat: NEAR.lat + 0.001, lng: NEAR.lng },
+    ],
+    store: dbHintStore(world.driver),
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  walked.clock.nowMs = world.clock.nowMs + 2 * 3_600_000;
+  walked.emitFix(NEAR.lat, NEAR.lng);
+  walked.clock.nowMs += 21_000;
+  walked.emitFix(NEAR.lat, NEAR.lng);
+  const state = walked.storeState();
+  assert.equal(state.kind, 'ready');
+  if (state.kind !== 'ready') return;
+  assert.deepEqual(state.guides.map((guide) => guide.routeId), ['route-other']);
+  assert.equal(state.context, 'active');
+  assert.equal(walked.events[0].type, 'guide_nearby_shown');
+  if (walked.events[0].type !== 'guide_nearby_shown') return;
+  assert.equal(walked.events[0].session_id, 'walk-1');
+});
+
+test('G07.06 AC5: stale fix, imprecise fix and denied permission never present', async () => {
+  const single = {
+    offers: [offer('route-near')],
+    points: [{ guideId: 'route-near', lat: NEAR.lat, lng: NEAR.lng }],
+  };
+  // The stale leg: the fix ages past the freshness window before the decide.
+  const stale = makeWorld(single);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  stale.emitFix(NEAR.lat, NEAR.lng);
+  stale.clock.nowMs += 60_000;
+  stale.notifyRun();
+  const staleState = stale.storeState();
+  if (staleState.kind === 'hidden') assert.equal(staleState.reason, 'stale-fix');
+  assert.notEqual(staleState.kind, 'ready');
+  // The accuracy leg: a fresh but imprecise fix is not a qualifying fix.
+  const imprecise = makeWorld(single);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  imprecise.locationPort.emitFix(imprecise.subscription, {
+    lat: NEAR.lat,
+    lng: NEAR.lng,
+    accuracy: 500,
+    at: imprecise.clock.nowMs,
+  });
+  imprecise.clock.nowMs += 21_000;
+  imprecise.notifyRun();
+  const impreciseState = imprecise.storeState();
+  if (impreciseState.kind === 'hidden') assert.equal(impreciseState.reason, 'stale-fix');
+  assert.notEqual(impreciseState.kind, 'ready');
+  // The denied leg: without the permission the service delivers no fixes —
+  // the controller never sees a position to present from.
+  const denied = makeWorld({ ...single, permission: 'denied' });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  denied.clock.nowMs += 21_000;
+  denied.notifyRun();
+  const deniedState = denied.storeState();
+  assert.equal(deniedState.kind, 'hidden');
+  if (deniedState.kind !== 'hidden') return;
+  assert.equal(deniedState.reason, 'stale-fix');
+});
+
+test('G07.06 AC5: the paid guide row carries the public preview facts only — locked content never leaks', async () => {
+  const world = makeWorld({
+    offers: [offer('route-near', 'paid')],
+    points: [{ guideId: 'route-near', lat: NEAR.lat, lng: NEAR.lng }],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const state = dwellToReady(world);
+  // The exact row shape: route, title, paid marker — no summary, no price,
+  // no media field the locked guide's preview must not hand out (N7).
+  assert.deepEqual(state.guides, [{ routeId: 'route-near', title: 'Гід route-near', paid: true }]);
+});
+
+test('G07.06 AC6: without the analytics recorder the hint limits still hold', async () => {
+  const world = makeWorld({
+    telemetry: null,
+    offers: [offer('route-near')],
+    points: [{ guideId: 'route-near', lat: NEAR.lat, lng: NEAR.lng }],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  dwellToReady(world);
+  world.binding.dismiss();
+  // The durable rows exist — the limits are local facts, not sent events.
+  const rows = world.driver.prepare(`SELECT dismissed_at FROM guide_hint_state WHERE scope = 'foreground'`).all();
+  assert.ok(rows.length === 1 && rows[0].dismissed_at !== null);
+  // Re-entry after the full dwell: still limited, with nothing sent anywhere.
+  departReturnDwell(world);
+  const state = world.storeState();
+  if (state.kind === 'hidden') assert.equal(state.reason, 'limited');
+  assert.notEqual(state.kind, 'ready');
+  assert.deepEqual(world.events, []);
+});
+
+test('G07.06: the commercial dialog keeps the card quiet — the gap PR #437 recorded', async () => {
+  // The revert guard: dropping the commercialDialogUp clause in decide()
+  // leaves the card ready while the dialog is up — this test turns red.
+  const dialog = { current: true };
+  const world = makeWorld({
+    commercialDialogUp: () => dialog.current,
+    offers: [offer('route-near')],
+    points: [{ guideId: 'route-near', lat: NEAR.lat, lng: NEAR.lng }],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  world.emitFix(NEAR.lat, NEAR.lng);
+  world.clock.nowMs += 21_000;
+  world.emitFix(NEAR.lat, NEAR.lng);
+  const quietState = world.storeState();
+  assert.equal(quietState.kind, 'hidden');
+  if (quietState.kind !== 'hidden') return;
+  assert.equal(quietState.reason, 'quiet');
+  // The dialog closes; the fresh fix after it re-checks and presents.
+  dialog.current = false;
+  world.clock.nowMs += 5_000;
+  world.emitFix(NEAR.lat, NEAR.lng);
+  assert.equal(world.storeState().kind, 'ready');
 });
