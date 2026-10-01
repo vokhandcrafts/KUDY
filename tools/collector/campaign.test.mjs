@@ -146,6 +146,26 @@ test('empty and non-mapping inputs are rejected with diagnostics', () => {
   }
 });
 
+// G17.19: the transport defaults to 'direct' — every pre-G17.19 campaign file
+// parses unchanged — and the named value 'tor' is accepted.
+test('AC1 (G17.19): transport defaults to direct; tor is accepted', () => {
+  const parsed = parseCampaign(campaignYaml());
+  assert.ok(parsed.ok, parsed.diagnostics?.join('\n'));
+  assert.equal(parsed.campaign.transport, 'direct');
+  const tor = parseCampaign(campaignYaml({ transport: 'transport: tor' }));
+  assert.ok(tor.ok, tor.diagnostics?.join('\n'));
+  assert.equal(tor.campaign.transport, 'tor');
+});
+
+test('AC1 (G17.19): an unknown transport is rejected naming the field', () => {
+  const parsed = parseCampaign(campaignYaml({ transport: 'transport: vpn' }));
+  assert.equal(parsed.ok, false);
+  assert.ok(
+    parsed.diagnostics.some((line) => line.startsWith('campaign.transport:')),
+    parsed.diagnostics.join('\n')
+  );
+});
+
 // Issue #260: the canonical «Кампанія» block in docs/24 is the template an
 // author copies into a campaign file — it must carry every key the schema
 // accepts for the copy flow, and never invent keys the strictObject schema
@@ -160,6 +180,7 @@ test('the canonical campaign YAML block in docs/24 stays in sync with the schema
     keys.includes('browser_user_data_dir'),
     'docs/24 canonical block omits browser_user_data_dir'
   );
+  assert.ok(keys.includes('transport'), 'docs/24 canonical block omits transport');
   const schemaKeys = Object.keys(campaignSchema.shape);
   assert.deepEqual(
     keys.filter((key) => !schemaKeys.includes(key)),

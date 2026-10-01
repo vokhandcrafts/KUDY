@@ -12,6 +12,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseCampaign } from './campaign.mjs';
 import { createBacklogWriter, createYoutubeFetch, parseVtt, renderTranscript } from './youtube.mjs';
+import { TOR_SOCKS5H_PROXY } from './transport.mjs';
 import { defaultHandlers, runCampaign } from './runloop.mjs';
 import { openStore, sha256Hex } from './store.mjs';
 import {
@@ -330,5 +331,84 @@ test('a cover URL on a non-public address is refused by the net guard before the
   await assert.rejects(
     () => fetchYoutube({ videoId: 'dQw4w9WgXcQ', stagingDir: path.join(dir, 'staging') }),
     /thumbnail http:\/\/127\.0\.0\.1:9\/cover\.jpg: net guard: 127\.0\.0\.1 is a loopback address — request not made/
+  );
+});
+
+// G17.19: an argv-recording yt-dlp stub — appends each invocation's args to a
+// JSONL log, then serves phase 1 (--dump-json → a one-video playlist with an
+// English subtitle) and phase 2 (--write-subs → writes the VTT), like the
+// shared writeYtDlpStub but recording the command boundary.
+function writeArgvYtDlpStub(dir, argvLog, { exitOnDump = false } = {}) {
+  const stubPath = path.join(dir, 'yt-dlp-argv-stub.mjs');
+  fs.writeFileSync(
+    stubPath,
+    `import fs from 'node:fs';
+const args = process.argv.slice(2);
+fs.appendFileSync(${JSON.stringify(argvLog)}, JSON.stringify(args) + '\\n');
+if (args.includes('--dump-json')) {
+  ${exitOnDump ? 'process.exit(3);' : `console.log(JSON.stringify({ id: 'dQw4w9WgXcQ', title: 'Stub video', subtitles: { en: [{ ext: 'vtt' }] } }));
+  process.exit(0);`}
+}
+if (args.includes('--write-subs')) {
+  const out = args[args.indexOf('-o') + 1];
+  const lang = args[args.indexOf('--sub-langs') + 1];
+  fs.writeFileSync(out + '.' + lang + '.vtt', 'WEBVTT\\n\\n00:00:00.000 --> 00:00:01.000\\nhello\\n');
+  process.exit(0);
+}
+process.exit(4);
+`
+  );
+  return [process.execPath, stubPath];
+}
+
+async function readArgvLog(argvLog) {
+  return (await fs.promises.readFile(argvLog, 'utf8')).trim().split('\n').map((line) => JSON.parse(line));
+}
+
+test('AC4 (G17.19): the tor transport passes --proxy to both yt-dlp invocations', async () => {
+  const dir = makeTempDir();
+  const argvLog = path.join(dir, 'argv.jsonl');
+  const command = writeArgvYtDlpStub(dir, argvLog);
+  const fetchYoutube = createYoutubeFetch({
+    command,
+    netGuard: async () => {},
+    proxy: TOR_SOCKS5H_PROXY,
+  });
+
+  const { selected } = await fetchYoutube({ videoId: 'dQw4w9WgXcQ', stagingDir: path.join(dir, 'staging') });
+  assert.ok(selected, 'the stub served a subtitle — both phases ran');
+
+  const invocations = await readArgvLog(argvLog);
+  assert.equal(invocations.length, 2, 'phase 1 (metadata) and phase 2 (subtitle write)');
+  for (const args of invocations) {
+    assert.deepEqual(args.slice(0, 2), ['--proxy', 'socks5h://127.0.0.1:9050']);
+  }
+});
+
+test('AC4 (G17.19): the direct transport spawns yt-dlp without --proxy', async () => {
+  const dir = makeTempDir();
+  const argvLog = path.join(dir, 'argv.jsonl');
+  const command = writeArgvYtDlpStub(dir, argvLog);
+  const fetchYoutube = createYoutubeFetch({ command, netGuard: async () => {} });
+
+  await fetchYoutube({ videoId: 'dQw4w9WgXcQ', stagingDir: path.join(dir, 'staging') });
+  for (const args of await readArgvLog(argvLog)) {
+    assert.equal(args.includes('--proxy'), false, "today's direct invocation stays byte-identical");
+  }
+});
+
+test('AC6 (G17.19): a yt-dlp failure under tor carries the tor-down hint, original message survives', async () => {
+  const dir = makeTempDir();
+  const argvLog = path.join(dir, 'argv.jsonl');
+  const command = writeArgvYtDlpStub(dir, argvLog, { exitOnDump: true });
+  const fetchYoutube = createYoutubeFetch({
+    command,
+    netGuard: async () => {},
+    proxy: TOR_SOCKS5H_PROXY,
+  });
+
+  await assert.rejects(
+    fetchYoutube({ videoId: 'dQw4w9WgXcQ', stagingDir: path.join(dir, 'staging') }),
+    /exited 3.*tor daemon/s
   );
 });

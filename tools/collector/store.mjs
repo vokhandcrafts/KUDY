@@ -27,6 +27,7 @@ export function createSchema(db) {
       topics TEXT NOT NULL,
       fence TEXT NOT NULL,
       youtube TEXT NOT NULL,
+      transport TEXT NOT NULL DEFAULT 'direct',
       created_at TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS raw_records (
@@ -124,6 +125,11 @@ export function createSchema(db) {
   if (!columns.includes('detail')) {
     db.exec('ALTER TABLE run_log ADD COLUMN detail TEXT');
   }
+  // G17.19: the same in-place migration for the campaign transport column.
+  const campaignColumns = db.prepare('PRAGMA table_info(campaigns)').all().map((column) => column.name);
+  if (!campaignColumns.includes('transport')) {
+    db.exec("ALTER TABLE campaigns ADD COLUMN transport TEXT NOT NULL DEFAULT 'direct'");
+  }
 }
 
 export function openStore(dbPath) {
@@ -137,13 +143,17 @@ export function openStore(dbPath) {
 // Campaign identity is the campaign file's resolved path: same file → same
 // row, re-running never duplicates. Editing the file keeps the identity (the
 // row's content_hash records what was last seen); a copied file is a new
-// campaign by definition.
+// campaign by definition. One field is refreshed on conflict: the transport
+// (G17.19) is a routing decision edited in the campaign file, and the row is
+// what the read-only dispatcher shows the human — a stale transport there
+// would misdescribe how the next run parses.
 export function ensureCampaign(db, { campaign, sourcePath, contentHash }) {
   const id = sha256Hex(sourcePath);
   const now = new Date().toISOString();
   db.prepare(
-    `INSERT INTO campaigns (id, city, source_path, content_hash, seeds, topics, fence, youtube, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING`
+    `INSERT INTO campaigns (id, city, source_path, content_hash, seeds, topics, fence, youtube, transport, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET transport = excluded.transport`
   ).run(
     id,
     campaign.city,
@@ -153,6 +163,7 @@ export function ensureCampaign(db, { campaign, sourcePath, contentHash }) {
     JSON.stringify(campaign.topics),
     JSON.stringify(campaign.fence),
     JSON.stringify(campaign.youtube),
+    campaign.transport,
     now
   );
   return { campaignId: id };

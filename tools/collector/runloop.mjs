@@ -24,6 +24,13 @@
 // http(s) call to the campaign's MediaWiki api.php endpoint — live runs are
 // manual, tests inject recorded fixtures and never touch the network. The
 // loop awaits handlers, so the run loop is async.
+//
+// The collection transport (G17.19, transport.mjs): the campaign's transport
+// field routes every network channel — the browser fetcher, the robots.txt
+// gate, the wiki api calls and the yt-dlp/cover pipeline — through the user's
+// tor daemon (SOCKS5 127.0.0.1:9050) when it is 'tor', and leaves today's
+// direct behavior untouched otherwise. All the transports are lazy: a
+// file://-only campaign never creates a browser, a dispatcher or a proxy.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,10 +45,11 @@ import {
 import { processImageStep } from './media.mjs';
 import { defaultSnapshotsRoot, processFetchedPage } from './snapshot.mjs';
 import { CrawlStopError, createCrawler, createPoliteness, parseCrawlDetail } from './crawler.mjs';
-import { RobotsBlockedError } from './robots.mjs';
+import { RobotsBlockedError, defaultFetchRobots } from './robots.mjs';
 import { createBrowserFetchPage } from './netfetch.mjs';
 import { createNetGuard } from './netguard.mjs';
 import { createBacklogWriter, createYoutubeFetch, processYoutubeStep } from './youtube.mjs';
+import { TOR_SOCKS5H_PROXY, createTorDispatcher, torDownDiagnostic, transportProxy } from './transport.mjs';
 import {
   WIKI_RIGHTS,
   parseArticleResponse,
@@ -76,11 +84,18 @@ function defaultLoadImage(url) {
 // real http(s) fetch against the campaign's MediaWiki endpoint. Any other
 // scheme answers null — the step handler turns that into a failed-step
 // diagnostic naming the URL. Tests override this boundary; no test touches
-// the network.
-async function defaultLoadApi(url) {
+// the network. Under the Tor transport (G17.19) the dispatcher rides along:
+// connection-level failures carry the tor-down hint, site-level ones (HTTP
+// ≥ 400) mean the proxy worked and keep their plain message.
+async function defaultLoadApi(url, { dispatcher = null } = {}) {
   const parsed = new URL(url);
   if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
-  const response = await fetch(url);
+  let response;
+  try {
+    response = await fetch(url, dispatcher ? { dispatcher } : undefined);
+  } catch (error) {
+    throw dispatcher ? torDownDiagnostic(error) : error;
+  }
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.text();
 }
@@ -91,9 +106,15 @@ export function defaultHandlers({
   fetchPage = null,
   // No default here: undefined falls through to createRobotsGate's own
   // production transport (robots.mjs defaultFetchRobots); tests inject one.
+  // Under the Tor transport the runloop wraps that production transport with
+  // the SOCKS5 dispatcher (fetchRobotsFor) — the robots.txt request is part
+  // of the crawl channel.
   fetchRobots,
-  youtubeFetch = createYoutubeFetch(),
-  loadApi = defaultLoadApi,
+  // No defaults here either: youtubeFetch and loadApi are created lazily per
+  // run (youtubeFor / loadApiFor) because the production transports depend on
+  // the campaign's chosen collection transport; tests inject one.
+  youtubeFetch = null,
+  loadApi = null,
   netGuard = createNetGuard(),
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 } = {}) {
@@ -105,6 +126,9 @@ export function defaultHandlers({
   let browser = null;
   let backlog = null;
   let politeness = null;
+  let youtube = null;
+  let apiTransport = null;
+  let dispatcherPromise = null;
   // One per-host politeness clock for the whole run (spec: «затрымка 2–5 с
   // паміж запытамі да аднаго хоста»), shared by the crawl and the wiki api
   // calls — the G17.08 pilot saw live HTTP 429s while two independent gates
@@ -114,13 +138,28 @@ export function defaultHandlers({
     politeness = createPoliteness(ctx.campaign.fence.delay_s, { sleep });
     return politeness;
   }
+  // The Tor transport's shared dispatcher (G17.19): created on the first
+  // channel use, so direct and file:// campaigns never create a proxy — the
+  // same lazy contract the browser has. One promise per run; a failure stays
+  // unmemoized so the next step retries.
+  function dispatcherFor(ctx) {
+    if (transportProxy(ctx.campaign) === null) return null;
+    if (dispatcherPromise === null) dispatcherPromise = createTorDispatcher();
+    return dispatcherPromise;
+  }
+  function fetchRobotsFor(ctx) {
+    if (fetchRobots) return fetchRobots;
+    const dispatcher = dispatcherFor(ctx);
+    if (dispatcher === null) return undefined; // robots.mjs default, direct
+    return async (url) => defaultFetchRobots(url, { dispatcher: await dispatcher });
+  }
   function crawlerFor(ctx) {
     if (crawler) return crawler;
     crawler = createCrawler({
       auditPath: path.join(ctx.snapshotsRoot, ctx.campaignId.slice(0, 12), 'fence-audit.jsonl'),
       delayRange: ctx.campaign.fence.delay_s,
       netGuard,
-      fetchRobots,
+      fetchRobots: fetchRobotsFor(ctx),
       gate: politenessFor(ctx),
       fetchPage:
         fetchPage ??
@@ -128,16 +167,39 @@ export function defaultHandlers({
           // The production fetcher is created on the first network URL and
           // closed when the run ends; file://-only runs never create it.
           if (!browser) {
-            browser = createBrowserFetchPage({ userDataDir: ctx.campaign.browser_user_data_dir ?? null });
+            browser = createBrowserFetchPage({
+              userDataDir: ctx.campaign.browser_user_data_dir ?? null,
+              proxyUrl: transportProxy(ctx.campaign),
+            });
           }
           return browser.then((fetcher) => fetcher.fetchPage(url));
         }),
     });
     return crawler;
   }
+  function youtubeFor(ctx) {
+    if (youtube) return youtube;
+    youtube =
+      youtubeFetch ??
+      createYoutubeFetch({
+        proxy: ctx.campaign.transport === 'tor' ? TOR_SOCKS5H_PROXY : null,
+      });
+    return youtube;
+  }
+  function loadApiFor(ctx) {
+    if (loadApi) return loadApi;
+    if (apiTransport === null) {
+      apiTransport = async (url) => defaultLoadApi(url, { dispatcher: await dispatcherFor(ctx) });
+    }
+    return apiTransport;
+  }
   const handlers = {
     loadImage,
-    loadApi,
+    // The wiki transport boundary in its direct form — the module seam the
+    // suites call directly. The wiki steps themselves go through loadApiFor:
+    // under the tor transport it wraps this boundary with the SOCKS5
+    // dispatcher (an injected loadApi is returned as-is there).
+    loadApi: loadApi ?? defaultLoadApi,
     seed(ctx, step) {
       const protocol = new URL(step.ref).protocol;
       if (protocol === 'http:' || protocol === 'https:') {
@@ -173,11 +235,13 @@ export function defaultHandlers({
       // G17.05: the shell row exists first (G17.01.a contract), then the
       // yt-dlp pipeline fills it — transcript, metadata, cover — or defers
       // the video to asr-backlog. The binary lives behind youtubeFetch;
-      // live runs are manual, tests spawn a stub command.
+      // live runs are manual, tests spawn a stub command. The production
+      // fetch (youtubeFor) is created on the first youtube step so the
+      // transport comes from the campaign (G17.19).
       if (!backlog) {
         backlog = createBacklogWriter(path.join(ctx.snapshotsRoot, ctx.campaignId.slice(0, 12), 'asr-backlog.jsonl'));
       }
-      return processYoutubeStep({ ...ctx, youtubeFetch, backlog }, step);
+      return processYoutubeStep({ ...ctx, youtubeFetch: youtubeFor(ctx), backlog }, step);
     },
     // Wiki article step: the work order (detail JSON) carries the api
     // endpoint; the ref is the requested title. A response the transport or
@@ -198,7 +262,7 @@ export function defaultHandlers({
         // The api endpoint is a campaign-configured address — guarded like a
         // seed before the transport touches it.
         await netGuard(requestUrl);
-        payload = await ctx.loadApi(requestUrl);
+        payload = await loadApiFor(ctx)(requestUrl);
       } catch (error) {
         throw new Error(`wiki-article '${step.ref}': ${requestUrl}: ${error.message}`);
       }
@@ -243,7 +307,7 @@ export function defaultHandlers({
       let payload;
       try {
         await netGuard(requestUrl);
-        payload = await ctx.loadApi(requestUrl);
+        payload = await loadApiFor(ctx)(requestUrl);
       } catch (error) {
         throw new Error(`wiki-category '${step.ref}': ${requestUrl}: ${error.message}`);
       }
@@ -308,7 +372,7 @@ export async function runCampaign(
   for (const url of campaign.seeds) enqueueStep(db, campaignId, 'seed', url, now);
 
   const counts = { campaignId, done: 0, failed: 0, stopped: null, robotsBlockedSeeds: 0 };
-  const ctx = { db, campaign, campaignId, now, snapshotsRoot, loadImage: handlers.loadImage, loadApi: handlers.loadApi };
+  const ctx = { db, campaign, campaignId, now, snapshotsRoot, loadImage: handlers.loadImage };
   // The loop drains: a seed, crawl or wiki-category handler enqueues new steps
   // mid-run, so the claimable list is re-read until nothing is left — one
   // invocation finishes the whole campaign. Every processed step ends 'done'

@@ -38,6 +38,9 @@ export function campaignYaml(overrides = {}) {
     // G17.04 wiki block: omitted by default (null), so the existing suites'
     // step counts stay untouched; wiki suites pass their YAML verbatim.
     wiki: null,
+    // G17.19 collection transport: omitted by default — the schema default
+    // 'direct' keeps every existing fixture on today's behavior.
+    transport: null,
     ...overrides,
   };
   const lines = [fields.city, fields.seeds, fields.topics];
@@ -48,6 +51,7 @@ export function campaignYaml(overrides = {}) {
     }
   }
   lines.push(fields.youtube);
+  if (fields.transport !== null) lines.push(fields.transport);
   if (fields.wiki !== null) lines.push(fields.wiki);
   return lines.filter((line) => line !== null).join('\n') + '\n';
 }

@@ -97,9 +97,12 @@ export function parseRobotsTxt(text, agent = ROBOTS_AGENT) {
 // text. Returns the document text, or null when the file is missing (404/410:
 // the standard «everything allowed»); any other HTTP error throws — the gate
 // reads that as «unavailable» and skips the host for this run. Network errors
-// (DNS, refused connection) throw the same way.
-export async function defaultFetchRobots(url) {
-  const response = await fetch(url);
+// (DNS, refused connection) throw the same way. Under the Tor transport
+// (G17.19) the runloop passes the SOCKS5 dispatcher — the robots.txt request
+// is part of the crawl channel and would expose the author's IP if it went
+// direct while the pages went through Tor.
+export async function defaultFetchRobots(url, { dispatcher = null } = {}) {
+  const response = await fetch(url, dispatcher ? { dispatcher } : undefined);
   if (response.status === 404 || response.status === 410) return null;
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.text();
