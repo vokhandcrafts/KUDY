@@ -44,6 +44,12 @@
   `mark_at` (`mark-without-reviewer`);
 - пераклад — новы Draft: уласны запіс рэвю, не скапіраваны з мовы-крыніцы
   (`translation-copied-review`), спасылка `source_draft_id` цэлая (`unknown-draft-ref`);
+- пераклад перасякае мяжу мовы: `source_draft_id` вядзе на драфт іншай лакаляі
+  (`translation-same-locale`, G14.04.c) — аднолокалявы «пераклад» хавае адсутную
+  сапраўдную крыніцу;
+- калі суфікс `draft_id` — код лакаляі са слоўніка be/en/uk, ён супадае з полем
+  `locale` (`locale-id-mismatch`, G14.04.c): ключ адной мовы са зместам іншай —
+  тое самае змешванне; суфіксы па-за слоўнікам (`be2`, `extra`) застаюцца законнымі;
 - ідэнтыфікатары ўнікальныя (`duplicate-id`), `draft_id` супадае з імём файла
   (`<draft_id>.json`, `draft-id-mismatch`), слоўнікі (`rights`, `kind`, `tier`,
   `decision`, `mark`) — толькі дапушчальныя значэнні (`invalid-value`).
