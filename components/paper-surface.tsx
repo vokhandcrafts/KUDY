@@ -9,7 +9,14 @@
 // layer is decorative: hidden from the accessibility tree, and children
 // render above it.
 import type { PropsWithChildren } from "react";
-import { Image, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 
 import grainSource from "../assets/paper-grain.png";
 import { tokens } from "./design-tokens";
@@ -19,8 +26,16 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colorPaper,
     flex: 1,
   },
+  // Issue #431: on Android the repeat tile is painted through a
+  // view-sized postprocessor, and with absoluteFillObject the first image
+  // submit runs before the view is laid out — the cached result collapses
+  // to one raw tile in the corner. The layer is sized from the window
+  // instead of measured, so the first submit already sees the full
+  // surface (the wrapper's contract is a full-screen calm surface).
   grain: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    left: 0,
     opacity: tokens.texturePaperGrainOpacity,
   },
 });
@@ -33,12 +48,13 @@ export function PaperSurface({
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }>) {
+  const { width, height } = useWindowDimensions();
   return (
     <View style={[styles.surface, style]} testID={testID}>
       <Image
         source={grainSource}
         resizeMode="repeat"
-        style={styles.grain}
+        style={[styles.grain, { width, height }]}
         accessible={false}
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"

@@ -7,7 +7,7 @@
 // of a surface is its content, never the texture.
 import { describe, expect, jest, test } from "@jest/globals";
 import { render, screen } from "@testing-library/react-native";
-import { Text } from "react-native";
+import { Dimensions, Text, type ScaledSize } from "react-native";
 
 import { PaperSurface } from "./paper-surface";
 
@@ -18,6 +18,13 @@ jest.mock("./design-tokens", () => {
   const actual = jest.requireActual("./design-tokens") as { tokens: Record<string, unknown> };
   return { tokens: { ...actual.tokens, texturePaperGrainOpacity: 0.5 } };
 });
+
+// Issue #431: the tiling window is synthetic and differs from the jest
+// default on purpose — the size assertions read this value, so only a
+// wrapper that sizes the grain through useWindowDimensions (which reads
+// Dimensions) passes them. The hook itself stays real.
+const syntheticWindow: ScaledSize = { width: 411, height: 875, scale: 3, fontScale: 1 };
+jest.spyOn(Dimensions, "get").mockReturnValue(syntheticWindow);
 
 function renderSurface() {
   return render(
@@ -81,5 +88,19 @@ describe("PaperSurface (G06.10.e)", () => {
       accessibilityElementsHidden: true,
       importantForAccessibility: "no-hide-descendants",
     });
+  });
+
+  // Issue #431: with absoluteFillObject Android's repeat paints through a
+  // view-sized postprocessor that races the first layout and collapses to
+  // one raw corner tile. The JS-side cause the suite can pin is the
+  // explicit window size: reverting the layer to a measured fill drops
+  // width/height from the style and turns this red.
+  test("the grain layer is sized from the window, not measured (#431)", () => {
+    renderSurface();
+    const style = mergedStyle(grainLayer());
+    expect(style.position).toBe("absolute");
+    expect(style.width).toBe(411);
+    expect(style.height).toBe(875);
+    expect((grainLayer()?.props as { resizeMode?: string })?.resizeMode).toBe("repeat");
   });
 });
