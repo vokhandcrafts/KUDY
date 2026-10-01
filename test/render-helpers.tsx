@@ -12,6 +12,7 @@ import { StatusBar } from "expo-status-bar";
 import { defaultEngineConfig } from "../core/engine/reducer";
 import { ServicesContext } from "../app/_layout";
 import Explore from "../app/(tabs)/explore";
+import NotFound from "../app/+not-found";
 import Guides from "../app/city/[id]/guides";
 import Map from "../app/map";
 import My from "../app/(tabs)/my";
@@ -99,6 +100,7 @@ export function frameRoutes() {
     "place/[id]": PlaceDetail,
     "run/[id]": Run,
     "map": Map,
+    "+not-found": NotFound,
   };
 }
 
