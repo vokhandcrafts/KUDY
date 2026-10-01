@@ -19,7 +19,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ### 2026-10-01 — Прагледзь спецыфікацыю даследчай бібліятэкі G19
 Што зрабіць: прагледзь спецыфікацыю `docs/25_content_research.md` і план `docs/superpowers/plans/2026-10-01-content-research.md`; пацвердзі іх або пазнач патрэбныя праўкі. Пасля прагляду і рэв'ю зліце PR дакументаў, каб яны сталі даступнымі выканаўцам; запуск задач і мадэльныя рашэнні G19.08 застаюцца асобным рашэннем.
-Issue: https://github.com/vokhandcrafts/KUDY/issues/457 (эпік: https://github.com/vokhandcrafts/KUDY/issues/456)
+PR: https://github.com/vokhandcrafts/KUDY/pull/467 (issue: https://github.com/vokhandcrafts/KUDY/issues/457; эпік: https://github.com/vokhandcrafts/KUDY/issues/456)
 
 ### 2026-10-01 — Смержыць PR #455: рашэнні §6 uk-release-scope улітыя ў дакумент (закрывае #302)
 Што зрабіць: змержы PR #455 squash-мержам пасля зелёнага CI — ён улікае пяць прынятых рашэнняў раздзела 6 даслоўна ў `uk-release-scope.md` і пры мержы закрые issue #302. Гэта follow-up да G14.04.b (PR #454 змержаны), дзе гэты крок паводле каментара ў #302 належыў выканаўцу задачы, але быў зразуметы занадта позна.
