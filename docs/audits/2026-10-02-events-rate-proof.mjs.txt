@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { createSqlEventsPort, handleEventsRequest, defaultEventsConfig, EVENT_RATE_INCREMENT_SQL } from './supabase/functions/_shared/events-core.ts';
+import { DEVICE_LOOKUP_SQL } from './supabase/functions/_shared/device-core.ts';
+
+const table = JSON.parse(fs.readFileSync('./contracts/events/event-table.v1.json', 'utf8'));
+let inserts = 0;
+const port = createSqlEventsPort({
+  async query(sql) {
+    if (sql === DEVICE_LOOKUP_SQL) return { rows: [{ device_id: '55555555-5555-4555-8555-000000000002' }] };
+    if (sql === EVENT_RATE_INCREMENT_SQL) return { rows: [{ attempts: 1 }] };
+    inserts += 1;
+    return { rows: [{ event_id: '55555555-5555-4555-8555-000000000001' }] };
+  },
+});
+const body = { events: [{
+  event_id: '55555555-5555-4555-8555-000000000001', type: 'app_open',
+  at: '2026-10-01T00:00:00.000Z', schema_version: 1, payload: {},
+}] };
+const answer = await handleEventsRequest({
+  method: 'POST', authorization: 'Bearer ' + 'a'.repeat(64),
+  rawBody: new TextEncoder().encode(JSON.stringify(body)),
+}, port, table, defaultEventsConfig(1759276800000));
+assert.equal(answer.status, 429);
+assert.equal(inserts, 0);
+console.log(JSON.stringify({ attempts: 1, answer, inserts }));

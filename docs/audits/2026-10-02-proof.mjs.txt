@@ -1,0 +1,106 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+const root = process.cwd();
+const req = createRequire(path.join(root, 'package.json'));
+const ts = req('typescript');
+function load(relative, overrides = {}, globals = {}) {
+  const filename = path.join(root, relative);
+  const code = ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+  const local = createRequire(filename);
+  const module = { exports: {} };
+  const names = Object.keys(globals);
+  const wrapper = vm.runInThisContext(`(function(require,module,exports,${names.join(',')}){${code}\n})`, { filename });
+  wrapper((name) => Object.hasOwn(overrides, name) ? overrides[name] : local(name), module, module.exports, ...Object.values(globals));
+  return module.exports;
+}
+let serve;
+const db = { unsafe: async () => [{ attempts: 1 }] };
+const device = load('supabase/functions/device/index.ts', { '../_shared/postgres-connection.ts': { database: () => db } }, { Deno: { serve: (handler) => { serve = handler; } } });
+const request = { method: 'POST', headers: new Headers({ 'x-forwarded-for': '192.0.2.1' }) };
+let registrationError;
+try { await device.handleDeviceRequest(request, db); } catch (error) { registrationError = error.message; }
+const response = await serve(request);
+assert.equal(response.status, 500);
+console.log('DEVICE', JSON.stringify({ status: response.status, body: await response.json(), cause: registrationError }));
+const calls = [];
+const adapter = load('services/audio/expo/expo-audio-port.ts', { 'expo-audio': { createAudioPlayer: () => { calls.push('create'); return { addListener: () => calls.push('listen'), play: () => calls.push('play'), pause() {}, remove() {} }; }, setAudioModeAsync: async () => {} } });
+adapter.createExpoAudioPlayerPort().play({ key: 1, path: 'file:///audit.mp3' });
+assert.equal(calls.includes('play'), false);
+console.log('AUDIO', JSON.stringify({ calls, physicalPlayCalls: calls.filter((call) => call === 'play').length }));
+const { createRunController } = req('./controllers/useRunController.ts');
+const { defaultEngineConfig } = req('./core/engine/reducer.ts');
+const { AudioService } = req('./services/audio/service.ts');
+const { FakeAudioPlayerPort } = req('./services/audio/fake-port.ts');
+const { LocationService } = req('./services/location/service.ts');
+const { FakeLocationOsPort } = req('./services/location/fake-port.ts');
+const { openDatabase, getLiveSession } = req('./services/db/db.ts');
+const { nodeSqliteDriver } = req('./services/db/test-fixture.ts');
+const { sessionStoreOver } = req('./test/session-store.ts');
+const { createAccessPort } = req('./services/download/access.ts');
+const driver = nodeSqliteDriver();
+openDatabase(driver);
+const location = new LocationService({ port: new FakeLocationOsPort('granted'), clock: { now: () => 1000, schedule: () => () => {} }, permissions: { foreground: 'fg', background: 'bg' } });
+const durable = sessionStoreOver(driver);
+let pauseWrites = 0;
+const controller = createRunController({
+  location, audio: new AudioService({ createPort: () => new FakeAudioPlayerPort() }),
+  clock: { now: () => 1000 }, engineConfig: defaultEngineConfig, pipelineConfig: { dwellMs: 0 },
+  route: { routeId: 'audit', version: '1', locale: 'be', tier: ['base'] },
+  stops: [{ stopId: 's1', lat: 0, lng: 0, radius: 20, storyBaseId: 'story' }],
+  sessionStore: { ...durable, pause: () => { pauseWrites++; throw new Error('audit disk write failed'); } },
+  readiness: { evaluate: async () => ({ status: 'ready', tierAvailable: ['base'] }) },
+  packageStops: { stopsOfLayer: async () => ['s1'] }, access: createAccessPort(),
+  newSessionId: () => 'audit-session', wakelock: { acquire() {}, release() {} }, recovery: { read: async () => null },
+});
+await controller.getState().start();
+assert.throws(() => controller.getState().pauseSession(), /audit disk write failed/);
+const afterFault = { memory: controller.getState().run.phase, disk: getLiveSession(driver).state, pauseWrites };
+controller.getState().pauseSession();
+console.log('DURABILITY', JSON.stringify({ afterFault, afterRetry: { memory: controller.getState().run.phase, disk: getLiveSession(driver).state, pauseWrites } }));
+assert.equal(pauseWrites, 1);
+const { createEventsTransport, setAnalyticsConsent, flushAnalytics } = req('./services/analytics.ts');
+const { emitEvent } = req('./services/eventLog.ts');
+setAnalyticsConsent(driver, 'granted');
+for (let i=0; i<257; i++) emitEvent(driver, { eventId: `audit-event-${i}`, type: 'audit', at: 1000, schemaVersion: 1, payload: '{}' });
+const batches = [];
+await flushAnalytics(driver, async (batch) => { batches.push(batch.length); if (batches.length === 1) setAnalyticsConsent(driver, 'revoked'); });
+assert.deepEqual(batches, [256,1]);
+console.log('CONSENT', JSON.stringify({ batches, secondBatchSentAfterRevocation: true }));
+const oldFetch = globalThis.fetch;
+let transportCall;
+globalThis.fetch = async (url, options) => { transportCall = { url, authorization: options.headers.authorization ?? options.headers.Authorization, redirect: options.redirect ?? 'default' }; return new Response('{}', { status: 200 }); };
+try { await createEventsTransport({ baseUrl: 'http://example.invalid/functions/v1', identity: { deviceId: 'audit-device', deviceSecret: 'SYNTHETIC-AUDIT-SECRET' } })([]); } finally { globalThis.fetch = oldFetch; }
+assert.equal(transportCall.url.startsWith('http:'), true);
+console.log('TRANSPORT', JSON.stringify(transportCall));
+const isolatedDriver = nodeSqliteDriver();
+openDatabase(isolatedDriver);
+const gpsPort = new FakeLocationOsPort();
+let instant = 1000;
+const sharedLocation = new LocationService({ port: gpsPort, clock: { now: () => instant, schedule: () => () => {} }, permissions: { foreground: 'fg', background: 'bg' } });
+const shared = {
+  location: sharedLocation, audio: new AudioService({ createPort: () => new FakeAudioPlayerPort() }),
+  clock: { now: () => instant }, engineConfig: defaultEngineConfig, pipelineConfig: { dwellMs: 0 },
+  stops: [{ stopId: 's1', lat: 0, lng: 0, radius: 20, storyBaseId: 'story' }], sessionStore: sessionStoreOver(isolatedDriver),
+  readiness: { evaluate: async () => ({ status: 'ready', tierAvailable: ['base'] }) },
+  packageStops: { stopsOfLayer: async () => ['s1'] }, access: createAccessPort(),
+  newSessionId: () => 'first-walk', wakelock: { acquire() {}, release() {} }, recovery: { read: async () => null },
+};
+const firstWalk = createRunController({ ...shared, route: { routeId: 'first', version: '1', locale: 'be', tier: ['base'] } });
+await firstWalk.getState().start();
+const subscription = Number(gpsPort.commands.find((call) => call.startsWith('start ')).slice(6));
+gpsPort.emitFix(subscription, { lat: 1, lng: 1, accuracy: 5, at: instant });
+assert.equal(firstWalk.getState().run.lastFix.at, 1000);
+const { createRunSurfaceController } = req('./controllers/run/runSurfaceController.ts');
+const refused = createRunSurfaceController({
+  routeId: 'second', session: shared,
+  pinnedPackage: { read: async () => ({ kind: 'pinned', version: '1', locale: 'be', tier: ['base'], stops: [{ stopId: 's1', placeId: 'p1', storyBaseId: 'story' }], places: [{ placeId: 'p1', lat: 0, lng: 0, radius: 20 }], stories: [], storiesExtended: [] }) },
+});
+await new Promise((resolve) => setImmediate(resolve));
+assert.equal(refused.getState().status, 'unavailable');
+instant = 2000;
+gpsPort.emitFix(subscription, { lat: 1, lng: 1, accuracy: 5, at: instant });
+assert.equal(firstWalk.getState().run.lastFix.at, 1000);
+console.log('OWNERSHIP', JSON.stringify({ refusal: refused.getState(), firstWalkPhase: firstWalk.getState().run.phase, incomingFixAt: instant, firstWalkLastFixAt: firstWalk.getState().run.lastFix.at }));
