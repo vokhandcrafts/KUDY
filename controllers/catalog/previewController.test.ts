@@ -274,7 +274,7 @@ describe('preview controller', () => {
     await controller.getState().download();
     // G06.05: the reason line is the named word, the thrown diagnostic
     // survives as the muted detail.
-    assert.equal(controller.getState().downloadError, 'Збой загрузкі');
+    assert.equal(controller.getState().downloadError, 'Збой загрузкі.');
     assert.equal(controller.getState().downloadDetail, 'transfer interrupted');
     assert.equal(controller.getState().busy, false);
   });
@@ -433,7 +433,7 @@ describe('G06.05: the download failure surfaces with its exits', () => {
     );
     await waitUntil(() => controller.getState().surface.kind === 'ready');
     await controller.getState().download();
-    assert.equal(controller.getState().downloadError, 'Збой загрузкі');
+    assert.equal(controller.getState().downloadError, 'Збой загрузкі.');
     assert.equal(controller.getState().downloadDetail, 'не хапае месца: патрэбна яшчэ 30 МБ');
     assert.equal(controller.getState().downloadStorageExit, true);
     assert.equal(controller.getState().busy, false);
@@ -451,7 +451,7 @@ describe('G06.05: the download failure surfaces with its exits', () => {
     );
     await waitUntil(() => controller.getState().surface.kind === 'ready');
     await controller.getState().download();
-    assert.equal(controller.getState().downloadError, 'Збой загрузкі');
+    assert.equal(controller.getState().downloadError, 'Збой загрузкі.');
     assert.equal(controller.getState().downloadDetail, 'пакет пашкоджаны: патрэбна паўторная загрузка');
     assert.equal(controller.getState().downloadStorageExit, false);
   });

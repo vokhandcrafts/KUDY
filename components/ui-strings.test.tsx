@@ -60,4 +60,16 @@ describe("uiStrings (G06.05 AC1)", () => {
     expect(uiStrings("uk").back).toBe(uiStrings("be").back);
     expect(uiStrings("en").back).not.toBe(uiStrings("be").back);
   });
+
+  // G06.10 (issue #433): the My history reason line obeys the same outward
+  // formatting rule as the controller reason dictionaries (the phrase rule
+  // guarded in controllers/reason-strings.test.ts) — a capital letter and a
+  // period in both locales; a revert to the period-less wording fails here.
+  test("the history reason line reads as a phrase (be+en)", () => {
+    for (const locale of ["be", "en"]) {
+      const line = uiStrings(locale).historyUnavailable;
+      expect(`${locale}:${/^[A-ZА-ЯЁЎ]/.test(line)}`).toBe(`${locale}:true`);
+      expect(`${locale}:${line.endsWith(".")}`).toBe(`${locale}:true`);
+    }
+  });
 });

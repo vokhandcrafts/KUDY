@@ -544,7 +544,7 @@ describe("run map surface", () => {
     const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
     expect(await screen.findByText("Сесія недаступная")).toBeTruthy();
-    expect(screen.getByTestId("run-unavailable-reason").props.children).toBe("Ужо ёсць жывая прагулка");
+    expect(screen.getByTestId("run-unavailable-reason").props.children).toBe("Ужо ёсць жывая прагулка.");
   });
 
   // UX 06 (issue #352) AC3: the destructive finish asks first; the decline

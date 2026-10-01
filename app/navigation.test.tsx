@@ -61,7 +61,7 @@ describe("route placeholders (19 §2.5)", () => {
     renderRouter({ "_layout": layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
     const myScreen = await screen.findByTestId("screen-KUDY");
     expect(myScreen).toBeTruthy();
-    expect(within(myScreen).getByText("Гісторыя недаступная")).toBeTruthy();
+    expect(within(myScreen).getByText("Гісторыя недаступная.")).toBeTruthy();
   });
 
   // G06.04 criterion 3: the session history — the live walk beside the
