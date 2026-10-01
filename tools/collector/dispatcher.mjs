@@ -1,16 +1,18 @@
 // Read-only local dispatcher for the collector (G17.12): one command boots an
 // HTTP server on 127.0.0.1 that renders the «Агляд» page for a human editor —
 // campaigns with record counts by status, photos, failed steps, and the latest
-// run_log steps with their diagnostics — and, since G17.13, the «Запісы» page:
+// run_log steps with their diagnostics —, since G17.13, the «Запісы» page:
 // every record of every campaign with its status, rights, photo/link counts
-// and URL-carried filters. Zero dependencies (node:http + node:sqlite). The
-// store is opened with readOnly: true, so no request can write to the database
-// even if the code grows one — and nothing on the request path writes files:
-// the file routes read below the snapshots root, contained by the repo idiom
-// in tools/serve-static.mjs (AR-2). The record card (G17.14, /record?id=…) is
-// the editor's reading place for one record: snapshot text with images at
-// their positions and captions, the link table, the metadata and the record's
-// own journal steps.
+// and URL-carried filters, and, since G17.20, the per-campaign «Як парсіць»
+// block: the transport stored with the campaign, with the manual steps a human
+// performs themselves under tor. Zero dependencies (node:http + node:sqlite).
+// The store is opened with readOnly: true, so no request can write to the
+// database even if the code grows one — and nothing on the request path writes
+// files: the file routes read below the snapshots root, contained by the repo
+// idiom in tools/serve-static.mjs (AR-2). The record card (G17.14,
+// /record?id=…) is the editor's reading place for one record: snapshot text
+// with images at their positions and captions, the link table, the metadata
+// and the record's own journal steps.
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import fs from 'node:fs';
@@ -18,6 +20,8 @@ import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { resolveStaticFile } from '../serve-static.mjs';
 import { wikiTitleFromUrl } from './wiki.mjs';
+import { parseCampaign } from './campaign.mjs';
+import { TOR_SOCKS5_PROXY } from './transport.mjs';
 
 export const DEFAULT_PORT = 8767;
 
@@ -51,6 +55,13 @@ const RIGHTS_BE = {
   author_own: 'уласны матэрыял',
 };
 const RECORD_PARAMS = ['status', 'city'];
+// Display words for the campaign transport (docs/24 «Кампанія», G17.20): the
+// raw key stays visible in a .key span, so the canonical value is never hidden
+// behind a translation.
+const TRANSPORT_BE = { direct: 'напрамую', tor: 'праз Tor' };
+// The approved SOCKS5 address is part of the transport contract
+// (transport.mjs) — the block spells it from there, never from a second copy.
+const TOR_SOCKS5_HOST = new URL(TOR_SOCKS5_PROXY).host;
 
 function escapeHtml(value) {
   return String(value)
@@ -94,14 +105,25 @@ function overviewData(db) {
     failedCounts.set(row.campaign_id, Number(row.n));
   }
 
+  // The transport (G17.19) rides in the row and is the only source for the
+  // «Як парсіць» block — never the YAML. A read-only connection cannot run
+  // the store's in-place migration, so a store written before the transport
+  // column existed falls back to the local default 'direct'.
+  const hasTransport = db
+    .prepare('PRAGMA table_info(campaigns)')
+    .all()
+    .some((column) => column.name === 'transport');
   const campaigns = db
-    .prepare('SELECT id, city, source_path, created_at FROM campaigns ORDER BY created_at, id')
+    .prepare(
+      `SELECT id, city, source_path, created_at${hasTransport ? ', transport' : ''} FROM campaigns ORDER BY created_at, id`
+    )
     .all()
     .map((row) => ({
       id: row.id,
       city: row.city,
       sourcePath: row.source_path,
       createdAt: row.created_at,
+      transport: (hasTransport ? row.transport : null) ?? 'direct',
       statuses: statusCounts.get(row.id) ?? {},
       photos: photoCounts.get(row.id) ?? 0,
       failed: failedCounts.get(row.id) ?? 0,
@@ -142,6 +164,51 @@ function campaignRowHtml(campaign) {
     `<td>${campaign.failed}</td>` +
     `<td><code>${escapeHtml(campaign.id.slice(0, 12))}</code></td>` +
     '</tr>'
+  );
+}
+
+// The campaign file is read (never written) only to detect a logged-in browser
+// profile — the store does not carry it, and tor + a login profile is the one
+// combination the block must warn loudly about (G17.20). An unreadable or
+// invalid file answers 'profile unknown': the block keeps rendering, only the
+// pointed warning stays out.
+function campaignHasLoginProfile(campaign) {
+  try {
+    const parsed = parseCampaign(fs.readFileSync(campaign.sourcePath, 'utf8'));
+    return parsed.ok && parsed.campaign.browser_user_data_dir !== undefined;
+  } catch {
+    return false;
+  }
+}
+
+// The per-campaign «Як парсіць» block (G17.20): the transport from the store
+// row in human words; under tor the numbered steps the human performs
+// themselves — raise the daemon, verify SOCKS5, parse this campaign — plus the
+// known risks; under direct the minimal block, the run command only, with no
+// Tor mention.
+function howToParseHtml(campaign) {
+  const title = `<h3>${escapeHtml(campaign.city)} — ${escapeHtml(
+    TRANSPORT_BE[campaign.transport] ?? campaign.transport
+  )} <span class="key">(${escapeHtml(campaign.transport)})</span></h3>`;
+  const runCommand = `node tools/collector/collector.mjs run --campaign ${campaign.sourcePath}`;
+  if (campaign.transport !== 'tor') {
+    return `${title}\n<p class="text">Запуск гэтай кампаніі: <code>${escapeHtml(runCommand)}</code></p>`;
+  }
+  const steps = [
+    `Падніме tor-дэман у асобным тэрмінале: <code>tor</code>`,
+    `Праверце SOCKS5-проксі: <code>curl --socks5-hostname ${TOR_SOCKS5_HOST} https://check.torproject.org/api/ip</code> — адказвае адрас Tor-выходу, не ваш`,
+    `Запусціце парсінг гэтай кампаніі: <code>${escapeHtml(runCommand)}</code>`,
+  ].map((step) => `<li>${step}</li>`);
+  const profileWarning = campaignHasLoginProfile(campaign)
+    ? '\n<p class="note">У кампаніі зададзены профіль браўзера (browser_user_data_dir) з сесіяй лагіну — праз Tor гэта дэананімізуе трафік. Не парсіць гэтую кампанію праз Tor з гэтым профілем.</p>'
+    : '';
+  return (
+    `${title}\n` +
+    `<p class="text">Збор ідзе праз уласны tor-дэман (SOCKS5 ${TOR_SOCKS5_HOST}) — яго чалавек паддымае сам:</p>\n` +
+    `<ol>\n${steps.join('\n')}\n</ol>\n` +
+    '<p class="note">Рызыкі: CDN блакуюць Tor-выходы — крокі часцей упадаюць, і серыя памылак спыняе прабег; ' +
+    'Tor марудны — загрузка старонкі можа не ўпісацца ў таймаўт 30 с.</p>' +
+    profileWarning
   );
 }
 
@@ -213,13 +280,15 @@ ${body}
 export function renderOverview({ campaigns, recentSteps }) {
   const campaignRows =
     campaigns.length > 0 ? campaigns.map(campaignRowHtml).join('\n') : `<tr><td colspan="7" class="empty">${EMPTY_LIBRARY_MESSAGE}</td></tr>`;
+  const howToParse =
+    campaigns.length > 0 ? `\n<h2>Як парсіць</h2>\n${campaigns.map(howToParseHtml).join('\n')}\n` : '';
   return pageShell(
     'overview',
     `<h2>Кампаніі</h2>
 <table>
 <tr><th>Горад</th><th>Сыравіна (raw)</th><th>Ачышчана (cleaned)</th><th>Выкарыстана (used)</th><th>Фота</th><th>Упалыя крокі</th><th>Кампанія</th></tr>
 ${campaignRows}
-</table>
+</table>${howToParse}
 <h2>Апошнія крокі журналу</h2>
 ${stepsTableHtml(recentSteps, { withCity: true, empty: 'Журнал пусты.' })}`
   );

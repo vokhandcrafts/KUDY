@@ -1,15 +1,16 @@
-// Dispatcher suite (G17.12, «Запісы» — G17.13): the read-only local pages over
-// the store. The fixture database is built through the production store
-// functions, then closed; the suite boots the real dispatcher on an ephemeral
-// port and fetches the pages — no route is stubbed (implementation-rules 15).
-// Assertions are on rendered content, so reverting the feature turns the suite
-// red.
+// Dispatcher suite (G17.12, «Запісы» — G17.13, «Як парсіць» — G17.20): the
+// read-only local pages over the store. The fixture database is built through
+// the production store functions, then closed; the suite boots the real
+// dispatcher on an ephemeral port and fetches the pages — no route is stubbed
+// (implementation-rules 15). Assertions are on rendered content, so reverting
+// the feature turns the suite red.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
+import { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
 import {
   completeStep,
@@ -689,4 +690,180 @@ test('the root npm script collector:dispatch points at the dispatch CLI command'
     'node tools/collector/collector.mjs dispatch',
     'collector:dispatch must raise the dispatcher through the documented CLI command'
   );
+});
+
+// --- «Як парсіць» (G17.20) ---
+
+// A minimal valid campaign file on disk: the block reads it (never writes)
+// for the login-profile detection, so the fixtures are real files addressed
+// by the absolute paths the store rows carry.
+function writeCampaignYaml(dir, name, { profile = false, transport = null } = {}) {
+  const file = path.join(dir, name);
+  const lines = [
+    'city: gdansk',
+    'seeds:',
+    '  - https://news.example/a',
+    'topics: []',
+    'fence: { depth: 3, extra_domains: [], delay_s: [2, 5] }',
+    'youtube: []',
+  ];
+  if (transport !== null) lines.push(`transport: ${transport}`);
+  if (profile) lines.push('browser_user_data_dir: /home/editor/browser-profile');
+  fs.writeFileSync(file, `${lines.join('\n')}\n`);
+  return file;
+}
+
+function insertCampaignRow(db, id, sourcePath, transport) {
+  db.prepare(
+    `INSERT INTO campaigns (id, city, source_path, content_hash, seeds, topics, fence, youtube, transport, created_at)
+     VALUES (?, 'gdansk', ?, 'hash', '[]', '[]', '{}', '[]', ?, '2026-09-23T00:00:00.000Z')`
+  ).run(id, sourcePath, transport);
+}
+
+// The common arrangement of the «Як парсіць» tests: one campaign row with its
+// campaign file on disk and the real dispatcher over the store. yamlTransport
+// lets a test diverge the file from the row — the row is what the last run
+// used, and the store upsert would never create that divergence itself.
+async function startTransportDispatcher(t, dir, { name, profile = false, transport, yamlTransport = null }) {
+  const dbPath = path.join(dir, 'db.sqlite');
+  const db = openStore(dbPath);
+  const campaignYamlPath = writeCampaignYaml(dir, name, { profile, transport: yamlTransport ?? transport });
+  insertCampaignRow(db, 'c1', campaignYamlPath, transport);
+  db.close();
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+  return { dispatcher, campaignYamlPath, dbPath };
+}
+
+test('the «Як парсіць» block shows the transport from the store row, never from the YAML', async (t) => {
+  const dir = makeTempDir();
+  // The YAML says tor; the row — what the last run actually used — says
+  // direct: the block must follow the row.
+  const { dispatcher, campaignYamlPath } = await startTransportDispatcher(t, dir, {
+    name: 'direct.yaml',
+    transport: 'direct',
+    yamlTransport: 'tor',
+  });
+
+  const response = await get(dispatcher, '/');
+  assert.equal(response.status, 200);
+  assert.match(response.body, /<h2>Як парсіць<\/h2>/);
+  // The human word and the raw key come from the row.
+  assert.match(response.body, /<h3>gdansk — напрамую <span class="key">\(direct\)<\/span><\/h3>/);
+  assert.ok(
+    response.body.includes(
+      `Запуск гэтай кампаніі: <code>node tools/collector/collector.mjs run --campaign ${campaignYamlPath}</code>`
+    ),
+    'the minimal block names this campaign file in the run command'
+  );
+  // The YAML's tor never leaks into the page: the minimal direct block carries
+  // the run command only, with no Tor mention at all.
+  assert.doesNotMatch(response.body, /праз Tor/);
+  assert.doesNotMatch(response.body, /tor-дэман/);
+});
+
+test('a tor campaign renders the numbered manual steps and the risks', async (t) => {
+  const dir = makeTempDir();
+  const { dispatcher, campaignYamlPath } = await startTransportDispatcher(t, dir, {
+    name: 'tor.yaml',
+    transport: 'tor',
+  });
+
+  const response = await get(dispatcher, '/');
+  assert.equal(response.status, 200);
+  assert.match(response.body, /<h3>gdansk — праз Tor <span class="key">\(tor\)<\/span><\/h3>/);
+  // The numbered steps carry the copy-paste commands: raise the daemon,
+  // verify the SOCKS5 address from the transport contract, parse this
+  // campaign.
+  assert.match(
+    response.body,
+    /<ol>\n<li>Падніме tor-дэман у асобным тэрмінале: <code>tor<\/code><\/li>\n<li>Праверце SOCKS5-проксі: <code>curl --socks5-hostname 127\.0\.0\.1:9050 https:\/\/check\.torproject\.org\/api\/ip<\/code>[^<]*<\/li>\n<li>Запусціце парсінг гэтай кампаніі: <code>[^<]*<\/code><\/li>\n<\/ol>/
+  );
+  assert.ok(
+    response.body.includes(`run --campaign ${campaignYamlPath}</code>`),
+    'the run command names this campaign file'
+  );
+  // The risks the spec names are on the page.
+  assert.match(response.body, /CDN блакуюць Tor-выходы/);
+  assert.match(response.body, /таймаўт 30 с/);
+  // No profile in the campaign file — no pointed warning.
+  assert.doesNotMatch(response.body, /дэананімізуе/);
+});
+
+test('a tor campaign with a login profile in its file warns about de-anonymization', async (t) => {
+  const dir = makeTempDir();
+  const { dispatcher } = await startTransportDispatcher(t, dir, {
+    name: 'tor-profile.yaml',
+    transport: 'tor',
+    profile: true,
+  });
+
+  const response = await get(dispatcher, '/');
+  assert.equal(response.status, 200);
+  assert.match(response.body, /праз Tor гэта дэананімізуе трафік/);
+  // The profile path stays the campaign file's business: the warning names
+  // the field, it never renders a local path.
+  assert.ok(!response.body.includes('/home/editor/browser-profile'), 'the profile path never renders');
+});
+
+test('an unknown transport value in a row renders the raw key and the minimal block', async (t) => {
+  const dir = makeTempDir();
+  // A corrupt row (a foreign writer) carries a value the schema never allows:
+  // the raw key shows as text, the page answers with the minimal block, not a
+  // crash.
+  const { dispatcher } = await startTransportDispatcher(t, dir, {
+    name: 'odd.yaml',
+    transport: 'vpn',
+  });
+
+  const response = await get(dispatcher, '/');
+  assert.equal(response.status, 200);
+  assert.match(response.body, /<h3>gdansk — vpn <span class="key">\(vpn\)<\/span><\/h3>/);
+  assert.doesNotMatch(response.body, /<ol>/);
+  assert.doesNotMatch(response.body, /праз Tor/);
+});
+
+test('a store written before the transport column falls back to the direct default', async (t) => {
+  const dir = makeTempDir();
+  const dbPath = path.join(dir, 'old.sqlite');
+  // Built without the store helpers on purpose: openStore migrates in place,
+  // while a dispatcher opens read-only — a database an old writer left behind
+  // has no transport column, and the page must answer with the local default,
+  // not a crash.
+  const db = new DatabaseSync(dbPath);
+  db.exec(`
+    CREATE TABLE campaigns (id TEXT PRIMARY KEY, city TEXT NOT NULL, source_path TEXT NOT NULL, content_hash TEXT NOT NULL, seeds TEXT NOT NULL, topics TEXT NOT NULL, fence TEXT NOT NULL, youtube TEXT NOT NULL, created_at TEXT NOT NULL);
+    CREATE TABLE raw_records (id TEXT PRIMARY KEY, campaign_id TEXT NOT NULL, status TEXT NOT NULL);
+    CREATE TABLE media (raw_record_id TEXT NOT NULL);
+    CREATE TABLE run_log (id INTEGER PRIMARY KEY, campaign_id TEXT NOT NULL, kind TEXT NOT NULL, ref TEXT NOT NULL, status TEXT NOT NULL, error TEXT, finished_at TEXT);
+  `);
+  db.prepare(
+    `INSERT INTO campaigns (id, city, source_path, content_hash, seeds, topics, fence, youtube, created_at)
+     VALUES ('c1', 'gdansk', 'old.yaml', 'hash', '[]', '[]', '{}', '[]', '2026-09-23T00:00:00.000Z')`
+  ).run();
+  db.close();
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const response = await get(dispatcher, '/');
+  assert.equal(response.status, 200);
+  assert.match(response.body, /<h3>gdansk — напрамую <span class="key">\(direct\)<\/span><\/h3>/);
+  assert.doesNotMatch(response.body, /праз Tor/);
+});
+
+test('no request writes the database or the campaign files it reads', async (t) => {
+  const dir = makeTempDir();
+  const { dispatcher, campaignYamlPath, dbPath } = await startTransportDispatcher(t, dir, {
+    name: 'tor-profile.yaml',
+    transport: 'tor',
+    profile: true,
+  });
+  const dbHashBefore = sha256Hex(fs.readFileSync(dbPath));
+  const yamlBefore = fs.readFileSync(campaignYamlPath);
+
+  await get(dispatcher, '/');
+  await get(dispatcher, '/records');
+
+  assert.equal(sha256Hex(fs.readFileSync(dbPath)), dbHashBefore);
+  assert.deepEqual(fs.readFileSync(campaignYamlPath), yamlBefore);
 });
