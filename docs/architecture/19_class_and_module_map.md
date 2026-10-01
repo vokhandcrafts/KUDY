@@ -35,7 +35,7 @@
 
 - **`core/pipeline`** валодае прыёмам фікса: accuracy gate (адкід > 40 м), spike rejection (> 12 км/г ці > 5 м), згладжванне па 3 фіксах, dwell-акумулятар (старт `dwell_ms = 6000`) — [09 §6.2](09_technical_architecture.md). Ён **не ведае** `heard`/`auto_fired` і не мутуе стан.
 - **`core/engine`** валодае пераправеркай на мяжы трыгера: свежасць ≤ 30 000 мс, `accuracy ≤ radius`, адкладзеная адлегласць ≤ 2 × radius — умовы §4.8 ADR G01.01 і інварыянты 7–8 `09`.
-- **`services/config`** — адзіны дастаўнік значэнняў (радыус, dwell, cooldown, свежасць) без рэлізу; заяўленыя ліміты калібруюцца ў поле [G11.02](../16_delivery_backlog.md).
+- **`services/remote-config`** — адзіны дастаўнік значэнняў (радыус, dwell, cooldown, свежасць) без рэлізу; заяўленыя ліміты калібруюцца ў поле [G11.02](../16_delivery_backlog.md). Уладальнік перанесены з `services/config` у PR G09.05 (#295): `services/config.ts` застаўся node-загрузчыкам bundle-лічбаў G07.05.
 
 Лакальныя лікі ў іншых месцах — **не правілы дадатку**:
 
@@ -87,7 +87,7 @@
 | `services/db.ts` | клас | SQLite-адкрыццё (module-level singleton promise), транзакцыі §3.3, міграцыі зоны B | адно злучэнне на працэс; памылка міграцыі не дазваляе дроп базы | G04.01 |
 | `services/device.ts` | функцыі + адаптар `services/device-secure-store.ts` | рэгістрацыя прылады адзін раз: сакрэт → expo-secure-store, `device_id` → зона B праз services/db; crash-window аднаўляецца свежай identity; bearer-кантракт агульны з feedback (`21` §2) | чакае першага спажыўца (G08.03/G09.02/G16.02); без паўторнай рэгістрацыі пры жывой паре | G08.01 |
 | `services/eventLog.ts` | клас | лакальная чарга падзей з захаваннем у `event_queue` (зона B) праз `services/db`, батч, адпраўка толькі са згодай; без каардынат | чарга перажывае restart; згода брамуе толькі адпраўку | G09.01–G09.02 |
-| `services/config.ts` | сэрвіс | remote config + кэш + бяспечны default; адзін дастаўнік лікаў AR-5 | кэш перажывае офлайн | G09.05 |
+| `services/remote-config.ts` | сэрвіс | remote config + кэш + бяспечны default; адзін дастаўнік лікаў AR-5 (кантракт — `contracts/config`; `services/config.ts` — толькі node-загрузчык bundle-лічбаў G07.05) | кэш перажывае офлайн | G09.05 |
 | `services/map.ts` | сэрвіс | MapLibre, офлайн-рэгіён, style/glyphs з бандла, атрыбуцыя ODbL | **gated:** рашэнне G00.02.c не прынятае | G06.02 |
 | `services/feedbackRepository.ts` | сэрвіс | уласная ацэнка, `feedback_local`/`feedback_outbox`, транзакцыі; не чысціць durable разам з кэшам | чарга перажывае restart; макс 1 in-flight на мэту | G16.02 |
 | `services/feedbackSync.ts` | клас | серыялізаваная адпраўка па мэце, CAS, backoff 2…8 с (мяжа 5 хв), stop праз 7 дзён | адна перадача за раз; без аўтарэгістрацыі на 401 | G16.02 |
@@ -157,7 +157,7 @@ function step(previous: RunState, event: RunEvent, now: number, config: EngineCo
 
 `RunState` — палі §4.2 ADR G01.01 даслоўна: `heard: Set<story_id>` (манатонны), `auto_fired: Set<stop_id>` (манатонны), `playing: { stop_id, story_id, play_id } | null`, `queued: { stop_id, radius, at } | null`, `accessible_stop_ids`, `tier_available`, `autoplay_suspended`, `last_fix`, `focus_lost_at?` (транзітнае поле `09` §6.1: час FocusLoss для інварыянту 5 — FocusRegain пазней за 10 хв закрывае кропку), `play_seq` (write-through лічыльнік запускаў ADR G01.03 §3.1: на кожным PlayStory расце на +1 і пішацца ў durable радок; ён і ёсць `play_id` каманды PlayStory), плюс замацаваныя `session_id`/`route_id`/`version`/`locale`. Забароненыя сінонімы (`consumed`, `played`-калонка, `heard: Set<stop_id>`) — ADR §4.2.
 
-`EngineConfig` — толькі значэнні з `services/config` (свежасць, множнік чаргі, вакно FocusRegain 10 хв — інварыянт 5 `09`); без функцый і без чытання гадзінніка.
+`EngineConfig` — толькі значэнні з `services/remote-config` (свежасць, множнік чаргі, вакно FocusRegain 10 хв — інварыянт 5 `09`); без функцый і без чытання гадзінніка.
 
 ### 3.2 Межа даверу `AccessReady` (capability-канал)
 

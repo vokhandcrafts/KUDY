@@ -15,10 +15,11 @@
 // names, implementation-rules 2); the one conversion this transport performs
 // is `at` epoch ms → the ISO-8601 UTC string the event table defines (the
 // conversion eventLog explicitly deferred here).
-import { getSetting, setSetting } from './db/db.ts';
+import { setSetting } from './db/db.ts';
 import type { SqlDriver } from './db/types.ts';
 import type { DeviceIdentity } from './device.ts';
 import { flushEvents, type EventSender, type OutgoingEvent } from './eventLog.ts';
+import { readConsentState } from './consent.ts';
 
 // Closed consent vocabulary (`09` §10: asked → granted or refused; a granted
 // consent can be withdrawn). Absent (never asked) is the third state — the
@@ -43,12 +44,13 @@ export class AnalyticsError extends Error {
 // Reads the durable consent state. null = consent was never asked — the gate
 // is closed for it (criterion 1: no consent, no sending). A stored value
 // outside the closed vocabulary is corrupt durable state: a named
-// diagnostic, never a silent "closed" (silent wrong behavior).
+// diagnostic, never a silent "closed" (silent wrong behavior). The shared
+// accessor (services/consent.ts) owns the vocabulary; the error class stays
+// this module's contract.
 export function getAnalyticsConsent(driver: SqlDriver): AnalyticsConsent | null {
-  const stored = getSetting(driver, CONSENT_KEY);
-  if (stored === null) return null;
-  if (stored === 'granted' || stored === 'revoked') return stored;
-  throw new AnalyticsError('invalid_consent_state', `settings.${CONSENT_KEY} holds an unknown value: ${stored}`);
+  return readConsentState(driver, CONSENT_KEY, (key, stored) =>
+    new AnalyticsError('invalid_consent_state', `settings.${key} holds an unknown value: ${stored}`),
+  );
 }
 
 // Grants, refuses or withdraws analytics consent. Writing `revoked` over a

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Remote config дадатку (GET /v1/config)",
+  "description": "Канфігурацыйны дакумент з 09 §5: шэсць палёў даслоўна з кананічнага радка API (trigger_radius_default, dwell_ms, accuracy_gate_m, moment_cooldown_min, moments_per_session_max, min_app_version) + канверт config_schema_version паводле прэцэдэнту catalog_schema_version (G01.06). Слоўнік закрыты (additionalProperties: false): канфіг структурна нясе толькі лічбы — ні поля разблакоўкі кантэнту, ні URL, ні вольнага тэксту. Верхнія мяжы — палітыка валідатара (крывы ці варожы адказ не можа знесіліць брамы сесіі); ніжнія — фізічныя сэнсы палёў. Прычыны пачатковых лічбаў — 10 §даследаванні (accuracy 40 м, dwell 6000 мс) і core/pipeline (defaultPipelineConfig dwellMs 6000); лічбы, якіх канон не фіксуе, — прапанова да палявой каліброўкі G11.02.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "config_schema_version",
+    "trigger_radius_default",
+    "dwell_ms",
+    "accuracy_gate_m",
+    "moment_cooldown_min",
+    "moments_per_session_max",
+    "min_app_version"
+  ],
+  "properties": {
+    "config_schema_version": { "const": 1 },
+    "trigger_radius_default": { "type": "number", "minimum": 1, "maximum": 500 },
+    "dwell_ms": { "type": "integer", "minimum": 1000, "maximum": 120000 },
+    "accuracy_gate_m": { "type": "number", "minimum": 1, "maximum": 200 },
+    "moment_cooldown_min": { "type": "integer", "minimum": 0, "maximum": 10080 },
+    "moments_per_session_max": { "type": "integer", "minimum": 0, "maximum": 20 },
+    "min_app_version": { "type": "integer", "minimum": 1, "maximum": 1000000 }
+  }
+}
