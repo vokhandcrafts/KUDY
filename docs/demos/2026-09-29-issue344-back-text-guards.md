@@ -21,7 +21,7 @@ node_modules/.bin/jest app/back-navigation.test.tsx components/back-button.test.
 
 ```output
 Test Suites: 2 passed, 2 total
-Tests:       10 passed, 10 total
+Tests:       13 passed, 13 total
 Snapshots:   0 total
 ```
 

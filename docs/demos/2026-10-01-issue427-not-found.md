@@ -54,7 +54,7 @@ rm components/placeholder.tsx
 ```output
 Tests:       1 failed, 18 skipped, 19 total
 Tests:       1 failed, 7 skipped, 8 total
-Tests:       1 failed, 7 skipped, 8 total
+Tests:       1 failed, 8 skipped, 9 total
 ```
 
 Крытэры 1 і 3 — жывы прагон. Захаваныя ў `.scratch/issue-427/screens/`
