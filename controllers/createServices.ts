@@ -613,7 +613,7 @@ export function createServices(ports: ServicePorts): Services {
           // G07.05 — the R07 carry source: the hint controller's
           // foreground-window ids move into session scope in the Start
           // transaction (ADR G01.03 §3.9).
-          ...(hints ? { carryGuideHints: undefined } : {}),
+          ...(hints ? { carryGuideHints: hints.foregroundCarry } : {}),
         });
         runSurfaces.set(routeId, store);
         // A refused surface (the walk never started) is not the walk's

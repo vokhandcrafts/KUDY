@@ -13,6 +13,7 @@ import { AudioService } from '../services/audio/service.ts';
 import { FakeLocationOsPort } from '../services/location/fake-port.ts';
 import { LocationService } from '../services/location/service.ts';
 import {
+  DbError,
   listGuidesInHintCooldown,
   listSessionGuideHints,
   openDatabase,
@@ -98,6 +99,7 @@ function makeWorld(options?: {
   points?: GuideHintPoint[];
   run?: RunState;
   foreground?: boolean;
+  store?: GuideHintStore;
 }): World {
   const clock = { nowMs: 10_000 };
   const locationPort = new FakeLocationOsPort();
@@ -140,7 +142,7 @@ function makeWorld(options?: {
     location,
     audio,
     catalog,
-    store: dbHintStore(driver),
+    store: options?.store ?? dbHintStore(driver),
     points: () => points,
     values: VALUES,
     liveRun: () => runSource,
@@ -481,4 +483,50 @@ test('the root wires no hint controller without the full seam set', async () => 
   // No catalog service → no public previews → the honest absence.
   assert.equal(services.hints, undefined);
   assert.equal(services.catalog, undefined);
+});
+
+test('a hint-store failure degrades fail-closed — the fix pipeline never sees the DbError', async () => {
+  const boom = (): never => {
+    throw new DbError('guide-hint-write-failed', 'disk gone');
+  };
+  const world = makeWorld({
+    store: { recordShown: boom, recordDismissed: boom, sessionShown: boom, cooldownBlocked: boom },
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  // The fix dispatch survives a throwing store: no exception leaves the
+  // controller, the card hides fail-closed and the failure is sticky — no
+  // later fix can present either.
+  world.emitFix(NEAR.lat, NEAR.lng);
+  world.clock.nowMs += 21_000;
+  world.emitFix(NEAR.lat, NEAR.lng);
+  const state = world.storeState();
+  assert.equal(state.kind, 'hidden');
+  if (state.kind !== 'hidden') return;
+  assert.equal(state.reason, 'limited');
+  world.clock.nowMs += 60_000;
+  world.emitFix(NEAR.lat, NEAR.lng);
+  assert.equal(world.storeState().kind, 'hidden');
+});
+
+test('a failed durable dismissal hides the card and sends no dismissed event', async () => {
+  const events: GuideHintEventRecord[] = [];
+  const world = makeWorld({
+    store: {
+      recordShown: () => {},
+      recordDismissed: () => {
+        throw new DbError('guide-hint-write-failed', 'disk gone');
+      },
+      sessionShown: () => [],
+      cooldownBlocked: () => [],
+    },
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  dwellToReady(world);
+  world.binding.dismiss();
+  const state = world.storeState();
+  assert.equal(state.kind, 'hidden');
+  if (state.kind !== 'hidden') return;
+  assert.equal(state.reason, 'limited');
+  // The shown event of the presentation stands; no dismissed event was sent.
+  assert.deepEqual(world.events.map((event) => event.type), ['guide_nearby_shown']);
 });

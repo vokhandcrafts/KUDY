@@ -230,6 +230,14 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
     lastQualifyingFixAt = fix.at;
   };
 
+  // The durable limit store's failure policy: a transient sqlite failure must
+  // never propagate into the fix pipeline this controller observes (decide()
+  // runs inside the location service's port-event dispatch — a thrown DbError
+  // would skip the window recompute and the later observers). The controller
+  // degrades fail-closed — the card hides and stays hidden — while the named
+  // DbError rule stays the store's own diagnostic surface.
+  let storeHealth: 'ok' | 'failed' = 'ok';
+
   const present = (next: {
     readonly context: 'idle' | 'active';
     readonly sessionId: string | null;
@@ -242,7 +250,13 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
       episodeKey = key;
       suggestionId = `hint-${String(nextSeq())}`;
       episodeRecorded = new Set(ids);
-      deps.store.recordShown({ guideIds: ids, context: next.context, sessionId: next.sessionId, at: now() });
+      try {
+        deps.store.recordShown({ guideIds: ids, context: next.context, sessionId: next.sessionId, at: now() });
+      } catch {
+        storeHealth = 'failed';
+        hidden('limited');
+        return;
+      }
       for (const id of ids) windowShown.add(id);
       deps.telemetry?.record({
         type: 'guide_nearby_shown',
@@ -256,8 +270,14 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
       // suggestion_id and the already-sent shown event stay.
       const joined = ids.filter((id) => !episodeRecorded.has(id));
       if (joined.length > 0) {
+        try {
+          deps.store.recordShown({ guideIds: joined, context: next.context, sessionId: next.sessionId, at: now() });
+        } catch {
+          storeHealth = 'failed';
+          hidden('limited');
+          return;
+        }
         for (const id of joined) episodeRecorded.add(id);
-        deps.store.recordShown({ guideIds: joined, context: next.context, sessionId: next.sessionId, at: now() });
         for (const id of joined) windowShown.add(id);
       }
     }
@@ -337,10 +357,22 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
     // cooldown set guards both contexts: one outing must not re-introduce a
     // guide a recent window already presented (ADR G07.04 §3 intent).
     const presenting = episodeKey !== null ? episodeRecorded : new Set<string>();
-    const blocked = new Set<string>([
-      ...deps.store.cooldownBlocked(at, deps.values.foreground_cooldown_s * 1000),
-      ...(sessionId !== null ? deps.store.sessionShown(sessionId) : []),
-    ]);
+    let cooldown: readonly string[];
+    let sessionRows: readonly string[];
+    try {
+      cooldown = deps.store.cooldownBlocked(at, deps.values.foreground_cooldown_s * 1000);
+      sessionRows = sessionId !== null ? deps.store.sessionShown(sessionId) : [];
+    } catch {
+      // The limits are unreadable — fail closed (the comment at storeHealth).
+      storeHealth = 'failed';
+      hidden('limited');
+      return;
+    }
+    if (storeHealth === 'failed') {
+      hidden('limited');
+      return;
+    }
+    const blocked = new Set<string>([...cooldown, ...sessionRows]);
     const inRadius = new Map<string, boolean>();
     for (const point of deps.points()) {
       if (
@@ -404,7 +436,15 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
       if (state.kind !== 'ready') return;
       const ids = state.guides.map((guide) => guide.routeId);
       const sessionId = state.context === 'active' ? currentSessionId() : null;
-      deps.store.recordDismissed({ guideIds: ids, context: state.context, sessionId, at: now() });
+      try {
+        deps.store.recordDismissed({ guideIds: ids, context: state.context, sessionId, at: now() });
+      } catch {
+        // The durable dismissal failed — the limits cannot be trusted, so
+        // the card hides fail-closed and no dismissed event is sent.
+        storeHealth = 'failed';
+        hidden('limited');
+        return;
+      }
       for (const id of ids) windowShown.add(id);
       deps.telemetry?.record({
         type: 'guide_nearby_dismissed',
