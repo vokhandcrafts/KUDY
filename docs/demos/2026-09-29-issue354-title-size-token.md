@@ -9,7 +9,9 @@
 `components/design-tokens.ts` з анкерам на канон, замена ўсіх пяці
 месцаў, guard-тэст прагулкі па экранах падае пры рэверце на hardcoded
 18. Іншыя памеры шрыфтаў (10–12dp_run, 12/13/20 па-за загалоўкамі) —
-па-за межамі. Створана 2026-09-29.*
+па-за межамі. Створана 2026-09-29. Output-блокі перазахопленыя
+2026-10-01 у PR issue #435 (зрух радкоў пасля зліццяў + split
+screen-styles; rule 11).*
 
 <!-- showboat-id: issue354-title-size-token -->
 
@@ -21,7 +23,7 @@ grep -n "fontTitleSize" components/design-tokens.ts
 ```
 
 ```output
-37:  fontTitleSize: 18, // font.size-title — памер загалоўка экрана
+41:  fontTitleSize: 18, // font.size-title — памер загалоўка экрана
 ```
 
 Крытэр 2 — усе шэсць экранаў ўжываюць токен: My KUDY, Побач, а агульны
@@ -35,10 +37,10 @@ for f in "app/(tabs)/my.tsx" app/map.tsx components/screen-styles.ts components/
 ```
 
 ```output
-app/(tabs)/my.tsx:36:    fontSize: tokens.fontTitleSize,
-app/map.tsx:34:    fontSize: tokens.fontTitleSize,
-components/screen-styles.ts:17:    fontSize: tokens.fontTitleSize,
-components/guide-card.tsx:121:    fontSize: tokens.fontTitleSize,
+app/(tabs)/my.tsx:38:    fontSize: tokens.fontTitleSize,
+app/map.tsx:35:    fontSize: tokens.fontTitleSize,
+components/screen-styles.ts:15:  fontSize: tokens.fontTitleSize,
+components/guide-card.tsx:126:    fontSize: tokens.fontTitleSize,
 ```
 
 Крытэр 3 — guard-тэст design-tokens зелёны: канон ↔ код сінхронныя, а
@@ -51,7 +53,7 @@ node --test test/design-tokens.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 ```
 
 ```output
-ℹ tests 13
-ℹ pass 13
+ℹ tests 18
+ℹ pass 18
 ℹ fail 0
 ```

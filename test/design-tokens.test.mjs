@@ -301,6 +301,41 @@ test('surface font-family mirror stays anchored to the licensed canon families (
   );
 });
 
+test('the display family renders only guide and history names (canon §3, issue #435)', () => {
+  // Canon §3: Alegreya is the display face of the guide and story names
+  // only. The role lives in one place — screenStyles.displayTitle; every
+  // other screen title (rubrics, place names, collections) consumes
+  // screenStyles.title on the UI family. The walk is the reverted-line
+  // check (implementation-rules 1): re-pointing a rubric or place title
+  // at the display role, or a screen consuming the display token
+  // directly, turns this red.
+  const roleSource = readFileSync(join(root, 'components/screen-styles.ts'), 'utf8');
+  assert.match(roleSource, /title:\s*{[^}]*fontFamily:\s*tokens\.fontFamilyUi/,
+    'screenStyles.title must render the UI family');
+  assert.match(roleSource, /displayTitle:\s*{[^}]*fontFamily:\s*tokens\.fontFamilyDisplay/,
+    'screenStyles.displayTitle must render the display family');
+  const displayConsumers = [];
+  const scan = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const filePath = join(dir, entry.name);
+      if (entry.isDirectory()) scan(filePath);
+      else if (/\.(tsx|ts)$/.test(entry.name) && !entry.name.includes('.test.')) {
+        const source = readFileSync(filePath, 'utf8');
+        if (dir === join(root, 'app') && /fontFamilyDisplay/.test(source)) {
+          displayConsumers.push(`${filePath.slice(root.length + 1)}: hard-coded display token`);
+        }
+        if (/screenStyles\.displayTitle/.test(source)) {
+          displayConsumers.push(filePath.slice(root.length + 1));
+        }
+      }
+    }
+  };
+  scan(join(root, 'app'));
+  scan(join(root, 'components'));
+  assert.deepEqual(displayConsumers.sort(), ['app/route/[id].tsx'],
+    'the display role is allowed on the route preview title (the history name) only');
+});
+
 test('surface styles consume the canon title token — no hardcoded title size (UX 08)', () => {
   // The six screen titles (Explore, My KUDY, Побач, guides rubric, route
   // preview, place detail) take their size from tokens.fontTitleSize, pinned

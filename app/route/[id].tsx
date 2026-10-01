@@ -269,7 +269,7 @@ export default function RoutePreview() {
         ) : null}
         {state.surface.kind === "ready" ? (
           <View>
-            <ScaledText style={screenStyles.title}>{state.surface.preview.title}</ScaledText>
+            <ScaledText style={screenStyles.displayTitle}>{state.surface.preview.title}</ScaledText>
             {state.surface.preview.summary ? (
               <ScaledText style={styles.summary}>{state.surface.preview.summary}</ScaledText>
             ) : null}

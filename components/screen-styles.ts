@@ -6,6 +6,17 @@ import { StyleSheet } from "react-native";
 
 import { tokens } from "./design-tokens";
 
+// Issue #435: canon §3 gives Alegreya the guide and story names only —
+// every other screen title (rubrics, place names, collections) stays on
+// the UI family. The display role is the separate style below; the guard
+// in test/design-tokens.test.mjs tracks who consumes it.
+const titleBase = {
+  color: tokens.colorInk,
+  fontSize: tokens.fontTitleSize,
+  fontWeight: tokens.fontWeightStrong,
+  marginBottom: tokens.spaceS,
+};
+
 export const screenStyles = StyleSheet.create({
   screen: {
     backgroundColor: tokens.colorPaper,
@@ -13,13 +24,13 @@ export const screenStyles = StyleSheet.create({
     padding: tokens.spaceL,
   },
   title: {
-    color: tokens.colorInk,
-    // G06.10.b: the display family — canon §3 gives Alegreya the guide and
-    // story titles only; while the face loads (and in tests) the unknown
-    // family name falls back to the system font, weight and size hold.
+    ...titleBase,
+    fontFamily: tokens.fontFamilyUi,
+  },
+  displayTitle: {
+    ...titleBase,
+    // G06.10.b: while the face loads (and in tests) the unknown family
+    // name falls back to the system font, weight and size hold.
     fontFamily: tokens.fontFamilyDisplay,
-    fontSize: tokens.fontTitleSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceS,
   },
 });

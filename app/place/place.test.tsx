@@ -17,7 +17,8 @@ import PlaceDetail from "./[id]";
 import MapScreen from "../map";
 import RoutePreview from "../route/[id]";
 import { createServices } from "../../controllers/createServices";
-import { fixtureText, layoutWith, serve, sha256 } from "../../test/render-helpers";
+import { fixtureText, flatStyle, layoutWith, serve, sha256 } from "../../test/render-helpers";
+import { tokens } from "../../components/design-tokens";
 import { AudioService } from "../../services/audio/service";
 import { FakeAudioPlayerPort } from "../../services/audio/fake-port";
 import type { BundlesStore, FileFacts } from "../../services/contentRepo/types";
@@ -244,5 +245,13 @@ describe("Place detail loading indicator (UX 07)", () => {
     );
     expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
     expect(screen.getByTestId("place-loading")).toBeTruthy();
+  });
+});
+
+describe("Place detail font role (issue #435)", () => {
+  test("the place name renders the UI family — the display serif is for guide and story names only (canon §3)", async () => {
+    await openPlace();
+    const title = screen.getByText("Двор сукнараў");
+    expect(flatStyle(title).fontFamily).toBe(tokens.fontFamilyUi);
   });
 });
