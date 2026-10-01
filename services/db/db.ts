@@ -409,6 +409,38 @@ export function listPendingEvents(driver: SqlDriver): EventQueueRow[] {
     .map(toEventQueueRow);
 }
 
+// G09.04 diagnostics read: the full log window — sent and pending rows alike,
+// the sent flag included so the report can name the server-visibility
+// boundary. Read-only (the queue is never modified here); the window is
+// inclusive on both ends and optional on either side, in the queue's stable
+// dispatch order.
+export interface EventWindow {
+  from?: number;
+  to?: number;
+}
+
+export function listEvents(driver: SqlDriver, window: EventWindow = {}): EventQueueRow[] {
+  const conditions: string[] = [];
+  const params: SqlValue[] = [];
+  if (window.from !== undefined) {
+    conditions.push('at >= ?');
+    params.push(window.from);
+  }
+  if (window.to !== undefined) {
+    conditions.push('at <= ?');
+    params.push(window.to);
+  }
+  const where = conditions.length > 0 ? ` WHERE ${conditions.join(' AND ')}` : '';
+  return driver
+    .prepare(
+      `SELECT event_id, type, at, schema_version, payload, sent
+       FROM event_queue${where}
+       ORDER BY at, event_id`,
+    )
+    .all(...params)
+    .map(toEventQueueRow);
+}
+
 // One transaction marks the acknowledged batch; a crash before the commit
 // leaves the rows pending and the next flush resends them unchanged. The
 // sent = 0 guard keeps the return value the honest "marked now" count —
