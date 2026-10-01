@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { jest } from "@jest/globals";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
 import { defaultEngineConfig } from "../core/engine/reducer";
 import { ServicesContext } from "../app/_layout";
@@ -58,10 +59,14 @@ export function serve(paths: Record<string, string>) {
 export function layoutWith(services: Services) {
   // The test layout mirrors app/_layout.tsx: the provider around the Stack
   // navigator with the native header off (UX 02, issue #348 — expo-router
-  // reads the routes from context, children are not rendered explicitly).
+  // reads the routes from context, children are not rendered explicitly),
+  // and the root status bar pinned to dark content (issue #428) — copied
+  // verbatim from there, the guard for the real file is app/status-bar.test.tsx.
   return function TestLayout() {
     return (
       <ServicesContext.Provider value={services}>
+        {/* Issue #428: one dark-content config at the navigation root. */}
+        <StatusBar style="dark" />
         <Stack screenOptions={{ headerShown: false }} />
       </ServicesContext.Provider>
     );
