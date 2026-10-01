@@ -23,7 +23,9 @@ import {
   getSession,
   getLiveSession,
   getSetting,
+  listPendingEvents,
   listSessionHistory,
+  markEventsSent,
   openDatabase,
   pauseSession,
   rebuildDerived,
@@ -362,6 +364,27 @@ test('appendEvent: a repeated event_id lands once (09 §10 idempotency)', () => 
     appendEvent(driver, { ...event, eventId: 'evt-bad', at: null as unknown as number }),
   );
   assert.equal(rowCount(driver, 'event_queue'), 1);
+});
+
+test('listPendingEvents: only unsent rows, stable order by at then event_id (G09.01)', () => {
+  const driver = openFresh();
+  appendEvent(driver, { eventId: 'evt-b', type: 'app_open', at: 2, schemaVersion: 1, payload: '{}' });
+  appendEvent(driver, { eventId: 'evt-a', type: 'app_open', at: 2, schemaVersion: 1, payload: '{}' });
+  appendEvent(driver, { eventId: 'evt-c', type: 'app_open', at: 1, schemaVersion: 1, payload: '{}' });
+  assert.deepEqual(listPendingEvents(driver).map((row) => row.eventId), ['evt-c', 'evt-a', 'evt-b']);
+  markEventsSent(driver, ['evt-a']);
+  assert.deepEqual(listPendingEvents(driver).map((row) => row.eventId), ['evt-c', 'evt-b']);
+  assert.ok(listPendingEvents(driver).every((row) => !row.sent));
+});
+
+test('markEventsSent: one honest changes count, re-marking is a no-op, empty batch wakes nothing (G09.01)', () => {
+  const driver = openFresh();
+  appendEvent(driver, { eventId: 'evt-x1', type: 'app_open', at: 1, schemaVersion: 1, payload: '{}' });
+  assert.equal(markEventsSent(driver, ['evt-x1', 'evt-missing']), 1);
+  assert.equal(markEventsSent(driver, ['evt-x1']), 0);
+  assert.equal(markEventsSent(driver, []), 0);
+  const stored = driver.prepare('SELECT sent FROM event_queue WHERE event_id = ?').get('evt-x1');
+  assert.equal(Number(stored!.sent), 1);
 });
 
 test('openDatabase: reopening a store already at the latest version is a no-op', () => {

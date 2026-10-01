@@ -94,6 +94,13 @@ export interface EventInput {
   payload: string;
 }
 
+// A stored event_queue row (G09.01): EventInput plus the sent flag. sent is
+// flush bookkeeping — 0 until a sender resolves for the batch, 1 after the
+// mark; the flag itself never leaves the device.
+export interface EventQueueRow extends EventInput {
+  sent: boolean;
+}
+
 // `09` §7 bundle_asset (zone A): the resume registry of the download channel
 // (G04.02.a). One row per file of a layer, status pending/partial/complete;
 // the registry is derived state, rebuilt by re-hashing what lies on disk.
