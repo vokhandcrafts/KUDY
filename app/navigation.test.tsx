@@ -58,7 +58,7 @@ describe("route placeholders (19 §2.5)", () => {
   // the screen shows its honest unavailable state — no fake history.
   test("My KUDY without the history member renders its honest unavailable state", async () => {
     renderRouter({ "_layout": layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
-    const myScreen = await screen.findByTestId("screen-My KUDY");
+    const myScreen = await screen.findByTestId("screen-KUDY");
     expect(myScreen).toBeTruthy();
     expect(within(myScreen).getByText("Гісторыя недаступная")).toBeTruthy();
   });
@@ -316,5 +316,17 @@ describe("rubric surface and the canonical chain (11 §16.1–16.2)", () => {
     );
     fireEvent.press(await screen.findByTestId("link-nearby"));
     expect(await screen.findByTestId("screen-Map")).toBeTruthy();
+  });
+
+  // Issue #426: the history surface's one Explore access (NAV3) — the
+  // «KUDY» entry opens /my; removing the link turns this red
+  // (implementation-rules 1).
+  test("the Explore surface's «KUDY» entry opens the history surface", async () => {
+    renderRouter(
+      { _layout: layoutWith(createServices({})), "(tabs)/explore": Explore, "(tabs)/my": My },
+      { initialUrl: "/explore" },
+    );
+    fireEvent.press(await screen.findByTestId("link-kudy"));
+    expect(await screen.findByTestId("screen-KUDY")).toBeTruthy();
   });
 });

@@ -22,7 +22,7 @@ test.each([
   ["place", "/place/p1", "screen-Place detail"],
   ["run", "/run/r1", "screen-Run"],
   ["map", "/map", "screen-Map"],
-  ["my", "/my", "screen-My KUDY"],
+  ["my", "/my", "screen-KUDY"],
 ])("the %s screen starts its content below the pinned top inset (AC4)", async (_name, url, screenId) => {
   renderRouter(frameRoutes(), { initialUrl: url });
   expect(flatStyle(await screen.findByTestId(screenId)).paddingTop).toBe(66);

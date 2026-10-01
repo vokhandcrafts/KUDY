@@ -414,7 +414,7 @@ describe("G06.05 preview a11y and failure exits (issue #280)", () => {
     // The two manual exits of AC4: the named retry and the storage surface.
     expect(screen.getByTestId("btn-download-retry").props.accessibilityLabel).toBe("Паўтарыць");
     fireEvent.press(screen.getByTestId("btn-download-storage"));
-    expect(await screen.findByTestId("screen-My KUDY")).toBeTruthy();
+    expect(await screen.findByTestId("screen-KUDY")).toBeTruthy();
   });
 
   test("AC4: the failed catalog load gets its named retry — one press re-runs the refresh", async () => {

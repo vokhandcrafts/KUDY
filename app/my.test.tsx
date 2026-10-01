@@ -1,4 +1,5 @@
-// UX 01 (issue #347) — the My KUDY surface render suite: a finished-run
+// UX 01 (issue #347) — the KUDY surface render suite (the display name since
+// issue #426): a finished-run
 // history of ten sessions renders inside the surface's ScrollView — the
 // list is reachable by scroll, never cut by the fold. The rows come from a
 // fake session-history port: the screen renders what the durable zone keeps
@@ -29,7 +30,7 @@ const finishedRow = (n: number): SessionRow => ({
   playSeq: 0,
 });
 
-describe("My KUDY surface (UX 01)", () => {
+describe("KUDY surface (UX 01)", () => {
   test("the finished history scrolls: ten sessions render inside the ScrollView", async () => {
     const rows = Array.from({ length: 10 }, (_, i) => finishedRow(i + 1));
     const services = createServices({ sessionHistory: { list: async () => rows } });
@@ -39,13 +40,21 @@ describe("My KUDY surface (UX 01)", () => {
       expect(screen.getByTestId(`my-session-${row.sessionId}`)).toBeTruthy();
     }
   });
+
+  // Issue #426: the display name is «KUDY» (the owner's 2026-10-01 decision),
+  // not «My KUDY» — reverting the string turns this red.
+  test("the surface's title renders «KUDY» in the display locale", async () => {
+    renderRouter({ _layout: layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("screen-KUDY")).toBeTruthy();
+    expect(screen.getByText("KUDY")).toBeTruthy();
+  });
 });
 
 // UX 05 (issue #351): the rows show the catalog's guide title when the
 // catalog names the route; a route it does not name keeps the raw id — the
 // durable zone's own fact. Removing the lookup (or the fallback) fails one
 // of the two assertions.
-describe("My KUDY guide titles (UX 05)", () => {
+describe("KUDY guide titles (UX 05)", () => {
   test("the ready catalog names the route; an unknown route falls back to its id", async () => {
     serve(CATALOG_FIXTURES);
     const rows = [
@@ -67,7 +76,7 @@ describe("My KUDY guide titles (UX 05)", () => {
 // «Загрузка…» text — a never-resolving history read holds the surface in
 // loading. Reverting the LoadingIndicator wiring in app/(tabs)/my.tsx turns
 // this red (implementation-rules 1).
-describe("My KUDY loading indicator (UX 07)", () => {
+describe("KUDY loading indicator (UX 07)", () => {
   test("the loading state shows the ActivityIndicator next to the text", async () => {
     const services = createServices({ sessionHistory: { list: () => new Promise(() => {}) } });
     renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
@@ -100,15 +109,15 @@ test("G06.05: the unavailable history offers the named retry and recovers", asyn
 // G06.10.e (issue #405): the calm surface carries the paper grain over the
 // unchanged paper — the wrapper's layer sits under the scrolling history.
 // Removing the wrapper from the screen turns this red (implementation-rules 1).
-describe("My KUDY paper grain (G06.10.e)", () => {
+describe("KUDY paper grain (G06.10.e)", () => {
   test("the surface renders the grain layer over the unchanged paper", async () => {
     renderRouter({ _layout: layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
-    expect(await screen.findByTestId("screen-My KUDY")).toBeTruthy();
+    expect(await screen.findByTestId("screen-KUDY")).toBeTruthy();
     // The grain is in the render tree but never in the a11y tree — the
     // default query (which walks the accessibility tree) misses it.
     expect(screen.queryByTestId("paper-grain")).toBeNull();
     expect(screen.getByTestId("paper-grain", { includeHiddenElements: true })).toBeTruthy();
-    expect(flatStyle(screen.getByTestId("screen-My KUDY")).backgroundColor).toBe(tokens.colorPaper);
+    expect(flatStyle(screen.getByTestId("screen-KUDY")).backgroundColor).toBe(tokens.colorPaper);
     // The content above the grain: the history list is mounted.
     expect(screen.getByTestId("scroll-my")).toBeTruthy();
   });
