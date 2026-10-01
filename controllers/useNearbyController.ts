@@ -136,9 +136,11 @@ export interface NearbyHintDeps {
   // The app-foreground fact; absent, nothing is ever shown — fail closed,
   // the idiom of every optional port (AC3: hints never render in background).
   readonly foreground?: () => boolean;
-  // The commercial-dialog fact (11 §15 verbatim: «Пры … камерцыйнага дыялогу
-  // … картка не паказваецца» — the gap PR #437 recorded for these cross-
-  // checks). Absent, the fact is unknown and the gate stays open — no
+  // The commercial-dialog fact (R07 in 15 verbatim: «Падчас аўдыё, званка,
+  // камерцыйнага дыялогу або ручной блакіроўкі аўтаматыкі картка не
+  // паказваецца»; 11 §15 names the same pause as «аперацыі пакупкі» — the
+  // gap PR #437 recorded for these cross-checks). Absent, the fact is
+  // unknown and the gate stays open — no
   // surface the card mounts on hosts a commercial dialog today; the adapter
   // wires it when the commercial card lands (the `foreground` idiom, with
   // the opposite failure direction: an absent dialog fact must not kill the
