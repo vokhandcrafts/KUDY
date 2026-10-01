@@ -9,7 +9,7 @@ import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCatalogController } from "../../../controllers/catalog/useCatalogController";
-import { useServices } from "../../_layout";
+import { useServices, useUiLocale } from "../../_layout";
 import { BackButton } from "../../../components/back-button";
 import { tokens } from "../../../components/design-tokens";
 import { CityCatalogBody } from "../../../components/guide-card";
@@ -25,13 +25,16 @@ const styles = StyleSheet.create({
 
 export default function Guides() {
   const services = useServices();
+  // G14.04.d (issue #305): the words read the switchable display locale —
+  // a switch re-renders them in place, no restart.
+  const locale = useUiLocale();
   const controller = useCatalogController(services.catalog?.controller);
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4).
   const insets = useSafeAreaInsets();
   // G06.05 (issue #280, AC1/AC4): the shared words in the display locale and
   // the failed load's named retry.
-  const strings = uiStrings(services.locale);
+  const strings = uiStrings(locale);
   return (
     <View
       style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]}
@@ -43,7 +46,7 @@ export default function Guides() {
         catalog={controller?.surface ?? null}
         onRetry={controller ? () => void controller.refresh() : undefined}
         variant="rubric"
-        locale={services.locale}
+        locale={locale}
       />
     </View>
   );

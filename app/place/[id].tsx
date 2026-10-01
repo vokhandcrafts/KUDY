@@ -21,7 +21,7 @@ import {
 } from "../../controllers/place/placeDetailController";
 import type { MomentPlayBinding, MomentPlayOutcome } from "../../controllers/moment/momentPlayController";
 import { useStoreState } from "../../controllers/useControllerStore";
-import { useServices } from "../_layout";
+import { useServices, useUiLocale } from "../_layout";
 import { AccessBadge } from "../../components/guide-card";
 import { BackButton } from "../../components/back-button";
 import { uiStrings } from "../../components/ui-strings";
@@ -208,6 +208,9 @@ function MomentCard({
 
 export default function PlaceDetail() {
   const services = useServices();
+  // G14.04.d (issue #305): the words read the switchable display locale —
+  // a switch re-renders them in place, no restart.
+  const locale = useUiLocale();
   const params = useLocalSearchParams<{ id: string }>();
   const placeId = typeof params.id === "string" ? params.id : "";
   // One binding per open (the Nearby surface's pattern); the moment play
@@ -225,10 +228,10 @@ export default function PlaceDetail() {
   const momentState = useStoreState(momentPlay?.store);
   const playFailure = momentState !== null && momentState.kind === "failed" ? momentState : null;
   // G06.05 (issue #280, AC1): the display locale, not a hard-code.
-  const strings = placeDetailStrings(services.locale);
+  const strings = placeDetailStrings(locale);
   // G06.10 (issue #432): the back word is the shared chrome catalog's — the
   // place dictionary holds no copy of it (one back image, one dictionary).
-  const back = uiStrings(services.locale).back;
+  const back = uiStrings(locale).back;
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4).
   const insets = useSafeAreaInsets();
@@ -263,7 +266,7 @@ export default function PlaceDetail() {
               <>
                 {facts.summary !== null ? <ScaledText style={styles.summary}>{facts.summary}</ScaledText> : null}
                 <View style={{ marginBottom: tokens.spaceM }}>
-                  <AccessBadge access={facts.access} locale={services.locale} />
+                  <AccessBadge access={facts.access} locale={locale} />
                 </View>
                 <ScaledText style={styles.facts}>
                   {strings.textLabel}: {facts.text_locales.length > 0 ? facts.text_locales.join(", ") : "—"};{" "}

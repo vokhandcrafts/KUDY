@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 import { createServices, type ServicePorts, type Services } from "../controllers/createServices";
 import { useAppFonts } from "../components/fonts";
 
@@ -31,6 +31,16 @@ export function useServices(): Services {
     throw new Error("useServices must be used under the root layout");
   }
   return services;
+}
+
+// G14.04.d (issue #305) — the display locale the words read per render: the
+// useSyncExternalStore idiom of the hint mount, over the ui-locale store the
+// My KUDY row writes. Subscribing here is what makes the switch restart-free
+// — a screen showing uk words re-renders in place when the row fires, the
+// services object never rebuilds.
+export function useUiLocale(): string {
+  const { uiLocale } = useServices();
+  return useSyncExternalStore(uiLocale.subscribe, uiLocale.current);
 }
 
 export default function RootLayout() {

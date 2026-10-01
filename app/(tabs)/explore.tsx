@@ -13,7 +13,7 @@ import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCatalogController } from "../../controllers/catalog/useCatalogController";
-import { useServices } from "../_layout";
+import { useServices, useUiLocale } from "../_layout";
 import { tokens } from "../../components/design-tokens";
 import { CityCatalogBody } from "../../components/guide-card";
 import { PaperSurface } from "../../components/paper-surface";
@@ -45,6 +45,9 @@ function SurfaceLink({ href, label, testID }: { href: string; label: string; tes
 
 export default function Explore() {
   const services = useServices();
+  // G14.04.d (issue #305): the words read the switchable display locale —
+  // a switch re-renders them in place, no restart.
+  const locale = useUiLocale();
   const controller = useCatalogController(services.catalog?.controller);
   // UX 02 (issue #348): with the native header off the screen starts below
   // the status bar and the notch — the top safe-area inset is the screen's
@@ -52,7 +55,7 @@ export default function Explore() {
   const insets = useSafeAreaInsets();
   // G06.05 (issue #280, AC1): the shared words in the display locale; the
   // failed catalog load gets its named retry (AC4).
-  const strings = uiStrings(services.locale);
+  const strings = uiStrings(locale);
   return (
     // G06.10.e (issue #405): the calm surface's paper — the shared wrapper
     // layers the canon grain over the unchanged paper token.
@@ -68,7 +71,7 @@ export default function Explore() {
         catalog={controller?.surface ?? null}
         onRetry={controller ? () => void controller.refresh() : undefined}
         variant="city"
-        locale={services.locale}
+        locale={locale}
         middle={
           <>
             <SurfaceLink href="/map" label={strings.nearby} testID="link-nearby" />

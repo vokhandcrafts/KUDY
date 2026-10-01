@@ -1,14 +1,22 @@
 // G06.05 (issue #280) — the shared UI words of the G06 surfaces, BE/EN per
-// the row's first criterion. The catalogs here are presentation-only chrome
+// the row's first criterion. G14.04.d (issue #305) adds the third catalog:
+// uk rides the same mechanism beside be/en (uk-release-scope §3.1 — "тая ж
+// сістэма, новы набор"), with the catalog keys kept equivalent by the
+// parity guard. The catalogs here are presentation-only chrome
 // (back labels, loading, the catalog state words, the KUDY surface sections,
 // the preview facts line); domain words with diagnostics stay with their
 // controllers (runMapStrings, placeDetailStrings, previewStrings). The
 // locale argument is the composition root's display locale — the first
-// preference of createServices (the UI-locale *selection* is L02 and stays
-// out); an unknown locale falls back to Belarusian, the app's first
-// preference (the runMapStrings idiom).
+// preference of createServices, switchable through its ui-locale store
+// (the L02 selection this row deferred to G14.04.d); an unknown locale
+// falls back to Belarusian, the app's first preference (the runMapStrings
+// idiom).
 
 export type AccessKind = "free" | "paid" | "mixed";
+
+// The closed UI-locale vocabulary (uk-release-scope §4: the explicit choice
+// is offered in My KUDY; 09 §8's be/en canon extended by the uk package).
+export type UiLocaleCode = "be" | "en" | "uk";
 
 export interface UiStrings {
   readonly back: string;
@@ -80,9 +88,15 @@ export interface UiStrings {
   readonly seasonName: Record<string, string>;
   readonly reasonText: Record<string, string>;
   readonly differenceText: Record<string, string>;
+  // G14.04.d (issue #305) — the My KUDY language row (uk-release-scope §4:
+  // «Мова прапануецца ў My KUDY»): the row's label and the options' self
+  // names, which are the same native words in every catalog — a language is
+  // never named through a translation.
+  readonly languageLabel: string;
+  readonly languageSelfNames: Record<UiLocaleCode, string>;
 }
 
-const STRINGS: Record<"be" | "en", UiStrings> = {
+const STRINGS: Record<UiLocaleCode, UiStrings> = {
   be: {
     // G06.10 (issue #432): the back words carry no text arrow — the one
     // arrow image is the Lucide glyph BackButton renders; the word alone is
@@ -155,6 +169,8 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
       season_unassessed: "сезон не ацэнены",
       season_not_recommended: "не для гэтага сезону",
     },
+    languageLabel: "Мова",
+    languageSelfNames: { be: "Беларуская", en: "English", uk: "Українська" },
   },
   en: {
     back: "Back",
@@ -225,9 +241,86 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
       season_unassessed: "season not assessed",
       season_not_recommended: "not for this season",
     },
+    languageLabel: "Language",
+    languageSelfNames: { be: "Беларуская", en: "English", uk: "Українська" },
+  },
+  uk: {
+    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1). The
+    // lines are the agent's rendering of the same facts the be/en words name;
+    // the native-speaker review is the owner's (uk-release-scope §5, §6.4).
+    back: "Назад",
+    backToCity: "Місто",
+    notFoundTitle: "Такого екрана немає",
+    notFoundHint: "Каталог чекає — повертайтеся до нього кнопкою «Назад».",
+    loading: "Завантаження…",
+    walk: "Прогулянка",
+    nearby: "Поруч →",
+    guidesLink: "Гіди →",
+    kudyLink: "KUDY →",
+    retry: "Повторити",
+    catalogUnavailable: "Каталог недоступний",
+    catalogTemporarilyUnavailable: "Каталог тимчасово недоступний",
+    notPublished: "не опубліковано",
+    validCache: "Попередній валідний кеш",
+    previewUnavailable: "Прев'ю тимчасово недоступне",
+    degradedData: "Частина даних тимчасово недоступна",
+    myKudy: "KUDY",
+    historyUnavailable: "Історія недоступна.",
+    currentWalk: "Поточна прогулянка",
+    noCurrentWalk: "Поточної прогулянки немає",
+    pastWalks: "Попередні прогулянки",
+    noPastWalks: "Попередніх прогулянок немає",
+    stateLabel: { active: "активна", paused: "призупинена", finished: "завершена" },
+    heardCount: (count) => `прослухано: ${count}`,
+    liveRowLine: (state, day, heard) => `${state} — з ${day} — прослухано: ${heard}`,
+    pastRowLine: (startedDay, finishedDay, heard) =>
+      `${startedDay} — ${finishedDay ?? "—"} — прослухано: ${heard}`,
+    access: { free: "Безкоштовно", paid: "Платно", mixed: "Змішано" },
+    languagesLine: (textLocales) => `Мови: ${textLocales.join(", ")}`,
+    textAudioLine: (textLocales, audioLocales) =>
+      `Текст: ${textLocales.join(", ")}${audioLocales.length > 0 ? `; аудіо: ${audioLocales.join(", ")}` : ""}`,
+    stopsCount: (count) => `Точки: ${count}`,
+    sizeMb: (mb) => `Розмір: ${mb} МБ`,
+    freeStopsCount: (count) => `Точок безкоштовно: ${count}`,
+    stopNumber: (position) => `Точка ${position}`,
+    durationLabel: "Тривалість",
+    stopsLabel: "Точки",
+    locked: "Зачинено",
+    durationRange: (minMinutes, maxMinutes) => `Час: від ${minMinutes} до ${maxMinutes} хв`,
+    durationMinutes: (minutes) => `Час: ${minutes} хв`,
+    switchConfirm: (liveTitle, candidateTitle) => `Завершити «${liveTitle}» і почати «${candidateTitle}»?`,
+    switchAccept: "Завершити й почати",
+    cancel: "Скасувати",
+    whatToDo: "Чим зайнятися →",
+    discoveryTitle: "Чим зайнятися",
+    discoveryUnavailable: "Підбір недоступний",
+    discoveryTemporarilyUnavailable: "Підбір зараз недоступний",
+    discoveryEmpty: "Нічого точно не підходить — послабте вибір або подивіться інші варіанти.",
+    discoveryAlternatives: "Інші варіанти",
+    collectionUnavailable: "Підбірка недоступна",
+    collectionUnresolved: "Деякі члени підбірки ще не опубліковані.",
+    timeUnlimited: "Без обмеження",
+    timeCap: (minutes) =>
+      minutes === 60 ? "До години" : minutes === 120 ? "До двох годин" : minutes === 240 ? "На пів дня" : `До ${minutes} хв`,
+    seasonName: { spring: "Весна", summer: "Літо", autumn: "Осінь", winter: "Зима" },
+    reasonText: {
+      editorial: "редакційний вибір",
+      theme_match: "тема",
+      within_time: "підходить за часом",
+      season_recommended: "рекомендовано на цей сезон",
+    },
+    differenceText: {
+      duration_unknown: "час не оцінено",
+      over_time: "довше за запит",
+      theme_mismatch: "інша тема",
+      season_unassessed: "сезон не оцінено",
+      season_not_recommended: "не для цього сезону",
+    },
+    languageLabel: "Мова",
+    languageSelfNames: { be: "Беларуская", en: "English", uk: "Українська" },
   },
 };
 
 export function uiStrings(locale: string): UiStrings {
-  return locale === "en" ? STRINGS.en : STRINGS.be;
+  return locale === "en" ? STRINGS.en : locale === "uk" ? STRINGS.uk : STRINGS.be;
 }

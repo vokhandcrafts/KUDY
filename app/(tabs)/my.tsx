@@ -19,7 +19,7 @@ import type { CatalogSurfaceState } from "../../controllers/catalog/catalogContr
 import { useMyKudy } from "../../controllers/myKudyController";
 import type { MyKudyState } from "../../controllers/myKudyController";
 import { useStoreState } from "../../controllers/useControllerStore";
-import { useServices } from "../_layout";
+import { useServices, useUiLocale } from "../_layout";
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
 import { LoadingIndicator } from "../../components/loading-indicator";
@@ -82,6 +82,33 @@ const styles = StyleSheet.create({
     color: tokens.colorAccent,
     fontSize: tokens.fontBaseSize,
   },
+  // G14.04.d (issue #305): the language row — three self-named chips in one
+  // calm line; the selected chip carries the accent border and ink, the
+  // others stay muted.
+  localeRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: tokens.spaceS,
+    marginTop: tokens.spaceS,
+  },
+  localeChip: {
+    borderColor: tokens.colorLine,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    paddingHorizontal: tokens.spaceM,
+    paddingVertical: tokens.spaceS,
+  },
+  localeChipSelected: {
+    borderColor: tokens.colorAccent,
+  },
+  localeChipLabel: {
+    color: tokens.colorMuted,
+    fontSize: tokens.fontBaseSize,
+  },
+  localeChipLabelSelected: {
+    color: tokens.colorAccent,
+    fontWeight: tokens.fontWeightStrong,
+  },
 });
 
 // The local calendar day of a durable timestamp (UX 05, issue #351): the
@@ -96,6 +123,9 @@ const localDay = (at: number): string => {
 
 export default function My() {
   const services = useServices();
+  // G14.04.d (issue #305): the words read the switchable display locale —
+  // a switch re-renders them in place, no restart.
+  const locale = useUiLocale();
   // The store handle is stable; the state object is not — the focus refresh
   // reads the store, never the state identity (a refresh that re-runs on its
   // own result would loop forever).
@@ -117,7 +147,7 @@ export default function My() {
   const insets = useSafeAreaInsets();
   // G06.05 (issue #280, AC1): the surface's words come from the shared
   // catalog in the display locale.
-  const strings = uiStrings(services.locale);
+  const strings = uiStrings(locale);
   return (
     // G06.10.e (issue #405): the calm surface's paper — the shared wrapper
     // layers the canon grain over the unchanged paper token.
@@ -129,6 +159,14 @@ export default function My() {
           lists stay reachable beyond the fold. */}
       <ScrollView testID="scroll-my">
         <ScaledText style={styles.title}>{strings.myKudy}</ScaledText>
+        {/* G14.04.d (issue #305): the language row (uk-release-scope §4 —
+            «Мова прапануецца ў My KUDY») — the one UI-locale switch of the
+            app. The options carry their own native names from the catalog;
+            the chosen one is announced by the selected state, no invented
+            word rides the screen. Writing the switch re-renders this and the
+            other surfaces' words in place (the run's pinned locale stays the
+            walk's own — ADR G01.03 §3.4). */}
+        <UiLocaleRow locale={locale} onPick={(code) => services.uiLocale.set(code)} strings={strings} />
         {controller === null || controller.status === "unavailable" ? (
           // No member (the db adapter has not landed) and a failed read are
           // the same honest surface: no history is invented either way.
@@ -224,6 +262,46 @@ function MyKudyRows({
       ) : (
         <ScaledText style={styles.rowLine}>{strings.noPastWalks}</ScaledText>
       )}
+    </View>
+  );
+}
+
+// G14.04.d (issue #305): the My KUDY language row — the options render their
+// own native names (the same self-name words in every catalog, a language is
+// never named through a translation) and the pick writes the ui-locale store.
+// The selected option rides accessibilityState, the word stays the label.
+function UiLocaleRow({
+  locale,
+  onPick,
+  strings,
+}: {
+  locale: string;
+  onPick: (code: "be" | "en" | "uk") => void;
+  strings: ReturnType<typeof uiStrings>;
+}) {
+  const codes = Object.keys(strings.languageSelfNames) as Array<"be" | "en" | "uk">;
+  return (
+    <View testID="my-ui-locale">
+      <ScaledText style={styles.section}>{strings.languageLabel}</ScaledText>
+      <View style={styles.localeRow}>
+        {codes.map((code) => (
+          <PressableSurface
+            key={code}
+            accessibilityRole="button"
+            accessibilityLabel={strings.languageSelfNames[code]}
+            accessibilityState={{ selected: locale === code }}
+            onPress={() => onPick(code)}
+            style={[styles.localeChip, locale === code ? styles.localeChipSelected : null]}
+            testID={`btn-ui-locale-${code}`}
+          >
+            <ScaledText
+              style={[styles.localeChipLabel, locale === code ? styles.localeChipLabelSelected : null]}
+            >
+              {strings.languageSelfNames[code]}
+            </ScaledText>
+          </PressableSurface>
+        ))}
+      </View>
     </View>
   );
 }

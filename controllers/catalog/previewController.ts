@@ -237,7 +237,7 @@ export interface PreviewStrings {
   readonly retry: string;
 }
 
-const PREVIEW_STRINGS: Record<'be' | 'en', PreviewStrings> = {
+const PREVIEW_STRINGS: Record<'be' | 'en' | 'uk', PreviewStrings> = {
   be: {
     label: { download: 'Загрузіць', start: 'Пачаць' },
     reason: {
@@ -282,10 +282,34 @@ const PREVIEW_STRINGS: Record<'be' | 'en', PreviewStrings> = {
     storageExit: 'Free up space in KUDY',
     retry: 'Retry',
   },
+  uk: {
+    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1); the
+    // native-speaker review is the owner's (uk-release-scope §5, §6.4).
+    label: { download: 'Завантажити', start: 'Почати' },
+    reason: {
+      'preview#purchase-required': 'Потрібна покупка.',
+      'preview#storage-unknown': 'Сховище недоступне.',
+      'preview#verify-unavailable': 'Перевірка недоступна.',
+      'preview#download-unavailable': 'Завантаження недоступне в цьому складанні.',
+      'preview#not-published': 'Гід не опублікований.',
+    },
+    detail: (detail) =>
+      detail.kind === 'damaged'
+        ? 'пакет пошкоджений: потрібне повторне завантаження'
+        : detail.kind === 'missing-files'
+          ? `бракує файлів: ${detail.count}`
+          : detail.kind === 'stale'
+            ? 'доступне оновлення'
+            : 'пакет неповний',
+    downloadFailed: 'Збій завантаження.',
+    storageFullDetail: (mb) => `бракує місця: потрібно ще ${mb} МБ`,
+    storageExit: 'Звільнити місце в KUDY',
+    retry: 'Повторити',
+  },
 };
 
 export function previewStrings(locale: string): PreviewStrings {
-  return locale === 'en' ? PREVIEW_STRINGS.en : PREVIEW_STRINGS.be;
+  return locale === 'en' ? PREVIEW_STRINGS.en : locale === 'uk' ? PREVIEW_STRINGS.uk : PREVIEW_STRINGS.be;
 }
 
 // The refusal's rendered word: the known map, else the raw reason itself

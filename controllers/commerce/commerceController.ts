@@ -342,7 +342,7 @@ export interface OfferStrings {
   readonly continueFree: string;
 }
 
-const OFFER_STRINGS: Record<'be' | 'en', OfferStrings> = {
+const OFFER_STRINGS: Record<'be' | 'en' | 'uk', OfferStrings> = {
   be: {
     offerTitle: 'Усе гісторыі гіда',
     offerBody: 'Адна пакупка адкрывае гісторыі гэтага гіда.',
@@ -365,8 +365,23 @@ const OFFER_STRINGS: Record<'be' | 'en', OfferStrings> = {
     tryAgain: 'Try again',
     continueFree: 'Continue free',
   },
+  uk: {
+    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1); the
+    // native-speaker review is the owner's (uk-release-scope §5, §6.4).
+    // `purchasedPending` mirrors the be/en rendering of `11` §8 verbatim
+    // («Куплена · трэба загрузіць»).
+    offerTitle: 'Усі історії гіда',
+    offerBody: 'Одна покупка відкриває історії цього гіда.',
+    buy: 'Купити',
+    dismiss: 'Не зараз',
+    purchasedPending: 'Куплено · треба завантажити',
+    errorTitle: 'Покупка не завершилася',
+    errorBody: 'Можна спробувати ще раз або продовжити безкоштовно.',
+    tryAgain: 'Спробувати ще раз',
+    continueFree: 'Продовжити безкоштовно',
+  },
 };
 
 export function offerStrings(locale: string): OfferStrings {
-  return locale === 'en' ? OFFER_STRINGS.en : OFFER_STRINGS.be;
+  return locale === 'en' ? OFFER_STRINGS.en : locale === 'uk' ? OFFER_STRINGS.uk : OFFER_STRINGS.be;
 }

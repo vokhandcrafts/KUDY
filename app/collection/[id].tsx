@@ -19,7 +19,7 @@ import {
   type DiscoveryOffer,
   type DiscoveryRef,
 } from "../../controllers/useDiscoveryController";
-import { useServices } from "../_layout";
+import { useServices, useUiLocale } from "../_layout";
 import {
   AccessBadge,
   cardStyle,
@@ -128,9 +128,12 @@ function CollectionBody({
 export default function Collection() {
   const params = useLocalSearchParams<{ id: string }>();
   const services = useServices();
+  // G14.04.d (issue #305): the words read the switchable display locale —
+  // a switch re-renders them in place, no restart.
+  const locale = useUiLocale();
   const state = useStoreState(services.discovery?.controller);
   // G06.05 (issue #280, AC1): the shared words in the display locale.
-  const strings = uiStrings(services.locale);
+  const strings = uiStrings(locale);
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4).
   const insets = useSafeAreaInsets();
