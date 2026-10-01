@@ -101,6 +101,25 @@ export interface EventQueueRow extends EventInput {
   sent: boolean;
 }
 
+// R07 hint limits (ADR G01.03 §3.9, ADR G07.04): one record per factually
+// presented guide_id. `scope='session'` requires the sessionId (the schema
+// CHECK says the same); `foreground` rows carry the window's facts while
+// `guide_hint_last` holds the cross-opening cooldown.
+export interface GuideHintRecordInput {
+  readonly guideIds: readonly string[];
+  readonly scope: 'session' | 'foreground';
+  readonly sessionId?: string;
+  readonly at: number;
+}
+
+// One guide_hint_state row read back for the limits: dismissed_at is null
+// while the guide was only shown.
+export interface GuideHintStateRow {
+  readonly guideId: string;
+  readonly shownAt: number;
+  readonly dismissedAt: number | null;
+}
+
 // `09` §7 bundle_asset (zone A): the resume registry of the download channel
 // (G04.02.a). One row per file of a layer, status pending/partial/complete;
 // the registry is derived state, rebuilt by re-hashing what lies on disk.

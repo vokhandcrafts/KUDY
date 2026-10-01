@@ -7,7 +7,7 @@
 // wired), and the honest map note stands in for the tiles decision (ADR
 // G00.02 — the Run surface's precedent, no invented geometry: the index
 // publishes no coordinates).
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useMemo } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,6 +22,7 @@ import {
 import { useServices } from "./_layout";
 import { BackButton } from "../components/back-button";
 import { AccessBadge, StateBanner } from "../components/guide-card";
+import { GuideHintMount } from "../components/GuideHintCard";
 import { LoadingIndicator } from "../components/loading-indicator";
 import { PressableSurface } from "../components/pressable-surface";
 import { ScaledText } from "../components/scaled-text";
@@ -180,6 +181,10 @@ export default function Map() {
   const binding = useMemo(() => services.nearby?.create(), [services.nearby]);
   const { surface, locationView, locale } = useNearbySurface(binding);
   const strings = nearbyStrings(locale);
+  // G07.05 — the R07 hint card of the open city surface: the one app-wide
+  // hint controller's state, mounted below the back button; the tap opens
+  // the preview the usual way (no Start, no audio).
+  const router = useRouter();
   const offers =
     surface && (surface.kind === "ready" || surface.kind === "offline") ? surface.offers : [];
   const list = nearbyOrder(offers, locationView);
@@ -201,6 +206,11 @@ export default function Map() {
           it never had one (AC2); the label is hosted by the shared
           component's <Text> (the #344 class guard). */}
       <BackButton label={uiStrings(services.locale).back} testID="btn-map-back" />
+      <GuideHintMount
+        binding={services.hints}
+        locale={locale}
+        onOpen={(routeId) => router.push(`/route/${routeId}`)}
+      />
       {/* UX 01 (issue #347): the offer list scrolls — the last card is
           reachable beyond the fold, never cut by the screen edge. */}
       <ScrollView testID="scroll-nearby">

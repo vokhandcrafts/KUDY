@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/runMap";
 import { useRunState, useRunSurface } from "../../controllers/run/runSurfaceController";
 import { BackButton } from "../../components/back-button";
+import { GuideHintMount } from "../../components/GuideHintCard";
 import { PressableSurface } from "../../components/pressable-surface";
 import { tokens } from "../../components/design-tokens";
 import { LoadingIndicator } from "../../components/loading-indicator";
@@ -777,6 +778,15 @@ export default function Run() {
           </ScrollView>
         </View>
       ) : null}
+      {/* G07.05: the quiet card never becomes a second row over the player
+          (R07) — it renders below the panel surface, dismissible, and its
+          only action is the preview open; the session and its progress stay
+          (AC5). */}
+      <GuideHintMount
+        binding={services.hints}
+        locale={ready?.locale ?? services.locale}
+        onOpen={(routeId) => router.push(`/route/${routeId}`)}
+      />
       {endConfirm ? (
         // UX 06 (issue #352) AC3: the confirmation is a real modal — the
         // decline (and the system Back, the shell's onRequestClose) leaves

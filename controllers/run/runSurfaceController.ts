@@ -132,6 +132,11 @@ export interface RunSurfaceDeps {
   // through the switch-guide transaction. A cached surface (the walk is
   // already live) ignores it.
   readonly confirmedSwitch?: boolean;
+  // G07.05 — the R07 carry source (ADR G01.03 §3.9): the composition root
+  // hands in the hint controller's foreground-window ids, and the fresh
+  // Start's transaction moves them into session scope. Read at start time —
+  // the window's facts are whatever the hint controller recorded by then.
+  readonly carryGuideHints?: () => readonly string[];
 }
 
 export function createRunSurfaceController(deps: RunSurfaceDeps): ControllerStore<RunSurfaceState> {
@@ -202,11 +207,20 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
     // No live row for this route: the surface opened for a fresh handover
     // (the preview gated the §4.1 dialog and handed over), so the walk
     // starts here — through the confirmed switch-guide transaction when the
-    // dialog's «Завяршыць і пачаць» led here (G06.04). A refusal is the
-    // named reason — the walk never half-starts.
+    // dialog's «Завяршыць і пачаць» led here (G06.04). The R07 carry rides
+    // the same input (ADR G01.03 §3.9). A refusal is the named reason — the
+    // walk never half-starts.
+    const carry = deps.carryGuideHints?.();
     const started = await controller
       .getState()
-      .start(deps.confirmedSwitch ? { confirmedSwitch: true } : undefined);
+      .start(
+        deps.confirmedSwitch || carry !== undefined
+          ? {
+              ...(deps.confirmedSwitch ? { confirmedSwitch: true } : {}),
+              ...(carry !== undefined && carry.length > 0 ? { carryGuideHints: [...carry] } : {}),
+            }
+          : undefined,
+      );
     if (!started.ok) return unavailable(started.reason);
   }
   store.setState({

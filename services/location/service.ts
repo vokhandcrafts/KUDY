@@ -64,6 +64,10 @@ export class LocationService {
   private lastFixAt: number | null = null;
   private stops: ReadonlyArray<GeofenceStop> = [];
   private fixSink: ((fix: FixInput) => void) | null = null;
+  // G07.05 (09 §20) — read-only raw-fix observers (the R07 hint controller).
+  // They receive the same forwarded fixes the sink gets and may issue no
+  // location commands; arming stays setMode's alone.
+  private readonly fixObservers = new Set<(fix: FixInput) => void>();
 
   constructor(deps: LocationServiceDeps) {
     this.port = deps.port;
@@ -118,6 +122,16 @@ export class LocationService {
   // like the audio service's onEvent.
   onFix(handler: (fix: FixInput) => void): void {
     this.fixSink = handler;
+  }
+
+  // G07.05 (09 §20) — the read-only raw-fix tap for non-command consumers:
+  // the hint controller follows the fixes the ONE subscription already
+  // delivers without touching the 19 §3.3 sink, the window or the modes.
+  // Returns the unsubscribe — the observer releases it with the surface
+  // whose opening armed the subscription.
+  onRawFix(handler: (fix: FixInput) => void): () => void {
+    this.fixObservers.add(handler);
+    return () => this.fixObservers.delete(handler);
   }
 
   status(): LocationStatus {
@@ -211,6 +225,7 @@ export class LocationService {
     }
     this.scheduleGapWatch();
     this.fixSink?.(event.fix);
+    for (const observer of this.fixObservers) observer(event.fix);
     this.recomputeWindow();
   }
 

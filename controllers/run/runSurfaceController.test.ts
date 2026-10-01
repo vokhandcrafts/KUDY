@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 
 import { createServices } from '../createServices.ts';
 import type { BundlesStore, Tier } from '../../services/contentRepo/types.ts';
-import type { RunSessionPorts, RunSurfaceState } from './runSurfaceController.ts';
+import { createRunSurfaceController, type RunSessionPorts, type RunSurfaceState } from './runSurfaceController.ts';
 import type { RunControllerState } from '../useRunController.ts';
 import type {
   RunPackageStops,
@@ -35,8 +35,11 @@ import {
   finishSession,
   getLiveSession,
   getSession,
+  listSessionGuideHints,
   openDatabase,
   pauseSession,
+  recordGuideHintDismissed,
+  recordGuideHintShown,
   resumeSession,
   startSession,
 } from '../../services/db/db.ts';
@@ -873,4 +876,58 @@ test('G07.03: the no-session Moment over the same root still launches on the idl
   assert.deepEqual(outcome, { outcome: 'started' });
   assert.deepEqual(world.audioPort.commands, [`play 1:${MOMENT_AUDIO_PATH}`]);
   assert.deepEqual(world.audioPort.violations, []);
+});
+
+
+test('G07.05: the fresh Start carries the foreground-window hint ids into session scope (ADR G01.03 §3.9)', async () => {
+  const world = mapWorld();
+  // The foreground window's shown facts, written the way the hint controller
+  // writes them (the nearby controller owns the rows, 09 §20).
+  recordGuideHintShown(world.driver, { guideIds: ['guide-near', 'guide-gone'], scope: 'foreground', at: 1 });
+  recordGuideHintDismissed(world.driver, { guideIds: ['guide-gone'], scope: 'foreground', at: 2 });
+  // The surface's carry source — the root hands in the hint controller's
+  // foregroundCarry; a refused package would leave the carry unspent.
+  const store = createRunSurfaceController({
+    routeId: 'route-map',
+    pinnedPackage: {
+      read: async () => ({
+        kind: 'pinned',
+        version: '1',
+        locale: 'be',
+        tier: ['base' as Tier],
+        stops: [
+          { stopId: 'stop-1', placeId: 'place-1', storyBaseId: 'story-1', name: { be: 'Мытня' } },
+          { stopId: 'stop-2', placeId: 'place-2', storyBaseId: 'story-2', name: { be: 'Порт' } },
+          { stopId: 'stop-3', placeId: 'place-3', storyBaseId: 'story-3', name: { be: 'Вежа' } },
+          { stopId: 'stop-4', placeId: 'place-4', storyBaseId: 'story-4', name: { be: 'Плошча' } },
+        ],
+        places: [
+          { placeId: 'place-1', lat: 54.35, lng: 18.65, radius: 40, kind: 'audio' },
+          { placeId: 'place-2', lat: 54.36, lng: 18.66, radius: 40, kind: 'audio' },
+          { placeId: 'place-3', lat: 54.37, lng: 18.67, radius: 40, kind: 'audio' },
+          { placeId: 'place-4', lat: 54.38, lng: 18.68, radius: 40, kind: 'audio' },
+        ],
+        stories: [],
+        storiesExtended: [],
+      }),
+    },
+    session: world.session,
+    carryGuideHints: () => ['guide-near', 'guide-gone'],
+  });
+  const state = await settled(store);
+  assert.equal(state.status, 'ready');
+  const run = state.controller.getState().run;
+  assert.equal(run.phase, 'Active');
+  // The carried ids moved into the session scope inside the Start
+  // transaction — shown and dismissed alike — and survive as session rows.
+  assert.deepEqual(
+    listSessionGuideHints(world.driver, run.sessionId).map((row) => row.guideId).sort(),
+    ['guide-gone', 'guide-near'],
+  );
+  // The consumed foreground rows are the transfer's own move (UPDATE, not
+  // INSERT): the same ids now live once, under the session scope.
+  assert.deepEqual(
+    listSessionGuideHints(world.driver, run.sessionId).map((row) => (row.dismissedAt === null ? 'shown' : 'dismissed')).sort(),
+    ['dismissed', 'shown'],
+  );
 });

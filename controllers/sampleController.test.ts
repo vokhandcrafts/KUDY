@@ -43,7 +43,8 @@ test('criterion 2: without the port the root constructs no contentRepo (the app 
   // factory and the one moment controller as the eighth and ninth with
   // G07.02; the display locale joined as the tenth member with G06.05; the
   // commerce factory as the eleventh with G08.05; the discovery controller
-  // as the twelfth with G15.03).
+  // as the twelfth with G15.03; the one hint controller as the thirteenth
+  // with G07.05).
   assert.deepEqual(services, {
     locale: 'be',
     contentRepo: undefined,
@@ -53,6 +54,7 @@ test('criterion 2: without the port the root constructs no contentRepo (the app 
     walk: undefined,
     history: undefined,
     nearby: undefined,
+    hints: undefined,
     place: undefined,
     moment: undefined,
     commerce: undefined,

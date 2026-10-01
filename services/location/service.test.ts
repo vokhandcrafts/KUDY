@@ -519,3 +519,35 @@ test('G05.02.c AC2: a foreground grant does not skip the background ask on the g
   ]);
   h.assertClean();
 });
+
+// --- G07.05 (issue #284): the read-only raw-fix tap -------------------------
+
+test('G07.05: onRawFix observers receive the same fixes the sink forwards; the unsubscribe releases them', () => {
+  const h = makeService();
+  const observed: FixInput[] = [];
+  const unsubscribe = h.service.onRawFix((fix) => observed.push(fix));
+  h.service.setMode('city-surface');
+  h.port.reportPermission('granted');
+  const fix = { lat: 54.4, lng: 18.6, accuracy: 5, at: 1 };
+  h.port.emitFix(h.currentSub(), fix);
+  assert.deepEqual(observed, [fix]);
+  assert.deepEqual(h.fixes, [fix]);
+  unsubscribe();
+  h.port.emitFix(h.currentSub(), { lat: 54.41, lng: 18.6, accuracy: 5, at: 2 });
+  assert.deepEqual(observed, [fix]);
+  h.assertClean();
+});
+
+test('G07.05: the tap adds no location command — the modes and the window stay setMode business', () => {
+  const h = makeService();
+  h.service.setMode('city-surface');
+  h.port.reportPermission('granted');
+  const baseline = [...h.port.commands];
+  const unsubscribe = h.service.onRawFix(() => {});
+  h.port.emitFix(h.currentSub(), { lat: 54.4, lng: 18.6, accuracy: 5, at: 1 });
+  // The only new commands are the service's own per-fix window recomputes.
+  const nonWindow = (list: string[]): string[] => list.filter((command) => !command.startsWith('regions'));
+  assert.deepEqual(nonWindow(h.port.commands), nonWindow(baseline));
+  unsubscribe();
+  h.assertClean();
+});
