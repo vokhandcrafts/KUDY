@@ -6,6 +6,8 @@
 // «Побач»; NAV3 — the button works from the empty city too).
 // G15.03 (issue #70) adds the «Чым заняцца» selector entry — Explore →
 // Discovery result; the results never replace the city (20 §3, D04).
+// Issue #426 adds the «KUDY» entry — the history surface's one Explore
+// access (NAV3), named per the owner's 2026-10-01 decision (no «My»).
 import { Link } from "expo-router";
 import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -71,6 +73,7 @@ export default function Explore() {
           <>
             <SurfaceLink href="/map" label={strings.nearby} testID="link-nearby" />
             <SurfaceLink href="/discovery" label={strings.whatToDo} testID="link-discovery" />
+            <SurfaceLink href="/my" label={strings.kudyLink} testID="link-kudy" />
           </>
         }
       />

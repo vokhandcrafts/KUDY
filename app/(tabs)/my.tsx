@@ -1,7 +1,9 @@
-// G06.04 (issue #63) — the My KUDY surface: the app's session history from
-// the history controller — the live walk (active/paused) beside the
-// finished previous runs (11 §16.2, 03: «My KUDY захоўвае лакальную
-// гісторыю сесій»). The rows render the durable zone's own facts — state,
+// G06.04 (issue #63) — the KUDY surface (the display name since issue #426;
+// the route, controller and contract quotes below keep the my- identifiers):
+// the app's session history from the history controller — the live walk
+// (active/paused) beside the finished previous runs (11 §16.2, 03: «My KUDY
+// захоўвае лакальную гісторыю сесій»). The rows render the durable zone's
+// own facts — state,
 // dates, heard count — plus the guide's catalog title when the catalog
 // names the route (UX 05, issue #351); without it the row falls back to the
 // raw id, and no title is ever invented. Without the history member (the
@@ -119,7 +121,7 @@ export default function My() {
   return (
     // G06.10.e (issue #405): the calm surface's paper — the shared wrapper
     // layers the canon grain over the unchanged paper token.
-    <PaperSurface style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-My KUDY">
+    <PaperSurface style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-KUDY">
       {/* UX 02 (issue #348): the surface's one back element (AC2), fixed
           above the scrolling history so it stays reachable. */}
       <BackButton label={strings.back} testID="btn-my-back" />

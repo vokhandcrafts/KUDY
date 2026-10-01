@@ -1,7 +1,7 @@
 // G06.05 (issue #280) — the shared UI words of the G06 surfaces, BE/EN per
 // the row's first criterion. The catalogs here are presentation-only chrome
-// (back labels, loading, the catalog state words, the My KUDY sections, the
-// preview facts line); domain words with diagnostics stay with their
+// (back labels, loading, the catalog state words, the KUDY surface sections,
+// the preview facts line); domain words with diagnostics stay with their
 // controllers (runMapStrings, placeDetailStrings, previewStrings). The
 // locale argument is the composition root's display locale — the first
 // preference of createServices (the UI-locale *selection* is L02 and stays
@@ -17,6 +17,9 @@ export interface UiStrings {
   readonly walk: string;
   readonly nearby: string;
   readonly guidesLink: string;
+  // The KUDY surface's Explore entry (issue #426): the owner's 2026-10-01
+  // decision — the history surface is named «KUDY», not «My KUDY».
+  readonly kudyLink: string;
   readonly retry: string;
   readonly catalogUnavailable: string;
   readonly catalogTemporarilyUnavailable: string;
@@ -83,6 +86,7 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
     walk: "Прагулка",
     nearby: "Побач →",
     guidesLink: "Гіды →",
+    kudyLink: "KUDY →",
     retry: "Паўтарыць",
     catalogUnavailable: "Каталог недаступны",
     catalogTemporarilyUnavailable: "Каталог часова недаступны",
@@ -90,7 +94,7 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
     validCache: "Папярэдні валідны кэш",
     previewUnavailable: "Прэв'ю часова недаступны",
     degradedData: "Частка звестак часова недаступная",
-    myKudy: "My KUDY",
+    myKudy: "KUDY",
     historyUnavailable: "Гісторыя недаступная",
     currentWalk: "Бягучая прагулка",
     noCurrentWalk: "Бягучай прагулкі няма",
@@ -150,6 +154,7 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
     walk: "Walk",
     nearby: "Nearby →",
     guidesLink: "Guides →",
+    kudyLink: "KUDY →",
     retry: "Retry",
     catalogUnavailable: "Catalog unavailable",
     catalogTemporarilyUnavailable: "Catalog temporarily unavailable",
@@ -157,7 +162,7 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
     validCache: "Previous valid cache",
     previewUnavailable: "Preview temporarily unavailable",
     degradedData: "Some data temporarily unavailable",
-    myKudy: "My KUDY",
+    myKudy: "KUDY",
     historyUnavailable: "History unavailable",
     currentWalk: "Current walk",
     noCurrentWalk: "No current walk",

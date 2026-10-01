@@ -257,7 +257,7 @@ const PREVIEW_STRINGS: Record<'be' | 'en', PreviewStrings> = {
             : 'пакет няпоўны',
     downloadFailed: 'Збой загрузкі',
     storageFullDetail: (mb) => `не хапае месца: патрэбна яшчэ ${mb} МБ`,
-    storageExit: 'Вызваліць месца ў My KUDY',
+    storageExit: 'Вызваліць месца ў KUDY',
     retry: 'Паўтарыць',
   },
   en: {
@@ -279,7 +279,7 @@ const PREVIEW_STRINGS: Record<'be' | 'en', PreviewStrings> = {
             : 'package incomplete',
     downloadFailed: 'Download failed',
     storageFullDetail: (mb) => `not enough space: ${mb} MB more needed`,
-    storageExit: 'Free up space in My KUDY',
+    storageExit: 'Free up space in KUDY',
     retry: 'Retry',
   },
 };
