@@ -137,7 +137,6 @@ export interface RunMapStrings {
   readonly endConfirmAccept: string;
   readonly endConfirmCancel: string;
   readonly endedTitle: string;
-  readonly back: string;
   readonly close: string;
   readonly loading: string;
   readonly unavailableTitle: string;
@@ -218,7 +217,6 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     endConfirmAccept: 'Завяршыць',
     endConfirmCancel: 'Скасаваць',
     endedTitle: 'Прагулка завершана',
-    back: '← Назад',
     close: 'Зачыніць',
     loading: 'Загрузка…',
     unavailableTitle: 'Сесія недаступная',
@@ -277,7 +275,6 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     endConfirmAccept: 'Finish',
     endConfirmCancel: 'Cancel',
     endedTitle: 'Walk finished',
-    back: '← Back',
     close: 'Close',
     loading: 'Loading…',
     unavailableTitle: 'Session unavailable',

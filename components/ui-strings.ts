@@ -84,10 +84,13 @@ export interface UiStrings {
 
 const STRINGS: Record<"be" | "en", UiStrings> = {
   be: {
-    back: "← Назад",
-    backToCity: "← Горад",
+    // G06.10 (issue #432): the back words carry no text arrow — the one
+    // arrow image is the Lucide glyph BackButton renders; the word alone is
+    // both the visible caption and the screen-reader label.
+    back: "Назад",
+    backToCity: "Горад",
     notFoundTitle: "Такога экрана няма",
-    notFoundHint: "Каталог чакае — вяртайцеся да яго кнопкай «← Назад».",
+    notFoundHint: "Каталог чакае — вяртайцеся да яго кнопкай «Назад».",
     loading: "Загрузка…",
     walk: "Прагулка",
     nearby: "Побач →",
@@ -154,10 +157,10 @@ const STRINGS: Record<"be" | "en", UiStrings> = {
     },
   },
   en: {
-    back: "← Back",
-    backToCity: "← City",
+    back: "Back",
+    backToCity: "City",
     notFoundTitle: "No such screen",
-    notFoundHint: "The catalog is waiting — use «← Back» to return to it.",
+    notFoundHint: "The catalog is waiting — use «Back» to return to it.",
     loading: "Loading…",
     walk: "Walk",
     nearby: "Nearby →",

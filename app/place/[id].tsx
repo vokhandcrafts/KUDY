@@ -24,6 +24,7 @@ import { useStoreState } from "../../controllers/useControllerStore";
 import { useServices } from "../_layout";
 import { AccessBadge } from "../../components/guide-card";
 import { BackButton } from "../../components/back-button";
+import { uiStrings } from "../../components/ui-strings";
 import { LoadingIndicator } from "../../components/loading-indicator";
 import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
@@ -225,6 +226,9 @@ export default function PlaceDetail() {
   const playFailure = momentState !== null && momentState.kind === "failed" ? momentState : null;
   // G06.05 (issue #280, AC1): the display locale, not a hard-code.
   const strings = placeDetailStrings(services.locale);
+  // G06.10 (issue #432): the back word is the shared chrome catalog's — the
+  // place dictionary holds no copy of it (one back image, one dictionary).
+  const back = uiStrings(services.locale).back;
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4).
   const insets = useSafeAreaInsets();
@@ -234,7 +238,7 @@ export default function PlaceDetail() {
     <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Place detail">
       {/* UX 02 (issue #348): the back sits in the frame above the scroll —
           reachable while the moment cards are scrolled (AC2). */}
-      <BackButton label={strings.back} testID="btn-place-back" />
+      <BackButton label={back} testID="btn-place-back" />
       {/* UX 01 (issue #347): the detail scrolls — the last moment card is
           reachable beyond the fold. */}
       <ScrollView testID="scroll-place">

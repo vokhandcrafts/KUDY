@@ -22,7 +22,7 @@ node_modules/.bin/jest app/layout-header.test.tsx app/back-navigation.test.tsx a
 
 ```output
 Test Suites: 4 passed, 4 total
-Tests:       18 passed, 18 total
+Tests:       22 passed, 22 total
 Snapshots:   0 total
 ```
 

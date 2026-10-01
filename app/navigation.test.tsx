@@ -169,7 +169,7 @@ describe("route placeholders (19 §2.5)", () => {
     renderRouter({ "_layout": layoutWith(createServices({})), ...routes }, { initialUrl: "/definitely/missing" });
     const notFound = await screen.findByTestId("screen-Not found");
     expect(within(notFound).getByText("Такога экрана няма")).toBeTruthy();
-    expect(within(notFound).getByText("Каталог чакае — вяртайцеся да яго кнопкай «← Назад».")).toBeTruthy();
+    expect(within(notFound).getByText("Каталог чакае — вяртайцеся да яго кнопкай «Назад».")).toBeTruthy();
     fireEvent.press(within(notFound).getByTestId("btn-not-found-back"));
     expect(await screen.findByTestId("screen-Explore")).toBeTruthy();
   });

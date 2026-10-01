@@ -169,6 +169,14 @@ describe("guide preview surface (G06.01.b)", () => {
     expect(screen.getByTestId("stop-locked-stop-b1-2")).toBeTruthy();
     expect(screen.getByText("Млынавая вуліца")).toBeTruthy();
     expect(screen.getByText("Кароткі анонс пашыранай гісторыі пра млын.")).toBeTruthy();
+    // G06.10 (issue #432): the locked badge renders the Lucide lock through
+    // the icon layer — no emoji glyph anywhere in the rendered preview, the
+    // badge's screen-reader word stays «Зачынена». The emoji query turns
+    // red the moment the 🔒 markup returns.
+    expect(screen.queryByText("🔒")).toBeNull();
+    const lockedBadge = screen.getByTestId("stop-locked-stop-b1-2");
+    expect(lockedBadge.props.accessibilityLabel).toBe("Зачынена");
+    expect(within(lockedBadge).UNSAFE_getByType(Svg).props.className).toBe("lucide lucide-lock");
   });
 
   test("the stop rows show the place's human title from the catalog, never the raw place id (UX 05, AC1)", async () => {
@@ -307,7 +315,7 @@ describe("guide preview surface (G06.01.b)", () => {
       { initialUrl: "/route/guide-route-a1?from=rubric" },
     );
     expect(await screen.findByTestId("btn-preview-back")).toBeTruthy();
-    expect(within(screen.getByTestId("btn-preview-back")).getByText("← Назад")).toBeTruthy();
+    expect(within(screen.getByTestId("btn-preview-back")).getByText("Назад")).toBeTruthy();
   });
 
   test("a route the catalog does not name renders the honest unavailable state", async () => {

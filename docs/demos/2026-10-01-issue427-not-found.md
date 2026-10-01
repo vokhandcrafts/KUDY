@@ -54,7 +54,7 @@ rm components/placeholder.tsx
 ```output
 Tests:       1 failed, 18 skipped, 19 total
 Tests:       1 failed, 7 skipped, 8 total
-Tests:       1 failed, 7 skipped, 8 total
+Tests:       1 failed, 8 skipped, 9 total
 ```
 
 Крытэры 1 і 3 — жывы прагон. Захаваныя ў `.scratch/issue-427/screens/`
@@ -69,3 +69,7 @@ tcp:8082 tcp:8082`, метро з worktree (`npx expo start --port 8082
 deep-лінк `kudy://nope`; экран здымае `adb exec-out screencap -p`.
 Белыя цішоткі статус-бара на светлай паперы — вядомая знаходка #428 (асобная
 задача, тут out of scope).
+
+*Resolution 2026-10-01 (PR #443, issue #432): вобраз Назаду на гэтым экране
+болей не тэкставая стрэлка «← Назад» — Lucide-стрэлка + слова «Назад»;
+згадкі «← Назад» ў прозе і апісаннях скрыншотаў вышэй — стан на дату дэмы.*
