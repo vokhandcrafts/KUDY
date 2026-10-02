@@ -41,6 +41,17 @@
 //    durable delta and only then publishes (ADR §3.1/§3.3; R2, G20.03): a
 //    failing hook rejects the whole transition, so no effect ever fires for a
 //    state the durable row does not hold.
+// 8. G20.04 (issue #475, runtime.md R3): the constructor registers nothing.
+//    The GPS sink and the access channel are the session's: they attach only
+//    when a session is accepted (start()) or restored (restore()) and release
+//    on end(), retire() and dispose() — a candidate controller that is never
+//    accepted holds no such registration, so a refused second walk cannot
+//    steal the live walk's GPS. The audio events are the controller's:
+//    they attach with the session but survive end()/retire() (a moment
+//    launch outlives the session, ADR G01.02 §3.8, and its finish must
+//    clear the Ended mirror — the reducer still accepts tagged player
+//    callbacks while Ended), releasing only on dispose(). Every release
+//    removes only this orchestrator's own registration.
 import { acceptFix } from '../../core/pipeline/pipeline.ts';
 import {
   initialPipelineState,
@@ -113,6 +124,7 @@ export interface RunOrchestratorDeps {
 export class RunOrchestrator {
   private readonly location: LocationService;
   private readonly audio: AudioService;
+  private readonly access: DownloadAccessPort | undefined;
   private readonly clock: RunClock;
   private readonly engineConfig: EngineConfig;
   private readonly pipelineConfig: PipelineConfig;
@@ -131,6 +143,17 @@ export class RunOrchestrator {
   private engineState: RunState = initialRunState;
   private pipelineState: PipelineState = initialPipelineState;
   private ownMomentSeq = 0;
+  // G20.04 (header note 8): the live resource registrations, per resource.
+  // The audio subscription is the controller's: a moment launch survives End
+  // (ADR G01.02 §3.8) and the reducer still accepts the tagged player
+  // callbacks of the Ended session — a moment finishing in that window must
+  // reach the engine to clear the mirror, so it survives end()/retire() and
+  // releases only on dispose() (or re-registration after a full detach). The
+  // GPS sink and the access channel are the session's: a candidate holds
+  // neither, they attach on acceptance/restore and release on end()/retire().
+  private audioRelease: (() => void) | null = null;
+  private locationRelease: (() => void) | null = null;
+  private accessRelease: (() => void) | null = null;
   // G07.03 — the one-shot carry of playMoment's resolved teaser path to the
   // effect that fires inside the same synchronous dispatch (the engine's
   // command carries no path — content resolution is not the engine's read).
@@ -139,6 +162,7 @@ export class RunOrchestrator {
   constructor(deps: RunOrchestratorDeps) {
     this.location = deps.location;
     this.audio = deps.audio;
+    this.access = deps.access;
     this.clock = deps.clock;
     this.engineConfig = deps.engineConfig;
     this.pipelineConfig = deps.pipelineConfig;
@@ -150,9 +174,44 @@ export class RunOrchestrator {
     this.candidates = new Map(
       deps.stops.map((stop) => [stop.stopId, { lat: stop.lat, lng: stop.lng, radius: stop.radius }]),
     );
-    deps.location.onFix((fix) => this.onFix(fix));
-    deps.audio.onEvent((event) => this.onAudioEvent(event));
-    deps.access?.onAccessReady((event) => this.dispatch(event));
+  }
+
+  // The subscription transfer of R3: only an accepted (start) or restored
+  // (recover) session takes the resources. Each registration attaches at
+  // most once — a second attach adds nothing; a re-Start after end()
+  // re-attaches what end() released.
+  private attachResourceSubscriptions(): void {
+    if (this.audioRelease === null) {
+      this.audioRelease = this.audio.onEvent((event) => this.onAudioEvent(event));
+    }
+    if (this.locationRelease === null) {
+      this.locationRelease = this.location.onFix((fix) => this.onFix(fix));
+    }
+    if (this.access !== undefined && this.accessRelease === null) {
+      this.accessRelease = this.access.onAccessReady((event) => this.dispatch(event));
+    }
+  }
+
+  // The session-scoped cleanup of R3 (end, switch): the GPS sink and the
+  // access channel release here; every release removes only this
+  // orchestrator's own registration, so a released owner never detaches the
+  // walk that took the resources after it. The audio subscription stays —
+  // the surviving moment's finish must clear the Ended mirror.
+  private detachSessionSubscriptions(): void {
+    this.locationRelease?.();
+    this.locationRelease = null;
+    this.accessRelease?.();
+    this.accessRelease = null;
+  }
+
+  // R3's total lifecycle: releases every service registration this
+  // orchestrator still holds, idempotently and without touching any shared
+  // resource — the mode, the window and the physical player belong to
+  // end()/retire(), not to the listener cleanup.
+  dispose(): void {
+    this.detachSessionSubscriptions();
+    this.audioRelease?.();
+    this.audioRelease = null;
   }
 
   // Read-only engine view for the UI layer (G05.05) and the scenario tests:
@@ -174,6 +233,9 @@ export class RunOrchestrator {
   // a paid walk re-entered after both layers were activated starts with both;
   // without it the route's default selection applies.
   start(sessionId: string, accessibleStopIds?: ReadonlyArray<string>, verifiedTiers?: Tier[]): void {
+    // The acceptance takes the resources (R3, header note 8) — the store's
+    // commit already happened in the caller.
+    this.attachResourceSubscriptions();
     let playingNow: { momentId: string; storyId: string; seq: number } | undefined;
     if (this.engineState.phase === 'Ended') {
       const ended = this.engineState;
@@ -248,6 +310,10 @@ export class RunOrchestrator {
     if (this.engineState.phase !== 'Active' && this.engineState.phase !== 'Paused') return false;
     this.dispatch({ type: 'End' });
     this.location.setMode('idle'); // 19 §4.3: End releases the GPS subscription
+    // R3: End releases the session-scoped listeners (GPS sink, access). The
+    // audio events stay — a surviving moment must clear the Ended mirror, and
+    // a re-Start re-attaches the rest (note 8).
+    this.detachSessionSubscriptions();
     return true;
   }
 
@@ -275,6 +341,11 @@ export class RunOrchestrator {
     };
     this.location.setMode('idle');
     this.location.setGeofenceWindow([]);
+    // R3: the switched-away walk releases its session-scoped listeners — the
+    // new walk owns the resources from its own acceptance, never from this
+    // mirror's death. (dispose() on this abandoned controller releases the
+    // rest.)
+    this.detachSessionSubscriptions();
   }
 
   // G05.05.b restart recovery (09 §9.1, ADR G01.03 §3.2): the restored
@@ -285,6 +356,8 @@ export class RunOrchestrator {
   // pipeline candidates and the window geometry follow the row's package,
   // never the catalog's current one.
   restore(state: RunSessionState, stops: ReadonlyArray<RunStop>): void {
+    // The restored session re-owns the resources (R3: acceptance or restore).
+    this.attachResourceSubscriptions();
     this.engineState = state;
     this.stops = stops;
     this.candidates = new Map(

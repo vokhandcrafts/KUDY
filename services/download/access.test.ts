@@ -124,7 +124,12 @@ test('criterion 1: one commit delivers exactly one event; an outside-built objec
     };
     assert.deepEqual(Object.keys(access), ['onAccessReady']);
     const foreignEvents: AccessReadyEvent[] = [];
-    const foreign: DownloadAccessPort = { onAccessReady: () => foreignEvents.push(forged as AccessReadyEvent) };
+    const foreign: DownloadAccessPort = {
+      onAccessReady: () => {
+        foreignEvents.push(forged as AccessReadyEvent);
+        return () => {};
+      },
+    };
     assert.deepEqual(await emitAccessReady(foreign, KEY, async () => null), ['access#no-channel']);
     assert.deepEqual(foreignEvents, []);
     assert.deepEqual(events, []);
@@ -434,4 +439,23 @@ test('a handler that throws is isolated: the remaining handlers still receive th
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+// G20.04 (issue #475, runtime.md R3) — each registration returns its own
+// release: the released handler receives no further event, a later one keeps
+// receiving, and the release of an already-removed handler is a no-op.
+test('G20.04: the access release removes only its own handler', async () => {
+  const access = createAccessPort();
+  const first: AccessReadyEvent[] = [];
+  const second: AccessReadyEvent[] = [];
+  const releaseFirst = access.onAccessReady((event) => first.push(event));
+  access.onAccessReady((event) => second.push(event));
+  releaseFirst();
+
+  await emitAccessReady(access, KEY, async () => utf8(JSON.stringify(ROUTE_DOC)));
+
+  assert.deepEqual(first, []); // released before the emission
+  assert.equal(second.length, 1); // the surviving handler keeps receiving
+  assert.deepEqual(second[0].stopIds, ['stop-1', 'stop-2']);
+  releaseFirst(); // a repeated release is a no-op
 });
