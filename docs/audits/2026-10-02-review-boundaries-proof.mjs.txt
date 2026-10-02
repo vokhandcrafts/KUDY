@@ -1,0 +1,53 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { createPreviewController } from './controllers/catalog/previewController.ts';
+import { loadCatalog, loadNearby, loadPreview } from './services/catalog/catalogService.ts';
+import { evaluatePackage } from './services/contentRepo/contentRepo.ts';
+
+const preview = { routeId: 'r', version: '1', title: 'Synthetic', textLocales: ['be'], access: 'free', routeAccess: 'free_base' };
+let inventoryCalls = 0;
+const controller = createPreviewController({
+  service: { async loadPreview() { return { kind: 'ready', preview, degraded: null }; } },
+  inventory: { async layerState() {
+    if (++inventoryCalls > 1) throw new Error('synthetic-inventory-fault');
+    return { state: 'not_downloaded' };
+  } },
+  download: { async activate(key) { return { status: 'complete', key, verified: 1, bytes: 1, fetched: 1, diagnostics: [] }; } },
+}, 'r');
+await new Promise(resolve => setImmediate(resolve));
+assert.equal(controller.getState().button.enabled, true);
+await assert.rejects(controller.getState().download(), /synthetic-inventory-fault/);
+assert.equal(controller.getState().busy, true);
+console.log(JSON.stringify({ case: 'download-refresh-failure', busy: controller.getState().busy }));
+
+const fixture = 'fixtures/discovery-contract/';
+const catalog = fs.readFileSync(fixture + 'catalog-with-discovery.json', 'utf8');
+const index = fs.readFileSync(fixture + 'index-valid.json', 'utf8');
+const route = JSON.parse(catalog).routes[0];
+let hashCalls = 0;
+const deps = {
+  loader: async rel => rel === 'catalog.json' ? catalog : rel.endsWith('/route.json')
+    ? JSON.stringify({ route_id: route.route_id, version: route.version, access: 'free_base', stops: [] }) : index,
+  sha256: async () => { hashCalls++; throw new Error('synthetic-digest-fault'); },
+};
+const options = { localePreference: ['be'] };
+for (const [name, run] of [
+  ['catalog', () => loadCatalog(deps, options, null)],
+  ['nearby', () => loadNearby(deps, options, null)],
+  ['preview', () => loadPreview(deps, options, route.route_id, null)],
+]) {
+  const result = await run();
+  assert.equal(result.kind, 'ready');
+  assert.equal(result.degraded, 'index-unavailable');
+  console.log(JSON.stringify({ case: name + '-digest-rejected', outcome: result.kind, degraded: result.degraded }));
+}
+assert.equal(hashCalls, 3);
+
+const key = { routeId: 'r', version: '1' };
+await assert.rejects(evaluatePackage({
+  key,
+  readFile: async rel => ({ kind: 'present', bytes: new TextEncoder().encode(JSON.stringify(rel === 'route.json'
+    ? { route_id: 'r', version: '1', access: 'free_base', stops: [null] } : [])) }),
+  exists: async () => false,
+}, { locale: 'be', tier: 'base' }), TypeError);
+console.log(JSON.stringify({ case: 'route-stops-null', outcome: 'TypeError instead of incomplete' }));
