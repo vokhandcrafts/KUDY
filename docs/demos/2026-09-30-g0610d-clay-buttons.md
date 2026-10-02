@@ -51,4 +51,4 @@ Tests:       28 passed, 28 total
 > не змяняе — перапіс аднаго тэста 1:1). Тэкст умеўнага ўводзін («канон §5:
 > opacity 0.5») — гістарычны: кантракт выключанага стану перавызначаны
 > ghost-парай `color.disabled-ink`/`color.disabled-line`, гл. дэму
-> 2026-10-03-430-disabled-contrast.md.
+> `2026-10-03-issue430-disabled-contrast.md`.
