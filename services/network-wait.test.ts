@@ -108,3 +108,21 @@ test('stalled_catalog_loader_deadline: an unresolved catalog fetch rejects named
     stub.restore();
   }
 });
+
+test('timeout_cleanup: an owner already gone before the wait answers cancelled immediately', async () => {
+  // The pre-aborted signal never fires an abort event again — the wait must
+  // still reject named without waiting out its deadline (the first delta
+  // review round caught the hang).
+  const owner = new AbortController();
+  owner.abort();
+  const started = Date.now();
+  await assert.rejects(
+    withWaitLimit('wait-device', 60_000, () => new Promise<string>(() => {}), owner.signal),
+    (error: WaitTimeoutError) => {
+      assert.equal(error.kind, 'cancelled');
+      assert.equal(error.rule, 'wait-device');
+      return true;
+    },
+  );
+  assert.ok(Date.now() - started < 5_000, 'the wait rejected immediately, not at the deadline');
+});

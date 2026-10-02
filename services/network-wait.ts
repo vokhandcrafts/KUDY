@@ -60,17 +60,23 @@ export async function withWaitLimit<T>(
     // on its own, and the owner must not hang on its own cancellation.
     rejectWait?.(new WaitTimeoutError(rule, 'cancelled', `${rule}: the owner disposed the request`));
   };
-  if (externalSignal?.aborted) onExternalAbort();
-  else externalSignal?.addEventListener('abort', onExternalAbort, { once: true });
+  if (!externalSignal?.aborted) {
+    externalSignal?.addEventListener('abort', onExternalAbort, { once: true });
+  }
   try {
     return await new Promise<T>((resolve, reject) => {
       rejectWait = reject;
-      timer = setTimeout(() => {
-        // The deadline aborts the request itself — an adapter that honors
-        // the signal stops transferring the body, not just the headers.
-        controller.abort();
-        reject(new WaitTimeoutError(rule, 'timeout', `${rule}: the network wait exceeded ${limitMs} ms`));
-      }, limitMs);
+      // An owner that was already gone before the wait began answers
+      // cancelled immediately — here, where rejectWait exists.
+      if (externalSignal?.aborted) onExternalAbort();
+      else {
+        timer = setTimeout(() => {
+          // The deadline aborts the request itself — an adapter that honors
+          // the signal stops transferring the body, not just the headers.
+          controller.abort();
+          reject(new WaitTimeoutError(rule, 'timeout', `${rule}: the network wait exceeded ${limitMs} ms`));
+        }, limitMs);
+      }
       // A late reply after the deadline (or after owner disposal) races a
       // settled promise: the first settle wins, the loser is discarded, so
       // disposed state is never mutated by a stale response.
