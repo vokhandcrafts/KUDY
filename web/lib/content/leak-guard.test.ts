@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildBundle } from '../../../tools/build-bundle/build-bundle.mjs';
+import { runBuildBundle } from './test-fixture.ts';
 import { scanWebContentInput } from './leak-guard.ts';
 
 const REPO_ROOT = fileURLToPath(new URL('../../..', import.meta.url));
@@ -23,7 +23,7 @@ let poisoned = '';
 test('demo bundle builds and the real public/private split passes the guard', async () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-web-guard-'));
   const buildRoot = path.join(tmp, 'build');
-  await buildBundle({ inDir: AUTHOR_TREE, outDir: buildRoot });
+  runBuildBundle({ inDir: AUTHOR_TREE, outDir: buildRoot });
   cleanPublic = path.join(buildRoot, 'public');
   privateDir = path.join(buildRoot, 'private');
   const res = scanWebContentInput({ publicDir: cleanPublic, privateDir });

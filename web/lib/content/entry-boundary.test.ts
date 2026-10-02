@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { buildDemoFixture } from './test-fixture.ts';
-import { deriveInterimCatalog } from './interim-catalog.ts';
+import { deriveInterimCatalog } from '../../../contracts/interim-catalog.mjs';
 import { scanWebContentInput } from './leak-guard.ts';
 
 test('an unsafe bundle entry name fails the catalog derivation with a named diagnostic', async () => {

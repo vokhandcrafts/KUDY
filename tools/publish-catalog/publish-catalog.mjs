@@ -31,7 +31,8 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { canonicalJson, isIdentifier, sha256Hex } from '../build-bundle/build-bundle.mjs';
+import { canonicalJson, sha256Hex } from '../build-bundle/build-bundle.mjs';
+import { isIdentifier } from '../../contracts/identifier.mjs';
 import { readCatalogDoc } from '../../contracts/reader.mjs';
 
 export class PublishError extends Error {
