@@ -63,7 +63,10 @@ export class LocationService {
   private lastFix: FixInput | null = null;
   private lastFixAt: number | null = null;
   private stops: ReadonlyArray<GeofenceStop> = [];
-  private fixSink: ((fix: FixInput) => void) | null = null;
+  // The slot holds a per-registration token object, not the bare handler: a
+  // release must be able to tell ITS registration from a later one even when
+  // both wrapped the same handler function (R3, G20.04).
+  private fixSlot: { sink: (fix: FixInput) => void } | null = null;
   // G07.05 (09 §20) — read-only raw-fix observers (the R07 hint controller).
   // They receive the same forwarded fixes the sink gets and may issue no
   // location commands; arming stays setMode's alone.
@@ -119,9 +122,15 @@ export class LocationService {
   }
 
   // The single controller sink (19 §3.3 onFix). A second call replaces it,
-  // like the audio service's onEvent.
-  onFix(handler: (fix: FixInput) => void): void {
-    this.fixSink = handler;
+  // like the audio service's onEvent. Returns the registration's release:
+  // it clears the slot only while this registration still owns it — a
+  // released owner never detaches the one that replaced it (R3, G20.04).
+  onFix(handler: (fix: FixInput) => void): () => void {
+    const slot = { sink: handler };
+    this.fixSlot = slot;
+    return () => {
+      if (this.fixSlot === slot) this.fixSlot = null;
+    };
   }
 
   // G07.05 (09 §20) — the read-only raw-fix tap for non-command consumers:
@@ -224,7 +233,7 @@ export class LocationService {
       this.log(`fix stream is live (generation ${String(this.currentSub)})`);
     }
     this.scheduleGapWatch();
-    this.fixSink?.(event.fix);
+    this.fixSlot?.sink(event.fix);
     for (const observer of this.fixObservers) observer(event.fix);
     this.recomputeWindow();
   }

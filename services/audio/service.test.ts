@@ -266,3 +266,19 @@ test('criterion 6: the services/audio sources import nothing from core/engine', 
     'service.test.ts',
   ]);
 });
+
+// G20.04 (issue #475, runtime.md R3) — each registration returns its own
+// release: a removed handler receives no events, the surviving ones do.
+test('G20.04: each onEvent registration returns its own release', async () => {
+  const { service, lastPort } = makeService();
+  const removed: AudioServiceEvent[] = [];
+  const kept: AudioServiceEvent[] = [];
+  const release = service.onEvent((event) => removed.push(event));
+  service.onEvent((event) => kept.push(event));
+  release();
+  await service.play({ token: guideToken(1), path: 'a.mp3' });
+  lastPort().finish(1);
+  assert.deepEqual(removed, []);
+  assert.equal(kept.length, 1);
+  assert.equal(kept[0].type, 'finished');
+});

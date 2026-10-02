@@ -16,9 +16,11 @@ export type AccessReadyEvent = Extract<RunEvent, { type: 'AccessReady' }>;
 
 // 19 §3.2, verbatim: the issuer is one — services/download, one app run
 // (ADR G01.03 §3.5). Authenticity comes from the typed channel, not the
-// issuer string; controller/UI/entitlement cannot emulate it.
+// issuer string; controller/UI/entitlement cannot emulate it. Each
+// registration returns its own release (R3, G20.04) — a released owner
+// leaves no handler on the channel and never detaches a later one.
 export interface DownloadAccessPort {
-  onAccessReady(handler: (event: AccessReadyEvent) => void): void;
+  onAccessReady(handler: (event: AccessReadyEvent) => void): () => void;
 }
 
 // The delivery state of one port instance — the handlers to fan out to and
@@ -45,6 +47,10 @@ export function createAccessPort(): DownloadAccessPort {
   const port: DownloadAccessPort = {
     onAccessReady(handler) {
       channel.handlers.push(handler);
+      return () => {
+        const index = channel.handlers.indexOf(handler);
+        if (index !== -1) channel.handlers.splice(index, 1);
+      };
     },
   };
   channels.set(port, channel);

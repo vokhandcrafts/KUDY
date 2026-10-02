@@ -165,7 +165,7 @@ function step(previous: RunState, event: RunEvent, now: number, config: EngineCo
 // Выдавец — адзін: services/download, адзін запуск дадатку (ADR G01.03 §3.5).
 // Сапраўднасць дае тыпізаваны канал, не радок issuer; эмуляцыя кантролерам/UI/entitlement немагчымая.
 export interface DownloadAccessPort {
-  onAccessReady(handler: (event: Extract<RunEvent, { type: 'AccessReady' }>) => void): void;
+  onAccessReady(handler: (event: Extract<RunEvent, { type: 'AccessReady' }>) => void): () => void;  // G20.04: вяртае release сваёй рэгістрацыі
 }
 ```
 
@@ -184,7 +184,7 @@ interface AcceptedFix { lat: number; lng: number; accuracy: number; at: number; 
 interface LocationService {
   setMode(mode: LocationMode): void;          // узбраенне/вызваленне падпіскі і геафенсаў
   setGeofenceWindow(stopIds: StopId[]): void; // ≤ 20 рэгіёнаў; пералік па свежым фіксе
-  onFix(handler: (fix: FixInput) => void): void;   // сыры фікс → кантролер (далей acceptFix у pipeline, §5.2)
+  onFix(handler: (fix: FixInput) => void): () => void;   // сыры фікс → кантролер (далей acceptFix у pipeline, §5.2); release здымае слот толькі пакуль ён свой (G20.04)
   status(): 'acquiring' | 'live' | 'recovering' | 'stalled';       // watchdog, парог 15 с
   currentMode(): LocationMode;                // чытанне рэжыму (G07.01: паверхня горада ўзброіцца толькі па-за жывой прагулкай)
 }
@@ -205,7 +205,7 @@ function acceptFix(fix: FixInput, candidates: ReadonlyMap<StopId, number>, confi
 interface AudioService {
   play(request: { storyId: StoryId; path: string; sessionId: SessionId; playId: number }): Promise<void>;
   stop(): void; pause(): void; resume(): void;
-  onEvent(handler: (cb: AudioTaggedEvent) => void): void;   // тэг: (sessionId, playId)
+  onEvent(handler: (cb: AudioTaggedEvent) => void): () => void;   // тэг: (sessionId, playId); release здымае сваё імя з Set (G20.04)
 }
 // AudioTaggedEvent — канчатковы tagged union: G01.02 (адкрыта). Мінімум, які ўжо можна лічыць абавязаным:
 // завершэнне файла, збой прайгравання (→ story_play_failed, не AudioFinished), UserPausedAudio, FocusLoss/FocusRegain.

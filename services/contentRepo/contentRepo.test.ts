@@ -308,3 +308,117 @@ test('TR-3: truncated route.json is invalid-json, never a crash', async () => {
     remove();
   }
 });
+
+// G20.24 — R7 (runtime.md §R7): route.json stop rows are untrusted bytes.
+// Every row is structurally checked before field access: null, primitive,
+// array and malformed object rows yield named incomplete results, never a
+// TypeError, and damage can neither produce ready nor unlock a denied layer.
+// All cases run through the real node PackageStore boundary (storeAt), so the
+// store serves the damaged bytes exactly as a device would.
+
+// Rewrites only the stops array of the fixture route.json, leaving every
+// other byte of the valid sample package in place.
+function writeRouteStops(root: string, stops: unknown): void {
+  fs.writeFileSync(
+    `${root}/route.json`,
+    JSON.stringify({ ...JSON.parse(fs.readFileSync(`${root}/route.json`, 'utf8')), stops }),
+  );
+}
+
+test('G20.24 null_stop_no_throw: stops:[null] evaluates incomplete through the real store', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    writeRouteStops(root, [null]);
+    assert.deepEqual(
+      await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' }),
+      { status: 'incomplete', missing: ['route.json#stops[0]#type'] },
+    );
+  } finally {
+    remove();
+  }
+});
+
+test('G20.24 malformed_stop_row_incomplete: null, primitive, array and malformed object rows are each named', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    const base = JSON.parse(fs.readFileSync(`${root}/route.json`, 'utf8'));
+    const cases: Array<[string, unknown, string]> = [
+      ['null row', null, 'route.json#stops[1]#type'],
+      ['primitive row', 5, 'route.json#stops[1]#type'],
+      ['array row', ['stop-1'], 'route.json#stops[1]#type'],
+      ['object without a usable access_tier', {}, 'route.json#stops[1].access_tier#type'],
+      ['object with a non-string place_id', { id: 's', position: 0, access_tier: 'base', place_id: 5 }, 'route.json#stops[1].place_id#type'],
+    ];
+    for (const [label, row, expected] of cases) {
+      writeRouteStops(root, [base.stops[0], row]);
+      assert.deepEqual(
+        await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' }),
+        { status: 'incomplete', missing: [expected] },
+        label,
+      );
+    }
+  } finally {
+    remove();
+  }
+});
+
+test('G20.24: structural stop faults do not suppress identity or reference checks', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    writeRouteStops(root, [null, { id: 'stop-9', position: 9, place_id: 'place-404', access_tier: 'base' }]);
+    const result = await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' });
+    assert.equal(result.status, 'incomplete');
+    if (result.status !== 'incomplete') return;
+    assert.deepEqual(result.missing.sort(), [
+      'places.json#unknown-ref:place-404',
+      'route.json#stops[0]#type',
+    ]);
+    // Identity is decided before the stops pass and survives damaged rows.
+    const mismatched = await evaluatePackage(storeAt(root, { routeId: 'route-x', version: '2' }), { locale: 'be', tier: 'base' });
+    assert.deepEqual(mismatched, { status: 'incomplete', missing: ['route.json#identity-mismatch'] });
+  } finally {
+    remove();
+  }
+});
+
+test('G20.24 denied_layer_stays_locked: damaged stops never turn a denied layer ready', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    writeRouteStops(root, [null]);
+    // Structural incompleteness precedes access (types.ts precedence): a
+    // damaged package is incomplete with and without the grant — the damage
+    // never reads as a purchase decision or as free access.
+    assert.deepEqual(
+      await evaluatePackage(storeAt(root), { locale: 'be', tier: 'extended', grantedTiers: [] }),
+      { status: 'incomplete', missing: ['route.json#stops[0]#type'] },
+    );
+    assert.deepEqual(
+      await evaluatePackage(storeAt(root), { locale: 'be', tier: 'extended', grantedTiers: ['extended'] }),
+      { status: 'incomplete', missing: ['route.json#stops[0]#type'] },
+    );
+  } finally {
+    remove();
+  }
+});
+
+test('G20.24 valid_route_readiness: valid two-tier stops keep base and granted-extended readiness', async () => {
+  const { root, remove } = tempPackage();
+  try {
+    assert.deepEqual(await evaluatePackage(storeAt(root), { locale: 'be', tier: 'base' }), {
+      status: 'ready',
+      routeId: 'route-x',
+      version: '1',
+      tier: 'base',
+      tierAvailable: ['base'],
+    });
+    assert.deepEqual(await evaluatePackage(storeAt(root), { locale: 'be', tier: 'extended', grantedTiers: ['extended'] }), {
+      status: 'ready',
+      routeId: 'route-x',
+      version: '1',
+      tier: 'extended',
+      tierAvailable: ['base', 'extended'],
+    });
+  } finally {
+    remove();
+  }
+});

@@ -931,3 +931,33 @@ test('G07.05: the fresh Start carries the foreground-window hint ids into sessio
     ['dismissed', 'shown'],
   );
 });
+
+// G20.04 (issue #475, runtime.md R3) — the refused second surface must leave
+// the live walk the owner of the one GPS sink: the candidate controller
+// registers nothing until its own session is accepted or restored.
+test('G20.04 refused_second_run_keeps_fixes: a refused second surface leaves the live walk the fix owner', async () => {
+  const world = mapWorld({
+    ...DEFAULT_FILES,
+    [`${OTHER_LAYER}/route.json`]: ROUTE_OTHER_JSON,
+    [`${OTHER_LAYER}/places.json`]: PLACES_OTHER_JSON,
+  });
+  const first = await openSurface(world); // the real first walk
+  if (first.state.status !== 'ready') throw new Error('the first surface never opened');
+  const firstController = first.state.controller;
+  const lastFixAt = (): number => {
+    const run = firstController.getState().run;
+    if (run.phase === 'Idle') throw new Error('the first walk is not live');
+    if (run.lastFix === null) throw new Error('no fix accepted yet');
+    return run.lastFix.at;
+  };
+  fixAt(world, 54.352, 18.648, 10_000); // stop-1's fixes reach the live walk
+  assert.equal(firstController.getState().run.phase, 'Active');
+  assert.equal(lastFixAt(), 12_000);
+
+  const second = await openSurface(world, 'route-other');
+  assert.deepEqual(second.state, { status: 'unavailable', reason: 'live-session-exists' });
+
+  fixAt(world, 54.352, 18.648, 20_000); // a fresh position after the refusal
+  assert.equal(lastFixAt(), 22_000); // the first walk remains the owner
+  assert.equal(firstController.getState().run.phase, 'Active');
+});
