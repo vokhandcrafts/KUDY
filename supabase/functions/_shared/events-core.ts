@@ -156,7 +156,10 @@ export function createSqlEventsPort(db: EventSqlRunner): EventsPort {
     },
     async incrementEventRate(deviceId, windowStartMs) {
       const { rows } = await db.query(EVENT_RATE_INCREMENT_SQL, [deviceId, windowStartMs]);
-      return Number(rows[0]?.['attempts'] ?? 0);
+      // The raw cell is returned unvalidated on purpose: checkRateLimit owns
+      // the counter validation, so a missing or malformed reply fails closed
+      // instead of counting as 0 (spec N1).
+      return rows[0]?.['attempts'] as number;
     },
     async insertEventBatch(deviceId, rows) {
       if (rows.length === 0) return 0;
@@ -387,7 +390,10 @@ export async function handleEventsRequest(
 
   // The limit bounds stored batches: counted after validation, before the
   // insert — the same fixed-window idiom device-core pins for registrations.
-  const rate = checkRateLimit(
+  // The decision awaits the atomic SQL increment (spec N1); a storage fault
+  // or an invalid counter throws past the closed-list answers — the wiring
+  // maps it to the internal-failure diagnostic and 500.
+  const rate = await checkRateLimit(
     { increment: (key, windowStartMs) => port.incrementEventRate(key, windowStartMs) },
     deviceId,
     config.nowMs,

@@ -117,8 +117,12 @@ export function rateWindowStart(nowMs: number, windowMs = DEVICE_RATE_WINDOW_MS)
 }
 
 export interface RateStorage {
-  /** Atomically bumps the window counter and returns the new count. */
-  increment(ipHash: string, windowStartMs: number): number;
+  /**
+   * Atomically bumps the window counter and returns the new count. The
+   * production increment is the SQL `returning` value, so this may be a
+   * promise — `checkRateLimit` awaits it before the comparison (spec N1).
+   */
+  increment(ipHash: string, windowStartMs: number): number | Promise<number>;
 }
 
 export interface RateDecision {
@@ -128,15 +132,23 @@ export interface RateDecision {
   retryAfterSeconds: number;
 }
 
-export function checkRateLimit(
+export async function checkRateLimit(
   storage: RateStorage,
   ipHash: string,
   nowMs: number,
   limit = DEVICE_RATE_LIMIT,
   windowMs = DEVICE_RATE_WINDOW_MS,
-): RateDecision {
+): Promise<RateDecision> {
   const windowStart = rateWindowStart(nowMs, windowMs);
-  const attempts = storage.increment(ipHash, windowStart);
+  // Spec N1: the counter from the database is checked as a correct value
+  // before the limit comparison. A missing or malformed reply (and any
+  // storage fault thrown by the increment) rejects here instead of surfacing
+  // as a limit denial or a silent allow — the wiring maps the rejection to
+  // its closed internal-failure answer.
+  const attempts = await storage.increment(ipHash, windowStart);
+  if (typeof attempts !== 'number' || !Number.isInteger(attempts) || attempts < 0) {
+    throw new Error('rate counter: the storage did not return a valid attempt count');
+  }
   return {
     allowed: attempts <= limit,
     attempts,
