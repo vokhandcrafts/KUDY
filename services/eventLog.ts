@@ -57,10 +57,22 @@ const FLUSH_CHUNK = 256;
 // flush resends the same event_ids — the stable-id contract the server
 // dedupes against. Returns the number of marked events; an empty queue
 // wakes no transport.
-export async function flushEvents(driver: SqlDriver, send: EventSender): Promise<number> {
+//
+// The optional beforeBatch gate is read before every chunk is sent; a false
+// return stops the flush there — chunks already acknowledged stay marked,
+// the rest stay pending and unmarked. The gate is a loop decision, not a
+// sender wrapper: a resolving wrapper would still be followed by the mark,
+// retiring a batch that never left (the G20.05 consent recheck relies on
+// the gate, not on a silent no-op send).
+export interface FlushEventsOptions {
+  beforeBatch?: () => boolean;
+}
+
+export async function flushEvents(driver: SqlDriver, send: EventSender, options?: FlushEventsOptions): Promise<number> {
   const pending = listPendingEvents(driver);
   let marked = 0;
   for (let start = 0; start < pending.length; start += FLUSH_CHUNK) {
+    if (options?.beforeBatch && !options.beforeBatch()) break;
     const chunk = pending.slice(start, start + FLUSH_CHUNK);
     await send(
       chunk.map((row) => ({

@@ -15,7 +15,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { DbError, openDatabase } from './db/db.ts';
+import { DbError, listPendingEvents, openDatabase } from './db/db.ts';
 import { nodeSqliteFileDriver } from './db/test-fixture.ts';
 import type { SqlDriver } from './db/types.ts';
 import { eventFactory, openFreshEventStore } from './eventLog-test-fixture.ts';
@@ -187,6 +187,34 @@ test('the flush batch is bounded: a queue larger than the chunk goes out in orde
   assert.equal(batches.length, 2);
   assert.deepEqual(batches.flat(), ids);
   assert.equal((await capture(driver)).length, 0);
+});
+
+test('the beforeBatch gate stops the flush between chunks — acknowledged chunks stay marked, the tail stays pending', async () => {
+  const driver = openFreshEventStore();
+  const ids: string[] = [];
+  for (let i = 0; i < 300; i += 1) {
+    const one = event({ at: 1_700_000_000_000 + i });
+    ids.push(one.eventId);
+    emitEvent(driver, one);
+  }
+  let chunks = 0;
+  const marked = await flushEvents(
+    driver,
+    (events) => {
+      chunks += 1;
+      assert.equal(events.length, 256);
+      return Promise.resolve();
+    },
+    { beforeBatch: () => chunks === 0 },
+  );
+
+  assert.equal(chunks, 1, 'the gate closed before the second chunk was sent');
+  assert.equal(marked, 256, 'only the acknowledged chunk is marked');
+  assert.deepEqual(
+    listPendingEvents(driver).map((row) => row.eventId),
+    ids.slice(256),
+    'the gated-out tail stays pending, in queue order',
+  );
 });
 
 test('emit refuses a payload that is not a JSON object — named diagnostic, nothing stored', () => {
