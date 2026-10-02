@@ -45,12 +45,14 @@ export async function runGitleaksPipeline({
   sourceDir = '.',
   fetchImpl = fetch,
   signal = AbortSignal.timeout(120000),
+  tmpRoot = tmpdir(),
 }) {
   if (!/^[0-9a-f]{64}$/.test(expectedSha256 ?? '')) {
     return fail('missing-checksum', 'no pinned 64-hex sha256 digest — refusing to download');
   }
   let workDir;
   try {
+    workDir = await mkdtemp(path.join(tmpRoot, 'gitleaks-fetch-'));
     let response;
     try {
       response = await fetchImpl(url, { signal });
@@ -65,7 +67,6 @@ export async function runGitleaksPipeline({
     if (actual !== expectedSha256) {
       return fail('digest-mismatch', `archive sha256 ${actual} does not match the pinned digest`);
     }
-    workDir = await mkdtemp(path.join(tmpdir(), 'gitleaks-fetch-'));
     const archivePath = path.join(workDir, 'scanner.tgz');
     await writeFile(archivePath, bytes);
     const extract = spawnSync('tar', ['-xzf', archivePath, '-C', workDir, 'gitleaks'], {
@@ -83,6 +84,8 @@ export async function runGitleaksPipeline({
       return fail('scanner', `scanner exited ${run.status}`);
     }
     return { ok: true };
+  } catch (error) {
+    return fail('staging', `filesystem failure: ${error.message}`);
   } finally {
     if (workDir) await rm(workDir, { recursive: true, force: true });
   }

@@ -114,17 +114,18 @@ if (!/run:\s*node --test --experimental-strip-types.*fixtures-hygiene\.test\.ts/
 
 // G20.27 revert guard — supply-chain pins (spec V6, issue #500): every action
 // reference in every workflow must be a full 40-hex upstream commit SHA, the
-// tag staying only as a version annotation. The secret scanner must run
-// through the committed digest-verifying pipeline, and that pipeline must
-// carry its own version + checksum constants — the digest is never taken from
-// the download or the environment. Reverting any pin, fetching the scanner
-// with curl/wget again, or emptying the digest constant must turn this
-// committed check red.
-const workflowFiles = [
-  '.github/workflows/required-checks.yml',
-  '.github/workflows/guard-required-checks.yml',
-  '.github/workflows/jscpd.yml',
-];
+// tag staying only as a version annotation. The file list is enumerated from
+// the directory, not hardcoded: a future fourth workflow with a tag ref must
+// turn this guard red by itself. The secret scanner must run through the
+// committed digest-verifying pipeline, and that pipeline must carry its own
+// version + checksum constants — the digest is never taken from the download
+// or the environment. Reverting any pin, fetching the scanner with curl/wget
+// again, or emptying the digest constant must turn this committed check red.
+const workflowFiles = fs
+  .readdirSync('.github/workflows')
+  .filter((name) => name.endsWith('.yml') || name.endsWith('.yaml'))
+  .sort()
+  .map((name) => `.github/workflows/${name}`);
 for (const workflowFile of workflowFiles) {
   const wfText = fs
     .readFileSync(workflowFile, 'utf8')

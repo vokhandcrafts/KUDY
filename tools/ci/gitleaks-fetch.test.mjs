@@ -98,6 +98,23 @@ test('an HTTP failure stops the pipeline — zero scanner executions', { skip: p
   assert.ok(!existsSync(marker), 'the scanner never executed');
 });
 
+test('a filesystem failure answers a named staging failure with zero executions', async () => {
+  let fetchCalled = false;
+  const result = await runGitleaksPipeline({
+    url: 'http://127.0.0.1:9/scanner.tgz',
+    expectedSha256: GITLEAKS_SHA256,
+    tmpRoot: path.join(tmpdir(), 'kudy-gitleaks-absent-root'),
+    fetchImpl: async () => {
+      fetchCalled = true;
+      throw new Error('fetch must not be reached');
+    },
+  });
+  assert.strictEqual(result.ok, false);
+  assert.strictEqual(result.stage, 'staging');
+  assert.match(result.message, /filesystem failure/);
+  assert.strictEqual(fetchCalled, false, 'the temp directory is reserved before any download');
+});
+
 test('the committed pins are the single owner: a 64-hex digest and a URL derived from the version constant', () => {
   assert.match(GITLEAKS_SHA256, /^[0-9a-f]{64}$/);
   assert.match(GITLEAKS_VERSION, /^[0-9]+\.[0-9]+\.[0-9]+$/);
