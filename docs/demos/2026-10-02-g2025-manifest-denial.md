@@ -18,7 +18,7 @@
 не адбываецца. Да выпраўлення абрэзаны JSON і `null` уцякалі ў знешнюю мяжу
 збою як `503 entitlement_unavailable` — гэта лоўяць названыя тэсты
 `corrupt_manifest_403_no_provider` і `null_manifest_403` (эксперымент на адкат
-зроблены перад pushам):
+зроблены да адпраўкі змен):
 
 ```sh
 LD_LIBRARY_PATH="$HOME/.local/lib" node --experimental-strip-types --input-type=module -e "
