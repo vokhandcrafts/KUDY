@@ -155,7 +155,7 @@ export function affectedDeviceIds(event: Record<string, unknown>): string[] {
   const type = event['type'];
   if (type === 'TRANSFER') {
     collectDeviceIds(ids, event['transferred_from']);
-  } else if (CACHE_INVALIDATING_EVENT_TYPES.has(type)) {
+  } else if (typeof type === 'string' && CACHE_INVALIDATING_EVENT_TYPES.has(type)) {
     if (typeof event['app_user_id'] === 'string' && DEVICE_ID_PATTERN.test(event['app_user_id'])) {
       ids.push(event['app_user_id']);
     }

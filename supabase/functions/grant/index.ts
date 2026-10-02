@@ -157,7 +157,7 @@ function serialize(answer: GrantAnswer): Response {
   if (answer.status === 200) {
     return new Response(JSON.stringify(answer.body), { status: 200, headers: { 'content-type': 'application/json' } });
   }
-  const headers = answer.status === 503 || answer.status === 429
+  const headers: Record<string, string> = answer.status === 503 || answer.status === 429
     ? { 'retry-after': String(answer.retryAfterSeconds) }
     : {};
   return errors(answer.status, answer.code, headers);
@@ -166,7 +166,7 @@ function serialize(answer: GrantAnswer): Response {
 // One request's port set. The manifest base captured during load feeds the
 // signer — the core always loads the manifest before minting, so the base is
 // the loaded layer's; per-request ports keep requests from sharing it.
-function requestDeps(db: postgres.Sql, storage: StorageConfig, config: GrantConfig): GrantPortDeps {
+function requestDeps(db: postgres.Sql, storage: StorageConfig, config: ResolvedConfig): GrantPortDeps {
   // Each statement is one of the pinned constants exported by grant-core,
   // executed with its parameters built in place — the client-controlled
   // mapping key only ever appears as the inline sha256 digest

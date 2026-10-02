@@ -61,6 +61,24 @@ if (!/tools\/collector/.test(pkg.scripts?.test ?? '')) {
   failures.push('npm test glob does not include tools/collector');
 }
 
+// G20.13 revert guard — the Deno entrypoint type-check is config-as-code
+// (implementation-rules 1 and 7): losing the server:typecheck script, its
+// required-checks job or the pinned setup-deno action would drop the check
+// silently. The job is authorized by the operator decision recorded in
+// issue #493 (closed 2026-10-02).
+if (!pkg.scripts?.['server:typecheck']) {
+  failures.push('package.json has no server:typecheck script');
+}
+if (!/server:typecheck/.test(text)) {
+  failures.push('required-checks.yml does not run server:typecheck');
+}
+if (!/uses:\s*denoland\/setup-deno@[0-9a-f]{40}/.test(text)) {
+  failures.push('required-checks.yml does not pin denoland/setup-deno to a full 40-hex commit SHA');
+}
+if (!/supabase\/functions\/\.deno-version/.test(text)) {
+  failures.push('required-checks.yml does not read the committed Deno version pin');
+}
+
 // Issue #241 revert guard — the jscpd gate must stay self-contained. The
 // reusable workflow in vokhandcrafts/ai-company-infrastructure cannot be
 // called from this repository: both repos are private and user-owned, and
@@ -98,4 +116,4 @@ if (failures.length > 0) {
   for (const failure of failures) console.error(`- ${failure}`);
   process.exit(1);
 }
-console.log('guard-required-checks: OK — required-checks runs npm ci + npm test + web build');
+console.log('guard-required-checks: OK — required-checks runs npm ci + npm test + web build + server:typecheck');

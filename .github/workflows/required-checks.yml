@@ -42,6 +42,23 @@ jobs:
         run: npm run typecheck
       - name: typecheck (web)
         run: npx tsc --noEmit -p web
+  server-typecheck:
+    # G20.13 (#484): the production Deno entrypoints are type-checked in the
+    # environment their code runs in. Operator authorization for this exact
+    # job is recorded in issue #493 (closed 2026-10-02). The version owner is
+    # the committed supabase/functions/.deno-version — the action reads it
+    # directly and tools/ci/deno-typecheck.mjs verifies the runtime against
+    # the same file, so CI and the check script cannot drift apart.
+    # setup-deno is pinned to its verified upstream commit (V6 full-SHA
+    # policy); the pre-existing checkout/setup-node tags are G20.27's scope.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version-file: supabase/functions/.deno-version
+      - name: typecheck (production Deno entrypoints)
+        run: npm run server:typecheck
   web-build:
     runs-on: ubuntu-latest
     steps:
