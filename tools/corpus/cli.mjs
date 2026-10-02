@@ -1,21 +1,30 @@
-// G19.01 — corpus CLI: local contract validation (issue #458).
-// Two commands from the plan's G19.01 row:
+// G19.01/G19.02 — corpus CLI: local contract validation and package import.
+// Commands from the plan's G19.01/G19.02 rows:
 //   validate-input --manifest PATH
 //   validate-run   --config PATH
-// Each reads the one JSON document named on the command line and answers
-// with stable diagnostics; no filesystem object beyond that document is
-// touched and no model call is made — referenced files are checked at
-// unpack (G19.02), the model boundary is G19.04. Exit codes follow the
-// collector CLI: 0 valid, 1 contract diagnostics, 2 usage/file error.
+//   unpack --manifest PATH --input-root PATH --library-root PATH
+//          [--extractor-version V]        (default: wiki-html/v1)
+// validate-* read the one JSON document named on the command line and answer
+// with stable diagnostics; unpack additionally walks the manifest records
+// and imports each into the library root through importArticle — the only
+// filesystem objects touched are the manifest document and the roots passed
+// explicitly. No network call is made at any point (25 §3): the extraction
+// profile opens its browser context with JavaScript disabled and every
+// request aborted. Exit codes follow the collector CLI: 0 ok, 1 contract
+// diagnostics, 2 usage/file error.
 
+import { mkdirSync } from 'node:fs';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { validateInput, validateRunConfig } from './contracts.mjs';
+import { CorpusDiagnostic, createExtractionBrowserFactory } from './extract.mjs';
+import { importArticle } from './import.mjs';
 
 const usage = `usage: node tools/corpus/cli.mjs validate-input --manifest PATH
-       node tools/corpus/cli.mjs validate-run --config PATH`;
+       node tools/corpus/cli.mjs validate-run --config PATH
+       node tools/corpus/cli.mjs unpack --manifest PATH --input-root PATH --library-root PATH [--extractor-version V]`;
 
 function fail(message, code) {
   console.error(`corpus: ${message}`);
@@ -62,7 +71,60 @@ function countMedia(manifest) {
   return manifest.records.reduce((total, record) => total + (Array.isArray(record?.media) ? record.media.length : 0), 0);
 }
 
-function main(args) {
+// unpack: manifest-level contract first, then per-record import. One failed
+// record does not stop the others; the summary and the exit code reflect
+// every failure. Output carries record indexes and id prefixes only —
+// source keys, site addresses and local paths are private data (25 §9).
+async function unpackCommand(parsed) {
+  if (!parsed.manifest || !parsed['input-root'] || !parsed['library-root']) {
+    fail('unpack requires --manifest, --input-root and --library-root', 2);
+  }
+  const manifest = readJsonDocument('manifest', parsed.manifest);
+  const verdict = validateInput(manifest);
+  if (!verdict.ok) {
+    printDiagnostics('manifest', verdict.errors);
+    process.exit(1);
+  }
+  const inputRoot = path.resolve(parsed['input-root']);
+  const libraryRoot = path.resolve(parsed['library-root']);
+  mkdirSync(libraryRoot, { recursive: true });
+  const extractorVersion = parsed['extractor-version'] ?? 'wiki-html/v1';
+
+  const factory = await createExtractionBrowserFactory();
+  let failed = 0;
+  try {
+    for (const [index, record] of manifest.records.entries()) {
+      try {
+        const pkg = await importArticle(record, {
+          inputRoot,
+          libraryRoot,
+          sourceNamespace: manifest.source_namespace,
+          extractorVersion,
+          browserFactory: factory,
+        });
+        // An already-present package is not re-measured, so its line carries
+        // no media/missing counts — those would be stale, not recomputed.
+        const tail = pkg.alreadyPresent ? '' : `, ${pkg.media.length} media file(s), ${pkg.missing.length} missing original(s)`;
+        console.log(
+          `corpus: record[${index}] ${pkg.alreadyPresent ? 'already-present' : 'imported'} — article ${pkg.articleId.slice(0, 12)} revision ${pkg.revisionId.slice(0, 12)}${tail}`
+        );
+      } catch (error) {
+        failed += 1;
+        if (error instanceof CorpusDiagnostic) {
+          console.error(`corpus: record[${index}] ${error.rule} — ${error.message}`);
+        } else {
+          console.error(`corpus: record[${index}] unexpected error — ${error.message}`);
+        }
+      }
+    }
+  } finally {
+    await factory.close();
+  }
+  console.log(`corpus: unpack finished — ${manifest.records.length - failed} ok, ${failed} failed`);
+  if (failed > 0) process.exit(1);
+}
+
+async function main(args) {
   const [command, ...rest] = args;
 
   if (command === 'validate-input') {
@@ -91,10 +153,18 @@ function main(args) {
     return;
   }
 
+  if (command === 'unpack') {
+    await unpackCommand(parseArgs(rest));
+    return;
+  }
+
   console.error(usage);
   fail(`unknown command '${command ?? ''}'`, 2);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main(process.argv.slice(2));
+  main(process.argv.slice(2)).catch((error) => {
+    console.error(`corpus: ${error instanceof CorpusDiagnostic ? `${error.rule} — ${error.message}` : error.message}`);
+    process.exit(1);
+  });
 }
