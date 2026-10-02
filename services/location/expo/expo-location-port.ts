@@ -38,7 +38,7 @@ import type {
   PermissionState,
 } from '../types.ts';
 import { mapOsLocationToFix, type OsLocationObject } from './fix-mapping.ts';
-import { mapOsPermission } from './permission-mapping.ts';
+import { mapScopeAnswer, type OsPermissionResponse } from './permission-mapping.ts';
 import { locationExtrasFromConfig, type LocationExtras } from './location-config.ts';
 
 // The task name is this adapter's, not a canon constant; registered once per
@@ -74,14 +74,28 @@ export class ExpoLocationOsPort implements LocationOsPort {
   private backgroundIntent = false;
   private removeWatch: (() => void) | null = null;
   private regions: ReadonlyArray<GeofenceStop> = [];
+  // G20.07 (runtime.md R4) — the two OS scopes are tracked separately.
+  // `permissionState` is the foreground capability the port reports (every
+  // armed mode needs it); a background answer never writes it, except
+  // through the platform invariant a background grant implies the
+  // foreground one (permission-mapping.ts). A background denial must not
+  // revoke already-granted foreground work.
   private permissionState: PermissionState = 'undetermined';
+  private backgroundState: PermissionState = 'undetermined';
+  // G20.07 criterion 3 — the generation of the newest permission ask. A
+  // response of an older ask (a mode change, an explicit retry, the
+  // constructor's initial read) is a superseded decision and is dropped
+  // whole, the same discipline the fix stream runs under.
+  private permissionAsk = 0;
 
   constructor(extras: LocationExtras) {
     this.extras = extras;
     // The sync permission() answer starts honest: the OS state resolves
-    // asynchronously and arrives as a permission event like any other.
+    // asynchronously and arrives as a permission event like any other. The
+    // read answers the foreground scope; generation 0 means no ask has
+    // superseded it yet.
     void Location.getForegroundPermissionsAsync()
-      .then((response) => this.applyPermission(mapOsPermission(response)))
+      .then((response) => this.applyAnswer('foreground', response, 0))
       .catch((error: unknown) => console.warn(`location adapter: permission check failed: ${String(error)}`));
   }
 
@@ -95,17 +109,18 @@ export class ExpoLocationOsPort implements LocationOsPort {
     // the ask (09 §9; the G06.03 Start screen) — the OS dialogs take their
     // text from the manifest strings the expo-location plugin writes.
     void explanation;
+    const ask = ++this.permissionAsk;
     void (scope === 'background'
       ? Location.requestBackgroundPermissionsAsync()
       : Location.requestForegroundPermissionsAsync()
     )
-      .then((response) => this.applyPermission(mapOsPermission(response)))
+      .then((response) => this.applyAnswer(scope, response, ask))
       .catch((error: unknown) => console.warn(`location adapter: permission request failed: ${String(error)}`));
   }
 
   startFixes(sub: number): void {
     this.currentSub = sub;
-    if (this.backgroundIntent && this.permissionState === 'granted') {
+    if (this.backgroundIntent && this.backgroundState === 'granted') {
       defineUpdatesTaskOnce((location) => this.emitFix(location));
       Location.startLocationUpdatesAsync(LOCATION_UPDATES_TASK, {
         accuracy: OS_ACCURACY,
@@ -118,6 +133,9 @@ export class ExpoLocationOsPort implements LocationOsPort {
         void this.startForegroundWatch(sub);
       });
       return;
+    }
+    if (this.backgroundIntent) {
+      console.warn(`location adapter: the background scope is not granted — the session continues on the foreground watch`);
     }
     void this.startForegroundWatch(sub);
   }
@@ -148,9 +166,20 @@ export class ExpoLocationOsPort implements LocationOsPort {
     this.handler = handler;
   }
 
-  private applyPermission(state: PermissionState): void {
-    this.permissionState = state;
-    if (state !== 'undetermined') this.handler?.({ type: 'permission', state });
+  private applyAnswer(scope: LocationPermissionScope, response: OsPermissionResponse, ask: number): void {
+    // A response of an ask that is no longer the newest cannot overwrite a
+    // newer capability decision (G20.07 criterion 3) — dropped whole.
+    if (ask !== this.permissionAsk) return;
+    const scoped = mapScopeAnswer(scope, response, {
+      foreground: this.permissionState,
+      background: this.backgroundState,
+    });
+    this.backgroundState = scoped.background;
+    if (scoped.foreground === this.permissionState) return;
+    this.permissionState = scoped.foreground;
+    if (this.permissionState !== 'undetermined') {
+      this.handler?.({ type: 'permission', state: this.permissionState });
+    }
   }
 
   private async startForegroundWatch(sub: number): Promise<void> {
