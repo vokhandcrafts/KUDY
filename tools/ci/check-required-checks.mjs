@@ -9,7 +9,14 @@
 import fs from 'node:fs';
 
 const file = '.github/workflows/required-checks.yml';
-const text = fs.readFileSync(file, 'utf8');
+// Comment lines are stripped before the command checks: a left-over
+// `# run: npm test` must not keep a guard green after the step itself is
+// deleted (the delta review of G20.15 flagged the exposure).
+const text = fs
+  .readFileSync(file, 'utf8')
+  .split('\n')
+  .filter((line) => !line.trim().startsWith('#'))
+  .join('\n');
 
 const failures = [];
 if (/echo\s+"no product/.test(text)) {

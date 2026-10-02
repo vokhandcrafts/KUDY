@@ -67,7 +67,11 @@ test('arch-check wiring is guarded (package.json scripts, npm-test glob, config,
   assert.match(pkg.scripts['arch:check'], /tools\/arch\/arch-check\.mjs/, 'arch:check must invoke tools/arch/arch-check.mjs');
   assert.match(pkg.scripts['arch:check'], /\.dependency-cruiser\.cjs/, 'arch:check must pass the repo config');
   assert.match(pkg.scripts['arch:check'], /tools\/arch\/baseline\.json/, 'arch:check must pass the baseline');
-  assert.match(pkg.scripts['arch:check'], /core services contracts tools web app controllers/, 'arch:check must scan the zone list (controllers included since G06.09.b)');
+  assert.match(
+    pkg.scripts['arch:check'],
+    /core services contracts tools web app controllers components docs\/run-model/,
+    'arch:check must scan the full zone list (components and docs/run-model included since G18.01)',
+  );
   assert.match(pkg.scripts['arch:baseline'], /tools\/arch\/arch-baseline\.mjs/, 'arch:baseline must invoke tools/arch/arch-baseline.mjs');
   assert.match(pkg.scripts.test, /"?tools\/arch\/\*\.test\.mjs"?/, 'npm test glob must include tools/arch tests');
 
@@ -338,8 +342,19 @@ test('workflow_gate_invocation: the committed arch:check command rejects a plant
   );
   fs.writeFileSync(path.join(dir, 'services', 'adapter.mjs'), "export const use = (x) => x;\n");
 
-  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'tools', 'arch', 'baseline.json') });
-  assert.notEqual(status, 0, `the planted violation must fail the gate:\n${output}`);
+  // The parsed vector drives the spawn — the config and baseline VALUES and
+  // the zone LIST come from the committed script, so trimming either (the
+  // delta-review experiment: dropping the trailing zones) changes what is
+  // cruised here and cannot silently pass.
+  const configArg = scriptArgs[scriptArgs.indexOf('--config') + 1];
+  const baselineArg = scriptArgs[scriptArgs.indexOf('--baseline') + 1];
+  const run = spawnSync(
+    process.execPath,
+    [CHECK_SCRIPT, '--config', path.resolve(dir, configArg), '--baseline', path.resolve(dir, baselineArg), ...zones],
+    { cwd: dir, encoding: 'utf8' },
+  );
+  const output = `${run.stdout}\n${run.stderr}`;
+  assert.notEqual(run.status, 0, `the planted violation must fail the gate:\n${output}`);
   assert.match(output, /core-zone-closed/, 'the violated rule must be named');
   assert.match(output, /core\/pure\.mjs/, 'the violating source must be named');
 });
