@@ -21,7 +21,7 @@ import {
   setAnalyticsConsent,
   type EventsHttpTransport,
 } from './analytics.ts';
-import { DbError, openDatabase } from './db/db.ts';
+import { DbError, listPendingEvents, openDatabase } from './db/db.ts';
 import { nodeSqliteFileDriver } from './db/test-fixture.ts';
 import type { SqlDriver } from './db/types.ts';
 import { eventFactory, openFreshEventStore } from './eventLog-test-fixture.ts';
@@ -118,6 +118,74 @@ test('criterion 2: local recording never depends on consent — emit works after
   // A plain flush (no gate) still drains through an explicit sender — the
   // consent decision belongs to the send path, not to the queue's storage.
   assert.equal(await flushEvents(driver, () => Promise.resolve()), 2);
+});
+
+// G20.05 (issue #476) — the durable consent is re-read before every batch
+// (network-privacy N2). Audit A26-05 scenario: 257 queued events, the
+// withdrawal lands while the first batch (256) is in flight — the second
+// batch must not start, and the skipped batch must stay pending, unmarked.
+test('G20.05 revoke_between_batches: withdrawal between batches sends exactly one batch and leaves the tail pending', async () => {
+  const driver = openFreshEventStore();
+  setAnalyticsConsent(driver, 'granted');
+  const ids: string[] = [];
+  for (let i = 0; i < 257; i += 1) {
+    const one = event({ at: 1_700_000_000_000 + i });
+    ids.push(one.eventId);
+    emitEvent(driver, one);
+  }
+
+  let calls = 0;
+  const marked = await flushAnalytics(driver, (batch) => {
+    calls += 1;
+    assert.equal(batch.length, 256);
+    // the withdrawal lands while the first batch is in flight: the server
+    // already has these 256, the next batch must not start
+    setAnalyticsConsent(driver, 'revoked');
+    return Promise.resolve();
+  });
+
+  assert.equal(calls, 1, 'exactly one network batch — the second 256+1 batch is the regression');
+  assert.equal(marked, 256, 'the completed in-flight batch is acknowledged');
+  assert.deepEqual(
+    listPendingEvents(driver).map((row) => row.eventId),
+    [ids[256]!],
+    'a skipped batch cannot be marked delivered: the tail stays pending, unmarked',
+  );
+});
+
+test('G20.05 revoke_before_flush: no network request, and restoring consent resumes the queue without duplicates', async () => {
+  const driver = openFreshEventStore();
+  const one = event();
+  const two = event({ type: 'route_preview' });
+  emitEvent(driver, one);
+  emitEvent(driver, two);
+
+  // revoked before the flush: no request starts, nothing is marked
+  setAnalyticsConsent(driver, 'revoked');
+  let calls = 0;
+  assert.equal(await flushAnalytics(driver, () => {
+    calls += 1;
+    return Promise.resolve();
+  }), 0);
+  assert.equal(calls, 0);
+
+  // restoring consent resumes the same queued rows with their stable
+  // event_ids — the ids the server dedupes against — in queue order
+  setAnalyticsConsent(driver, 'granted');
+  const sent: string[][] = [];
+  assert.equal(await flushAnalytics(driver, (batch) => {
+    sent.push(batch.map((e) => e.event_id));
+    return Promise.resolve();
+  }), 2);
+  assert.deepEqual(sent, [[one.eventId, two.eventId]]);
+
+  // the resumed rows were marked exactly once: a second flush wakes nothing
+  let again = 0;
+  assert.equal(await flushAnalytics(driver, () => {
+    again += 1;
+    return Promise.resolve();
+  }), 0);
+  assert.equal(again, 0);
 });
 
 test('consent state: durable across a restart, corrupt value is a named diagnostic', () => {

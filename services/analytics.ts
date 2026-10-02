@@ -65,13 +65,20 @@ export function setAnalyticsConsent(driver: SqlDriver, consent: AnalyticsConsent
 // (no in-memory second copy): without a granted consent flushAnalytics
 // returns without reading pending rows, without constructing any network
 // work and without marking anything — zero calls of the sender, not an
-// empty batch (criterion 1: «ні пінгаў, ні batched»). The decision must
-// happen before flushEvents, not inside a wrapped sender: a resolving
-// wrapper would let flushEvents mark the batch sent and silently retire
-// never-sent events — exactly the queue loss criterion 2 forbids.
+// empty batch (criterion 1: «ні пінгаў, ні batched»).
+//
+// The durable state is also re-read before EVERY batch inside the flush
+// (network-privacy N2): a withdrawal that lands while an earlier batch is
+// in flight stops the next batch before it starts, and the unacknowledged
+// rows stay pending, unmarked. The recheck is eventLog's loop gate, not a
+// wrapped sender: a resolving wrapper would let flushEvents mark the batch
+// sent and silently retire never-sent events — exactly the queue loss
+// criterion 2 forbids.
 export async function flushAnalytics(driver: SqlDriver, send: EventSender): Promise<number> {
   if (getAnalyticsConsent(driver) !== 'granted') return 0;
-  return flushEvents(driver, send);
+  return flushEvents(driver, send, {
+    beforeBatch: () => getAnalyticsConsent(driver) === 'granted',
+  });
 }
 
 // The HTTP port — injectable so the transport is proven without a network
