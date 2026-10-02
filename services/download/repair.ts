@@ -16,8 +16,10 @@
 // same reason).
 import { upsertBundleAsset } from '../db/db.ts';
 import {
+  afterPackageSweeps,
   completeRow,
   layerPath,
+  onPackageLane,
   parseActivationInput,
   stageAndRename,
   stagingLayerPath,
@@ -31,15 +33,44 @@ import type { ActivateDeps, ActivateInput, RepairResult } from './types.ts';
  * first, and a verification failure stops the run with the remaining request
  * in `missing` — the caller re-checks presence and re-requests what is still
  * gone. A requested path outside the lock is rejected before any fetch
- * (criterion 4: the pinned version is never filled from elsewhere).
+ * (criterion 4: the pinned version is never filled from elsewhere). The
+ * filesystem work queues on the same package lane as activate() (G20.09): a
+ * repair shares the staging tree and the final layer with an in-flight
+ * activation of the same package.
  */
 export async function repairLayer(
   input: ActivateInput,
   deps: ActivateDeps,
   requested: readonly string[],
 ): Promise<RepairResult> {
-  const { key, entries, diagnostics, invalid } = parseActivationInput(input);
-  if (invalid) return { status: 'invalid-input', key, diagnostics };
+  const parsed = parseActivationInput(input);
+  if (parsed.invalid) return { status: 'invalid-input', key: parsed.key, diagnostics: parsed.diagnostics };
+
+  const declared = new Set(parsed.entries.map((entry) => entry.path));
+  const wanted = [...new Set(requested)];
+  const unknown = wanted.filter((path) => !declared.has(path));
+  if (wanted.length === 0 || unknown.length > 0) {
+    return {
+      status: 'invalid-input',
+      key: parsed.key,
+      // An empty request is a composition bug, not a silent no-op; a path
+      // outside the lock is never fetched.
+      diagnostics: [
+        ...parsed.diagnostics,
+        ...unknown.map((path) => `repair#not-in-lock:${path}`),
+        ...(wanted.length === 0 ? ['repair#empty-request'] : []),
+      ],
+    };
+  }
+  return onPackageLane(parsed.key, () => runRepair(parsed, deps, wanted));
+}
+
+async function runRepair(
+  parsed: ReturnType<typeof parseActivationInput>,
+  deps: ActivateDeps,
+  wanted: readonly string[],
+): Promise<RepairResult> {
+  const { key, entries } = parsed;
 
   // The shared deletion gate (G04.04.b criterion 4), read like activate()
   // reads it: a package marked deleted stops this repair at the next
@@ -50,22 +81,10 @@ export async function repairLayer(
   const cancelled = (): boolean =>
     gate !== null && repair !== null && !gate.isActive(key, repair);
 
-  const declared = new Set(entries.map((entry) => entry.path));
-  const wanted = [...new Set(requested)];
-  const unknown = wanted.filter((path) => !declared.has(path));
-  if (wanted.length === 0 || unknown.length > 0) {
-    return {
-      status: 'invalid-input',
-      key,
-      // An empty request is a composition bug, not a silent no-op; a path
-      // outside the lock is never fetched.
-      diagnostics: [
-        ...diagnostics,
-        ...unknown.map((path) => `repair#not-in-lock:${path}`),
-        ...(wanted.length === 0 ? ['repair#empty-request'] : []),
-      ],
-    };
-  }
+  // Same first boundary as activate(): a deletion sweep of this package
+  // still running is waited out; a deletion marked after the epoch was
+  // taken stops the repair at the check below (G20.09).
+  await afterPackageSweeps(key);
   if (cancelled()) return { status: 'cancelled', key, repaired: [] };
 
   const wantedPaths = new Set(wanted);

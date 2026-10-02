@@ -19,6 +19,7 @@ import type {
   DownloadStore,
   LayerKey,
   LockEntry,
+  PackageKey,
   RebuildDeps,
   RebuildResult,
   RecoveryResult,
@@ -57,6 +58,63 @@ export function stagingVersionPath(routeId: string, version: string): string {
 
 export function stagingLayerPath(key: LayerKey): string {
   return `bundles/${key.routeId}/${STAGING}/${key.version}/${key.locale}/${key.tier}`;
+}
+
+// The package identity both same-package coordinators key on: the deletion
+// gate's epoch map (delete.ts) and the activation lanes below. Route plus
+// version — a package stages and is deleted as one unit (`09` §7): its
+// layers share the staging version tree, so overlapping work of one version
+// races on the same paths no matter the locale or tier.
+export function packageIdentity(key: PackageKey): string {
+  return JSON.stringify([key.routeId, key.version]);
+}
+
+// G20.09 — per-package coordination lanes. Two overlapping activate() or
+// repairLayer() requests of one package run their bodies sequentially:
+// unserialized, the second rename tail moves the first's complete final
+// layer into the staging trash and emits ready for an incomplete layer, and
+// two fetches of one file race on the shared .part name. The deletion sweep
+// (delete.ts) runs on its own lane — it never waits for an in-flight
+// activation (G04.04.b: the deletion completes and the download stops named
+// at its next gate check) — and an activation waits out a pending sweep at
+// its first boundary (afterPackageSweeps): a fresh-epoch activation that
+// starts mid-sweep resumes from or writes into a tree being removed and its
+// tail hits a raw ENOENT. A deletion marked after the activation took its
+// epoch is covered by the gate itself — the stale epoch cancels at the first
+// check. Lanes are keyed per package: different packages never wait on each
+// other. A settled lane deletes itself; a rejected body does not poison the
+// next queued call.
+function keyedLane(): (identity: string, body: () => Promise<unknown>) => Promise<unknown> {
+  const lanes = new Map<string, Promise<unknown>>();
+  return (identity, body) => {
+    const previous = lanes.get(identity) ?? Promise.resolve();
+    const run = previous.then(body, body);
+    lanes.set(identity, run);
+    const settled = (): void => {
+      if (lanes.get(identity) === run) lanes.delete(identity);
+    };
+    run.then(settled, settled);
+    return run;
+  };
+}
+
+const activationLane = keyedLane();
+
+export function onPackageLane<T>(key: PackageKey, body: () => Promise<T>): Promise<T> {
+  return activationLane(packageIdentity(key), body) as Promise<T>;
+}
+
+const sweepLane = keyedLane();
+
+export function onSweepLane<T>(key: PackageKey, body: () => Promise<T>): Promise<T> {
+  return sweepLane(packageIdentity(key), body) as Promise<T>;
+}
+
+// Resolves once every deletion sweep of this package registered so far has
+// finished removing its files — the first boundary of every activation and
+// repair body.
+export function afterPackageSweeps(key: PackageKey): Promise<void> {
+  return onSweepLane(key, async () => {});
 }
 
 // The parsed lock.json — every entry through the shared shape guard. An empty
@@ -188,10 +246,21 @@ export async function stageAndRename(
  * Verify and activate one layer (19 §3.5 activate()). Idempotent: a repeated
  * request for a complete layer returns complete with zero fetches; every
  * failure category leaves the old layer untouched and partial never counts as
- * ready (ADR G01.03 §3.7).
+ * ready (ADR G01.03 §3.7). Overlapping requests of one package serialize on
+ * the package lane (G20.09) — the shared staging tree, .part names and the
+ * rename tail cannot interleave; different packages run independently.
  */
 export async function activate(input: ActivateInput, deps: ActivateDeps): Promise<ActivationResult> {
-  const { key, entries, diagnostics, invalid } = parseActivationInput(input);
+  const parsed = parseActivationInput(input);
+  if (parsed.invalid) return runActivation(parsed, deps);
+  return onPackageLane(parsed.key, () => runActivation(parsed, deps));
+}
+
+async function runActivation(
+  parsed: ReturnType<typeof parseActivationInput>,
+  deps: ActivateDeps,
+): Promise<ActivationResult> {
+  const { key, entries, diagnostics, invalid } = parsed;
   if (invalid) return { status: 'invalid-input', key, diagnostics };
 
   // The shared deletion gate (G04.04.b criterion 4): with a gate present the
@@ -205,6 +274,14 @@ export async function activate(input: ActivateInput, deps: ActivateDeps): Promis
   const activation = gate?.beginActivation(key) ?? null;
   const cancelled = (): boolean =>
     gate !== null && activation !== null && !gate.isActive(key, activation);
+
+  // A deletion sweep of this package may still be running (its mark made
+  // this activation fresh, so the gate alone cannot see it): wait it out
+  // before the first filesystem touch. A deletion marked after the epoch
+  // was taken is covered by the gate — the stale epoch stops the run at the
+  // next check (G20.09).
+  await afterPackageSweeps(key);
+  if (cancelled()) return { status: 'cancelled', key, fetched: 0 };
 
   const finalLayer = layerPath(key);
   const stagingLayer = stagingLayerPath(key);

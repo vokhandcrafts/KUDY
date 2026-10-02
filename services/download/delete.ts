@@ -11,22 +11,24 @@
 // must not delete a pinned version — the guard lives here, not in the UI).
 import { deletePackageAssets, listUnfinishedSessions } from '../db/db.ts';
 import { isSafeSegment } from '../safe-path.ts';
-import { packagePath, stagingVersionPath } from './download.ts';
+import { onSweepLane, packageIdentity, packagePath, stagingVersionPath } from './download.ts';
 import type { DeletionGate, DeleteDeps, DeleteResult, PackageKey } from './types.ts';
 
-// The gate factory (types.ts): an epoch counter per package identity.
+// The gate factory (types.ts): an epoch counter per package identity. The
+// identity itself is canonical in download.ts (packageIdentity) — the same
+// identity the activation lanes (G20.09) key on, so the gate and the lanes
+// cannot disagree about what "one package" is.
 // beginActivation hands the current epoch to a starting activation;
 // markCancelled (deletePackage, before any removal) bumps it, which turns
 // every in-flight activation of that package inactive at its next check.
 export function createDeletionGate(): DeletionGate {
   const epochs = new Map<string, number>();
-  const identityOf = (key: PackageKey) => JSON.stringify([key.routeId, key.version]);
-  const epochOf = (key: PackageKey): number => epochs.get(identityOf(key)) ?? 0;
+  const epochOf = (key: PackageKey): number => epochs.get(packageIdentity(key)) ?? 0;
   return {
     beginActivation: (key) => epochOf(key),
     isActive: (key, activation) => epochOf(key) === activation,
     markCancelled: (key) => {
-      const identity = identityOf(key);
+      const identity = packageIdentity(key);
       epochs.set(identity, (epochs.get(identity) ?? 0) + 1);
     },
   };
@@ -79,11 +81,20 @@ export async function deletePackage(input: PackageKey, deps: DeleteDeps): Promis
   }
 
   deps.gate.markCancelled(input);
-  await deps.store.remove(stagingVersionPath(input.routeId, input.version));
-  await deps.store.remove(packagePath(input.routeId, input.version));
-  return {
-    status: 'deleted',
-    key: input,
-    removedAssetRows: deletePackageAssets(deps.driver, input.routeId, input.version),
-  };
+  // The removals run on the package sweep lane — never behind an in-flight
+  // activation (G04.04.b criterion 4: the deletion completes while the
+  // download stops named at its next gate check), and no fresh-epoch
+  // activation can start writing into the package mid-sweep: every
+  // activation body waits out the pending sweep first (G20.09). The mark
+  // and the lane entry are in the same synchronous turn, so a sweep is
+  // always registered before an activation could take the new epoch.
+  return onSweepLane(input, async () => {
+    await deps.store.remove(stagingVersionPath(input.routeId, input.version));
+    await deps.store.remove(packagePath(input.routeId, input.version));
+    return {
+      status: 'deleted' as const,
+      key: input,
+      removedAssetRows: deletePackageAssets(deps.driver, input.routeId, input.version),
+    };
+  });
 }
