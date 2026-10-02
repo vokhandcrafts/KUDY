@@ -105,10 +105,10 @@ if (!/run:\s*npm run arch:check\s*$/m.test(text)) {
 if (!/runs-on:\s*windows-latest/.test(text)) {
   failures.push('required-checks.yml has no windows-latest job — the portable subset is not covered on Windows');
 }
-if (!/node --test --experimental-strip-types test\/design-tokens\.test\.mjs/.test(text)) {
+if (!/run:\s*node --test --experimental-strip-types test\/design-tokens\.test\.mjs/.test(text)) {
   failures.push('required-checks.yml does not run the portable design-tokens suite on Windows');
 }
-if (!/supabase\/functions\/_shared\/fixtures-hygiene\.test\.ts/.test(text)) {
+if (!/run:\s*node --test --experimental-strip-types.*fixtures-hygiene\.test\.ts/.test(text)) {
   failures.push('required-checks.yml does not run the fixture-hygiene guard on Windows');
 }
 
