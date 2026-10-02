@@ -17,6 +17,11 @@ export const tokens = {
   // існуючых колераў (канон §2), не новыя брэнд-колеры.
   colorShelfAccent: '#154f3a', // color.shelf.accent — полка вылепленай primary-кнопкі
   colorShelfLine: '#c9c1b1', // color.shelf.line — полка вылепленай звычайнай кнопкі
+  // Issue #430 (рашэнне ўладара 2026-10-03) — чытэльны выключаны стан: значэнне
+  // супадае з color.muted, але ролі і пары ў каноне свае (тэкст ≥4.5:1, межа
+  // ≥3:1 на паперы, §5).
+  colorDisabledInk: '#6b7280', // color.disabled-ink — тэкст выключанай кнопкі
+  colorDisabledLine: '#6b7280', // color.disabled-line — межа выключанай кнопкі
   colorBadgePaid: '#fdf1d7', // color.badge.paid
   colorBadgeFree: '#e7f2ec', // color.badge.free
   colorBadgeMixed: '#ece7f8', // color.badge.mixed

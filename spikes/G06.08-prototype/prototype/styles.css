@@ -38,6 +38,7 @@
 body { margin: 0; font: 16px/1.45 system-ui, sans-serif; background: var(--kudy-paper); color: var(--kudy-ink); }
 button { font: inherit; padding: 6px 12px; border-radius: var(--radius); border: 1px solid var(--kudy-line); background: var(--kudy-card); cursor: pointer; }
 button.primary { background: var(--kudy-accent); color: var(--kudy-accent-ink); border-color: var(--kudy-accent); }
+/* Гістарычны чарнавік 2026-09 (спайк G06.08): перасільваецца канонам §5 пасля issue #430 — выключаная кнопка = ghost-пара color.disabled-ink/line, не opacity. */
 button:disabled { opacity: .5; cursor: not-allowed; }
 button:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--kudy-accent); outline-offset: 1px; }
 header#topbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--kudy-line); background: var(--kudy-card); position: sticky; top: 0; }

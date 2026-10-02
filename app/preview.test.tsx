@@ -660,7 +660,8 @@ describe("guide preview font layer (G06.10.b)", () => {
 // screen carries the accent shelf of the canon tokens (through the token
 // mirror — a hardcoded literal in the surfaces fails these assertions),
 // the secondary actions take the line shade, and the disabled contract
-// (canon §5: opacity 0.5, no dip, the reason next to the button) holds.
+// (canon §5 after the owner's variant А, issue #430: the ghost pair, no
+// shelf, no dip, the reason next to the button) holds.
 describe("guide preview clay buttons (G06.10.d)", () => {
   test("the primary action renders the accent shelf from the token mirror; the text pair is unchanged", async () => {
     serve(CATALOG_FIXTURES);
@@ -679,7 +680,11 @@ describe("guide preview clay buttons (G06.10.d)", () => {
     expect(flatStyle(label).color).toBe(tokens.colorAccentInk);
   });
 
-  test("the disabled primary keeps opacity 0.5, never dips, and the reason stays next to the button", async () => {
+  // Issue #430 (owner's variant А): the disabled primary reads — the canon
+  // ghost pair through the mirror, no opacity substitute anywhere in the
+  // layers, no shelf. Reverting to the dimmed accent copy fails the border,
+  // the fill and the label-color queries (implementation-rules 1).
+  test("the disabled primary renders the ghost pair, no shelf, never dips, and the reason stays next to the button", async () => {
     serve(CATALOG_FIXTURES);
     renderRouter(
       withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
@@ -687,9 +692,18 @@ describe("guide preview clay buttons (G06.10.d)", () => {
     );
     const button = await screen.findByTestId("btn-start");
     const resting = flatStyle(button);
-    expect(resting.opacity).toBe(0.5);
+    // No opacity layer — the dimmed copy of the enabled button is gone.
+    expect(resting.opacity).toBeUndefined();
+    // The ghost: transparent fill on the paper, the canon disabled border.
+    expect(resting.backgroundColor).toBe("transparent");
+    expect(resting.borderWidth).toBe(1);
+    expect(resting.borderColor).toBe(tokens.colorDisabledLine);
+    // The shelf drops with the pressable look: no clay base while disabled.
+    expect(resting.borderBottomWidth).toBeUndefined();
     expect(resting.transform).toBeUndefined();
-    expect(resting.borderBottomWidth).toBe(4);
+    // The label leaves the white-on-accent pair for the disabled ink.
+    const label = within(button).getByText("Пачаць");
+    expect(flatStyle(label).color).toBe(tokens.colorDisabledInk);
     // A disabled press fires no dip: the style holds its resting shape.
     fireEvent.press(button);
     expect(flatStyle(screen.getByTestId("btn-start")).transform).toBeUndefined();

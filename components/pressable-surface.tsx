@@ -11,8 +11,10 @@
 // (visual-language §2) through the token mirror, and on press it dips
 // into the shelf — translate plus a reduced shelf, the bottom edge holds.
 // The dim and the ripple stay on top of the dip; a disabled pressable
-// never dips — the disabled contract (canon §5, opacity 0.5 + the reason
-// nearby) is untouched.
+// never dips, and the disabled primary reads through the canon ghost pair
+// (canon §5 after the owner's variant А, issue #430:
+// color.disabled-ink/line, transparent fill, no shelf) — the old
+// opacity 0.5 contract is gone.
 import { forwardRef, type ComponentRef } from "react";
 import {
   Pressable,
