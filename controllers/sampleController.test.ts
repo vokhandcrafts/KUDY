@@ -44,22 +44,43 @@ test('criterion 2: without the port the root constructs no contentRepo (the app 
   // G07.02; the display locale joined as the tenth member with G06.05; the
   // commerce factory as the eleventh with G08.05; the discovery controller
   // as the twelfth with G15.03; the one hint controller as the thirteenth
-  // with G07.05).
-  assert.deepEqual(services, {
-    locale: 'be',
-    contentRepo: undefined,
-    catalog: undefined,
-    preview: undefined,
-    run: undefined,
-    walk: undefined,
-    history: undefined,
-    nearby: undefined,
-    hints: undefined,
-    place: undefined,
-    moment: undefined,
-    commerce: undefined,
-    discovery: undefined,
-  });
+  // with G07.05; the ui-locale switch as the fourteenth with G14.04.d —
+  // chrome state over an optional persistence seam, constructed without
+  // ports, with the display locale reading through it).
+  assert.deepEqual(Object.keys(services).sort(), [
+    'catalog',
+    'commerce',
+    'contentRepo',
+    'discovery',
+    'hints',
+    'history',
+    'locale',
+    'moment',
+    'nearby',
+    'place',
+    'preview',
+    'run',
+    'uiLocale',
+    'walk',
+  ]);
+  for (const member of [
+    'contentRepo',
+    'catalog',
+    'preview',
+    'run',
+    'walk',
+    'history',
+    'nearby',
+    'hints',
+    'place',
+    'moment',
+    'commerce',
+    'discovery',
+  ] as const) {
+    assert.equal(services[member], undefined, `${member} constructed without its port`);
+  }
+  assert.equal(services.locale, 'be');
+  assert.equal(services.uiLocale.current(), 'be');
 });
 
 test('criterion 2: a failing port surfaces as a readiness card, not a crash', async () => {

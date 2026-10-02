@@ -33,7 +33,7 @@ import {
 } from "../../components/modal-dialog";
 import { ScaledText } from "../../components/scaled-text";
 import { WalkProgress } from "../../components/walk-progress";
-import { useServices } from "../_layout";
+import { useServices, useUiLocale } from "../_layout";
 
 const OSM_ATTRIBUTION_URL = "https://www.openstreetmap.org/copyright";
 
@@ -343,6 +343,9 @@ export default function Run() {
   const { id, confirmedSwitch } = useLocalSearchParams<{ id: string; confirmedSwitch?: string }>();
   const router = useRouter();
   const services = useServices();
+  // G14.04.d (issue #305): the words read the switchable display locale —
+  // a switch re-renders them in place, no restart.
+  const locale = useUiLocale();
   const routeId = typeof id === "string" ? id : "";
   // The §4.1 handover's confirmed flag (G06.04): «Завяршыць і пачаць» on the
   // preview started this route's surface through the switch-guide
@@ -789,7 +792,7 @@ export default function Run() {
           (AC5). */}
       <GuideHintMount
         binding={services.hints}
-        locale={ready?.locale ?? services.locale}
+        locale={ready?.locale ?? locale}
         onOpen={(routeId) => router.push(`/route/${routeId}`)}
       />
       {endConfirm ? (

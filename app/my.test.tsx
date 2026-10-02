@@ -122,3 +122,49 @@ describe("KUDY paper grain (G06.10.e)", () => {
     expect(screen.getByTestId("scroll-my")).toBeTruthy();
   });
 });
+
+// G14.04.d (issue #305, AC3): the language row — the UI-locale switch the
+// surface offers (uk-release-scope §4). Pressing uk re-renders the chrome
+// words in place: the same mounted surface keeps its history read count (a
+// restart would re-run the boot read), the section header changes from the
+// be line to the uk one, and the chosen option rides the selected a11y
+// state. The walk's own locale stays out of the switch's reach — the store
+// holds no session reference (uiLocaleStore.test.ts).
+describe("KUDY language row (G14.04.d)", () => {
+  test("picking uk re-renders the words in place, no restart", async () => {
+    let reads = 0;
+    const services = createServices({
+      sessionHistory: { list: async () => { reads += 1; return []; } },
+    });
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByText("Бягучая прагулка")).toBeTruthy();
+    const readsAtStart = reads;
+    fireEvent.press(screen.getByTestId("btn-ui-locale-uk"));
+    expect(await screen.findByText("Поточна прогулянка")).toBeTruthy();
+    expect(screen.queryByText("Бягучая прагулка")).toBeNull();
+    // No restart: the switch fired no second boot of the surface's reads.
+    expect(reads).toBe(readsAtStart);
+    // The composition root reads through the switch — the same services
+    // object, the locale member is the switched value.
+    expect(services.uiLocale.current()).toBe("uk");
+    expect(services.locale).toBe("uk");
+    expect(screen.getByTestId("btn-ui-locale-uk").props.accessibilityState).toEqual({ selected: true });
+  });
+
+  test("the row offers the three self-named locales and marks the current one", async () => {
+    renderRouter({ _layout: layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
+    expect(screen.getByText("Беларуская")).toBeTruthy();
+    expect(screen.getByText("English")).toBeTruthy();
+    expect(screen.getByText("Українська")).toBeTruthy();
+    expect(screen.getByTestId("btn-ui-locale-be").props.accessibilityState).toEqual({ selected: true });
+    expect(screen.getByTestId("btn-ui-locale-en").props.accessibilityState).toEqual({ selected: false });
+    // Switching to en re-renders the chrome in English (AC3: no restart) —
+    // the honest-unavailable line renders with no history port behind the
+    // surface, so it is the always-present chrome word.
+    expect(screen.getByText("Гісторыя недаступная.")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("btn-ui-locale-en"));
+    expect(await screen.findByText("History unavailable.")).toBeTruthy();
+    expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
+  });
+});

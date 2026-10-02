@@ -40,7 +40,7 @@ import { screenStyles } from "../../components/screen-styles";
 import { uiStrings } from "../../components/ui-strings";
 import { UpgradeOffer } from "../../components/upgrade-offer";
 import { WalkButton } from "../../components/walk-button";
-import { useServices } from "../_layout";
+import { useServices, useUiLocale } from "../_layout";
 
 const styles = StyleSheet.create({
   // G06.10.b: the interface text renders the UI family (canon §3, Golos
@@ -180,6 +180,9 @@ export default function RoutePreview() {
   const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
   const router = useRouter();
   const services = useServices();
+  // G14.04.d (issue #305): the words read the switchable display locale —
+  // a switch re-renders them in place, no restart.
+  const locale = useUiLocale();
   const routeId = typeof id === "string" && id.length > 0 ? id : "";
   const controller = usePreviewController(routeId ? services.preview : undefined, routeId);
   // G08.05 (issue #292): the commerce controller per opened route (the
@@ -190,7 +193,7 @@ export default function RoutePreview() {
     [services.commerce, routeId],
   );
   const commerce = useStoreState(commerceStore);
-  const ostrings = offerStrings(services.locale);
+  const ostrings = offerStrings(locale);
   useEffect(() => {
     // NAV9: the opening records its source surface; an unrecognized value
     // records nothing (no unvalidated echo, 21 §3.2).
@@ -203,8 +206,8 @@ export default function RoutePreview() {
   const insets = useSafeAreaInsets();
   // G06.05 (issue #280, AC1): the surface and the button's words in the
   // display locale (the button's codes live in the controller).
-  const strings = uiStrings(services.locale);
-  const pstrings = previewStrings(services.locale);
+  const strings = uiStrings(locale);
+  const pstrings = previewStrings(locale);
   // G08.05: the load fact the offer derivation consumes — the access kind
   // and the route document's product_id_route. Called per surface change;
   // the derivation is idempotent.
@@ -255,7 +258,7 @@ export default function RoutePreview() {
       {/* UX 01 (issue #347): the surface scrolls — every stop and the main
           button stay reachable beyond the fold; the §4.1 overlay stays above. */}
       <ScrollView testID="scroll-preview">
-        <WalkButton walk={services.walk} locale={services.locale} />
+        <WalkButton walk={services.walk} locale={locale} />
         {state.surface.kind === "loading" ? <LoadingIndicator text={strings.loading} /> : null}
         {state.surface.kind === "unavailable" ? (
           <View testID="preview-unavailable">
@@ -273,13 +276,13 @@ export default function RoutePreview() {
             {state.surface.preview.summary ? (
               <ScaledText style={styles.summary}>{state.surface.preview.summary}</ScaledText>
             ) : null}
-            <AccessBadge access={state.surface.preview.access} locale={services.locale} />
+            <AccessBadge access={state.surface.preview.access} locale={locale} />
             <LocalesLine
               textLocales={state.surface.preview.textLocales}
               audioLocales={state.surface.preview.audioLocales}
               localesKnown={state.surface.preview.localesKnown}
               testID="preview-locales"
-              locale={services.locale}
+              locale={locale}
             />
             {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin) ? (
               // G06.10.c (issue #403): the first icon application — the

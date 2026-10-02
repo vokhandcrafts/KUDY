@@ -1,0 +1,26 @@
+{
+  "version": "gdansk-v1",
+  "topics": [
+    { "topic_id": "topic.trade", "title": "Гандаль і рамёствы" },
+    { "topic_id": "topic.hanseatic", "title": "Ханза і марскі гандаль" },
+    { "topic_id": "topic.buildings", "title": "Будаўніцтва і архітэктура" },
+    { "topic_id": "topic.families", "title": "Сем'і і роды" },
+    { "topic_id": "topic.biographies", "title": "Біяграфіі" },
+    { "topic_id": "topic.events", "title": "Падзеі і канфлікты" },
+    { "topic_id": "topic.religion", "title": "Рэлігія і кляштары" },
+    { "topic_id": "topic.daily-life", "title": "Побыт і штодзённасць" }
+  ],
+  "proposed_topics": [],
+  "epochs": [
+    { "epoch_id": "epoch.medieval", "title": "Сярэднявечча", "year_from": 997, "year_to": 1454 },
+    { "epoch_id": "epoch.early-modern", "title": "Ранні Новы час", "year_from": 1454, "year_to": 1793 },
+    { "epoch_id": "epoch.prussian", "title": "Прускі перыяд", "year_from": 1793, "year_to": 1918 },
+    { "epoch_id": "epoch.interwar", "title": "Міжваенны перыяд", "year_from": 1918, "year_to": 1939 }
+  ],
+  "districts": [
+    { "district_id": "district.main-town", "title": "Główne Miasto" },
+    { "district_id": "district.old-town", "title": "Stare Miasto" },
+    { "district_id": "district.wrzeszcz", "title": "Wrzeszcz" },
+    { "district_id": "district.oliwa", "title": "Oliwa" }
+  ]
+}

@@ -23,12 +23,13 @@ npx jest --config jest.config.js -t "G06.05" --verbose 2>&1 | sed -E 's/ \([0-9.
     ✓ AC4: the failed catalog load gets its named retry — one press re-runs the refresh
     ✓ AC4: the restored walk announces itself and names the lost tier
     ✓ AC5: a failed story play is announced — the suspended banner names the manual path
+    ✓ all three locales carry the same keys
     ✓ an unknown locale falls back to Belarusian, the first preference
-    ✓ both locales carry the same keys
-    ✓ no word is empty in either locale
+    ✓ no word is empty in any locale
     ✓ the actions are buttons announcing their labels
     ✓ the canon big-text factor caps the OS font scaling
     ✓ the dialog never animates — the reduced-motion contract stays pinned
+    ✓ the history reason line reads as a phrase (be+en+uk)
   ✓ G06.05: the unavailable history offers the named retry and recovers
 PASS app/my.test.tsx
 PASS app/preview.test.tsx
@@ -51,5 +52,5 @@ npx jest --config jest.config.js app/run.test.tsx -t "denied GPS" --verbose 2>&1
 ```output
     ○ skipped G06.03 AC1: Back and the card's ✕ dismiss the panel identically
     ✓ AC4: a denied GPS renders the contract banner; manual play still launches the audio
-Tests:       21 skipped, 1 passed, 22 total
+Tests:       26 skipped, 1 passed, 27 total
 ```
