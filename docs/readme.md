@@ -1,5 +1,7 @@
 # KUDY — план прадукту (MVP, Гданьск)
 
+**Выпраўленні паводле аўдытаў 2026-10-02:** [тры спецыфікацыі](specifications/architecture-hardening/README.md) і [задачы G20](agent-tasks/architecture-hardening/README.md). Архітэктура захоўваецца; рэалізацыя не запушчаная.
+
 **Новыя патрабаванні 2026-09-13:** [20 — падборкі, водгукі і мовы](20_discovery_and_feedback.md) · [21 — тэхнічны кантракт](architecture/21_discovery_feedback_architecture.md) · план (history: docs/plans/2026-09-13-discovery-feedback.md @ 76ffa5a58728c263ab5bc9db2717623b7aa58f24) · [новыя задачы](agent-tasks/discovery/README.md).
 
 **Вэб-трэк 2026-09-16:** план вэб-аўдыёверсіі (history: docs/plans/2026-09-16-web-audio-version.md @ f9f6aa3d1956a73110d7e8a839a45d8bd19ea909) · [заданні вэб-каналу G10](agent-tasks/web/README.md).
