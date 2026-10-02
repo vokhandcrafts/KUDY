@@ -11,6 +11,8 @@ import test from 'node:test';
 import { getDeviceId, openDatabase, setDeviceId } from './db/db.ts';
 import { nodeSqliteDriver } from './db/test-fixture.ts';
 import { DeviceError, ensureDeviceIdentity, type SecureSecretStore } from './device.ts';
+import { stubGlobalFetch } from './fetch-stub-test-fixture.ts';
+import { openFreshEventStore } from './eventLog-test-fixture.ts';
 
 interface Registration {
   device_id: string;
@@ -196,3 +198,102 @@ test('network failure surfaces as network_failed and stores nothing', async () =
 function setDeviceIdForTest(driver: Parameters<typeof getDeviceId>[0], deviceId: string): void {
   setDeviceId(driver, deviceId);
 }
+
+// G20.06 — network-privacy N3: the production default transport validates
+// the endpoint before the network and refuses redirects. These suites stub
+// the platform fetch (services/fetch-stub-test-fixture — the network
+// boundary, not the code under test) and drive the real defaultTransport —
+// reverting the validation, the redirect option or the redirected-response
+// guard makes them fail (implementation-rules 1/15).
+
+test('G20.06 N3: http, malformed and credential URLs are rejected before any network call', async () => {
+  const stub = stubGlobalFetch(async () => {
+    throw new Error('the network must not be reached for an unvalidated endpoint');
+  });
+  try {
+    for (const baseUrl of ['http://example.invalid/functions/v1', 'not a url at all', 'https://user:pass@example.invalid/functions/v1']) {
+      const store = memorySecretStore();
+      const driver = openFreshEventStore();
+      await assert.rejects(
+        ensureDeviceIdentity({ driver, secretStore: store, baseUrl }),
+        (error: unknown) => error instanceof DeviceError && error.rule === 'unsafe_endpoint',
+        baseUrl,
+      );
+      assert.equal(store.saved(), null, 'no secret may be requested or stored for an unsafe endpoint');
+      assert.equal(getDeviceId(driver), null);
+    }
+    assert.equal(stub.requests.length, 0, 'unsafe endpoints must make zero network calls');
+  } finally {
+    stub.restore();
+  }
+});
+
+test('G20.06 N3: a valid configured https endpoint registers through the default transport with redirect refused', async () => {
+  const stub = stubGlobalFetch(async () =>
+    new Response(JSON.stringify(REGISTRATION), { status: 201, headers: { 'content-type': 'application/json' } }));
+  try {
+    const store = memorySecretStore();
+    const identity = await ensureDeviceIdentity({
+      driver: openFreshEventStore(),
+      secretStore: store,
+      baseUrl: 'https://example.functions.supabase.co/functions/v1',
+    });
+    assert.equal(identity.deviceSecret, REGISTRATION.device_secret);
+    assert.equal(stub.requests.length, 1);
+    assert.equal(
+      (stub.requests[0].init as RequestInit | undefined)?.redirect,
+      'error',
+      'the secret-bearing request must run with redirect: error',
+    );
+    assert.equal(store.saved(), REGISTRATION.device_secret);
+  } finally {
+    stub.restore();
+  }
+});
+
+test('G20.06 N3: when the platform refuses the redirect, registration fails closed with network_failed', async () => {
+  const stub = stubGlobalFetch(async () => {
+    throw new TypeError('the redirect was refused by redirect: error');
+  });
+  try {
+    const store = memorySecretStore();
+    await assert.rejects(
+      ensureDeviceIdentity({
+        driver: openFreshEventStore(),
+        secretStore: store,
+        baseUrl: 'https://example.functions.supabase.co/functions/v1',
+      }),
+      (error: unknown) => error instanceof DeviceError && error.rule === 'network_failed',
+    );
+    assert.equal((stub.requests[0].init as RequestInit | undefined)?.redirect, 'error');
+    assert.equal(store.saved(), null);
+  } finally {
+    stub.restore();
+  }
+});
+
+test('G20.06 N3: a response redirected away from the endpoint is not accepted', async () => {
+  // A worst-case platform that followed the redirect despite the option:
+  // the final response claims the registration body but from a foreign URL.
+  const redirected = {
+    status: 201,
+    url: 'https://attacker.example/functions/v1/device',
+    text: async () => JSON.stringify(REGISTRATION),
+  } as unknown as Response;
+  const stub = stubGlobalFetch(async () => redirected);
+  try {
+    const store = memorySecretStore();
+    await assert.rejects(
+      ensureDeviceIdentity({
+        driver: openFreshEventStore(),
+        secretStore: store,
+        baseUrl: 'https://example.functions.supabase.co/functions/v1',
+      }),
+      (error: unknown) => error instanceof DeviceError && error.rule === 'unsafe_endpoint' && /redirect/.test(error.message),
+    );
+    assert.equal(stub.requests.length, 1, 'our code must not start a second authorized request after the redirect');
+    assert.equal(store.saved(), null, 'a secret delivered by a redirected response must never be stored');
+  } finally {
+    stub.restore();
+  }
+});
