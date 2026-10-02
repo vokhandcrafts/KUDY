@@ -366,6 +366,8 @@ test('surface styles consume the canon title token — no hardcoded title size (
 
 test('guard is wired into npm test (implementation-rules 1 and 7)', () => {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  assert.match(pkg.scripts.test, /test\/design-tokens\.test\.mjs/,
-    'npm test must run test/design-tokens.test.mjs');
+  // G20.28: the zone glob replaced the manual path list; file-level ownership
+  // of this suite is named by tools/ci/test-discovery.test.mjs.
+  assert.match(pkg.scripts.test, /"test\/\*\.test\.mjs"/,
+    'npm test must run the test/ zone that owns design-tokens.test.mjs');
 });

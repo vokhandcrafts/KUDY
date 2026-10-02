@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-02 — Engine mutation gate: дадай `engine-regressions` у required statuses (задача #501)
+Што зрабіць: у GitHub UI (Settings → Branches → protection галіны main) дадай новы статус `engine-regressions` да required checks поруч з `server-typecheck` — бачнасць branch protection з сесіі не праверыць (токен без адпаведных scope), а без гэтага новы job застаецца неабавязковым. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #501.
+PR: https://github.com/vokhandcrafts/KUDY/pull/529 (issue: https://github.com/vokhandcrafts/KUDY/issues/501; эпік: https://github.com/vokhandcrafts/KUDY/issues/470)
+
 ### 2026-10-02 — Deno type-check: дадай `server-typecheck` у required statuses (задача #484)
 Што зрабіць: у GitHub UI (Settings → Branches → protection галіны main) дадай новы статус `server-typecheck` да required checks — з сесіі бачнасць branch protection не праверыць (токен без адпаведных scope), а без гэтага новы job застаецца неабавязковым. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #484.
 PR: https://github.com/vokhandcrafts/KUDY/pull/519 (issue: https://github.com/vokhandcrafts/KUDY/issues/484; эпік: https://github.com/vokhandcrafts/KUDY/issues/470)
