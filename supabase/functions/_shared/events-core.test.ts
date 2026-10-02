@@ -36,6 +36,7 @@ import {
   type EventsPort,
 } from './events-core.ts';
 import { freshMigratedDatabase } from './test-db.ts';
+import { ISO_AT, wireEvent } from './wire-test-support.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const TABLE = JSON.parse(
@@ -43,21 +44,9 @@ const TABLE = JSON.parse(
 ) as EventTableSpec;
 
 const NOW_MS = 1_759_276_800_000; // fixed clock; the rate window derives from it
-const ISO_AT = '2026-10-01T00:00:00.000Z';
 
 function config(overrides: Partial<EventsConfig> = {}): EventsConfig {
   return { ...defaultEventsConfig(NOW_MS), ...overrides };
-}
-
-function wireEvent(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  return {
-    event_id: '55555555-5555-4555-8555-000000000001',
-    type: 'app_open',
-    at: ISO_AT,
-    schema_version: 1,
-    payload: {},
-    ...overrides,
-  };
 }
 
 // The fake port: auth through the real G08.01 hash, an in-memory rate
@@ -338,6 +327,23 @@ test('limits: the per-device rate window answers 429 with a retry-after', async 
   assert.equal(third.code, 'event_rate_limited');
   assert.ok(third.retryAfterSeconds >= 1, 'the answer carries a retry-after');
   assert.equal(port.inserted.length, 2, 'the over-limit batch is never stored');
+});
+
+test('spec N1: a rate reply without a valid counter rejects — never a silent allow (criterion 2)', async () => {
+  const { port, authorization } = registeredPort();
+  // The SQL port answers a missing counter row as undefined; the shared
+  // decision must reject it instead of counting it as 0.
+  port.incrementEventRate = async () => undefined as unknown as number;
+  await assert.rejects(
+    handleEventsRequest(
+      { method: 'POST', authorization, rawBody: raw({ events: [wireEvent()] }) },
+      port,
+      TABLE,
+      config(),
+    ),
+    /did not return a valid attempt count/,
+  );
+  assert.equal(port.inserted.length, 0, 'an invalid counter reply stores nothing');
 });
 
 test('validation walk: the table-driven validator agrees with the enforcement block it reads', () => {

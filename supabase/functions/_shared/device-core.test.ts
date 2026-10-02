@@ -82,21 +82,21 @@ test('memory lookup keeps the constant-time compare idiom working over many entr
   });
 });
 
-test('rate limit: attempts up to the limit pass, the next one is denied with Retry-After', () => {
+test('rate limit: attempts up to the limit pass, the next one is denied with Retry-After', async () => {
   const now = 1_700_000_000_000;
   let attempts = 0;
   const storage = { increment: () => ++attempts };
   for (let i = 0; i < DEVICE_RATE_LIMIT; i++) {
-    const decision = checkRateLimit(storage, hashIp('203.0.113.7'), now);
+    const decision = await checkRateLimit(storage, hashIp('203.0.113.7'), now);
     assert.equal(decision.allowed, true, `attempt ${i + 1}`);
   }
-  const denied = checkRateLimit(storage, hashIp('203.0.113.7'), now);
+  const denied = await checkRateLimit(storage, hashIp('203.0.113.7'), now);
   assert.equal(denied.allowed, false);
   assert.equal(denied.attempts, DEVICE_RATE_LIMIT + 1);
   assert.ok(denied.retryAfterSeconds >= 1 && denied.retryAfterSeconds <= DEVICE_RATE_WINDOW_MS / 1000);
 });
 
-test('rate limit: a new window resets the counter; other IPs are independent', () => {
+test('rate limit: a new window resets the counter; other IPs are independent', async () => {
   const withinFirstWindow = DEVICE_RATE_WINDOW_MS - 1;
   const nextWindow = DEVICE_RATE_WINDOW_MS + 10;
   // Window-aware fake mirroring the SQL counter's (ip_hash, window_start) key.
@@ -111,11 +111,40 @@ test('rate limit: a new window resets the counter; other IPs are independent', (
   };
   const ip = hashIp('198.51.100.4');
   for (let i = 0; i < DEVICE_RATE_LIMIT; i++) {
-    checkRateLimit(storage, ip, withinFirstWindow);
+    await checkRateLimit(storage, ip, withinFirstWindow);
   }
-  assert.equal(checkRateLimit(storage, ip, withinFirstWindow).allowed, false);
-  assert.equal(checkRateLimit(storage, ip, nextWindow).allowed, true);
-  assert.equal(checkRateLimit(storage, hashIp('192.0.2.9'), withinFirstWindow).allowed, true);
+  assert.equal((await checkRateLimit(storage, ip, withinFirstWindow)).allowed, false);
+  assert.equal((await checkRateLimit(storage, ip, nextWindow)).allowed, true);
+  assert.equal((await checkRateLimit(storage, hashIp('192.0.2.9'), withinFirstWindow)).allowed, true);
+});
+
+test('rate limit: the counter may be a promise — the decision awaits the SQL result (spec N1)', async () => {
+  const now = 1_700_000_000_000;
+  let attempts = 0;
+  const storage = { increment: async () => ++attempts };
+  const first = await checkRateLimit(storage, hashIp('203.0.113.7'), now);
+  assert.equal(first.allowed, true);
+  assert.equal(first.attempts, 1);
+  assert.ok(first.retryAfterSeconds >= 1 && first.retryAfterSeconds <= DEVICE_RATE_WINDOW_MS / 1000);
+});
+
+test('rate limit: an invalid counter reply throws — never a silent allow or a limit denial (spec N1)', async () => {
+  const now = 1_700_000_000_000;
+  const ipHash = hashIp('203.0.113.7');
+  for (const attempts of [undefined, null, '3', -1, Number.NaN, 1.5]) {
+    await assert.rejects(
+      checkRateLimit({ increment: async () => attempts as number }, ipHash, now),
+      /did not return a valid attempt count/,
+      `attempts ${String(attempts)} must be rejected`,
+    );
+  }
+  await assert.rejects(
+    checkRateLimit({ increment: async () => {
+      throw new Error('pq: connection refused');
+    } }, ipHash, now),
+    /connection refused/,
+    'a storage fault propagates to the wiring instead of becoming a decision',
+  );
 });
 
 test('rateWindowStart floors to the window boundary', () => {
