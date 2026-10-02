@@ -112,7 +112,10 @@ node --test --experimental-strip-types services/analytics.test.ts supabase/funct
 ```
 
 ```output
-ℹ tests 45
-ℹ pass 45
+ℹ tests 47
+ℹ pass 47
 ℹ fail 0
 ```
+
+Лік 45 → 47: 2026-10-02, G20.05 (#476) дадаў у сюіт тэсты рэчэку згоды
+паміж батчамі — перазахоп у PR issue #476 (правіла 11).
