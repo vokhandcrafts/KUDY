@@ -3,8 +3,9 @@
 // never invoked player.play — physicalPlayCalls=0). The only mock is the
 // `expo-audio` module, replaced with node:test module mocks before the
 // adapter import; the npm test node invocation passes
-// --experimental-test-module-mocks (only this file uses mock.module).
-// Reverting the adapter's created.play() fails
+// --experimental-test-module-mocks (this file and the G20.07 location
+// adapter test use mock.module). Reverting the adapter's created.play()
+// fails
 // physical_play_called, and removing the stale-owner guard fails the
 // late-tick assertions of replaced_player_released (implementation-rules 1).
 // Physical sound on a device stays a separate acceptance proof — no mock
