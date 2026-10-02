@@ -8,7 +8,7 @@
 дыягностыкам. Створана 2026-10-02.*
 
 Паводзінавыя рэгрэсійныя тэсты дзвюх wire-сюітаў — асінхронны SQL-фейк,
-няма сінхроннага счётчыка-фейка:
+няма сінхроннага лічыльніка-фейка:
 
 ```sh
 node --test --experimental-strip-types supabase/functions/_shared/device-wire.test.ts supabase/functions/_shared/events-wire.test.ts 2>&1 | grep -E "^ℹ (tests|pass|fail)"
