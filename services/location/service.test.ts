@@ -568,3 +568,22 @@ test('G20.04: the onFix release removes only its own registration', () => {
   assert.deepEqual(second, [FIRST_FIX]); // the replacement was never detached
   h.assertClean();
 });
+
+// The release token is per registration, not per handler function: two
+// registrations of the SAME handler are two registrations — the first one's
+// release must not clear the slot the second one owns (reverting the slot
+// token to a bare function comparison turns this test red).
+test('G20.04: a release of the same handler registered twice does not kill the later registration', () => {
+  const h = makeService();
+  h.arm();
+  const fixes: FixInput[] = [];
+  const handler = (fix: FixInput): void => {
+    fixes.push(fix);
+  };
+  const releaseFirst = h.service.onFix(handler);
+  h.service.onFix(handler); // the later registration owns the slot now
+  releaseFirst(); // the FIRST registration's release
+  h.port.emitFix(h.currentSub(), FIRST_FIX);
+  assert.deepEqual(fixes, [FIRST_FIX]); // the surviving registration still delivers
+  h.assertClean();
+});

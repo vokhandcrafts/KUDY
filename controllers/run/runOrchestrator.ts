@@ -166,7 +166,8 @@ export class RunOrchestrator {
 
   // The subscription transfer of R3: only an accepted (start) or restored
   // (recover) session takes the sink, the audio events and the access
-  // channel. Idempotent — a re-Start after End re-registers nothing.
+  // channel. A second attach while the subscriptions are live adds nothing —
+  // the duplicate-registration guard below; a re-Start after end() re-attaches.
   private attachResourceSubscriptions(): void {
     if (this.releases.length > 0) return;
     const releases: Array<() => void> = [
