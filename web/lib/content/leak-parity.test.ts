@@ -3,16 +3,18 @@
 // case's reject payload, mapped onto the tree the web build consumes, with
 // exactly the case's class, and accept the clean twin — the same tree with
 // that one defect removed. The packager side runs the same array against
-// buildBundle (tools/build-bundle/leak-parity.test.mjs).
+// the packager process (tools/build-bundle/leak-parity.test.mjs). G20.18:
+// the packager runs through its supported process entry (runBuildBundle),
+// not a cross-zone import.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildBundle } from '../../../tools/build-bundle/build-bundle.mjs';
 import { LEAK_FIXTURE_LAYOUT, LEAK_SCANNER_CASES } from '../../../contracts/fixtures/leak-scanner-cases.ts';
 import type { LeakFixturePayload } from '../../../contracts/fixtures/leak-scanner-cases.ts';
+import { runBuildBundle } from './test-fixture.ts';
 import { scanWebContentInput, type ScanResult } from './leak-guard.ts';
 
 const REPO_ROOT = fileURLToPath(new URL('../../..', import.meta.url));
@@ -22,7 +24,7 @@ const LAYOUT = LEAK_FIXTURE_LAYOUT;
 // actually consumes, so each payload poisons its own build output.
 async function cleanBuild(): Promise<{ publicDir: string; privateDir: string }> {
   const buildRoot = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-leak-parity-web-')), 'build');
-  await buildBundle({ inDir: path.join(REPO_ROOT, LAYOUT.authorTree), outDir: buildRoot });
+  runBuildBundle({ inDir: path.join(REPO_ROOT, LAYOUT.authorTree), outDir: buildRoot });
   return { publicDir: path.join(buildRoot, 'public'), privateDir: path.join(buildRoot, 'private') };
 }
 

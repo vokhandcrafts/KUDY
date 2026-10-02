@@ -21,6 +21,7 @@
 // walks, canonical JSON with sorted keys, no timestamps in any artifact.
 
 import { createHash } from 'node:crypto';
+import { isIdentifier } from '../../contracts/identifier.mjs';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
@@ -99,8 +100,6 @@ async function writeFileRel(outAbs, rel, buf) {
   await fsp.mkdir(path.dirname(abs), { recursive: true });
   await fsp.writeFile(abs, buf);
 }
-
-export const isIdentifier = (value) => typeof value === 'string' && /^[a-z0-9._-]{1,64}$/.test(value);
 
 const isPathSafe = (value, forbidEmptySegments = false) =>
   value.split('/').every((segment) =>

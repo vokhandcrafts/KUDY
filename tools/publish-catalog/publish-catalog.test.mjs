@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 import { buildBundle, canonicalJson, sha256Hex } from '../build-bundle/build-bundle.mjs';
 import { PublishError, publishCatalog, rollbackCatalog } from './publish-catalog.mjs';
-import { deriveInterimCatalog } from '../../web/lib/content/interim-catalog.ts';
+import { deriveInterimCatalog } from '../../contracts/interim-catalog.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const fixtureDir = path.join(repoRoot, 'fixtures', 'content', 'demo-route');
