@@ -38,7 +38,6 @@ function makeServices(clock: ManualClock): {
   return { locationPort, audioPort, location, audio };
 }
 
-
 const RADIUS = 20;
 const STOPS: RunStop[] = [
   { stopId: 'a', lat: 0, lng: 0, radius: RADIUS, storyBaseId: 'a' },
