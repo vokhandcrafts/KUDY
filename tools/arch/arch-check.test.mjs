@@ -343,9 +343,10 @@ test('workflow_gate_invocation: the committed arch:check command rejects a plant
   fs.writeFileSync(path.join(dir, 'services', 'adapter.mjs'), "export const use = (x) => x;\n");
 
   // The parsed vector drives the spawn — the config and baseline VALUES and
-  // the zone LIST come from the committed script, so trimming either (the
-  // delta-review experiment: dropping the trailing zones) changes what is
-  // cruised here and cannot silently pass.
+  // the zone LIST come from the committed script: a config/baseline drift
+  // fails right here, and middle-zone trimming fails here too (the missing
+  // zone directory breaks the cruise); trailing-zone trimming is caught by
+  // the wiring test's full zone-list pin above.
   const configArg = scriptArgs[scriptArgs.indexOf('--config') + 1];
   const baselineArg = scriptArgs[scriptArgs.indexOf('--baseline') + 1];
   const run = spawnSync(
