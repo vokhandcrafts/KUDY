@@ -97,6 +97,21 @@ if (!/run:\s*npm run arch:check\s*$/m.test(text)) {
   failures.push('required-checks.yml does not run `npm run arch:check` — the real repository graph is not gated');
 }
 
+// G20.17 revert guard — the portable path-boundary guards must run on Windows
+// (A26-08, issue #488): losing the windows-latest job would drop the main
+// development host from CI again. The portable subset is exactly the two
+// dependency-free suites; the symlink-privilege security cases stay mandatory
+// on the Linux tests job and are guarded by npm test there.
+if (!/runs-on:\s*windows-latest/.test(text)) {
+  failures.push('required-checks.yml has no windows-latest job — the portable subset is not covered on Windows');
+}
+if (!/run:\s*node --test --experimental-strip-types test\/design-tokens\.test\.mjs/.test(text)) {
+  failures.push('required-checks.yml does not run the portable design-tokens suite on Windows');
+}
+if (!/run:\s*node --test --experimental-strip-types.*fixtures-hygiene\.test\.ts/.test(text)) {
+  failures.push('required-checks.yml does not run the fixture-hygiene guard on Windows');
+}
+
 // Issue #241 revert guard — the jscpd gate must stay self-contained. The
 // reusable workflow in vokhandcrafts/ai-company-infrastructure cannot be
 // called from this repository: both repos are private and user-owned, and
@@ -134,4 +149,4 @@ if (failures.length > 0) {
   for (const failure of failures) console.error(`- ${failure}`);
   process.exit(1);
 }
-console.log('guard-required-checks: OK — required-checks runs npm ci + npm test + web build + server:typecheck + arch:check');
+console.log('guard-required-checks: OK — required-checks runs npm ci + npm test + web build + server:typecheck + arch:check + windows portable subset');

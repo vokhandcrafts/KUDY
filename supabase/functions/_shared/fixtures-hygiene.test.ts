@@ -37,7 +37,13 @@ test('guard: fixture surface enumerates the expected trees', () => {
 });
 
 test('guard: no JWT-shaped token is committed in the fixture surface', () => {
-  const selfPath = path.relative(repoRoot, fileURLToPath(import.meta.url));
+  // git ls-files prints forward slashes on every platform, path.relative
+  // follows the host separator (A26-08) — normalize at the comparison
+  // boundary (tools/validate/tools-check.mjs idiom).
+  const selfPath = path
+    .relative(repoRoot, fileURLToPath(import.meta.url))
+    .split(path.sep)
+    .join('/');
   for (const rel of committedFiles) {
     // A guard cannot flag its own source: its message names the marker itself.
     if (rel === selfPath) continue;
