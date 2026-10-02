@@ -1,0 +1,10 @@
+{
+  // G20.13 (#484): the type-check environment for the production Deno
+  // entrypoints under supabase/functions/. Policy owners:
+  //   - Deno runtime version: .deno-version (verified by tools/ci/deno-typecheck.mjs)
+  //   - dependency graph: deno.lock (checked with --locked; update via `deno install` here)
+  // Nothing is excluded from the check; no compiler option loosens the
+  // default strict mode.
+  "nodeModulesDir": "auto",
+  "lock": true
+}

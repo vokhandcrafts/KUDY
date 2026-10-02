@@ -30,7 +30,9 @@ export interface EventTableFieldSpec {
   type?: string;
   pattern?: string;
   enum?: readonly string[];
-  const?: number;
+  // A `const` constraint sits on string fields (identifiers, versions) and on
+  // integer fields alike — the JSON Schema value it must equal.
+  const?: string | number;
   minimum?: number;
   minItems?: number;
   items?: EventTableFieldSpec;
@@ -143,7 +145,8 @@ export interface EventsPort {
 
 /** The minimal SQL surface the production port needs (PGlite matches it; the Deno wiring adapts postgres.js). */
 export interface EventSqlRunner {
-  query(sql: string, params?: unknown[]): Promise<{ rows: Array<Record<string, unknown>> }>;
+  /** The pinned statements take primitive parameters only (built in place). */
+  query(sql: string, params?: ReadonlyArray<string | number | boolean | null>): Promise<{ rows: Array<Record<string, unknown>> }>;
 }
 
 /** Production port over Postgres — the pinned statements, nothing else. */
@@ -163,7 +166,7 @@ export function createSqlEventsPort(db: EventSqlRunner): EventsPort {
     },
     async insertEventBatch(deviceId, rows) {
       if (rows.length === 0) return 0;
-      const params: unknown[] = [];
+      const params: string[] = [];
       for (const row of rows) {
         params.push(row.eventId, deviceId, row.type, row.at, JSON.stringify(row.payload));
       }
