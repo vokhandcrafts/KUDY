@@ -156,6 +156,30 @@ if (!/GITLEAKS_SHA256\s*=\s*['"][0-9a-f]{64}['"]/.test(gitleaksFetcher)) {
   failures.push('tools/ci/fetch-gitleaks.mjs has no pinned 64-hex archive sha256 digest');
 }
 
+// G20.28 revert guard (#501, spec §V7) — the default command discovers tests
+// through zone globs expanded by tools/ci/test-discovery.test.mjs, and that
+// discovery guard must stay wired itself. The globs are pinned in this
+// independent check (run by its own workflow, outside npm test) so deleting
+// the tools/ci zone — or the guard's own file — turns this check red instead
+// of disabling the check together with what it verified
+// (implementation-rules 1; the #105 self-check residual closed for this zone).
+for (const glob of ['"test/*.test.mjs"', '"contracts/**/*.test.mjs"', '"spikes/**/*.test.mjs"', '"tools/ci/*.test.mjs"']) {
+  if (!pkg.scripts?.test?.includes(glob)) {
+    failures.push(`npm test glob is gone: ${glob}`);
+  }
+}
+
+// G20.28 revert guard — engine:regressions must run in the required workflow
+// (spec §V7; authorized by issue #493 zone 7): losing the script or the
+// workflow step would drop the mutation gate from CI silently. The failure
+// text carries the planned missing_engine_workflow_step guard name.
+if (!pkg.scripts?.['engine:regressions']) {
+  failures.push('package.json has no engine:regressions script');
+}
+if (!/run:\s*npm run engine:regressions\s*$/m.test(text)) {
+  failures.push('missing_engine_workflow_step: required-checks.yml does not run `npm run engine:regressions`');
+}
+
 // Issue #241 revert guard — the jscpd gate must stay self-contained. The
 // reusable workflow in vokhandcrafts/ai-company-infrastructure cannot be
 // called from this repository: both repos are private and user-owned, and
