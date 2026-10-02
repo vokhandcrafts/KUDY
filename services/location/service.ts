@@ -119,9 +119,14 @@ export class LocationService {
   }
 
   // The single controller sink (19 §3.3 onFix). A second call replaces it,
-  // like the audio service's onEvent.
-  onFix(handler: (fix: FixInput) => void): void {
+  // like the audio service's onEvent. Returns the registration's release:
+  // it clears the slot only while this registration still owns it — a
+  // released owner never detaches the one that replaced it (R3, G20.04).
+  onFix(handler: (fix: FixInput) => void): () => void {
     this.fixSink = handler;
+    return () => {
+      if (this.fixSink === handler) this.fixSink = null;
+    };
   }
 
   // G07.05 (09 §20) — the read-only raw-fix tap for non-command consumers:

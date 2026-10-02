@@ -20,6 +20,25 @@ import { FakeAudioPlayerPort } from '../../services/audio/fake-port.ts';
 import { createAccessPort, emitAccessReady, type DownloadAccessPort } from '../../services/download/access.ts';
 
 const utf8 = (text: string) => new TextEncoder().encode(text);
+// The shared service construction of both worlds: one ManualClock-driven
+// LocationService and AudioService over their fake OS ports.
+function makeServices(clock: ManualClock): {
+  locationPort: FakeLocationOsPort;
+  audioPort: FakeAudioPlayerPort;
+  location: LocationService;
+  audio: AudioService;
+} {
+  const locationPort = new FakeLocationOsPort();
+  const location = new LocationService({
+    port: locationPort,
+    clock,
+    permissions: { foreground: 'fg', background: 'bg' },
+  });
+  const audioPort = new FakeAudioPlayerPort();
+  const audio = new AudioService({ createPort: () => audioPort });
+  return { locationPort, audioPort, location, audio };
+}
+
 
 const RADIUS = 20;
 const STOPS: RunStop[] = [
@@ -56,14 +75,7 @@ interface Harness {
 
 function harness(options: { access?: DownloadAccessPort } = {}): Harness {
   const clock = new ManualClock();
-  const locationPort = new FakeLocationOsPort();
-  const location = new LocationService({
-    port: locationPort,
-    clock,
-    permissions: { foreground: 'fg', background: 'bg' },
-  });
-  const audioPort = new FakeAudioPlayerPort();
-  const audio = new AudioService({ createPort: () => audioPort });
+  const { locationPort, audioPort, location, audio } = makeServices(clock);
   const orchestrator = new RunOrchestrator({
     location,
     audio,
@@ -78,11 +90,13 @@ function harness(options: { access?: DownloadAccessPort } = {}): Harness {
   return { clock, locationPort, audioPort, orchestrator };
 }
 
-const live = (h: Harness): RunSessionState => {
-  const state = h.orchestrator.state;
+const liveOf = (orchestrator: RunOrchestrator): RunSessionState => {
+  const state = orchestrator.state;
   if (state.phase === 'Idle') throw new Error('no live session');
   return state;
 };
+
+const live = (h: Harness): RunSessionState => liveOf(h.orchestrator);
 
 // Narrowed reads over the session: the queue cell's stop and the audible
 // guide launch's stop (a moment launch reads as none — no guide stop_id).
@@ -93,14 +107,14 @@ const playingStopId = (s: RunSessionState): string | null =>
 // The subscription the service currently holds: every arm mints the next
 // generation, so a scenario that re-Starts the session must deliver on the
 // fresh one (a fix of a stopped subscription is dropped by the service).
-const currentSub = (h: Harness): number => {
+const currentSub = (h: Pick<Harness, 'locationPort'>): number => {
   const starts = h.locationPort.commands.filter((command) => command.startsWith('start '));
   const last = starts[starts.length - 1];
   if (last === undefined) throw new Error('the location service never armed');
   return Number(last.slice('start '.length));
 };
 
-const deliver = (h: Harness, lat: number, lng: number): void => {
+const deliver = (h: Pick<Harness, 'clock' | 'locationPort'>, lat: number, lng: number): void => {
   const raw: FixInput = { lat, lng, accuracy: 5, at: h.clock.now() };
   h.locationPort.emitFix(currentSub(h), raw);
 };
@@ -457,4 +471,143 @@ test('G08.04 criterion 5: another version (a new release) never mixes into the o
   assert.deepEqual(after.tierAvailable, tierBefore);
   assert.deepEqual(after.heard, heardBefore);
   assert.equal(h.locationPort.regionPushes, windowBefore); // no window rebuild either
+});
+
+// --- G20.04 (issue #475) — subscription ownership (runtime.md R3) ------------
+//
+// The shared world: ONE location service, audio service and access port —
+// the shape of one app process where every opened run surface constructs its
+// own orchestrator. A candidate that is never accepted must hold no
+// registration; an accepted one releases on end/retire/dispose; a released
+// owner never detaches the walk that took the resources after it.
+
+interface SharedWorld {
+  clock: ManualClock;
+  locationPort: FakeLocationOsPort;
+  audioPort: FakeAudioPlayerPort;
+  access: DownloadAccessPort;
+  make(): RunOrchestrator;
+}
+
+function sharedWorld(): SharedWorld {
+  const clock = new ManualClock();
+  const { locationPort, audioPort, location, audio } = makeServices(clock);
+  const access = createAccessPort();
+  return {
+    clock,
+    locationPort,
+    audioPort,
+    access,
+    make: () =>
+      new RunOrchestrator({
+        location,
+        audio,
+        clock,
+        engineConfig: defaultEngineConfig,
+        pipelineConfig: { dwellMs: 0 },
+        route: { routeId: 'route-1', version: 'v1', locale: 'be', tier: ['base'] },
+        stops: STOPS,
+        access,
+      }),
+  };
+}
+
+test('G20.04 refused_second_run_keeps_fixes: a constructed candidate takes no sink from the live walk', () => {
+  const world = sharedWorld();
+  const first = world.make();
+  first.start('walk-1');
+  deliver(world, 0, 0); // the live walk accepts its first position
+  assert.equal(liveOf(first).lastFix?.at, 0);
+
+  // The second surface's controller is constructed while the first walk is
+  // live (the refusal decides later): the constructor registers nothing, so
+  // the next fix still reaches the first walk.
+  const candidate = world.make();
+  world.clock.set(30_000);
+  deliver(world, 0, 0);
+  assert.equal(liveOf(first).lastFix?.at, 30_000);
+  assert.equal(candidate.state.phase, 'Idle'); // and the candidate holds no session
+});
+
+test('G20.04 dispose_releases_listeners: a disposed orchestrator holds no sink, audio events or access channel', async () => {
+  const world = sharedWorld();
+  const orchestrator = world.make();
+  orchestrator.start('walk-1');
+  deliver(world, 0, 0); // stop a plays (key 1)
+  assert.equal(playingStopId(liveOf(orchestrator)), 'a');
+  assert.deepEqual([...liveOf(orchestrator).heard], []); // credited only on the finish
+
+  orchestrator.dispose();
+  orchestrator.dispose(); // idempotent
+
+  world.clock.set(30_000);
+  deliver(world, 0, 0); // would refresh last_fix if the sink survived
+  assert.equal(liveOf(orchestrator).lastFix?.at, 0);
+  world.audioPort.finish(1); // the launch's physical finish arrives after disposal
+  assert.deepEqual([...liveOf(orchestrator).heard], []); // a disposed owner is never credited
+  await emitAccessReady(
+    world.access,
+    { routeId: 'route-1', version: 'v1', locale: 'be', tier: 'extended' },
+    async () => utf8(JSON.stringify(ACCESS_ROUTE_DOC)),
+  );
+  assert.deepEqual(liveOf(orchestrator).tierAvailable, ['base']); // and no unlock reaches it
+});
+
+test('G20.04 stale_owner_cleanup: a released old owner never detaches the walk that replaced it', async () => {
+  const world = sharedWorld();
+  const first = world.make();
+  first.start('walk-1');
+  world.clock.set(1_000);
+  deliver(world, 0, 0); // first plays a (key 1)
+  const second = world.make();
+  second.start('walk-2'); // the switch: second owns the sink now
+  world.clock.set(2_000);
+  deliver(world, 0, 0); // second plays a (key 2)
+  assert.equal(liveOf(second).lastFix?.at, 2_000);
+  assert.equal(liveOf(first).lastFix?.at, 1_000); // one sink: the newest owner
+
+  first.dispose(); // the old owner's cleanup
+  world.clock.set(3_000);
+  deliver(world, 0, 0); // the new owner still receives — the cleanup never detached it
+  assert.equal(liveOf(second).lastFix?.at, 3_000);
+
+  world.audioPort.finish(2);
+  assert.deepEqual([...liveOf(second).heard], ['a']);
+  await emitAccessReady(
+    world.access,
+    { routeId: 'route-1', version: 'v1', locale: 'be', tier: 'extended' },
+    async () => utf8(JSON.stringify(ACCESS_ROUTE_DOC)),
+  );
+  assert.deepEqual(liveOf(second).tierAvailable, ['base', 'extended']);
+  assert.deepEqual(liveOf(first).tierAvailable, ['base']); // the released owner got nothing
+});
+
+test('G20.04: repeated open/dispose cycles leave no listener on the shared services', async () => {
+  const world = sharedWorld();
+  const cycles: RunOrchestrator[] = [];
+  for (let n = 1; n <= 3; n++) {
+    const orchestrator = world.make();
+    orchestrator.start(`walk-${String(n)}`);
+    world.clock.set(n * 1_000);
+    deliver(world, 0, 0); // the cycle's own position, while it owns the sink
+    cycles.push(orchestrator);
+    orchestrator.dispose();
+  }
+
+  // Nothing is registered anymore: a late fix, a late finish and an unlock
+  // reach nobody — every cycle keeps exactly its own delivery.
+  world.clock.set(10_000);
+  deliver(world, 0, 0);
+  world.audioPort.finish(3);
+  await emitAccessReady(
+    world.access,
+    { routeId: 'route-1', version: 'v1', locale: 'be', tier: 'extended' },
+    async () => utf8(JSON.stringify(ACCESS_ROUTE_DOC)),
+  );
+  cycles.forEach((orchestrator, index) => {
+    const session = liveOf(orchestrator);
+    assert.equal(session.lastFix?.at, (index + 1) * 1_000);
+    assert.deepEqual([...session.heard], []);
+    assert.deepEqual(session.tierAvailable, ['base']);
+  });
 });

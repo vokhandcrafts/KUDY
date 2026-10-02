@@ -41,6 +41,13 @@
 //    durable delta and only then publishes (ADR §3.1/§3.3; R2, G20.03): a
 //    failing hook rejects the whole transition, so no effect ever fires for a
 //    state the durable row does not hold.
+// 8. G20.04 (issue #475, runtime.md R3): the constructor registers nothing.
+//    The resource subscriptions — the location sink, the audio events and the
+//    access channel — attach only when a session is accepted (start()) or
+//    restored (restore()), and release on end(), retire() and dispose(). A
+//    candidate controller that is never accepted holds no service
+//    registration, so a refused second walk cannot steal the live walk's
+//    GPS or audio; repeated open/close cycles leave no listener behind.
 import { acceptFix } from '../../core/pipeline/pipeline.ts';
 import {
   initialPipelineState,
@@ -113,6 +120,7 @@ export interface RunOrchestratorDeps {
 export class RunOrchestrator {
   private readonly location: LocationService;
   private readonly audio: AudioService;
+  private readonly access: DownloadAccessPort | undefined;
   private readonly clock: RunClock;
   private readonly engineConfig: EngineConfig;
   private readonly pipelineConfig: PipelineConfig;
@@ -131,6 +139,9 @@ export class RunOrchestrator {
   private engineState: RunState = initialRunState;
   private pipelineState: PipelineState = initialPipelineState;
   private ownMomentSeq = 0;
+  // G20.04 (header note 8): the live resource registrations. Empty while no
+  // session is accepted or restored — a candidate holds no listener.
+  private releases: ReadonlyArray<() => void> = [];
   // G07.03 — the one-shot carry of playMoment's resolved teaser path to the
   // effect that fires inside the same synchronous dispatch (the engine's
   // command carries no path — content resolution is not the engine's read).
@@ -139,6 +150,7 @@ export class RunOrchestrator {
   constructor(deps: RunOrchestratorDeps) {
     this.location = deps.location;
     this.audio = deps.audio;
+    this.access = deps.access;
     this.clock = deps.clock;
     this.engineConfig = deps.engineConfig;
     this.pipelineConfig = deps.pipelineConfig;
@@ -150,9 +162,37 @@ export class RunOrchestrator {
     this.candidates = new Map(
       deps.stops.map((stop) => [stop.stopId, { lat: stop.lat, lng: stop.lng, radius: stop.radius }]),
     );
-    deps.location.onFix((fix) => this.onFix(fix));
-    deps.audio.onEvent((event) => this.onAudioEvent(event));
-    deps.access?.onAccessReady((event) => this.dispatch(event));
+  }
+
+  // The subscription transfer of R3: only an accepted (start) or restored
+  // (recover) session takes the sink, the audio events and the access
+  // channel. Idempotent — a re-Start after End re-registers nothing.
+  private attachResourceSubscriptions(): void {
+    if (this.releases.length > 0) return;
+    const releases: Array<() => void> = [
+      this.location.onFix((fix) => this.onFix(fix)),
+      this.audio.onEvent((event) => this.onAudioEvent(event)),
+    ];
+    if (this.access !== undefined) {
+      releases.push(this.access.onAccessReady((event) => this.dispatch(event)));
+    }
+    this.releases = releases;
+  }
+
+  // The explicit cleanup of R3 (refusal, end, switch, disposal): every
+  // release removes only this orchestrator's own registration, so a released
+  // owner never detaches the walk that took the resources after it.
+  private detachResourceSubscriptions(): void {
+    for (const release of this.releases) release();
+    this.releases = [];
+  }
+
+  // R3's total lifecycle: releases every service registration this
+  // orchestrator still holds, idempotently and without touching any shared
+  // resource — the mode, the window and the physical player belong to
+  // end()/retire(), not to the listener cleanup.
+  dispose(): void {
+    this.detachResourceSubscriptions();
   }
 
   // Read-only engine view for the UI layer (G05.05) and the scenario tests:
@@ -174,6 +214,9 @@ export class RunOrchestrator {
   // a paid walk re-entered after both layers were activated starts with both;
   // without it the route's default selection applies.
   start(sessionId: string, accessibleStopIds?: ReadonlyArray<string>, verifiedTiers?: Tier[]): void {
+    // The acceptance takes the resources (R3, header note 8) — the store's
+    // commit already happened in the caller.
+    this.attachResourceSubscriptions();
     let playingNow: { momentId: string; storyId: string; seq: number } | undefined;
     if (this.engineState.phase === 'Ended') {
       const ended = this.engineState;
@@ -248,6 +291,9 @@ export class RunOrchestrator {
     if (this.engineState.phase !== 'Active' && this.engineState.phase !== 'Paused') return false;
     this.dispatch({ type: 'End' });
     this.location.setMode('idle'); // 19 §4.3: End releases the GPS subscription
+    // R3: End releases the listeners too — a finished walk holds no sink, no
+    // audio events and no access channel (a re-Start re-attaches, note 8).
+    this.detachResourceSubscriptions();
     return true;
   }
 
@@ -275,6 +321,9 @@ export class RunOrchestrator {
     };
     this.location.setMode('idle');
     this.location.setGeofenceWindow([]);
+    // R3: the switched-away walk releases its listeners — the new walk owns
+    // the resources from its own acceptance, never from this mirror's death.
+    this.detachResourceSubscriptions();
   }
 
   // G05.05.b restart recovery (09 §9.1, ADR G01.03 §3.2): the restored
@@ -285,6 +334,8 @@ export class RunOrchestrator {
   // pipeline candidates and the window geometry follow the row's package,
   // never the catalog's current one.
   restore(state: RunSessionState, stops: ReadonlyArray<RunStop>): void {
+    // The restored session re-owns the resources (R3: acceptance or restore).
+    this.attachResourceSubscriptions();
     this.engineState = state;
     this.stops = stops;
     this.candidates = new Map(

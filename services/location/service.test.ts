@@ -551,3 +551,20 @@ test('G07.05: the tap adds no location command — the modes and the window stay
   unsubscribe();
   h.assertClean();
 });
+
+// G20.04 (issue #475, runtime.md R3) — the sink registration returns its own
+// release, and a released registration never detaches the one that replaced
+// it: an old owner's cleanup cannot blind the walk that took over.
+test('G20.04: the onFix release removes only its own registration', () => {
+  const h = makeService();
+  h.arm();
+  const first: FixInput[] = [];
+  const second: FixInput[] = [];
+  const releaseFirst = h.service.onFix((fix) => first.push(fix));
+  h.service.onFix((fix) => second.push(fix)); // replaces the first registration
+  releaseFirst(); // the replaced owner's cleanup
+  h.port.emitFix(h.currentSub(), FIRST_FIX);
+  assert.deepEqual(first, []); // it was already replaced before the cleanup
+  assert.deepEqual(second, [FIRST_FIX]); // the replacement was never detached
+  h.assertClean();
+});

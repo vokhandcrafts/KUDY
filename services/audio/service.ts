@@ -28,7 +28,8 @@ export interface AudioServiceDeps {
 // controller (G07.02) each add their own sink over the one physical player
 // and filter by their own token — a handler whose token is not its launch
 // ignores the event entirely (ADR G01.02 §3.5). Repeated onEvent() calls
-// accumulate listeners; dispose drops them with the port.
+// accumulate listeners; each registration returns its own release (R3,
+// G20.04), and dispose drops the port with the session.
 type EventHandler = (event: AudioServiceEvent) => void;
 
 // The port instance the service currently plays on. `alive` dies with
@@ -53,8 +54,11 @@ export class AudioService {
     this.createPort = deps.createPort;
   }
 
-  onEvent(handler: EventHandler): void {
+  onEvent(handler: EventHandler): () => void {
     this.handlers.add(handler);
+    return () => {
+      this.handlers.delete(handler);
+    };
   }
 
   // PlayStory / PlayMoment carry the controller's token (ADR G01.02 §3.2);
