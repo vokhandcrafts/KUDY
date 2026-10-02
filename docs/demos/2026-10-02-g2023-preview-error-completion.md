@@ -12,8 +12,9 @@
 `initial_refresh_terminal`, `stale_refresh_failure`): сінтэтычныя адмовы
 партоў фактаў праз сапраўдны `createPreviewController`. Рэверц-эксперыменты
 (implementation-rules 1) выкананы ў гэтай сесіі: без фіксу кантролера чырвоныя
-3 кейсы, без run-guard'а ў catch — кейс `stale_refresh_failure`; з фіксам —
-ніжэйшы вывод, два прагону запар байт-у-байт ідэнтычныя.
+ўсе чатыры кейсы (адмова заглушанага boot-прагону дасягае runner'а як
+unhandled rejection), без run-guard'а ў catch — кейс `stale_refresh_failure`;
+з фіксам — ніжэйшы вывод, два прагону запар байт-у-байт ідэнтычныя.
 
 ```sh
 node --test controllers/catalog/previewController.test.ts 2>&1 | grep -E "^ℹ (tests|pass|fail)"
