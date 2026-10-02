@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Аўтарскае рашэнне review-decision/v1",
+  "description": "25 §8: ReviewDecision захоўвае claim_id, рэвізію/версію выніку, accepted|rejected, аўтара рашэння, час і заўвагу. Прыняцце патрабуе яўнага дзеяння аўтара; выпраўленне фармулёўкі стварае новую версію сцвярджэння з паўторнай праверкай падставы, новы мадэльны прагон яе не зацвярджае. Вынік ідэнтыфікуецца роўна адным з двух — рэвізіяй або версіяй (v1 фіксуе «роўна адно», каб рашэнне было адназначна прывязанае).",
+  "type": "object",
+  "required": ["claim_id", "decision", "decided_by", "decided_at"],
+  "additionalProperties": false,
+  "properties": {
+    "claim_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "decision": { "type": "string", "enum": ["accepted", "rejected"] },
+    "decided_by": { "type": "string", "minLength": 1 },
+    "decided_at": { "type": "string", "format": "date-time" },
+    "result_revision": { "type": "string", "minLength": 1 },
+    "result_version": { "type": "string", "minLength": 1 },
+    "note": { "type": "string" }
+  },
+  "oneOf": [
+    { "required": ["result_revision"] },
+    { "required": ["result_version"] }
+  ]
+}

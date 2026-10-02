@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Прыватны даследчы экспарт export-private/v1",
+  "description": "25 §9: прыватны даследчы экспарт утрымлівае Case, прынятыя факты з падставамі, выявы з правамі, прынятыя сувязі і асобны спіс адкрытых патрэб у кантэксце. Непрынятыя факты не трапляюць у спіс матэрыялу для сцэнара (адбор прынятых — сховішча і G19.07, схема фіксуе форму). Гэта не Story і не аўтаматычна апублікаваны кантэнт; экспарт пазначаецца яўна і не публікуецца гэтым інструментам.",
+  "type": "object",
+  "required": ["case_id", "generated_at", "claims", "relations", "images", "open_context_needs"],
+  "additionalProperties": false,
+  "properties": {
+    "case_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim_id", "statement", "modality", "evidence"],
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "statement": { "type": "string", "minLength": 1 },
+          "modality": { "type": "string", "enum": ["occurred", "planned", "attributed", "uncertain", "negated"] },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["fragment_id", "start", "end", "quote"],
+              "additionalProperties": false,
+              "properties": {
+                "fragment_id": { "type": "string", "minLength": 1 },
+                "start": { "type": "integer", "minimum": 0 },
+                "end": { "type": "integer", "minimum": 1 },
+                "quote": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["relation_id", "subject", "action", "object", "claim_id"],
+        "additionalProperties": false,
+        "properties": {
+          "relation_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "subject": { "type": "string", "minLength": 1 },
+          "action": { "type": "string", "minLength": 1 },
+          "object": { "type": "string", "minLength": 1 },
+          "claim_id": { "type": "string", "minLength": 1, "maxLength": 128 }
+        }
+      }
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["media_key", "rights"],
+        "additionalProperties": false,
+        "properties": {
+          "media_key": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "rights": { "type": "string", "minLength": 1 },
+          "caption": { "type": "string" },
+          "author": { "type": "string" }
+        }
+      }
+    },
+    "open_context_needs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["concept"],
+        "additionalProperties": false,
+        "properties": {
+          "concept": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

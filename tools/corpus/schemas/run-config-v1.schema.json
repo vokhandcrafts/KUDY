@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Прыватная канфігурацыя мадэльнага прагону run-config/v1",
+  "description": "25 §6: перад жывым прагонам патрэбны прынятыя аўтарам пастаўшчык, мадэль, дазвол на перадачу ачышчанага тэксту, межы токенаў і бюджэт; жывы прагон забаронены да зададзенага аўтарам верхняга ліміту кошту запыту. Тайм-аўт і колькасць спроб задаюцца абавязкова; аўтаматычныя спробы не перавышаюць тры на адзінку працы (25 §6). Па змоўчанні каманда робіць dry-run — паказвае аб'ём працы і ацэнку без сеткі; таму dry-run не патрабуе дазволу і лімітаў кошту. Файл канфігурацыі — прыватны даны (машына аўтара), у Git не трапляе.",
+  "type": "object",
+  "required": ["level", "mode", "provider_id", "model_id", "vocabulary_version", "timeout_ms", "max_attempts"],
+  "additionalProperties": false,
+  "properties": {
+    "level": { "type": "integer", "enum": [1, 2] },
+    "mode": { "type": "string", "enum": ["dry-run", "live"] },
+    "provider_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "model_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "vocabulary_version": { "type": "string", "minLength": 1 },
+    "timeout_ms": { "type": "integer", "minimum": 1 },
+    "max_attempts": { "type": "integer", "minimum": 1, "maximum": 3 },
+    "data_transfer_consent": { "type": "boolean" },
+    "token_limit_total": { "type": "integer", "minimum": 1 },
+    "cost_cap_per_request": { "type": "number", "minimum": 0 }
+  },
+  "if": {
+    "required": ["mode"],
+    "properties": { "mode": { "const": "live" } }
+  },
+  "then": {
+    "required": ["data_transfer_consent", "token_limit_total", "cost_cap_per_request"],
+    "properties": { "data_transfer_consent": { "const": true } }
+  }
+}

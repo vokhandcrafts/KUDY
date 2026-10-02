@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Публічны статусны экспарт export-public-status/v1",
+  "description": "25 §9: публічны статусны экспарт змяшчае толькі непразрыстыя ідэнтыфікатары, станы і сумарныя метрыкі. Ён не змяшчае адрасоў сайтаў, сапраўдных ключоў/назваў крыніцы, лакальных шляхоў, цытат або выяў — форма схемы дадатковых палёў не дапускае. Ідэнтыфікатары кананічных матэрыялаў не экспартуюцца: для кожнага статуснага экспарту яны замяняюцца выпадковымі псеўданімамі (v1 — 32 шаснаццатковыя знакі), каб не раскрываць крыніцу праз падбор яе ключоў. Метрыкі — толькі цэлыя лікі; назвы метрык вольныя (additionalProperties: integer), бо набор сумарных паказчыкаў вызначае G19.07.",
+  "type": "object",
+  "required": ["generated_at", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "generated_at": { "type": "string", "format": "date-time" },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["case_ref", "state", "metrics"],
+        "additionalProperties": false,
+        "properties": {
+          "case_ref": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+          "state": { "type": "string", "minLength": 1 },
+          "metrics": {
+            "type": "object",
+            "additionalProperties": { "type": "integer" }
+          }
+        }
+      }
+    }
+  }
+}

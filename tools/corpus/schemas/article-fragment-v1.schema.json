@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Пакет артыкула і фрагмент article/v1",
+  "description": "25 §3–§4: нязменны пакет артыкула. article_id — SHA-256 ад кананічнага UTF-8 JSON-масіву [source_namespace, source_record_key]; revision_id — SHA-256 ад нязмененых байтаў HTML; asset_id — SHA-256 байтаў выявы; fragment_id вылічаецца з рэвізіі, версіі ачысткі і лакатара. extractor_version пазначае рэвізію ачысткі (профіль/vN), новая версія не перацірае папярэднюю. Фрагмент — 25 §4 даслоўна: fragment_id, article_id, revision_id, extractor_version, kind, section_path, text, source_locator; kind: body, caption, bibliography. Ліміт тэксту фрагмента — 6000 Unicode code points (25 §4); схемны maxLength лічыць UTF-16-адзінкі, таму ліміт трыма вытворца ачысткі (G19.02), не гэтая схема. Спасылка захоўвае бачны тэкст, лакатар і прыватны адрас; выявы — подпіс, аўтара і даты толькі пры наяўнасці падставы; розныя гады ў назве файла і подпісе застаюцца як разыходжанне (25 §4). unsupported-template пазначае адсутнасць/неадназначнасць кантэйнера без ціхага пераходу да тэксту ўсёй старонкі.",
+  "type": "object",
+  "required": ["article_id", "revision_id", "extractor_version", "title", "fragments"],
+  "additionalProperties": false,
+  "properties": {
+    "article_id": { "$ref": "#/$defs/sha256hex" },
+    "revision_id": { "$ref": "#/$defs/sha256hex" },
+    "extractor_version": { "type": "string", "pattern": "^[a-z][a-z0-9-]*/v[0-9]+$" },
+    "title": { "type": "string", "minLength": 1 },
+    "unsupported_template": { "type": "boolean" },
+    "fragments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fragment_id", "article_id", "revision_id", "extractor_version", "kind", "section_path", "text", "source_locator"],
+        "additionalProperties": false,
+        "properties": {
+          "fragment_id": { "$ref": "#/$defs/sha256hex" },
+          "article_id": { "$ref": "#/$defs/sha256hex" },
+          "revision_id": { "$ref": "#/$defs/sha256hex" },
+          "extractor_version": { "type": "string", "pattern": "^[a-z][a-z0-9-]*/v[0-9]+$" },
+          "kind": { "type": "string", "enum": ["body", "caption", "bibliography"] },
+          "section_path": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "text": { "type": "string", "minLength": 1 },
+          "source_locator": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["visible_text", "target", "source_locator"],
+        "additionalProperties": false,
+        "properties": {
+          "visible_text": { "type": "string", "minLength": 1 },
+          "target": { "type": "string", "minLength": 1 },
+          "source_locator": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "source_locator"],
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": { "$ref": "#/$defs/sha256hex" },
+          "source_locator": { "type": "string", "minLength": 1 },
+          "caption": { "type": "string" },
+          "author": { "type": "string" },
+          "dates": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "file": { "type": "integer", "minimum": 1 },
+              "caption": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256hex": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

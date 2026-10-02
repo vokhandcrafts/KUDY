@@ -1,0 +1,37 @@
+{
+  "source_namespace": "fixture-wiki",
+  "records": [
+    {
+      "source_record_key": "example-0001",
+      "html_path": "pages/example-0001-navigation.html",
+      "language": "be",
+      "rights": "public-domain",
+      "city_id": "gdansk"
+    },
+    {
+      "source_record_key": "example-0002",
+      "html_path": "pages/example-0002-single-paragraph.html",
+      "language": "be",
+      "rights": "public-domain",
+      "city_id": "gdansk"
+    },
+    {
+      "source_record_key": "example-0003",
+      "html_path": "pages/example-0003-media-dates.html",
+      "language": "be",
+      "rights": "public-domain",
+      "city_id": "gdansk",
+      "media": [
+        { "media_key": "example-0003-01", "local_path": "images/example-0003-01.png", "rights": "research_only" },
+        { "media_key": "example-0003-02", "local_path": "images/example-0003-02.png", "rights": "public-domain" }
+      ]
+    },
+    {
+      "source_record_key": "example-0004",
+      "html_path": "pages/example-0004-traps.html",
+      "language": "be",
+      "rights": "research_only",
+      "city_id": "gdansk"
+    }
+  ]
+}
