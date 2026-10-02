@@ -9,32 +9,11 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createStatusMapper } from './status-mapping.ts';
+import { status } from './status-fixture.ts';
 import type { AudioStatus } from 'expo-audio';
 import type { PlayerSourceEvent } from '../types.ts';
 import { FakeAudioPlayerPort } from '../fake-port.ts';
 import { AudioService } from '../service.ts';
-
-// A fully loaded, ready, not-yet-playing status; tests override the fields
-// that change. Field list mirrors expo-audio 1.1.1 AudioStatus verbatim.
-function status(overrides: Partial<AudioStatus> = {}): AudioStatus {
-  return {
-    id: 1,
-    currentTime: 0,
-    playbackState: 'ready',
-    timeControlStatus: 'paused',
-    reasonForWaitingToPlay: '',
-    mute: false,
-    duration: 62.5,
-    playing: false,
-    loop: false,
-    didJustFinish: false,
-    isBuffering: false,
-    isLoaded: true,
-    playbackRate: 1,
-    shouldCorrectPitch: true,
-    ...overrides,
-  };
-}
 
 function makeMapper() {
   const mapper = createStatusMapper();

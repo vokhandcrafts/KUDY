@@ -1,9 +1,12 @@
 // G05.03.b — the expo-audio adapter over the G05.03.a player port. This is
 // the only module of services/audio/expo/ that imports expo-audio at
-// runtime; node --test never imports it (the pure mappings it delegates to
-// are tested on synthetic statuses instead). The composition root receives
-// the port factory as the audio port parameter — no other module imports
-// this file (AC4; verified by arch:check and the import grep in results).
+// runtime; node --test imports it only through the G20.02 behavioral suite,
+// which replaces the expo-audio module itself with node:test module mocks
+// (the npm test node invocation passes --experimental-test-module-mocks;
+// only this file uses mock.module).
+// The composition root receives the port factory as the audio port parameter —
+// no other module imports this file (AC4; verified by arch:check and the
+// import grep in results).
 //
 // Canon anchors: `09` §6.3 `audio` row — one physical player; position in
 // milliseconds, never a 0..1 ratio; a disposed player is re-created, never
@@ -64,6 +67,14 @@ function withSourceKey(event: MappedEvent, key: number): PlayerSourceEvent {
   }
 }
 
+// The reason carried to the existing failed-event path (story_play_failed
+// one level up): the failing operation plus the original message; a
+// non-Error throw is stringified whole.
+function failureReason(operation: string, error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  return `${operation}: ${message}`;
+}
+
 export function createExpoAudioPlayerPort(options?: ExpoAudioPlayerPortOptions): AudioPlayerPort {
   const updateIntervalMs = options?.updateIntervalMs ?? 250;
   const mapper = createStatusMapper();
@@ -85,8 +96,19 @@ export function createExpoAudioPlayerPort(options?: ExpoAudioPlayerPortOptions):
       player = null;
       sourceKey = null;
       latest = null;
-      const created = createAudioPlayer({ uri: source.path }, { updateInterval: updateIntervalMs });
+      let created: AudioPlayer;
+      try {
+        created = createAudioPlayer({ uri: source.path }, { updateInterval: updateIntervalMs });
+      } catch (error) {
+        handler?.({ type: 'failed', key: source.key, reason: failureReason('player creation failed', error) });
+        return;
+      }
+      // The listener closes over its own player and drops everything while
+      // another player owns the port: a late tick of a removed player must
+      // neither touch the shared `latest`/mapper ledger nor be credited to
+      // the new source (R1: one owner per launch).
       created.addListener('playbackStatusUpdate', (status: AudioStatus) => {
+        if (player !== created) return;
         latest = status;
         const mapped = mapper.onStatus(status);
         if (mapped && sourceKey !== null) handler?.(withSourceKey(mapped, sourceKey));
@@ -95,6 +117,22 @@ export function createExpoAudioPlayerPort(options?: ExpoAudioPlayerPortOptions):
       sourceKey = source.key;
       latest = null;
       mapper.onCommand('play');
+      try {
+        // Identity and subscriptions are in place — only now the physical
+        // player starts. expo-audio creates a player paused: creation and
+        // play are separate operations (audit A26-02 — the player was
+        // created and subscribed but never started).
+        created.play();
+      } catch (error) {
+        // The listener dies with the player — remove() is the one release;
+        // the port is back to no-player, and the failure reaches the
+        // existing failed-event path one level up.
+        created.remove();
+        player = null;
+        sourceKey = null;
+        latest = null;
+        handler?.({ type: 'failed', key: source.key, reason: failureReason('player start failed', error) });
+      }
     },
 
     stop(): void {
