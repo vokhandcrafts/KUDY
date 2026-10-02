@@ -30,7 +30,7 @@ import { freshMigratedDatabase, MIGRATIONS } from './test-db.ts';
 
 const migrationsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'migrations');
 
-const SERVER_TABLES = ['devices', 'entitlement_cache', 'event_log', 'device_registration_rate', 'grant_products', 'webhook_events', 'event_send_rate'];
+const SERVER_TABLES = ['devices', 'entitlement_cache', 'event_log', 'device_registration_rate', 'grant_products', 'webhook_events', 'event_send_rate', 'grant_request_rate'];
 
 function normalize(sql: string): string {
   return sql
@@ -114,6 +114,16 @@ test('guard: the events rate counter is device-owned and cascades on device dele
     create!,
     /references devices \(device_id\) on delete cascade/,
     'event_send_rate must cascade on device delete (09 §5 DELETE /v1/device)',
+  );
+});
+
+test('guard: the grant request counter is device-owned and cascades on device delete (G20.26)', () => {
+  const create = replayedStatements().find((s) => s.startsWith('create table ') && tableOf(s, 2) === 'grant_request_rate');
+  assert.ok(create, 'grant_request_rate must exist in the migration');
+  assert.match(
+    create!,
+    /references devices \(device_id\) on delete cascade/,
+    'grant_request_rate must cascade on device delete (09 §5 DELETE /v1/device)',
   );
 });
 

@@ -24,11 +24,17 @@
 //   SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY — Storage signed-URL minting
 //   GRANT_STORAGE_BUCKET — the private bucket holding the published
 //     manifests and the extended files; the client never names the bucket
+//
+// N8 rate gate: no environment knob — the per-device window/limit constants
+// live in grant-core (one owner, the device/events idiom); the counter table
+// is grant_request_rate (migration 20261002000000) and a limiter fault lands
+// on the closed 503 below, never on an open gate.
 import postgres from 'npm:postgres@3.4.9';
 
 import { bearerSecretHash, DEVICE_LOOKUP_SQL } from '../_shared/device-core.ts';
 import {
   createSqlEntitlementCache,
+  createSqlGrantRate,
   createSqlProductLookup,
   grantRouteKey,
   GRANT_CACHE_CAP_SQL,
@@ -38,6 +44,7 @@ import {
   GRANT_CACHE_WRITE_SQL,
   GRANT_MAX_BODY_BYTES,
   GRANT_PRODUCT_LOOKUP_SQL,
+  GRANT_RATE_INCREMENT_SQL,
   GRANT_RETRY_AFTER_SECONDS,
   GRANT_URL_TTL_SECONDS,
   handleGrant,
@@ -150,7 +157,9 @@ function serialize(answer: GrantAnswer): Response {
   if (answer.status === 200) {
     return new Response(JSON.stringify(answer.body), { status: 200, headers: { 'content-type': 'application/json' } });
   }
-  const headers = answer.status === 503 ? { 'retry-after': String(answer.retryAfterSeconds) } : {};
+  const headers = answer.status === 503 || answer.status === 429
+    ? { 'retry-after': String(answer.retryAfterSeconds) }
+    : {};
   return errors(answer.status, answer.code, headers);
 }
 
@@ -182,6 +191,11 @@ function requestDeps(db: postgres.Sql, storage: StorageConfig, config: GrantConf
     async capCache(deviceId, cap) {
       await db.unsafe(GRANT_CACHE_CAP_SQL, [deviceId, cap]);
     },
+    async incrementRate(deviceId, windowStartMs) {
+      return db.unsafe(GRANT_RATE_INCREMENT_SQL, [deviceId, windowStartMs]) as Promise<
+        Array<Record<string, unknown>>
+      >;
+    },
   };
   let manifestBase = '';
   return {
@@ -201,6 +215,7 @@ function requestDeps(db: postgres.Sql, storage: StorageConfig, config: GrantConf
       },
     },
     cache: createSqlEntitlementCache(runner),
+    rate: createSqlGrantRate(runner),
   };
 }
 

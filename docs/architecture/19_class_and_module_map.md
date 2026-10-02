@@ -241,10 +241,11 @@ type GrantError =
   | { status: 403; code: 'device_auth_failed' | 'unknown_route_tier' | 'manifest_not_found'
       | 'path_not_allowed' | 'no_entitlement' | 'environment_mismatch' | 'url_expired' | 'url_invalid' }
   | { status: 404; code: 'not_found' }
+  | { status: 429; code: 'rate_limited' }                    // + Retry-After; кліент рэтраіць абмежавана (N8)
   | { status: 503; code: 'entitlement_unavailable' };        // + Retry-After; кліент рэтраіць
 ```
 
-Адрозненне прычын для UI: няма дазволу (GPS) → ручны шлях; няма права (`no_entitlement`, `403`) → прапанова пакупкі; праверка недаступная (`503`) → рэтрай, не адмова; кантэнт няпоўны (`readiness() = false`) → экран загрузкі; невалідны ўвод (`invalid_request`) → памылка выканаўца, не карыстальніка. Новыя коды па-за спісам забароненыя (`09` §5.1).
+Адрозненне прычын для UI: няма дазволу (GPS) → ручны шлях; няма права (`no_entitlement`, `403`) → прапанова пакупкі; праверка недаступная (`503`) → рэтрай, не адмова; ліміт запытаў прылады (`rate_limited`, `429`) → рэтрай пасля `Retry-After`, не адмова; кантэнт няпоўны (`readiness() = false`) → экран загрузкі; невалідны ўвод (`invalid_request`) → памылка выканаўца, не карыстальніка. Новыя коды па-за спісам забароненыя (`09` §5.1).
 
 ### 3.7 Durable-захаванне: транзакцыі і міграцыі
 

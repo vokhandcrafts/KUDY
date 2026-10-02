@@ -183,6 +183,7 @@ const EXPECTED_KIND: Record<(typeof GRANT_ERRORS)[number]['code'], string> = {
   invalid_request: 'executor-error',
   no_entitlement: 'purchase',
   entitlement_unavailable: 'unavailable',
+  rate_limited: 'rate-limited',
   url_expired: 'regrant',
   device_auth_failed: 'failed',
   unknown_route_tier: 'failed',
@@ -208,6 +209,11 @@ test('criterion 2: every code of the closed list has its own outcome', async () 
       const unavailable = outcome as Extract<GrantOutcome, { kind: 'unavailable' }>;
       assert.equal(unavailable.retriesUsed, 0);
       assert.equal(unavailable.retryAfterMs, DEFAULT_GRANT_RETRY.defaultRetryAfterMs);
+    }
+    if (outcome.kind === 'rate-limited') {
+      const limited = outcome as Extract<GrantOutcome, { kind: 'rate-limited' }>;
+      assert.equal(limited.retriesUsed, 0);
+      assert.equal(limited.retryAfterMs, DEFAULT_GRANT_RETRY.defaultRetryAfterMs);
     }
   }
 });
@@ -273,6 +279,30 @@ test('criterion 2: when the bounded retries are spent the outcome stays retryabl
   assert.equal(unavailable.retryAfterMs, 99_000);
   assert.deepEqual(delays, [5000, 40_000]);
   assert.equal(calls.length, 3);
+});
+
+test('bounded_rate_retry: 429 rate_limited retries with the server wait and stops at the bound (N8)', async () => {
+  let call = 0;
+  const { transport, calls } = recordingTransport(() => {
+    call += 1;
+    // Distinct headers: the final 429's own Retry-After must be the one the
+    // spent outcome carries — the wait for a later manual attempt.
+    if (call === 1) return errResponse(429, 'rate_limited', { 'retry-after': '3' });
+    if (call === 2) return errResponse(429, 'rate_limited', { 'retry-after': '11' });
+    return errResponse(429, 'rate_limited', { 'retry-after': '59' });
+  });
+  const { deps, delays } = rig(transport, { policy: { maxRetries: 2 } });
+
+  const outcome = await requestGrant({ ...KEY, lock: lockFor(['stops.json']) }, deps);
+
+  assert.equal(outcome.kind, 'rate-limited');
+  const limited = outcome as Extract<GrantOutcome, { kind: 'rate-limited' }>;
+  assert.equal(limited.code, 'rate_limited');
+  assert.equal(limited.status, 429);
+  assert.equal(limited.retriesUsed, 2);
+  assert.equal(limited.retryAfterMs, 59_000);
+  assert.deepEqual(delays, [3000, 11_000]);
+  assert.equal(calls.length, 3, 'no transport call may follow the spent bound');
 });
 
 test('criterion 4: offline is a defined outcome — no exception reaches the caller', async () => {

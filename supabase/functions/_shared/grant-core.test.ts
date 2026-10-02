@@ -2,10 +2,11 @@
 // when the corresponding gate in grant-core.ts is reverted (implementation-
 // rules 1/14): request shape, unsafe-path pre-probe rejection, product
 // mapping, exact-manifest membership, the 403/503 distinction, the
-// sandbox→production refusal, and the bounded positive cache. The SQL ports
-// run their production constants against real Postgres (PGlite) with the
-// committed migrations applied; provider, manifest source, signer and clock
-// are fakes — the thin platform adapters are exercised at deploy time.
+// sandbox→production refusal, the bounded positive cache and the N8
+// per-device request gate. The SQL ports run their production constants
+// against real Postgres (PGlite) with the committed migrations applied;
+// provider, manifest source, signer and clock are fakes — the thin platform
+// adapters are exercised at deploy time.
 //
 // The closed-list cross-check keeps the server answers aligned with the
 // client contract (services/download/grant.ts GRANT_ERRORS, `19` §3.6): an
@@ -18,8 +19,11 @@ import { GRANT_ERRORS } from '../../../services/download/grant.ts';
 import { registerDevice } from './device-core.ts';
 import {
   createSqlEntitlementCache,
+  createSqlGrantRate,
   createSqlProductLookup,
   GRANT_CACHE_MAX_ROWS_PER_DEVICE,
+  GRANT_RATE_LIMIT,
+  GRANT_RATE_WINDOW_MS,
   GRANT_RETRY_AFTER_SECONDS,
   GRANT_URL_TTL_SECONDS,
   handleGrant,
@@ -79,8 +83,8 @@ test('isUnsafeUrlTtl: only finite positive integers up to the canonical 600 s pa
   }
 });
 
-test('shape gate: malformed bodies are 400 invalid_request before any port runs', async () => {
-  const { deps } = await wiredDeps();
+test('shape gate: malformed bodies are 400 invalid_request before any mapping, manifest or provider probe', async () => {
+  const h = await wiredDeps();
   const bodies: unknown[] = [
     null,
     42,
@@ -101,7 +105,7 @@ test('shape gate: malformed bodies are 400 invalid_request before any port runs'
     { route_id: ROUTE, version: VERSION, locale: LOCALE, tier: 'пашыраны', paths: ['a.mp3'] },
   ];
   for (const body of bodies) {
-    const answer = await handleGrant(body, '00000000-0000-4000-8000-000000000000', environment(), deps);
+    const answer = await handleGrant(body, h.deviceId, environment(), h.deps);
     assert.deepEqual(
       { status: answer.status, code: answer.status === 200 ? undefined : answer.code },
       { status: 400, code: 'invalid_request' },
@@ -122,6 +126,7 @@ test('cross-check: every 4xx/5xx code the client knows is either a grant-endpoin
     { status: 403, code: 'path_not_allowed' },
     { status: 403, code: 'no_entitlement' },
     { status: 403, code: 'environment_mismatch' },
+    { status: 429, code: 'rate_limited' },
     { status: 503, code: 'entitlement_unavailable' },
   ];
   for (const entry of emitted) {
@@ -188,6 +193,7 @@ async function wiredDeps(): Promise<Harness> {
     },
   },
     cache: createSqlEntitlementCache(runner),
+    rate: createSqlGrantRate(runner),
   };
 
   return {
@@ -401,6 +407,10 @@ test('a cache row written under another environment never grants under this one'
 
 test('the cache is bounded: expired rows are swept and the per-device cap holds', async () => {
   const h = await wiredDeps();
+  // This test exercises the cache cap past its bound, not the request gate —
+  // the N8 gate would deny rounds 31+ of the same window before the cache
+  // write. The rate port keeps the production runner with a raised limit.
+  h.deps.rate = createSqlGrantRate(h.runner, 10_000);
   // Fill the cache past the cap with distinct route × tier rows.
   for (let index = 0; index < GRANT_CACHE_MAX_ROWS_PER_DEVICE + 4; index += 1) {
     const routeId = `route-${String(index).padStart(3, '0')}`;
@@ -421,4 +431,109 @@ test('the cache is bounded: expired rows are swept and the per-device cap holds'
   // The freshest rows survive; the earliest ones were evicted.
   assert.ok(!rows.some((row) => row.route_id === 'route-000'), 'the oldest row must have been evicted');
   assert.ok(rows.some((row) => row.route_id === `route-${String(GRANT_CACHE_MAX_ROWS_PER_DEVICE + 3).padStart(3, '0')}`), 'the newest row must survive');
+});
+
+// --- N8: the per-device request gate before the provider --------------------
+
+test('grant_limit_no_provider_call: beyond the per-device limit the answer is 429 and the provider is never called again', async () => {
+  const h = await wiredDeps();
+  const request = grantRequest([MANIFEST_PATHS[0]]);
+  for (let round = 1; round <= GRANT_RATE_LIMIT; round += 1) {
+    const answer = await handleGrant(request, h.deviceId, environment(), h.deps);
+    assert.equal(answer.status, 200, `round ${round} within the limit must grant`);
+  }
+  const providerCallsAtLimit = h.providerCalls.length;
+  const mintedAtLimit = h.minted.length;
+  assert.ok(providerCallsAtLimit > 0, 'the first round must have verified with the provider');
+
+  // The cache answers the repeats — but the request counter still counts
+  // them (N8: «Ліміт дзейнічае і для паўтораў»). Beyond the limit the answer
+  // is the closed 429 and no port past the gate runs.
+  for (let round = 0; round < 3; round += 1) {
+    const answer = await handleGrant(request, h.deviceId, environment(), h.deps);
+    if (answer.status !== 429) assert.fail(`expected 429, got ${JSON.stringify(answer)}`);
+    assert.equal(answer.code, 'rate_limited');
+    assert.ok(
+      Number.isInteger(answer.retryAfterSeconds) && answer.retryAfterSeconds >= 1
+        && answer.retryAfterSeconds <= GRANT_RATE_WINDOW_MS / 1000,
+      'Retry-After must name the remaining part of the window',
+    );
+  }
+  assert.equal(h.providerCalls.length, providerCallsAtLimit, 'zero additional provider calls beyond the limit');
+  assert.equal(h.minted.length, mintedAtLimit, 'the denied rounds mint nothing');
+});
+
+test('concurrent_grant_limit: parallel rounds cannot bypass counting (G20.26 criterion 3)', async () => {
+  const h = await wiredDeps();
+  // limit + 5 concurrent rounds: the atomic window increment serializes in
+  // the real database, so exactly the limit answers may pass the gate.
+  const rounds = GRANT_RATE_LIMIT + 5;
+  const answers = await Promise.all(
+    Array.from({ length: rounds }, () => handleGrant(grantRequest([MANIFEST_PATHS[0]]), h.deviceId, environment(), h.deps)),
+  );
+  const granted = answers.filter((answer) => answer.status === 200);
+  const limited = answers.filter((answer) => answer.status === 429);
+  assert.equal(granted.length, GRANT_RATE_LIMIT, 'exactly the limit many rounds pass');
+  assert.equal(limited.length, rounds - GRANT_RATE_LIMIT, 'the rest are rate-limited');
+  // Every allowed round consumed one counted attempt — the provider saw no
+  // more verifications than allowed rounds that needed it.
+  assert.ok(h.providerCalls.length <= GRANT_RATE_LIMIT, 'no provider call may bypass the gate');
+});
+
+test('limiter_failure_denied: a limiter fault propagates fail-closed, never as an allow or a limit denial', async () => {
+  const h = await wiredDeps();
+  // The limiter storage dies: the round must not answer 200 (no bypass) nor
+  // 429 (a storage fault is not a limit — spec N1), and must not reach the
+  // provider; the Deno wrapper maps the fault to its closed 503.
+  h.deps.rate = {
+    consume: async () => {
+      throw new Error('rate storage unavailable');
+    },
+  };
+  await assert.rejects(
+    () => handleGrant(grantRequest([MANIFEST_PATHS[0]]), h.deviceId, environment(), h.deps),
+    /rate storage unavailable/,
+  );
+  assert.deepEqual(h.providerCalls, [], 'a limiter fault never reaches the provider');
+  assert.deepEqual(h.minted, [], 'a limiter fault never mints');
+
+  // A malformed count from the SQL layer (not a valid attempt number) is the
+  // same failure: the shared core refuses it before the limit comparison
+  // (spec N1) instead of reading it as 0 or as a limit denial.
+  const brokenRunner: GrantSqlRunner = {
+    findProduct: async () => [],
+    readCache: async () => [],
+    writeCache: async () => {},
+    sweepExpiredCache: async () => {},
+    capCache: async () => {},
+    incrementRate: async () => [{ attempts: '12' }],
+  };
+  h.deps.rate = createSqlGrantRate(brokenRunner);
+  await assert.rejects(() => handleGrant(grantRequest([MANIFEST_PATHS[0]]), h.deviceId, environment(), h.deps), /valid attempt count/);
+  assert.deepEqual(h.providerCalls, [], 'a malformed count never reaches the provider');
+});
+
+test('second_device_budget: another device works within its own budget after one device exhausts its limit', async () => {
+  const h = await wiredDeps();
+  // A second device in the SAME deployment: its counter row is its own, so
+  // it works while device A waits out its window (one shared provider
+  // budget, per-device buckets).
+  const second = registerDevice();
+  await h.db.query('insert into devices (device_id, secret_hash) values ($1, $2)', [second.deviceId, second.secretHash]);
+
+  for (let round = 0; round < GRANT_RATE_LIMIT; round += 1) {
+    const answer = await handleGrant(grantRequest([MANIFEST_PATHS[0]]), h.deviceId, environment(), h.deps);
+    assert.equal(answer.status, 200, `device A round ${round + 1} within the limit must grant`);
+  }
+  const exhausted = await handleGrant(grantRequest([MANIFEST_PATHS[0]]), h.deviceId, environment(), h.deps);
+  if (exhausted.status !== 429) assert.fail(`expected 429, got ${JSON.stringify(exhausted)}`);
+  assert.equal(exhausted.code, 'rate_limited', 'device A is limited');
+
+  const answer = await handleGrant(grantRequest([MANIFEST_PATHS[0]]), second.deviceId, environment(), h.deps);
+  assert.equal(answer.status, 200, 'device B passes its own gate');
+  assert.deepEqual(
+    h.providerCalls.filter((call) => call.deviceId === second.deviceId).map((call) => call.deviceId),
+    [second.deviceId],
+    'device B was verified by the provider exactly once',
+  );
 });
