@@ -26,6 +26,21 @@ jobs:
         working-directory: web
       - name: tests
         run: npm test
+  windows-portable:
+    # A26-08 (issue #488): the portable path-boundary guards run on Windows,
+    # the main development host — git prints `/` while path.relative prints
+    # `\`. Both files are dependency-free (node builtins only), so no install
+    # step. The symlink-privilege security cases stay mandatory on the Linux
+    # tests job above; on an incapable host they self-skip with the
+    # limitation named, never silently.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: portable path-boundary checks (design-tokens + fixture hygiene)
+        run: node --test --experimental-strip-types test/design-tokens.test.mjs supabase/functions/_shared/fixtures-hygiene.test.ts
   lint:
     runs-on: ubuntu-latest
     steps:
