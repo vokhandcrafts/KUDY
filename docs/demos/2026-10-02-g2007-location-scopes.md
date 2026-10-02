@@ -64,7 +64,7 @@ background updates requested: 0 | watch removed: 0
 after-background-denied fixes: 2 | status: live
 ```
 
-Другі блок — крытэр 3: запытання forgeground (city surface) і background
+Другі блок — крытэр 3: запытанні foreground (city surface) і background
 (Start) ідуць па чарзе, а адказы прыходзяць у адваротным парадку.
 Састарэлы адмовы-адказ першага запытання кідаецца цалкам — свежае
 рашэнне перамагае. Да выпраўлення адказ-адмова перапісваў бы сцан у
