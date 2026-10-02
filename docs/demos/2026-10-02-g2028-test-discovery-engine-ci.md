@@ -34,8 +34,8 @@ set -o pipefail; rm -rf /tmp/kudy-g2028-demo; T=/tmp/kudy-g2028-demo; git clone 
 
 ```output
 ✖ G20.28 node-runner sentinel must execute and fail (sentinel-failure-g20-28-node)
-ℹ tests 1907
-ℹ pass 1900
+ℹ tests 1913
+ℹ pass 1906
 ℹ fail 1
 ✖ G20.28 node-runner sentinel must execute and fail (sentinel-failure-g20-28-node)
 exit=1
@@ -53,7 +53,7 @@ set -o pipefail; cd /tmp/kudy-g2028-demo && rm test/g20-28-node-sentinel.test.mj
   ● G20.28 jest-runner sentinel must execute and fail (sentinel-failure-g20-28-jest)
   ● G20.28 jest-runner sentinel must execute and fail (sentinel-failure-g20-28-jest)
 Test Suites: 1 failed, 24 passed, 25 total
-Tests:       1 failed, 175 passed, 176 total
+Tests:       1 failed, 178 passed, 179 total
 exit=1
 ```
 
