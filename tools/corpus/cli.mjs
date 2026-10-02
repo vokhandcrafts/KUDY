@@ -1,17 +1,22 @@
-// G19.01/G19.02 — corpus CLI: local contract validation and package import.
-// Commands from the plan's G19.01/G19.02 rows:
+// G19.01/G19.02/G19.03 — corpus CLI: local contract validation, package
+// import, database registration and verified backups.
+// Commands from the plan's G19.01/G19.02/G19.03 rows:
 //   validate-input --manifest PATH
 //   validate-run   --config PATH
 //   unpack --manifest PATH --input-root PATH --library-root PATH
 //          [--extractor-version V]        (default: wiki-html/v1)
+//   import --db PATH --library-root PATH
+//   backup --db PATH --library-root PATH --out DIR
+//   restore --backup DIR --library-root PATH
 // validate-* read the one JSON document named on the command line and answer
 // with stable diagnostics; unpack additionally walks the manifest records
-// and imports each into the library root through importArticle — the only
-// filesystem objects touched are the manifest document and the roots passed
-// explicitly. No network call is made at any point (25 §3): the extraction
-// profile opens its browser context with JavaScript disabled and every
-// request aborted. Exit codes follow the collector CLI: 0 ok, 1 contract
-// diagnostics, 2 usage/file error.
+// and imports each into the library root through importArticle; import
+// registers every complete package the library tree already holds into the
+// SQLite store (idempotent, like unpack); backup/restore follow 25 §9 —
+// consistent snapshot + checksum manifest, restore only into a fresh root.
+// The only filesystem objects touched are the documents and the roots passed
+// explicitly. No network call is made at any point (25 §3). Exit codes
+// follow the collector CLI: 0 ok, 1 contract diagnostics, 2 usage/file error.
 
 import { mkdirSync } from 'node:fs';
 import { readFileSync } from 'node:fs';
@@ -21,10 +26,15 @@ import { pathToFileURL } from 'node:url';
 import { validateInput, validateRunConfig } from './contracts.mjs';
 import { CorpusDiagnostic, createExtractionBrowserFactory } from './extract.mjs';
 import { importArticle } from './import.mjs';
+import { backupCorpus, restoreCorpus } from './backup.mjs';
+import { closeCorpus, listLibraryPackages, openCorpus, registerPackage } from './store.mjs';
 
 const usage = `usage: node tools/corpus/cli.mjs validate-input --manifest PATH
        node tools/corpus/cli.mjs validate-run --config PATH
-       node tools/corpus/cli.mjs unpack --manifest PATH --input-root PATH --library-root PATH [--extractor-version V]`;
+       node tools/corpus/cli.mjs unpack --manifest PATH --input-root PATH --library-root PATH [--extractor-version V]
+       node tools/corpus/cli.mjs import --db PATH --library-root PATH
+       node tools/corpus/cli.mjs backup --db PATH --library-root PATH --out DIR
+       node tools/corpus/cli.mjs restore --backup DIR --library-root PATH`;
 
 function fail(message, code) {
   console.error(`corpus: ${message}`);
@@ -126,6 +136,72 @@ async function unpackCommand(parsed) {
   if (failed > 0) process.exit(1);
 }
 
+// import: register what the library tree already holds — unpack placed the
+// files, the store records their identities. One failed package does not
+// stop the others; output carries id prefixes and rule names only (25 §9:
+// paths and source keys never reach the journal).
+async function importCommand(parsed) {
+  if (!parsed.db || !parsed['library-root']) fail('import requires --db and --library-root', 2);
+  let store;
+  try {
+    store = openCorpus(parsed.db);
+  } catch (error) {
+    fail(`import: ${error instanceof CorpusDiagnostic ? error.rule : error.name ?? 'error'}`, 1);
+  }
+  try {
+    let packages;
+    try {
+      packages = listLibraryPackages(path.resolve(parsed['library-root']));
+    } catch (error) {
+      fail(`import: ${error instanceof CorpusDiagnostic ? error.rule : error.name ?? 'error'}`, 1);
+    }
+    let failed = 0;
+    for (const [index, packageRecord] of packages.entries()) {
+      try {
+        const outcome = registerPackage(store, packageRecord);
+        console.log(
+          `corpus: package[${index}] ${outcome.alreadyRegistered ? 'already-registered' : 'registered'} — article ${packageRecord.articleId.slice(0, 12)} revision ${packageRecord.revisionId.slice(0, 12)}`
+        );
+      } catch (error) {
+        failed += 1;
+        console.error(`corpus: package[${index}] ${error instanceof CorpusDiagnostic ? error.rule : error.name ?? 'error'}`);
+      }
+    }
+    console.log(`corpus: import finished — ${packages.length - failed} ok, ${failed} failed`);
+    if (failed > 0) process.exit(1);
+  } finally {
+    closeCorpus(store);
+  }
+}
+
+function backupCommand(parsed) {
+  if (!parsed.db || !parsed['library-root'] || !parsed.out) fail('backup requires --db, --library-root and --out', 2);
+  let store;
+  try {
+    store = openCorpus(parsed.db);
+  } catch (error) {
+    fail(`backup: ${error instanceof CorpusDiagnostic ? error.rule : error.name ?? 'error'}`, 1);
+  }
+  try {
+    const outcome = backupCorpus(store, { libraryRoot: path.resolve(parsed['library-root']), outDir: path.resolve(parsed.out) });
+    console.log(`corpus: backup written — ${outcome.files} file(s), db ${outcome.dbBytes} byte(s)`);
+  } catch (error) {
+    fail(`backup: ${error instanceof CorpusDiagnostic ? error.rule : error.name ?? 'error'}`, 1);
+  } finally {
+    closeCorpus(store);
+  }
+}
+
+function restoreCommand(parsed) {
+  if (!parsed.backup || !parsed['library-root']) fail('restore requires --backup and --library-root', 2);
+  try {
+    const outcome = restoreCorpus({ backupDir: path.resolve(parsed.backup), newLibraryRoot: path.resolve(parsed['library-root']) });
+    console.log(`corpus: restored into ${outcome.libraryRoot} — database ${path.basename(outcome.dbPath)}`);
+  } catch (error) {
+    fail(`restore: ${error instanceof CorpusDiagnostic ? error.rule : error.name ?? 'error'}`, 1);
+  }
+}
+
 async function main(args) {
   const [command, ...rest] = args;
 
@@ -157,6 +233,21 @@ async function main(args) {
 
   if (command === 'unpack') {
     await unpackCommand(parseArgs(rest));
+    return;
+  }
+
+  if (command === 'import') {
+    await importCommand(parseArgs(rest));
+    return;
+  }
+
+  if (command === 'backup') {
+    backupCommand(parseArgs(rest));
+    return;
+  }
+
+  if (command === 'restore') {
+    restoreCommand(parseArgs(rest));
     return;
   }
 

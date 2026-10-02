@@ -1,7 +1,7 @@
-// G19.01 — CLI behavioral checks (issue #458).
-// validation_exit_codes walks the real CLI (spawnSync, the production entry
-// point) over the committed synthetic fixtures and over documents mutated in
-// a temp dir; corpus_suite_is_wired guards the runner wiring itself
+// G19.01/G19.02/G19.03 — CLI behavioral checks (issues #458/#459/#460).
+// validation_exit_codes and import_backup_restore walk the real CLI
+// (spawnSync, the production entry point) over committed synthetic fixtures
+// and temp trees; corpus_suite_is_wired guards the runner wiring itself
 // (implementation-rules 1 and 7: removing the corpus glob from npm test must
 // turn this suite red).
 
@@ -12,6 +12,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { EXTRACTOR, makeSyntheticLibrary } from './fixtures/packages.mjs';
 
 const cliPath = fileURLToPath(new URL('./cli.mjs', import.meta.url));
 const fixtureManifest = fileURLToPath(new URL('./fixtures/manifests/valid-input-v1.json', import.meta.url));
@@ -173,4 +175,52 @@ test('corpus_suite_is_wired: the corpus suite runs inside npm test (implementati
     /"tools\/corpus\/\*\.test\.mjs"/,
     'npm test must enumerate the tools/corpus glob — reverting it would silently drop every corpus suite from the default run'
   );
+});
+
+// G19.03 — the database commands walk the real CLI: import registers what
+// unpack-style files hold, backup writes the verified snapshot, restore
+// materializes a fresh library that the store reopens (issue #460).
+test('import_backup_restore: the library registers idempotently and round-trips through a backup', (t) => {
+  const library = makeSyntheticLibrary(t, { seed: 'cli-roundtrip' });
+
+  const dbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'corpus-cli-db-'));
+  t.after(() => fs.rmSync(dbDir, { recursive: true, force: true }));
+  const dbPath = path.join(dbDir, 'corpus.db');
+  const backupDir = path.join(dbDir, 'backup');
+  const restoredRoot = path.join(dbDir, 'restored');
+
+  const first = runCli(['import', '--db', dbPath, '--library-root', library.root]);
+  assert.equal(first.status, 0, first.stderr);
+  assert.match(first.stdout, /package\[0\] registered — article [0-9a-f]{12} revision [0-9a-f]{12}/);
+  assert.match(first.stdout, /import finished — 1 ok, 0 failed/);
+
+  const second = runCli(['import', '--db', dbPath, '--library-root', library.root]);
+  assert.equal(second.status, 0, second.stderr);
+  assert.match(second.stdout, /package\[0\] already-registered/, 're-import must not duplicate the package');
+
+  const backup = runCli(['backup', '--db', dbPath, '--library-root', library.root, '--out', backupDir]);
+  assert.equal(backup.status, 0, backup.stderr);
+  assert.match(backup.stdout, /backup written — [0-9]+ file\(s\)/);
+  assert.ok(fs.existsSync(path.join(backupDir, 'manifest.json')));
+
+  const restore = runCli(['restore', '--backup', backupDir, '--library-root', restoredRoot]);
+  assert.equal(restore.status, 0, restore.stderr);
+  assert.match(restore.stdout, /restored into .* — database corpus\.db/);
+  assert.ok(fs.existsSync(path.join(restoredRoot, 'articles')));
+
+  // The restored library registers as already-present against its own DB.
+  const reopen = runCli(['import', '--db', path.join(restoredRoot, 'corpus.db'), '--library-root', restoredRoot]);
+  assert.equal(reopen.status, 0, reopen.stderr);
+  assert.match(reopen.stdout, /package\[0\] already-registered/);
+
+  // A corrupt backup never materializes a library: the CLI answers exit 1
+  // with the named rule, not a crash.
+  const corruptDir = path.join(dbDir, 'corrupt');
+  fs.cpSync(backupDir, corruptDir, { recursive: true });
+  const documentFile = path.join(corruptDir, `articles/${library.articleId}/revisions/${library.revisionId}/extractions/${EXTRACTOR}/article.json`);
+  fs.writeFileSync(documentFile, fs.readFileSync(documentFile).toString().replace('"title"', '"title '));
+  const failed = runCli(['restore', '--backup', corruptDir, '--library-root', path.join(dbDir, 'never')]);
+  assert.equal(failed.status, 1, failed.stderr);
+  assert.match(failed.stderr, /corpus: restore: backup-checksum-mismatch/);
+  assert.equal(fs.existsSync(path.join(dbDir, 'never')), false);
 });
