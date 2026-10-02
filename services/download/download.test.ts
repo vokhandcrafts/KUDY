@@ -542,14 +542,14 @@ async function assertPublishPoint(
 // to signal when stops.json lands in staging, the fetch port parked on the
 // audio transfer, activation A started and B requested exactly at that
 // window. The optional deletion gate is wired into the deps of both
-// requests before either body runs.
+// requests before either body runs; the caller owns the gate instance and
+// hands the same one to deletePackage().
 async function overlapRig(
   root: string,
   gate?: DeletionGate,
 ): Promise<{
   driver: SqlDriver;
   deps: ActivateDeps;
-  gate: DeletionGate | undefined;
   parking: { release: () => void };
   first: Promise<ActivationResult>;
   second: Promise<ActivationResult>;
@@ -564,7 +564,7 @@ async function overlapRig(
   const first = activate({ ...KEY, lock }, deps);
   await stagedStops;
   const second = activate({ ...KEY, lock }, deps);
-  return { driver, deps, gate, parking, first, second, lock };
+  return { driver, deps, parking, first, second, lock };
 }
 
 test('G20.09 overlapping_same_key_activation: the second tail cannot turn a ready layer incomplete', async () => {
@@ -593,7 +593,8 @@ test('G20.09 overlapping_same_key_activation: the second tail cannot turn a read
 test('G20.09 cancel_delete_overlap: a deletion mid-flight cancels the parked activation and the queued one re-downloads', async () => {
   const root = tmpRoot();
   try {
-    const { driver, deps, gate, parking, first, second } = await overlapRig(root, createDeletionGate());
+    const gate = createDeletionGate();
+    const { driver, deps, parking, first, second } = await overlapRig(root, gate);
     await deletePackage({ routeId: KEY.routeId, version: KEY.version }, { store: deps.store, driver, gate });
     parking.release();
 
@@ -675,7 +676,8 @@ test('G20.09 cancel_delete_overlap: a restart check mid-overlap derives readines
 test('G20.09 cancel_delete_overlap: a pinned version refuses deletion and the overlap finishes untouched', async () => {
   const root = tmpRoot();
   try {
-    const { driver, deps, gate, parking, first, second } = await overlapRig(root, createDeletionGate());
+    const gate = createDeletionGate();
+    const { driver, deps, parking, first, second } = await overlapRig(root, gate);
     const sessionId = '11111111-1111-4111-8111-111111111111';
     startSession(driver, {
       sessionId,
