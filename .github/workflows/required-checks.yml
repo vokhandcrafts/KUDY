@@ -42,6 +42,13 @@ jobs:
         run: npm run typecheck
       - name: typecheck (web)
         run: npx tsc --noEmit -p web
+      - name: arch:check (real repository graph)
+        # G20.15 (#486): the required gate cruises the real checkout's
+        # dependency graph, not checker fixtures. Operator authorization for
+        # this exact step is recorded in issue #493 (closed 2026-10-02); the
+        # invocation is pinned by tools/ci/check-required-checks.mjs and the
+        # failure semantics by the arch-check sandbox suite (tools/arch).
+        run: npm run arch:check
   server-typecheck:
     # G20.13 (#484): the production Deno entrypoints are type-checked in the
     # environment their code runs in. Operator authorization for this exact
