@@ -166,7 +166,9 @@ async function main(args) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main(process.argv.slice(2)).catch((error) => {
-    console.error(`corpus: ${error instanceof CorpusDiagnostic ? `${error.rule} — ${error.message}` : error.message}`);
+    // Journal hygiene (25 §6/§9): the rule or error class only — messages
+    // may embed local paths and private keys.
+    console.error(`corpus: ${error instanceof CorpusDiagnostic ? error.rule : error.name ?? 'error'}`);
     process.exit(1);
   });
 }

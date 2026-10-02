@@ -254,11 +254,10 @@ export async function importArticle(inputRecord, { inputRoot, libraryRoot, sourc
     fs.writeFileSync(path.join(extractionStaging, 'text.md'), renderMarkdown(finalDocument));
 
     if (fs.existsSync(revisionDir)) {
-      // The revision exists (another extractor version): move the new
-      // extraction and any newly provided media into it, so the package
-      // never names an asset that is absent on disk.
-      fs.mkdirSync(path.join(revisionDir, 'extractions'), { recursive: true });
-      fs.renameSync(extractionStaging, extractionDir);
+      // The revision exists (another extractor version): move the newly
+      // provided media first and rename the extraction last, so a crash
+      // mid-merge can only leave already-stored assets behind — never a
+      // visible article.json naming files that are still in staging.
       const stagedImages = path.join(staging, 'images');
       if (fs.existsSync(stagedImages)) {
         fs.mkdirSync(path.join(revisionDir, 'images'), { recursive: true });
@@ -267,6 +266,8 @@ export async function importArticle(inputRecord, { inputRoot, libraryRoot, sourc
           if (!fs.existsSync(target)) fs.renameSync(path.join(stagedImages, file), target);
         }
       }
+      fs.mkdirSync(path.join(revisionDir, 'extractions'), { recursive: true });
+      fs.renameSync(extractionStaging, extractionDir);
       fs.rmSync(staging, { recursive: true, force: true });
     } else {
       fs.mkdirSync(path.join(articleDir, 'revisions'), { recursive: true });
