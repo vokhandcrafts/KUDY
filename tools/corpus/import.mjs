@@ -37,7 +37,6 @@ import { CorpusDiagnostic, extractArticle, renderMarkdown, sha256Hex } from './e
 
 const HTML_BYTES_LIMIT = 20 * 1024 * 1024;
 const MEDIA_BYTES_LIMIT = 50 * 1024 * 1024;
-const MEDIA_PER_RECORD_LIMIT = 200;
 const EXTRACTOR_VERSION_PATTERN = /^[a-z][a-z0-9-]*\/v[0-9]+$/;
 
 // Minimal magic-byte table for the v1 media formats; the extension must
@@ -178,11 +177,10 @@ export async function importArticle(inputRecord, { inputRoot, libraryRoot, sourc
 
   // Media validation completes before the first byte is written anywhere:
   // every declared file is read, size- and format-checked and hashed here,
-  // so a diagnostic can never leave a half-written package behind.
+  // so a diagnostic can never leave a half-written package behind. The
+  // per-record media count is owned by the corpus-input schema (maxItems
+  // 200) and rejects at validateRecord — no second implementation here.
   const recordMedia = inputRecord.media ?? [];
-  if (recordMedia.length > MEDIA_PER_RECORD_LIMIT) {
-    throw new CorpusDiagnostic('too-many-media', `record '${sourceRecordKey}' exceeds ${MEDIA_PER_RECORD_LIMIT} media files`);
-  }
   const media = [];
   for (const medium of recordMedia) {
     const extension = extensionOf(medium.local_path);
@@ -256,8 +254,19 @@ export async function importArticle(inputRecord, { inputRoot, libraryRoot, sourc
     fs.writeFileSync(path.join(extractionStaging, 'text.md'), renderMarkdown(finalDocument));
 
     if (fs.existsSync(revisionDir)) {
+      // The revision exists (another extractor version): move the new
+      // extraction and any newly provided media into it, so the package
+      // never names an asset that is absent on disk.
       fs.mkdirSync(path.join(revisionDir, 'extractions'), { recursive: true });
       fs.renameSync(extractionStaging, extractionDir);
+      const stagedImages = path.join(staging, 'images');
+      if (fs.existsSync(stagedImages)) {
+        fs.mkdirSync(path.join(revisionDir, 'images'), { recursive: true });
+        for (const file of fs.readdirSync(stagedImages)) {
+          const target = path.join(revisionDir, 'images', file);
+          if (!fs.existsSync(target)) fs.renameSync(path.join(stagedImages, file), target);
+        }
+      }
       fs.rmSync(staging, { recursive: true, force: true });
     } else {
       fs.mkdirSync(path.join(articleDir, 'revisions'), { recursive: true });

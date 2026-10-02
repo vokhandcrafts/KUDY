@@ -112,21 +112,63 @@ test('identity_not_title', { skip }, async (t) => {
 });
 
 test('retained_extractions', { skip }, async (t) => {
-  const tree = makeTree(t, { 'pages/a.html': pageHtml('Камяніца', 'Адзін тэкст, дзве рэвізіі ачысткі.') });
+  const tree = makeTree(t, {
+    'pages/a.html': pageHtml('Камяніца', 'Адзін тэкст, дзве рэвізіі ачысткі.'),
+    'images/photo.png': PNG_BYTES,
+  });
   const record = { source_record_key: 'wiki-retain', html_path: 'pages/a.html', language: 'be', rights: 'research_only' };
 
   const first = await runImport(record, tree, 'wiki-html/v1');
   const v1Bytes = readFileSync(path.join(first.paths.extractionDir, 'article.json'));
 
-  const second = await runImport(record, tree, 'wiki-html/v2');
+  // The same bytes re-imported under a new extractor version, now with
+  // provided media: the new extraction and the new asset both land in the
+  // existing revision — the package never names an absent file.
+  const withMedia = { ...record, media: [{ media_key: 'photo-001', local_path: 'images/photo.png', rights: 'research_only' }] };
+  const second = await runImport(withMedia, tree, 'wiki-html/v2');
   assert.ok(second.paths.extractionDir.endsWith(path.join('extractions', 'wiki-html/v2')));
   assert.ok(existsSync(path.join(first.paths.extractionDir, 'article.json')), 'the earlier extraction is retained');
   assert.deepEqual(readFileSync(path.join(first.paths.extractionDir, 'article.json')), v1Bytes, 'earlier files stay byte-identical');
-
+  const assetId = sha256Hex(PNG_BYTES);
+  assert.deepEqual(readFileSync(path.join(second.paths.revisionDir, 'images', `${assetId}.png`)), PNG_BYTES, 'media provided with the new version is stored in the existing revision');
   const v2Document = JSON.parse(readFileSync(path.join(second.paths.extractionDir, 'article.json'), 'utf8'));
   assert.equal(v2Document.extractor_version, 'wiki-html/v2');
+  assert.deepEqual(v2Document.images, [{ asset_id: assetId, source_locator: 'photo-001' }]);
+
+  // A version bump without new media only adds the extraction directory.
+  const third = await runImport(record, tree, 'wiki-html/v3');
+  assert.ok(existsSync(path.join(third.paths.extractionDir, 'article.json')));
   const v1Document = JSON.parse(v1Bytes.toString('utf8'));
   assert.notEqual(v1Document.fragments[0].fragment_id, v2Document.fragments[0].fragment_id, 'fragment ids bind to the extractor version');
+});
+
+test('named_diagnostics_for_limits_and_formats', { skip }, async (t) => {
+  const tree = makeTree(t, {
+    'pages/a.html': pageHtml('Камяніца', 'Звычайны тэкст.'),
+    'pages/bad-utf8.html': Buffer.from([0xff, 0xfe, 0x00, 0x01, 0x02]),
+    'images/big.png': Buffer.alloc(50 * 1024 * 1024 + 1, 32),
+    'images/notes.txt': Buffer.from('гэта не выява'),
+  });
+  const base = { source_record_key: 'wiki-diag', html_path: 'pages/a.html', language: 'be', rights: 'research_only' };
+  const diagnostic = (rule) => (error) => error instanceof CorpusDiagnostic && error.rule === rule;
+
+  await assert.rejects(runImport(base, tree, 'wiki-html/1'), diagnostic('invalid-extractor-version'), 'the extractor version pattern is checked before any filesystem work');
+  await assert.rejects(runImport({ ...base, html_path: 'pages/bad-utf8.html' }, tree), diagnostic('html-not-utf8'), 'html that is not valid UTF-8 is rejected');
+  await assert.rejects(
+    runImport({ ...base, media: [{ media_key: 'big', local_path: 'images/big.png', rights: 'research_only' }] }, tree),
+    diagnostic('media-too-large'),
+    'a media file over 50 MiB is rejected'
+  );
+  await assert.rejects(
+    runImport({ ...base, media: [{ media_key: 'notes', local_path: 'images/notes.txt', rights: 'research_only' }] }, tree),
+    diagnostic('media-unknown-format'),
+    'an extension outside the v1 format table is rejected'
+  );
+  const articlesRoot = path.join(tree.libraryRoot, 'articles');
+  const registered = existsSync(articlesRoot)
+    ? readdirSync(articlesRoot).filter((name) => existsSync(path.join(articlesRoot, name, 'revisions')))
+    : [];
+  assert.deepEqual(registered, [], 'no revision registered after any diagnostic');
 });
 
 test('traversal_and_junction', { skip }, async (t) => {

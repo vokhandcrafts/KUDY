@@ -133,7 +133,11 @@ function collectOutline() {
       }
       if (tag === 'A') {
         const text = collapse(node.textContent);
-        if (text) links.push({ text, href: node.getAttribute('href') ?? '' });
+        const href = node.getAttribute('href');
+        // A visible-text anchor without an href (legacy <a name>) keeps its
+        // text in the body but records no link: the schema requires a
+        // non-empty target and there is no address to store.
+        if (text && href) links.push({ text, href });
         line += text;
         return;
       }
@@ -223,22 +227,29 @@ function sentenceAtoms(paragraphText) {
 
 const CODE_POINTS = (text) => Array.from(text).length;
 
-// Cuts one atom into ≤ limit code point pieces at the last space of each
+// Cuts a text into ≤ limit code point pieces at the last space of each
 // window (hard cut when a window has none) — stable positions for the same
-// input, per 25 §4.
-function splitOversizeAtom(atom) {
+// input, per 25 §4. Every fragment kind shares this limit.
+function chunkTexts(text) {
   const pieces = [];
-  let rest = atom.text;
+  let rest = text;
   while (CODE_POINTS(rest) > FRAGMENT_LIMIT) {
     const chars = Array.from(rest);
     const window = chars.slice(0, FRAGMENT_LIMIT + 1).join('');
     const cut = window.lastIndexOf(' ');
     const at = cut > 0 ? cut : FRAGMENT_LIMIT;
-    pieces.push({ text: chars.slice(0, at).join('').trimEnd(), glue: ' ' });
+    pieces.push(chars.slice(0, at).join('').trimEnd());
     rest = chars.slice(at).join('').trimStart();
   }
-  pieces.push({ text: rest, glue: atom.glue });
+  pieces.push(rest);
   return pieces;
+}
+
+// Splits one oversize sentence atom into ≤ limit pieces; only the last piece
+// keeps the atom's original glue.
+function splitOversizeAtom(atom) {
+  const pieces = chunkTexts(atom.text);
+  return pieces.map((text, index) => ({ text, glue: index === pieces.length - 1 ? atom.glue : ' ' }));
 }
 
 // Packs the section stream into fragments ≤ 6000 code points: sentences stay
@@ -400,17 +411,19 @@ export async function extractArticle(htmlBytes, { articleId, revisionId, extract
         figureIndex += 1;
         if (block.src) imageRefs.push({ reference: block.src, locator: `figure[${figureIndex}]` });
         if (block.caption) {
-          const source_locator = `figure[${figureIndex}]:caption`;
-          fragments.push({
-            fragment_id: fragmentId(revisionId, extractorVersion, source_locator),
-            article_id: articleId,
-            revision_id: revisionId,
-            extractor_version: extractorVersion,
-            kind: 'caption',
-            section_path: [...sectionPath],
-            text: block.caption,
-            source_locator,
-          });
+          for (const [chunkIndex, chunkText] of chunkTexts(block.caption).entries()) {
+            const source_locator = `figure[${figureIndex}]:caption${chunkIndex > 0 ? `:c[${chunkIndex + 1}]` : ''}`;
+            fragments.push({
+              fragment_id: fragmentId(revisionId, extractorVersion, source_locator),
+              article_id: articleId,
+              revision_id: revisionId,
+              extractor_version: extractorVersion,
+              kind: 'caption',
+              section_path: [...sectionPath],
+              text: chunkText,
+              source_locator,
+            });
+          }
         }
       } else if (block.src) {
         imageIndex += 1;
@@ -421,17 +434,19 @@ export async function extractArticle(htmlBytes, { articleId, revisionId, extract
     if (block.kind === 'refitem') {
       flushBody();
       bibliographyIndex += 1;
-      const source_locator = `bibliography:li[${bibliographyIndex}]`;
-      fragments.push({
-        fragment_id: fragmentId(revisionId, extractorVersion, source_locator),
-        article_id: articleId,
-        revision_id: revisionId,
-        extractor_version: extractorVersion,
-        kind: 'bibliography',
-        section_path: [...sectionPath],
-        text: block.text,
-        source_locator,
-      });
+      for (const [chunkIndex, chunkText] of chunkTexts(block.text).entries()) {
+        const source_locator = `bibliography:li[${bibliographyIndex}]${chunkIndex > 0 ? `:c[${chunkIndex + 1}]` : ''}`;
+        fragments.push({
+          fragment_id: fragmentId(revisionId, extractorVersion, source_locator),
+          article_id: articleId,
+          revision_id: revisionId,
+          extractor_version: extractorVersion,
+          kind: 'bibliography',
+          section_path: [...sectionPath],
+          text: chunkText,
+          source_locator,
+        });
+      }
     }
   }
   flushBody();

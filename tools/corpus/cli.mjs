@@ -73,8 +73,9 @@ function countMedia(manifest) {
 
 // unpack: manifest-level contract first, then per-record import. One failed
 // record does not stop the others; the summary and the exit code reflect
-// every failure. Output carries record indexes and id prefixes only —
-// source keys, site addresses and local paths are private data (25 §9).
+// every failure. Output carries record indexes, id prefixes and rule names
+// only — source keys, site addresses and local paths are private data
+// (25 §9), so CorpusDiagnostic messages never reach the journal here.
 async function unpackCommand(parsed) {
   if (!parsed.manifest || !parsed['input-root'] || !parsed['library-root']) {
     fail('unpack requires --manifest, --input-root and --library-root', 2);
@@ -111,9 +112,10 @@ async function unpackCommand(parsed) {
       } catch (error) {
         failed += 1;
         if (error instanceof CorpusDiagnostic) {
-          console.error(`corpus: record[${index}] ${error.rule} — ${error.message}`);
+          console.error(`corpus: record[${index}] ${error.rule}`);
         } else {
-          console.error(`corpus: record[${index}] unexpected error — ${error.message}`);
+          // OS-level messages embed full paths — name the error class only.
+          console.error(`corpus: record[${index}] unexpected ${error.name ?? 'error'}`);
         }
       }
     }

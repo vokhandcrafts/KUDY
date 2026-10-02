@@ -14,15 +14,17 @@ git-ігнараваным `.scratch/`.*
 `exclude_neighbor_navigation`, `caption_asset_binding`,
 `static_original_refs_are_inert`, `zero_network` (extract);
 `identity_not_title`, `retained_extractions`, `traversal_and_junction`,
-`partial_write_retry`, `missing_local_media`, `cli_unpack_contract` (import):
+`partial_write_retry`, `missing_local_media`, `cli_unpack_contract` (import)
++ дадатковыя `body_links_preserved`, `anchor_without_href_keeps_text_without_link`,
+`named_diagnostics_for_limits_and_formats`:
 
 ```sh
 node --test tools/corpus/extract.test.mjs tools/corpus/import.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 ```
 
 ```output
-ℹ tests 12
-ℹ pass 12
+ℹ tests 14
+ℹ pass 14
 ℹ fail 0
 ```
 
@@ -82,8 +84,8 @@ node --test tools/corpus/import.test.mjs 2>&1 | grep -E "^ℹ (pass|fail)"
 ```
 
 ```output
-ℹ pass 5
-ℹ fail 1
 ℹ pass 6
+ℹ fail 1
+ℹ pass 7
 ℹ fail 0
 ```

@@ -170,6 +170,24 @@ test('body_links_preserved', { skip: skipReason }, async () => {
   assert.match(document.fragments.find((fragment) => fragment.kind === 'body').text, /камяніцу на Выдуманай/);
 });
 
+test('anchor_without_href_keeps_text_without_link', { skip: skipReason }, async () => {
+  const html = Buffer.from(
+    '<!DOCTYPE html><html lang="be"><head><meta charset="utf-8"><title>Цэх</title></head><body>' +
+      '<h1 id="firstHeading">Цэх ганчароў</h1><div id="mw-content-text"><div class="mw-parser-output">' +
+      '<p>Цэх згадваецца <a name="cesspit">пры камяніцы</a> ў 1734 годзе.</p>' +
+      '</div></div></body></html>'
+  );
+  const factory = await sharedFactory();
+  const { document } = await extractArticle(html, {
+    articleId: sha256Hex('name-anchor'),
+    revisionId: sha256Hex('revision-name-anchor'),
+    extractorVersion: 'wiki-html/v1',
+    browserFactory: factory,
+  });
+  assert.equal(document.links, undefined, 'an anchor without an href records no link — an empty target would reject the record');
+  assert.match(document.fragments.find((fragment) => fragment.kind === 'body').text, /пры камяніцы/, 'the anchor text stays in the body');
+});
+
 test('zero_network', { skip: skipReason }, async () => {
   const factory = await sharedFactory();
   const session = await factory.open();
