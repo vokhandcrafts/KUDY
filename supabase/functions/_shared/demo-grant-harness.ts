@@ -7,6 +7,7 @@
 import { registerDevice } from './device-core.ts';
 import {
   createSqlEntitlementCache,
+  createSqlGrantRate,
   createSqlProductLookup,
   type EntitlementVerdict,
   type GrantPortDeps,
@@ -58,6 +59,7 @@ export async function createGrantDemoHarness(manifestPaths: string[]): Promise<G
       },
     },
     cache: createSqlEntitlementCache(runner),
+    rate: createSqlGrantRate(runner),
   };
 
   return {

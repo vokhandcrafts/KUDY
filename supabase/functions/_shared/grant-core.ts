@@ -13,6 +13,7 @@
 // Deno wiring is supabase/functions/grant/index.ts (not-run until deploy,
 // G08.01 precedent).
 
+import { checkRateLimit, type RateDecision, type RateStorage } from './device-core.ts';
 import { createHash } from 'node:crypto';
 
 export type GrantEnvironment = 'sandbox' | 'production';
@@ -31,6 +32,22 @@ export const GRANT_URL_TTL_SECONDS = 600;
 export const GRANT_CACHE_TTL_SECONDS = 86_400;
 export const GRANT_RETRY_AFTER_SECONDS = 30;
 export const GRANT_CACHE_MAX_ROWS_PER_DEVICE = 32;
+
+// N8 — the /grant request gate: one configurable owner for the per-device
+// window and limit. A grant happens once per activation and the positive
+// cache answers repeats, but the counter counts every authenticated request
+// (N8: «Ліміт дзейнічае і для паўтораў»), so the values are defensive
+// implementation choices (the DEVICE_RATE_LIMIT/EVENT_RATE_LIMIT idiom; no
+// canonical number exists in 09) — recorded in docs/agent-tasks/results/
+// G20.26.md and to be re-tuned only from verified deployment data.
+export const GRANT_RATE_LIMIT = 30;
+export const GRANT_RATE_WINDOW_MS = 60 * 60 * 1000;
+
+/** Atomic per-device window increment against `grant_request_rate` (migration 20261002000000); `$2` is the window start in epoch ms. */
+export const GRANT_RATE_INCREMENT_SQL =
+  'insert into grant_request_rate (device_id, window_start, attempts) values ($1::uuid, to_timestamp($2 / 1000.0), 1) ' +
+  'on conflict (device_id, window_start) do update set attempts = grant_request_rate.attempts + 1 ' +
+  'returning attempts';
 
 // N5: the URL TTL is a finite positive integer of at most the canonical
 // 600 s — the 09 §2 private-zone value serves as both the default and the
@@ -68,7 +85,8 @@ export interface GrantRequestBody {
 // endpoint emits the grant-side subset — url_expired/url_invalid belong to
 // the file source, not to /v1/grant — and the cross-check test proves the
 // subset against the client's list. Errors carry `{ error: { code } }` on
-// the wire (the spike and the client's responseCode agree).
+// the wire (the spike and the client's responseCode agree). N8 adds the
+// 429 rate_limited answer (the device-wire spelling) with Retry-After.
 export type GrantAnswer =
   | { status: 200; body: { lock_url: string; urls: Array<{ path: string; url: string; expires_at: number }> } }
   | { status: 400; code: 'invalid_request' }
@@ -78,6 +96,7 @@ export type GrantAnswer =
         | 'no_entitlement' | 'environment_mismatch';
     }
   | { status: 404; code: 'not_found' }
+  | { status: 429; code: 'rate_limited'; retryAfterSeconds: number }
   | { status: 503; code: 'entitlement_unavailable'; retryAfterSeconds: number };
 
 // Spike provider contract (spikes/G00.03-sandbox-grant/server/provider.mjs):
@@ -107,10 +126,17 @@ export interface GrantConfig {
 
 // All server-side concerns are ports: product mapping (SQL `grant_products`),
 // the published-manifest source (private storage), the RevenueCat provider,
-// the signed-URL minter and the clock. No default transport anywhere — the
-// core cannot reach the network or the storage on its own.
+// the signed-URL minter, the clock and the N8 rate gate. No default transport
+// anywhere — the core cannot reach the network or the storage on its own.
 export interface GrantPortDeps {
   now(): number;
+  // The N8 gate: the atomic per-device increment runs before every other
+  // layer. The port carries the shared fixed-window decision (device-core
+  // RateDecision); a rejection or a malformed count propagates — the wrapper
+  // maps any limiter fault to its closed 503, never to an open gate.
+  rate: {
+    consume(deviceId: string, nowMs: number): Promise<RateDecision>;
+  };
   products: { find(routeId: string, tier: string): Promise<string | null> };
   manifests: {
     load(routeId: string, version: string, locale: string, tier: string): Promise<{ paths: string[]; lockUrl: string } | null>;
@@ -152,9 +178,9 @@ function parseGrantRequestBody(request: unknown, maxPaths: number): GrantRequest
  * One POST /v1/grant round for an already authenticated device (the wrapper
  * runs `verifyBearer` first — the G08.01 module stays the single auth path —
  * and answers `403 device_auth_failed` itself). The gate order is the spike's:
- * shape → unsafe paths → product mapping → manifest → membership →
- * entitlement → signed URLs, so a cheap client fault can never probe the
- * layers behind it.
+ * rate gate (N8) → shape → unsafe paths → product mapping → manifest →
+ * membership → entitlement → signed URLs, so a cheap client fault can never
+ * probe the layers behind it and no path reaches the provider uncounted.
  */
 export async function handleGrant(
   request: unknown,
@@ -162,6 +188,16 @@ export async function handleGrant(
   config: GrantConfig,
   deps: GrantPortDeps,
 ): Promise<GrantAnswer> {
+  // N8: after the device identity, before anything expensive — the atomic
+  // per-device counter. Every authenticated request counts, repeats included;
+  // the decision reuses the shared fixed-window core (device-core
+  // checkRateLimit — one algorithm per the N1 directive), and a limiter fault
+  // (storage error, malformed count) propagates: the wrapper's closed 503
+  // answers it, never an open gate.
+  const rate = await deps.rate.consume(deviceId, deps.now());
+  if (!rate.allowed) {
+    return { status: 429, code: 'rate_limited', retryAfterSeconds: rate.retryAfterSeconds };
+  }
   const maxPaths = config.maxPaths ?? GRANT_MAX_PATHS;
   const retryAfterSeconds = config.retryAfterSeconds ?? GRANT_RETRY_AFTER_SECONDS;
   // N5: a URL TTL outside the canonical policy is a server misconfiguration,
@@ -247,6 +283,7 @@ export interface GrantSqlRunner {
   writeCache(input: { deviceId: string; routeId: string; tier: string; environment: string; expiresAtMs: number }): Promise<unknown>;
   sweepExpiredCache(deviceId: string, nowMs: number): Promise<unknown>;
   capCache(deviceId: string, cap: number): Promise<unknown>;
+  incrementRate(deviceId: string, windowStartMs: number): Promise<Array<Record<string, unknown>>>;
 }
 
 /** Single-match product lookup by the generated `route_key` — at most one row per (route_id, tier) by unique index. */
@@ -309,6 +346,36 @@ export function createSqlEntitlementCache(runner: GrantSqlRunner): EntitlementCa
       // every write and a device never holds more than the cap.
       await runner.sweepExpiredCache(deviceId, nowMs);
       await runner.capCache(deviceId, GRANT_CACHE_MAX_ROWS_PER_DEVICE);
+    },
+  };
+}
+
+// The N8 gate over the `grant_request_rate` table: the shared fixed-window
+// core (device-core checkRateLimit) runs the atomic increment and validates
+// the returned count, so the grant endpoint runs the same algorithm as the
+// device and events endpoints (N1: no separate incompatible algorithm per
+// endpoint). The storage shape is the RateStorage contract — the raw device
+// id is the bucket key, never an IP. The limit/window parameters default to
+// the canonical constants (the single owner); tests that exercise other
+// gates past the request budget pass their own values.
+export function createSqlGrantRate(
+  runner: GrantSqlRunner,
+  limit: number = GRANT_RATE_LIMIT,
+  windowMs: number = GRANT_RATE_WINDOW_MS,
+): GrantPortDeps['rate'] {
+  const storage: RateStorage = {
+    async increment(deviceId, windowStartMs) {
+      const rows = await runner.incrementRate(deviceId, windowStartMs);
+      const attempts = rows[0]?.['attempts'];
+      if (typeof attempts !== 'number') {
+        throw new Error('rate counter: the storage did not return a valid attempt count');
+      }
+      return attempts;
+    },
+  };
+  return {
+    consume(deviceId, now) {
+      return checkRateLimit(storage, deviceId, now, limit, windowMs);
     },
   };
 }

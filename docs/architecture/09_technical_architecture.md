@@ -206,7 +206,7 @@ bundle/<route_id>/<version>/
 | Метад | Шлях | Прызначэнне | Аўтарызацыя |
 |---|---|---|---|
 | `POST` | `/v1/device` | Рэгістрацыя ўстаноўкі: сервер генеруе `device_id` (UUID) і `device_secret` (32 байты, вяртаецца **адзін раз**), хэш сакрэту — у `devices`. Кліент трымае сакрэт у `expo-secure-store` | няма, rate-limit па IP |
-| `POST` | `/v1/grant` | `{route_id, version, locale, tier, paths[]}` → праверка права **запросам да RevenueCat** → `{lock_url, urls:[{path,url,expires_at}]}`. Няма права → `403 no_entitlement`; RevenueCat недаступны і кэшу няма → `503 entitlement_unavailable` (з `Retry-After`) | `Bearer <device_secret>` |
+| `POST` | `/v1/grant` | `{route_id, version, locale, tier, paths[]}` → атамарны лічыльнік запытаў прылады (N8) → праверка права **запросам да RevenueCat** → `{lock_url, urls:[{path,url,expires_at}]}`. Няма права → `403 no_entitlement`; RevenueCat недаступны і кэшу няма → `503 entitlement_unavailable` (з `Retry-After`); ліміт запытаў прылады вычарпаны → `429 rate_limited` (з `Retry-After`) | `Bearer <device_secret>` |
 | `POST` | `/v1/events` | Батч падзей `{event_id (UUID, генеруе кліент), type, at, payload}`. Ідэмпатэнтна па `event_id` (unique index) | `Bearer <device_secret>` |
 | `POST` | `/v1/feedback/read` | Чытанне толькі ўласнай ацэнкі па вядомай мэце, §5 у `21` | `Bearer <device_secret>` |
 | `PUT` | `/v1/feedback` | Ідэмпатэнтная CAS-запіс/замена непублічнай ацэнкі, валідацыя target/version/locale | `Bearer <device_secret>` |

@@ -24,6 +24,7 @@ import type { FetchPort, LayerKey, LockEntry } from './types.ts';
 //     | { status: 403; code: 'device_auth_failed' | 'unknown_route_tier' | 'manifest_not_found'
 //         | 'path_not_allowed' | 'no_entitlement' | 'environment_mismatch' | 'url_expired' | 'url_invalid' }
 //     | { status: 404; code: 'not_found' }
+//     | { status: 429; code: 'rate_limited' }                    // + Retry-After; кліент рэтраіць абмежавана (N8)
 //     | { status: 503; code: 'entitlement_unavailable' };        // + Retry-After; кліент рэтраіць
 // Machine projection of the same list: STATUS_OF and OUTCOME_BY_CODE derive
 // from it (or fail to compile), and the test fake's list is deep-compared
@@ -39,6 +40,7 @@ export const GRANT_ERRORS = [
   { status: 403, code: 'url_expired' },
   { status: 403, code: 'url_invalid' },
   { status: 404, code: 'not_found' },
+  { status: 429, code: 'rate_limited' },
   { status: 503, code: 'entitlement_unavailable' },
 ] as const;
 
@@ -47,7 +49,7 @@ export type GrantCode = (typeof GRANT_ERRORS)[number]['code'];
 // The status of each closed code — derived, never restated by hand.
 const STATUS_OF = Object.fromEntries(GRANT_ERRORS.map((entry) => [entry.code, entry.status])) as Record<
   GrantCode,
-  400 | 403 | 404 | 503
+  400 | 403 | 404 | 429 | 503
 >;
 
 function isGrantCode(code: string): code is GrantCode {
@@ -103,10 +105,14 @@ export interface GrantUrls {
 // no_entitlement: the neighbouring layer offers the purchase path (G08.03
 // owns it). `unavailable` — entitlement_unavailable with the Retry-After
 // wait already honoured for the bounded retries (19 §3.6: «кліент рэтраіць»);
-// retrying again later stays available. `executor-error` — invalid_request
-// is a client bug, not a user answer (19 §3.6). `regrant` — url_expired: the
-// fetch source answers it by re-granting (criterion 3); the grant endpoint
-// itself never sends it, and a server that does gets the same named answer.
+// retrying again later stays available. `rate-limited` — rate_limited (N8):
+// the same bounded Retry-After machinery runs, and the spent outcome carries
+// its own wait for a later manual attempt; the request budget of the device
+// is spent, so no further automatic call is made after the bound.
+// `executor-error` — invalid_request is a client bug, not a user answer
+// (19 §3.6). `regrant` — url_expired: the fetch source answers it by
+// re-granting (criterion 3); the grant endpoint itself never sends it, and a
+// server that does gets the same named answer.
 // The remaining closed codes are named `failed` answers. Anything outside
 // the list — an unknown status or code, or a status↔code pairing the closed
 // list does not define, or a malformed success body — is `unknown`: fail
@@ -121,6 +127,13 @@ export type GrantOutcome =
       kind: 'unavailable';
       code: 'entitlement_unavailable';
       status: 503;
+      retryAfterMs: number;
+      retriesUsed: number;
+    }
+  | {
+      kind: 'rate-limited';
+      code: 'rate_limited';
+      status: 429;
       retryAfterMs: number;
       retriesUsed: number;
     }
@@ -268,6 +281,13 @@ const OUTCOME_BY_CODE: Record<GrantCode, (ctx: GrantAnswerContext) => GrantOutco
     retryAfterMs: ctx.retryAfterMs,
     retriesUsed: ctx.retriesUsed,
   }),
+  rate_limited: (ctx) => ({
+    kind: 'rate-limited',
+    code: 'rate_limited',
+    status: 429,
+    retryAfterMs: ctx.retryAfterMs,
+    retriesUsed: ctx.retriesUsed,
+  }),
   url_expired: () => ({ kind: 'regrant', code: 'url_expired', status: 403 }),
   device_auth_failed: () => ({ kind: 'failed', status: 403, code: 'device_auth_failed' }),
   unknown_route_tier: () => ({ kind: 'failed', status: 403, code: 'unknown_route_tier' }),
@@ -304,9 +324,11 @@ function mapGrantAnswer(
 }
 
 // One POST /v1/grant round trip with the full closed-list mapping. Retries
-// only 503 entitlement_unavailable, honouring Retry-After through the
-// injected delay (criterion 2, the Proof); any transport rejection is the
-// defined offline outcome (criterion 4).
+// only the bounded-wait family — 503 entitlement_unavailable and the N8 429
+// rate_limited — honouring Retry-After through the injected delay (criterion
+// 2 and 4, the Proof); any transport rejection is the defined offline
+// outcome (criterion 4). A rate-limited reply that outlives the retry bound
+// surfaces as the named rate-limited outcome carrying its wait.
 async function grantOnce(key: LayerKey, paths: string[], deps: ResolvedDeps): Promise<GrantOutcome> {
   const body: GrantRequestBody = {
     route_id: key.routeId,
@@ -334,13 +356,17 @@ async function grantOnce(key: LayerKey, paths: string[], deps: ResolvedDeps): Pr
       deps.diagnostic('grant:offline');
       return { kind: 'offline' };
     }
-    if (response.status === 503 && responseCode(response.body) === 'entitlement_unavailable') {
-      // The header of every 503 is parsed — including the final one, so the
-      // spent outcome carries its own wait for the next attempt.
+    const code = responseCode(response.body);
+    const boundedWait = (response.status === 503 && code === 'entitlement_unavailable')
+      || (response.status === 429 && code === 'rate_limited');
+    if (boundedWait) {
+      // The header of every bounded-wait answer is parsed — including the
+      // final one, so the spent outcome carries its own wait for the next
+      // attempt.
       retryAfterMs = parseRetryAfter(response.headers, deps.policy.defaultRetryAfterMs);
       if (retriesUsed < deps.policy.maxRetries) {
         retriesUsed += 1;
-        deps.diagnostic(`grant:retry entitlement_unavailable delay_ms=${retryAfterMs}`);
+        deps.diagnostic(`grant:retry ${code ?? ''} delay_ms=${retryAfterMs}`);
         await deps.delay(retryAfterMs);
         continue;
       }
