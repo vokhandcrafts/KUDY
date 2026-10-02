@@ -16,8 +16,11 @@
 //     opens production files (09 §5, ADR G00.03 §3)
 //   REVENUECAT_SECRET_API_KEY — Secret API key; never client-side, never logged
 //   REVENUECAT_BASE_URL — optional https override (spike canonical name)
-//   GRANT_URL_TTL_SECONDS / GRANT_ENTITLEMENT_CACHE_TTL_SECONDS — optional
-//     overrides of the grant-core defaults (600s / 86400s)
+//   GRANT_URL_TTL_SECONDS — optional override of the 600 s default; any
+//     out-of-policy value (N5: zero, negative, fractional, non-finite,
+//     malformed, above the cap) fails closed — the function never mints
+//   GRANT_ENTITLEMENT_CACHE_TTL_SECONDS — optional override of the 86400s
+//     cache default; a distinct policy, not the URL TTL
 //   SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY — Storage signed-URL minting
 //   GRANT_STORAGE_BUCKET — the private bucket holding the published
 //     manifests and the extended files; the client never names the bucket
@@ -38,6 +41,7 @@ import {
   GRANT_RETRY_AFTER_SECONDS,
   GRANT_URL_TTL_SECONDS,
   handleGrant,
+  isUnsafeUrlTtl,
   type GrantAnswer,
   type GrantConfig,
   type GrantPortDeps,
@@ -274,6 +278,21 @@ function optionalSecondsEnv(name: string, fallback: number): number {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
 }
 
+// N5: the URL TTL is fail-closed at the configuration boundary — an absent
+// setting uses the 600 s default, and any present but out-of-policy value
+// (zero, negative, fractional, non-finite, malformed, above the cap) stops
+// the function before it can mint, instead of silently falling back. The
+// cache TTL above keeps its own lenient policy.
+function requireCanonicalUrlTtlEnv(name: string): number {
+  const raw = Deno.env.get(name);
+  if (typeof raw !== 'string' || raw.trim() === '') return GRANT_URL_TTL_SECONDS;
+  const parsed = Number(raw);
+  if (isUnsafeUrlTtl(parsed)) {
+    throw new Error(`${name} must be a positive integer of at most ${GRANT_URL_TTL_SECONDS} seconds (N5)`);
+  }
+  return parsed;
+}
+
 function resolveConfig(): ResolvedConfig {
   const environment = requireEnv('GRANT_ENVIRONMENT');
   if (environment !== 'sandbox' && environment !== 'production') {
@@ -292,7 +311,7 @@ function resolveConfig(): ResolvedConfig {
     supabaseUrl: requireEnv('SUPABASE_URL'),
     serviceRoleKey: requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
     bucket: requireEnv('GRANT_STORAGE_BUCKET'),
-    urlTtlSeconds: optionalSecondsEnv('GRANT_URL_TTL_SECONDS', GRANT_URL_TTL_SECONDS),
+    urlTtlSeconds: requireCanonicalUrlTtlEnv('GRANT_URL_TTL_SECONDS'),
     cacheTtlSeconds: optionalSecondsEnv('GRANT_ENTITLEMENT_CACHE_TTL_SECONDS', GRANT_CACHE_TTL_SECONDS),
   };
 }
