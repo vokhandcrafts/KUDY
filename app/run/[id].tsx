@@ -353,11 +353,16 @@ export default function Run() {
   const surface = useRunSurface(services.run, routeId, confirmedSwitch === "1");
   const ready = surface?.status === "ready" ? surface : null;
   const run = useRunState(ready?.controller ?? null);
-  const strings = runMapStrings(ready?.locale ?? "be");
+  // Issue #524: without a ready session the words follow the UI-locale
+  // choice (the #305 store) — the fixed "be" fallback kept Belarusian on
+  // screen after choosing English or Українська. A ready session keeps its
+  // pinned locale (a UI switch never substitutes the active walk's language).
+  const strings = runMapStrings(ready?.locale ?? locale);
   // G06.10 (issue #432): the back word is the shared chrome catalog's, in the
   // run session's own display locale — the run map dictionary holds no copy
-  // of it (one back image, one dictionary).
-  const back = uiStrings(ready?.locale ?? "be").back;
+  // of it (one back image, one dictionary). The no-session fallback rides
+  // the same UI-locale choice (issue #524).
+  const back = uiStrings(ready?.locale ?? locale).back;
 
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4). A hook —
