@@ -15,7 +15,11 @@ export type { Sha256 };
 
 // What the envelope's route entry publishes ("спіс усяго, што існуе", 09 §4):
 // route_id, version, locales, layers, sizes, product_id — copied verbatim
-// from the catalog.schema.json route shape.
+// from the catalog.schema.json route shape. The strict v1 wire owner is the
+// generated contracts/wire/wire-types.ts; THIS projection is intentionally
+// looser (string locales, optional sizes) because the same shape serves the
+// legacy-v0 and unknown-major routes the envelope routes through it — that
+// looseness is a documented mapping, not a schema defect (G20.19, issue #490).
 export interface CatalogRouteEntry {
   readonly route_id: string;
   readonly version: string;

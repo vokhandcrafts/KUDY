@@ -20,6 +20,8 @@
 | `schemas/localized-text.schema.json`, `schemas/identifier.schema.json` | Агульныя тыпы: локалі allowlist `be/en/uk`, ідэнтыфікатары `[a-z0-9._-]` ≤ 64 |
 | `reader.mjs` | Ядро інтэрпрэтацыі схем + named-правілы + чытанне каталогу |
 | `contracts.test.mjs` | Прыёмачная сюіта (у `npm test`) |
+| `wire/wire-types.ts` | Згенераваная TS-праекцыя wire-формаў каталогу і route.json + пераліку моваў; уладальнік — схемы, рукамі не рэдагаваць |
+| `fixtures/bundle-docs.ts` | Агульныя фікстуры чытальнікаў абодвух бакоў (прылада і вэб) |
 | `examples/` | Прыклады сутнасцей без бандл-фікстур: Moment, Media, імпартаваны гід |
 
 ## Версіяванне і палітыка чытання
@@ -41,8 +43,14 @@
 
 Ядро `reader.mjs` інтэрпрэтуе толькі падмноства draft-07, якое выкарыстоўваюць гэтыя схемы (`type`, `required`, `properties`, `additionalProperties`, `propertyNames`, `max/minProperties`, `items`, `max/minItems`, `enum`, `const`, `pattern`, `min/maxLength`, `min/maximum`, `$ref`, `allOf`, `oneOf`, `if/then`). Крыжаваныя праверкі запісаў — named-правілы рэдара (`duplicate-ref`, `foreign-city`, `estimated_duration_range`, `nested-collection`, `duplicate-member-ref`, `missing-overlap-note`), фікстуры `fixtures/discovery-contract/` падаюць на кожную названую. **Гэта не поўны валідатар**: каардынаты, транскрыпты, незацверджаны кантэнт, перакрыццё радыусаў, стабільнасць `RouteStop.id` між версіямі — валідатар G02.02 (`tools/validate/`); публікацыя і pointer update — G02.04.
 
+## Згенераваныя wire-тыпы (G20.19)
+
+`wire/wire-types.ts` — дэтэрмінаваная праекцыя схем у TypeScript: v1-форма каталогу (`CatalogRouteEntry`, `CatalogPointer`, `CatalogView`), bundle-wire (`RouteDoc`, `RouteStop`) і пералік моваў. Уладальнік фармату — схемы: генератар `tools/contracts/generate-wire-types.mjs` чытае іх пры кожным запуску, allowlist моваў выводзіць з `localized-text.schema.json` (кананічны ўладальнік, не новая вытворная) і fail-closed адхіляе люзр, што разышоўся з уладальнікам. Праверка састарэлага вываду — `npm run contracts:wire:check` (захаваны ў `npm test` праз `tools/contracts/wire-types.test.mjs`), рэгенерацыя — `npm run contracts:wire` (G20.19, issue #490; спецафікацыя §V4).
+
+Праекцыя не замяняе праверку даных падчас чытання: pattern'ы, ліміты і ўмоўныя required (`allOf` if/then у stop.schema.json) застаюцца працай `reader.mjs`. Расслабленыя праекцыі старых версіяў (`services/catalog/envelope.ts` — legacy-v0/unknown-major) — асобныя задакументаваныя мадэлі, іх наўмысна не тыпізуе строгі v1-тып.
+
 ## Запуск
 
 ```
-npm test   # уключае contracts/contracts.test.mjs
+npm test   # уключае contracts/contracts.test.mjs і tools/contracts/wire-types.test.mjs
 ```
