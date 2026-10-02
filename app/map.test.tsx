@@ -373,6 +373,9 @@ describe("Nearby UI-locale words (issue #523)", () => {
     expect(screen.getByText("Nearby")).toBeTruthy();
     expect(screen.getByText("The city map arrives after the tiles decision")).toBeTruthy();
     expect(screen.getByTestId("nearby-mode").props.children).toBe("Near you");
+    // en.back differs from the be default («← Назад») — the label itself
+    // proves the switch reached the back element (review round 1).
+    expect(screen.getByTestId("btn-map-back").props.accessibilityLabel).toBe("Back");
     expect(screen.queryByText("Побач")).toBeNull();
     // The switch re-rendered the words in place — the arming discipline
     // keeps the one subscription, the close releases what the surface armed.
