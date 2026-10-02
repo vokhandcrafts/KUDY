@@ -21,7 +21,7 @@ import {
   type NearbyLocationView,
   type NearbyOfferFacts,
 } from "../controllers/nearby/nearbySurfaceController";
-import { useServices } from "./_layout";
+import { useServices, useUiLocale } from "./_layout";
 import { BackButton } from "../components/back-button";
 import { CanonIcon } from "../components/canon-icon";
 import { AccessBadge, StateBanner } from "../components/guide-card";
@@ -196,8 +196,15 @@ export default function Map() {
   // One binding per open: the factory resolves the offers store and the
   // location guard (the composition root owns both — 19 §4.2).
   const binding = useMemo(() => services.nearby?.create(), [services.nearby]);
-  const { surface, locationView, locale } = useNearbySurface(binding);
-  const strings = nearbyStrings(locale);
+  const { surface, locationView } = useNearbySurface(binding);
+  // Issue #523: the chrome words read the UI-locale switch (the #305 store,
+  // the same useUiLocale subscription the catalog row and My KUDY hold) — the
+  // binding's locale is the content-display preference (be first), so without
+  // the catalog service the chrome stuck to Belarusian. The switch re-renders
+  // the open surface in place; the binding is not recreated, so no second
+  // GPS subscription is armed.
+  const uiLocale = useUiLocale();
+  const strings = nearbyStrings(uiLocale);
   // G07.05 — the R07 hint card of the open city surface: the one app-wide
   // hint controller's state, mounted below the back button; the tap opens
   // the preview the usual way (no Start, no audio).
@@ -222,10 +229,10 @@ export default function Map() {
       {/* UX 02 (issue #348): the Nearby surface gains its one back element —
           it never had one (AC2); the label is hosted by the shared
           component's <Text> (the #344 class guard). */}
-      <BackButton label={uiStrings(services.locale).back} testID="btn-map-back" />
+      <BackButton label={uiStrings(uiLocale).back} testID="btn-map-back" />
       <GuideHintMount
         binding={services.hints}
-        locale={locale}
+        locale={uiLocale}
         onOpen={(routeId) => router.push(`/route/${routeId}`)}
       />
       {/* UX 01 (issue #347): the offer list scrolls — the last card is
@@ -263,7 +270,7 @@ export default function Map() {
               </ScaledText>
             ) : (
               list.map((offer) => (
-                <NearbyCard key={offer.offer_id} offer={offer} strings={strings} locale={locale} />
+                <NearbyCard key={offer.offer_id} offer={offer} strings={strings} locale={uiLocale} />
               ))
             )}
           </>
