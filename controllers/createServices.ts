@@ -53,6 +53,7 @@ import {
 } from './run/runSurfaceController.ts';
 import type { RunControllerState } from './useRunController.ts';
 import { createMyKudyController, type MyKudyState, type SessionHistoryPort } from './myKudyController.ts';
+import { createUiLocaleStore, type UiLocalePersistence, type UiLocaleSwitch } from './uiLocaleStore.ts';
 import type { ControllerStore } from './createControllerStore.ts';
 import {
   createCommerceController,
@@ -141,6 +142,11 @@ export interface ServicePorts {
   // service is not constructed and the surfaces render their named state.
   readonly discoverySnapshot?: DiscoverySnapshotStore;
   readonly discoveryAnalytics?: DiscoveryAnalyticsPort;
+  // G14.04.d (issue #305) — the optional durable seam of the UI-locale
+  // switch: reads the stored choice at composition, writes every switch.
+  // Absent (the device db adapter is TR-10) the choice lives for the
+  // session; the `settings` row joins with the adapter (the consent idiom).
+  readonly uiLocalePersistence?: UiLocalePersistence;
   // G07.05 (issue #284) — the R07 hint seams: the durable guide_hint_state/
   // guide_hint_last store over services/db (zone B), the public points
   // projection and the accepted values document (ADR G07.04 §3). The app
@@ -158,8 +164,12 @@ export interface ServicePorts {
 
 export interface Services {
   // G06.05 (issue #280): the display locale the string catalogs render in —
-  // the first preference (L02's selection UI replaces the constant later).
+  // G14.04.d (issue #305) reads it through the ui-locale store below: the
+  // value the switch holds, changing without a services rebuild.
   readonly locale: string;
+  // G14.04.d (issue #305) — the UI-locale switch (the L02 selection): the
+  // My KUDY row writes be/en/uk through it, the screens subscribe.
+  readonly uiLocale: UiLocaleSwitch;
   readonly contentRepo:
     | {
         readonly evaluatePackage: (input: EvaluateInput) => Promise<Readiness>;
@@ -280,13 +290,21 @@ export function createServices(ports: ServicePorts): Services {
     discoverySnapshot,
     discoveryAnalytics,
     guideHints,
+    uiLocalePersistence,
   } = ports;
   const catalogLoader = catalogOrigin ? createOriginCatalogLoader(catalogOrigin) : undefined;
-  // MVP display-locale order: Belarusian first (21 §3.2 allowlist; the
-  // UI-locale selection is G06.05/L02 and will replace this). One preference
-  // value for the catalog service, the preview controller and the moment
-  // facts reader.
+  // MVP display-locale order: Belarusian first (21 §3.2 allowlist; G14.04.d's
+  // ui-locale switch below changes the chrome words' display locale, this
+  // content-display preference stays the composition fact until the uk
+  // content wave lands — G14.04.c/f). One preference value for the catalog
+  // service, the preview controller and the moment facts reader.
   const localePreference: readonly string[] = ['be', 'en'];
+  // G14.04.d (issue #305) — the UI-locale switch (the L02 selection G06.05
+  // deferred here): the chrome words' display locale, switchable in My KUDY
+  // without a restart. The persistence port is optional — absent (the app
+  // build today, the device db adapter is TR-10) the choice lives for the
+  // session; the durable `settings` row joins with the adapter.
+  const uiLocale = createUiLocaleStore(uiLocalePersistence);
   const catalogService = catalogLoader &&
     catalogSha256 &&
     createCatalogService({ loader: catalogLoader, sha256: catalogSha256 }, { localePreference });
@@ -563,7 +581,15 @@ export function createServices(ports: ServicePorts): Services {
     },
   };
   return {
-    locale: localePreference[0] ?? 'be',
+    // G14.04.d — the display locale reads through the ui-locale store (the
+    // L02 switch): a getter, so the screens' per-render uiStrings(...) sees
+    // the switched value without a services rebuild.
+    get locale() {
+      return uiLocale.current();
+    },
+    // G14.04.d (issue #305) — the switch itself: the My KUDY row writes it,
+    // the screens subscribe through useUiLocale.
+    uiLocale,
     contentRepo: packageStore && {
       evaluatePackage: (input) => evaluatePackage(packageStore, input),
     },

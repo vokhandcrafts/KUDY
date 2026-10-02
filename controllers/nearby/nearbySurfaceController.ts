@@ -187,7 +187,7 @@ export interface NearbyStrings {
   readonly durationUnit: string;
 }
 
-const STRINGS: Record<'be' | 'en', NearbyStrings> = {
+const STRINGS: Record<'be' | 'en' | 'uk', NearbyStrings> = {
   be: {
     title: 'Побач',
     proximityHeader: 'Паблізу',
@@ -228,8 +228,30 @@ const STRINGS: Record<'be' | 'en', NearbyStrings> = {
     audioLabel: 'audio',
     durationUnit: 'min',
   },
+  uk: {
+    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1); the
+    // native-speaker review is the owner's (uk-release-scope §5, §6.4).
+    title: 'Поруч',
+    proximityHeader: 'Поблизу',
+    reviewHeader: 'Огляд',
+    noteDenied: 'Позицію не дозволено — ручний огляд',
+    noteHeldByWalk: 'Прогулянка використовує позицію — ручний огляд',
+    noteAcquiring: 'Шукаємо позицію…',
+    noteUnstable: 'Позиція нестабільна',
+    empty: 'Пропозиції поки не опубліковані',
+    unavailable: 'Каталог недоступний',
+    loading: 'Завантаження…',
+    indexDegraded: 'Індекс пропозицій тимчасово недоступний',
+    mapNote: 'Карта міста з’явиться після рішення про тайли',
+    cardHint: 'Картка пропозиції. Аудіо не запускається.',
+    guideLabel: 'Гід',
+    placeLabel: 'Місце',
+    textLabel: 'Текст',
+    audioLabel: 'аудіо',
+    durationUnit: 'хв',
+  },
 };
 
 export function nearbyStrings(locale: string): NearbyStrings {
-  return locale === 'en' ? STRINGS.en : STRINGS.be;
+  return locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
 }

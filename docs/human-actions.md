@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-02 — Рэв'юй uk-радкі як носьбіт і смержы PR G14.04.d (закрывае #305)
+Што зрабіць: прачытай uk-радкі ў трох зонах — `components/ui-strings.ts`, пяць кантролер-слоўнікаў (`previewController`, `runMap`, `placeDetailController`, `nearbySurfaceController`, `commerceController`) і `web/lib/i18n/uk.ts` — і папраў мову дзе трэба: рэв'ю носьбіта uk належыць табе па рашэнні 6.4 uk-release-scope. Пасля правак (або без іх) смержы PR squash-мержам пасля зелёнага CI — ён закрые issue #305.
+PR: https://github.com/vokhandcrafts/KUDY/pull/469 (issue: https://github.com/vokhandcrafts/KUDY/issues/305)
+
 ### 2026-10-01 — Прагледзь спецыфікацыю даследчай бібліятэкі G19
 Што зрабіць: прагледзь спецыфікацыю `docs/25_content_research.md` і план `docs/superpowers/plans/2026-10-01-content-research.md`; пацвердзі іх або пазнач патрэбныя праўкі. Пасля прагляду і рэв'ю зліце PR дакументаў, каб яны сталі даступнымі выканаўцам; запуск задач і мадэльныя рашэнні G19.08 застаюцца асобным рашэннем.
 PR: https://github.com/vokhandcrafts/KUDY/pull/467 (issue: https://github.com/vokhandcrafts/KUDY/issues/457; эпік: https://github.com/vokhandcrafts/KUDY/issues/456)

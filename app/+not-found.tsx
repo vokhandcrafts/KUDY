@@ -14,7 +14,7 @@ import { tokens } from "../components/design-tokens";
 import { ScaledText } from "../components/scaled-text";
 import { screenStyles } from "../components/screen-styles";
 import { uiStrings } from "../components/ui-strings";
-import { useServices } from "./_layout";
+import { useServices, useUiLocale } from "./_layout";
 
 const styles = StyleSheet.create({
   hint: {
@@ -33,13 +33,16 @@ const styles = StyleSheet.create({
 
 export default function NotFound() {
   const services = useServices();
+  // G14.04.d (issue #305): the words read the switchable display locale —
+  // a switch re-renders them in place, no restart.
+  const locale = useUiLocale();
   const router = useRouter();
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4). A hook —
   // before any early returns.
   const insets = useSafeAreaInsets();
   // G06.05 (issue #280, AC1): the chrome words in the display locale.
-  const strings = uiStrings(services.locale);
+  const strings = uiStrings(locale);
   return (
     <View
       style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]}

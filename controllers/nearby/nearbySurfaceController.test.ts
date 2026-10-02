@@ -96,7 +96,10 @@ describe('nearbyStrings (criterion 5)', () => {
     assert.match(en.cardHint, /Audio does not start/);
   });
 
-  it('falls back to Belarusian for an unknown locale (09 §0: be + en)', () => {
-    assert.equal(nearbyStrings('uk').title, 'Побач');
+  it('carries the uk words and falls back to Belarusian for an unknown locale (G14.04.d; 09 §0)', () => {
+    // G14.04.d (issue #305): uk answers from its own catalog now — the
+    // unknown-locale fallback is probed on a locale no catalog answers.
+    assert.equal(nearbyStrings('uk').title, 'Поруч');
+    assert.equal(nearbyStrings('de').title, 'Побач');
   });
 });

@@ -12,6 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { be } from '../i18n/be.ts';
 import { en } from '../i18n/en.ts';
+import { uk } from '../i18n/uk.ts';
 import { SiteDataError, readSiteCatalogPage, readSiteGuidePage } from './site.ts';
 import { buildDemoFixture } from './test-fixture.ts';
 
@@ -109,8 +110,11 @@ test('defined rejections fail the site build instead of rendering empty pages', 
   );
 });
 
-test('the be and en string files keep the same key set (09 §8: UI localization from the first page)', () => {
+test('the be, en and uk string files keep the same key set (09 §8: UI localization from the first page; G14.04.d adds uk)', () => {
   assert.deepEqual(Object.keys(be).sort(), Object.keys(en).sort());
+  // G14.04.d (issue #305): the third file rides the same key set — a key
+  // added to be/en only fails here (implementation-rules 1).
+  assert.deepEqual(Object.keys(be).sort(), Object.keys(uk).sort());
 });
 
 test('no page or component hardcodes an href or an external URL (acceptance 5: CTAs resolve through lib/app-links.ts)', () => {

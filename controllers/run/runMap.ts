@@ -199,7 +199,7 @@ export function runMapReason(reason: string, strings: RunMapStrings): string {
   return strings.reasonText[reason as keyof RunMapStrings['reasonText']] ?? reason;
 }
 
-const STRINGS: Record<'be' | 'en', RunMapStrings> = {
+const STRINGS: Record<'be' | 'en' | 'uk', RunMapStrings> = {
   be: {
     status: {
       playing: 'гучыць',
@@ -316,8 +316,68 @@ const STRINGS: Record<'be' | 'en', RunMapStrings> = {
     storyExtended: 'Extended story',
     playStoryHint: 'Plays this story aloud',
   },
+  uk: {
+    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1); the
+    // native-speaker review is the owner's (uk-release-scope §5, §6.4).
+    status: {
+      playing: 'звучить',
+      played: 'прослухано',
+      available: 'доступно',
+      pending: 'чекає',
+      locked: 'зачинено',
+    },
+    lockedHint: 'Доступно після купівлі',
+    pausedTitle: 'Прогулянка призупинена',
+    resume: 'Продовжити',
+    pauseWalk: 'Призупинити прогулянку',
+    endWalk: 'Завершити прогулянку',
+    endConfirmTitle: 'Завершити прогулянку?',
+    endConfirmAccept: 'Завершити',
+    endConfirmCancel: 'Скасувати',
+    endedTitle: 'Прогулянка завершена',
+    close: 'Зачинити',
+    loading: 'Завантаження…',
+    unavailableTitle: 'Сесія недоступна',
+    schematicNote: 'Схема точок маршруту — карта міста з’явиться після рішення про тайли',
+    attribution: 'Дані © учасники OpenStreetMap, ODbL',
+    markerHint: 'Перегляд точки. Аудіо не запускається.',
+    nothingPlaying: 'Нічого не грає',
+    nowPlayingLabel: 'Зараз грає',
+    transcript: 'Транскрипт',
+    transcriptPending: 'Текст прийде з контентом пакета',
+    readMore: 'Читати',
+    pauseAudio: 'Пауза',
+    playAudio: 'Грати',
+    reasonText: {
+      'package-incomplete': 'Гід неповний.',
+      'package-needs-recovery': 'Гід потребує відновлення.',
+      'package-access-locked': 'Доступ до гіда ще не відкритий.',
+      'live-session-exists': 'Вже є жива прогулянка.',
+      'switch-no-live-session': 'Живої прогулянки вже немає — почніть наново.',
+      'run#package-not-downloaded': 'Гід не завантажений.',
+      'run#package-ambiguous': 'На диску кілька версій гіда.',
+      'run#unsafe-route-id': 'Неправильний ідентифікатор маршруту.',
+      'run#locale-missing': 'Мова гіда не знайдена.',
+      'run#package-read-failed': 'Гід не читається.',
+      'run#recovery-failed': 'Збій читання живої сесії.',
+      fallback: 'Збій.',
+    },
+    poiKind: {
+      sight: 'Пам’ятка',
+    },
+    deniedGps: 'Автоматичні історії не працюють — я не бачу вашої позиції',
+    gpsStalled: 'Позиція застаріла',
+    gpsStalledDetail: 'Автозапуск і черга заблоковані',
+    manualPlayHint: 'Кожна історія запускається руками з картки точки',
+    autoplaySuspendedTitle: 'Автоматичні історії призупинені',
+    restoredTitle: 'Прогулянка продовжена зі збереженої сесії',
+    tierUnavailable: 'Додатковий рівень недоступний у відновленій сесії',
+    storyBase: 'Основна історія',
+    storyExtended: 'Додаткова історія',
+    playStoryHint: 'Запускає звук цієї історії',
+  },
 };
 
 export function runMapStrings(locale: string): RunMapStrings {
-  return locale === 'en' ? STRINGS.en : STRINGS.be;
+  return locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
 }

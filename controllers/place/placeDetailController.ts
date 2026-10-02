@@ -109,7 +109,7 @@ export function placeRefusalText(refusal: string, strings: PlaceDetailStrings): 
   return strings.refusalText[refusal as keyof PlaceDetailStrings['refusalText']] ?? refusal;
 }
 
-const STRINGS: Record<'be' | 'en', PlaceDetailStrings> = {
+const STRINGS: Record<'be' | 'en' | 'uk', PlaceDetailStrings> = {
   be: {
     loading: 'Загрузка…',
     unavailable: 'Дэталь месца недаступная',
@@ -164,8 +164,37 @@ const STRINGS: Record<'be' | 'en', PlaceDetailStrings> = {
     playFailed: 'The audio did not start.',
     playFailedHint: 'Try starting it again.',
   },
+  uk: {
+    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1); the
+    // native-speaker review is the owner's (uk-release-scope §5, §6.4).
+    loading: 'Завантаження…',
+    unavailable: 'Деталі місця недоступні',
+    error: 'Не вдалося відкрити місце',
+    noFacts: 'Місце поки не опубліковане в каталозі',
+    empty: 'Тізерів для цього місця немає',
+    teaserLabel: 'Тізер',
+    playLabel: 'Послухати тізер',
+    stopLabel: 'Зупинити',
+    resumeLabel: 'Продовжити',
+    nowPlaying: 'Зараз грає',
+    paused: 'Пауза',
+    guideLink: "Прев'ю гіда",
+    guideLinkHint: "Відкриває прев'ю гіда, не запуск прогулянки.",
+    playHint: 'Явний Play тізера через єдиний плеєр.',
+    noAudio: 'Аудіо тізера не опубліковане',
+    durationUnit: 'хв',
+    textLabel: 'Текст',
+    audioLabel: 'аудіо',
+    refusalText: {
+      'moment#audio-unpublished': 'Звук тізера не опублікований.',
+      'moment#session-unroutable': 'Тізер не звучить у прогулянці — запустіть його тут ще раз.',
+      'moment#session-refused': 'Тізер зараз не запускається — спробуйте ще раз.',
+    },
+    playFailed: 'Звук не почався.',
+    playFailedHint: 'Спробуйте запустити ще раз.',
+  },
 };
 
 export function placeDetailStrings(locale: string): PlaceDetailStrings {
-  return locale === 'en' ? STRINGS.en : STRINGS.be;
+  return locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
 }
