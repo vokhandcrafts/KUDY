@@ -16,6 +16,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { isIdentifier } from './identifier.mjs';
 
+// The producer-side derivation model: locales/layers are read from the
+// directories on disk, not the schema wire projection — the wire owner is
+// contracts/wire/wire-types.ts (generated, G20.19); the published output is
+// schema-validated downstream.
+
 // Walk trust boundary (implementation-rules 14): names that reach a read or
 // stat path are type-checked against links and re-pinned to the real tree
 // root — recursive readdir may descend through directory symlinks (node ≥26

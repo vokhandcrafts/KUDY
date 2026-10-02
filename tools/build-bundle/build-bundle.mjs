@@ -101,7 +101,6 @@ async function writeFileRel(outAbs, rel, buf) {
   await fsp.writeFile(abs, buf);
 }
 
-
 const isPathSafe = (value, forbidEmptySegments = false) =>
   value.split('/').every((segment) =>
     segment !== 'private' &&
