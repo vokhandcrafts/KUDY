@@ -344,6 +344,7 @@ export function createPreviewController(
   routeId: string,
 ): ControllerStore<PreviewControllerState> {
   const preference = ports.localePreference ?? ['be', 'en'];
+  const strings = previewStrings(preference[0] ?? 'be');
   let seq = 0;
   let previous: GuidePreview | null = null;
   const store = createControllerStore<PreviewControllerState>((set, get) => {
@@ -365,6 +366,16 @@ export function createPreviewController(
         canDownload: ports.download !== undefined,
       });
     }
+    // The named download failure (R6): busy releases and the thrown
+    // diagnostic survives as the muted detail. Both thrown paths share it —
+    // the activation channel and the post-activation facts read.
+    function failDownload(error: unknown): void {
+      set({
+        busy: false,
+        downloadError: strings.downloadFailed,
+        downloadDetail: error instanceof Error ? error.message : String(error),
+      });
+    }
     return {
       surface: { kind: 'loading' },
       source: null,
@@ -382,23 +393,37 @@ export function createPreviewController(
       downloadStorageExit: false,
       refresh: async () => {
         const run = ++seq;
-        const next: PreviewLoadState = await ports.service.loadPreview(routeId, previous);
-        if (run !== seq) return;
-        if (next.kind === 'ready') {
-          previous = next.preview;
-          const button = await deriveButton(next.preview);
+        try {
+          const next: PreviewLoadState = await ports.service.loadPreview(routeId, previous);
           if (run !== seq) return;
-          set({ surface: { kind: 'ready', preview: next.preview, degraded: next.degraded }, button });
-          return;
-        }
-        if (next.kind === 'not-published') {
+          if (next.kind === 'ready') {
+            previous = next.preview;
+            const button = await deriveButton(next.preview);
+            if (run !== seq) return;
+            set({ surface: { kind: 'ready', preview: next.preview, degraded: next.degraded }, button });
+            return;
+          }
+          if (next.kind === 'not-published') {
+            set({
+              surface: { kind: 'unavailable', reason: 'preview#not-published' },
+              button: get().button,
+            });
+            return;
+          }
+          set({ surface: { kind: 'unavailable', reason: next.reason }, button: get().button });
+        } catch (error) {
+          // R6: a failed catalog or facts read still ends the operation —
+          // the terminal diagnostic surface, never an eternal loading; a
+          // stale failure does not overwrite a newer run's result.
+          if (run !== seq) return;
           set({
-            surface: { kind: 'unavailable', reason: 'preview#not-published' },
+            surface: {
+              kind: 'unavailable',
+              reason: error instanceof Error ? error.message : String(error),
+            },
             button: get().button,
           });
-          return;
         }
-        set({ surface: { kind: 'unavailable', reason: next.reason }, button: get().button });
       },
       recordSource: (source) => {
         // Idempotent: the screen's effect may re-run with the same param —
@@ -420,7 +445,6 @@ export function createPreviewController(
           return;
         }
         const preview = state.surface.preview;
-        const strings = previewStrings(preference[0] ?? 'be');
         set({ busy: true, downloadError: null, downloadDetail: null, downloadStorageExit: false });
         let result: ActivationResult;
         try {
@@ -431,11 +455,7 @@ export function createPreviewController(
             tier: 'base',
           });
         } catch (error) {
-          set({
-            busy: false,
-            downloadError: strings.downloadFailed,
-            downloadDetail: error instanceof Error ? error.message : String(error),
-          });
+          failDownload(error);
           return;
         }
         // G06.05 (issue #280, AC4): a non-complete activation is a named
@@ -461,7 +481,17 @@ export function createPreviewController(
           });
           return;
         }
-        const button = await deriveButton(preview);
+        // R6: a complete activation result says nothing about readiness —
+        // the refreshed facts read may still fail. Busy releases with the
+        // visible diagnostic; the button keeps its facts-based meaning (the
+        // retry re-derives it), Start never follows the activation result.
+        let button: PreviewButton;
+        try {
+          button = await deriveButton(preview);
+        } catch (error) {
+          failDownload(error);
+          return;
+        }
         set({ busy: false, button });
       },
       start: async () => {
