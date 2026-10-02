@@ -42,7 +42,7 @@ import {
   startSession,
 } from '../services/db/db.ts';
 import { nodeSqliteDriver } from '../services/db/test-fixture.ts';
-import type { SqlDriver } from '../services/db/types.ts';
+import type { SqlDriver, SqlStatement } from '../services/db/types.ts';
 import { evaluatePackage } from '../services/contentRepo/contentRepo.ts';
 import { tempPackage, storeAt, stubWithUnreadable } from '../services/contentRepo/test-fixture.ts';
 import type { PackageStore, Tier } from '../services/contentRepo/types.ts';
@@ -105,6 +105,10 @@ interface WorldOptions {
   // A scenario may decorate the recovery port of the world's own controller
   // (the concurrent-recover race gates the read).
   recovery?: (base: RunRecovery) => RunRecovery;
+  // A scenario may wrap the real driver (G20.03): the fault lives at the
+  // driver boundary below services/db, so the refused write travels the real
+  // transaction, rollback and error path.
+  driver?: (base: SqlDriver) => SqlDriver;
 }
 
 const isTierValue = (value: string): value is Tier => value === 'base' || value === 'extended';
@@ -173,8 +177,9 @@ function world(options: WorldOptions = {}): World {
   const clock = manualClock();
   const locationPort = new FakeLocationOsPort();
   const audioPort = new FakeAudioPlayerPort();
-  const driver = nodeSqliteDriver();
-  openDatabase(driver);
+  const baseDriver = nodeSqliteDriver();
+  openDatabase(baseDriver);
+  const driver = options.driver ? options.driver(baseDriver) : baseDriver;
   const access = createAccessPort();
   const pkg = tempPackage();
   const packageStore = options.packageStore ?? storeAt(pkg.root);
@@ -1153,4 +1158,238 @@ test('G06.04 retire: the mirror ends, the wakelock releases, late callbacks writ
   // A second retire is a no-op.
   w.store.getState().retire();
   assert.equal(w.store.getState().run.phase, 'Ended');
+});
+
+// G20.03 (issue #474) — the single acceptance protocol of R2 (runtime.md):
+// proposed state → durable write → published state and effects. The fault
+// lives at the driver boundary below services/db: while armed, every COMMIT
+// fails, so each refused write (pause, resume, finish, checkpoint) travels
+// the real transaction, rollback and error path — reads and single
+// statements pass, and the row keeps its previous state through the store's
+// own ROLLBACK.
+class FailingCommitDriver implements SqlDriver {
+  faulted = false;
+  pauseAttempts = 0;
+  private readonly base: SqlDriver;
+
+  constructor(base: SqlDriver) {
+    this.base = base;
+  }
+
+  execSql(sql: string): void {
+    if (this.faulted && sql.trim() === 'COMMIT') throw new Error('audit disk write failed');
+    this.base.execSql(sql);
+  }
+
+  prepare(sql: string): SqlStatement {
+    if (sql.includes("UPDATE session SET state = 'paused'")) this.pauseAttempts += 1;
+    return this.base.prepare(sql);
+  }
+}
+
+test('G20.03 criterion 1: a refused Pause write leaves the row and the screens at the last durable state', async (t) => {
+  const w = world({ driver: (base) => new FailingCommitDriver(base) });
+  t.after(w.discardPackage);
+  const fault = w.driver as FailingCommitDriver;
+  const sessionId = okStart(await w.store.getState().start());
+  fix(w, 0, 0); // the guide plays: play_seq 1 and auto_fired [stop-1] are durable
+  assert.equal(row(w, sessionId)?.playSeq, 1);
+
+  fault.faulted = true;
+  // The original storage error surfaces to the caller — the screen's failure
+  // display hangs off this contract.
+  assert.throws(() => w.store.getState().pauseSession(), /audit disk write failed/);
+
+  // Nothing advertised the transition: the row kept its previous state, the
+  // store mirror kept Active, the wakelock and the GPS mode stayed with the
+  // live walk.
+  assert.equal(row(w, sessionId)?.state, 'active');
+  assert.equal(live(w).phase, 'Active');
+  assert.deepEqual(w.wakelockCalls, ['acquire']);
+  assert.equal(w.locationPort.activeSubscriptions(), 1);
+  // The durable facts written before the failure survive (criterion 4: no
+  // rollback deletes durable progress).
+  assert.deepEqual(row(w, sessionId)?.autoFired, ['stop-1']);
+  assert.equal(row(w, sessionId)?.playSeq, 1);
+
+  // The physical guide sound stopped safely (R2) even though the row is
+  // still active — and no further command fired.
+  assert.deepEqual(w.audioPort.commands, ['play 1:be/base/audio/story-b.m4a', 'stop']);
+  // More walking produces no automatic sound while the write is refused.
+  dwellAt(w, 0.0009, 0, 60_000);
+  assert.equal(w.audioPort.commands.filter((command) => command.startsWith('play')).length, 1);
+
+  // Storage recovers → the retry re-attempts the write and persists.
+  fault.faulted = false;
+  w.store.getState().pauseSession();
+  assert.equal(row(w, sessionId)?.state, 'paused');
+  assert.equal(live(w).phase, 'Paused');
+  assert.equal(fault.pauseAttempts, 2); // the refused attempt and the retry
+  assert.deepEqual(w.wakelockCalls, ['acquire', 'release']); // released by the retry
+});
+
+test('G20.03 criterion 1: a refused Resume write keeps the walk paused in the row and on the screen', async (t) => {
+  const w = world({ driver: (base) => new FailingCommitDriver(base) });
+  t.after(w.discardPackage);
+  const fault = w.driver as FailingCommitDriver;
+  const sessionId = okStart(await w.store.getState().start());
+  w.store.getState().pauseSession();
+  assert.deepEqual(w.wakelockCalls, ['acquire', 'release']);
+
+  fault.faulted = true;
+  assert.throws(() => w.store.getState().resumeSession(), /audit disk write failed/);
+
+  assert.equal(row(w, sessionId)?.state, 'paused'); // the durable state stayed authoritative
+  assert.equal(live(w).phase, 'Paused');
+  assert.equal(w.locationPort.activeSubscriptions(), 0); // no re-arm fired
+  assert.deepEqual(w.wakelockCalls, ['acquire', 'release']); // no acquire raced ahead of the write
+
+  fault.faulted = false;
+  w.store.getState().resumeSession();
+  assert.equal(row(w, sessionId)?.state, 'active');
+  assert.equal(live(w).phase, 'Active');
+  assert.equal(w.locationPort.activeSubscriptions(), 1);
+  assert.deepEqual(w.wakelockCalls, ['acquire', 'release', 'acquire']);
+});
+
+test('G20.03 criterion 3: a refused End write leaves a live row a restart can restore', async (t) => {
+  const w = world({ driver: (base) => new FailingCommitDriver(base) });
+  t.after(w.discardPackage);
+  const fault = w.driver as FailingCommitDriver;
+  w.granted.push('extended');
+  const sessionId = okStart(await w.store.getState().start({ tier: 'extended' }));
+  fix(w, 0, 0); // the guide plays
+  dwellAt(w, 0.0009, 0, 60_000); // stop-2 queues behind the sounding guide
+  fault.faulted = true;
+
+  assert.throws(() => w.store.getState().end(), /audit disk write failed/);
+
+  // The row is still live with every durable fact; nothing advertised Ended
+  // and End's releases never fired.
+  const written = row(w, sessionId);
+  assert.equal(written?.state, 'active');
+  assert.equal(written?.finishedAt, null);
+  assert.equal(live(w).phase, 'Active');
+  assert.equal(w.locationPort.activeSubscriptions(), 1);
+  assert.deepEqual(written?.autoFired, ['stop-1']);
+
+  // The physical guide stopped safely; once storage recovers, a trigger
+  // stands down into auto_fired — no automatic sound comes back by itself
+  // after the failed End (criterion 2). The walk leaves stop-2's radius
+  // first, so the smoothing window re-fires the trigger on the way back.
+  assert.ok(w.audioPort.commands.includes('stop'));
+  fault.faulted = false;
+  // The walk leaves stop-2's radius (the smoothing mean clears it on the
+  // second fix, resetting the dwell accumulator) and returns walking-speed
+  // slow — a faster return dies in the pipeline's spike gate, not in the
+  // engine.
+  dwellAt(w, 0.00045, 0, 100_000); // out of the 2 × radius deferred bound
+  dwellAt(w, 0.0009, 0, 120_000); // back into stop-2: the trigger re-fires
+  assert.deepEqual(row(w, sessionId)?.autoFired, ['stop-1', 'stop-2']);
+  assert.equal(w.audioPort.commands.filter((command) => command.startsWith('play')).length, 1);
+
+  // The restart restores the durable row as a state: session identity,
+  // progress and version survive the failed End; the walk can then really
+  // end.
+  const secondWakelock: string[] = [];
+  const second = restart(w, undefined, secondWakelock);
+  await second.getState().recover();
+  const restored = liveFrom(second);
+  assert.equal(restored.sessionId, sessionId);
+  assert.equal(restored.phase, 'Active');
+  assert.equal(restored.version, '1');
+  assert.equal(restored.playSeq, 1);
+  assert.deepEqual(restored.autoFired, ['stop-1', 'stop-2']);
+
+  second.getState().end();
+  assert.equal(row(w, sessionId)?.state, 'finished');
+  assert.equal(row(w, sessionId)?.finishedAt, 122_000);
+  assert.deepEqual(row(w, sessionId)?.autoFired, ['stop-1', 'stop-2']); // nothing deleted
+  assert.deepEqual(secondWakelock, ['acquire', 'release']);
+});
+
+test('G20.03 criterion 1: a refused progress checkpoint keeps the row and the screen without the credit', async (t) => {
+  const w = world({ driver: (base) => new FailingCommitDriver(base) });
+  t.after(w.discardPackage);
+  const fault = w.driver as FailingCommitDriver;
+  const sessionId = okStart(await w.store.getState().start());
+  fix(w, 0, 0); // the trigger: play_seq 1 and auto_fired [stop-1] are durable
+  fault.faulted = true;
+
+  // The physical finished arrives while the write fails: the credit is
+  // advertised nowhere — not in the row, not in the store mirror — and the
+  // original storage error surfaces through the callback chain.
+  assert.throws(() => w.audioPort.finish(1), /audit disk write failed/);
+  assert.deepEqual(row(w, sessionId)?.heard, []);
+  assert.deepEqual(live(w).heard, []);
+  assert.equal(row(w, sessionId)?.state, 'active');
+  // The earlier durable facts are untouched (criterion 4).
+  assert.deepEqual(row(w, sessionId)?.autoFired, ['stop-1']);
+  assert.equal(row(w, sessionId)?.playSeq, 1);
+
+  // Storage recovers → the next accepted event persists; the walk continues
+  // on the same row with its progress.
+  fault.faulted = false;
+  w.store.getState().selectStop('stop-1'); // the manual replay: a new launch
+  assert.equal(row(w, sessionId)?.playSeq, 2);
+  w.audioPort.finish(2);
+  assert.deepEqual(row(w, sessionId)?.heard, ['story-b']);
+  assert.deepEqual(live(w).heard, ['story-b']);
+});
+
+test('G20.03 criterion 2: a failed Pause stops only the guide sound — a Moment is not session property', async (t) => {
+  const w = world({ driver: (base) => new FailingCommitDriver(base) });
+  t.after(w.discardPackage);
+  const fault = w.driver as FailingCommitDriver;
+  const sessionId = okStart(await w.store.getState().start());
+  fix(w, 0, 0); // the guide plays (key 1)
+  w.store.getState().playMoment('moment-1', 'story-b'); // the moment takes the player (key 2)
+  const commandsAtMoment = w.audioPort.commands.length;
+
+  fault.faulted = true;
+  assert.throws(() => w.store.getState().pauseSession(), /audit disk write failed/);
+
+  // The moment launch is not session property: the failed Pause proposed no
+  // stop for it and the failure posture must not add one.
+  assert.equal(w.audioPort.commands.length, commandsAtMoment);
+  assert.equal(row(w, sessionId)?.state, 'active');
+  assert.equal(live(w).phase, 'Active');
+
+  fault.faulted = false;
+  w.store.getState().pauseSession(); // the retry
+  assert.equal(row(w, sessionId)?.state, 'paused');
+  assert.equal(live(w).phase, 'Paused');
+  assert.equal(live(w).playing?.owner, 'moment'); // the moment keeps sounding through the pause
+  assert.equal(w.audioPort.commands.length, commandsAtMoment);
+});
+
+test('G20.03 criterion 3: rapid ordered actions around one failed transition keep one consistent row', async (t) => {
+  const w = world({ driver: (base) => new FailingCommitDriver(base) });
+  t.after(w.discardPackage);
+  const fault = w.driver as FailingCommitDriver;
+  w.granted.push('extended');
+  const sessionId = okStart(await w.store.getState().start({ tier: 'extended' }));
+  fix(w, 0, 0); // stop-1 plays
+  w.audioPort.finish(1); // heard [story-b]
+
+  // One refused Pause in the middle of the ordered chain, then the retry and
+  // the rest of the actions without a pause for the failure.
+  fault.faulted = true;
+  assert.throws(() => w.store.getState().pauseSession(), /audit disk write failed/);
+  fault.faulted = false;
+  w.store.getState().pauseSession();
+  w.store.getState().resumeSession();
+  w.store.getState().end();
+
+  // One row, one session id, the pinned version, the full durable history —
+  // the failed attempt added nothing, lost nothing, renamed nothing.
+  assert.equal(sessionCount(w), 1);
+  const written = row(w, sessionId);
+  assert.equal(written?.state, 'finished');
+  assert.equal(written?.version, '1');
+  assert.deepEqual(written?.heard, ['story-b']);
+  assert.deepEqual(written?.autoFired, ['stop-1']);
+  assert.equal(written?.playSeq, 1);
+  assert.equal(live(w).phase, 'Ended');
+  assert.equal(fault.pauseAttempts, 2); // the refused attempt and the retry
 });

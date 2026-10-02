@@ -16,13 +16,16 @@
 //    propagates (criterion 1's injected mid-transaction failure leaves the
 //    rollback to the store).
 // 2. The orchestrator's onCommitted hook (its header note 7) is the
-//    durability point: after the engine committed an event and before its
-//    effects fire, the durable delta is checkpointed — so the play_seq of a
-//    PlayStory lands in the row before the command reaches the audio service
-//    (write-through, ADR §3.1), and a failed write aborts the pending
-//    effects. A plain checkpoint's own rollback is safe by contract (§3.3:
-//    the next checkpoint writes the newer state) — the error still surfaces,
-//    it is never swallowed.
+//    durability point: it receives step()'s PROPOSED state before the
+//    orchestrator commits anything — the durable delta is written first, the
+//    screens are published only after the write succeeded, and the effects
+//    fire after that — so the play_seq of a PlayStory lands in the row before
+//    the command reaches the audio service (write-through, ADR §3.1), and a
+//    failed write rejects the whole transition: the engine keeps the last
+//    durable state, no effect fires and the error surfaces (R2, G20.03). A
+//    plain checkpoint's own rollback is safe by contract (§3.3: the next
+//    checkpoint writes the newer state) — the error still surfaces, it is
+//    never swallowed.
 // 3. The delta is a before/after compare of the monotonic sets and play_seq:
 //    a callback the reducer rejected mutates nothing, so nothing is written
 //    (criterion 4's «rejected by step() writes nothing») and an unlock that
@@ -31,14 +34,16 @@
 //    injected clock, fixes arrive only through the location service
 //    (criterion 6); session ids come from the injected newSessionId port.
 // 5. G05.05.b (issue #217) adds the rest of the lifecycle. The Pause/Resume/
-//    End transactions of ADR §3.3 run in the onCommitted hook — the hook is
-//    the point after the engine committed and before the effects fire — as
+//    End transactions of ADR §3.3 run in the onCommitted hook — the point
+//    before the orchestrator commits the proposed state and its effects — as
 //    ONE store transaction each (Pause: UPDATE + the sets checkpoint; End:
 //    UPDATE finished + finished_at + the final checkpoint), so a failing
-//    write aborts the pending effects and the rollback leaves the row in its
-//    previous state. After End the controller drops the row reference: the
-//    finished row is history, and no later callback, fix or AccessReady
-//    writes it (criterion 6; ADR §3.1 «гісторыя ніколі не перазапісваецца»).
+//    write rejects the transition (R2, G20.03: the memory and the screens
+//    keep the last durable state, the retry re-dispatches) and the rollback
+//    leaves the row in its previous state. After End the controller drops
+//    the row reference: the finished row is history, and no later callback,
+//    fix or AccessReady writes it (criterion 6; ADR §3.1 «гісторыя ніколі не
+//    перазапісваецца»).
 // 6. The wakelock is the session axis of 09 §9 / 11 §6: taken after the
 //    Start commit and on Resume, released on Pause and End. The screen-
 //    foreground rule of 11 §6 belongs to the composition root.
@@ -315,11 +320,14 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
     nextMomentSeq: deps.nextMomentSeq,
     currentMomentPlay: deps.currentMomentPlay,
     onCommitted: (before, after) => {
-      // The mirror first (the engine state is committed either way), then
-      // the durable write — its failure aborts the pending effects below
-      // (decision 2).
-      store?.setState({ run: after });
-      if (sessionId === null) return;
+      // R2 (G20.03): proposed → durable write → publish. The durable write
+      // runs first; its failure rejects the transition — the orchestrator
+      // keeps the last durable state, fires no effect and rethrows — so the
+      // screens never see a state the row does not hold.
+      if (sessionId === null) {
+        store?.setState({ run: after });
+        return;
+      }
       const progress = durableDelta(before, after);
       // The lifecycle transactions of ADR §3.3 (decision 5): the durable
       // write carries the delta of the same transition, so Pause and End
@@ -327,13 +335,9 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
       // reaches here — start() wrote its row before the dispatch.
       if (before.phase === 'Active' && after.phase === 'Paused') {
         deps.sessionStore.pause(sessionId, progress ?? undefined);
-        return;
-      }
-      if (before.phase === 'Paused' && after.phase === 'Active') {
+      } else if (before.phase === 'Paused' && after.phase === 'Active') {
         deps.sessionStore.resume(sessionId);
-        return;
-      }
-      if (after.phase === 'Ended') {
+      } else if (after.phase === 'Ended') {
         deps.sessionStore.finish(sessionId, {
           finishedAt: deps.clock.now(),
           progress: progress ?? undefined,
@@ -342,9 +346,10 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
         // reference, so no later callback, fix or AccessReady writes it
         // (criterion 6).
         sessionId = null;
-        return;
+      } else if (progress !== null) {
+        deps.sessionStore.checkpoint(sessionId, progress);
       }
-      if (progress !== null) deps.sessionStore.checkpoint(sessionId, progress);
+      store?.setState({ run: after });
     },
   });
 
