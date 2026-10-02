@@ -126,34 +126,51 @@ test('criterion 2: the limit boundary and one beyond retain the 429/retry contra
 test('criterion 2: an invalid SQL counter reply fails closed — 500, never 429, no insert', async () => {
   for (const attempts of [undefined, null, '3', -1, Number.NaN, 1.5]) {
     const db = asyncEventsSql({ attemptsByCall: [attempts] });
-    const response = await handleEventsWireRequest(postRequest({ events: [wireEvent()] }), db, TABLE);
+    const { result: response, lines } = await captureConsoleError(() =>
+      handleEventsWireRequest(postRequest({ events: [wireEvent()] }), db, TABLE),
+    );
     assert.equal(response.status, 500, `attempts ${String(attempts)} must not be accepted or priced as 429`);
     const body = (await response.json()) as { error: { code: string } };
     assert.equal(body.error.code, 'server_error');
     assert.equal(db.insertCalls(), 0, `no batch is stored for attempts ${String(attempts)}`);
+    assert.equal(lines.length, 1, `attempts ${String(attempts)} emits one diagnostic`);
+    const entry = JSON.parse(lines[0]!) as { operation: string; reason: string };
+    assert.deepEqual(entry, { operation: 'events_intake', reason: 'storage_failure' });
   }
   const rowless = asyncEventsSql({ rateEmptyRows: true });
-  const response = await handleEventsWireRequest(postRequest({ events: [wireEvent()] }), rowless, TABLE);
+  const { result: response, lines } = await captureConsoleError(() =>
+    handleEventsWireRequest(postRequest({ events: [wireEvent()] }), rowless, TABLE),
+  );
   assert.equal(response.status, 500, 'a missing counter row fails closed');
   assert.equal(rowless.insertCalls(), 0);
+  assert.equal(lines.length, 1, 'a missing counter row emits one diagnostic');
 });
 
 test('criterion 2: a failed SQL reply fails closed without inserts', async () => {
   const rateFailure = asyncEventsSql({ rateError: new Error('pq: connection refused') });
-  const rateResponse = await handleEventsWireRequest(postRequest({ events: [wireEvent()] }), rateFailure, TABLE);
+  const { result: rateResponse, lines: rateLines } = await captureConsoleError(() =>
+    handleEventsWireRequest(postRequest({ events: [wireEvent()] }), rateFailure, TABLE),
+  );
   assert.equal(rateResponse.status, 500);
   assert.equal(((await rateResponse.json()) as { error: { code: string } }).error.code, 'server_error');
   assert.equal(rateFailure.insertCalls(), 0, 'a storage failure never stores a batch');
+  assert.equal(rateLines.length, 1, 'one diagnostic for the failed increment');
 
   const lookupFailure = asyncEventsSql({ lookupError: new Error('pq: connection refused') });
-  const lookupResponse = await handleEventsWireRequest(postRequest({ events: [wireEvent()] }), lookupFailure, TABLE);
+  const { result: lookupResponse, lines: lookupLines } = await captureConsoleError(() =>
+    handleEventsWireRequest(postRequest({ events: [wireEvent()] }), lookupFailure, TABLE),
+  );
   assert.equal(lookupResponse.status, 500);
   assert.equal(lookupFailure.rateCalls(), 0, 'a failed lookup never reaches the rate step');
+  assert.equal(lookupLines.length, 1, 'one diagnostic for the failed lookup');
 
   const insertFailure = asyncEventsSql({ insertError: new Error('pq: connection refused') });
-  const insertResponse = await handleEventsWireRequest(postRequest({ events: [wireEvent()] }), insertFailure, TABLE);
+  const { result: insertResponse, lines: insertLines } = await captureConsoleError(() =>
+    handleEventsWireRequest(postRequest({ events: [wireEvent()] }), insertFailure, TABLE),
+  );
   assert.equal(insertResponse.status, 500);
   assert.equal(insertFailure.rateCalls(), 1, 'the limit decision still consumed its one increment');
+  assert.equal(insertLines.length, 1, 'one diagnostic for the failed insert');
 });
 
 test('criterion 3: one atomic increment per request — concurrency never reads-then-writes', async () => {

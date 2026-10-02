@@ -105,29 +105,39 @@ test('criterion 2: the limit boundary and one beyond retain the 429/retry contra
 test('criterion 2: an invalid SQL counter reply fails closed — 500, never 429, no insert', async () => {
   for (const attempts of [undefined, null, '3', -1, Number.NaN, 1.5]) {
     const db = asyncDeviceSql({ attemptsByCall: [attempts] });
-    const response = await handleDeviceRequest(postRequest(), db);
+    const { result: response, lines } = await captureConsoleError(() => handleDeviceRequest(postRequest(), db));
     assert.equal(response.status, 500, `attempts ${String(attempts)} must not be accepted or priced as 429`);
     assert.equal(((await response.json()) as { error: string }).error, 'server_error');
     assert.equal(db.insertCalls(), 0, `no device is stored for attempts ${String(attempts)}`);
+    assert.equal(lines.length, 1, `attempts ${String(attempts)} emits one diagnostic`);
+    const entry = JSON.parse(lines[0]!) as { operation: string; reason: string };
+    assert.deepEqual(entry, { operation: 'device_registration', reason: 'rate_increment_failed' });
   }
   const rowless = asyncDeviceSql({ rateEmptyRows: true });
-  const response = await handleDeviceRequest(postRequest(), rowless);
+  const { result: response, lines } = await captureConsoleError(() => handleDeviceRequest(postRequest(), rowless));
   assert.equal(response.status, 500, 'a missing counter row fails closed');
   assert.equal(rowless.insertCalls(), 0);
+  assert.equal(lines.length, 1, 'a missing counter row emits one diagnostic');
 });
 
 test('criterion 2: a failed SQL reply fails closed without inserts', async () => {
   const rateFailure = asyncDeviceSql({ rateError: new Error('pq: connection refused') });
-  const rateResponse = await handleDeviceRequest(postRequest(), rateFailure);
+  const { result: rateResponse, lines: rateLines } = await captureConsoleError(() =>
+    handleDeviceRequest(postRequest(), rateFailure),
+  );
   assert.equal(rateResponse.status, 500);
   assert.equal(((await rateResponse.json()) as { error: string }).error, 'server_error');
   assert.equal(rateFailure.insertCalls(), 0, 'a storage failure never registers a device');
+  assert.equal(rateLines.length, 1, 'one diagnostic for the failed increment');
 
   const insertFailure = asyncDeviceSql({ insertError: new Error('pq: unique violation') });
-  const insertResponse = await handleDeviceRequest(postRequest(), insertFailure);
+  const { result: insertResponse, lines: insertLines } = await captureConsoleError(() =>
+    handleDeviceRequest(postRequest(), insertFailure),
+  );
   assert.equal(insertResponse.status, 500);
   assert.equal(((await insertResponse.json()) as { error: string }).error, 'server_error');
   assert.equal(insertFailure.rateCalls(), 1, 'the limit decision still consumed its one increment');
+  assert.equal(insertLines.length, 1, 'one diagnostic for the failed insert');
 });
 
 test('criterion 3: one atomic increment per request — concurrency never reads-then-writes', async () => {
