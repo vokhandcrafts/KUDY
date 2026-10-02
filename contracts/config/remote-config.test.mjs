@@ -128,9 +128,11 @@ test('guard: the defaults loader names an unreadable file', () => {
 
 test('guard: this suite is wired into npm test (implementation-rules 7)', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(HERE, '..', '..', 'package.json'), 'utf8'));
+  // G20.28: the zone glob replaced the manual path list; file-level ownership
+  // of this suite is named by tools/ci/test-discovery.test.mjs.
   assert.ok(
-    pkg.scripts.test.includes('contracts/config/remote-config.test.mjs'),
-    'removing contracts/config/remote-config.test.mjs from the npm test script must fail this guard',
+    pkg.scripts.test.includes('"contracts/**/*.test.mjs"'),
+    'removing the contracts zone from the npm test script must fail this guard',
   );
 });
 
