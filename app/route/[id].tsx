@@ -134,14 +134,21 @@ const styles = StyleSheet.create({
     marginTop: tokens.spaceM,
     padding: tokens.spaceM,
   },
+  // Issue #430 (варыянт А): the disabled primary reads — transparent fill,
+  // the canon ghost pair through the mirror, no opacity substitute (§5).
   mainButtonDisabled: {
-    opacity: 0.5,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: tokens.colorDisabledLine,
   },
   mainButtonLabel: {
     color: tokens.colorAccentInk,
     fontFamily: tokens.fontFamilyUiStrong,
     fontSize: tokens.fontBaseSize,
     fontWeight: tokens.fontWeightStrong,
+  },
+  mainButtonLabelDisabled: {
+    color: tokens.colorDisabledInk,
   },
   buttonReason: {
     color: tokens.colorInk,
@@ -250,6 +257,9 @@ export default function RoutePreview() {
     if (outcome === "handover") router.push(`/run/${routeId}`);
   };
   const state = controller;
+  // Issue #430: the disabled condition is the button's own (enabled gate +
+  // busy); the ghost pair and the dropped shelf read it, nothing else.
+  const mainDisabled = !state.button.enabled || state.busy;
   return (
     <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Route preview">
       {/* UX 02 (issue #348): the back sits in the frame above the scroll —
@@ -435,17 +445,23 @@ export default function RoutePreview() {
             <PressableSurface
               accessibilityRole="button"
               accessibilityLabel={pstrings.label[state.button.label]}
-              accessibilityState={{ disabled: !state.button.enabled || state.busy }}
+              accessibilityState={{ disabled: mainDisabled }}
               onPress={() => void handleMainButton()}
-              disabled={!state.button.enabled || state.busy}
-              style={[styles.mainButton, (!state.button.enabled || state.busy) && styles.mainButtonDisabled]}
+              disabled={mainDisabled}
+              style={[styles.mainButton, mainDisabled && styles.mainButtonDisabled]}
               // G06.10.d (issue #404): the one main action of the screen is
               // the clay primary — the accent shelf; the dip rides the
               // shared wrapper (a disabled press never dips).
-              shelf="accent"
+              // Issue #430: the disabled primary drops the shelf — the ghost
+              // pair of canon §5 carries the unavailable state instead.
+              shelf={mainDisabled ? undefined : "accent"}
               testID={state.button.action === "download" ? "btn-download" : "btn-start"}
             >
-              <ScaledText style={styles.mainButtonLabel}>{pstrings.label[state.button.label]}</ScaledText>
+              <ScaledText
+                style={[styles.mainButtonLabel, mainDisabled && styles.mainButtonLabelDisabled]}
+              >
+                {pstrings.label[state.button.label]}
+              </ScaledText>
             </PressableSurface>
             {state.button.reason ? (
               <ScaledText style={styles.buttonReason} testID="button-reason">

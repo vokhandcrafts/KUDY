@@ -35,7 +35,7 @@ node_modules/.bin/jest app/preview.test.tsx 2>&1 | grep -E "^(Tests:|Test Suites
 
 ```output
 Test Suites: 1 passed, 1 total
-Tests:       23 passed, 23 total
+Tests:       28 passed, 28 total
 ```
 
 Доказ (revert-эксперымент, implementation-rules 1): забіць колер полкі
@@ -45,3 +45,10 @@ Tests:       23 passed, 23 total
 кнопкі прагляду (укладзены масіў стыляў больш не злітаваны да opacity).
 Эксперыменты пачынаюцца і сканчаюцца аднаўленнем файлаў з git, таму пасля
 дэмы код застаецца ў камітнутым стане.
+
+> 2026-10-03, issue #430 (варыянт А): лічба тэстаў прэв'ю перазахопленая —
+> сют рос чужымі PR-амі пасля 30.09 (было 23, цяпер 28; увод гэтага PR лічбу
+> не змяняе — перапіс аднаго тэста 1:1). Тэкст умеўнага ўводзін («канон §5:
+> opacity 0.5») — гістарычны: кантракт выключанага стану перавызначаны
+> ghost-парай `color.disabled-ink`/`color.disabled-line`, гл. дэму
+> 2026-10-03-430-disabled-contrast.md.

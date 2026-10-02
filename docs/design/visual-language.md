@@ -127,8 +127,12 @@ production-экранаў G06.01+ і для прататыпа G06.08: асоб�
 - Primary: фон `color.accent`, тэкст `color.accent-ink` — адно галоўнае
   дзеянне на экран (прэв'ю: `Download → Start`, 09 §6.5).
 - Звычайная: фон `color.card`, межа `color.line`.
-- Выключаная: opacity 0.5 + `cursor: not-allowed` — прычына недаступнасці
-  заўсёды пазначаная побач (`11` §7).
+- Выключаная: тэкст `color.disabled-ink`, межа `color.disabled-line`, фон
+  празрысты — пара ≥ 4.5:1 (тэкст) і ≥ 3:1 (межа) на падкладцы (папера ці
+  белая картка) па WCAG 1.4.3/1.4.11, без полкі і без празрыстасці-падмены;
+  прычына недаступнасці заўсёды пазначаная побач (`11` §7). Рашэнне ўладара
+  2026-10-03 (issue #430): голае `opacity 0.5` давала ≈2:1 — амаль нябачны
+  стан.
 - Фокус: outline 3px `color.accent` з змяшчэннем 1px — аднолькавы для ўсіх
   інтэрактыўных элементаў (кнопкі, чыпы, маркеры, кнопкі шкалы).
 - Чып-фільтр: націснуты (`aria-pressed=true`) — фон `color.accent`.
@@ -235,6 +239,8 @@ mascot-only (a11y-плашка `screens.md`).
     "color.line":             { "value": "#d8d2c6", "use": "межы картак, падзяляльнікі табліц, трэк прагрэсу" },
     "color.shelf.accent":     { "value": "#154f3a", "use": "полка вылепленай primary-кнопкі — цяменшае нацяжэнне color.accent" },
     "color.shelf.line":       { "value": "#c9c1b1", "use": "полка вылепленай звычайнай кнопкі — цяменшае нацяжэнне color.line" },
+    "color.disabled-ink":     { "value": "#6b7280", "use": "тэкст выключанай кнопкі — прыглушаная чытэльная пара на паперы (§5, issue #430)" },
+    "color.disabled-line":    { "value": "#6b7280", "use": "межа выключанай кнопкі (§5, issue #430)" },
     "color.map":              { "value": "#eef3ee", "use": "фон мапы Побач і Run" },
     "color.street":           { "value": "#dfe7df", "use": "вуліцы на мапе" },
     "color.person":           { "value": "#1f5aa8", "use": "кропка пазіцыі карыстальніка" },
@@ -329,7 +335,11 @@ mascot-only (a11y-плашка `screens.md`).
     { "fg": "color.person", "bg": "color.map", "min": 3 },
     { "fg": "color.accent", "bg": "color.paper", "min": 3 },
     { "fg": "color.accent", "bg": "color.card", "min": 3 },
-    { "fg": "color.accent", "bg": "color.line", "min": 3 }
+    { "fg": "color.accent", "bg": "color.line", "min": 3 },
+    { "fg": "color.disabled-ink", "bg": "color.paper", "min": 4.5 },
+    { "fg": "color.disabled-ink", "bg": "color.card", "min": 4.5 },
+    { "fg": "color.disabled-line", "bg": "color.paper", "min": 3 },
+    { "fg": "color.disabled-line", "bg": "color.card", "min": 3 }
   ],
   "supersession": {
     "--kudy-paper":      { "token": "color.paper" },
