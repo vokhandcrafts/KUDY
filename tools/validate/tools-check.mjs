@@ -83,7 +83,11 @@ function main() {
   }
 
   const { status, output } = productionPassOutcome(collectProductionToolFiles());
-  if (output.trim()) process.stdout.write(output);
+  if (output.trim()) {
+    // A clean run reports on stdout; diagnostics for a refused or failing
+    // run go to stderr so pipelines do not read them as normal output.
+    (status === 0 ? process.stdout : process.stderr).write(output);
+  }
   process.exit(status);
 }
 
