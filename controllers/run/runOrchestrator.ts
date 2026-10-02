@@ -36,10 +36,11 @@
 //    engine (ADR G01.03 §3.5): its handler is registered here, where dispatch
 //    is private, so no public method accepts an AccessReady-shaped event and
 //    a look-alike from any other source has no route into step(). The
-//    onCommitted hook runs after step() committed an event and before its
-//    effects fire — the durability point where useRunController checkpoints
-//    the durable sets and write-throughs play_seq (ADR §3.1/§3.3); a failing
-//    hook aborts the pending effects (effects only after commit).
+//    onCommitted hook runs on step()'s PROPOSED state, before the orchestrator
+//    commits it — the durability point where useRunController writes the
+//    durable delta and only then publishes (ADR §3.1/§3.3; R2, G20.03): a
+//    failing hook rejects the whole transition, so no effect ever fires for a
+//    state the durable row does not hold.
 import { acceptFix } from '../../core/pipeline/pipeline.ts';
 import {
   initialPipelineState,
@@ -391,16 +392,43 @@ export class RunOrchestrator {
     }
   }
 
-  // The one input path: commit the state, hand the durability point its
-  // before/after views (header note 7 — the checkpoints and the play_seq
-  // write-through of ADR G01.03 §3.1/§3.3 happen here, before any effect),
-  // then apply the proposed effects.
+  // The one input path (R2, G20.03): the durability point receives step()'s
+  // proposed state BEFORE anything commits — the durable write, then the
+  // state (header note 7: the checkpoints and the play_seq write-through of
+  // ADR G01.03 §3.1/§3.3 happen here), then the proposed effects. A durable
+  // write that refuses aborts the transition whole: the engine memory keeps
+  // the last durable state (failTransition's posture), no effect fires and
+  // the original error surfaces to the dispatch caller — the screens never
+  // advertise a transition the row does not hold, and the retry
+  // re-dispatches it against the row.
   private dispatch(event: RunEvent): void {
     const before = this.engineState;
     const result = step(this.engineState, event, this.clock.now(), this.engineConfig);
+    try {
+      this.onCommitted?.(before, result.state);
+    } catch (error) {
+      this.failTransition(event, result.commands, before);
+      throw error;
+    }
     this.engineState = result.state;
-    this.onCommitted?.(before, result.state);
     this.applyEffects(result.commands);
+  }
+
+  // The refused-commit posture of a failed session Pause or End (R2, G20.03):
+  // the memory state stays the durable one — plus the automation suspension,
+  // so the next sound never starts by itself after the failed write (11
+  // §5.1.1 outcome 2) — and the physical guide sound still stops: the
+  // proposed StopAudio is the only effect that runs, because the guide launch
+  // is the session's property even though the row keeps its previous state.
+  // A sounding moment is not session property: its stop is not proposed and
+  // not applied here. The retry re-dispatches the transition from this state.
+  private failTransition(event: RunEvent, commands: ReadonlyArray<RunCommand>, before: RunState): void {
+    if (event.type !== 'Pause' && event.type !== 'End') return;
+    if (before.phase === 'Idle') return;
+    for (const command of commands) {
+      if (command.type === 'StopAudio') this.audio.stop();
+    }
+    this.engineState = { ...before, autoplaySuspended: true };
   }
 
   private applyEffects(commands: ReadonlyArray<RunCommand>): void {
