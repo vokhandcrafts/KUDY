@@ -79,6 +79,17 @@ if (!/supabase\/functions\/\.deno-version/.test(text)) {
   failures.push('required-checks.yml does not read the committed Deno version pin');
 }
 
+// G20.15 revert guard — the required workflow must cruise the REAL repository
+// graph (implementation-rules 1 and 18; authorized by issue #493, closed):
+// losing the arch:check step from required-checks.yml would silently drop the
+// layer-boundary gate from CI, leaving only the fixture suites. The command is
+// end-anchored so a renamed or suffixed script (arch:check-anything) does not
+// count as the gate. The script itself and its npm-test wiring are pinned by
+// the G18.01 checks above.
+if (!/run:\s*npm run arch:check\s*$/m.test(text)) {
+  failures.push('required-checks.yml does not run `npm run arch:check` — the real repository graph is not gated');
+}
+
 // Issue #241 revert guard — the jscpd gate must stay self-contained. The
 // reusable workflow in vokhandcrafts/ai-company-infrastructure cannot be
 // called from this repository: both repos are private and user-owned, and
@@ -116,4 +127,4 @@ if (failures.length > 0) {
   for (const failure of failures) console.error(`- ${failure}`);
   process.exit(1);
 }
-console.log('guard-required-checks: OK — required-checks runs npm ci + npm test + web build + server:typecheck');
+console.log('guard-required-checks: OK — required-checks runs npm ci + npm test + web build + server:typecheck + arch:check');

@@ -305,3 +305,41 @@ test('a baselined violation passes; the same violation without the baseline fail
   assert.equal(second.status, 0, `baselined violation must pass:\n${second.output}`);
   assert.match(second.output, /pass via the baseline/);
 });
+
+// G20.15 (issue #486) — the required workflow must gate the REAL repository
+// graph with the same command it declares. This test parses the committed
+// `npm run arch:check` script, runs its exact argument vector against a
+// repository fixture (the real config, the script's baseline path, the
+// script's zone list) with a planted forbidden import, and asserts the
+// nonzero answer names the source and the rule. Reverting the gate (or
+// dropping its config/zone wiring from the script) fails here before CI does.
+test('workflow_gate_invocation: the committed arch:check command rejects a planted violation', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8'));
+  const script = pkg.scripts['arch:check'];
+  assert.match(script, /^node tools\/arch\/arch-check\.mjs /, 'the gate script must invoke the committed checker');
+  const scriptArgs = script.replace(/^node tools\/arch\/arch-check\.mjs/, '').trim().split(/\s+/);
+  assert.equal(scriptArgs[0], '--config', 'the gate must be driven by the committed config');
+  const zones = scriptArgs.slice(scriptArgs.indexOf('--baseline') + 2);
+  assert.ok(zones.length > 0, 'the gate must name the zone list');
+
+  // Repository fixture: the real config, the script's baseline path, every
+  // zone directory the script names, and one planted forbidden import
+  // (core -> services violates the matrix the config projects).
+  const dir = makeSandbox({ files: {} });
+  fs.mkdirSync(path.join(dir, 'tools', 'arch'), { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, 'tools', 'arch', 'baseline.json'),
+    JSON.stringify({ generated: '2026-10-02', entries: [] }),
+  );
+  for (const zone of zones) fs.mkdirSync(path.join(dir, zone), { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, 'core', 'pure.mjs'),
+    "import { use } from '../services/adapter.mjs';\nexport const step = () => Boolean(use);\n",
+  );
+  fs.writeFileSync(path.join(dir, 'services', 'adapter.mjs'), "export const use = (x) => x;\n");
+
+  const { status, output } = runChecker({ cwd: dir, baselineFile: path.join(dir, 'tools', 'arch', 'baseline.json') });
+  assert.notEqual(status, 0, `the planted violation must fail the gate:\n${output}`);
+  assert.match(output, /core-zone-closed/, 'the violated rule must be named');
+  assert.match(output, /core\/pure\.mjs/, 'the violating source must be named');
+});
