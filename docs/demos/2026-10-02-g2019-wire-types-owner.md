@@ -52,9 +52,10 @@ ok 3 - repeated generation is byte-identical to the committed output
 ok 4 - a locale-allowlist change fails the check until regeneration (owner: localized-text)
 ok 5 - a catalog-schema field change fails the check until regeneration
 ok 6 - a mirror schema diverging from the locale owner fails closed with a named diagnostic
-ok 7 - the committed projection keeps the v1-only shapes and the generated header
-# tests 7
-# pass 7
+ok 7 - a corrupt schema file yields a named diagnostic, not a stack trace
+ok 8 - the committed projection keeps the v1-only shapes and the generated header
+# tests 8
+# pass 8
 # fail 0
 ```
 

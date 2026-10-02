@@ -22,6 +22,15 @@ const COMMITTED = path.join(REPO_ROOT, 'contracts', 'wire', 'wire-types.ts');
 
 const SCHEMA_FILES = ['localized-text.schema.json', 'catalog.schema.json', 'route.schema.json', 'stop.schema.json'];
 
+// Sandboxes are tracked so every test can clean up after itself (t.after).
+const SANDBOXES = [];
+
+function trackCleanup(t) {
+  t.after(() => {
+    for (const dir of SANDBOXES.splice(0)) fs.rmSync(dir, { recursive: true, force: true });
+  });
+}
+
 function runGenerator(args) {
   const run = spawnSync(process.execPath, [GENERATOR, ...args], { encoding: 'utf8' });
   return { status: run.status, output: `${run.stdout}\n${run.stderr}` };
@@ -30,6 +39,7 @@ function runGenerator(args) {
 // A sandbox with copies of the four schema files, optionally mutated.
 function makeSchemaSandbox(mutations) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-wire-'));
+  SANDBOXES.push(dir);
   for (const name of SCHEMA_FILES) fs.copyFileSync(path.join(SCHEMAS, name), path.join(dir, name));
   for (const mutate of mutations ?? []) {
     const file = path.join(dir, mutate.file);
@@ -60,7 +70,8 @@ test('committed wire-types output is fresh (--check passes on HEAD)', () => {
   assert.match(output, /wire-types: OK/);
 });
 
-test('repeated generation is byte-identical to the committed output', () => {
+test('repeated generation is byte-identical to the committed output', (t) => {
+  trackCleanup(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-wire-'));
   const first = path.join(dir, 'first.ts');
   const second = path.join(dir, 'second.ts');
@@ -72,7 +83,8 @@ test('repeated generation is byte-identical to the committed output', () => {
   assert.equal(fs.readFileSync(first, 'utf8'), readCommitted(), 'generation must reproduce the committed file');
 });
 
-test('a locale-allowlist change fails the check until regeneration (owner: localized-text)', () => {
+test('a locale-allowlist change fails the check until regeneration (owner: localized-text)', (t) => {
+  trackCleanup(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-wire-'));
   const out = path.join(dir, 'wire-types.ts');
   fs.copyFileSync(COMMITTED, out);
@@ -100,7 +112,8 @@ test('a locale-allowlist change fails the check until regeneration (owner: local
   assert.equal(fresh.status, 0, `the check must pass after regeneration:\n${fresh.output}`);
 });
 
-test('a catalog-schema field change fails the check until regeneration', () => {
+test('a catalog-schema field change fails the check until regeneration', (t) => {
+  trackCleanup(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-wire-'));
   const out = path.join(dir, 'wire-types.ts');
   fs.copyFileSync(COMMITTED, out);
@@ -122,7 +135,8 @@ test('a catalog-schema field change fails the check until regeneration', () => {
   assert.equal(fresh.status, 0, `the check must pass after regeneration:\n${fresh.output}`);
 });
 
-test('a mirror schema diverging from the locale owner fails closed with a named diagnostic', () => {
+test('a mirror schema diverging from the locale owner fails closed with a named diagnostic', (t) => {
+  trackCleanup(t);
   const sandbox = makeSchemaSandbox([
     {
       file: 'catalog.schema.json',
@@ -134,6 +148,16 @@ test('a mirror schema diverging from the locale owner fails closed with a named 
   const run = runGenerator(['--schemas', sandbox, '--out', path.join(os.tmpdir(), 'kudy-wire-must-not-write.ts')]);
   assert.notEqual(run.status, 0, 'the compatibility gate must fail closed');
   assert.match(run.output, /diverges from its canonical owner/, 'the diagnostic must name the divergence');
+});
+
+test('a corrupt schema file yields a named diagnostic, not a stack trace', (t) => {
+  trackCleanup(t);
+  const sandbox = makeSchemaSandbox([]);
+  fs.writeFileSync(path.join(sandbox, 'catalog.schema.json'), '{"properties":', 'utf8');
+  const run = runGenerator(['--schemas', sandbox, '--out', path.join(os.tmpdir(), 'kudy-wire-corrupt.ts')]);
+  assert.notEqual(run.status, 0, `the generator must fail closed:\n${run.output}`);
+  assert.match(run.output, /invalid JSON/, 'the diagnostic must name the invalid input');
+  assert.doesNotMatch(run.output, /at\s+\S+\s+\(.*:\d+:\d+\)/, 'no raw stack trace — a diagnostic is expected');
 });
 
 test('the committed projection keeps the v1-only shapes and the generated header', () => {
