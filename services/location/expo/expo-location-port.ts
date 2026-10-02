@@ -1,11 +1,10 @@
 // G05.02.c — the expo-location adapter over the G05.02.b port (the audio
 // adapter pattern of G05.03.b): the only module of services/location/expo/
-// that imports expo modules at runtime; node --test never imports it — the
-// pure mappings (fix-mapping, permission-mapping) and the config extraction
-// (location-config) it delegates to are tested on synthetic inputs instead.
+// that imports Expo modules at runtime. Node behavioral tests replace only
+// the Expo boundary; mappings and config extraction also have pure suites.
 // The composition root receives the port factory as the location port
 // parameter — the one sanctioned construction path (G06.09.b); no other
-// module imports this file (AC4; verified by arch:check and the import grep
+// production module imports this file (AC4; verified by arch:check and the import grep
 // in results/G05.02.c.md).
 //
 // Mapping decisions recorded in results/G05.02.c.md:
@@ -50,14 +49,18 @@ const LOCATION_UPDATES_TASK = 'KUDY/location-updates';
 const OS_ACCURACY = Location.Accuracy.High;
 
 let updatesTaskDefined = false;
-function defineUpdatesTaskOnce(emitFix: (location: OsLocationObject) => void): void {
+// Expo uses one process-wide task name: native start/stop operations and
+// its delivery slot must follow the same order, including across ports.
+let backgroundWork: Promise<void> = Promise.resolve();
+let backgroundSink: ((location: OsLocationObject) => void) | null = null;
+function defineUpdatesTaskOnce(): void {
   if (updatesTaskDefined) return;
   TaskManager.defineTask<{ locations: OsLocationObject[] }>(LOCATION_UPDATES_TASK, async ({ data, error }) => {
     if (error !== null && error !== undefined) {
       console.warn(`location adapter: background task error ${String(error)}`);
       return;
     }
-    for (const location of data?.locations ?? []) emitFix(location);
+    for (const location of data?.locations ?? []) backgroundSink?.(location);
   });
   updatesTaskDefined = true;
 }
@@ -73,6 +76,7 @@ export class ExpoLocationOsPort implements LocationOsPort {
   private currentSub: number | null = null;
   private backgroundIntent = false;
   private removeWatch: (() => void) | null = null;
+  private backgroundSink: ((location: OsLocationObject) => void) | null = null;
   private regions: ReadonlyArray<GeofenceStop> = [];
   // G20.07 (runtime.md R4) — the two OS scopes are tracked separately.
   // `permissionState` is the foreground capability the port reports (every
@@ -121,17 +125,24 @@ export class ExpoLocationOsPort implements LocationOsPort {
   startFixes(sub: number): void {
     this.currentSub = sub;
     if (this.backgroundIntent && this.backgroundState === 'granted') {
-      defineUpdatesTaskOnce((location) => this.emitFix(location));
-      Location.startLocationUpdatesAsync(LOCATION_UPDATES_TASK, {
-        accuracy: OS_ACCURACY,
-        foregroundService: {
-          notificationTitle: this.extras.locationForegroundService.notificationTitle,
-          notificationBody: this.extras.locationForegroundService.notificationBody,
-        },
-      }).catch((error: unknown) => {
-        console.warn(`location adapter: background updates refused (${String(error)}) — falling back to the foreground watch`);
-        void this.startForegroundWatch(sub);
-      });
+      backgroundWork = backgroundWork.then(async () => {
+        if (this.currentSub !== sub) return;
+        defineUpdatesTaskOnce();
+        this.backgroundSink = (location) => this.emitFix(location, sub);
+        backgroundSink = this.backgroundSink;
+        try {
+          await Location.startLocationUpdatesAsync(LOCATION_UPDATES_TASK, {
+            accuracy: OS_ACCURACY,
+            foregroundService: {
+              notificationTitle: this.extras.locationForegroundService.notificationTitle,
+              notificationBody: this.extras.locationForegroundService.notificationBody,
+            },
+          });
+        } catch (error) {
+          console.warn(`location adapter: background updates refused (${String(error)})`);
+          if (this.currentSub === sub) void this.startForegroundWatch(sub);
+        }
+      }).catch((error: unknown) => console.warn(`location adapter: background setup failed: ${String(error)}`));
       return;
     }
     if (this.backgroundIntent) {
@@ -145,17 +156,16 @@ export class ExpoLocationOsPort implements LocationOsPort {
     this.currentSub = null;
     this.removeWatch?.();
     this.removeWatch = null;
-    // The stop tail is asynchronous while the service's next startFixes is
-    // synchronous (the watchdog's recoveryStep stops the old subscription and
-    // starts a fresh one back to back): without the generation check the
-    // trailing stop would land after the new start and kill the fresh
-    // background stream — the same task name, one process. A subscription
-    // that took over owns the task; only a genuinely stopped one stops it.
-    void Location.hasStartedLocationUpdatesAsync(LOCATION_UPDATES_TASK)
-      .then(async (started) => {
-        if (started && this.currentSub === null) await Location.stopLocationUpdatesAsync(LOCATION_UPDATES_TASK);
-      })
-      .catch((error: unknown) => console.warn(`location adapter: stopping background updates failed: ${String(error)}`));
+    backgroundWork = backgroundWork.then(async () => {
+      const replacedByBackground = () => this.currentSub !== null
+        && this.backgroundIntent && this.backgroundState === 'granted';
+      if (replacedByBackground() || backgroundSink !== this.backgroundSink) return;
+      const started = await Location.hasStartedLocationUpdatesAsync(LOCATION_UPDATES_TASK);
+      if (replacedByBackground() || backgroundSink !== this.backgroundSink) return;
+      if (started) await Location.stopLocationUpdatesAsync(LOCATION_UPDATES_TASK);
+      backgroundSink = null;
+      this.backgroundSink = null;
+    }).catch((error: unknown) => console.warn(`location adapter: stopping background updates failed: ${String(error)}`));
   }
 
   setRegions(regions: ReadonlyArray<GeofenceStop>): void {
@@ -186,7 +196,7 @@ export class ExpoLocationOsPort implements LocationOsPort {
     try {
       const watch = await Location.watchPositionAsync(
         { accuracy: OS_ACCURACY },
-        (location) => this.emitFix(location),
+        (location) => this.emitFix(location, sub),
         (error: unknown) => console.warn(`location adapter: watch error ${String(error)}`),
       );
       if (this.currentSub !== sub) {
@@ -199,9 +209,8 @@ export class ExpoLocationOsPort implements LocationOsPort {
     }
   }
 
-  private emitFix(location: OsLocationObject): void {
-    const sub = this.currentSub;
-    if (sub === null) return;
+  private emitFix(location: OsLocationObject, sub: number): void {
+    if (this.currentSub !== sub) return;
     const mapped = mapOsLocationToFix(location);
     if (!mapped.ok) {
       console.warn(`location adapter: OS fix rejected (${mapped.reason})`);

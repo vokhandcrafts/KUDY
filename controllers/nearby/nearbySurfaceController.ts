@@ -131,7 +131,19 @@ export function useNearbySurface(
       return;
     }
     let armedByUs = false;
+    let foreground = false;
+    let disposed = false;
+    const releaseLocation = () => {
+      if (armedByUs && location.currentMode() === 'city-surface') location.setMode('idle');
+      armedByUs = false;
+    };
     const read = () => {
+      if (disposed) return;
+      if (!foreground) {
+        releaseLocation();
+        setLocationView({ state: 'absent' });
+        return;
+      }
       // The arming decision is re-evaluated every tick, not only on mount: a
       // walk that starts (or ends) while the surface stays mounted changes
       // the mode under us — the guard arms whenever the mode is free again,
@@ -139,24 +151,33 @@ export function useNearbySurface(
       // walk's own subscription (criterion 4, 11 §7: the named state never
       // sticks).
       const mode = location.currentMode();
+      if (mode !== 'city-surface') armedByUs = false;
       if (nearbyArmingDecision(mode) === 'arm' && mode !== 'city-surface') {
         location.setMode('city-surface');
         armedByUs = true;
       }
       setLocationView(nearbyLocationView(location));
     };
+    // Pure Node consumers call controller decisions without a native runtime;
+    // React mounts this lifecycle observer only on the rendered surface.
+    const { AppState }: typeof import('react-native') = require('react-native');
+    foreground = AppState.currentState === 'active';
+    const appStateSubscription = AppState.addEventListener('change', state => {
+      foreground = state === 'active';
+      read();
+    });
     read();
     // The service emits no status change event; the surface polls its
     // status() read while open (a permission answer, a grant or a watchdog
     // step land within one poll — the render suite's waits rely on it).
     const timer = setInterval(read, STATUS_POLL_MS);
     return () => {
+      disposed = true;
       clearInterval(timer);
       // 09 §20: the subscription is released when the surface closes — only
       // what this surface armed, never a walk's own mode.
-      if (armedByUs && location.currentMode() === 'city-surface') {
-        location.setMode('idle');
-      }
+      appStateSubscription.remove();
+      releaseLocation();
     };
   }, [location]);
   return { surface, locationView, locale };
