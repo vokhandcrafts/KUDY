@@ -15,8 +15,8 @@ jobs:
         node: [22, 24]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ matrix.node }}
       - name: install (root)
@@ -35,8 +35,8 @@ jobs:
     # limitation named, never silently.
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
       - name: portable path-boundary checks (design-tokens + fixture hygiene)
@@ -44,8 +44,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
       - name: install (root)
@@ -72,10 +72,13 @@ jobs:
     # directly and tools/ci/deno-typecheck.mjs verifies the runtime against
     # the same file, so CI and the check script cannot drift apart.
     # setup-deno is pinned to its verified upstream commit (V6 full-SHA
-    # policy); the pre-existing checkout/setup-node tags are G20.27's scope.
+    # policy); every checkout/setup-node reference in every workflow is pinned
+    # the same way by G20.27 (#500) — the tag stays only as a version
+    # annotation, and tools/ci/check-required-checks.mjs fails the guard when
+    # a pin is dropped.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
           deno-version-file: supabase/functions/.deno-version
@@ -84,8 +87,8 @@ jobs:
   web-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
       - name: install (web)
@@ -97,12 +100,15 @@ jobs:
   gitleaks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - name: gitleaks
-        run: |
-          curl -sSL -o /tmp/gitleaks.tgz \
-            https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz
-          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
-          /tmp/gitleaks detect --source . --verbose --no-banner
+      - name: gitleaks (digest-pinned download)
+        # G20.27 (#500, spec V6): the archive is fetched over HTTPS with an
+        # HTTP-success check, its sha256 is verified against the digest pinned
+        # in tools/ci/fetch-gitleaks.mjs BEFORE extraction, and only then the
+        # scanner executes — with --redact, so findings never print secrets
+        # into the job log. Any missing/wrong digest or HTTP failure exits
+        # nonzero with zero scanner executions
+        # (tools/ci/gitleaks-fetch.test.mjs proves all four cases).
+        run: node tools/ci/fetch-gitleaks.mjs
