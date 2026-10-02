@@ -17,6 +17,7 @@ import { after, describe, it } from 'node:test';
 // @ts-expect-error — reader.mjs has no type declarations
 import { readCatalogDoc } from '../../contracts/reader.mjs';
 import { loadCatalog, loadNearby, loadPreview } from './catalogService.ts';
+import { withWaitLimit } from '../network-wait.ts';
 import { readCatalogEnvelope } from './envelope.ts';
 import { createOriginCatalogLoader } from './loader.ts';
 import type { CatalogGuideCard, CatalogPathLoader, NearbyOfferFacts, Sha256 } from './types.ts';
@@ -908,5 +909,41 @@ describe('loadNearby — the Nearby offer projection (G07.01)', () => {
     assert.deepEqual(cached, { kind: 'offline', offers: previous, reason: 'network gone' });
     const bare = await loadNearby({ loader: failing, sha256 }, opts, null);
     assert.deepEqual(bare, { kind: 'error', reason: 'network gone' });
+  });
+});
+
+describe('G20.10 bounded catalog waits (issue #481)', () => {
+  const previousCards = [
+    {
+      routeId: 'r-1',
+      version: '1',
+      offerId: null,
+      title: 'r-1',
+      summary: null,
+      textLocales: ['be'],
+      audioLocales: [],
+      localesKnown: false,
+      access: 'free',
+      editorialOrder: null,
+      estimatedDuration: null,
+    },
+  ] as const;
+
+  it('stalled_catalog_uses_cache: a deadline failure falls back to the validated previous copy', async () => {
+    const failingLoader: CatalogPathLoader = async (relPath) => {
+      // The same answer the deadline loader produces: the named wait failure.
+      return withWaitLimit('wait-catalog', 25, () => new Promise<string>(() => {}));
+    };
+    const cached = await loadCatalog({ loader: failingLoader, sha256 }, opts, previousCards as never);
+    assert.equal(cached.kind, 'offline');
+    assert.ok(cached.kind === 'offline' && cached.guides.length === 1, 'the validated copy is served');
+    assert.match(cached.reason, /wait-catalog/);
+  });
+
+  it('stalled_catalog_uses_cache: without a copy the existing error state surfaces, named', async () => {
+    const failingLoader: CatalogPathLoader = () => withWaitLimit('wait-catalog', 25, () => new Promise<string>(() => {}));
+    const fresh = await loadCatalog({ loader: failingLoader, sha256 }, opts, null);
+    assert.equal(fresh.kind, 'error');
+    assert.ok(fresh.kind === 'error' && /wait-catalog/.test(fresh.reason));
   });
 });

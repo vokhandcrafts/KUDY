@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-02 — Deno type-check: дадай `server-typecheck` у required statuses (задача #484)
+Што зрабіць: у GitHub UI (Settings → Branches → protection галіны main) дадай новы статус `server-typecheck` да required checks — з сесіі бачнасць branch protection не праверыць (токен без адпаведных scope), а без гэтага новы job застаецца неабавязковым. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #484.
+PR: https://github.com/vokhandcrafts/KUDY/pull/519 (issue: https://github.com/vokhandcrafts/KUDY/issues/484; эпік: https://github.com/vokhandcrafts/KUDY/issues/470)
+
 ### 2026-10-02 — Ліміт grant-запытаў: правераная ква deployment-а (задача #499)
 Што зрабіць: перад рэальным запускам grant-функцыі запішы ў задачу #499 правераную квоту RevenueCat гэтага deployment-а і, калі дэфолт 30 запытаў/год на прыладу (канстанты ў `grant-core.ts`) не пасуе, назаві патрэбнае значэнне — агульнай праверанай квоты зараз няма, і агент наўмысна яе не выдумаў. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #499.
 PR: https://github.com/vokhandcrafts/KUDY/pull/514 (issue: https://github.com/vokhandcrafts/KUDY/issues/499; эпік: https://github.com/vokhandcrafts/KUDY/issues/470)

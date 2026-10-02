@@ -27,9 +27,15 @@ export interface RequestLike {
   headers: { get(name: string): string | null };
 }
 
-/** The `unsafe` statement surface of the pinned postgres.js driver. */
+/**
+ * The `unsafe` statement surface of the pinned postgres.js driver: the
+ * handler passes primitive parameter lists only (the statements are pinned
+ * constants, parameters built in place), and the real `postgres.Sql`
+ * satisfies this shape structurally — a mutable primitive array is a
+ * `ParameterOrJSON[]` for the driver.
+ */
 export interface DeviceSqlClient {
-  unsafe(sql: string, params: readonly unknown[]): PromiseLike<ArrayLike<unknown>>;
+  unsafe(sql: string, params: (string | number | boolean | null)[]): PromiseLike<ArrayLike<unknown>>;
 }
 
 export function deviceErrorResponse(status: number, code: string, extraHeaders: Record<string, string> = {}): Response {

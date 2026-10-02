@@ -626,3 +626,32 @@ test('criterion 5: no secret, token or signed URL reaches diagnostics, errors or
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+// G20.10 (issue #481, §N4): the grant round-trip and the byte transfer are
+// finite — a stalled origin answers the documented degraded state (request)
+// or the redacted transfer failure (bytes), never an endless wait.
+test('G20.10 stalled_grant_lock_media_bytes: a stalled grant request answers offline with the named wait diagnostic', async () => {
+  const transport: GrantTransport = async () =>
+    new Promise<GrantHttpResponse>(() => {
+      // never resolves — the stalled grant origin
+    });
+  const { deps, diagnostics } = rig(transport, { waitLimits: { requestMs: 25 } });
+  const outcome = await requestGrant({ ...KEY, lock: lockFor(['stops.json']) }, deps);
+  assert.equal(outcome.kind, 'offline');
+  assert.ok(diagnostics.includes('grant:wait-timeout rule=wait-grant-request'), diagnostics.join('\n'));
+});
+
+test('G20.10 stalled_grant_lock_media_bytes: an unresolved byte transfer rejects redacted at the deadline', async () => {
+  const { transport } = recordingTransport((call) => okResponse(call.body.paths, 600_000));
+  const fetchBytes: GrantFetchDeps['fetchBytes'] = async () => {
+    await new Promise(() => {});
+    return { status: 0, body: null };
+  };
+  const { deps: sourceDeps, diagnostics } = sourceRig(transport, fetchBytes, { waitLimits: { bytesMs: 25 } });
+  const fetch = createGrantFetchSource({ key: KEY, entries: parseLock(lockFor(['stops.json'])).entries }, sourceDeps);
+  await assert.rejects(fetch('stops.json'), (error: Error) => {
+    assert.equal(error.message, 'grant-fetch#transfer-failed', 'the reply stays redacted — no URL, no wait detail');
+    return true;
+  });
+  assert.ok(diagnostics.includes('grant-fetch:wait-timeout rule=wait-grant-bytes'), diagnostics.join('\n'));
+});
