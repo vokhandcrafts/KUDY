@@ -64,7 +64,9 @@ const FULL_LOADER = loaderFromTexts({ 'catalog.json': CATALOG, 'bundle/r-1/1/rou
 
 const READY: Readiness = { status: 'ready', routeId: 'r-1', version: '1', tier: 'base', tierAvailable: ['base'] };
 
-function fakeInventory(states: PreviewLayerFacts[]): PreviewInventoryPort & { calls: number } {
+function fakeInventory(
+  states: (PreviewLayerFacts | Error | Promise<PreviewLayerFacts>)[],
+): PreviewInventoryPort & { calls: number } {
   let call = 0;
   return {
     get calls() {
@@ -74,19 +76,20 @@ function fakeInventory(states: PreviewLayerFacts[]): PreviewInventoryPort & { ca
       void input;
       const next = states[Math.min(call, states.length - 1)];
       call += 1;
-      return Promise.resolve(next);
+      if (next instanceof Error) return Promise.reject(next);
+      return next instanceof Promise ? next : Promise.resolve(next);
     },
   };
 }
 
-function fakeEvaluate(statuses: Readiness[]): PreviewEvaluatePort {
+function fakeEvaluate(statuses: (Readiness | Error)[]): PreviewEvaluatePort {
   let call = 0;
   return {
     evaluate: (input) => {
       void input;
       const next = statuses[Math.min(call, statuses.length - 1)];
       call += 1;
-      return Promise.resolve(next);
+      return next instanceof Error ? Promise.reject(next) : Promise.resolve(next);
     },
   };
 }
@@ -468,5 +471,104 @@ describe('G06.05: the download failure surfaces with its exits', () => {
     await controller.getState().download();
     assert.equal(controller.getState().downloadError, null);
     assert.equal(controller.getState().busy, false);
+  });
+});
+
+// G20.23 (issue #496, R6): the operation ends even when the facts read
+// fails — busy releases with the diagnostic, Start never follows the
+// activation result, the initial refresh lands in a terminal state and a
+// stale failure never overwrites a newer run. Synthetic faults only.
+describe('G20.23 (R6): the operation ends when the facts read fails', () => {
+  it('activation_refresh_failure_releases_busy: the post-activation inventory fault does not wedge the button', async () => {
+    const inventory = fakeInventory([
+      { state: 'not_downloaded', missingCount: null },
+      new Error('synthetic-inventory-fault'),
+      { state: 'ready', missingCount: null },
+    ]);
+    const download = fakeDownload();
+    const controller = createPreviewController(
+      makePorts(FULL_LOADER, { inventory, evaluate: fakeEvaluate([READY]), download }),
+      'r-1',
+    );
+    await waitUntil(() => controller.getState().surface.kind === 'ready');
+    await controller.getState().download();
+    assert.equal(controller.getState().busy, false);
+    assert.equal(controller.getState().downloadError, 'Збой загрузкі.');
+    assert.equal(controller.getState().downloadDetail, 'synthetic-inventory-fault');
+    assert.equal(controller.getState().button.action, 'download', 'the facts, not the result, own the button');
+    // The retry runs: the facts read recovers and the flip follows them.
+    await controller.getState().download();
+    assert.deepEqual(download.keys, ['r-1', 'r-1']);
+    assert.deepEqual([controller.getState().button.action, controller.getState().button.enabled], ['start', true]);
+  });
+
+  it('failed_evaluate_retry: a failed readiness verdict keeps Start blocked and visible, the retry re-verifies', async () => {
+    const inventory = fakeInventory([
+      { state: 'not_downloaded', missingCount: null },
+      { state: 'ready', missingCount: null },
+    ]);
+    const evaluate = fakeEvaluate([new Error('synthetic-evaluate-fault'), READY]);
+    const controller = createPreviewController(
+      makePorts(FULL_LOADER, { inventory, evaluate, download: fakeDownload() }),
+      'r-1',
+    );
+    await waitUntil(() => controller.getState().surface.kind === 'ready');
+    await controller.getState().download();
+    assert.equal(controller.getState().busy, false);
+    assert.equal(controller.getState().downloadError, 'Збой загрузкі.');
+    assert.equal(controller.getState().downloadDetail, 'synthetic-evaluate-fault');
+    // The complete activation result alone starts nothing: the readiness
+    // verdict was not verified, Start stays blocked, the failure is not
+    // hidden behind a silent success.
+    assert.equal(await controller.getState().start(), 'blocked');
+    assert.equal(controller.getState().button.action, 'download');
+    // The retry re-reads the facts and only then unlocks Start.
+    await controller.getState().download();
+    assert.deepEqual([controller.getState().button.action, controller.getState().button.enabled], ['start', true]);
+  });
+
+  it('initial_refresh_terminal: a boot facts-read failure lands in a terminal, recoverable state', async () => {
+    const inventory = fakeInventory([
+      new Error('synthetic-inventory-fault'),
+      { state: 'ready', missingCount: null },
+    ]);
+    const controller = createPreviewController(
+      makePorts(FULL_LOADER, { inventory, evaluate: fakeEvaluate([READY]) }),
+      'r-1',
+    );
+    await waitUntil(() => controller.getState().surface.kind === 'unavailable');
+    const surface = controller.getState().surface;
+    assert.ok(surface.kind === 'unavailable');
+    assert.equal(surface.reason, 'synthetic-inventory-fault');
+    assert.equal(controller.getState().busy, false);
+    // The recovery path: the next surface start re-runs the refresh.
+    await controller.getState().refresh();
+    assert.ok(controller.getState().surface.kind === 'ready');
+  });
+
+  it('stale_refresh_failure: a late rejected run never overwrites a newer result', async () => {
+    // The boot run's facts read hangs on the gate; the manual refresh
+    // completes first and readies the surface. The boot's late read then
+    // rejects — the run guard in the error path must drop that stale
+    // failure instead of clobbering the newer result.
+    const factsGate = deferred<PreviewLayerFacts>();
+    const inventory = fakeInventory([
+      factsGate.promise,
+      { state: 'ready', missingCount: null },
+    ]);
+    const controller = createPreviewController(
+      makePorts(FULL_LOADER, { inventory, evaluate: fakeEvaluate([READY]) }),
+      'r-1',
+    );
+    // Deterministic interleaving: the boot run parks on its pending facts
+    // read first; only then does the newer refresh take its own (ready) read.
+    await waitUntil(() => inventory.calls === 1);
+    controller.getState().refresh();
+    await waitUntil(() => controller.getState().surface.kind === 'ready');
+    factsGate.reject(new Error('synthetic-inventory-fault'));
+    await new Promise((resolve) => setImmediate(resolve));
+    const { surface } = controller.getState();
+    assert.ok(surface.kind === 'ready', 'the stale failure was dropped');
+    assert.equal(surface.preview.durationMin, 20);
   });
 });
