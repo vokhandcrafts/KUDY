@@ -23,6 +23,8 @@ export interface CatalogEnvelope {
   // reader.mjs readCatalogDoc statuses, same meaning: v1 (use it),
   // legacy-v0 (a bare routes array), unknown-major (routes only, the
   // discovery pointer is not interpreted), invalid (nothing is used).
+  // The strict v1-only wire shapes live in contracts/wire/wire-types.ts
+  // (generated); this envelope is the multi-version device projection.
   readonly status: 'v1' | 'legacy-v0' | 'unknown-major' | 'invalid';
   readonly routes: readonly CatalogRouteEntry[];
   readonly discovery_index: CatalogPointer | null;

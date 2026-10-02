@@ -1,11 +1,20 @@
-// Typed shapes of the public layer the web reads. Field names are copied
-// verbatim from the versioned contracts (contracts/schemas/) — the bundle
-// format is a public contract (09 §4), nothing is invented at the call site.
+// Typed shapes of the public layer the web reads. The catalog and bundle wire
+// definitions and the locale allowlist are NOT restated here:
+// contracts/wire/wire-types.ts (generated verbatim from contracts/schemas/,
+// G20.19 issue #490) is their single owner and this module re-exports it.
+// Declared below are only the shapes no schema owns yet: reader-result
+// envelopes, the discovery wire, story, previews and the public projections.
+export type {
+  CatalogPointer,
+  CatalogRouteEntry,
+  CatalogView,
+  Locale,
+  LocalizedText,
+  RouteDoc,
+  RouteStop,
+} from '../../../contracts/wire/wire-types.ts';
 
-export type Locale = 'be' | 'en' | 'uk';
-
-// localized-text.schema.json: subset of the be/en/uk allowlist, non-empty strings.
-export type LocalizedText = { [K in Locale]?: string };
+import type { Locale, LocalizedText } from '../../../contracts/wire/wire-types.ts';
 
 export type RejectionCode =
   | 'unknown-schema-version'
@@ -28,30 +37,9 @@ export type ReadResult<T> =
   | { ok: false; code: RejectionCode; errors: ContractError[] };
 
 // catalog.schema.json envelope, v1 only (web policy: unknown catalog_schema_version
-// is a defined safe rejection, not a partial render — G02.05 rule).
-export interface CatalogRouteEntry {
-  route_id: string;
-  version: string;
-  locales: Locale[];
-  layers: string[];
-  product_id?: string;
-  // catalog.schema.json: sizes is required and requires base (09 §4: sizes
-  // per layer, not bytes); extended is optional; no other keys allowed.
-  sizes: { base: number; extended?: number };
-}
-
-export interface CatalogPointer {
-  schema_version: number;
-  revision: string;
-  path: string;
-  bytes: number;
-  sha256: string;
-}
-
-export interface CatalogView {
-  routes: CatalogRouteEntry[];
-  discovery_index: CatalogPointer | null;
-}
+// is a defined safe rejection, not a partial render — G02.05 rule). The wire
+// shapes (CatalogRouteEntry, CatalogPointer, CatalogView) come from the
+// generated contracts/wire/wire-types.ts re-export above.
 
 // DiscoveryIndexV1 per 21 §3.2 — fields read by the web channel.
 export interface DiscoveryRef {
@@ -94,39 +82,6 @@ export interface DiscoveryIndex {
   themes: { id: string; labels: LocalizedText }[];
   offers: DiscoveryOffer[];
   collections: DiscoveryCollection[];
-}
-
-// route.schema.json / stop.schema.json.
-export interface RouteStop {
-  // origin — reserved provenance field (stop.schema.json, G02.01).
-  origin?: 'official' | 'imported';
-  id: string;
-  position: number;
-  place_id: string;
-  access_tier: 'base' | 'extended';
-  story_base_id?: string;
-  story_extended_id?: string;
-  trigger_radius_m?: number;
-  optional?: boolean;
-  preview?: { name: LocalizedText; announce: LocalizedText };
-}
-
-export interface RouteDoc {
-  // origin — reserved provenance field (route.schema.json, G02.01).
-  origin?: 'official' | 'imported';
-  route_id: string;
-  version: string;
-  city_id: string;
-  access: 'free_base' | 'paid';
-  product_id_route?: string;
-  product_id_extension?: string;
-  distance_m: number;
-  duration_min: number;
-  cover?: string;
-  polyline?: string;
-  published?: boolean;
-  free_stop_count: number;
-  stops: RouteStop[];
 }
 
 // story.schema.json — one entry of the per-locale base stops.json.

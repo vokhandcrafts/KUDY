@@ -12,6 +12,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { isIdentifier } from '../../../tools/build-bundle/build-bundle.mjs';
 
+// The producer-side derivation model: locales/layers are read from the
+// directories on disk (plain strings, typed by construction), not the schema
+// wire projection — the wire owner is contracts/wire/wire-types.ts
+// (generated, G20.19); the published output is schema-validated downstream.
 interface InterimRoute {
   route_id: string;
   version: string;

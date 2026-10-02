@@ -1,34 +1,14 @@
 // Shared contract fixtures for the reader tests on both sides — TR-3/TR-5 of
 // docs/architecture/23_technical_remarks.md: the SAME documents feed
 // services/contentRepo and the web reader, so a contract drift on either side
-// fails on the same input. Field names and enum domains are copied verbatim
-// from contracts/schemas/route.schema.json, catalog.schema.json and
-// stop.schema.json; the full samples carry every schema property so the
-// key-parity tests pin the restatements.
+// fails on the same input. The sample TYPES are not restated here:
+// contracts/wire/wire-types.ts is the generated verbatim projection of
+// contracts/schemas/ (G20.19, issue #490) and the imports below are the only
+// declaration. The samples themselves still carry every schema property so
+// the key-parity tests keep pinning the generated projection.
+import type { CatalogRouteEntry, RouteDoc } from '../wire/wire-types.ts';
 
-export function routeDoc(access: 'free_base' | 'paid' = 'free_base'): {
-  origin: 'official' | 'imported';
-  route_id: string;
-  version: string;
-  city_id: string;
-  access: 'free_base' | 'paid';
-  product_id_route: string;
-  product_id_extension: string;
-  distance_m: number;
-  duration_min: number;
-  cover: string;
-  polyline: string;
-  published: boolean;
-  free_stop_count: number;
-  stops: Array<{
-    id: string;
-    position: number;
-    place_id: string;
-    access_tier: 'base' | 'extended';
-    story_base_id?: string;
-    story_extended_id?: string;
-  }>;
-} {
+export function routeDoc(access: 'free_base' | 'paid' = 'free_base'): RouteDoc {
   return {
     origin: 'official',
     route_id: 'route-x',
@@ -62,14 +42,7 @@ export const nullRouteText = 'null';
 // Truncated JSON: JSON.parse must fail with the reader's invalid-json rule.
 export const truncatedRouteText = '{"route_id":"route-x","version":"1"';
 
-export function catalogEntry(): {
-  route_id: string;
-  version: string;
-  locales: Array<'be' | 'en' | 'uk'>;
-  layers: Array<'base' | 'extended'>;
-  product_id: string;
-  sizes: { base: number; extended: number };
-} {
+export function catalogEntry(): CatalogRouteEntry {
   return {
     route_id: 'route-x',
     version: '1',
