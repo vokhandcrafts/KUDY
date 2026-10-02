@@ -67,7 +67,7 @@ async function expectReArmAfterWalkEnds(
 async function openNearby(
   env?: ReturnType<typeof makeRunSession>,
   withRunSession = false,
-): Promise<{ rendered: { unmount(): void } }> {
+): Promise<{ rendered: { unmount(): void }; services: ReturnType<typeof createServices> }> {
   const services = createServices({
     catalogOrigin: "https://catalog.test",
     catalogSha256: sha256,
@@ -77,7 +77,7 @@ async function openNearby(
   serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
   const rendered = renderRouter(withMapRoutes(services), { initialUrl: "/map" });
   await screen.findByTestId("nearby-card-offer-e1-place");
-  return { rendered };
+  return { rendered, services };
 }
 
 afterEach(() => {
@@ -337,5 +337,67 @@ describe("Map paper grain (G06.10.e)", () => {
     // the layer on the map.
     expect(screen.queryByTestId("paper-grain")).toBeNull();
     expect(screen.queryByTestId("paper-grain", { includeHiddenElements: true })).toBeNull();
+  });
+});
+
+// Issue #523: the Nearby chrome words read the UI-locale switch (the #305
+// store) instead of the binding's content-display locale — without the
+// catalog service the fixed 'be' fallback kept «Побач» on screen after
+// choosing English or Українська. The real store drives every case;
+// reverting the useUiLocale wiring in app/map.tsx turns all three red
+// (implementation-rules 1).
+describe("Nearby UI-locale words (issue #523)", () => {
+  test("without the service the chosen locale drives the title, the map note, the unavailable word and the back label", async () => {
+    const services = createServices({});
+    services.uiLocale.set("uk");
+    renderRouter(withMapRoutes(services), { initialUrl: "/map" });
+    expect(await screen.findByTestId("screen-Map")).toBeTruthy();
+    expect(screen.getByText("Поруч")).toBeTruthy();
+    expect(screen.getByText("Карта міста з’явиться після рішення про тайли")).toBeTruthy();
+    expect(screen.getByTestId("nearby-error")).toBeTruthy();
+    expect(screen.getByText("Каталог недоступний")).toBeTruthy();
+    expect(screen.getByTestId("btn-map-back").props.accessibilityLabel).toBe("Назад");
+    // No words of the other languages in these elements (criterion 1).
+    expect(screen.queryByText("Побач")).toBeNull();
+    expect(screen.queryByText("Каталог недаступны")).toBeNull();
+  });
+
+  test("switching the locale on the open surface rewords the chrome and arms no second GPS subscription", async () => {
+    const env = makeRunSession();
+    const { rendered, services } = await openNearby(env);
+    expect(screen.getByText("Побач")).toBeTruthy();
+    expect(startsOf(env.locationPort)).toEqual(["start 1"]);
+    act(() => {
+      services.uiLocale.set("en");
+    });
+    expect(screen.getByText("Nearby")).toBeTruthy();
+    expect(screen.getByText("The city map arrives after the tiles decision")).toBeTruthy();
+    expect(screen.getByTestId("nearby-mode").props.children).toBe("Near you");
+    expect(screen.queryByText("Побач")).toBeNull();
+    // The switch re-rendered the words in place — the arming discipline
+    // keeps the one subscription, the close releases what the surface armed.
+    expect(startsOf(env.locationPort)).toEqual(["start 1"]);
+    rendered.unmount();
+    expect(stopsOf(env.locationPort)).toEqual(["stop 1"]);
+  });
+
+  test("with the connected service the authored content keeps its language while the chrome follows the switch", async () => {
+    const { rendered, services } = await openNearby();
+    const card = await screen.findByTestId("nearby-card-offer-a1-place");
+    expect(within(card).getByText("Двор сукнараў")).toBeTruthy();
+    expect(within(card).getByText("Тэкст: be, en; аўдыё: —\n~20—30 хв")).toBeTruthy();
+    expect(within(card).getByText("Бясплатна")).toBeTruthy();
+    act(() => {
+      services.uiLocale.set("uk");
+    });
+    const ukCard = screen.getByTestId("nearby-card-offer-a1-place");
+    // The chrome words follow the switch (criterion 3): the facts labels and
+    // the access badge render in uk...
+    expect(screen.getByText("Поруч")).toBeTruthy();
+    expect(within(ukCard).getByText("Текст: be, en; аудіо: —\n~20—30 хв")).toBeTruthy();
+    expect(within(ukCard).getByText("Безкоштовно")).toBeTruthy();
+    // ...and the authored content keeps its language.
+    expect(within(ukCard).getByText("Двор сукнараў")).toBeTruthy();
+    rendered.unmount();
   });
 });
