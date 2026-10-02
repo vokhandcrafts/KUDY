@@ -8,7 +8,6 @@
 // real default: 30 000 ms freshness, 2 × radius deferred bound, 10 min focus.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-
 import { RunOrchestrator, type RunStop } from './runOrchestrator.ts';
 import { defaultEngineConfig } from '../../core/engine/reducer.ts';
 import { stopStatus, type RunSessionState } from '../../core/engine/state.ts';
@@ -610,4 +609,26 @@ test('G20.04: repeated open/dispose cycles leave no listener on the shared servi
     assert.deepEqual([...session.heard], []);
     assert.deepEqual(session.tierAvailable, ['base']);
   });
+});
+
+test('G20.04: a moment finishing in the Ended window leaves no phantom playing in the fresh session', () => {
+  const world = sharedWorld();
+  const orchestrator = world.make();
+  orchestrator.start('walk-1');
+  deliver(world, 0, 0); // stop a plays (key 1)
+  orchestrator.playMoment('moment-9', 'story-m9'); // the moment takes the player (key 2)
+  orchestrator.end(); // the walk ends; the moment survives (ADR G01.02 §3.8)
+  world.audioPort.finish(2); // the moment physically finishes in the Ended window
+  const ended = orchestrator.state;
+  if (ended.phase === 'Idle') throw new Error('the walk never started');
+  assert.equal(ended.playing, null); // its finish cleared the Ended mirror
+  orchestrator.start('walk-2'); // the fresh session
+  const state = orchestrator.state;
+  if (state.phase === 'Idle') throw new Error('no session after Start');
+  assert.equal(state.playing, null); // nothing inherited — no phantom moment
+  world.clock.set(30_000);
+  deliver(world, 0.0009, 0); // the next GPS trigger
+  const afterTrigger = orchestrator.state;
+  if (afterTrigger.phase === 'Idle') throw new Error('no session after Start');
+  assert.equal(playingStopId(afterTrigger), 'b'); // the guide automation is alive
 });
