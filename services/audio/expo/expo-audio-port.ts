@@ -2,8 +2,9 @@
 // the only module of services/audio/expo/ that imports expo-audio at
 // runtime; node --test imports it only through the G20.02 behavioral suite,
 // which replaces the expo-audio module itself with node:test module mocks
-// (npm test passes --experimental-test-module-mocks for that file). The
-// composition root receives the port factory as the audio port parameter —
+// (the npm test node invocation passes --experimental-test-module-mocks;
+// only this file uses mock.module).
+// The composition root receives the port factory as the audio port parameter —
 // no other module imports this file (AC4; verified by arch:check and the
 // import grep in results).
 //
