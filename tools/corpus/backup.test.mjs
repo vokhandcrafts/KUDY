@@ -8,7 +8,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { CorpusDiagnostic } from './extract.mjs';
+import { CorpusDiagnostic, sha256Hex } from './extract.mjs';
 import { backupCorpus, restoreCorpus } from './backup.mjs';
 import {
   closeCorpus,
@@ -96,15 +96,20 @@ test('restore_roundtrip: a fresh directory reproduces annotations, decisions and
   assert.equal(ruleOf(() => restoreCorpus({ backupDir, newLibraryRoot: restoredRoot })), 'restore-target-exists');
 });
 
-test('corrupt_checksum: a tampered or incomplete backup never materializes a library', (t) => {
-  const library = makeSyntheticLibrary(t, { seed: 'corrupt' });
+// Shared arrangement: a populated library, one taken backup, closed store.
+function makeBackupFixture(t, seed) {
+  const library = makeSyntheticLibrary(t, { seed });
   const store = openCorpus(library.dbPath);
   populateAnnotations(store, library);
-
   const backupDir = path.join(library.root, 'backup');
   const target = path.join(library.root, 'restored');
   backupCorpus(store, { libraryRoot: library.root, outDir: backupDir });
   closeCorpus(store);
+  return { library, backupDir, target };
+}
+
+test('corrupt_checksum: a tampered or incomplete backup never materializes a library', (t) => {
+  const { library, backupDir, target } = makeBackupFixture(t, 'corrupt');
 
   // Corrupt bytes: one flipped byte in a copied file.
   const textFile = path.join(backupDir, `articles/${library.articleId}/revisions/${library.revisionId}/extractions/${EXTRACTOR}/text.md`);
@@ -120,6 +125,24 @@ test('corrupt_checksum: a tampered or incomplete backup never materializes a lib
   fs.rmSync(path.join(backupDir, `articles/${library.articleId}/revisions/${library.revisionId}/raw.html`));
   assert.equal(ruleOf(() => restoreCorpus({ backupDir, newLibraryRoot: target })), 'backup-file-missing');
   assert.equal(fs.existsSync(target), false, 'an incomplete backup must not create the target');
+});
+
+test('tampered_manifest: unsafe paths and unparseable manifests are rejected before any write', (t) => {
+  const { backupDir, target } = makeBackupFixture(t, 'manifest');
+
+  // A traversal path inside an otherwise valid manifest: the strict path
+  // rule fires before a single byte is written to the target.
+  const manifestFile = path.join(backupDir, 'manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+  manifest.files.push({ path: 'articles/../../evil.html', bytes: 4, sha256: sha256Hex('evil') });
+  fs.writeFileSync(manifestFile, JSON.stringify(manifest));
+  assert.equal(ruleOf(() => restoreCorpus({ backupDir, newLibraryRoot: target })), 'unsafe-backup-path');
+  assert.equal(fs.existsSync(target), false);
+
+  // An unparseable manifest is a named rejection, not a crash.
+  fs.writeFileSync(manifestFile, '{ not json');
+  assert.equal(ruleOf(() => restoreCorpus({ backupDir, newLibraryRoot: target })), 'backup-manifest-missing');
+  assert.equal(fs.existsSync(target), false);
 });
 
 test('failed_migration_keeps_backup: a broken migration restores the pre-migration database', (t) => {

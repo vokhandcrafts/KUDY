@@ -83,6 +83,7 @@ console.log(`corrupt rule: ${rule(() => restoreCorpus({ backupDir: `${scratch}/b
 console.log(`corrupt target created: ${fs.existsSync(`${scratch}/never`)}`);
 
 fs.rmSync(scratch, { recursive: true, force: true });
+fs.rmSync(library.root, { recursive: true, force: true });
 
 function shaPrefix(seed) {
   // Deterministic 64-hex id from a literal seed (the same shape the

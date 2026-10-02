@@ -154,6 +154,26 @@ test('orphan_fragment: a fragment of another revision and an unknown media asset
   assert.equal(count('SELECT COUNT(*) AS n FROM fragments'), 0);
 });
 
+test('duplicate_registration: the same ids with a different document answer a named diagnostic, not a silent no-op', (t) => {
+  const store = makeStore(t);
+  const pkg = syntheticPackage();
+  registerPackage(store, pkg);
+
+  const colliding = syntheticPackage();
+  colliding.document = { ...colliding.document, title: 'A different document under the same ids' };
+  assert.equal(ruleOf(() => registerPackage(store, colliding)), 'package-document-mismatch');
+
+  const count = (sql) => Number(store.db.prepare(sql).get().n);
+  assert.equal(count('SELECT COUNT(*) AS n FROM articles'), 1, 'the collision must not add rows');
+  assert.equal(count('SELECT COUNT(*) AS n FROM extractions'), 1);
+});
+
+test('delete_scope_missing: an unscoped machine-result delete is rejected, never erasing everything', (t) => {
+  const store = makeStore(t);
+  assert.equal(ruleOf(() => deleteModelResults(store, {})), 'delete-scope-missing');
+  assert.equal(ruleOf(() => deleteModelResults(store)), 'delete-scope-missing');
+});
+
 test('unresolved_mention: a mention without a proposal stays unresolved; person and family stay distinct kinds', (t) => {
   const store = makeStore(t);
   const pkg = syntheticPackage();

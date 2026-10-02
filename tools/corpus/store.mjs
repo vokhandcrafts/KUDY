@@ -184,37 +184,61 @@ function inTransaction(store, action, callback) {
 }
 
 function migrateCorpus(store, migrations) {
-  store.db.exec(
-    `CREATE TABLE IF NOT EXISTS corpus_schema_migrations (
-       version INTEGER PRIMARY KEY,
-       applied_at TEXT NOT NULL
-     )`
-  );
-  const applied = new Set(store.db.prepare('SELECT version FROM corpus_schema_migrations').all().map((row) => row.version));
+  try {
+    store.db.exec(
+      `CREATE TABLE IF NOT EXISTS corpus_schema_migrations (
+         version INTEGER PRIMARY KEY,
+         applied_at TEXT NOT NULL
+       )`
+    );
+  } catch (error) {
+    throw translateSqliteError(error, 'migration bookkeeping');
+  }
+  let applied;
+  try {
+    applied = new Set(store.db.prepare('SELECT version FROM corpus_schema_migrations').all().map((row) => row.version));
+  } catch (error) {
+    throw translateSqliteError(error, 'migration bookkeeping');
+  }
   for (const migration of migrations) {
     if (applied.has(migration.version)) continue;
-    // 25 §9: перад міграцыяй ствараецца аднаўляльная копія. The copy happens
-    // outside any transaction (no statement of ours is open), so the file
-    // image is consistent; on failure the bytes go back and the snapshot
-    // stays on disk for forensics.
+    // 25 §9: перад міграцыяй ствараецца аднаўляльная копія. The write lock is
+    // taken FIRST: a busy answer here means another session owns the database
+    // — nothing of ours was written, so there is nothing to restore and no
+    // snapshot must ever land on top of a live foreign file. The snapshot is
+    // then read from a second connection (the committed state our lock now
+    // protects). SQLite DDL is transactional: a failed migration rolls back
+    // to the pre-migration bytes by itself; the snapshot stays on disk as the
+    // recoverable copy.
     const snapshotPath = `${store.dbPath}.pre-migration-v${migration.version}`;
-    fs.copyFileSync(store.dbPath, snapshotPath);
     try {
-      inTransaction(store, `migration v${migration.version}`, () => {
-        store.db.exec(migration.up);
-        store.db.prepare('INSERT INTO corpus_schema_migrations (version, applied_at) VALUES (?, ?)').run(migration.version, new Date().toISOString());
-      });
+      store.db.exec('BEGIN IMMEDIATE');
+    } catch (error) {
+      throw translateSqliteError(error, `migration v${migration.version}`);
+    }
+    try {
+      // A stale snapshot from an earlier failed attempt is superseded by
+      // this one — VACUUM INTO refuses an existing target.
+      fs.rmSync(snapshotPath, { force: true });
+      const snapshotDb = new DatabaseSync(store.dbPath);
+      try {
+        snapshotDb.prepare('VACUUM INTO ?').run(snapshotPath);
+      } finally {
+        snapshotDb.close();
+      }
+      store.db.exec(migration.up);
+      store.db.prepare('INSERT INTO corpus_schema_migrations (version, applied_at) VALUES (?, ?)').run(migration.version, new Date().toISOString());
+      store.db.exec('COMMIT');
     } catch (error) {
       try {
-        fs.copyFileSync(snapshotPath, store.dbPath);
+        store.db.exec('ROLLBACK');
       } catch {
-        // the snapshot itself is the recovery artifact; report its location
+        // the transaction was already rolled back by SQLite itself
       }
-      store.close();
       const details = error instanceof CorpusDiagnostic ? error.details : { cause: String(error?.message ?? error) };
       throw new CorpusDiagnostic(
         'migration-failed',
-        `migration v${migration.version} failed — the database was restored from the pre-migration snapshot (${snapshotPath})`,
+        `migration v${migration.version} failed — the transaction was rolled back; the pre-migration snapshot stays at ${snapshotPath}`,
         { version: migration.version, snapshotPath, ...details },
       );
     }
@@ -306,9 +330,17 @@ export function registerPackage(store, packageRecord) {
   const now = new Date().toISOString();
   return inTransaction(store, 'package registration', () => {
     const existing = store.db
-      .prepare('SELECT 1 AS present FROM extractions WHERE article_id = ? AND revision_id = ? AND extractor_version = ?')
+      .prepare('SELECT document_json FROM extractions WHERE article_id = ? AND revision_id = ? AND extractor_version = ?')
       .get(record.articleId, record.revisionId, record.extractorVersion);
-    if (existing) return { alreadyRegistered: true };
+    if (existing) {
+      // Idempotence must not swallow a content collision: the same ids with a
+      // different document mean the caller disagrees with the registered
+      // bytes — answer with a named diagnostic instead of a silent no-op.
+      if (existing.document_json !== JSON.stringify(document)) {
+        throw new CorpusDiagnostic('package-document-mismatch', 'a package with these ids is already registered with a different document', {});
+      }
+      return { alreadyRegistered: true };
+    }
 
     store.db.prepare('INSERT OR IGNORE INTO articles (article_id, title, registered_at) VALUES (?, ?, ?)').run(
       record.articleId,
