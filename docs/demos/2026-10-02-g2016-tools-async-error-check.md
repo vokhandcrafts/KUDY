@@ -5,7 +5,7 @@
 Усе блокі дэтэрмінаваныя: піны eslint 10.11.0 / typescript-eslint 8.71.0 /
 @types/node 26.6.4 фіксуюць тэксты паведамленьняў, а раннер нармалізуе шляхі
 да адносных, таму вывад не залежыць ад хоста. Першы блок — вытворчы прагон:
-56 файлаў `tools/**/*.mjs` (без тэстаў і фікстураў) чыстыя па дзвюх правілах —
+57 файлаў `tools/**/*.mjs` (без тэстаў і фікстураў) чыстыя па дзвюх правілах —
 `@typescript-eslint/no-floating-promises` і `no-empty` (catch без цела):
 
 ```sh
@@ -14,7 +14,7 @@ echo "exit=$?"
 ```
 
 ```output
-tools-check: 56 production tool files clean
+tools-check: 57 production tool files clean
 exit=0
 ```
 
