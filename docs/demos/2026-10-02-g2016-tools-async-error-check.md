@@ -9,7 +9,7 @@
 `@typescript-eslint/no-floating-promises` і `no-empty` (catch без цела):
 
 ```sh
-node tools/validate/tools-check.mjs
+LD_LIBRARY_PATH=$HOME/.local/lib node tools/validate/tools-check.mjs
 echo "exit=$?"
 ```
 
@@ -25,7 +25,7 @@ catch адхіляюцца з імем правілы і ненулявым вы
 (implementation-rules 1, гл. results G20.16):
 
 ```sh
-node tools/validate/tools-check.mjs --file tools/validate/fixtures/floating-promise.mjs
+LD_LIBRARY_PATH=$HOME/.local/lib node tools/validate/tools-check.mjs --file tools/validate/fixtures/floating-promise.mjs
 echo "exit=$?"
 ```
 
@@ -40,7 +40,7 @@ exit=1
 ```
 
 ```sh
-node tools/validate/tools-check.mjs --file tools/validate/fixtures/empty-catch.mjs
+LD_LIBRARY_PATH=$HOME/.local/lib node tools/validate/tools-check.mjs --file tools/validate/fixtures/empty-catch.mjs
 echo "exit=$?"
 ```
 
@@ -59,7 +59,7 @@ exit=1
 каб негатыўныя вынікі ішлі ад парушэнняў, а не ад зламанай налады:
 
 ```sh
-node tools/validate/tools-check.mjs --file tools/validate/fixtures/valid-async-handling.mjs
+LD_LIBRARY_PATH=$HOME/.local/lib node tools/validate/tools-check.mjs --file tools/validate/fixtures/valid-async-handling.mjs
 echo "exit=$?"
 ```
 
@@ -67,16 +67,16 @@ echo "exit=$?"
 exit=0
 ```
 
-Пяты блок — зводка гарда ў `npm test` (свідэр без таймінгаў): шэсць тэстаў —
-npm-спроўка, непустое пакрыццё, вытворчы прагон, дзве негатыўныя фікстуры і
-адна станоўчая:
+Пяты блок — зводка гарда ў `npm test` (свідэр без таймінгаў): адзінаццаць
+тэстаў — npm-спроўка, непустое пакрыццё, вытворчы прагон, дзве негатыўныя
+фікстуры, станоўчая, покрыццё конфіга, пустая выбарка і fail-closed галінкі:
 
 ```sh
-node --test tools/validate/tools-check.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
+LD_LIBRARY_PATH=$HOME/.local/lib node --test tools/validate/tools-check.test.mjs 2>&1 | grep -E "^ℹ (tests|pass|fail)"
 ```
 
 ```output
-ℹ tests 6
-ℹ pass 6
+ℹ tests 11
+ℹ pass 11
 ℹ fail 0
 ```

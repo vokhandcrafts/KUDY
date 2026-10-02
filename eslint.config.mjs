@@ -2,10 +2,11 @@
 // Type-aware rules only — the two defect classes the task names: forgotten
 // asynchronous work and empty error handlers. No formatting, no style rules.
 //
-// The enforced file selection is owned by tools/validate/tools-check.mjs; the
-// ignores below mirror it so a manual `npx eslint tools` sees the same set.
-// Drift between the two self-surfaces: a file the runner includes but the
-// config ignores fails the manual run, and the reverse fails tools:check.
+// The enforced file selection is owned by tools/validate/tools-check.mjs,
+// which passes an explicit list; the ignores below only keep a manual
+// `npx eslint tools` aligned with it. A file the runner enforces but the
+// config ignores is skipped with a warning, not a failure — the guard suite
+// asserts the config ignores nothing from the enforced selection.
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(

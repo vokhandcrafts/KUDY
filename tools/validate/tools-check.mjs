@@ -16,7 +16,7 @@ const require = createRequire(import.meta.url);
 // package.json subpath is exported) and join the physical bin location.
 export const eslintBin = path.join(path.dirname(require.resolve('eslint/package.json')), 'bin', 'eslint.js');
 
-export function collectProductionToolFiles() {
+export function collectProductionToolFiles(root = path.join(repoRoot, 'tools')) {
   const files = [];
   const walk = (dir) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
@@ -33,7 +33,7 @@ export function collectProductionToolFiles() {
       }
     }
   };
-  walk(path.join(repoRoot, 'tools'));
+  walk(root);
   return files;
 }
 
@@ -53,6 +53,20 @@ export function runEslintUnignored(relativeFiles) {
   return runEslint(relativeFiles, { unignored: true });
 }
 
+// Fail-closed production pass: an empty selection or a lint failure must not
+// look like success. Returns the exit status and report without exiting, so
+// the guard suite can test the behavior directly.
+export function productionPassOutcome(files) {
+  if (files.length === 0) {
+    return { status: 2, output: 'tools-check: empty production selection — refusing to pass silently\n' };
+  }
+  const { status, output } = runEslint(files);
+  if (status === 0) {
+    return { status: 0, output: `tools-check: ${files.length} production tool files clean\n` };
+  }
+  return { status: status > 0 ? status : 1, output };
+}
+
 function main() {
   const args = process.argv.slice(2);
   const fileIndex = args.indexOf('--file');
@@ -68,18 +82,9 @@ function main() {
     process.exit(status === 0 ? 0 : status > 0 ? status : 1);
   }
 
-  const files = collectProductionToolFiles();
-  if (files.length === 0) {
-    console.error('tools-check: empty production selection — refusing to pass silently');
-    process.exit(2);
-  }
-  const { status, output } = runEslint(files);
-  if (status === 0) {
-    console.log(`tools-check: ${files.length} production tool files clean`);
-    return;
-  }
-  process.stdout.write(output);
-  process.exit(status > 0 ? status : 1);
+  const { status, output } = productionPassOutcome(collectProductionToolFiles());
+  if (output.trim()) process.stdout.write(output);
+  process.exit(status);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {

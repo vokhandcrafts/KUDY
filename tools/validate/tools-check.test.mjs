@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { collectProductionToolFiles, eslintBin, repoRoot } from './tools-check.mjs';
+import { collectProductionToolFiles, eslintBin, productionPassOutcome, repoRoot } from './tools-check.mjs';
 
 // G20.16 (issue #487): the enforced tools async/error check stays wired into
 // the default command and keeps catching the named defects. Implementation
@@ -69,4 +69,44 @@ test('guard: handled-error fixture passes the same rules', () => {
     0,
     `the valid fixture must pass the same rules\n${res.stdout ?? ''}${res.stderr ?? ''}`
   );
+});
+
+test('guard: the committed config ignores nothing from the enforced selection', () => {
+  const files = collectProductionToolFiles();
+  const res = spawnSync(process.execPath, [eslintBin, '--format', 'json', ...files], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+  });
+  assert.equal(res.status, 0, `config must lint the whole selection\n${res.stderr ?? ''}`);
+  const results = JSON.parse(res.stdout);
+  const ignored = results
+    .filter((r) => r.messages.some((m) => /File ignored/.test(m.message)))
+    .map((r) => r.filePath);
+  assert.deepEqual(ignored, [], 'enforced files must not be silenced by config ignores');
+});
+
+test('guard: a directory without production files selects nothing', () => {
+  const empty = fs.mkdtempSync(path.join(repoRoot, 'node_modules', '.tools-check-probe-'));
+  try {
+    assert.deepEqual(collectProductionToolFiles(empty), []);
+  } finally {
+    fs.rmdirSync(empty);
+  }
+});
+
+test('guard: empty selection refuses to pass with exit 2', () => {
+  const outcome = productionPassOutcome([]);
+  assert.equal(outcome.status, 2);
+  assert.match(outcome.output, /empty production selection/);
+});
+
+test('guard: production pass propagates a lint failure', () => {
+  const outcome = productionPassOutcome(['tools/validate/no-such-file.mjs']);
+  assert.notEqual(outcome.status, 0, 'a missing enforced file must not look like success');
+});
+
+test('guard: --file without a path refuses to run with exit 2', () => {
+  const run = spawnSync(process.execPath, [runner, '--file'], { cwd: repoRoot, encoding: 'utf8' });
+  assert.equal(run.status, 2);
+  assert.match(`${run.stdout ?? ''}${run.stderr ?? ''}`, /--file requires a path/);
 });
