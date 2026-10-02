@@ -24,6 +24,7 @@ import {
   GRANT_URL_TTL_SECONDS,
   handleGrant,
   isUnsafePath,
+  isUnsafeUrlTtl,
   type EntitlementVerdict,
   type GrantPortDeps,
 } from './grant-core.ts';
@@ -61,6 +62,20 @@ test('isUnsafePath refuses traversal, absolute, home, drive/scheme, backslash, N
   const safe = ['audio/story-01.mp3', 'transcripts/private-story-01.be.txt', 'a/b/c/d.dat'];
   for (const candidate of safe) {
     assert.equal(isUnsafePath(candidate), false, `must allow: ${candidate}`);
+  }
+});
+
+test('isUnsafeUrlTtl: only finite positive integers up to the canonical 600 s pass (N5)', () => {
+  // The 09 §2 private-zone value is both the default and the upper bound —
+  // this pin keeps the constant tied to the canon it restates.
+  assert.equal(GRANT_URL_TTL_SECONDS, 600);
+  const unsafe = [0, -0, -1, 0.5, 600.5, NaN, Infinity, -Infinity, 601, 1e9];
+  for (const ttl of unsafe) {
+    assert.equal(isUnsafeUrlTtl(ttl), true, `must refuse: ${ttl}`);
+  }
+  const safe = [1, 599, 600];
+  for (const ttl of safe) {
+    assert.equal(isUnsafeUrlTtl(ttl), false, `must allow: ${ttl}`);
   }
 });
 
@@ -288,6 +303,60 @@ test('a grant mirrors exactly the requested manifest members with short-lived UR
   assert.deepEqual(
     h.minted.map((call) => call.ttlSeconds),
     paths.map(() => GRANT_URL_TTL_SECONDS),
+  );
+});
+
+test('an out-of-policy URL TTL fails the whole round closed: the signer never mints and no layer is probed', async () => {
+  const h = await wiredDeps();
+  for (const ttl of [0, -1, 0.5, 601, NaN, Infinity]) {
+    const answer = await handleGrant(grantRequest(MANIFEST_PATHS), h.deviceId, { ...environment(), urlTtlSeconds: ttl }, h.deps);
+    assert.deepEqual(
+      answer,
+      { status: 503, code: 'entitlement_unavailable', retryAfterSeconds: GRANT_RETRY_AFTER_SECONDS },
+      `must refuse to mint for ttl ${ttl}`,
+    );
+  }
+  assert.deepEqual(h.minted, [], 'the signer must never see an out-of-policy TTL');
+  assert.deepEqual(h.manifestLoads, [], 'no manifest load may happen under a misconfigured TTL');
+  assert.deepEqual(h.providerCalls, [], 'the provider must not be consulted under a misconfigured TTL');
+  assert.deepEqual(await h.cacheRows(), [], 'a misconfigured round must not write cache rows');
+});
+
+test('the URL TTL cap: 600 mints exactly 600 s, 601 never reaches the signer', async () => {
+  const h = await wiredDeps();
+  const granted = await handleGrant(grantRequest(MANIFEST_PATHS), h.deviceId, { ...environment(), urlTtlSeconds: 600 }, h.deps);
+  assert.equal(granted.status, 200);
+  if (granted.status === 200) {
+    assert.deepEqual(
+      granted.body.urls.map((grantedUrl) => grantedUrl.expires_at),
+      MANIFEST_PATHS.map(() => 1_700_000_000_000 + 600 * 1000),
+    );
+  }
+  assert.deepEqual(h.minted.map((call) => call.ttlSeconds), MANIFEST_PATHS.map(() => 600));
+
+  // The same harness: the 601 round must fail at the TTL gate — before the
+  // positive cache could answer and before any further mint call.
+  const refused = await handleGrant(grantRequest(MANIFEST_PATHS), h.deviceId, { ...environment(), urlTtlSeconds: 601 }, h.deps);
+  assert.deepEqual(refused, { status: 503, code: 'entitlement_unavailable', retryAfterSeconds: GRANT_RETRY_AFTER_SECONDS });
+  assert.deepEqual(h.minted.map((call) => call.ttlSeconds), MANIFEST_PATHS.map(() => 600), '601 must not add a single mint call');
+  assert.equal(h.providerCalls.length, 1, 'the 601 round must fail before the provider');
+});
+
+test('the URL TTL and the entitlement-cache TTL are distinct policies', async () => {
+  const h = await wiredDeps();
+  const answer = await handleGrant(
+    grantRequest(MANIFEST_PATHS),
+    h.deviceId,
+    { ...environment(), urlTtlSeconds: 600, cacheTtlSeconds: 3600 },
+    h.deps,
+  );
+  assert.equal(answer.status, 200);
+  assert.deepEqual(h.minted.map((call) => call.ttlSeconds), MANIFEST_PATHS.map(() => 600), 'the minted URL TTL stays 600 s');
+  const rows = await h.cacheRows();
+  assert.equal(rows.length, 1);
+  assert.ok(
+    rows[0]!.expires_in_s > 3_500_000 && rows[0]!.expires_in_s <= 3_600_000,
+    `the cache row must carry its own 3600 s TTL, got ${rows[0]!.expires_in_s}`,
   );
 });
 

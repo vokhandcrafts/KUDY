@@ -32,6 +32,15 @@ export const GRANT_CACHE_TTL_SECONDS = 86_400;
 export const GRANT_RETRY_AFTER_SECONDS = 30;
 export const GRANT_CACHE_MAX_ROWS_PER_DEVICE = 32;
 
+// N5: the URL TTL is a finite positive integer of at most the canonical
+// 600 s — the 09 §2 private-zone value serves as both the default and the
+// upper bound, so one constant carries the policy (Number.isSafeInteger also
+// refuses fractional and non-finite values). The spike's start-server gate
+// (positive integer) is the same idiom plus this cap.
+export function isUnsafeUrlTtl(ttlSeconds: number): boolean {
+  return !Number.isSafeInteger(ttlSeconds) || ttlSeconds <= 0 || ttlSeconds > GRANT_URL_TTL_SECONDS;
+}
+
 // A requested path must be a plain relative member of the manifest: no
 // absolute form, no traversal, no drive/scheme prefix, no empty segments.
 // Refused before any catalog or manifest lookup, so a malformed path can
@@ -155,6 +164,14 @@ export async function handleGrant(
 ): Promise<GrantAnswer> {
   const maxPaths = config.maxPaths ?? GRANT_MAX_PATHS;
   const retryAfterSeconds = config.retryAfterSeconds ?? GRANT_RETRY_AFTER_SECONDS;
+  // N5: a URL TTL outside the canonical policy is a server misconfiguration,
+  // not a client fault — the round fails closed (the same 503 a misconfigured
+  // wrapper environment answers) before any port runs, so no layer is probed
+  // and the signer never mints an out-of-policy link.
+  const urlTtlSeconds = config.urlTtlSeconds ?? GRANT_URL_TTL_SECONDS;
+  if (isUnsafeUrlTtl(urlTtlSeconds)) {
+    return { status: 503, code: 'entitlement_unavailable', retryAfterSeconds };
+  }
   const body = parseGrantRequestBody(request, maxPaths);
   if (body === null) return { status: 400, code: 'invalid_request' };
   if (body.paths.some(isUnsafePath)) return { status: 403, code: 'path_not_allowed' };
@@ -194,10 +211,9 @@ export async function handleGrant(
     }
   }
 
-  const ttlSeconds = config.urlTtlSeconds ?? GRANT_URL_TTL_SECONDS;
   const urls: Array<{ path: string; url: string; expires_at: number }> = [];
   for (const path of body.paths) {
-    const minted = await deps.signer.mint({ path, deviceId, ttlSeconds, nowMs });
+    const minted = await deps.signer.mint({ path, deviceId, ttlSeconds: urlTtlSeconds, nowMs });
     urls.push({ path, url: minted.url, expires_at: minted.expiresAtMs });
   }
   return {
