@@ -112,6 +112,50 @@ if (!/run:\s*node --test --experimental-strip-types.*fixtures-hygiene\.test\.ts/
   failures.push('required-checks.yml does not run the fixture-hygiene guard on Windows');
 }
 
+// G20.27 revert guard — supply-chain pins (spec V6, issue #500): every action
+// reference in every workflow must be a full 40-hex upstream commit SHA, the
+// tag staying only as a version annotation. The file list is enumerated from
+// the directory, not hardcoded: a future fourth workflow with a tag ref must
+// turn this guard red by itself. The secret scanner must run through the
+// committed digest-verifying pipeline, and that pipeline must carry its own
+// version + checksum constants — the digest is never taken from the download
+// or the environment. Reverting any pin, fetching the scanner with curl/wget
+// again, or emptying the digest constant must turn this committed check red.
+const workflowFiles = fs
+  .readdirSync('.github/workflows')
+  .filter((name) => name.endsWith('.yml') || name.endsWith('.yaml'))
+  .sort()
+  .map((name) => `.github/workflows/${name}`);
+for (const workflowFile of workflowFiles) {
+  const wfText = fs
+    .readFileSync(workflowFile, 'utf8')
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('#'))
+    .join('\n');
+  const refs = wfText.match(/uses:\s*\S+/g) ?? [];
+  const unpinned = refs.filter((ref) => !/^uses:\s*[\w.-]+\/[\w.-]+@[0-9a-f]{40}$/.test(ref));
+  if (unpinned.length > 0) {
+    failures.push(
+      `${workflowFile}: action references not pinned to a full 40-hex upstream commit SHA: ${unpinned.join(', ')}`
+    );
+  }
+}
+if (!/run:\s*node tools\/ci\/fetch-gitleaks\.mjs\s*$/m.test(text)) {
+  failures.push(
+    'required-checks.yml does not run the committed gitleaks fetch-and-verify pipeline (tools/ci/fetch-gitleaks.mjs)'
+  );
+}
+if (/(?:curl|wget)[^\n]*gitleaks/.test(text)) {
+  failures.push('required-checks.yml downloads the scanner directly — the digest-pinned pipeline is bypassed');
+}
+const gitleaksFetcher = fs.readFileSync('tools/ci/fetch-gitleaks.mjs', 'utf8');
+if (!/GITLEAKS_VERSION\s*=\s*['"][0-9]+\.[0-9]+\.[0-9]+['"]/.test(gitleaksFetcher)) {
+  failures.push('tools/ci/fetch-gitleaks.mjs has no pinned scanner version constant');
+}
+if (!/GITLEAKS_SHA256\s*=\s*['"][0-9a-f]{64}['"]/.test(gitleaksFetcher)) {
+  failures.push('tools/ci/fetch-gitleaks.mjs has no pinned 64-hex archive sha256 digest');
+}
+
 // Issue #241 revert guard — the jscpd gate must stay self-contained. The
 // reusable workflow in vokhandcrafts/ai-company-infrastructure cannot be
 // called from this repository: both repos are private and user-owned, and
