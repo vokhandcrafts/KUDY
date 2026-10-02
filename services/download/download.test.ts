@@ -19,7 +19,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
-import { activate, layerPath, rebuildBundleAssets, stagingLayerPath } from './download.ts';
+import { activate, layerPath, recoverOnOpen, rebuildBundleAssets, stagingLayerPath } from './download.ts';
+import { createDeletionGate, deletePackage } from './delete.ts';
 import { createNodeDownloadStore, nodeSha256 } from './nodeDownloadStore.ts';
 import {
   AUDIO,
@@ -34,7 +35,8 @@ import {
   utf8,
 } from './test-fixture.ts';
 import { getBundleAssets, getSession, startSession } from '../db/db.ts';
-import type { LayerKey } from './types.ts';
+import type { SqlDriver } from '../db/types.ts';
+import type { ActivationResult, ActivateDeps, DeletionGate, LayerKey } from './types.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -457,6 +459,282 @@ test('criterion 6: activation hashes the transferred bytes — CRLF content veri
     const v2: LayerKey = { ...KEY, version: '2' };
     const result = await activate({ ...v2, lock: await lockFrom(crlfSource) }, flipped.deps);
     assert.equal(result.status, 'hash-mismatch');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+// G20.09 — same-package overlap (issue #480). Two activate() calls of one
+// layer share the staging tree, the .part names and the rename tail; the
+// per-package lane serializes them, and these tests fail when that
+// serialization is reverted.
+
+// A fetch port that parks on one path until the test releases it — the
+// controlled barrier of the overlap schedules.
+function parkingFetch(deps: ActivateDeps, parkedPath: string): { release: () => void } {
+  const realFetch = deps.fetch;
+  let release: () => void = () => {};
+  const parked = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  deps.fetch = async (rel) => {
+    if (rel === parkedPath) await parked;
+    return realFetch(rel);
+  };
+  return { release };
+}
+
+// Resolves once a rename lands on the target path: the overlap window opens
+// exactly there (a file is staged; the rename tail has not run).
+function signalOnRename(deps: ActivateDeps, targetRel: string): Promise<void> {
+  const realRename = deps.store.rename.bind(deps.store);
+  let resolve!: () => void;
+  const signal = new Promise<void>((r) => {
+    resolve = r;
+  });
+  deps.store = {
+    ...deps.store,
+    rename: async (from: string, to: string) => {
+      await realRename(from, to);
+      if (to === targetRel) resolve();
+    },
+  };
+  return signal;
+}
+
+// Guard for the independence proof: the promise must settle on its own, a
+// global (cross-package) queue would leave it parked until the timeout.
+function raceWithTimeout<T>(promise: Promise<T>, ms = 2000): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const guard = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('unrelated package lanes blocked each other')), ms);
+  });
+  guard.catch(() => {});
+  return Promise.race([promise, guard]).finally(() => clearTimeout(timer));
+}
+
+// Criterion 1 — the ready inventory must equal the disk at every publish
+// point: every lock path complete in the registry, every file present with
+// the hash the row claims, no staging or trash leftovers.
+async function assertPublishPoint(
+  root: string,
+  driver: SqlDriver,
+  key: LayerKey,
+  sources: Record<string, Uint8Array>,
+): Promise<void> {
+  const store = createNodeDownloadStore(root);
+  const rows = getBundleAssets(driver, key);
+  assert.deepEqual(
+    rows.map((row) => [row.path, row.status]).sort(),
+    Object.keys(sources).map((rel) => [rel, 'complete']).sort(),
+  );
+  for (const row of rows) {
+    const disk = await store.readFile(`${layerPath(key)}/${row.path}`);
+    assert.notEqual(disk, null, `${row.path} exists on disk`);
+    assert.equal(await nodeSha256(disk!), row.sha256, `${row.path} disk bytes match the registry hash`);
+    assert.equal(disk!.length, row.bytesDone);
+  }
+  assert.equal(await store.exists(stagingLayerPath(key)), false);
+  assert.equal(await store.exists(`${stagingLayerPath(key)}.old`), false);
+}
+
+// The overlap rig: a fresh driver over the two-file layer, the store wired
+// to signal when stops.json lands in staging, the fetch port parked on the
+// audio transfer, activation A started and B requested exactly at that
+// window. The optional deletion gate is wired into the deps of both
+// requests before either body runs; the caller owns the gate instance and
+// hands the same one to deletePackage().
+async function overlapRig(
+  root: string,
+  gate?: DeletionGate,
+): Promise<{
+  driver: SqlDriver;
+  deps: ActivateDeps;
+  parking: { release: () => void };
+  first: Promise<ActivationResult>;
+  second: Promise<ActivationResult>;
+  lock: unknown;
+}> {
+  const driver = openFresh();
+  const { deps } = depsFor(root, { driver });
+  if (gate) deps.cancel = gate;
+  const lock = await lockFrom(GOOD);
+  const stagedStops = signalOnRename(deps, `${stagingLayerPath(KEY)}/stops.json`);
+  const parking = parkingFetch(deps, 'audio/story-1.m4a');
+  const first = activate({ ...KEY, lock }, deps);
+  await stagedStops;
+  const second = activate({ ...KEY, lock }, deps);
+  return { driver, deps, parking, first, second, lock };
+}
+
+test('G20.09 overlapping_same_key_activation: the second tail cannot turn a ready layer incomplete', async () => {
+  const root = tmpRoot();
+  try {
+    // A parks on the audio fetch with stops.json already staged; B overlaps
+    // A on the same layer key exactly there. On the package lane B runs only
+    // after A's rename tail has settled; reverted, B's tail moves A's
+    // complete final layer into the staging trash and deletes it.
+    const { driver, parking, first, second } = await overlapRig(root);
+    parking.release();
+
+    const a = await first;
+    const b = await second;
+    assert.equal(a.status, 'complete');
+    assert.equal(b.status, 'complete');
+    // B saw the layer A committed: the repeated-request fast path, zero
+    // fetches (the unserialized B fetched the audio file itself).
+    assert.equal((b as Extract<typeof b, { status: 'complete' }>).fetched, 0);
+    await assertPublishPoint(root, driver, KEY, GOOD);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('G20.09 cancel_delete_overlap: a deletion mid-flight cancels the parked activation and the queued one re-downloads', async () => {
+  const root = tmpRoot();
+  try {
+    const gate = createDeletionGate();
+    const { driver, deps, parking, first, second } = await overlapRig(root, gate);
+    await deletePackage({ routeId: KEY.routeId, version: KEY.version }, { store: deps.store, driver, gate });
+    parking.release();
+
+    // The parked body stopped named at the boundary after its fetch: no
+    // write resurrected what the user deleted, zone-A rows went with it.
+    // `fetched` stays honest — the one file transferred before the stop.
+    const a = await first;
+    assert.equal(a.status, 'cancelled');
+    assert.equal((a as Extract<typeof a, { status: 'cancelled' }>).fetched, 1);
+    assert.deepEqual(getBundleAssets(driver, KEY), []);
+
+    // The queued activation began after the delete: the new epoch, a normal
+    // fresh download — re-downloading a deleted package must work.
+    const b = await second;
+    assert.equal(b.status, 'complete');
+    await assertPublishPoint(root, driver, KEY, GOOD);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('G20.09 cancel_delete_overlap: a fetch failure parks a partial activation and the queued one resumes it', async () => {
+  const root = tmpRoot();
+  try {
+    const driver = openFresh();
+    const { deps, fetchLog } = depsFor(root, { driver });
+    const lock = await lockFrom(GOOD);
+
+    // A's audio transfer dies after stops.json is staged: partial, staging
+    // keeps the verified file. The queued B resumes from it.
+    const stagedStops = signalOnRename(deps, `${stagingLayerPath(KEY)}/stops.json`);
+    const realFetch = deps.fetch;
+    let audioFailed = false;
+    deps.fetch = async (rel) => {
+      if (rel === 'audio/story-1.m4a' && !audioFailed) {
+        audioFailed = true;
+        throw new Error('connection lost');
+      }
+      return realFetch(rel);
+    };
+    const first = activate({ ...KEY, lock }, deps);
+    await stagedStops;
+    const second = activate({ ...KEY, lock }, deps);
+
+    const a = await first;
+    assert.equal(a.status, 'partial');
+    assert.deepEqual((a as Extract<typeof a, { status: 'partial' }>).missing, ['audio/story-1.m4a']);
+    const b = await second;
+    assert.equal(b.status, 'complete');
+    // Exactly the failed file was re-fetched (the rejected attempt never
+    // reached the counting port); the verified stop was never re-fetched.
+    assert.deepEqual(fetchLog, ['stops.json', 'audio/story-1.m4a']);
+    await assertPublishPoint(root, driver, KEY, GOOD);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('G20.09 cancel_delete_overlap: a restart check mid-overlap derives readiness from the disk alone', async () => {
+  const root = tmpRoot();
+  try {
+    const { driver, deps, parking, first } = await overlapRig(root);
+    // The restart reads the disk while the activation is parked: nothing is
+    // final yet, and staging never counts — the honest answer is not-ready.
+    const mid = await recoverOnOpen({ ...KEY, lock: await lockFrom(GOOD) }, { store: deps.store, sha256: nodeSha256, driver });
+    assert.equal(mid.status, 'not-ready');
+    parking.release();
+
+    const a = await first;
+    assert.equal(a.status, 'complete');
+    const after = await recoverOnOpen({ ...KEY, lock: await lockFrom(GOOD) }, { store: deps.store, sha256: nodeSha256, driver });
+    assert.equal(after.status, 'ready');
+    await assertPublishPoint(root, driver, KEY, GOOD);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('G20.09 cancel_delete_overlap: a pinned version refuses deletion and the overlap finishes untouched', async () => {
+  const root = tmpRoot();
+  try {
+    const gate = createDeletionGate();
+    const { driver, deps, parking, first, second } = await overlapRig(root, gate);
+    const sessionId = '11111111-1111-4111-8111-111111111111';
+    startSession(driver, {
+      sessionId,
+      routeId: KEY.routeId,
+      version: KEY.version,
+      locale: KEY.locale,
+      startedAt: 1_700_000_000_000,
+    });
+    const refusal = await deletePackage(
+      { routeId: KEY.routeId, version: KEY.version },
+      { store: deps.store, driver, gate },
+    );
+    assert.equal(refusal.status, 'refused');
+    assert.equal((refusal as Extract<typeof refusal, { status: 'refused' }>).reason, 'pinned-by-unfinished-session');
+    assert.deepEqual((refusal as Extract<typeof refusal, { status: 'refused' }>).sessionIds, [sessionId]);
+    parking.release();
+
+    // The protected walk content stays intact: the pinned session and the
+    // full layer it walks with.
+    const a = await first;
+    const b = await second;
+    assert.equal(a.status, 'complete');
+    assert.equal(b.status, 'complete');
+    assert.notEqual(getSession(driver, sessionId), null);
+    await assertPublishPoint(root, driver, KEY, GOOD);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('G20.09 unrelated_keys_independent: a parked download of one package never blocks another package', async () => {
+  const root = tmpRoot();
+  try {
+    const keyA: LayerKey = { routeId: 'route-a', version: '1', locale: 'be', tier: 'base' };
+    const keyB: LayerKey = { routeId: 'route-b', version: '1', locale: 'be', tier: 'base' };
+    const rigA = depsFor(root, { sources: { 'stops.json': STOPS } });
+    const rigB = depsFor(root, { sources: { 'stops.json': STOPS } });
+    const lockA = await lockFrom({ 'stops.json': STOPS });
+    const lockB = await lockFrom({ 'stops.json': STOPS });
+
+    // A parks before its first write; B must still run to completion while A
+    // is parked — the lanes are per package, not one global queue (the
+    // timeout guard fails the test if a cross-package queue ever appears).
+    const parkingA = parkingFetch(rigA.deps, 'stops.json');
+    const first = activate({ ...keyA, lock: lockA }, rigA.deps);
+    const second = activate({ ...keyB, lock: lockB }, rigB.deps);
+    try {
+      const b = await raceWithTimeout(second);
+      assert.equal(b.status, 'complete');
+      parkingA.release();
+      const a = await first;
+      assert.equal(a.status, 'complete');
+      await assertPublishPoint(root, rigA.deps.driver, keyA, { 'stops.json': STOPS });
+      await assertPublishPoint(root, rigB.deps.driver, keyB, { 'stops.json': STOPS });
+    } finally {
+      parkingA.release();
+    }
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
