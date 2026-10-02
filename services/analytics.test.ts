@@ -24,6 +24,7 @@ import {
 import { DbError, listPendingEvents, openDatabase } from './db/db.ts';
 import { nodeSqliteFileDriver } from './db/test-fixture.ts';
 import type { SqlDriver } from './db/types.ts';
+import { stubGlobalFetch } from './fetch-stub-test-fixture.ts';
 import { eventFactory, openFreshEventStore } from './eventLog-test-fixture.ts';
 import { emitEvent, flushEvents, type OutgoingEvent } from './eventLog.ts';
 
@@ -325,4 +326,89 @@ test('boundaries: DbError still surfaces through the gated flush (queue integrit
     assert.ok(error instanceof DbError);
     return true;
   });
+});
+
+// G20.06 — network-privacy N3: the production default events transport
+// validates the endpoint before the network and before the Authorization
+// header is attached, and refuses redirects. These suites stub the platform
+// fetch (services/fetch-stub-test-fixture — the network boundary, not the
+// code under test) and drive the real defaultHttpTransport — reverting the
+// validation, the redirect option or the redirected-response guard makes
+// them fail (implementation-rules 1/15).
+
+const N3_IDENTITY = { deviceId: '33333333-3333-4333-8333-000000000001', deviceSecret: 'secret-value' };
+
+test('G20.06 N3: secret-bearing events requests reject unsafe endpoints before any network call', async () => {
+  const stub = stubGlobalFetch(async () => {
+    throw new Error('the network must not be reached for an unvalidated endpoint');
+  });
+  try {
+    for (const baseUrl of ['http://example.invalid/functions/v1', 'not a url at all', 'https://user:pass@example.invalid/functions/v1']) {
+      const send = createEventsTransport({ baseUrl, identity: N3_IDENTITY });
+      await assert.rejects(send([]), (error: unknown) => {
+        assert.ok(error instanceof AnalyticsError);
+        assert.equal((error as AnalyticsError).rule, 'unsafe_endpoint');
+        assert.ok(!((error as AnalyticsError).message.includes('example.invalid')), 'the diagnostic must not echo the URL');
+        return true;
+      }, baseUrl);
+    }
+    assert.equal(stub.requests.length, 0, 'unsafe endpoints must make zero network calls — the bearer never leaves');
+  } finally {
+    stub.restore();
+  }
+});
+
+test('G20.06 N3: a valid configured https endpoint keeps the wire behavior with redirect refused', async () => {
+  const stub = stubGlobalFetch(async () => new Response(JSON.stringify({ accepted: 0 }), { status: 200 }));
+  try {
+    const send = createEventsTransport({ baseUrl: 'https://example.supabase.co/functions/v1', identity: N3_IDENTITY });
+    await send([]);
+    assert.equal(stub.requests.length, 1);
+    const init = stub.requests[0]!.init as RequestInit | undefined;
+    assert.equal(init?.redirect, 'error', 'the secret-bearing request must run with redirect: error');
+    const headers = (init?.headers ?? {}) as Record<string, string>;
+    assert.equal(headers.authorization, `Bearer ${N3_IDENTITY.deviceSecret}`);
+  } finally {
+    stub.restore();
+  }
+});
+
+test('G20.06 N3: when the platform refuses the redirect, the send fails closed with network_failed', async () => {
+  const stub = stubGlobalFetch(async () => {
+    throw new TypeError('the redirect was refused by redirect: error');
+  });
+  try {
+    const send = createEventsTransport({ baseUrl: 'https://example.supabase.co/functions/v1', identity: N3_IDENTITY });
+    await assert.rejects(send([]), (error: unknown) => {
+      assert.ok(error instanceof AnalyticsError);
+      assert.equal((error as AnalyticsError).rule, 'network_failed');
+      return true;
+    });
+    assert.equal((stub.requests[0]!.init as RequestInit | undefined)?.redirect, 'error');
+  } finally {
+    stub.restore();
+  }
+});
+
+test('G20.06 N3: a response redirected away from the endpoint is not accepted', async () => {
+  // A worst-case platform that followed the redirect despite the option:
+  // the final response claims 200 but from a foreign URL.
+  const redirected = {
+    status: 200,
+    url: 'https://attacker.example/functions/v1/events',
+    text: async () => JSON.stringify({ accepted: 1 }),
+  } as unknown as Response;
+  const stub = stubGlobalFetch(async () => redirected);
+  try {
+    const send = createEventsTransport({ baseUrl: 'https://example.supabase.co/functions/v1', identity: N3_IDENTITY });
+    await assert.rejects(send([]), (error: unknown) => {
+      assert.ok(error instanceof AnalyticsError);
+      assert.equal((error as AnalyticsError).rule, 'unsafe_endpoint');
+      assert.match((error as AnalyticsError).message, /redirect/);
+      return true;
+    });
+    assert.equal(stub.requests.length, 1, 'our code must not start a second authorized request after the redirect');
+  } finally {
+    stub.restore();
+  }
 });

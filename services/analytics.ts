@@ -20,6 +20,7 @@ import type { SqlDriver } from './db/types.ts';
 import type { DeviceIdentity } from './device.ts';
 import { flushEvents, type EventSender, type OutgoingEvent } from './eventLog.ts';
 import { readConsentState } from './consent.ts';
+import { assertNotRedirected, parseSecureEndpointUrl, SecureUrlError } from './secure-url.ts';
 
 // Closed consent vocabulary (`09` §10: asked → granted or refused; a granted
 // consent can be withdrawn). Absent (never asked) is the third state — the
@@ -32,7 +33,7 @@ export type AnalyticsConsent = 'granted' | 'revoked';
 const CONSENT_KEY = 'analytics_consent';
 
 export class AnalyticsError extends Error {
-  rule: 'network_failed' | 'rate_limited' | 'server_error' | 'invalid_payload' | 'invalid_consent_state' | 'invalid_event_time';
+  rule: 'network_failed' | 'rate_limited' | 'server_error' | 'invalid_payload' | 'invalid_consent_state' | 'invalid_event_time' | 'unsafe_endpoint';
 
   constructor(rule: AnalyticsError['rule'], message: string, options?: { cause?: unknown }) {
     super(message, options);
@@ -90,10 +91,30 @@ export interface EventsHttpTransport {
 function defaultHttpTransport(): EventsHttpTransport {
   return {
     async postEvents(url, body, headers) {
+      // N3: the parsed URL is validated before the network and before the
+      // Authorization header is attached (the header is built by the caller
+      // but only reaches fetch past this check). Redirects are refused
+      // twice: fetch runs with redirect: 'error', and a response that was
+      // redirected anyway (a platform that ignored the option) is rejected
+      // before its body is read — the batch is never sent to a foreign
+      // origin with the device secret attached.
+      let endpoint: URL;
+      try {
+        endpoint = parseSecureEndpointUrl(url, 'events send');
+      } catch (error) {
+        const message = error instanceof SecureUrlError
+          ? error.message
+          : 'events send: the endpoint URL is not parseable';
+        throw new AnalyticsError('unsafe_endpoint', message, { cause: error });
+      }
       let response: Response;
       try {
-        response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+        response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body), redirect: 'error' });
+        assertNotRedirected(endpoint, response, 'events send');
       } catch (error) {
+        if (error instanceof SecureUrlError) {
+          throw new AnalyticsError('unsafe_endpoint', error.message, { cause: error });
+        }
         throw new AnalyticsError('network_failed', 'events send request failed', { cause: error });
       }
       const text = await response.text();

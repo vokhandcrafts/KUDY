@@ -13,9 +13,10 @@
 // by design (09 §2).
 import { getDeviceId, setDeviceId } from './db/db.ts';
 import type { SqlDriver } from './db/types.ts';
+import { assertNotRedirected, parseSecureEndpointUrl, SecureUrlError } from './secure-url.ts';
 
 export class DeviceError extends Error {
-  rule: 'network_failed' | 'rate_limited' | 'server_error' | 'invalid_response';
+  rule: 'network_failed' | 'rate_limited' | 'server_error' | 'invalid_response' | 'unsafe_endpoint';
 
   constructor(rule: DeviceError['rule'], message: string, options?: { cause?: unknown }) {
     super(message, options);
@@ -53,8 +54,24 @@ export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0
 function defaultTransport(): DeviceRegistrationTransport {
   return {
     async register(baseUrl) {
+      // N3: the parsed URL is validated before the network — the response
+      // carries the device secret, so an unvalidated endpoint never gets
+      // the request. Redirects are refused twice: fetch itself runs with
+      // redirect: 'error', and a response that was redirected anyway (a
+      // platform that ignored the option) is rejected before its body is
+      // read, so a secret from a foreign origin is never accepted.
+      let endpoint: URL;
       try {
-        const response = await fetch(`${baseUrl}/device`, { method: 'POST' });
+        endpoint = parseSecureEndpointUrl(`${baseUrl}/device`, 'device registration');
+      } catch (error) {
+        const message = error instanceof SecureUrlError
+          ? error.message
+          : 'device registration: the endpoint URL is not parseable';
+        throw new DeviceError('unsafe_endpoint', message, { cause: error });
+      }
+      try {
+        const response = await fetch(endpoint, { method: 'POST', redirect: 'error' });
+        assertNotRedirected(endpoint, response, 'device registration');
         const text = await response.text();
         let body: unknown = null;
         try {
@@ -64,6 +81,9 @@ function defaultTransport(): DeviceRegistrationTransport {
         }
         return { status: response.status, body };
       } catch (error) {
+        if (error instanceof SecureUrlError) {
+          throw new DeviceError('unsafe_endpoint', error.message, { cause: error });
+        }
         throw new DeviceError('network_failed', 'device registration request failed', { cause: error });
       }
     },
