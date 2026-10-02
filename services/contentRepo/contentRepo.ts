@@ -16,12 +16,6 @@ import type {
   Tier,
 } from './types.ts';
 
-interface RouteStop {
-  id?: string;
-  access_tier?: string;
-  place_id?: string;
-}
-
 interface RouteDoc {
   route_id?: string;
   version?: string;
@@ -112,11 +106,38 @@ export async function evaluatePackage(store: PackageStore, input: EvaluateInput)
   const access: RouteAccess | null = routeDoc.access === 'free_base' || routeDoc.access === 'paid' ? routeDoc.access : null;
   if (access === null) return { status: 'incomplete', missing: ['route.json#type'] };
 
-  const stops = Array.isArray(routeDoc.stops) ? (routeDoc.stops as RouteStop[]) : [];
+  const routeStops: readonly unknown[] = Array.isArray(routeDoc.stops) ? routeDoc.stops : [];
   // stops is required by contracts/schemas/route.schema.json — absent and
   // non-array are the same schema fault (!Array.isArray covers both), and an
   // empty default would let a broken package read as ready.
   if (!Array.isArray(routeDoc.stops)) missing.push('route.json#type');
+  // R7 (runtime.md §R7): route.json is untrusted bytes — every stop row is
+  // structurally checked before any field access, so a damaged row is a named
+  // incompleteness, never a TypeError (implementation-rules 14). Only the
+  // fields evaluatePackage consumes are checked: access_tier drives the layer
+  // filter on every row, place_id feeds the places.json reference; id and
+  // position stay the schema-owned package validator's business
+  // (tools/validate). Diagnostics reuse the module vocabulary
+  // `<where>#<rule>`.
+  const tierStops = new Map<Tier, string[]>();
+  routeStops.forEach((row, index) => {
+    if (row === null || typeof row !== 'object' || Array.isArray(row)) {
+      missing.push(`route.json#stops[${index}]#type`);
+      return;
+    }
+    const record = row as { access_tier?: unknown; place_id?: unknown };
+    if (record.access_tier !== 'base' && record.access_tier !== 'extended') {
+      missing.push(`route.json#stops[${index}].access_tier#type`);
+      return;
+    }
+    if (typeof record.place_id !== 'string') {
+      missing.push(`route.json#stops[${index}].place_id#type`);
+      return;
+    }
+    const places = tierStops.get(record.access_tier);
+    if (places) places.push(record.place_id);
+    else tierStops.set(record.access_tier, [record.place_id]);
+  });
   for (const rel of ROOT_FILES) {
     if (rel === 'route.json') continue;
     const file = await readJson(store, rel);
@@ -162,10 +183,9 @@ export async function evaluatePackage(store: PackageStore, input: EvaluateInput)
         missing.push(`voices.json#unknown-ref:${story.voice_id}`);
       }
     }
-    for (const stop of stops) {
-      if (stop.access_tier !== tier) continue;
-      if (typeof stop.place_id === 'string' && !placeIds.has(stop.place_id)) {
-        missing.push(`places.json#unknown-ref:${stop.place_id}`);
+    for (const placeId of tierStops.get(tier) ?? []) {
+      if (!placeIds.has(placeId)) {
+        missing.push(`places.json#unknown-ref:${placeId}`);
       }
     }
   }
