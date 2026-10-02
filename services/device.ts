@@ -13,6 +13,7 @@
 // by design (09 §2).
 import { getDeviceId, setDeviceId } from './db/db.ts';
 import type { SqlDriver } from './db/types.ts';
+import { NETWORK_WAIT_LIMITS, withWaitLimit } from './network-wait.ts';
 import { assertNotRedirected, parseSecureEndpointUrl, SecureUrlError } from './secure-url.ts';
 
 export class DeviceError extends Error {
@@ -51,7 +52,7 @@ export interface DeviceIdentity {
 // the pattern stays single-sourced here (jscpd gate).
 export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-function defaultTransport(): DeviceRegistrationTransport {
+function defaultTransport(waitLimitMs: number): DeviceRegistrationTransport {
   return {
     async register(baseUrl) {
       // N3: the parsed URL is validated before the network — the response
@@ -70,16 +71,22 @@ function defaultTransport(): DeviceRegistrationTransport {
         throw new DeviceError('unsafe_endpoint', message, { cause: error });
       }
       try {
-        const response = await fetch(endpoint, { method: 'POST', redirect: 'error' });
-        assertNotRedirected(endpoint, response, 'device registration');
-        const text = await response.text();
-        let body: unknown = null;
-        try {
-          body = text === '' ? null : JSON.parse(text);
-        } catch {
-          body = null;
-        }
-        return { status: response.status, body };
+        // G20.10 (§N4): the registration wait is finite and covers the body.
+        // A deadline rejects before anything is persisted — a failed
+        // registration never fabricates a local secret or identity.
+        const response = await withWaitLimit('wait-device', waitLimitMs, async (signal) => {
+          const response = await fetch(endpoint, { method: 'POST', redirect: 'error', signal });
+          assertNotRedirected(endpoint, response, 'device registration');
+          const text = await response.text();
+          let body: unknown = null;
+          try {
+            body = text === '' ? null : JSON.parse(text);
+          } catch {
+            body = null;
+          }
+          return { status: response.status, body };
+        });
+        return { status: response.status, body: response.body };
       } catch (error) {
         if (error instanceof SecureUrlError) {
           throw new DeviceError('unsafe_endpoint', error.message, { cause: error });
@@ -117,6 +124,8 @@ export function ensureDeviceIdentity(deps: {
   /** Functions base URL, e.g. https://<ref>.supabase.co/functions/v1 */
   baseUrl: string;
   transport?: DeviceRegistrationTransport;
+  /** Wait limit override for the default transport (tests; the owner is NETWORK_WAIT_LIMITS.deviceMs). */
+  waitLimitMs?: number;
 }): Promise<DeviceIdentity> {
   const running = inflight.get(deps.driver);
   if (running) return running;
@@ -132,6 +141,7 @@ async function registerOnce(deps: {
   secretStore: SecureSecretStore;
   baseUrl: string;
   transport?: DeviceRegistrationTransport;
+  waitLimitMs?: number;
 }): Promise<DeviceIdentity> {
   const secret = await deps.secretStore.getSecret();
   const storedDeviceId = getDeviceId(deps.driver);
@@ -144,7 +154,7 @@ async function registerOnce(deps: {
     await deps.secretStore.clearSecret();
   }
 
-  const transport = deps.transport ?? defaultTransport();
+  const transport = deps.transport ?? defaultTransport(deps.waitLimitMs ?? NETWORK_WAIT_LIMITS.deviceMs);
   const response = await transport.register(deps.baseUrl);
   if (response.status === 429) {
     throw new DeviceError('rate_limited', 'device registration is rate limited; retry later');

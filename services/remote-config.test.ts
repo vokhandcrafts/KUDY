@@ -12,6 +12,7 @@ import { checkRemoteConfig, loadDefaultRemoteConfig } from '../contracts/config/
 import { getSetting } from './db/db.ts';
 import { openDatabase } from './db/db.ts';
 import { nodeSqliteFileDriver } from './db/test-fixture.ts';
+import { stubGlobalFetch } from './fetch-stub-test-fixture.ts';
 import { readRemoteConfig, refreshRemoteConfig } from './remote-config.ts';
 import type { ConfigHttpTransport, RemoteConfigDocument } from './remote-config.ts';
 import type { SqlDriver } from './db/types.ts';
@@ -188,3 +189,33 @@ test('offline read: a contract-invalid cache row is not trusted and not repaired
 function setSettingRow(driver: SqlDriver, key: string, value: string): void {
   driver.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').run(key, value);
 }
+
+// G20.10 (issue #481): the default transport's wait is finite — a stalled
+// config origin answers with the documented fallback (cache → defaults), the
+// named diagnostic, and never a fabricated value or a cache overwrite.
+test('G20.10 stalled_config_defaults: an unresolved config fetch falls back to defaults at the deadline', async () => {
+  const driver = freshStore();
+  const stub = stubGlobalFetch(
+    () =>
+      new Promise<Response>(() => {
+        // never resolves — the stalled config origin
+      }),
+  );
+  try {
+    const result = await refreshRemoteConfig({
+      baseUrl: 'https://example.invalid/functions/v1',
+      driver,
+      check: checkRemoteConfig,
+      defaults: DEFAULTS,
+      waitLimitMs: 25,
+    });
+    assert.equal(result.source, 'defaults');
+    assert.equal(result.config.dwell_ms, DEFAULTS.dwell_ms);
+    assert.equal(result.diagnostics[0].rule, 'config-fetch-failed');
+    assert.match(String(result.diagnostics[0].detail), /wait-config/);
+    // The deadline is not an acceptance: nothing was cached.
+    assert.equal(getSetting(driver, 'remote_config_cache'), null);
+  } finally {
+    stub.restore();
+  }
+});

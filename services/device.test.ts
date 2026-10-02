@@ -297,3 +297,33 @@ test('G20.06 N3: a response redirected away from the endpoint is not accepted', 
     stub.restore();
   }
 });
+
+// G20.10 (issue #481): the default transport's registration wait is finite —
+// a stalled endpoint answers network_failed at the deadline and the failed
+// registration persists no fabricated secret or identity.
+test('G20.10 stalled_device_no_identity: an unresolved registration stores nothing', async () => {
+  const store = memorySecretStore();
+  const driver = nodeSqliteDriver();
+  openDatabase(driver);
+  const stub = stubGlobalFetch(
+    () =>
+      new Promise<Response>(() => {
+        // never resolves — the stalled registration endpoint
+      }),
+  );
+  try {
+    await assert.rejects(
+      ensureDeviceIdentity({ driver, secretStore: store, baseUrl: 'https://example.functions.supabase.co/functions/v1', waitLimitMs: 25 }),
+      (error: DeviceError) => {
+        assert.equal(error.rule, 'network_failed');
+        return true;
+      },
+    );
+    // Nothing was fabricated: no secret saved or cleared into a new value,
+    // no device_id row.
+    assert.equal(store.saves, 0);
+    assert.equal(getDeviceId(driver), null);
+  } finally {
+    stub.restore();
+  }
+});

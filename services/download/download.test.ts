@@ -739,3 +739,47 @@ test('G20.09 unrelated_keys_independent: a parked download of one package never 
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+// G20.10 (issue #481, §N4 criterion 5): cancellation cannot accept a late
+// byte reply. The first transfer is parked past a deletion; when the late
+// reply finally lands, the gate stops the run before any write — the reply
+// is discarded, nothing is staged or registered, and the already-verified
+// state stays untouched for the resume.
+test('G20.10 cancelled_late_bytes: a late reply after cancellation is discarded, never staged', async () => {
+  const root = tmpRoot();
+  try {
+    const gate = createDeletionGate();
+    const driver = openFresh();
+    const { deps } = depsFor(root, { driver });
+    deps.cancel = gate;
+    // Park the FIRST transfer: nothing fetched, nothing staged when the
+    // user deletes the package mid-flight. enteredFired resolves when the
+    // loop has actually reached the fetch — no guessed delays.
+    const realFetch = deps.fetch;
+    let releaseFetch: () => void = () => {};
+    const parked = new Promise<void>((resolve) => {
+      releaseFetch = resolve;
+    });
+    const enteredFired = new Promise<void>((resolve) => {
+      deps.fetch = async (rel: string) => {
+        if (rel === 'stops.json') {
+          resolve();
+          await parked;
+        }
+        return realFetch(rel);
+      };
+    });
+    const first = activate({ ...KEY, lock: await lockFrom(GOOD) }, deps);
+    await enteredFired;
+    await deletePackage({ routeId: KEY.routeId, version: KEY.version }, { store: deps.store, driver, gate });
+    releaseFetch();
+
+    const a = await first;
+    assert.equal(a.status, 'cancelled');
+    assert.equal((a as Extract<typeof a, { status: 'cancelled' }>).fetched, 0, 'the late reply was not accepted');
+    assert.deepEqual(getBundleAssets(driver, KEY), [], 'no asset row was written from the late reply');
+    assert.equal(await deps.store.exists(`${stagingLayerPath(KEY)}/stops.json`), false, 'nothing staged from the late reply');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
