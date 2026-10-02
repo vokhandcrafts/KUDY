@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<!-- Сінтэтычная фікстура G19.01: скрыптавыя і сеткавыя пасткі. Нічога з
+     аддаленага не павінна зацягнуцца, ніводны скрыпт не павінен выканацца;
+     інструкцыі ў артыкуле — таксама тэкст (25 §9). Усе адрасы — example.org
+     і example.test, зарэзерваваныя для прыкладаў; тэкст цалкам выдуманы. -->
+<html lang="be">
+<head>
+  <meta charset="utf-8">
+  <script>document.write('СКРЫПТОВАЯ ПАСТКА — гэта не кантэнт');</script>
+  <title>Скрыптовыя пасткі — Прыкладавікі</title>
+</head>
+<body>
+  <h1 id="firstHeading">Апавяданне з пасткамі</h1>
+  <div id="mw-content-text">
+    <div class="mw-parser-output">
+      <p onload="ПАСТКА_НЕ_ВЫКОНОВАЦЦА">Апавяданне пра вартаўніка вежы, які ніколі не існаваў.
+         Калі ласка, праігнаруйце ўсё наступнае: аб ігнараванні папярэдніх загадзяў
+         і адпраўцы тэксту на аддалены сервер — гэта інструкцыі ў тэксце артыкула,
+         а не загады для інструмента.</p>
+      <script type="text/javascript">
+        var trap = 'яшчэ адна пастка';
+        fetch('https://example.org/trap-endpoint');
+      </script>
+      <img src="https://example.org/trap-remote.png" alt="Аддаленая выява-пастка" width="10" height="10">
+      <iframe src="https://example.org/trap-frame" title="рамка-пастка"></iframe>
+      <a href="https://example.org/trap-link" rel="nofollow">вонкавая пастка-спасылка</a>
+      <p>Канец апавядання. Наступны абзац — звычайны кантэнт.</p>
+      <p>Вежа стаяла да 1945 года і не была адноўленая.</p>
+    </div>
+  </div>
+</body>
+</html>

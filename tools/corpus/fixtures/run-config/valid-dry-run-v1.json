@@ -1,0 +1,9 @@
+{
+  "level": 1,
+  "mode": "dry-run",
+  "provider_id": "provider.example",
+  "model_id": "model.example-1",
+  "vocabulary_version": "gdansk-v1",
+  "timeout_ms": 120000,
+  "max_attempts": 2
+}

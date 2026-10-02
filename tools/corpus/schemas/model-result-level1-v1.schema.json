@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Вынік узроўню 1 model-result-level1/v1",
+  "description": "25 §2, §5: узровень 1 — падказкі для адбору па ўсім артыкуле, не зацверджаныя факты. Запісы — 25 §5 даслоўна: Entity (entity_id, kind, асноўная назва, варыянты назвы, стан супастаўлення), Mention (асоба/месца/арганізацыя, фрагмент і дыяпазон тэксту, тып згадкі, прапанаваны entity_id), TimeReference (пачатак/канец, дакладнасць, роля даты, фрагмент і дыяпазон), PlaceReference (месца, назва/адрас, тып удзелу, раён і яго падстава), TopicAssignment (topic_id з версіянаванага слоўніка, фрагмент-падстава), Hook (зачэпка, чаму пасуе, фрагмент-падстава), ContextNeed (паняцце, фрагмент, стан закрыцця). Віды сутнасцей person/family/place/organization, тыпы згадкі — спіс 25 §5. Да трох зачэпак на артыкул (25 §2). Невядомая мяжа прамежка гадоў — поле адсутнічае (25 §5: прамежкі дапускаюць невядомую мяжу); прыкладнасць — precision approximate. Супастаўленні мадэль толькі прапануе: matching_status unmatched/proposed чакае аўтарскага рашэння (confirmed/split/rejected), зліццё чалавека і сям'і забаронена (25 §5).",
+  "type": "object",
+  "required": ["article_id", "revision_id", "run_id", "vocabulary_version", "entities", "mentions", "time_references", "place_references", "topic_assignments", "hooks", "context_needs"],
+  "additionalProperties": false,
+  "properties": {
+    "article_id": { "$ref": "#/$defs/sha256hex" },
+    "revision_id": { "$ref": "#/$defs/sha256hex" },
+    "run_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "vocabulary_version": { "type": "string", "minLength": 1 },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity_id", "kind", "name"],
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "kind": { "type": "string", "enum": ["person", "family", "place", "organization"] },
+          "name": { "type": "string", "minLength": 1 },
+          "name_variants": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "matching_status": { "type": "string", "enum": ["unmatched", "proposed", "confirmed", "split", "rejected"] }
+        }
+      }
+    },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "fragment_id", "start", "end", "mention_type"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "type": "string", "enum": ["person", "place", "organization"] },
+          "fragment_id": { "type": "string", "minLength": 1 },
+          "start": { "type": "integer", "minimum": 0 },
+          "end": { "type": "integer", "minimum": 1 },
+          "mention_type": {
+            "type": "string",
+            "enum": ["biography", "participation", "commemoration", "name_origin", "depicted", "creator", "other"]
+          },
+          "proposed_entity_id": { "type": "string", "minLength": 1, "maxLength": 128 }
+        }
+      }
+    },
+    "time_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fragment_id", "start", "end", "role"],
+        "additionalProperties": false,
+        "properties": {
+          "fragment_id": { "type": "string", "minLength": 1 },
+          "start": { "type": "integer", "minimum": 0 },
+          "end": { "type": "integer", "minimum": 1 },
+          "year_from": { "type": "integer", "minimum": 1 },
+          "year_to": { "type": "integer", "minimum": 1 },
+          "precision": { "type": "string", "enum": ["exact", "approximate"] },
+          "role": { "type": "string", "enum": ["event", "lifespan", "depiction", "creation", "publication", "unknown"] }
+        }
+      }
+    },
+    "place_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["place", "name", "participation_type", "districts"],
+        "additionalProperties": false,
+        "properties": {
+          "place": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "address": { "type": "string" },
+          "participation_type": { "type": "string", "minLength": 1 },
+          "districts": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "district_basis": { "type": "string" }
+        }
+      }
+    },
+    "topic_assignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["topic_id", "fragment_id"],
+        "additionalProperties": false,
+        "properties": {
+          "topic_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "fragment_id": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "hooks": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["text", "rationale", "fragment_id"],
+        "additionalProperties": false,
+        "properties": {
+          "text": { "type": "string", "minLength": 1 },
+          "rationale": { "type": "string", "minLength": 1 },
+          "fragment_id": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "context_needs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["concept", "fragment_id", "closure_state"],
+        "additionalProperties": false,
+        "properties": {
+          "concept": { "type": "string", "minLength": 1 },
+          "fragment_id": { "type": "string", "minLength": 1 },
+          "closure_state": { "type": "string", "enum": ["open", "closed"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256hex": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}
