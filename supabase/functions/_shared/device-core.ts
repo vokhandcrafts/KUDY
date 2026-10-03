@@ -169,3 +169,72 @@ export const DEVICE_INSERT_SQL =
 /** Lookup statement for `verifyBearer` — indexes by the stored hash. */
 export const DEVICE_LOOKUP_SQL =
   'select device_id from devices where secret_hash = $1';
+
+/**
+ * Device deletion (`09` §5 DELETE /v1/device, G09.03): removing the devices
+ * row is the whole server-side action — the FK cascades committed by the
+ * migrations clear `event_log` (20260922120000), `entitlement_cache`
+ * (20260922120000) and `event_send_rate` (20261001000000). Content rights
+ * live in the stores and RevenueCat (`09` §5: «правы на кантэнт не
+ * выдаляюцца»), so nothing else is touched here.
+ */
+export const DEVICE_DELETE_SQL =
+  'delete from devices where device_id = $1';
+
+export type DeviceDeleteAnswer =
+  | { status: 204 }
+  | { status: 403; code: 'device_auth_failed' }
+  | { status: 404; code: 'not_found' };
+
+export interface DeviceDeletePort {
+  lookupDeviceId(secretHash: string): Promise<string | null>;
+  deleteDeviceRow(deviceId: string): Promise<void>;
+}
+
+/**
+ * The `DELETE /v1/device` half of the device function, structured like
+ * `handleEventsRequest`: closed answer list, the single G08.01 auth path.
+ * Idempotency answer: a repeated DELETE with the same secret finds no row
+ * and answers `device_auth_failed` (403) — there is no separate
+ * "already deleted" success code, because the row cannot come back (the
+ * registration path is the only writer) and the client's wipe flow treats
+ * the 403 as completion (services/device.ts). A port fault is deliberately
+ * not caught: it is a server fault, and mapping it to a closed-list answer
+ * is the wiring's job (the events-core idiom).
+ */
+export async function handleDeviceDeleteRequest(
+  req: { method: string; authorization: string | null | undefined },
+  port: DeviceDeletePort,
+): Promise<DeviceDeleteAnswer> {
+  if (req.method !== 'DELETE') {
+    return { status: 404, code: 'not_found' };
+  }
+  const secretHash = bearerSecretHash(req.authorization);
+  if (secretHash === null) {
+    return { status: 403, code: 'device_auth_failed' };
+  }
+  const deviceId = await port.lookupDeviceId(secretHash);
+  if (deviceId === null) {
+    return { status: 403, code: 'device_auth_failed' };
+  }
+  await port.deleteDeviceRow(deviceId);
+  return { status: 204 };
+}
+
+export interface DeviceSqlRunner {
+  query(sql: string, params?: unknown[]): Promise<{ rows: Array<Record<string, unknown>> }>;
+}
+
+/** Production port over Postgres — the pinned statements, nothing else. */
+export function createSqlDeviceDeletePort(db: DeviceSqlRunner): DeviceDeletePort {
+  return {
+    async lookupDeviceId(secretHash) {
+      const { rows } = await db.query(DEVICE_LOOKUP_SQL, [secretHash]);
+      const candidate = rows[0]?.['device_id'];
+      return typeof candidate === 'string' ? candidate : null;
+    },
+    async deleteDeviceRow(deviceId) {
+      await db.query(DEVICE_DELETE_SQL, [deviceId]);
+    },
+  };
+}

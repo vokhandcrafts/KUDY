@@ -19,7 +19,13 @@ import test from 'node:test';
 
 import { AnalyticsError, createEventsTransport } from '../../../services/analytics.ts';
 
-import { hashSecret, registerDevice } from './device-core.ts';
+import {
+  createSqlDeviceDeletePort,
+  DEVICE_INSERT_SQL,
+  handleDeviceDeleteRequest,
+  hashSecret,
+  registerDevice,
+} from './device-core.ts';
 import {
   createSqlEventsPort,
   defaultEventsConfig,
@@ -401,6 +407,36 @@ test('PGlite: the rate counter dies with the device row (cascade)', async () => 
   await db.query('delete from devices where device_id = $1', [deviceId]);
   const left = await db.query('select count(*)::int as count from event_send_rate');
   assert.equal(left.rows[0]!.count, 0, 'device delete clears the counter (09 §5)');
+});
+
+// G09.03 criterion 3: the deleted device account cannot be resurrected —
+// its old secret authenticates nothing and its old events store nothing.
+// Fails if the delete stops removing the devices row or the intake stops
+// consulting it (implementation-rules 1).
+test('G09.03: after device-delete the same batch answers 403 and stores nothing', async () => {
+  const db = await freshMigratedDatabase();
+  const registration = registerDevice();
+  await db.query(DEVICE_INSERT_SQL, [registration.deviceId, registration.secretHash]);
+  const port = createSqlEventsPort(db);
+  const request = {
+    method: 'POST',
+    authorization: `Bearer ${registration.deviceSecret}`,
+    rawBody: raw({ events: [wireEvent()] }),
+  };
+
+  const first = await handleEventsRequest(request, port, TABLE, config());
+  assert.deepEqual(first, { status: 200, body: { accepted: 1 } });
+
+  const deleted = await handleDeviceDeleteRequest(
+    { method: 'DELETE', authorization: request.authorization },
+    createSqlDeviceDeletePort(db),
+  );
+  assert.deepEqual(deleted, { status: 204 });
+
+  const resurrect = await handleEventsRequest(request, port, TABLE, config());
+  assert.deepEqual(resurrect, { status: 403, code: 'device_auth_failed' }, 'the old secret authenticates nothing');
+  const left = await db.query('select count(*)::int as count from event_log');
+  assert.equal(left.rows[0]!.count, 0, 'the old events store nothing into the deleted account');
 });
 
 // --- the closed-list cross-check: every server status is handled by the client ---

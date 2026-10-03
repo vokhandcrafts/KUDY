@@ -490,6 +490,29 @@ export function getDeviceId(driver: SqlDriver): string | null {
   return row ? String(row.device_id) : null;
 }
 
+// The durable `settings` key holding the analytics consent state (`09` §10:
+// «Стан згоды — у settings»). The literal lives here — with the settings SQL
+// — as the single definition; services/analytics reads and writes through it.
+export const ANALYTICS_CONSENT_KEY = 'analytics_consent';
+
+// G09.03 — the client half of device data deletion (09 §5): after the server
+// answers, the device row, the local event queue, the feedback tables (`21`
+// §6 — the old outbox never restores the server-side feedback) and the
+// consent state go away in one transaction; the next identity starts from
+// the "never asked" consent. Row-level deletes only: zone B tables and their
+// DDL stay (schema.ts) — deletion is a data action, never a migration.
+// Downloaded bundles (zone A) and run progress (`session`) are deliberately
+// untouched (09 §5, `21` §6).
+export function clearDeviceAccountState(driver: SqlDriver): void {
+  inTransaction(driver, () => {
+    driver.prepare('DELETE FROM event_queue').run();
+    driver.prepare('DELETE FROM feedback_local').run();
+    driver.prepare('DELETE FROM feedback_outbox').run();
+    driver.prepare('DELETE FROM settings WHERE key = ?').run(ANALYTICS_CONSENT_KEY);
+    driver.prepare('DELETE FROM device WHERE singleton = 1').run();
+  });
+}
+
 // `09` §7 bundle_asset (zone A): the download channel's resume registry
 // (G04.02.a). Rows are derived state — rebuilt by re-hashing what lies on
 // disk; no zone B table is ever touched here.
