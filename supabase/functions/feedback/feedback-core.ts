@@ -742,6 +742,16 @@ async function runCasMutation(tx: FeedbackTx, deviceId: string, plan: CasPlan): 
       return { kind: 'answer', answer: { status: 409, error: 'revision_conflict' } };
     }
     if ((await plan.create(tx, deviceId)) === 0) {
+      // The `for update` lock holds no row here, so the earlier re-check
+      // could still have missed an uncommitted winner; this one catches the
+      // committed winner: the same mutation_id replays its stored result, a
+      // different id stays a plain CAS conflict.
+      const raced = await tx.findMutation(deviceId, plan.mutationId);
+      if (raced !== null) {
+        return raced.payloadHash === plan.payloadHash
+          ? { kind: 'committed', revision: raced.resultRevision }
+          : { kind: 'answer', answer: { status: 409, error: 'mutation_conflict' } };
+      }
       return { kind: 'answer', answer: { status: 409, error: 'revision_conflict' } };
     }
     await tx.insertMutation(deviceId, plan.mutationId, plan.payloadHash, plan.key, 1);
