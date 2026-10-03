@@ -354,6 +354,62 @@ test('a different payload under the same mutation_id conflicts with 409', async 
   assert.equal(rows.rows[0]?.score, 4, 'the conflicting payload overwrote nothing');
 });
 
+test('a duplicate that raced past the original replays after the lock, never 503s', async () => {
+  const { call, target } = await ratingScenario();
+  const put = (mutationId: string, expectedRevision: number, score: number, reasonCodes: string[]) =>
+    call('PUT', '/v1/feedback', {
+      mutation_id: mutationId,
+      target,
+      expected_revision: expectedRevision,
+      score,
+      reason_codes: reasonCodes,
+      disclosure_version: 'feedback-disclosure-1',
+    });
+
+  // The original create commits (revision 1) and a later edit moves the row
+  // to revision 2; the identical create-retry still carries expected 0.
+  assert.deepEqual(await (await put('00000000-0000-4000-8000-000000000001', 0, 4, ['interesting_stories'])).json(), { revision: 1, saved: true });
+  assert.deepEqual(await (await put('00000000-0000-4000-8000-000000000002', 1, 5, [])).json(), { revision: 2, saved: true });
+
+  // The retry holds the ledger row, so it replays the stored revision 1 —
+  // not a 409 revision_conflict against the advanced current row.
+  const replay = await put('00000000-0000-4000-8000-000000000001', 0, 4, ['interesting_stories']);
+  assert.deepEqual(await replay.json(), { revision: 1, saved: true });
+
+  // A different payload under the same id with an expected_revision that
+  // happens to match the current row conflicts as mutation_conflict — it
+  // must never reach the CAS update or die on the ledger PK as a 503.
+  const conflict = await put('00000000-0000-4000-8000-000000000001', 1, 2, ['interesting_stories']);
+  assert.equal(conflict.status, 409);
+  assert.deepEqual(await conflict.json(), { error: 'mutation_conflict' });
+});
+
+test('forged-bearer failures count toward the shared IP bucket', async () => {
+  const db = await freshFeedbackDatabase();
+  const client = pgliteFeedbackClient(db);
+  const config = { ...testFeedbackConfig(), deviceRateLimit: 100, ipRateLimit: 1 };
+  const device = await registerFeedbackDevice(db);
+  await publishFixtureTargets(db, [{ kind: 'guide', route_id: 'guide-route-a1', version: '1', locale: 'be' }]);
+
+  const forged = await handleFeedbackEdgeRequest(
+    feedbackRequest({ method: 'POST', url: 'https://feedback.test/v1/feedback/read', body: { target: { kind: 'guide', route_id: 'guide-route-a1', version: '1', locale: 'be' } }, secret: 'not-a-secret', ip: '203.0.113.9' }),
+    client,
+    config,
+  );
+  assert.equal(forged.status, 401, 'the forged bearer fails auth first');
+
+  // The valid device behind the same address finds the IP bucket already
+  // consumed by the unauthenticated flood.
+  const valid = await handleFeedbackEdgeRequest(
+    feedbackRequest({ method: 'POST', url: 'https://feedback.test/v1/feedback/read', body: { target: { kind: 'guide', route_id: 'guide-route-a1', version: '1', locale: 'be' } }, secret: device.secret, ip: '203.0.113.9' }),
+    client,
+    config,
+  );
+  assert.equal(valid.status, 429, 'the IP bucket spans authenticated and unauthenticated requests');
+  const stored = await db.query('select ip_hash from feedback_ip_rate');
+  assert.deepEqual(stored.rows.map((row) => row.ip_hash), [hashIp('203.0.113.9')]);
+});
+
 // --- limits and envelope failures ---
 
 test('the device and IP limits answer 429 with Retry-After; reads count too', async () => {

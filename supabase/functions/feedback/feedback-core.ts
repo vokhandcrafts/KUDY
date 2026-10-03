@@ -604,6 +604,12 @@ export async function handleFeedbackRequest(
   if (!methodOk) {
     return { status: 422, error: 'invalid_request' };
   }
+  // The per-IP bucket counts every request that reaches the handler —
+  // including ones that fail auth or validation — the service-protection
+  // half of 21 §5.3 (120/min per IP); the raw address is already hashed by
+  // the wiring.
+  const ipLimited = windowDecision(await port.incrementIpRate(req.ipHash, windowStart(config)), config.ipRateLimit, config);
+  if (ipLimited) return ipLimited;
   const auth = await feedbackPreamble(req, port, config);
   if (!auth.ok) return auth.answer;
   const deviceId = auth.deviceId;
@@ -614,7 +620,7 @@ export async function handleFeedbackRequest(
   if (req.operation === 'read') {
     const verdict = validateReadBody(parsed.body);
     if (!verdict.ok) return { status: 422, error: verdict.error };
-    const limited = await enforceFeedbackLimits(deviceId, req, port, config);
+    const limited = await enforceFeedbackLimits(deviceId, port, config);
     if (limited) return limited;
     const row = await port.readCurrent(deviceId, verdict.key);
     const current = row ?? { revision: 0, score: null, reasonCodes: [], deleted: false };
@@ -652,7 +658,7 @@ async function mutationAnswer(
   if (operation === 'put') {
     const verdict = validatePutBody(body);
     if (!verdict.ok) return { status: 422, error: verdict.error };
-    return committedAnswer('put', deviceId, req, port, config, {
+    return committedAnswer('put', deviceId, port, config, {
       ...planHead(verdict),
       create: (tx, deviceId) => tx.insertCurrentRating(deviceId, verdict.key, verdict.score, verdict.reasonCodes),
       apply: (tx, deviceId) => tx.updateCurrentRating(deviceId, verdict.key, verdict.expectedRevision, verdict.score, verdict.reasonCodes),
@@ -660,7 +666,7 @@ async function mutationAnswer(
   }
   const verdict = validateDeleteBody(body);
   if (!verdict.ok) return { status: 422, error: verdict.error };
-  return committedAnswer('delete', deviceId, req, port, config, {
+  return committedAnswer('delete', deviceId, port, config, {
     ...planHead(verdict),
     apply: (tx, deviceId) => tx.tombstoneCurrent(deviceId, verdict.key, verdict.expectedRevision),
   });
@@ -669,12 +675,11 @@ async function mutationAnswer(
 async function committedAnswer(
   operation: 'put' | 'delete',
   deviceId: string,
-  req: FeedbackRequestLike,
   port: FeedbackPort,
   config: FeedbackConfig,
   plan: CasPlan,
 ): Promise<FeedbackAnswer> {
-  const limited = await enforceFeedbackLimits(deviceId, req, port, config);
+  const limited = await enforceFeedbackLimits(deviceId, port, config);
   if (limited) return limited;
   const outcome = await port.transaction((tx) => runCasMutation(tx, deviceId, plan));
   if (outcome.kind !== 'committed') return outcome.answer;
@@ -685,14 +690,14 @@ async function committedAnswer(
 }
 
 /**
- * The 21 §5.3 request limits — every feedback request counts, reads
- * included. The counters live in the database and persist across rejected
- * requests: the request did arrive, whatever the answer.
+ * The 21 §5.3 request limits — the per-device half; every authenticated
+ * feedback request counts, reads included. The counters live in the database
+ * and persist across rejected requests: the request did arrive, whatever the
+ * answer. (The per-IP half counts in `handleFeedbackRequest` before auth, so
+ * forged-bearer floods are bucketed too.)
  */
-async function enforceFeedbackLimits(deviceId: string, req: FeedbackRequestLike, port: FeedbackPort, config: FeedbackConfig): Promise<FeedbackAnswer | null> {
-  const deviceRate = windowDecision(await port.incrementDeviceRate(deviceId, windowStart(config)), config.deviceRateLimit, config);
-  if (deviceRate) return deviceRate;
-  return windowDecision(await port.incrementIpRate(req.ipHash, windowStart(config)), config.ipRateLimit, config);
+async function enforceFeedbackLimits(deviceId: string, port: FeedbackPort, config: FeedbackConfig): Promise<FeedbackAnswer | null> {
+  return windowDecision(await port.incrementDeviceRate(deviceId, windowStart(config)), config.deviceRateLimit, config);
 }
 
 /**
@@ -721,6 +726,17 @@ async function runCasMutation(tx: FeedbackTx, deviceId: string, plan: CasPlan): 
     return { kind: 'answer', answer: { status: 503, error: 'target_not_published' } };
   }
   const current = await tx.lockCurrentRevision(deviceId, plan.key);
+  // READ COMMITTED: the lock wait re-reads the winner's committed row, so a
+  // duplicate that raced the original transaction re-checks its ledger here —
+  // the pre-lock lookup (21 §5.3 step 2) cannot see it yet. An identical
+  // retry replays the stored result, a different payload conflicts, and the
+  // ledger PK can no longer explode inside this transaction as a 503.
+  const raced = await tx.findMutation(deviceId, plan.mutationId);
+  if (raced !== null) {
+    return raced.payloadHash === plan.payloadHash
+      ? { kind: 'committed', revision: raced.resultRevision }
+      : { kind: 'answer', answer: { status: 409, error: 'mutation_conflict' } };
+  }
   if (current === null) {
     if (!plan.create || plan.expectedRevision !== 0) {
       return { kind: 'answer', answer: { status: 409, error: 'revision_conflict' } };

@@ -70,6 +70,23 @@ test('guard: the target schema shape matches the validation contract', () => {
 
 test('guard: the disclosure version and reason codes come from the fixture and the spec', () => {
   assert.ok(DISCLOSURE_VERSIONS.includes(fixture.disclosure_version), 'the fixture consent version is allowed');
+  // Both directions: the code lists equal the canonical 21 §5.1 sets
+  // verbatim — an extra code the spec does not define fails this guard too.
+  assert.deepEqual([...GUIDE_REASON_CODES], [
+    'interesting_stories',
+    'clear_delivery',
+    'too_long',
+    'hard_to_navigate',
+    'audio_problem',
+    'description_mismatch',
+  ]);
+  assert.deepEqual([...PLACE_REASON_CODES], [
+    'worth_visiting',
+    'description_mismatch',
+    'hard_to_reach',
+    'access_problem',
+  ]);
+  assert.deepEqual([...DISCLOSURE_VERSIONS], ['feedback-disclosure-1']);
   for (const code of ['interesting_stories', 'clear_delivery', 'too_long', 'hard_to_navigate', 'audio_problem', 'description_mismatch']) {
     assert.ok(GUIDE_REASON_CODES.includes(code), `guide reason ${code} is in the closed list (21 §5.1)`);
     assert.equal(validateReasonCodes('guide', [code]), null);
