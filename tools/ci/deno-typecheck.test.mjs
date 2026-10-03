@@ -21,7 +21,7 @@ const fixture = path.join('supabase', 'functions', '_fixtures', 'deno-async-mism
 // `/` while path.relative follows the host separator (A26-08; the 2026-10-03
 // Windows retest failed here with device\index.ts — G21.05).
 const repoRel = (entry, sep = path.sep) => entry.split(sep).join('/');
-const PRODUCTION_ENTRYPOINTS = ['device/index.ts', 'events/index.ts', 'grant/index.ts', 'rc-webhook/index.ts'];
+const PRODUCTION_ENTRYPOINTS = ['device/index.ts', 'events/index.ts', 'feedback/index.ts', 'grant/index.ts', 'rc-webhook/index.ts'];
 
 function runScript(args, env = {}) {
   return spawnSync(process.execPath, [script, ...args], {
@@ -74,7 +74,7 @@ test('runtime version drift from the committed pin fails closed', { skip: proces
 test('clean production entrypoints pass under the pinned runtime', { skip: denoUnavailableReason }, () => {
   const result = runScript([]);
   assert.strictEqual(result.status, 0, result.stderr);
-  assert.match(result.stdout, /4 production entrypoint\(s\)/);
+  assert.match(result.stdout, /5 production entrypoint\(s\)/);
   assert.match(result.stdout, /lock frozen/);
 });
 
