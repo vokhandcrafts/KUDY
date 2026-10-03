@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 import { freshMigratedDatabase, pgliteWebhookRunner } from './test-db.ts';
+import { runRetentionSweep, webhookRetentionCutoffMs } from './retention-core.ts';
 import {
   affectedDeviceIds,
   handleWebhook,
@@ -297,6 +298,74 @@ test('parseWebhookEvent keeps a non-integer event_timestamp_ms out of the persis
   const event = parseWebhookEvent(new TextEncoder().encode(JSON.stringify({ event: { id: 'e1', type: 'TEST', event_timestamp_ms: 'soon' } })));
   assert.ok(event !== null);
   assert.equal(event['event_timestamp_ms'], 'soon', 'the value survives into the stored payload');
+});
+
+test('webhook_payload_minimized: the durable payload keeps only the accounting fields — device identity and subscriber personal data never reach the row (G20.12, spec N6)', async () => {
+  const db = await freshMigratedDatabase();
+  const device = randomUUID();
+  await seedDeviceWithCache(db, device);
+
+  const event = {
+    id: randomUUID(),
+    type: 'CANCELLATION',
+    event_timestamp_ms: 1_699_999_000_000,
+    app_user_id: device,
+    aliases: [randomUUID(), '$RCAnonymousID:not-a-device'],
+    product_id: 'kudy.route.ext',
+    environment: 'SANDBOX',
+    store: 'APP_STORE',
+    cancel_reason: 'CUSTOMER_SUPPORT',
+    expiration_at_ms: 1_700_100_000_000,
+    // Synthetic subscriber personal fields RevenueCat may attach: the
+    // delivery drives the effects, but none of this is stored (spec N6:
+    // full messages and personal data never enter the test proofs).
+    email: 'subscriber@example.com',
+    ip: '203.0.113.9',
+    country: 'PL',
+  };
+  const answer = await handleWebhook(requestOf(event), { store: pgliteWebhookRunner(db) });
+
+  assert.deepEqual(answer, { status: 200 });
+  assert.equal(await cacheRowCount(db, device), 0, 'the rights effects still run from the parsed event, not the stored row');
+  const stored = await db.query('select payload from webhook_events where event_id = $1', [event.id]);
+  const payload = (stored.rows as Array<Record<string, unknown>>)[0]!['payload'] as Record<string, unknown>;
+  assert.deepEqual(payload, {
+    product_id: 'kudy.route.ext',
+    environment: 'SANDBOX',
+    store: 'APP_STORE',
+    cancel_reason: 'CUSTOMER_SUPPORT',
+    expiration_at_ms: 1_700_100_000_000,
+  });
+});
+
+test('replay_does_not_resurrect: after the retention sweep purges the event row, the replayed delivery re-persists it but can only drop cache rows — rights and the device account never come back (G20.12)', async () => {
+  const db = await freshMigratedDatabase();
+  const device = randomUUID();
+  await seedDeviceWithCache(db, device);
+  const event = { id: randomUUID(), type: 'CANCELLATION', app_user_id: device, product_id: 'kudy.route.ext' };
+  const request = requestOf(event);
+
+  const first = await handleWebhook(request, { store: pgliteWebhookRunner(db) });
+  assert.deepEqual(first, { status: 200 });
+  assert.equal(await cacheRowCount(db, device), 0);
+
+  // Age the bookkeeping row past the protective bound and sweep it away
+  // (received_at is forced explicitly so the pass is deterministic).
+  await db.query('update webhook_events set received_at = to_timestamp($1 / 1000.0)', [webhookRetentionCutoffMs(NOW_MS) - 1]);
+  const sweep = await runRetentionSweep(db, NOW_MS);
+  assert.equal(sweep.webhookEventsDeleted, 1);
+
+  // The replay arrives as a first delivery again (the idempotency row is
+  // gone) — and the only rights effect a webhook can ever apply is the
+  // fail-closed cache drop: nothing in the path inserts entitlement or
+  // device rows.
+  const replay = await handleWebhook(request, { store: pgliteWebhookRunner(db) });
+  assert.deepEqual(replay, { status: 200 });
+  const rows = await db.query('select count(*)::int as count from webhook_events');
+  assert.equal((rows.rows as Array<{ count: number }>)[0]!.count, 1, 'the replay re-persists the idempotency row');
+  assert.equal(await cacheRowCount(db, device), 0, 'no entitlement_cache row is created by the replay');
+  const devices = await db.query('select count(*)::int as count from devices');
+  assert.equal((devices.rows as Array<{ count: number }>)[0]!.count, 1, 'the device account itself is never resurrected');
 });
 
 // The isolation guard files, whitelist-verified and read only from inside
