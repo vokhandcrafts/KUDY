@@ -21,7 +21,7 @@
 // device-core; storage, clock and table injection points are named below —
 // the Deno edge function injects the SQL port and the parsed table, tests
 // inject fakes or run the real statements against Postgres (PGlite).
-import { bearerSecretHash, checkRateLimit, DEVICE_LOOKUP_SQL } from './device-core.ts';
+import { authenticateBearerDevice, checkRateLimit, DEVICE_LOOKUP_SQL } from './device-core.ts';
 
 // --- the injected event table (contracts/events/event-table.v1.json) ---
 
@@ -367,15 +367,11 @@ export async function handleEventsRequest(
     return { status: 404, code: 'not_found' };
   }
   // The G08.01 module stays the single auth path (criterion 4): no other
-  // identity exists, no user identity is accepted.
-  const secretHash = bearerSecretHash(req.authorization);
-  if (secretHash === null) {
-    return { status: 403, code: 'device_auth_failed' };
-  }
-  const deviceId = await port.lookupDeviceId(secretHash);
-  if (deviceId === null) {
-    return { status: 403, code: 'device_auth_failed' };
-  }
+  // identity exists, no user identity is accepted — the shared bearer
+  // preamble (device-core) answers 403 for every other shape.
+  const auth = await authenticateBearerDevice(req.authorization, (hash) => port.lookupDeviceId(hash));
+  if ('answer' in auth) return auth.answer;
+  const deviceId = auth.deviceId;
 
   if (req.rawBody.byteLength > config.maxBodyBytes) {
     return { status: 400, code: 'invalid_event', reason: `request body exceeds the ${config.maxBodyBytes} byte limit` };

@@ -1,8 +1,9 @@
-// G20.01 — the production POST /v1/device handler, moved out of the Deno
-// entrypoint so the node suites can drive it end-to-end (spec N1: «Прыёмка
-// праходзіць сапраўдныя апрацоўшчыкі і асінхронныя SQL-парты»). The rate
-// counter is awaited before the limit comparison — the old wiring read
-// `db.unsafe(...)` as already-resolved rows and crashed (audit A26-01,
+// G20.01 — the production device handler (POST /v1/device registration,
+// G09.03 DELETE /v1/device deletion), moved out of the Deno entrypoint so
+// the node suites can drive it end-to-end (spec N1: «Прыёмка праходзіць
+// сапраўдныя апрацоўшчыкі і асінхронныя SQL-парты»). The rate counter is
+// awaited before the limit comparison — the old wiring read `db.unsafe(...)`
+// as already-resolved rows and crashed (audit A26-01,
 // [key: async-sql-result-not-awaited]). Internal failure paths answer the
 // existing closed codes and emit exactly one redacted server diagnostic.
 //
@@ -14,11 +15,14 @@
 import { logServerDiagnostic } from './server-diagnostics.ts';
 import {
   checkRateLimit,
+  createSqlDeviceDeletePort,
   DEVICE_INSERT_SQL,
   DEVICE_RATE_LIMIT,
+  handleDeviceDeleteRequest,
   hashIp,
   RATE_INCREMENT_SQL,
   registerDevice,
+  type DeviceSqlRunner,
   type RateDecision,
 } from './device-core.ts';
 
@@ -57,7 +61,38 @@ export const deviceClientIp = (req: RequestLike): string => {
   return 'unknown';
 };
 
+// The delete core reads the PGlite-style `{ rows }` surface; the production
+// driver is the pinned postgres.js client, so the wiring adapts the one call
+// shape to the other (no second SQL dialect — the statements stay the core's
+// pinned constants).
+function deviceSqlRunner(db: DeviceSqlClient): DeviceSqlRunner {
+  return {
+    async query(sql: string, params: (string | number | boolean | null)[]) {
+      const rows = await db.unsafe(sql, params);
+      return { rows: Array.from(rows) as Array<Record<string, unknown>> };
+    },
+  };
+}
+
 export async function handleDeviceRequest(req: RequestLike, db: DeviceSqlClient): Promise<Response> {
+  if (req.method === 'DELETE') {
+    // G09.03 — DELETE /v1/device: the closed answer list (204 / 403
+    // device_auth_failed / 404) is the core's; the wiring only maps a port
+    // fault to the internal-failure answer (the events-wiring idiom). The
+    // 204 carries no body — 09 §5: the client wipes its local state only
+    // after the 204, and ordinary auth denials never emit a diagnostic.
+    try {
+      const answer = await handleDeviceDeleteRequest(
+        { method: req.method, authorization: req.headers.get('authorization') },
+        createSqlDeviceDeletePort(deviceSqlRunner(db)),
+      );
+      if (answer.status === 204) return new Response(null, { status: 204 });
+      return deviceErrorResponse(answer.status, answer.code);
+    } catch {
+      logServerDiagnostic('device_delete', 'device_delete_failed');
+      return deviceErrorResponse(500, 'server_error');
+    }
+  }
   if (req.method !== 'POST') {
     return deviceErrorResponse(404, 'not_found');
   }

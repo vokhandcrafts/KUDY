@@ -4,15 +4,26 @@
 // proven without a native runtime; the expo-secure-store adapter itself is a
 // device-level not-run (results/G08.01.md). Reverting the single-registration
 // guard, the crash-window recovery or the failure mapping in services/device.ts
-// makes these tests fail (implementation-rules 1/14).
+// makes these tests fail (implementation-rules 1/14). G09.03 adds the
+// device-delete flow: the wipe contract (criterion 1), the 403 recovery, the
+// no-wipe-on-failure rule and the feedback wipe (criterion 4).
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { getDeviceId, openDatabase, setDeviceId } from './db/db.ts';
+import { getAnalyticsConsent, setAnalyticsConsent } from './analytics.ts';
+import { getDeviceId, openDatabase, setDeviceId, setSetting, upsertBundleAsset } from './db/db.ts';
+import type { SqlDriver } from './db/types.ts';
 import { nodeSqliteDriver } from './db/test-fixture.ts';
-import { DeviceError, ensureDeviceIdentity, type SecureSecretStore } from './device.ts';
+import {
+  deleteDeviceAccount,
+  DeviceError,
+  ensureDeviceIdentity,
+  type DeviceDeleteTransport,
+  type SecureSecretStore,
+} from './device.ts';
 import { stubGlobalFetch } from './fetch-stub-test-fixture.ts';
-import { openFreshEventStore } from './eventLog-test-fixture.ts';
+import { emitEvent } from './eventLog.ts';
+import { eventFactory, openFreshEventStore } from './eventLog-test-fixture.ts';
 
 interface Registration {
   device_id: string;
@@ -323,6 +334,227 @@ test('G20.10 stalled_device_no_identity: an unresolved registration stores nothi
     // no device_id row.
     assert.equal(store.saves, 0);
     assert.equal(getDeviceId(driver), null);
+  } finally {
+    stub.restore();
+  }
+});
+
+// --- G09.03 — device data deletion (DELETE /v1/device) ---
+
+const DELETE_BASE = 'https://example.functions.supabase.co/functions/v1';
+const event = eventFactory('33333333-3333-4333-8333-');
+
+function scriptedDeleteTransport(responses: Array<{ status: number } | Error>) {
+  const calls: string[] = [];
+  const transport: DeviceDeleteTransport = {
+    deleteDevice: async (baseUrl, secret) => {
+      calls.push(`${baseUrl}|${secret}`);
+      const next = responses[calls.length - 1];
+      if (!next) throw new Error('unexpected extra delete call');
+      if (next instanceof Error) throw next;
+      return next;
+    },
+  };
+  return { calls, transport };
+}
+
+// Seeds every piece of durable state the delete must clear, plus the pieces
+// it must keep: a downloaded bundle (zone A) and an unrelated settings row.
+function seedAccountState(driver: SqlDriver): void {
+  setDeviceId(driver, REGISTRATION.device_id);
+  setAnalyticsConsent(driver, 'granted');
+  emitEvent(driver, event());
+  driver
+    .prepare("INSERT INTO feedback_local (target, revision, score, state) VALUES ('guide:gda-1:1:be', 2, 4, 'sent')")
+    .run();
+  driver
+    .prepare(
+      "INSERT INTO feedback_outbox (mutation_id, target, expected_revision, payload, disclosure_version, created_at, transport_state) VALUES ('mut-1', 'guide:gda-1:1:be', 2, '{}', '1', 1700000000000, 'pending')",
+    )
+    .run();
+  upsertBundleAsset(driver, {
+    routeId: 'gda-1',
+    version: '1',
+    locale: 'be',
+    tier: 'base',
+    path: 'audio/01.mp3',
+    status: 'complete',
+    bytesTotal: 10,
+    bytesDone: 10,
+    sha256: 'fixture',
+  });
+  setSetting(driver, 'unrelated_setting', 'keep');
+}
+
+function rowCount(driver: SqlDriver, table: string): number {
+  const row = driver.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get() as { n: number } | undefined;
+  return Number(row!.n);
+}
+
+function expectWiped(driver: SqlDriver, store: SecureSecretStore & { saved(): string | null }): void {
+  assert.equal(getDeviceId(driver), null, 'the device row is gone');
+  assert.equal(store.saved(), null, 'the device secret is cleared');
+  assert.equal(getAnalyticsConsent(driver), null, 'the consent state is back to never-asked');
+  assert.equal(rowCount(driver, 'event_queue'), 0, 'the local event queue is wiped');
+  assert.equal(rowCount(driver, 'feedback_local'), 0, 'the feedback state is wiped (criterion 4)');
+  assert.equal(rowCount(driver, 'feedback_outbox'), 0, 'the old outbox never restores the feedback');
+}
+
+function expectUntouched(driver: SqlDriver, store: SecureSecretStore & { saved(): string | null }): void {
+  assert.equal(getDeviceId(driver), REGISTRATION.device_id);
+  assert.equal(store.saved(), REGISTRATION.device_secret);
+  assert.equal(getAnalyticsConsent(driver), 'granted');
+  assert.equal(rowCount(driver, 'event_queue'), 1, 'the queue survives a failed delete');
+  assert.equal(rowCount(driver, 'feedback_local'), 1);
+  assert.equal(rowCount(driver, 'feedback_outbox'), 1);
+  assert.equal(rowCount(driver, 'bundle_asset'), 1, 'downloads are never touched by the delete flow');
+  assert.equal(rowCount(driver, 'settings'), 2, 'the unrelated setting survives');
+}
+
+test('G09.03: 204 wipes queue, consent, feedback tables, device row and secret — downloads stay (criterion 1)', async () => {
+  const store = memorySecretStore();
+  await store.saveSecret(REGISTRATION.device_secret);
+  const driver = nodeSqliteDriver();
+  openDatabase(driver);
+  seedAccountState(driver);
+  const { transport, calls } = scriptedDeleteTransport([{ status: 204 }]);
+
+  await deleteDeviceAccount({ driver, secretStore: store, baseUrl: DELETE_BASE, transport });
+
+  assert.deepEqual(calls, [`${DELETE_BASE}|${REGISTRATION.device_secret}`], 'the bearer goes to DELETE /v1/device');
+  expectWiped(driver, store);
+  assert.equal(rowCount(driver, 'bundle_asset'), 1, 'downloaded bundles stay (09 §5)');
+  const kept = driver.prepare('SELECT value FROM settings').get() as { value: string };
+  assert.equal(kept.value, 'keep', 'the settings wipe is consent-key scoped');
+});
+
+test('G09.03: 403 — an already-deleted device (a lost 204) still completes the local wipe', async () => {
+  const store = memorySecretStore();
+  await store.saveSecret(REGISTRATION.device_secret);
+  const driver = nodeSqliteDriver();
+  openDatabase(driver);
+  seedAccountState(driver);
+  const { transport } = scriptedDeleteTransport([{ status: 403 }]);
+
+  await deleteDeviceAccount({ driver, secretStore: store, baseUrl: DELETE_BASE, transport });
+
+  expectWiped(driver, store);
+  assert.equal(rowCount(driver, 'bundle_asset'), 1);
+});
+
+test('G09.03: a network failure wipes nothing — the retry is safe', async () => {
+  const store = memorySecretStore();
+  await store.saveSecret(REGISTRATION.device_secret);
+  const driver = nodeSqliteDriver();
+  openDatabase(driver);
+  seedAccountState(driver);
+  const { transport } = scriptedDeleteTransport([new DeviceError('network_failed', 'offline')]);
+
+  await assert.rejects(
+    deleteDeviceAccount({ driver, secretStore: store, baseUrl: DELETE_BASE, transport }),
+    (error: unknown) => error instanceof DeviceError && error.rule === 'network_failed',
+  );
+
+  expectUntouched(driver, store);
+  assert.equal(rowCount(driver, 'device'), 1);
+});
+
+test('G09.03: a server fault (500) wipes nothing', async () => {
+  const store = memorySecretStore();
+  await store.saveSecret(REGISTRATION.device_secret);
+  const driver = nodeSqliteDriver();
+  openDatabase(driver);
+  seedAccountState(driver);
+  const { transport } = scriptedDeleteTransport([{ status: 500 }]);
+
+  await assert.rejects(
+    deleteDeviceAccount({ driver, secretStore: store, baseUrl: DELETE_BASE, transport }),
+    (error: unknown) => error instanceof DeviceError && error.rule === 'server_error',
+  );
+
+  expectUntouched(driver, store);
+});
+
+test('G09.03: no secret — the wipe runs locally, with no server call and no re-registration', async () => {
+  const store = memorySecretStore();
+  const driver = nodeSqliteDriver();
+  openDatabase(driver);
+  seedAccountState(driver);
+  const { transport, calls } = scriptedDeleteTransport([{ status: 204 }]);
+
+  await deleteDeviceAccount({ driver, secretStore: store, baseUrl: DELETE_BASE, transport });
+
+  assert.deepEqual(calls, [], 'nothing to authenticate — no server call');
+  expectWiped(driver, store);
+});
+
+// G09.03 + G20.06 N3: the default delete transport validates the endpoint
+// before the network (the request carries the device bearer) and refuses
+// redirects — reverting the validation, the redirect option or the response
+// guard makes these suites fail (implementation-rules 1/15).
+
+test('G09.03 N3: the default delete transport rejects an unsafe endpoint before any network call', async () => {
+  const stub = stubGlobalFetch(async () => {
+    throw new Error('the network must not be reached for an unvalidated endpoint');
+  });
+  try {
+    const store = memorySecretStore();
+    await store.saveSecret(REGISTRATION.device_secret);
+    const driver = nodeSqliteDriver();
+    openDatabase(driver);
+    seedAccountState(driver);
+    await assert.rejects(
+      deleteDeviceAccount({ driver, secretStore: store, baseUrl: 'http://example.invalid/functions/v1' }),
+      (error: unknown) => error instanceof DeviceError && error.rule === 'unsafe_endpoint',
+    );
+    assert.equal(stub.requests.length, 0, 'unsafe endpoints must make zero network calls');
+    expectUntouched(driver, store);
+  } finally {
+    stub.restore();
+  }
+});
+
+test('G09.03 N3: a redirected delete response is refused and wipes nothing', async () => {
+  const redirected = {
+    status: 204,
+    url: 'https://attacker.example/functions/v1/device',
+    text: async () => '',
+  } as unknown as Response;
+  const stub = stubGlobalFetch(async () => redirected);
+  try {
+    const store = memorySecretStore();
+    await store.saveSecret(REGISTRATION.device_secret);
+    const driver = nodeSqliteDriver();
+    openDatabase(driver);
+    seedAccountState(driver);
+    await assert.rejects(
+      deleteDeviceAccount({ driver, secretStore: store, baseUrl: DELETE_BASE }),
+      (error: unknown) => error instanceof DeviceError && error.rule === 'unsafe_endpoint' && /redirect/.test(error.message),
+    );
+    assert.equal(stub.requests.length, 1, 'our code must not start a second authorized request after the redirect');
+    expectUntouched(driver, store);
+  } finally {
+    stub.restore();
+  }
+});
+
+test('G09.03: through the default transport a 204 deletes over the validated endpoint and wipes the account', async () => {
+  const stub = stubGlobalFetch(async () => new Response(null, { status: 204 }));
+  try {
+    const store = memorySecretStore();
+    await store.saveSecret(REGISTRATION.device_secret);
+    const driver = nodeSqliteDriver();
+    openDatabase(driver);
+    seedAccountState(driver);
+
+    await deleteDeviceAccount({ driver, secretStore: store, baseUrl: DELETE_BASE });
+
+    assert.equal(stub.requests.length, 1);
+    assert.equal((stub.requests[0]!.init as RequestInit | undefined)?.method, 'DELETE');
+    const headers = (stub.requests[0]!.init as RequestInit | undefined)?.headers as Record<string, string> | undefined;
+    assert.equal(headers?.authorization, `Bearer ${REGISTRATION.device_secret}`, 'the bearer goes to DELETE /v1/device');
+    assert.equal(String(stub.requests[0]!.input), `${DELETE_BASE}/device`);
+    expectWiped(driver, store);
   } finally {
     stub.restore();
   }

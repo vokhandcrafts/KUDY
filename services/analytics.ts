@@ -15,7 +15,10 @@
 // names, implementation-rules 2); the one conversion this transport performs
 // is `at` epoch ms → the ISO-8601 UTC string the event table defines (the
 // conversion eventLog explicitly deferred here).
-import { setSetting } from './db/db.ts';
+// The analytics consent key is defined once in services/db (with the
+// settings SQL) since G09.03: the device-delete wipe (clearDeviceAccountState)
+// must clear exactly the row this module owns, from the same constant.
+import { ANALYTICS_CONSENT_KEY, setSetting } from './db/db.ts';
 import type { SqlDriver } from './db/types.ts';
 import type { DeviceIdentity } from './device.ts';
 import { flushEvents, type EventSender, type OutgoingEvent } from './eventLog.ts';
@@ -27,10 +30,6 @@ import { assertNotRedirected, parseSecureEndpointUrl, SecureUrlError } from './s
 // gate is closed for it too. Refusal and withdrawal are the same stored
 // value: both stop sending and both keep the durable queue untouched.
 export type AnalyticsConsent = 'granted' | 'revoked';
-
-// The durable `settings` key (`09` §10: «Стан згоды — у settings»; the key
-// name is the one services/db tests already exercise).
-const CONSENT_KEY = 'analytics_consent';
 
 export class AnalyticsError extends Error {
   rule: 'network_failed' | 'rate_limited' | 'server_error' | 'invalid_payload' | 'invalid_consent_state' | 'invalid_event_time' | 'unsafe_endpoint';
@@ -49,7 +48,7 @@ export class AnalyticsError extends Error {
 // accessor (services/consent.ts) owns the vocabulary; the error class stays
 // this module's contract.
 export function getAnalyticsConsent(driver: SqlDriver): AnalyticsConsent | null {
-  return readConsentState(driver, CONSENT_KEY, (key, stored) =>
+  return readConsentState(driver, ANALYTICS_CONSENT_KEY, (key, stored) =>
     new AnalyticsError('invalid_consent_state', `settings.${key} holds an unknown value: ${stored}`),
   );
 }
@@ -58,7 +57,7 @@ export function getAnalyticsConsent(driver: SqlDriver): AnalyticsConsent | null 
 // previous `granted` is the withdrawal path: the queue and the local log are
 // not touched (criterion 2 — only the sending stops).
 export function setAnalyticsConsent(driver: SqlDriver, consent: AnalyticsConsent): void {
-  setSetting(driver, CONSENT_KEY, consent);
+  setSetting(driver, ANALYTICS_CONSENT_KEY, consent);
 }
 
 // The consent-gated flush — the one send entry point the app composes over

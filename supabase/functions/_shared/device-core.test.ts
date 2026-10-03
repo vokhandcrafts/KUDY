@@ -1,7 +1,8 @@
 // G08.01 — behavioral tests for the device-registration core. Every rule
 // here fails when the corresponding guard in device-core.ts is reverted
 // (implementation-rules 1/14): registration shape, bearer verification
-// negatives, and the per-IP rate window.
+// negatives, and the per-IP rate window. G09.03 adds the device-delete
+// answer contract and its production SQL port against PGlite.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
@@ -9,10 +10,13 @@ import test from 'node:test';
 import {
   checkRateLimit,
   createMemoryLookup,
+  createSqlDeviceDeletePort,
+  DEVICE_DELETE_SQL,
   DEVICE_INSERT_SQL,
   DEVICE_LOOKUP_SQL,
   DEVICE_RATE_LIMIT,
   DEVICE_RATE_WINDOW_MS,
+  handleDeviceDeleteRequest,
   hashIp,
   hashSecret,
   RATE_INCREMENT_SQL,
@@ -20,6 +24,7 @@ import {
   registerDevice,
   verifyBearer,
 } from './device-core.ts';
+import { freshMigratedDatabase } from './test-db.ts';
 
 test('registerDevice: UUID + 32-byte base64url secret + sha256 hash, secret returned once', () => {
   const reg = registerDevice();
@@ -172,4 +177,59 @@ test('SQL constants are pinned exactly: the statements the RLS suite proves by b
   );
   assert.equal(DEVICE_INSERT_SQL, 'insert into devices (device_id, secret_hash) values ($1, $2)');
   assert.equal(DEVICE_LOOKUP_SQL, 'select device_id from devices where secret_hash = $1');
+  assert.equal(DEVICE_DELETE_SQL, 'delete from devices where device_id = $1');
+});
+
+// --- G09.03 — device data deletion ---
+
+test('G09.03 PGlite: DELETE removes the devices row and the cascades take event_log, entitlement_cache and event_send_rate', async () => {
+  const db = await freshMigratedDatabase();
+  const registration = registerDevice();
+  await db.query(DEVICE_INSERT_SQL, [registration.deviceId, registration.secretHash]);
+  await db.query(
+    "insert into event_log (event_id, device_id, type, at, payload) values ('99999999-9999-4999-8999-000000000001', $1, 'app_open', to_timestamp(0), '{}'::jsonb)",
+    [registration.deviceId],
+  );
+  await db.query(
+    "insert into entitlement_cache (device_id, route_id, tier, payload, expires_at) values ($1, 'gda-1', 'extended', '{}'::jsonb, to_timestamp(0))",
+    [registration.deviceId],
+  );
+  await db.query('insert into event_send_rate (device_id, window_start, attempts) values ($1, to_timestamp(0), 3)', [
+    registration.deviceId,
+  ]);
+
+  const answer = await handleDeviceDeleteRequest(
+    { method: 'DELETE', authorization: `Bearer ${registration.deviceSecret}` },
+    createSqlDeviceDeletePort(db),
+  );
+  assert.deepEqual(answer, { status: 204 }, 'the live device deletes with an empty 204');
+  for (const table of ['devices', 'event_log', 'entitlement_cache', 'event_send_rate']) {
+    const left = await db.query(`select count(*)::int as count from ${table}`);
+    assert.equal(left.rows[0]!.count, 0, `${table} is empty after device delete (09 §5 cascade)`);
+  }
+});
+
+test('G09.03: a repeated delete, a wrong secret and a non-DELETE method follow the closed answer list', async () => {
+  const db = await freshMigratedDatabase();
+  const registration = registerDevice();
+  await db.query(DEVICE_INSERT_SQL, [registration.deviceId, registration.secretHash]);
+  const port = createSqlDeviceDeletePort(db);
+
+  const first = await handleDeviceDeleteRequest(
+    { method: 'DELETE', authorization: `Bearer ${registration.deviceSecret}` },
+    port,
+  );
+  assert.deepEqual(first, { status: 204 });
+  const second = await handleDeviceDeleteRequest(
+    { method: 'DELETE', authorization: `Bearer ${registration.deviceSecret}` },
+    port,
+  );
+  assert.deepEqual(second, { status: 403, code: 'device_auth_failed' }, 'idempotent 403 — no separate success code');
+  const wrong = await handleDeviceDeleteRequest({ method: 'DELETE', authorization: 'Bearer nope' }, port);
+  assert.deepEqual(wrong, { status: 403, code: 'device_auth_failed' });
+  const method = await handleDeviceDeleteRequest(
+    { method: 'POST', authorization: `Bearer ${registration.deviceSecret}` },
+    port,
+  );
+  assert.deepEqual(method, { status: 404, code: 'not_found' }, 'the core handles only DELETE');
 });
