@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-03 — G21.08: пацвердзі на Windows-хасце, што карпусныя сьюты зялёныя без EPERM
+Што зрабіць: на сваёй Windows-машыне прабягі `node --test tools/corpus/store.test.mjs tools/corpus/backup.test.mjs` (або поўны `npm test`) і пераканайся, што cleanup прыбірае часовыя тэчкі без восьмі EPERM-няўдач, запісаных у #541, а тэстар не пакідае жывых хэндлаў. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #541.
+PR: https://github.com/vokhandcrafts/KUDY/pull/574 (issue: https://github.com/vokhandcrafts/KUDY/issues/541; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
+
 ### 2026-10-03 — G21.05: пацвердзі на Windows-хасце, што дзве CI-гварды зялёныя
 Што зрабіць: на сваёй Windows-машыне прабягі `node --test tools/ci/deno-typecheck.test.mjs tools/ci/test-discovery.test.mjs` (або поўны `npm test`) і пераканайся, што тэсты з пазнакай (G21.05) зялёныя, а дзве няўдачы з лагу рэтэсту 2026-10-03 (`device\index.ts` і `app\…`-прэфіксы) зніклі. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #538.
 PR: https://github.com/vokhandcrafts/KUDY/pull/572 (issue: https://github.com/vokhandcrafts/KUDY/issues/538; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)

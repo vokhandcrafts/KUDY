@@ -9,6 +9,7 @@ import path from 'node:path';
 import test from 'node:test';
 
 import { CorpusDiagnostic, sha256Hex } from './extract.mjs';
+import { assertNoOpenHandlesUnder } from './fixtures/handles.mjs';
 import { backupCorpus, restoreCorpus } from './backup.mjs';
 import {
   closeCorpus,
@@ -56,6 +57,7 @@ function populateAnnotations(store, library) {
 
 test('restore_roundtrip: a fresh directory reproduces annotations, decisions and image associations', (t) => {
   const library = makeSyntheticLibrary(t, { seed: 'roundtrip' });
+  t.after(() => assertNoOpenHandlesUnder(library.root));
   const store = openCorpus(library.dbPath);
   populateAnnotations(store, library);
 
@@ -66,10 +68,17 @@ test('restore_roundtrip: a fresh directory reproduces annotations, decisions and
   closeCorpus(store);
 
   // The backup target is single-use: a second run refuses instead of mixing.
-  assert.equal(
-    ruleOf(() => backupCorpus(openCorpus(library.dbPath), { libraryRoot: library.root, outDir: backupDir })),
-    'backup-target-not-empty'
-  );
+  // The refusing session still owns its handle, so it closes before the
+  // sandbox removal — an open one fails the cleanup on Windows (EPERM).
+  const second = openCorpus(library.dbPath);
+  try {
+    assert.equal(
+      ruleOf(() => backupCorpus(second, { libraryRoot: library.root, outDir: backupDir })),
+      'backup-target-not-empty'
+    );
+  } finally {
+    closeCorpus(second);
+  }
 
   const restoredRoot = path.join(library.root, 'restored');
   const restored = restoreCorpus({ backupDir, newLibraryRoot: restoredRoot });
@@ -99,6 +108,7 @@ test('restore_roundtrip: a fresh directory reproduces annotations, decisions and
 // Shared arrangement: a populated library, one taken backup, closed store.
 function makeBackupFixture(t, seed) {
   const library = makeSyntheticLibrary(t, { seed });
+  t.after(() => assertNoOpenHandlesUnder(library.root));
   const store = openCorpus(library.dbPath);
   populateAnnotations(store, library);
   const backupDir = path.join(library.root, 'backup');
@@ -147,6 +157,7 @@ test('tampered_manifest: unsafe paths and unparseable manifests are rejected bef
 
 test('failed_migration_keeps_backup: a broken migration restores the pre-migration database', (t) => {
   const library = makeSyntheticLibrary(t, { seed: 'migration' });
+  t.after(() => assertNoOpenHandlesUnder(library.root));
   const store = openCorpus(library.dbPath);
   populateAnnotations(store, library);
   closeCorpus(store);

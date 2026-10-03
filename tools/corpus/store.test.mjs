@@ -10,6 +10,7 @@ import path from 'node:path';
 import test from 'node:test';
 
 import { CorpusDiagnostic, sha256Hex } from './extract.mjs';
+import { assertNoOpenHandlesUnder } from './fixtures/handles.mjs';
 import {
   CORPUS_MIGRATIONS,
   closeCorpus,
@@ -27,11 +28,19 @@ import {
 const VOCAB = 'gdansk-v1';
 const EXTRACTOR = 'wiki-html/v1';
 
-// A fresh store per test; every sandbox is removed when the test ends.
+// A fresh store per test; every sandbox is removed when the test ends. The
+// store closes before the removal — with a live SQLite handle the removal
+// fails on Windows (EPERM) and the census fails here.
 function makeStore(t, name = 'corpus.db') {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-corpus-'));
-  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
-  return openCorpus(path.join(dir, name));
+  let store;
+  t.after(() => {
+    if (store) closeCorpus(store);
+    assertNoOpenHandlesUnder(dir);
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+  store = openCorpus(path.join(dir, name));
+  return store;
 }
 
 function ruleOf(operation) {
@@ -236,7 +245,10 @@ test('decisions_survive_reindex: rebuilding the index or replacing machine resul
 
 test('writer_lock: a second write session answers db-busy, not a hang or a silent queue', (t) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-corpus-'));
-  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  t.after(() => {
+    assertNoOpenHandlesUnder(dir);
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
   const dbPath = path.join(dir, 'corpus.db');
   const first = openCorpus(dbPath);
   const second = openCorpus(dbPath);
