@@ -81,8 +81,12 @@ function checkVocabulary(filePath, baseDir = path.dirname(filePath)) {
 // Writes a mutated copy of the real vocabulary file to a temp path and runs the guard on
 // it. baseDir stays at the real docs/architecture/ so untouched rows still resolve their
 // canon links and only the injected defect can fail the check.
+// G21.06: the header/removal patterns are LF-anchored and this is a text-level
+// mutation, so the source text is read through the LF idiom first — on a CRLF
+// checkout the raw bytes would otherwise defeat the mutation and mask the
+// defect it asserts (rule 3).
 function checkMutated(mutate) {
-  const text = mutate(fs.readFileSync(VOCAB, 'utf8'));
+  const text = mutate(fs.readFileSync(VOCAB, 'utf8').replace(/\r\n/g, '\n'));
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'g1802-'));
   try {
     const copy = path.join(dir, '25_domain_vocabulary.md');
