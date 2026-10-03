@@ -1,0 +1,167 @@
+{
+  "date": "2026-10-02",
+  "head": "16e70c3554f0dd4f3dbda3c9389be6c1ad60e9a0",
+  "device": {
+    "screen": "1080x2400",
+    "density": 420,
+    "api": 36,
+    "bootCompleted": "1",
+    "serial": "emulator-5556",
+    "profile": "Pixel 6",
+    "abi": "x86_64",
+    "android": "16",
+    "avd": "KUDY_API36"
+  },
+  "build": {
+    "result": "BUILD SUCCESSFUL",
+    "tasks": 447,
+    "variant": "debug",
+    "gradle": "8.14.3",
+    "apkSha256": "AFAD802E4B779C13727F51558AFF5F428F8326D0CE2DBAB2C0DF72A1C68C4D16",
+    "apkBytes": 95973249
+  },
+  "totals": {
+    "checks": 26,
+    "failed": 3,
+    "passed": 23
+  },
+  "checks": [
+    {
+      "name": "Cold launch reaches Explore",
+      "status": "passed",
+      "evidence": "cold-start-normal.xml"
+    },
+    {
+      "name": "Catalog has a visible unavailable message",
+      "status": "passed",
+      "evidence": "explore-be.xml"
+    },
+    {
+      "name": "Explore tap opens Nearby",
+      "status": "passed",
+      "evidence": "nearby-be.xml"
+    },
+    {
+      "name": "Nearby Back returns to Explore",
+      "status": "passed",
+      "evidence": "before-discovery.xml"
+    },
+    {
+      "name": "Explore tap opens Discovery",
+      "status": "passed",
+      "evidence": "discovery-be.xml"
+    },
+    {
+      "name": "Discovery Back returns to Explore",
+      "status": "passed",
+      "evidence": "before-kudy.xml"
+    },
+    {
+      "name": "Explore tap opens KUDY",
+      "status": "passed",
+      "evidence": "kudy-be.xml"
+    },
+    {
+      "name": "English applies without restart and is selected",
+      "status": "passed",
+      "evidence": "kudy-en.xml"
+    },
+    {
+      "name": "Explore uses English after switch",
+      "status": "passed",
+      "evidence": "explore-en.xml"
+    },
+    {
+      "name": "Nearby uses English after switch",
+      "status": "failed",
+      "evidence": "nearby-after-en.xml"
+    },
+    {
+      "name": "Android Back returns to Explore",
+      "status": "passed",
+      "evidence": "before-discovery-en.xml"
+    },
+    {
+      "name": "Discovery uses English after switch",
+      "status": "passed",
+      "evidence": "discovery-en.xml"
+    },
+    {
+      "name": "Ukrainian applies without restart and is selected",
+      "status": "passed",
+      "evidence": "kudy-uk.xml"
+    },
+    {
+      "name": "Explore uses Ukrainian after switch",
+      "status": "passed",
+      "evidence": "explore-uk.xml"
+    },
+    {
+      "name": "Nearby uses Ukrainian after switch",
+      "status": "failed",
+      "evidence": "nearby-after-uk.xml"
+    },
+    {
+      "name": "Unknown link shows localized explanation",
+      "status": "passed",
+      "evidence": "unknown-route-uk.xml"
+    },
+    {
+      "name": "Unknown link Back returns to Explore",
+      "status": "passed",
+      "evidence": "unknown-back-explore.xml"
+    },
+    {
+      "name": "Unavailable guide uses Ukrainian",
+      "status": "passed",
+      "evidence": "guide-unavailable-uk.xml"
+    },
+    {
+      "name": "Unavailable run uses Ukrainian",
+      "status": "failed",
+      "evidence": "run-unavailable-uk.xml"
+    },
+    {
+      "name": "Place link shows an unavailable state",
+      "status": "passed",
+      "evidence": "place-unavailable.xml"
+    },
+    {
+      "name": "Collection link shows an unavailable state",
+      "status": "passed",
+      "evidence": "collection-unavailable.xml"
+    },
+    {
+      "name": "City guides link shows an unavailable state",
+      "status": "passed",
+      "evidence": "city-guides-unavailable.xml"
+    },
+    {
+      "name": "Large font keeps all three language buttons visible",
+      "status": "passed",
+      "evidence": "kudy-font-150-clean.xml"
+    },
+    {
+      "name": "Large font grows the language label",
+      "status": "passed",
+      "evidence": "kudy-font-150-clean.xml"
+    },
+    {
+      "name": "Large font keeps all Explore links visible",
+      "status": "passed",
+      "evidence": "explore-font-150-clean.xml"
+    },
+    {
+      "name": "Background return preserves KUDY screen and English",
+      "status": "passed",
+      "evidence": "after-background-en.xml"
+    }
+  ],
+  "limitations": [
+    "Real catalog, walk, audio, location and history flows have no device adapters in this build.",
+    "No physical phone or iOS test.",
+    "Changing font scale while running the debug client produced a linking error and reset navigation; clean launch at the larger font succeeded."
+  ],
+  "crashBufferEntries": 0,
+  "restoredFontScale": "1.0"
+}

@@ -1,0 +1,594 @@
+PASS app/run.test.tsx (75.94 s)
+  ● Console
+
+    console.error
+      Looks like you have configured linking in multiple places. This is likely an error since deep links should only be handled in one place to avoid conflicts. Make sure that:
+      - You don't have multiple NavigationContainers in the app each with 'linking' enabled
+      - Only a single instance of the root component is rendered
+
+      428 |     // spent trigger stays spent (check 17's durable half of this panel
+      429 |     // criterion), and the panel is where it was left — Half, the card open.
+    > 430 |     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+          |                 ^
+      431 |     await screen.findByTestId("run-map");
+      432 |     expect(starts()).toBe(1);
+      433 |     // The live in-memory walk, not a row restore: the story is still sounding
+
+      at error (node_modules/expo-router/src/fork/useLinking.native.ts:66:15)
+      at Object.react-stack-bottom-frame (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14062:20)
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at commitHookEffectListMount (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:8376:29)
+      at commitHookPassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:8463:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9782:13)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9897:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9775:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9775:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9794:11)
+      at flushPendingEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11528:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2082:11)
+      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
+      at actImplementation (node_modules/@testing-library/react-native/src/act.ts:30:25)
+      at renderWithAct (node_modules/@testing-library/react-native/src/render-act.ts:13:11)
+      at renderInternal (node_modules/@testing-library/react-native/src/render.tsx:69:33)
+      at Object.renderInternal (node_modules/@testing-library/react-native/src/render.tsx:44:10)
+      at render (node_modules/expo-router/src/testing-library/index.tsx:83:35)
+      at Object.<anonymous> (app/run.test.tsx:430:17)
+      at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+      at _next (node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+
+    console.error
+      Looks like you have configured linking in multiple places. This is likely an error since deep links should only be handled in one place to avoid conflicts. Make sure that:
+      - You don't have multiple NavigationContainers in the app each with 'linking' enabled
+      - Only a single instance of the root component is rendered
+
+      448 |     // navigating out of Run does not touch the audio).
+      449 |     const stopsBefore = audioPort.commands.filter((command) => command === "stop").length;
+    > 450 |     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+          |                 ^
+      451 |     await screen.findByTestId("run-map");
+      452 |     expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+      453 |     expect(audioPort.commands.filter((command) => command === "stop")).toHaveLength(stopsBefore);
+
+      at error (node_modules/expo-router/src/fork/useLinking.native.ts:66:15)
+      at Object.react-stack-bottom-frame (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14062:20)
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at commitHookEffectListMount (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:8376:29)
+      at commitHookPassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:8463:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9782:13)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9897:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9775:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9775:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9794:11)
+      at flushPendingEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11528:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2082:11)
+      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
+      at actImplementation (node_modules/@testing-library/react-native/src/act.ts:30:25)
+      at renderWithAct (node_modules/@testing-library/react-native/src/render-act.ts:13:11)
+      at renderInternal (node_modules/@testing-library/react-native/src/render.tsx:69:33)
+      at Object.renderInternal (node_modules/@testing-library/react-native/src/render.tsx:44:10)
+      at render (node_modules/expo-router/src/testing-library/index.tsx:83:35)
+      at Object.<anonymous> (app/run.test.tsx:450:17)
+      at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+      at _next (node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+
+FAIL app/preview.test.tsx (8.048 s)
+  ● guide preview surface (G06.01.b) › the stop rows show the place's human title from the catalog, never the raw place id (UX 05, AC1)
+
+    Unable to find an element with text: Портаўская брама
+
+    <RNCSafeAreaProvider>
+      <View>
+        <RNSScreenStack>
+          <RNSScreen
+            aria-hidden={false}
+          >
+            <RNSScreenContentWrapper>
+              <View
+                testID="screen-Route preview"
+              >
+                <View
+                  accessibilityLabel="Назад"
+                  accessibilityRole="button"
+                  accessible={true}
+                  testID="btn-preview-back"
+                >
+                  <View>
+                    <View
+                      accessibilityLabel="Назад"
+                      accessible={true}
+                      pointerEvents="none"
+                    >
+                      <RNSVGSvgView
+                        aria-hidden="true"
+                      >
+                        <RNSVGGroup>
+                          <RNSVGPath />
+                          <RNSVGPath />
+                        </RNSVGGroup>
+                      </RNSVGSvgView>
+                    </View>
+                    <Text>
+                      Назад
+                    </Text>
+                  </View>
+                </View>
+                <RCTScrollView
+                  testID="scroll-preview"
+                >
+                  <View>
+                    <View>
+                      <Text>
+                        guide-route-b1
+                      </Text>
+                      <View
+                        accessibilityLabel="Бясплатна"
+                        accessible={true}
+                        testID="badge-access-free"
+                      >
+                        <Text>
+                          Бясплатна
+                        </Text>
+                      </View>
+                      <Text
+                        testID="preview-locales"
+                      >
+                        Мовы: be
+                      </Text>
+                      <View
+                        accessibilityLabel="Час: 35 хв"
+                        accessible={true}
+                        testID="preview-duration"
+                      >
+                        <View
+                          accessibilityLabel="Працягласць"
+                          accessible={true}
+                          pointerEvents="none"
+                        >
+                          <RNSVGSvgView
+                            aria-hidden="true"
+                          >
+                            <RNSVGGroup>
+                              <RNSVGCircle />
+                              <RNSVGPath />
+                            </RNSVGGroup>
+                          </RNSVGSvgView>
+                        </View>
+                        <Text
+                          testID="preview-duration-text"
+                        >
+                          Час: 35 хв
+                        </Text>
+                      </View>
+                      <View
+                        accessibilityLabel="Кропкі: 2"
+                        accessible={true}
+                        testID="preview-counts"
+                      >
+                        <View
+                          accessibilityLabel="Кропкі"
+                          accessible={true}
+                          pointerEvents="none"
+                        >
+                          <RNSVGSvgView
+                            aria-hidden="true"
+                          >
+                            <RNSVGGroup>
+                              <RNSVGPath />
+                              <RNSVGCircle />
+                            </RNSVGGroup>
+                          </RNSVGSvgView>
+                        </View>
+                        <Text
+                          testID="preview-counts-text"
+                        >
+                          Кропкі: 2
+                        </Text>
+                      </View>
+                      <Text
+                        testID="preview-size"
+                      >
+                        Памер: 40 МБ
+                      </Text>
+                      <View
+                        testID="preview-banner"
+                      >
+                        <Text>
+                          Частка звестак часова недаступная
+                        </Text>
+                        <Text>
+                          index-unavailable
+                        </Text>
+                      </View>
+                      <View
+                        testID="preview-stops"
+                      >
+                        <View
+                          testID="stop-stop-b1-1"
+                        >
+                          <Text>
+                            Стары порт
+                          </Text>
+                          <Text>
+                            Адкуль пачыналася кожнае марское падарожжа горада.
+                          </Text>
+                        </View>
+                        <View
+                          testID="stop-stop-b1-2"
+                        >
+                          <Text>
+                            Млынавая вуліца
+                          </Text>
+                          <Text>
+                            Кароткі анонс пашыранай гісторыі пра млын.
+                          </Text>
+                          <View
+                            accessibilityLabel="Зачынена"
+                            accessible={true}
+                            testID="stop-locked-stop-b1-2"
+                          >
+                            <View
+                              accessibilityLabel="Зачынена"
+                              accessible={true}
+                              pointerEvents="none"
+                            >
+                              <RNSVGSvgView
+                                aria-hidden="true"
+                              >
+                                <RNSVGGroup>
+                                  <RNSVGRect />
+                                  <RNSVGPath />
+                                </RNSVGGroup>
+                              </RNSVGSvgView>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                      <View
+                        accessibilityLabel="Пачаць"
+                        accessibilityRole="button"
+                        accessibilityState={
+                          {
+                            "disabled": true,
+                          }
+                        }
+                        accessible={true}
+                        testID="btn-start"
+                      >
+                        <Text>
+                          Пачаць
+                        </Text>
+                      </View>
+                      <Text
+                        testID="button-reason"
+                      >
+                        Сховішча недаступнае.
+                      </Text>
+                    </View>
+                  </View>
+                </RCTScrollView>
+              </View>
+            </RNSScreenContentWrapper>
+            <RNSScreenStackHeaderConfig
+              pointerEvents="box-none"
+              title="route/[id]"
+            />
+          </RNSScreen>
+        </RNSScreenStack>
+      </View>
+    </RNCSafeAreaProvider>
+
+      190 |     );
+      191 |     expect(await screen.findByTestId("stop-stop-b1-1")).toBeTruthy();
+    > 192 |     expect(screen.getByText("Портаўская брама")).toBeTruthy();
+          |                   ^
+      193 |     expect(screen.getByTestId("stop-locked-stop-b1-2")).toBeTruthy();
+      194 |     expect(screen.getByText("Стары млын")).toBeTruthy();
+      195 |     expect(screen.queryByText(/place-b1/)).toBeNull();
+
+      at Object.getByText (app/preview.test.tsx:192:19)
+      at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+      at _next (node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+
+PASS app/map.test.tsx (5.175 s)
+PASS app/navigation.test.tsx
+PASS app/place/place.test.tsx
+PASS app/my.test.tsx
+PASS app/discovery.test.tsx
+PASS app/hint-card.test.tsx
+PASS components/pressable-surface.test.tsx
+PASS components/canon-icon.test.tsx
+PASS components/walk-progress.test.tsx
+PASS components/paper-surface.test.tsx
+PASS components/ui-strings.test.tsx
+PASS app/back-navigation.test.tsx
+PASS components/no-hardcoded-words.test.tsx
+PASS components/back-button.test.tsx
+PASS components/modal-dialog.test.tsx
+PASS app/safe-area.test.tsx
+PASS app/explore.test.tsx
+PASS app/status-bar.test.tsx
+  ● Console
+
+    console.error
+      An update to RootLayout(./_layout.js) inside a test was not wrapped in act(...).
+
+      When testing, code that causes React state updates should be wrapped into act(...):
+
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11801:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11800:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10326:9)
+      at dispatchSetStateInternal (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4148:13)
+      at dispatchSetState (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4107:7)
+      at setLoaded (node_modules/expo-font/src/FontHooks.ts:28:11)
+
+PASS components/scaled-text.test.tsx
+PASS app/layout-header.test.tsx
+  ● Console
+
+    console.error
+      An update to RootLayout inside a test was not wrapped in act(...).
+
+      When testing, code that causes React state updates should be wrapped into act(...):
+
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11801:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11800:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10326:9)
+      at dispatchSetStateInternal (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4148:13)
+      at dispatchSetState (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4107:7)
+      at setLoaded (node_modules/expo-font/src/FontHooks.ts:28:11)
+
+PASS components/loading-indicator.test.tsx
+PASS components/guide-card.test.tsx
+
+Summary of all failing tests
+FAIL app/preview.test.tsx (8.048 s)
+  ● guide preview surface (G06.01.b) › the stop rows show the place's human title from the catalog, never the raw place id (UX 05, AC1)
+
+    Unable to find an element with text: Портаўская брама
+
+    <RNCSafeAreaProvider>
+      <View>
+        <RNSScreenStack>
+          <RNSScreen
+            aria-hidden={false}
+          >
+            <RNSScreenContentWrapper>
+              <View
+                testID="screen-Route preview"
+              >
+                <View
+                  accessibilityLabel="Назад"
+                  accessibilityRole="button"
+                  accessible={true}
+                  testID="btn-preview-back"
+                >
+                  <View>
+                    <View
+                      accessibilityLabel="Назад"
+                      accessible={true}
+                      pointerEvents="none"
+                    >
+                      <RNSVGSvgView
+                        aria-hidden="true"
+                      >
+                        <RNSVGGroup>
+                          <RNSVGPath />
+                          <RNSVGPath />
+                        </RNSVGGroup>
+                      </RNSVGSvgView>
+                    </View>
+                    <Text>
+                      Назад
+                    </Text>
+                  </View>
+                </View>
+                <RCTScrollView
+                  testID="scroll-preview"
+                >
+                  <View>
+                    <View>
+                      <Text>
+                        guide-route-b1
+                      </Text>
+                      <View
+                        accessibilityLabel="Бясплатна"
+                        accessible={true}
+                        testID="badge-access-free"
+                      >
+                        <Text>
+                          Бясплатна
+                        </Text>
+                      </View>
+                      <Text
+                        testID="preview-locales"
+                      >
+                        Мовы: be
+                      </Text>
+                      <View
+                        accessibilityLabel="Час: 35 хв"
+                        accessible={true}
+                        testID="preview-duration"
+                      >
+                        <View
+                          accessibilityLabel="Працягласць"
+                          accessible={true}
+                          pointerEvents="none"
+                        >
+                          <RNSVGSvgView
+                            aria-hidden="true"
+                          >
+                            <RNSVGGroup>
+                              <RNSVGCircle />
+                              <RNSVGPath />
+                            </RNSVGGroup>
+                          </RNSVGSvgView>
+                        </View>
+                        <Text
+                          testID="preview-duration-text"
+                        >
+                          Час: 35 хв
+                        </Text>
+                      </View>
+                      <View
+                        accessibilityLabel="Кропкі: 2"
+                        accessible={true}
+                        testID="preview-counts"
+                      >
+                        <View
+                          accessibilityLabel="Кропкі"
+                          accessible={true}
+                          pointerEvents="none"
+                        >
+                          <RNSVGSvgView
+                            aria-hidden="true"
+                          >
+                            <RNSVGGroup>
+                              <RNSVGPath />
+                              <RNSVGCircle />
+                            </RNSVGGroup>
+                          </RNSVGSvgView>
+                        </View>
+                        <Text
+                          testID="preview-counts-text"
+                        >
+                          Кропкі: 2
+                        </Text>
+                      </View>
+                      <Text
+                        testID="preview-size"
+                      >
+                        Памер: 40 МБ
+                      </Text>
+                      <View
+                        testID="preview-banner"
+                      >
+                        <Text>
+                          Частка звестак часова недаступная
+                        </Text>
+                        <Text>
+                          index-unavailable
+                        </Text>
+                      </View>
+                      <View
+                        testID="preview-stops"
+                      >
+                        <View
+                          testID="stop-stop-b1-1"
+                        >
+                          <Text>
+                            Стары порт
+                          </Text>
+                          <Text>
+                            Адкуль пачыналася кожнае марское падарожжа горада.
+                          </Text>
+                        </View>
+                        <View
+                          testID="stop-stop-b1-2"
+                        >
+                          <Text>
+                            Млынавая вуліца
+                          </Text>
+                          <Text>
+                            Кароткі анонс пашыранай гісторыі пра млын.
+                          </Text>
+                          <View
+                            accessibilityLabel="Зачынена"
+                            accessible={true}
+                            testID="stop-locked-stop-b1-2"
+                          >
+                            <View
+                              accessibilityLabel="Зачынена"
+                              accessible={true}
+                              pointerEvents="none"
+                            >
+                              <RNSVGSvgView
+                                aria-hidden="true"
+                              >
+                                <RNSVGGroup>
+                                  <RNSVGRect />
+                                  <RNSVGPath />
+                                </RNSVGGroup>
+                              </RNSVGSvgView>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                      <View
+                        accessibilityLabel="Пачаць"
+                        accessibilityRole="button"
+                        accessibilityState={
+                          {
+                            "disabled": true,
+                          }
+                        }
+                        accessible={true}
+                        testID="btn-start"
+                      >
+                        <Text>
+                          Пачаць
+                        </Text>
+                      </View>
+                      <Text
+                        testID="button-reason"
+                      >
+                        Сховішча недаступнае.
+                      </Text>
+                    </View>
+                  </View>
+                </RCTScrollView>
+              </View>
+            </RNSScreenContentWrapper>
+            <RNSScreenStackHeaderConfig
+              pointerEvents="box-none"
+              title="route/[id]"
+            />
+          </RNSScreen>
+        </RNSScreenStack>
+      </View>
+    </RNCSafeAreaProvider>
+
+      190 |     );
+      191 |     expect(await screen.findByTestId("stop-stop-b1-1")).toBeTruthy();
+    > 192 |     expect(screen.getByText("Портаўская брама")).toBeTruthy();
+          |                   ^
+      193 |     expect(screen.getByTestId("stop-locked-stop-b1-2")).toBeTruthy();
+      194 |     expect(screen.getByText("Стары млын")).toBeTruthy();
+      195 |     expect(screen.queryByText(/place-b1/)).toBeNull();
+
+      at Object.getByText (app/preview.test.tsx:192:19)
+      at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+      at _next (node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+
+
+Test Suites: 1 failed, 23 passed, 24 total
+Tests:       1 failed, 182 passed, 183 total
+Snapshots:   0 total
+Time:        116.9 s
+Ran all test suites.
+Test results written to: D:\KUDY-Android\retest-2026-10-03\jest-results.json

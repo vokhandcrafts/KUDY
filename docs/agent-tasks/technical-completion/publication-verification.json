@@ -1,0 +1,475 @@
+{
+  "date": "2026-10-03",
+  "sourceHead": "0187f8721cf34be0ce3dcde276042ee04da83908",
+  "parent": {
+    "number": 532,
+    "url": "https://github.com/vokhandcrafts/KUDY/issues/532"
+  },
+  "totalChildren": 34,
+  "newChildrenThisExtension": 11,
+  "originalChildren": 23,
+  "reusedOpenIssues": 37,
+  "existingChildIssuesEdited": [
+    542,
+    543,
+    544,
+    545,
+    546,
+    547,
+    548
+  ],
+  "parentContentAppended": true,
+  "claimedIssuesEdited": false,
+  "claimedIssuePreserved": 533,
+  "dependencyEdges": 90,
+  "acyclic": true,
+  "newLabelsAdded": false,
+  "workersStarted": false,
+  "readBackComplete": true,
+  "openIssueVisibilityVerified": true,
+  "projectBoardVerification": "unavailable: authentication token is missing required scopes [read:project]",
+  "documentsOnMain": false,
+  "originalPublicationPrerequisite": {
+    "number": 533,
+    "url": "https://github.com/vokhandcrafts/KUDY/issues/533"
+  },
+  "extensionPublicationPrerequisite": {
+    "number": 556,
+    "url": "https://github.com/vokhandcrafts/KUDY/issues/556"
+  },
+  "dictionaryResearchPerformed": false,
+  "localLinksValid": true,
+  "tasks": [
+    {
+      "id": "G21.00",
+      "number": 533,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/533",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [],
+      "labels": [
+        "agent:blocked"
+      ]
+    },
+    {
+      "id": "G21.01",
+      "number": 534,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/534",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.02",
+      "number": 535,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/535",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.03",
+      "number": 536,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/536",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.04",
+      "number": 537,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/537",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.05",
+      "number": 538,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/538",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.06",
+      "number": 539,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/539",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.07",
+      "number": 540,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/540",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.08",
+      "number": 541,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/541",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.09",
+      "number": 542,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/542",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#556",
+        "#557"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.19",
+      "number": 543,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/543",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#542",
+        "#556",
+        "#558",
+        "#559",
+        "#566"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.10",
+      "number": 544,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/544",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#542",
+        "#543"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.11",
+      "number": 545,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/545",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#542",
+        "#543"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.12",
+      "number": 546,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/546",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#542",
+        "#543"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.13",
+      "number": 547,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/547",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#542",
+        "#543"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.14",
+      "number": 548,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/548",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#542",
+        "#543"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.15",
+      "number": 549,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/549",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#542",
+        "#544",
+        "#545",
+        "#546",
+        "#547",
+        "#548",
+        "#491"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.16",
+      "number": 550,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/550",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#542"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.17",
+      "number": 551,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/551",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#542",
+        "#550"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.20",
+      "number": 552,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/552",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#550"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.21",
+      "number": 553,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/553",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#552",
+        "#550",
+        "#551",
+        "#491"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.22",
+      "number": 554,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/554",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#542",
+        "#544",
+        "#545",
+        "#546",
+        "#547",
+        "#548",
+        "#550",
+        "#534"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.18",
+      "number": 555,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/555",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533",
+        "#549",
+        "#551",
+        "#553",
+        "#554",
+        "#534",
+        "#535",
+        "#536",
+        "#537"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.23",
+      "number": 556,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/556",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#533"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.24",
+      "number": 557,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/557",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#556"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.25",
+      "number": 558,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/558",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#556",
+        "#557",
+        "#542"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.26",
+      "number": 559,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/559",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#556",
+        "#558"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.27",
+      "number": 566,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/566",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#556",
+        "#565"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.28",
+      "number": 560,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/560",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#556"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.29",
+      "number": 561,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/561",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#556"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.30",
+      "number": 562,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/562",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#556"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.31",
+      "number": 563,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/563",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#556"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.32",
+      "number": 564,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/564",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#556"
+      ],
+      "labels": []
+    },
+    {
+      "id": "G21.33",
+      "number": 565,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/565",
+      "readBack": true,
+      "visibleInOpenIssues": true,
+      "dependencies": [
+        "#556",
+        "#560",
+        "#561",
+        "#562",
+        "#563",
+        "#564"
+      ],
+      "labels": []
+    }
+  ]
+}
