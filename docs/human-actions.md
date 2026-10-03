@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-03 — G21.07: пацвердзі на Windows-хасце named-скіпы filesystem-сютаў
+Што зрабіць: на сваёй Windows-машыне прабягі `node --test --experimental-strip-types web/lib/content/entry-boundary.test.ts` і `node --test tools/collector/cli.test.mjs` і пераканайся, што дзесяць capability-тэстаў з #540 даюць именаваныя скіпы (EPERM / EINVAL / «mode bits are not enforced»), а астатнія тэсты зялёныя. Альтэрнатыўна — аўтарызуй агенту даданне абодвух сют у job `windows-portable` (`.github/workflows/required-checks.yml` без аўтарызацыі змяняць забаронена). Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #540.
+PR: https://github.com/vokhandcrafts/KUDY/pull/575 (issue: https://github.com/vokhandcrafts/KUDY/issues/540; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
+
 ### 2026-10-03 — G21.08: пацвердзі на Windows-хасце, што карпусныя сьюты зялёныя без EPERM
 Што зрабіць: на сваёй Windows-машыне прабягі `node --test tools/corpus/store.test.mjs tools/corpus/backup.test.mjs` (або поўны `npm test`) і пераканайся, што cleanup прыбірае часовыя тэчкі без восьмі EPERM-няўдач, запісаных у #541, а тэстар не пакідае жывых хэндлаў. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #541.
 PR: https://github.com/vokhandcrafts/KUDY/pull/574 (issue: https://github.com/vokhandcrafts/KUDY/issues/541; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
