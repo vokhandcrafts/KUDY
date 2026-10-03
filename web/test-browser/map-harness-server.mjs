@@ -152,9 +152,15 @@ export const flushSync = client.flushSync;
 export default client;
 `,
   // city-map.tsx dynamic-imports 'maplibre-gl'; the UMD build is already on
-  // the page as window.maplibregl (loaded before the module graph).
+  // the page as window.maplibregl (loaded before the module graph). The
+  // stylesheet the component imports is applied by the harness <link> below
+  // (same pinned file from web/node_modules), so the import itself resolves
+  // to an inert module.
   '/vendor/maplibre-gl.mjs': `
 export default window.maplibregl;
+`,
+  '/vendor/css-shim.mjs': `
+export default {};
 `,
   // The component graph reaches build-time readers that import node
   // builtins; in the browser only their pure exports (localePath) are used,
@@ -183,6 +189,7 @@ function harnessHtml() {
       'react/jsx-runtime': '/vendor/react-jsx-runtime.mjs',
       'react-dom/client': '/vendor/react-dom-client.mjs',
       'maplibre-gl': '/vendor/maplibre-gl.mjs',
+      'maplibre-gl/dist/maplibre-gl.css': '/vendor/css-shim.mjs',
       ...Object.fromEntries(
         [
           'node:fs',
@@ -211,6 +218,7 @@ function harnessHtml() {
 <head>
 <meta charset="utf-8">
 <title>KUDY map harness</title>
+<link rel="stylesheet" href="/vendor/maplibre-gl.css">
 <script src="/vendor/maplibre-gl.js"></script>
 <script>
   window.process = { env: { NODE_ENV: 'production' } };
@@ -257,6 +265,11 @@ export async function startMapHarnessServer() {
           serve(
             fs.readFileSync(path.join(WEB_ROOT, 'node_modules', 'maplibre-gl', 'dist', 'maplibre-gl.js'), 'utf8'),
             JS_CONTENT_TYPE,
+          );
+        } else if (pathname === '/vendor/maplibre-gl.css') {
+          serve(
+            fs.readFileSync(path.join(WEB_ROOT, 'node_modules', 'maplibre-gl', 'dist', 'maplibre-gl.css'), 'utf8'),
+            'text/css; charset=utf-8',
           );
         } else {
           const source = resolveSourceModule(pathname);
