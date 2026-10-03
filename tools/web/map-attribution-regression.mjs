@@ -15,7 +15,7 @@
 // recorded as a limitation, never presented as live proof (G21.02 acceptance
 // 3/4).
 //
-// Usage: node tools/web/map-attribution-regression.mjs [--live] [--shots <dir>]
+// Usage: node tools/web/map-attribution-regression.mjs [--live] [--shots <dir>] [--out <dir>]
 // Requires a current static export: `npm run build` in web/. Playwright
 // resolves from the root node_modules; the chromium binary comes from
 // `npx playwright install chromium` (not wired into the standard runner —
