@@ -47,9 +47,25 @@ test('guard: removing the jest wiring is detected (app and components suites)', 
   const stripped = jestConfig.replace(/testMatch:\s*\[[^\]]*\]/u, 'testMatch: []');
   assert.notEqual(stripped, jestConfig, 'the delta fixture must actually remove testMatch');
   const { unowned } = discoverTests({ jestConfigSource: stripped });
+  // discoverTests answers host separators on Windows while the zone prefixes
+  // quote `/` (A26-08; G21.05) — convert at the comparison boundary, the
+  // design-tokens repoRel idiom. Both zones must still be named.
+  const unownedInRepoStyle = unowned.map((file) => file.split(path.sep).join('/'));
   assert.ok(
-    unowned.some((file) => file.startsWith('app/')) && unowned.some((file) => file.startsWith('components/')),
+    unownedInRepoStyle.some((file) => file.startsWith('app/'))
+      && unownedInRepoStyle.some((file) => file.startsWith('components/')),
     `jest-owned suites must appear unowned; unowned: ${unowned.join(', ')}`
+  );
+});
+
+test('the jest-wiring zone prefixes hold for Windows separators (G21.05)', () => {
+  // The 2026-10-03 Windows retest: app\… never started with 'app/'. win32
+  // shapes regenerate that input on every host, so dropping the boundary
+  // conversion fails here, not only on a Windows checkout.
+  const windowsShaped = ['app\\back-navigation.test.tsx', 'app\\run.test.tsx', 'components\\canon-icon.test.tsx'];
+  const inRepoStyle = windowsShaped.map((file) => file.split(path.win32.sep).join('/'));
+  assert.ok(
+    inRepoStyle.some((file) => file.startsWith('app/')) && inRepoStyle.some((file) => file.startsWith('components/'))
   );
 });
 

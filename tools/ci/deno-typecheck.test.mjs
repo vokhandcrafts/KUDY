@@ -17,6 +17,12 @@ const script = path.join(repoRoot, 'tools', 'ci', 'deno-typecheck.mjs');
 const functionsDir = path.join(repoRoot, 'supabase', 'functions');
 const fixture = path.join('supabase', 'functions', '_fixtures', 'deno-async-mismatch.ts');
 
+// Git-style repo-relative spelling for comparisons: the expected list quotes
+// `/` while path.relative follows the host separator (A26-08; the 2026-10-03
+// Windows retest failed here with device\index.ts — G21.05).
+const repoRel = (entry, sep = path.sep) => entry.split(sep).join('/');
+const PRODUCTION_ENTRYPOINTS = ['device/index.ts', 'events/index.ts', 'grant/index.ts', 'rc-webhook/index.ts'];
+
 function runScript(args, env = {}) {
   return spawnSync(process.execPath, [script, ...args], {
     cwd: repoRoot,
@@ -80,8 +86,18 @@ test('the planted A26-01 async mismatch is rejected with a named diagnostic', { 
 });
 
 test('the fixture is not part of the production enumeration', () => {
-  const entrypoints = findEntrypoints(functionsDir).map((entry) => path.relative(functionsDir, entry));
-  assert.deepEqual(entrypoints, ['device/index.ts', 'events/index.ts', 'grant/index.ts', 'rc-webhook/index.ts']);
+  const entrypoints = findEntrypoints(functionsDir).map((entry) => repoRel(path.relative(functionsDir, entry)));
+  assert.deepEqual(entrypoints, PRODUCTION_ENTRYPOINTS);
+});
+
+test('the enumeration comparison holds for Windows separators (G21.05)', () => {
+  // win32 shapes regenerate the exact retest input on every host, so dropping
+  // the boundary conversion fails here, not only on a Windows checkout.
+  const winRoot = 'C:\\kudy\\supabase\\functions';
+  const windowsShaped = PRODUCTION_ENTRYPOINTS
+    .map((entry) => path.win32.join(winRoot, entry))
+    .map((entry) => path.win32.relative(winRoot, entry));
+  assert.deepEqual(windowsShaped.map((entry) => repoRel(entry, path.win32.sep)), PRODUCTION_ENTRYPOINTS);
 });
 
 test('a directory without index.ts files yields no entrypoints', () => {
