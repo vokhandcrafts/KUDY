@@ -22,6 +22,12 @@ export type UiStringsLocale = UiLocale | 'uk';
 // here with the release unit, never before it.
 export const uiLocales: UiLocale[] = ['be', 'en'];
 
+// The locale the URLs without a prefix serve (plan §4): the single default
+// mapping point behind localePath and the exported document language
+// (G21.01) — the shared 404.html serves unknown URLs of both locales and
+// carries this default.
+export const defaultUiLocale: UiLocale = 'be';
+
 export interface UiStrings {
   brand: string;
   langSwitchName: string;
