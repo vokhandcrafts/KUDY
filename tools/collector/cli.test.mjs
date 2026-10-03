@@ -31,7 +31,7 @@ let readonlyDirProblem = null;
   try {
     fs.writeFileSync(path.join(probeRoot, 'probe.txt'), 'probe');
     readonlyDirProblem =
-      'directory mode bits are not enforced on this host — a chmod 0o555 directory still accepts writes ' +
+      'directory mode bits are not enforced on this host — a write into the chmod 0o555 probe directory succeeded ' +
       '(Windows: chmod cannot make a directory read-only), so the read-only-directory rejection case has ' +
       'no deny to assert; it stays mandatory on capable platforms';
   } catch {
