@@ -22,7 +22,7 @@ export function MapPage({ locale, data, strings }: {
     <SiteShell homeHref={localePath(locale, '/')} langSwitchHref={langSwitchHref} strings={strings}>
       <h1>{strings.mapTitle}</h1>
       <p>{strings.mapIntro}</p>
-      <CityMap markers={data.markers} label={strings.mapTitle} />
+      <CityMap markers={data.markers} label={strings.mapTitle} errorText={strings.mapError} />
       <p>
         <a href={mapProvider.osmCopyrightUrl}>{strings.mapAttribution}</a>
       </p>

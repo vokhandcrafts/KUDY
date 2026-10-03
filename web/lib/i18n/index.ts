@@ -51,6 +51,7 @@ export interface UiStrings {
   mapIntro: string;
   mapRoutesHeading: string;
   mapAttribution: string;
+  mapError: string;
   storyTextHeading: string;
   audioHeading: string;
   audioUnavailable: string;
