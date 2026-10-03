@@ -17,12 +17,15 @@ import { appLinks } from '../app-links.ts';
 const WEB_APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'app');
 
 // Static route set from the app directory: page.tsx files are routes,
-// bracketed segments are dynamic (handled separately, not "static").
+// bracketed segments are dynamic (handled separately, not "static"), and a
+// route-group directory — Next's per-locale root layout container — carries
+// no URL segment, so it is skipped like Next's own mapping does.
 function collectRoutes(dir: string, prefix = ''): string[] {
   const routes: string[] = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (entry.isDirectory()) {
-      routes.push(...collectRoutes(path.join(dir, entry.name), `${prefix}/${entry.name}`));
+      const nextPrefix = /^\(.*\)$/.test(entry.name) ? prefix : `${prefix}/${entry.name}`;
+      routes.push(...collectRoutes(path.join(dir, entry.name), nextPrefix));
     } else if (entry.name === 'page.tsx') {
       routes.push(prefix === '' ? '/' : prefix);
     }

@@ -25,7 +25,7 @@ import type {
   RejectionCode,
   RouteDoc,
 } from './types.ts';
-import type { UiLocale } from '../i18n/index.ts';
+import { defaultUiLocale, type UiLocale } from '../i18n/index.ts';
 
 export class SiteDataError extends Error {
   readonly code: RejectionCode;
@@ -43,10 +43,10 @@ function unwrap<T>(res: ReadResult<T>, dataPath: string): T {
   return res.data;
 }
 
-// Locale prefix of a web path (plan §4): be is the default locale at the root,
+// Locale prefix of a web path (plan §4): the default locale sits at the root,
 // every other UI locale is a URL prefix. The single mapping point for hrefs.
 export function localePath(locale: UiLocale, pagePath: string): string {
-  return locale === 'be' ? pagePath : `/${locale}${pagePath}`;
+  return locale === defaultUiLocale ? pagePath : `/${locale}${pagePath}`;
 }
 
 // The content root: build-bundle public output dropped into web/content/

@@ -35,7 +35,9 @@ function unsafeSegments(relPath: string): boolean {
   return normalized.split('/').some((seg) => seg === '' || seg === '.' || seg === '..' || seg === 'private' || seg === 'extended');
 }
 
-function listFiles(root: string): { abs: string; rel: string }[] {
+// Shared by the rendered-output scans (leak classes above and the exported
+// document language, exported-language.ts) — one tree walk, not two.
+export function listFiles(root: string): { abs: string; rel: string }[] {
   if (!fs.existsSync(root)) return [];
   const rootAbs = fs.realpathSync(root);
   const out: { abs: string; rel: string }[] = [];
