@@ -84,14 +84,16 @@ function fingerprintInput(record) {
   }
   input.format = record.format;
   input.id = record.id;
-  input.parameters = (record.parameters ?? []).map((parameter) => {
-    const canonical = { name: parameter.name, type: parameter.type };
-    if (parameter.fallback !== undefined) {
-      return { fallback: parameter.fallback, name: parameter.name, type: parameter.type };
-    }
-    if (parameter.join !== undefined) {
-      return { join: parameter.join, name: parameter.name, type: parameter.type };
-    }
+  // Corrupt parameters must not crash the hash path the stored-hash check feeds:
+  // a non-array answers as an empty list here and the schema/type diagnostics
+  // name the violation elsewhere (recordStrings, checkMessageSyntax).
+  const parameters = Array.isArray(record.parameters) ? record.parameters : [];
+  input.parameters = parameters.map((parameter) => {
+    const canonical = {};
+    if (parameter?.fallback !== undefined) canonical.fallback = parameter.fallback;
+    if (parameter?.join !== undefined) canonical.join = parameter.join;
+    canonical.name = parameter?.name;
+    canonical.type = parameter?.type;
     return canonical;
   });
   input.source = record.source;

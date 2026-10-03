@@ -224,4 +224,15 @@ test('corrupt input answers with diagnostics, never a throw', () => {
   // A record with a non-string source/format pair must not crash the checker.
   const verdict = checkUiMessages(docWith([{ id: 'x.y', source: 5, format: 'plain' }]));
   assert.equal(verdict.ok, false);
+  // The stored-hash check feeds the record into the fingerprint: a non-array
+  // parameters value under a well-formed hash must stay diagnostic, not throw.
+  const hashed = docWith([
+    { id: 'x.y', source: 'Слова', format: 'plain', parameters: 'nope', sourceHash: '0'.repeat(64) },
+  ]);
+  const hashedVerdict = checkUiMessages(hashed);
+  assert.equal(hashedVerdict.ok, false);
+  for (const error of hashedVerdict.errors) {
+    assert.equal(typeof error.rule, 'string');
+    assert.equal(typeof error.path, 'string');
+  }
 });

@@ -9,7 +9,7 @@
 <!-- showboat-id: g2124-source-record -->
 
 Фактычны інвентар зашытай крыніцы: колькасць запісаў і размеркаванне па
-каталогах (чытач зараджае рэальны файл і правярае кантракт кожнага запісу):
+каталогах (чытач загружае рэальны файл і правярае кантракт кожнага запісу):
 
 ```sh
 node -e "import('./contracts/ui-messages/ui-messages.mjs').then(m => { const d = m.loadUiMessagesSource(); const byDomain = {}; for (const r of d.records) { const dom = r.id.split('.').slice(0,2).join('.'); byDomain[dom] = (byDomain[dom]||0)+1; } console.log('records', d.records.length); console.log(Object.entries(byDomain).map(([k,v])=>k+'='+v).join(' ')); })"
@@ -20,8 +20,8 @@ records 234
 native.chrome=72 native.guideHint=4 native.nearby=18 native.offer=9 native.place=23 native.preview=12 native.run=50 web.ui=46
 ```
 
-Крытэр 5 — дублі ідэнтыфікатараў адхіляюцца іменаваным правілам (адкрытая
-захвятка чэкера на фікстуры з двума запісамі аднаго id):
+Крытэр 5 — дублі ідэнтыфікатараў адхіляюцца іменаваным правілам (адкрыты
+выклік чэкера на фікстуры з двума запісамі аднаго id):
 
 ```sh
 node -e "import('./contracts/ui-messages/ui-messages.mjs').then(m => { const r = { id: 'test.x', source: 'Слова', context: 'Кантэкст', format: 'plain', parameters: [], migratedFrom: ['t#x'], sourceHash: '' }; r.sourceHash = m.sourceHash(r); const dup = { ...r, context: 'Іншы кантэкст' }; dup.sourceHash = m.sourceHash(dup); const v = m.checkUiMessages({ source_schema_version: 1, source_locale: 'be', records: [r, dup] }); console.log(v.ok, '|', v.errors.map(e => e.rule + ' at ' + e.path).join(', ')); })"
