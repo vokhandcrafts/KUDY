@@ -3,6 +3,11 @@
 // copy — and renders tiles from the single recorded provider only
 // (lib/map-config.ts). Markers are non-interactive dots: no popups, no
 // playback, no links (acceptance 4). The map is removed on unmount.
+// A failed init must never be a silent empty box (G21.03): the failure
+// lands on the container as data-map-error and beside it a localized
+// accessible message renders — never the raw exception or a URL. A
+// successful load clears the message again; post-load tile errors are
+// transient — the initialized map keeps working, so they stay console-only.
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -15,17 +20,27 @@ import type { Map as MapLibreMap } from 'maplibre-gl';
 import type { MapMarkers } from '../lib/content/site.ts';
 import { mapProvider } from '../lib/map-config.ts';
 
-export function CityMap({ markers, label }: { markers: MapMarkers; label: string }) {
+export function CityMap({ markers, label, errorText }: {
+  markers: MapMarkers;
+  label: string;
+  errorText: string;
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const errorRef = useRef<HTMLParagraphElement | null>(null);
 
   useEffect(() => {
     let disposed = false;
+    let loaded = false;
     let map: MapLibreMap | null = null;
-    // A failed map init must be visible, never a silent empty box: the
-    // failure lands on the container as data-map-error (and the console).
     const fail = (error: unknown) => {
       console.error('city map init failed', error);
+      if (loaded) return;
       if (containerRef.current) containerRef.current.dataset.mapError = String(error);
+      if (errorRef.current) errorRef.current.hidden = false;
+    };
+    const succeed = () => {
+      if (containerRef.current) delete containerRef.current.dataset.mapError;
+      if (errorRef.current) errorRef.current.hidden = true;
     };
     void (async () => {
       try {
@@ -36,11 +51,19 @@ export function CityMap({ markers, label }: { markers: MapMarkers; label: string
           style: mapProvider.styleUrl,
         });
         // Async style/tile failures (offline visitor, provider outage) never
-        // reach the synchronous catch — they land here and become visible.
-        map.on('error', fail);
+        // reach the synchronous catch. A pre-load one leaves the map visibly
+        // broken (localized message + marker); a post-load tile error is
+        // transient — the initialized map keeps working, so it stays
+        // console-only.
+        map.on('error', (event) => {
+          if (!loaded) fail(event);
+          else console.error('city map runtime error', event);
+        });
         map.on('load', () => {
+          if (disposed || !map) return;
+          loaded = true;
+          succeed();
           try {
-            if (disposed || !map) return;
             map.addSource('stops', { type: 'geojson', data: markers });
             map.addLayer({
               id: 'stops',
@@ -85,5 +108,12 @@ export function CityMap({ markers, label }: { markers: MapMarkers; label: string
     };
   }, [markers]);
 
-  return <div ref={containerRef} role="region" aria-label={label} style={{ height: 360 }} />;
+  return (
+    <>
+      <div ref={containerRef} role="region" aria-label={label} style={{ height: 360 }} />
+      <p ref={errorRef} role="status" hidden>
+        {errorText}
+      </p>
+    </>
+  );
 }

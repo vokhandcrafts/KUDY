@@ -25,6 +25,7 @@ export const en: UiStrings = {
   mapIntro: 'An overview of the published routes and stops. The visitor’s position is never detected or used.',
   mapRoutesHeading: 'Routes on the map',
   mapAttribution: 'Map data © OpenStreetMap contributors (ODbL licence)',
+  mapError: 'The map is temporarily unavailable. The route list below still works as usual.',
   storyTextHeading: 'Story text',
   audioHeading: 'Audio',
   audioUnavailable: 'The audio file is not in the published bundle; the story text below still reads as usual.',
