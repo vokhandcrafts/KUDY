@@ -1,0 +1,101 @@
+Networking has been disabled
+Starting project at C:\Users\kamyl\WebstormProjects\KUDY
+Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
+Starting Metro Bundler
+Waiting on http://localhost:8083
+Logs for your project will appear below.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+| (node:39780) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+Android node_modules\expo-router\entry.js ▓▓░░░░░░░░░░░░░░ 16.0% ( 6/18)
+| (node:33112) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:68816) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:64144) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:33968) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:14616) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+Android node_modules\expo-router\entry.js ▓▓░░░░░░░░░░░░░░ 16.0% (110/297)
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 51.1% (488/683)
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 75.5% (843/970)
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 89.2% (1190/1300)
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (1644/1644)
+Android Bundled 21609ms node_modules\expo-router\entry.js (1644 modules)
+ ERROR  Looks like you have configured linking in multiple places. This is likely an error since deep links should only be handled in one place to avoid conflicts. Make sure that:
+- You don't have multiple NavigationContainers in the app each with 'linking' enabled
+- Only a single instance of the root component is rendered
+- You have set 'android:launchMode=singleTask' in the '<activity />' section of the 'AndroidManifest.xml' file to avoid launching multiple instances
+
+Call Stack
+  construct (<native>)
+  apply (<native>)
+  _construct (node_modules\@babel\runtime\helpers\construct.js)
+  Wrapper (node_modules\@babel\runtime\helpers\wrapNativeSuper.js)
+  construct (<native>)
+  _callSuper (node_modules\@babel\runtime\helpers\callSuper.js)
+  NamelessError (node_modules\expo-router\node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  captureCurrentStack (node_modules\expo-router\node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  HMRClient.log (node_modules\expo-router\node_modules\@expo\metro-runtime\src\metroServerLogs.native.ts)
+  console.level (node_modules\react-native\Libraries\Core\setUpDeveloperTools.js)
+  React.useEffect$argument_0 (node_modules\expo-router\build\fork\useLinking.native.js)
+  callCreate.reactStackBottomFrame (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  runWithFiberInDEV (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitHookEffectListMount (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitHookPassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  recursivelyTraversePassiveMountEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitPassiveMountOnFiber (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  flushPassiveEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  flushPendingEffects (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  performSyncWorkOnRoot (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  flushSyncWorkAcrossRoots_impl (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  flushSpawnedWork (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitRoot (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  commitRootWhenReady (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  performWorkOnRoot (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+  performWorkOnRootViaSchedulerTask (node_modules\react-native\Libraries\Renderer\implementations\ReactFabric-dev.js)
+
+Call Stack
+  ContextNavigator (node_modules\expo-router\build\ExpoRoot.js)
+  ExpoRoot (node_modules\expo-router\build\ExpoRoot.js)
+  App (node_modules\expo-router\build\qualified-entry.js)
+  WithDevTools (node_modules\expo\src\launch\withDevTools.tsx)
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 118ms node_modules\expo-router\entry.js (1 module)
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 832ms node_modules\expo-router\entry.js (1 module)

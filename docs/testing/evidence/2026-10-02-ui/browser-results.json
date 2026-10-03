@@ -1,0 +1,471 @@
+{
+  "checks": [
+    {
+      "name": "1440px /app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Поўная версія — у дадатку KUDY"
+      }
+    },
+    {
+      "name": "/app: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City guides"
+      }
+    },
+    {
+      "name": "/en: document language",
+      "status": "failed",
+      "error": "Expected en, got be"
+    },
+    {
+      "name": "1440px /: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Гіды па горадзе"
+      }
+    },
+    {
+      "name": "/: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Карта горада"
+      }
+    },
+    {
+      "name": "/map: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Прыватнасць"
+      }
+    },
+    {
+      "name": "/privacy: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en/app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The full version — in the KUDY app"
+      }
+    },
+    {
+      "name": "/en/app: document language",
+      "status": "failed",
+      "error": "Expected en, got be"
+    },
+    {
+      "name": "1440px /en/map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City map"
+      }
+    },
+    {
+      "name": "/en/map: document language",
+      "status": "failed",
+      "error": "Expected en, got be"
+    },
+    {
+      "name": "1440px /en/privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Privacy"
+      }
+    },
+    {
+      "name": "/en/privacy: document language",
+      "status": "failed",
+      "error": "Expected en, got be"
+    },
+    {
+      "name": "1440px /guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Дэма-гід: сукнаны двор"
+      }
+    },
+    {
+      "name": "/guides/demo-route-a1: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en/guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Demo guide: the cloth courtyard"
+      }
+    },
+    {
+      "name": "/en/guides/demo-route-a1: document language",
+      "status": "failed",
+      "error": "Expected en, got be"
+    },
+    {
+      "name": "1440px /guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Двор сукнараў (дэма)"
+      }
+    },
+    {
+      "name": "/guides/demo-route-a1/stops/stop-1: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Млынавая калона (дэма)"
+      }
+    },
+    {
+      "name": "/guides/demo-route-a1/stops/stop-2: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en/guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Cloth Merchants' Courtyard (demo)"
+      }
+    },
+    {
+      "name": "/en/guides/demo-route-a1/stops/stop-1: document language",
+      "status": "failed",
+      "error": "Expected en, got be"
+    },
+    {
+      "name": "1440px /en/guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The Mill Column (demo)"
+      }
+    },
+    {
+      "name": "/en/guides/demo-route-a1/stops/stop-2: document language",
+      "status": "failed",
+      "error": "Expected en, got be"
+    },
+    {
+      "name": "390px /app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Поўная версія — у дадатку KUDY"
+      }
+    },
+    {
+      "name": "390px /en: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City guides"
+      }
+    },
+    {
+      "name": "390px /: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Гіды па горадзе"
+      }
+    },
+    {
+      "name": "390px /map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Карта горада"
+      }
+    },
+    {
+      "name": "390px /privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Прыватнасць"
+      }
+    },
+    {
+      "name": "390px /en/app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The full version — in the KUDY app"
+      }
+    },
+    {
+      "name": "390px /en/map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City map"
+      }
+    },
+    {
+      "name": "390px /en/privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Privacy"
+      }
+    },
+    {
+      "name": "390px /guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Дэма-гід: сукнаны двор"
+      }
+    },
+    {
+      "name": "390px /en/guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Demo guide: the cloth courtyard"
+      }
+    },
+    {
+      "name": "390px /guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Двор сукнараў (дэма)"
+      }
+    },
+    {
+      "name": "390px /guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Млынавая калона (дэма)"
+      }
+    },
+    {
+      "name": "390px /en/guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Cloth Merchants' Courtyard (demo)"
+      }
+    },
+    {
+      "name": "390px /en/guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The Mill Column (demo)"
+      }
+    },
+    {
+      "name": "320px /app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Поўная версія — у дадатку KUDY"
+      }
+    },
+    {
+      "name": "320px /en: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City guides"
+      }
+    },
+    {
+      "name": "320px /: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Гіды па горадзе"
+      }
+    },
+    {
+      "name": "320px /map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Карта горада"
+      }
+    },
+    {
+      "name": "320px /privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Прыватнасць"
+      }
+    },
+    {
+      "name": "320px /en/app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The full version — in the KUDY app"
+      }
+    },
+    {
+      "name": "320px /en/map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City map"
+      }
+    },
+    {
+      "name": "320px /en/privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Privacy"
+      }
+    },
+    {
+      "name": "320px /guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Дэма-гід: сукнаны двор"
+      }
+    },
+    {
+      "name": "320px /en/guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Demo guide: the cloth courtyard"
+      }
+    },
+    {
+      "name": "320px /guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Двор сукнараў (дэма)"
+      }
+    },
+    {
+      "name": "320px /guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Млынавая калона (дэма)"
+      }
+    },
+    {
+      "name": "320px /en/guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Cloth Merchants' Courtyard (demo)"
+      }
+    },
+    {
+      "name": "320px /en/guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The Mill Column (demo)"
+      }
+    },
+    {
+      "name": "Internal link /",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/app",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/guides/demo-route-a1",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/map",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /app",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /guides/demo-route-a1",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /map",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/privacy",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /privacy",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /guides/demo-route-a1/stops/stop-1",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /guides/demo-route-a1/stops/stop-2",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/guides/demo-route-a1/stops/stop-1",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/guides/demo-route-a1/stops/stop-2",
+      "status": "passed"
+    },
+    {
+      "name": "Keyboard navigation to English catalog",
+      "status": "passed",
+      "detail": "City guides"
+    },
+    {
+      "name": "Catalog → guide → free stop → locked stop → guide",
+      "status": "passed"
+    },
+    {
+      "name": "Language switch preserves stop URL",
+      "status": "passed"
+    },
+    {
+      "name": "App fallback communicates unavailable stores",
+      "status": "passed",
+      "detail": "Поўная версія — у дадатку KUDY\nGPS-аўтазапуск гісторый на месцы\nОфлайн: маршруты пад рукой без інтэрнэту\nПоўныя маршруты: усе кропкі і ўсё аўдыё\n\nЗнайсці дадатак:\n\n· App Store — Хутка · Google Play — Хутка"
+    },
+    {
+      "name": "Unknown route returns 404 with route home",
+      "status": "passed"
+    },
+    {
+      "name": "Real map provider loads and fits route",
+      "status": "passed",
+      "evidence": "map-network-results.json"
+    },
+    {
+      "name": "Map provider failure has a visible explanation",
+      "status": "failed",
+      "error": "Map failed; page shows no failure explanation"
+    },
+    {
+      "name": "Published fixture audio can play",
+      "status": "blocked",
+      "error": "{\"ok\":false,\"error\":\"Failed to load because no supported source was found.\",\"code\":4,\"networkState\":3}",
+      "reason": "Synthetic 85-byte demo audio is not a playable media file"
+    },
+    {
+      "name": "Map CSS positions canvas and controls",
+      "status": "failed",
+      "evidence": "map-network-results.json"
+    }
+  ],
+  "summary": {
+    "passed": 69,
+    "failed": 9,
+    "blocked": 1
+  },
+  "pages": 42,
+  "widths": [
+    1440,
+    390,
+    320
+  ]
+}
