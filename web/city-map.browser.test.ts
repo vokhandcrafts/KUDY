@@ -28,7 +28,12 @@ const COLLECTOR = `(() => {
   const container = document.querySelector('[data-map-error]');
   const message = document.querySelector('p[role="status"]');
   const guideLinks = Array.from(document.querySelectorAll('a[href^="/guides/"]'));
-  const failureText = (message ? message.textContent : '') + (container ? container.textContent : '');
+  // The dataset marker is part of the failure surface too: it must name the
+  // failure without ever carrying the provider URL or an exception string.
+  const failureText =
+    (message ? message.textContent : '') +
+    (container ? container.textContent : '') +
+    (container ? container.dataset.mapError || '' : '');
   return {
     errorPresent: !!container,
     errorMarkerSet: container ? (container.dataset.mapError || '').length > 0 : false,

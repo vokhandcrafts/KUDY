@@ -51,8 +51,14 @@ export function CityMap({ markers, label, errorText }: {
           style: mapProvider.styleUrl,
         });
         // Async style/tile failures (offline visitor, provider outage) never
-        // reach the synchronous catch — they land here and become visible.
-        map.on('error', fail);
+        // reach the synchronous catch. A pre-load one leaves the map visibly
+        // broken (localized message + marker); a post-load tile error is
+        // transient — the initialized map keeps working, so it stays
+        // console-only.
+        map.on('error', (event) => {
+          if (!loaded) fail(event);
+          else console.error('city map runtime error', event);
+        });
         map.on('load', () => {
           if (disposed || !map) return;
           loaded = true;
