@@ -6,6 +6,11 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+// MapLibre positions its canvas and legal controls only through this
+// stylesheet, pinned to the package version. Without the import the
+// attribution control renders in static flow, overflows the map container
+// and collides with the server-side ODbL attribution below (G21.02).
+import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Map as MapLibreMap } from 'maplibre-gl';
 import type { MapMarkers } from '../lib/content/site.ts';
 import { mapProvider } from '../lib/map-config.ts';
