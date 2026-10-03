@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-03",
+  "head": "0187f8721cf34be0ce3dcde276042ee04da83908",
+  "android": {
+    "checks": 26,
+    "failed": 0,
+    "passed": 26
+  },
+  "node": {
+    "tests": 1912,
+    "passed": 1854,
+    "failed": 27,
+    "skipped": 31,
+    "failuresByCategory": {
+      "Windows path separator expectation": 2,
+      "CRLF fixture/golden output or mutation pattern": 7,
+      "Test uses POSIX chmod read-only directory; Windows does not enforce it": 1,
+      "Windows SQLite file locked during test cleanup": 8,
+      "Windows symlink permission": 7,
+      "Windows filename restriction": 2
+    }
+  },
+  "jest": {
+    "tests": 183,
+    "passed": 182,
+    "failed": 1,
+    "failedNames": [
+      "guide preview surface (G06.01.b) the stop rows show the place's human title from the catalog, never the raw place id (UX 05, AC1)"
+    ]
+  },
+  "web": {
+    "raw": {
+      "passed": 69,
+      "failed": 9,
+      "pages": 42
+    },
+    "pages": 42,
+    "widths": [
+      1440,
+      390,
+      320
+    ],
+    "passed": 69,
+    "failedAssertions": 8,
+    "blockedAudio": 1,
+    "realMapLoaded": true,
+    "mapCssLoaded": false
+  },
+  "gates": {
+    "typecheck": "passed",
+    "arch": "passed: 479 modules, 0 violations",
+    "webBuild": "passed",
+    "androidBuild": "passed: 447 tasks, 24 executed, 423 up-to-date"
+  },
+  "openIssues": 37,
+  "completionEstimate": {
+    "scope": "technical MVP including web, excluding content production and Phase 2",
+    "weightedPoints": [
+      17,
+      11,
+      8,
+      13,
+      7,
+      8,
+      2,
+      1
+    ],
+    "total": 67,
+    "reportedRange": "65–70%",
+    "method": "engineering judgment by functional areas, not test pass percentage or issue count"
+  }
+}
