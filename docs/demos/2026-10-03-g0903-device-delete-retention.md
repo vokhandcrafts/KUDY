@@ -131,8 +131,8 @@ console.log("delete-post:", JSON.stringify(await handleDeviceDeleteRequest({ met
 ```
 
 ```output
-sweep-1: {"eventsDeleted":1,"registrationRateWindowsDeleted":1,"sendRateWindowsDeleted":1}
-sweep-2: {"eventsDeleted":0,"registrationRateWindowsDeleted":0,"sendRateWindowsDeleted":0}
+sweep-1: {"eventsDeleted":1,"registrationRateWindowsDeleted":1,"sendRateWindowsDeleted":1,"webhookEventsDeleted":0}
+sweep-2: {"eventsDeleted":0,"registrationRateWindowsDeleted":0,"sendRateWindowsDeleted":0,"webhookEventsDeleted":0}
 events left: 2 (the cutoff keeps the boundary row)
 delete-1: {"status":204}
 tables after 204: 0 0 0

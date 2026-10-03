@@ -1,7 +1,8 @@
 // G09.03 — the retention sweep (docs/architecture/09 §10: «сырыя падзеі —
 // 14 месяцаў, потым выдаляюцца заданнем»; per-route aggregate counts stay
 // without device_id — no aggregate table exists yet, so the sweep deletes
-// only raw rows and never touches anything else).
+// only raw rows, plus the webhook bookkeeping rows added by G20.12, and
+// never touches anything else).
 //
 // The TTL commitments the migrations pin travel with this job: rows of
 // `device_registration_rate` are "deletable service-role data ... and get a
@@ -56,6 +57,27 @@ export function rateRetentionCutoffMs(nowMs: number): number {
   return nowMs - RATE_RETENTION_HOURS * 60 * 60 * 1000;
 }
 
+// G20.12 — protective bound for the webhook bookkeeping rows. Idempotency
+// needs them only while RevenueCat may retry the same event id (the
+// documented 5/10/20/40/80-minute schedule, 09 §5.1), the minimized payload
+// keeps no device identity, and no in-repo consumer reads the log yet — so
+// 30 days bounds an unconsumed accounting table without transferring the
+// 14-month analytics term onto accounting data (spec N6 forbids that without
+// a canonical decision). A protective implementation choice, not a canon
+// number (the G09.02 protective-parameters precedent); the accounting
+// retention term itself stays the owner's decision recorded in the G20.12
+// policy matrix.
+export const WEBHOOK_RETENTION_DAYS = 30;
+
+/** Webhook bookkeeping rows stored before this instant are deletable. */
+export function webhookRetentionCutoffMs(nowMs: number): number {
+  return nowMs - WEBHOOK_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+}
+
+/** Aged-out `webhook_events` rows (G20.12); `received_at` is the storage clock. */
+export const WEBHOOK_RETENTION_DELETE_SQL =
+  'delete from webhook_events where received_at < to_timestamp($1 / 1000.0) returning event_id';
+
 /** Raw `event_log` rows past the 14-month term (§10); epoch ms parameter, the grant-core to_timestamp idiom. */
 export const EVENT_RETENTION_DELETE_SQL =
   'delete from event_log where at < to_timestamp($1 / 1000.0) returning event_id';
@@ -76,10 +98,11 @@ export interface RetentionSweepResult {
   eventsDeleted: number;
   registrationRateWindowsDeleted: number;
   sendRateWindowsDeleted: number;
+  webhookEventsDeleted: number;
 }
 
 /**
- * One sweep pass: three independent deletes, each bounded by its own cutoff,
+ * One sweep pass: four independent deletes, each bounded by its own cutoff,
  * each answering the exact rows it removed. Order between the tables carries
  * no semantics (no FK links them), so a partially completed pass converges:
  * the next scheduled pass deletes only what aged past the cutoff since. A
@@ -95,9 +118,13 @@ export async function runRetentionSweep(
     rateRetentionCutoffMs(nowMs),
   ]);
   const sendRate = await runner.query(SEND_RATE_RETENTION_DELETE_SQL, [rateRetentionCutoffMs(nowMs)]);
+  const webhookEvents = await runner.query(WEBHOOK_RETENTION_DELETE_SQL, [
+    webhookRetentionCutoffMs(nowMs),
+  ]);
   return {
     eventsDeleted: events.rows.length,
     registrationRateWindowsDeleted: registrationRate.rows.length,
     sendRateWindowsDeleted: sendRate.rows.length,
+    webhookEventsDeleted: webhookEvents.rows.length,
   };
 }

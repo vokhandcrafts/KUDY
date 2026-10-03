@@ -18,6 +18,8 @@ import {
   rateRetentionCutoffMs,
   runRetentionSweep,
   subMonthsClamped,
+  WEBHOOK_RETENTION_DAYS,
+  webhookRetentionCutoffMs,
 } from './retention-core.ts';
 import { freshMigratedDatabase } from './test-db.ts';
 
@@ -98,7 +100,7 @@ test('PGlite order: a second sweep deletes nothing, and the sweep never resurrec
   const first = await runRetentionSweep(db, NOW_MS);
   assert.equal(first.eventsDeleted, 1);
   const second = await runRetentionSweep(db, NOW_MS);
-  assert.deepEqual(second, { eventsDeleted: 0, registrationRateWindowsDeleted: 0, sendRateWindowsDeleted: 0 });
+  assert.deepEqual(second, { eventsDeleted: 0, registrationRateWindowsDeleted: 0, sendRateWindowsDeleted: 0, webhookEventsDeleted: 0 });
   const left = await db.query('select count(*)::int as count from event_log');
   assert.equal(left.rows[0]!.count, 0);
 });
@@ -125,4 +127,28 @@ test('PGlite rate counters: dead windows of live devices are swept, fresh window
   const sendLeft = await db.query('select attempts from event_send_rate');
   assert.deepEqual(registrationLeft.rows, [{ attempts: 1 }], 'the live registration window stays');
   assert.deepEqual(sendLeft.rows, [{ attempts: 2 }], 'the live send window stays');
+});
+
+async function seedWebhookRow(db: Awaited<ReturnType<typeof freshMigratedDatabase>>, eventId: string, receivedAtMs: number): Promise<void> {
+  await db.query(
+    'insert into webhook_events (event_id, type, payload, effects_applied, received_at) values ($1, \'TEST\', \'{}\'::jsonb, true, to_timestamp($2 / 1000.0))',
+    [eventId, receivedAtMs],
+  );
+}
+
+test('webhook_expiry_purge: webhook bookkeeping rows past the protective bound are swept by received_at, the boundary row stays, a repeated pass deletes nothing', async () => {
+  const db = await freshMigratedDatabase();
+  assert.equal(WEBHOOK_RETENTION_DAYS, 30, 'the protective bound is 30 days — the G20.12 matrix proposal, not the analytics term');
+  const cutoff = webhookRetentionCutoffMs(NOW_MS);
+  assert.equal(cutoff, NOW_MS - WEBHOOK_RETENTION_DAYS * 24 * HOUR_MS);
+  await seedWebhookRow(db, 'wh-aged-out', cutoff - 1);
+  await seedWebhookRow(db, 'wh-at-boundary', cutoff);
+  await seedWebhookRow(db, 'wh-fresh', NOW_MS);
+
+  const sweep = await runRetentionSweep(db, NOW_MS);
+  assert.equal(sweep.webhookEventsDeleted, 1, 'exactly the row stored past the bound is deleted');
+  const left = await db.query('select event_id from webhook_events order by event_id');
+  assert.deepEqual(left.rows, [{ event_id: 'wh-at-boundary' }, { event_id: 'wh-fresh' }], 'the boundary and fresh rows survive');
+  const again = await runRetentionSweep(db, NOW_MS);
+  assert.equal(again.webhookEventsDeleted, 0, 'the sweep is idempotent');
 });
