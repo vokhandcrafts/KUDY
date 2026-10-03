@@ -18,6 +18,7 @@
 | `schemas/catalog.schema.json` | Versіяваны envelope каталогу: `{catalog_schema_version, generated_at?, routes[], discovery_index?}` |
 | `schemas/feedback-target.schema.json` | Мэты водгукаў з `21` §5.1 |
 | `schemas/localized-text.schema.json`, `schemas/identifier.schema.json` | Агульныя тыпы: локалі allowlist `be/en/uk`, ідэнтыфікатары `[a-z0-9._-]` ≤ 64 |
+| `schemas/ui-messages-source.schema.json` + `ui-messages/` | Кананічная крыніца UI-паведамленняў (G21.24): адзін запіс на паведамленне — id, беларускі арыгінал, кантэкст, параметры, абмежаванні, фармат; `source.json` + чэкер `ui-messages.mjs` (дублі ідэнтыфікатараў, кантэкст, сінтаксіс шаблонаў, выканальны код у радках, спраўджанне `sourceHash`); пераклады і запісы праверкі — асобна (G21.25/G21.26) |
 | `reader.mjs` | Ядро інтэрпрэтацыі схем + named-правілы + чытанне каталогу |
 | `contracts.test.mjs` | Прыёмачная сюіта (у `npm test`) |
 | `wire/wire-types.ts` | Згенераваная TS-праекцыя wire-формаў каталогу і route.json + пераліку моваў; уладальнік — схемы, рукамі не рэдагаваць |

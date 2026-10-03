@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Кананічная крыніца UI-паведамленняў (G21.24)",
+  "description": "Адзін асноўны запіс на кожнае UI-паведамленне (спека 2026-10-03-single-source-translations, «Абавязковы вынік»): устойлівы ідэнтыфікатар, беларускі арыгінал (крыніцавая мова заўсёды be), кантэкст экрана/дзеяння, параметры з тыпамі, абмежаванні і фармат. Пераклады і запісы праверкі тут НЕ захоўваюцца — асобна (G21.25/G21.26). Поле migratedFrom — карта міграцыі да фактычнага каталога-крыніцы, у адбітак не ўваходзіць. sourceHash — адбітак уводаў запісу (id, source, context, parameters, constraints, format, composed, discreteForms), які захоўваецца ў запісе і пералярна правяраецца чэкерам; змена любога ўводу мяняе адбітак (criterion 3). Правілы па-за схемай (дублі ідэнтыфікатараў, кантэкст, сінтаксіс шаблонаў, выканальны код у радках, неспадзяванне хэша) — у ui-messages.mjs, кожная са сваім іменаваным правілам.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source_schema_version", "source_locale", "records"],
+  "properties": {
+    "source_schema_version": { "const": 1 },
+    "source_locale": { "enum": ["be"] },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "source", "format", "parameters", "migratedFrom", "sourceHash"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(\\.[A-Za-z0-9_#-]+)+$",
+            "maxLength": 120
+          },
+          "source": { "type": "string", "minLength": 1 },
+          "context": { "type": "string" },
+          "format": { "enum": ["plain", "template"] },
+          "composed": { "type": "boolean" },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "type"],
+              "properties": {
+                "name": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9]*$" },
+                "type": { "enum": ["string", "number", "list"] },
+                "join": { "type": "string", "minLength": 1 },
+                "fallback": { "type": "string", "minLength": 1 }
+              }
+            }
+          },
+          "constraints": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "maxLength": { "type": "integer", "minimum": 1, "maximum": 1000 },
+              "accessibility": { "enum": ["label", "hint"] }
+            }
+          },
+          "discreteForms": {
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": { "pattern": "^[A-Za-z0-9_#-]+$" },
+            "additionalProperties": { "type": "string", "minLength": 1 }
+          },
+          "migratedFrom": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "sourceHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    }
+  }
+}
