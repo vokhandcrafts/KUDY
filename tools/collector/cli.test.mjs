@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ERROR_SERIES_LIMIT } from './crawler.mjs';
@@ -17,6 +18,29 @@ import {
 import { getRawRecord, openStore, upsertRawRecord } from './store.mjs';
 
 const cliPath = fileURLToPath(new URL('./collector.mjs', import.meta.url));
+
+// Host-capability probe (the tools/corpus/import.test.mjs pattern, G21.07):
+// the read-only-directory rejection case asserts a deny that only exists on a
+// host enforcing directory mode bits. Where chmod cannot restrict a directory
+// (Windows; a root user) the case is skipped with the reason named — never
+// silently — and stays mandatory on capable hosts.
+let readonlyDirProblem = null;
+{
+  const probeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'collector-readonly-dir-probe-'));
+  fs.chmodSync(probeRoot, 0o555);
+  try {
+    fs.writeFileSync(path.join(probeRoot, 'probe.txt'), 'probe');
+    readonlyDirProblem =
+      'directory mode bits are not enforced on this host — a write into the chmod 0o555 probe directory succeeded ' +
+      '(Windows: chmod cannot make a directory read-only), so the read-only-directory rejection case has ' +
+      'no deny to assert; it stays mandatory on capable platforms';
+  } catch {
+    // expected on a capable host: the probe write was denied
+  } finally {
+    fs.chmodSync(probeRoot, 0o755);
+    fs.rmSync(probeRoot, { recursive: true, force: true });
+  }
+}
 
 function runCli(args) {
   return spawnSync(process.execPath, [cliPath, ...args], { encoding: 'utf8' });
@@ -131,7 +155,7 @@ test('run with a file:// seed writes the snapshot; status counts it', () => {
   assert.match(status.stdout, /snapshots: 1/);
 });
 
-test('a rejected run converts to the exit-2 diagnostic path (the main().catch guard)', () => {
+test('a rejected run converts to the exit-2 diagnostic path (the main().catch guard)', { skip: readonlyDirProblem ?? undefined }, () => {
   // A read-only db *directory* passes openStore (the file opens) but fails the
   // first INSERT mid-run — runCampaign rejects, and the CLI guard must turn
   // the rejection into `collector: <reason>` with exit 2. Reverting the guard
