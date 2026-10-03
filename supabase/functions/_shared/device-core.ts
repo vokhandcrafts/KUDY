@@ -170,6 +170,30 @@ export const DEVICE_INSERT_SQL =
 export const DEVICE_LOOKUP_SQL =
   'select device_id from devices where secret_hash = $1';
 
+export type DeviceAuthFailure = { status: 403; code: 'device_auth_failed' };
+
+/**
+ * The single bearer-auth preamble for the server handlers that speak the
+ * device identity (the events intake and the device-delete handler): a
+ * well-formed bearer whose hash matches a live `devices` row passes, every
+ * other shape answers the same 403 device_auth_failed. G08.01 owns the
+ * identity — no handler builds a second one.
+ */
+export async function authenticateBearerDevice(
+  authorization: string | null | undefined,
+  lookupDeviceId: (secretHash: string) => Promise<string | null>,
+): Promise<{ deviceId: string } | { answer: DeviceAuthFailure }> {
+  const secretHash = bearerSecretHash(authorization);
+  if (secretHash === null) {
+    return { answer: { status: 403, code: 'device_auth_failed' } };
+  }
+  const deviceId = await lookupDeviceId(secretHash);
+  if (deviceId === null) {
+    return { answer: { status: 403, code: 'device_auth_failed' } };
+  }
+  return { deviceId };
+}
+
 /**
  * Device deletion (`09` §5 DELETE /v1/device, G09.03): removing the devices
  * row is the whole server-side action — the FK cascades committed by the
@@ -209,15 +233,9 @@ export async function handleDeviceDeleteRequest(
   if (req.method !== 'DELETE') {
     return { status: 404, code: 'not_found' };
   }
-  const secretHash = bearerSecretHash(req.authorization);
-  if (secretHash === null) {
-    return { status: 403, code: 'device_auth_failed' };
-  }
-  const deviceId = await port.lookupDeviceId(secretHash);
-  if (deviceId === null) {
-    return { status: 403, code: 'device_auth_failed' };
-  }
-  await port.deleteDeviceRow(deviceId);
+  const auth = await authenticateBearerDevice(req.authorization, (hash) => port.lookupDeviceId(hash));
+  if ('answer' in auth) return auth.answer;
+  await port.deleteDeviceRow(auth.deviceId);
   return { status: 204 };
 }
 

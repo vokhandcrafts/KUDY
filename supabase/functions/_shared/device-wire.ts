@@ -69,7 +69,7 @@ function deviceSqlRunner(db: DeviceSqlClient): DeviceSqlRunner {
   return {
     async query(sql: string, params: (string | number | boolean | null)[]) {
       const rows = await db.unsafe(sql, params);
-      return { rows: Array.from(rows) };
+      return { rows: Array.from(rows) as Array<Record<string, unknown>> };
     },
   };
 }

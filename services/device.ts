@@ -179,19 +179,42 @@ export interface DeviceDeleteTransport {
   deleteDevice(baseUrl: string, deviceSecret: string): Promise<{ status: number }>;
 }
 
-function defaultDeleteTransport(): DeviceDeleteTransport {
+function defaultDeleteTransport(waitLimitMs: number): DeviceDeleteTransport {
   return {
     async deleteDevice(baseUrl, deviceSecret) {
-      let response: Response;
+      // N3: the parsed URL is validated before the network — the request
+      // carries the device bearer, so an unvalidated endpoint never gets it.
+      // Redirects are refused twice (the fetch option and the response
+      // guard), the same way the registration transport refuses them.
+      let endpoint: URL;
       try {
-        response = await fetch(`${baseUrl}/device`, {
-          method: 'DELETE',
-          headers: { authorization: `Bearer ${deviceSecret}` },
-        });
+        endpoint = parseSecureEndpointUrl(`${baseUrl}/device`, 'device deletion');
       } catch (error) {
+        const message = error instanceof SecureUrlError
+          ? error.message
+          : 'device deletion: the endpoint URL is not parseable';
+        throw new DeviceError('unsafe_endpoint', message, { cause: error });
+      }
+      try {
+        // G20.10 (§N4): the deletion wait is finite and covers the body read.
+        const { status } = await withWaitLimit('wait-device', waitLimitMs, async (signal) => {
+          const response = await fetch(endpoint, {
+            method: 'DELETE',
+            headers: { authorization: `Bearer ${deviceSecret}` },
+            redirect: 'error',
+            signal,
+          });
+          assertNotRedirected(endpoint, response, 'device deletion');
+          await response.text();
+          return { status: response.status };
+        });
+        return { status };
+      } catch (error) {
+        if (error instanceof SecureUrlError) {
+          throw new DeviceError('unsafe_endpoint', error.message, { cause: error });
+        }
         throw new DeviceError('network_failed', 'device delete request failed', { cause: error });
       }
-      return { status: response.status };
     },
   };
 }
@@ -217,6 +240,8 @@ export async function deleteDeviceAccount(deps: {
   /** Functions base URL, e.g. https://<ref>.supabase.co/functions/v1 */
   baseUrl: string;
   transport?: DeviceDeleteTransport;
+  /** Wait limit override for the default transport (tests; the owner is NETWORK_WAIT_LIMITS.deviceMs). */
+  waitLimitMs?: number;
 }): Promise<void> {
   const secret = await deps.secretStore.getSecret();
   if (secret === null) {
@@ -228,7 +253,7 @@ export async function deleteDeviceAccount(deps: {
     await deps.secretStore.clearSecret();
     return;
   }
-  const transport = deps.transport ?? defaultDeleteTransport();
+  const transport = deps.transport ?? defaultDeleteTransport(deps.waitLimitMs ?? NETWORK_WAIT_LIMITS.deviceMs);
   const response = await transport.deleteDevice(deps.baseUrl, secret);
   if (response.status !== 204 && response.status !== 403) {
     throw new DeviceError('server_error', `device delete failed with status ${response.status}`);
