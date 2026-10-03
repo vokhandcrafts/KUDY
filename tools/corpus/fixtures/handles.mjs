@@ -3,8 +3,8 @@
 // point into the temporary tree its after hook is about to remove. On
 // Windows the removal itself enforces that contract — rmSync answers EPERM
 // while a handle is live — so the census is the Linux/procfs probe for the
-// identical condition; on a host without /proc/self/fd it stays a no-op,
-// which the suites' results record as a reported skip, never a hidden pass.
+// identical condition; on a host without /proc/self/fd it stays a no-op —
+// documented in the task results file, never a hidden pass.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
