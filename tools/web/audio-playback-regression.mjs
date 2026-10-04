@@ -93,9 +93,10 @@ const browser = await playwright.chromium.launch();
 
 // synthetic_audio_decodes + playback_advances on the real export: both
 // bundle-locale base tracks on the free stop page.
+let serve = null;
 try {
-  const { base, close } = await serveExport(OUT_DIR);
-  const { page, blockedExternal } = await openStopPage(browser, base);
+  serve = await serveExport(OUT_DIR);
+  const { page, blockedExternal } = await openStopPage(browser, serve.base);
   const trackCount = await page.locator('audio[controls]').count();
   const tracks = [];
 
@@ -134,17 +135,21 @@ try {
     details: { tracks, external_requests_blocked: blockedExternal() },
   };
   await page.close();
-  close();
 } catch (error) {
   for (const name of ['synthetic_audio_decodes', 'playback_advances']) {
     checks[name] = { ok: false, details: { error: error instanceof Error ? error.message : String(error) } };
   }
+} finally {
+  // A failure after the server started must still end the process — an
+  // unclosed listener would hold the event loop and hang the verdict.
+  serve?.close();
 }
 
 // corrupt_asset_fails: the same export with the be base audio replaced by an
 // 85-byte placeholder-marker file — the negative case must be loud, never
 // silence (a preload="none" asset is only fetched by the play click).
 let corruptRoot = null;
+let corruptServe = null;
 try {
   corruptRoot = join(tmpdir(), `kudy-audio-corrupt-${process.pid}`);
   cpSync(OUT_DIR, corruptRoot, { recursive: true });
@@ -152,8 +157,8 @@ try {
     join(corruptRoot, BASE_AUDIO_BE),
     Buffer.concat([Buffer.from('KUDY-DEMO-AUDIO\n', 'utf8'), Buffer.alloc(48, 0x2b)]),
   );
-  const { base: corruptBase, close: closeCorrupt } = await serveExport(corruptRoot);
-  const { page } = await openStopPage(browser, corruptBase);
+  corruptServe = await serveExport(corruptRoot);
+  const { page } = await openStopPage(browser, corruptServe.base);
   await clickPlay(page, 0);
   const failure = await page
     .waitForFunction(
@@ -181,10 +186,10 @@ try {
     details: failure,
   };
   await page.close();
-  closeCorrupt();
 } catch (error) {
   checks.corrupt_asset_fails = { ok: false, details: { error: error instanceof Error ? error.message : String(error) } };
 } finally {
+  if (corruptServe) corruptServe.close();
   if (corruptRoot) rmSync(corruptRoot, { recursive: true, force: true });
 }
 
