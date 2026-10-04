@@ -1,6 +1,6 @@
 {
   "task": "G21.30 (issue #562)",
-  "generated_at": "2026-10-04T00:37:02Z",
+  "generated_at": "2026-10-04T01:01:16Z",
   "agent": "zcode-cli (GLM-5.3-Flash)",
   "subject": {
     "name": "Unicode Common Locale Data Repository (CLDR)",
@@ -315,7 +315,8 @@
       "czech_fractions": "every value with visible fraction digits (v != 0) is many — including 1.0 and 2.0 (probe.cs.cardinal.decimals)",
       "belarusian_fractions": "x.0 forms follow the integer part (1.0 one, 2.0-4.0 few, 5.0 many); non-integer decimals (0.5, 1.1, 4.5) are other",
       "be_uk_divergence": "uk rules guard with v = 0, be rules operate on n: the string \"1.0\" is one in be but other in uk; the same holds for 2.0 (few vs other)",
-      "french_spanish_millions": "exact millions (1000000, 2000000) are many in es and fr; 0 is one in fr but other in es; fr decimals 0.5/1.5 are one, 2.0 is other"
+      "french_spanish_millions": "exact millions (1000000, 2000000) are many in es and fr; 0 is one in fr but other in es; fr decimals 0.5/1.5 are one, 2.0 is other",
+      "range_semantics": "UTS#35 ranges match integer values only (2..4 does not contain 2.5); the first version of the scratch evaluator matched them as float intervals and was corrected before the final probes — be \"2.5\" is other, cross-checked via ICU Intl.PluralRules"
     }
   },
   "coverage": {
@@ -479,7 +480,8 @@
     },
     "plural_ranges": {
       "source": "cldr-core/supplemental/pluralRanges.json",
-      "be_uk_cs": "full start/end matrix over one/few/many/other",
+      "be_uk": "full 4x4 start/end matrices over one/few/many/other (16 of 16 pairs)",
+      "cs": "14 of 16 pairs (few→one and one→one absent from the file)",
       "de_en_es_fr_sv": "reduced sets (see file)"
     },
     "number_symbols": {
@@ -586,7 +588,7 @@
       "minimal_pairs": "plural minimal pairs present for all eight locales; case/gender minimal pairs present for uk/cs/de/sv (see numbers.json minimalPairs)"
     },
     "ui_phrase_dictionary": {
-      "conclusion": "CLDR supplies locale rules and names, not application phrase dictionaries; the only UI-adjacent slot inspected (characters.moreInformation) is the unfilled placeholder \"?\" in be/en/cs",
+      "conclusion": "CLDR supplies locale rules and names, not application phrase dictionaries; the only UI-adjacent slot inspected (characters.moreInformation) is the unfilled placeholder \"?\" in all eight locales",
       "benchmark": [
         {
           "term": "back",
