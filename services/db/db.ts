@@ -44,7 +44,11 @@ export class DbError extends Error {
   }
 }
 
-function inTransaction<T>(driver: SqlDriver, body: () => T): T {
+// The transaction boundary every multi-statement zone B write shares
+// (ADR G01.03 §3.3: transaction ownership is this module's). Exported for the
+// feedback repository/sync (G16.02) so their writes reuse the one idiom
+// instead of pasting a second BEGIN/COMMIT variant (jscpd gate).
+export function inTransaction<T>(driver: SqlDriver, body: () => T): T {
   driver.execSql('BEGIN IMMEDIATE');
   try {
     const result = body();

@@ -176,4 +176,20 @@ export const migrationSteps: MigrationStep[] = [
       driver.execSql(INITIAL_SCHEMA_DDL);
     },
   },
+  // G16.02 — delivery bookkeeping for the feedback queue (`21` §5.3/§5.4):
+  // attempts + next_attempt_at drive the bounded transient backoff and the
+  // Retry-After schedule; the partial unique index is the schema-level
+  // backstop of «кожная мэта мае максімум адзін in-flight запыт» — a second
+  // pending/sending mutation for one target is a write failure, the same way
+  // one_live_session guards the session. Additive only (ADR G01.03 §3.8).
+  {
+    version: 2,
+    up: (driver) => {
+      driver.execSql('ALTER TABLE feedback_outbox ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0');
+      driver.execSql('ALTER TABLE feedback_outbox ADD COLUMN next_attempt_at INTEGER');
+      driver.execSql(
+        "CREATE UNIQUE INDEX one_inflight_feedback ON feedback_outbox(target) WHERE transport_state IN ('pending', 'sending')",
+      );
+    },
+  },
 ];
