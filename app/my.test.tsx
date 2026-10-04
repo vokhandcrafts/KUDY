@@ -233,6 +233,10 @@ describe("KUDY own ratings (G16.03)", () => {
     expect(await screen.findByTestId("my-ratings-section")).toBeTruthy();
     expect(screen.getByTestId("my-rating-0")).toBeTruthy();
     expect(screen.getByTestId("my-rating-state-0").props.children).toBe(feedbackStrings("be").stateSent);
+    // The row's facts line keeps the bound identity in the canon order — the
+    // content locale, then the pinned version (issue #598).
+    const be = feedbackStrings("be");
+    expect(screen.getByText(`${be.ratingOf(4)} · ${be.targetLine("be", "1")}`)).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-rating-edit-0"));
     expect(await screen.findByTestId("screen-Feedback")).toBeTruthy();
     // The form opened bound to the row's target: the acknowledged star comes

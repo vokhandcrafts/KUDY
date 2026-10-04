@@ -370,7 +370,7 @@ function OwnRatings({
               </ScaledText>
               <ScaledText style={styles.rowLine}>
                 {desiredScore === null ? "—" : strings.ratingOf(desiredScore)} ·{" "}
-                {strings.targetLine(item.target.version, item.target.locale)}
+                {strings.targetLine(item.target.locale, item.target.version)}
               </ScaledText>
               <ScaledText style={styles.rowLine} testID={`my-rating-state-${index}`}>
                 {feedbackDeliveryWord(deliveryOfView(item), strings)}

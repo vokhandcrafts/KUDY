@@ -300,7 +300,7 @@ describe("G16.03: the place rating action (issue #74)", () => {
     fireEvent.press(screen.getByTestId("btn-place-visit-accept"));
     expect(await screen.findByTestId("screen-Feedback")).toBeTruthy();
     expect(screen.getByTestId("feedback-title").props.children).toBe(words.formTitlePlace);
-    expect(screen.getByTestId("feedback-target-line").props.children).toBe(words.targetLine("1", "be"));
+    expect(screen.getByTestId("feedback-target-line").props.children).toBe(words.targetLine("be", "1"));
   });
 
   test("without the feedback member the card offers no rating", async () => {
