@@ -1,5 +1,9 @@
 # G21.25 (issue #558): згенераваныя каталогі UI-паведамленняў
 
+*Заўвага да асяроддзя: на хасце, дзе голы `node` патрабуе
+`LD_LIBRARY_PATH=$HOME/.local/lib` (зрух libsimdjson 2026-09-30), блокі
+запускаюцца з гэтым экспартам — інакш node падае ў кожным блоку.*
+
 *Showboat дэма задачи #558: `tools/i18n/generate-messages.mjs` праецыруе
 кананічную крыніцу `contracts/ui-messages/source.json` + правераныя
 пераклады `contracts/ui-messages/translations/` у натыўныя, кантролеравыя і
@@ -29,14 +33,18 @@ generated messages: 10 files fresh
 ```sh
 echo "// hand edit" >> components/ui-strings.generated.ts
 node --experimental-strip-types tools/i18n/generate-messages.mjs --check 2>&1 | grep -c "stale generated output: components/ui-strings.generated.ts"
+node --experimental-strip-types tools/i18n/generate-messages.mjs --check >/dev/null 2>&1; echo "exit=$?"
 node --experimental-strip-types tools/i18n/generate-messages.mjs 2>/dev/null | tail -1
 node --experimental-strip-types tools/i18n/generate-messages.mjs --check 2>/dev/null
+node --experimental-strip-types tools/i18n/generate-messages.mjs --check >/dev/null 2>&1; echo "exit=$?"
 ```
 
 ```output
 1
+exit=1
 generated messages: 10 files written
 generated messages: 10 files fresh
+exit=0
 ```
 
 Рэндэр без выканання коду: умоўны хвост `composed` (пусты спіс аўдыё хавае

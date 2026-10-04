@@ -471,5 +471,6 @@ export function run(argv = process.argv.slice(2), { root = ROOT, log = console.l
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  run();
+  const verdict = run();
+  if (verdict.status === 'stale' || verdict.status === 'error') process.exitCode = 1;
 }
