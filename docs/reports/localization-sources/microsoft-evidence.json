@@ -90,7 +90,8 @@
         "grammaticalNumber",
         "geographicalUsage"
       ],
-      "geographicalUsage_BLR_entries": 1,
+      "geographicalUsage_BLR_entries": 11298,
+      "geographicalUsage_note": "single value BLR across all be term entries; no regional variation",
       "product_layers_from_definitions": [
         "Windows",
         "Windows Phone Store",
@@ -1451,6 +1452,7 @@
     ]
   },
   "channels": {
+    "embed_token_note": "full Power BI embed tokens are published verbatim on the pinned hub page (subject.hub_page, git commit pinned); omitted here to keep high-entropy base64 out of the repository (gitleaks grafana-api-key false positive)",
     "terminology_search": {
       "url": "https://msit.powerbi.com/view?r=<embed-token>",
       "http_status": 200,
