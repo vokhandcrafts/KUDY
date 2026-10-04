@@ -3226,6 +3226,61 @@
         "controllers/useFeedbackController.ts#reasonText.access_problem"
       ],
       "sourceHash": "f4417031a4fef7cc54c3916e66770fcda831e75baa3bb6e70b3dd08b9cf9f54e"
+    },
+    {
+      "id": "native.feedback.errorText.feedback-input-invalid",
+      "source": "Звесткі не прынятыя: праверце выбар",
+      "context": "Названая памылка формы: невалідны ўвод (правіла feedback-input-invalid)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#errorText.feedback-input-invalid"
+      ],
+      "sourceHash": "b22dd71560cdeeb665203c01ed389749a1e6a9c1bf8f642df722e8896dd5bd94"
+    },
+    {
+      "id": "native.feedback.errorText.feedback-write-failed",
+      "source": "Запіс не ўдаўся: паўтарыце",
+      "context": "Названая памылка формы: збой запісу (правіла feedback-write-failed)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#errorText.feedback-write-failed"
+      ],
+      "sourceHash": "4a76d282ed50222f4700e03541a4b46ea0fa43e4c7f715bd742c082c694b2999"
+    },
+    {
+      "id": "native.feedback.errorText.feedback-transport-failed",
+      "source": "Сетка не адказала: паўтарыце",
+      "context": "Названая памылка формы: збой транспарту (правіла feedback-transport-failed)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#errorText.feedback-transport-failed"
+      ],
+      "sourceHash": "ca9f043892af3e9f4cbb37a64b494f6162aef9910123df3b2221f133621b462d"
+    },
+    {
+      "id": "native.feedback.errorText.feedback-send-no-draft",
+      "source": "Няма чарнавіка для адпраўкі",
+      "context": "Названая памылка формы: адпраўка без чарнавіка (правіла feedback-send-no-draft)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#errorText.feedback-send-no-draft"
+      ],
+      "sourceHash": "606c54918b744dbaf923e0375c7be1d96fed06d613e39668887c420ab7b3855c"
+    },
+    {
+      "id": "native.feedback.errorText.feedback-resolution-required",
+      "source": "Спачатку праверце стан на серверы",
+      "context": "Названая памылка формы: патрэбны чытанне ўласнага стану (правіла feedback-resolution-required)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#errorText.feedback-resolution-required"
+      ],
+      "sourceHash": "d16eb424c719e978864af4ab241f6608a78f9eead95acc2db963e3829b630555"
     }
   ]
 }

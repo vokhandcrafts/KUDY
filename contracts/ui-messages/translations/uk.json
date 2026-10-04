@@ -2208,6 +2208,46 @@
       "review": {
         "outcome": "approved"
       }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-input-invalid",
+      "value": "Відомості не прийнято: перевірте вибір",
+      "reviewedSourceHash": "b22dd71560cdeeb665203c01ed389749a1e6a9c1bf8f642df722e8896dd5bd94",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-write-failed",
+      "value": "Запис не вдався: повторіть",
+      "reviewedSourceHash": "4a76d282ed50222f4700e03541a4b46ea0fa43e4c7f715bd742c082c694b2999",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-transport-failed",
+      "value": "Мережа не відповіла: повторіть",
+      "reviewedSourceHash": "ca9f043892af3e9f4cbb37a64b494f6162aef9910123df3b2221f133621b462d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-send-no-draft",
+      "value": "Немає чернетки для надсилання",
+      "reviewedSourceHash": "606c54918b744dbaf923e0375c7be1d96fed06d613e39668887c420ab7b3855c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-resolution-required",
+      "value": "Спочатку перевірте стан на сервері",
+      "reviewedSourceHash": "d16eb424c719e978864af4ab241f6608a78f9eead95acc2db963e3829b630555",
+      "review": {
+        "outcome": "approved"
+      }
     }
   ]
 }

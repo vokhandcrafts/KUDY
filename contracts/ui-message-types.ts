@@ -240,6 +240,9 @@ export interface FeedbackStrings {
   readonly stateConflict: string;
   readonly stateActionRequired: string;
   readonly stateDeletePending: string;
+  // The named synchronous-failure rules (FeedbackErrorRule) in words; an
+  // unknown rule renders raw (the runMapReason fallback idiom).
+  readonly errorText: Record<string, string>;
   // The End invitation (20 §7: quiet, non-modal, once per session) and the
   // place card's explicit action with the self-reported visit confirmation.
   readonly inviteTitle: string;

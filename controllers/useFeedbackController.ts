@@ -176,6 +176,13 @@ export type FeedbackUiState = {
   }) => FeedbackTarget | null;
 };
 
+// The named synchronous-failure rule in words (the feedbackDeliveryWord
+// idiom): a machine rule code never shows alone — an unknown rule renders
+// raw as the last resort.
+export function feedbackErrorWord(rule: string, strings: FeedbackStrings): string {
+  return strings.errorText[rule] ?? rule;
+}
+
 // The store-side view → the rendered delivery state; exported for the My
 // KUDY list whose rows carry the same store views the form renders.
 export function deliveryOfView(view: FeedbackStateView | null): FeedbackDelivery {

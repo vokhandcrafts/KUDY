@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   feedbackDeliveryWord,
+  feedbackErrorWord,
   feedbackStrings,
   reasonsFor,
   useFeedbackState,
@@ -191,7 +192,7 @@ export default function FeedbackForm() {
           ) : null}
           {open.error !== null ? (
             <ScaledText style={styles.diagnostic} testID="feedback-error">
-              {open.error}
+              {feedbackErrorWord(open.error, strings)}
             </ScaledText>
           ) : null}
           <ScaledText style={styles.hint}>{strings.scaleHint}</ScaledText>

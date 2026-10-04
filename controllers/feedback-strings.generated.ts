@@ -55,6 +55,13 @@ export const FEEDBACK_STRINGS_DATA = {
       "hard_to_reach": "цяжка дабрацца",
       "access_problem": "праблема доступу",
     },
+    "errorText": {
+      "feedback-input-invalid": "Звесткі не прынятыя: праверце выбар",
+      "feedback-write-failed": "Запіс не ўдаўся: паўтарыце",
+      "feedback-transport-failed": "Сетка не адказала: паўтарыце",
+      "feedback-send-no-draft": "Няма чарнавіка для адпраўкі",
+      "feedback-resolution-required": "Спачатку праверце стан на серверы",
+    },
   },
   "en": {
     "unavailable": "Feedback is unavailable",
@@ -101,6 +108,13 @@ export const FEEDBACK_STRINGS_DATA = {
       "hard_to_reach": "hard to reach",
       "access_problem": "access problem",
     },
+    "errorText": {
+      "feedback-input-invalid": "The details were not accepted: check your choice",
+      "feedback-write-failed": "The write failed: try again",
+      "feedback-transport-failed": "The network did not answer: try again",
+      "feedback-send-no-draft": "No draft to send",
+      "feedback-resolution-required": "Check the server state first",
+    },
   },
   "uk": {
     "unavailable": "Відгук недоступний",
@@ -146,6 +160,13 @@ export const FEEDBACK_STRINGS_DATA = {
       "worth_visiting": "варто відвідати",
       "hard_to_reach": "важко дістатися",
       "access_problem": "проблема доступу",
+    },
+    "errorText": {
+      "feedback-input-invalid": "Відомості не прийнято: перевірте вибір",
+      "feedback-write-failed": "Запис не вдався: повторіть",
+      "feedback-transport-failed": "Мережа не відповіла: повторіть",
+      "feedback-send-no-draft": "Немає чернетки для надсилання",
+      "feedback-resolution-required": "Спочатку перевірте стан на сервері",
     },
   },
 };
