@@ -11,17 +11,17 @@
 import { useSyncExternalStore } from "react";
 import { StyleSheet, View } from "react-native";
 
+// G21.09 (issue #542): the hint card's message shapes live in the shared
+// pure contract zone (the uk catalog stays a be fallback until the
+// translation data lands).
+import type { GuideHintStrings } from "../contracts/ui-message-types";
+
 import { PressableSurface } from "./pressable-surface";
 import { ScaledText } from "./scaled-text";
 import { tokens } from "./design-tokens";
 import type { NearbyHintBinding, NearbyHintState } from "../controllers/useNearbyController";
 
-export function guideHintStrings(locale: string): {
-  readonly heading: string;
-  readonly paid: string;
-  readonly openHint: string;
-  readonly dismiss: string;
-} {
+export function guideHintStrings(locale: string): GuideHintStrings {
   const be = {
     heading: "Побач ёсць гід…",
     paid: "платны",

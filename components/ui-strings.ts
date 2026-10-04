@@ -10,93 +10,18 @@
 // preference of createServices, switchable through its ui-locale store
 // (the L02 selection this row deferred to G14.04.d); an unknown locale
 // falls back to Belarusian, the app's first preference (the runMapStrings
-// idiom).
+// idiom). G21.09 (issue #542, criterion 2) — the UiStrings/AccessKind shapes
+// moved to the shared pure contract zone (contracts/ui-message-types.ts) and
+// re-exported here; the catalogs stay the presentation data, keyed by the
+// complete UI locales of contracts/ui-locales.ts.
 
-export type AccessKind = "free" | "paid" | "mixed";
+import type { AccessKind, UiStrings } from "../contracts/ui-message-types.ts";
+import { completeUiLocaleSelfNames, type CompleteUiLocaleCode } from "../contracts/ui-locales.ts";
 
-// The closed UI-locale vocabulary (uk-release-scope §4: the explicit choice
-// is offered in My KUDY; 09 §8's be/en canon extended by the uk package).
-export type UiLocaleCode = "be" | "en" | "uk";
+export type { AccessKind, UiStrings } from "../contracts/ui-message-types.ts";
 
-export interface UiStrings {
-  readonly back: string;
-  readonly backToCity: string;
-  // The unknown deep link's words (issue #427): the honest message and the
-  // hint that names where the catalog is — the screen never renders dev text.
-  readonly notFoundTitle: string;
-  readonly notFoundHint: string;
-  readonly loading: string;
-  readonly walk: string;
-  readonly nearby: string;
-  readonly guidesLink: string;
-  // The KUDY surface's Explore entry (issue #426): the owner's 2026-10-01
-  // decision — the history surface is named «KUDY», not «My KUDY».
-  readonly kudyLink: string;
-  readonly retry: string;
-  readonly catalogUnavailable: string;
-  readonly catalogTemporarilyUnavailable: string;
-  readonly notPublished: string;
-  readonly validCache: string;
-  readonly previewUnavailable: string;
-  readonly degradedData: string;
-  readonly myKudy: string;
-  readonly historyUnavailable: string;
-  readonly currentWalk: string;
-  readonly noCurrentWalk: string;
-  readonly pastWalks: string;
-  readonly noPastWalks: string;
-  readonly stateLabel: Record<"active" | "paused" | "finished", string>;
-  readonly heardCount: (count: number) => string;
-  // The My KUDY row lines (G06.05, AC1): the state word, the local days and
-  // the heard count stay one sentence per locale — no hard-coded preposition.
-  readonly liveRowLine: (state: string, day: string, heard: number) => string;
-  readonly pastRowLine: (startedDay: string, finishedDay: string | null, heard: number) => string;
-  readonly access: Record<AccessKind, string>;
-  readonly languagesLine: (textLocales: readonly string[]) => string;
-  readonly textAudioLine: (textLocales: readonly string[], audioLocales: readonly string[]) => string;
-  readonly stopsCount: (count: number) => string;
-  readonly sizeMb: (mb: number) => string;
-  readonly freeStopsCount: (count: number) => string;
-  readonly stopNumber: (position: number) => string;
-  // The metadata-row icon words (G06.10.c, issue #403): the standalone
-  // screen-reader label the icon contract requires — the fact line next to
-  // the icon carries the value.
-  readonly durationLabel: string;
-  readonly stopsLabel: string;
-  // The locked stop's badge word — the 🔒 never reads alone (AC1: the
-  // screen-reader label is a word, the glyph is decoration).
-  readonly locked: string;
-  readonly durationRange: (minMinutes: number, maxMinutes: number) => string;
-  readonly durationMinutes: (minutes: number) => string;
-  readonly switchConfirm: (liveTitle: string, candidateTitle: string) => string;
-  readonly switchAccept: string;
-  readonly cancel: string;
-  // G15.03 (issue #70) — the discovery surfaces' chrome words (BE/EN): the
-  // Explore entry, the honest states and the labeled facts of the offer
-  // cards. The maps' fallback in the screens is the raw contract value — an
-  // unknown reason, difference or season renders verbatim, never dropped.
-  readonly whatToDo: string;
-  readonly discoveryTitle: string;
-  readonly discoveryUnavailable: string;
-  readonly discoveryTemporarilyUnavailable: string;
-  readonly discoveryEmpty: string;
-  readonly discoveryAlternatives: string;
-  readonly collectionUnavailable: string;
-  readonly collectionUnresolved: string;
-  readonly timeUnlimited: string;
-  readonly timeCap: (minutes: number) => string;
-  readonly seasonName: Record<string, string>;
-  readonly reasonText: Record<string, string>;
-  readonly differenceText: Record<string, string>;
-  // G14.04.d (issue #305) — the My KUDY language row (uk-release-scope §4:
-  // «Мова прапануецца ў My KUDY»): the row's label and the options' self
-  // names, which are the same native words in every catalog — a language is
-  // never named through a translation.
-  readonly languageLabel: string;
-  readonly languageSelfNames: Record<UiLocaleCode, string>;
-}
+const STRINGS: Record<CompleteUiLocaleCode, UiStrings> = {
 
-const STRINGS: Record<UiLocaleCode, UiStrings> = {
   be: {
     // G06.10 (issue #432): the back words carry no text arrow — the one
     // arrow image is the Lucide glyph BackButton renders; the word alone is
@@ -170,7 +95,9 @@ const STRINGS: Record<UiLocaleCode, UiStrings> = {
       season_not_recommended: "не для гэтага сезону",
     },
     languageLabel: "Мова",
-    languageSelfNames: { be: "Беларуская", en: "English", uk: "Українська" },
+    // The self-name words come from the one locale registry (G21.09): the
+    // same native words in every catalog, defined once in contracts.
+    languageSelfNames: completeUiLocaleSelfNames(),
   },
   en: {
     back: "Back",
@@ -242,7 +169,9 @@ const STRINGS: Record<UiLocaleCode, UiStrings> = {
       season_not_recommended: "not for this season",
     },
     languageLabel: "Language",
-    languageSelfNames: { be: "Беларуская", en: "English", uk: "Українська" },
+    // The self-name words come from the one locale registry (G21.09): the
+    // same native words in every catalog, defined once in contracts.
+    languageSelfNames: completeUiLocaleSelfNames(),
   },
   uk: {
     // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1). The
@@ -317,7 +246,9 @@ const STRINGS: Record<UiLocaleCode, UiStrings> = {
       season_not_recommended: "не для цього сезону",
     },
     languageLabel: "Мова",
-    languageSelfNames: { be: "Беларуская", en: "English", uk: "Українська" },
+    // The self-name words come from the one locale registry (G21.09): the
+    // same native words in every catalog, defined once in contracts.
+    languageSelfNames: completeUiLocaleSelfNames(),
   },
 };
 
