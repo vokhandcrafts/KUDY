@@ -41,7 +41,7 @@ export function pgliteFeedbackRunner(db: PGlite): FeedbackSqlRunner {
     transaction: (work) =>
       db.transaction((tx) =>
         work({
-          query: (sql, params) => (tx as PGlite).query(sql, (params ?? []) as unknown[]),
+          query: (sql, params) => (tx as unknown as PGlite).query(sql, (params ?? []) as unknown[]),
         }),
       ),
   };
@@ -58,7 +58,7 @@ export function pgliteFeedbackClient(db: PGlite): FeedbackSqlClient {
     begin: (work) =>
       db.transaction((tx) =>
         work({
-          unsafe: async (sql, params) => (await (tx as PGlite).query(sql, params as unknown[])).rows,
+          unsafe: async (sql, params) => (await (tx as unknown as PGlite).query(sql, params as unknown[])).rows,
         }),
       ),
   };
