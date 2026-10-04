@@ -1,0 +1,59 @@
+(node:5536) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/rc-webhook-core.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a signed refund (CANCELLATION) persists the event and drops the cached rights of app_user_id and uuid aliases (2181.6166ms)
+✔ a tampered signature is 401 and changes no rights (issue proof: падроблены подпіс → правы не змяніліся) (1916.5476ms)
+✔ a signature from a foreign secret, a missing or malformed header, and a stale timestamp are all 401 (2166.8814ms)
+✔ the HMAC covers the raw bytes: one flipped body byte with the original signature is 401 (2582.133ms)
+✔ an oversized body is 400 before the signature gate: nothing is persisted or executed (2230.3887ms)
+✔ corrupt payloads answer 400 without a crash, a persist or a rights change (1660.6333ms)
+✔ a duplicate delivery answers 200, keeps one event row and applies the effects once (issue proof: дубль → адна змена) (1541.6238ms)
+✔ a duplicate after a crash between persist and effects re-applies the idempotent effect (at-least-once, 09 §5.1) (1546.3564ms)
+✔ TRANSFER drops the cached rights of transferred_from devices only; transferred_to stays (1567.0315ms)
+✔ bookkeeping events (TEST, INITIAL_PURCHASE, BILLING_ISSUE, …) persist but touch no rights (1257.472ms)
+✔ a store fault never yields 200: the handler propagates it and nothing is half-applied (1027.2312ms)
+✔ affectedDeviceIds is total over corrupt shapes: null elements, wrong types and non-uuid strings contribute nothing (0.6222ms)
+✔ parseWebhookEvent keeps a non-integer event_timestamp_ms out of the persisted row (0.1151ms)
+✔ webhook_payload_minimized: the durable payload keeps only the accounting fields — device identity and subscriber personal data never reach the row (G20.12, spec N6) (1016.377ms)
+✔ replay_does_not_resurrect: after the retention sweep purges the event row, the replayed delivery re-persists it but can only drop cache rows — rights and the device account never come back (G20.12) (1018.188ms)
+✔ guard: the grant and device paths import nothing from the webhook core — integration off ⇒ grant/restore unchanged (2.9073ms)
+(node:21236) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/retention-core.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ term: 14 months subtract with day-of-month clamping, matching SQL interval arithmetic (2.3525ms)
+✔ rate counters: a window older than the bound is dead, a fresh one is never touched (0.3102ms)
+✔ PGlite term: the sweep deletes exactly the events past the 14-month boundary — recent and boundary rows stay (1535.2178ms)
+✔ PGlite volume: five hundred aged-out events go in one pass, ordered by the cutoff alone (952.0493ms)
+✔ PGlite order: a second sweep deletes nothing, and the sweep never resurrects newer rows (884.4689ms)
+✔ PGlite rate counters: dead windows of live devices are swept, fresh windows and both tables stay usable (897.6951ms)
+✔ webhook_expiry_purge: webhook bookkeeping rows past the protective bound are swept by received_at, the boundary row stays, a repeated pass deletes nothing (937.146ms)
+(node:10968) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ guard: every feedback table is RLS-enabled, revoked from clients, granted to service_role (1.5574ms)
+✔ guard: the device-owned feedback tables cascade on device delete (0.4411ms)
+✔ guard: the current-row shape is schema-checked (scale, tombstone state, revision) (0.5024ms)
+✔ guard: the CAS lock statement serializes same-key writers (0.1145ms)
+✔ guard: the contract limits are the spec numbers (0.1001ms)
+✔ anon and authenticated cannot touch the feedback tables, even with a grant re-added (1379.2502ms)
+✔ the registry and rows survive device deletion; the device-owned rows do not (971.8551ms)
+✔ deleted device credentials cannot recreate rows (895.4011ms)
+✔ prepared targets fail closed with 503; publication reconciles an interrupted import (856.6831ms)
+✔ a malformed export is rejected before any write (880.6164ms)
+✔ same-revision writes yield one success and one conflict; stale deletes cannot overwrite (963.9134ms)
+✔ a different payload under the same mutation_id conflicts with 409 (857.0324ms)
+✔ a duplicate that raced past the original replays after the lock, never 503s (846.1765ms)
+✔ forged-bearer failures count toward the shared IP bucket (869.7379ms)
+✔ the device and IP limits answer 429 with Retry-After; reads count too (892.1208ms)
+✔ envelope failures: unknown path, oversized body, invalid JSON (1046.8114ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 68201.8807

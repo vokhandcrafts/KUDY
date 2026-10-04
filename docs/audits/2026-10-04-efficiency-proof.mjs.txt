@@ -1,0 +1,136 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createHash } from 'node:crypto';
+import { DatabaseSync } from 'node:sqlite';
+import { readMomentFacts } from './services/contentRepo/momentFacts.ts';
+import { createPlaceDetailController } from './controllers/place/placeDetailController.ts';
+import { openDatabase, listSessionHistory } from './services/db/db.ts';
+import { flushEvents } from './services/eventLog.ts';
+import { runMapView } from './controllers/run/runMap.ts';
+import { step, defaultEngineConfig } from './core/engine/reducer.ts';
+import { initialRunState } from './core/engine/state.ts';
+import { createCatalogService } from './services/catalog/catalogService.ts';
+import { createSchema } from './tools/collector/store.mjs';
+import { startDispatcher } from './tools/collector/dispatcher.mjs';
+
+const output = {};
+const encode = (doc) => new TextEncoder().encode(JSON.stringify(doc));
+const audio = new Uint8Array(1024 * 1024);
+
+async function teaserProbe(routes, perRoute) {
+  const counts = { audioReads: 0, audioBytes: 0, stopsReads: 0, statCalls: 0 };
+  const store = {
+    async listDir(rel) {
+      if (rel === 'bundles') return Array.from({ length: routes }, (_, i) => `r-${i}`);
+      if (/^bundles\/r-\d+$/.test(rel)) return ['1'];
+      return null;
+    },
+    async readFile(rel) {
+      if (rel.endsWith('/moments.json')) return { kind: 'present', bytes: encode(Array.from({ length: perRoute }, (_, i) => ({ id: `m-${i}`, place_id: `p-${i}`, story_id: `s-${i}`, kind: 'teaser', cooldown_min: 60 }))) };
+      if (rel.endsWith('.m4a')) { counts.audioReads++; counts.audioBytes += audio.byteLength; return { kind: 'present', bytes: audio }; }
+      if (rel.endsWith('/stops.json')) { counts.stopsReads++; return { kind: 'present', bytes: encode(Array.from({ length: perRoute }, (_, i) => ({ story_id: `s-${i}`, text: `text ${i}` }))) }; }
+      return { kind: 'absent' };
+    },
+    async statSize() { counts.statCalls++; return audio.byteLength; },
+  };
+  const binding = createPlaceDetailController({
+    service: { loadNearby: async () => ({ kind: 'ready', offers: [], degraded: null }) },
+    moments: () => readMomentFacts(store, { locales: ['be'] }),
+    placeId: 'p-0',
+  });
+  await new Promise((resolve) => { const stop = binding.store.subscribe((state) => { if (state.kind !== 'loading') { stop(); resolve(); } }); });
+  const state = binding.store.getState();
+  assert.equal(state.kind, 'ready');
+  assert.equal(state.moments.length, routes);
+  assert.equal(counts.audioReads, routes * perRoute);
+  return { routes, perRoute, shownTeasers: state.moments.length, ...counts };
+}
+output.teasers = [await teaserProbe(1, 10), await teaserProbe(5, 20)];
+
+const sqlite = new DatabaseSync(':memory:');
+const allReads = [];
+const driver = {
+  execSql: (sql) => sqlite.exec(sql),
+  prepare(sql) {
+    const statement = sqlite.prepare(sql);
+    return {
+      all(...args) { const rows = statement.all(...args); allReads.push({ sql, rows: rows.length }); return rows; },
+      get: (...args) => statement.get(...args),
+      run: (...args) => statement.run(...args),
+    };
+  },
+};
+try {
+  openDatabase(driver);
+  sqlite.exec('BEGIN');
+  const event = sqlite.prepare('INSERT INTO event_queue(event_id,type,at,schema_version,payload) VALUES (?,?,?,?,?)');
+  for (let i = 0; i < 20000; i++) event.run(`e-${i}`, 'app_open', i, 1, JSON.stringify({ filler: 'x'.repeat(1024) }));
+  const session = sqlite.prepare("INSERT INTO session(session_id,route_id,version,locale,state,started_at,finished_at) VALUES (?, 'r', '1', 'be', 'finished', ?, ?)");
+  for (let i = 0; i < 10000; i++) session.run(`session-${i}`, i, i + 1);
+  sqlite.exec('COMMIT');
+  let sentBatchSize = 0;
+  await assert.rejects(flushEvents(driver, async (events) => { sentBatchSize = events.length; throw new Error('synthetic offline'); }), /synthetic offline/);
+  const eventRead = allReads.find((row) => row.sql.includes('FROM event_queue'));
+  assert.equal(eventRead.rows, 20000);
+  assert.equal(sentBatchSize, 256);
+  output.events = { selectedRowsBeforeFirstSend: eventRead.rows, attemptedBatch: sentBatchSize, pendingAfterFailure: Number(sqlite.prepare('SELECT count(*) AS n FROM event_queue WHERE sent=0').get().n), queryPlan: sqlite.prepare(`EXPLAIN QUERY PLAN ${eventRead.sql}`).all().map((row) => row.detail) };
+  output.history = { selectedRows: listSessionHistory(driver).length, queryPlan: sqlite.prepare('EXPLAIN QUERY PLAN SELECT session_id FROM session ORDER BY started_at DESC, session_id DESC').all().map((row) => row.detail) };
+} finally { sqlite.close(); }
+
+function countedArray(values, counter) {
+  return new Proxy(values, { get(target, key, receiver) { if (/^\d+$/.test(String(key))) counter.n++; return Reflect.get(target, key, receiver); } });
+}
+output.map = [10, 100, 1000].map((n) => {
+  const stops = Array.from({ length: n }, (_, i) => ({ stopId: `stop-${i}`, storyBaseId: `story-${i}`, lat: 54 + i / 100000, lng: 18 + i / 100000, radius: 30 }));
+  const start = { type: 'Start', sessionId: 's', routeId: 'r', version: '1', locale: 'be', tier: ['base'], accessibleStopIds: stops.map((s) => s.stopId), stops };
+  const { state } = step(initialRunState, start, 1000, defaultEngineConfig);
+  assert.equal(state.phase, 'Active');
+  const geometryReads = { n: 0 }, engineStopReads = { n: 0 };
+  const countedState = { ...state, stops: countedArray(state.stops, engineStopReads) };
+  const facts = stops.map((s) => ({ stopId: s.stopId, placeId: `p-${s.stopId}`, name: { be: s.stopId } }));
+  const view = runMapView(countedState, countedArray(stops, geometryReads), facts, [], ['be']);
+  assert.equal(view.markers.length, n);
+  return { stops: n, geometryElementReads: geometryReads.n, engineStopElementReads: engineStopReads.n };
+});
+
+const indexText = fs.readFileSync('fixtures/discovery-contract/index-valid.json', 'utf8');
+const catalog = JSON.parse(fs.readFileSync('fixtures/discovery-contract/catalog-with-discovery.json', 'utf8'));
+catalog.discovery_index.bytes = new TextEncoder().encode(indexText).byteLength;
+catalog.discovery_index.sha256 = createHash('sha256').update(indexText).digest('hex');
+const calls = [], sha256 = async (bytes) => createHash('sha256').update(bytes).digest('hex');
+const catalogService = createCatalogService({ sha256, loader: async (rel) => { calls.push(rel); if (rel === 'catalog.json') return JSON.stringify(catalog); if (rel === catalog.discovery_index.path) return indexText; const r = catalog.routes[0]; return JSON.stringify({ route_id: r.route_id, version: r.version, access: 'free_base', stops: [] }); } }, { localePreference: ['be', 'en'] });
+await catalogService.load(null);
+await catalogService.loadNearby(null);
+await catalogService.loadPreview(catalog.routes[0].route_id, null);
+output.catalog = { calls, catalogReads: calls.filter((x) => x === 'catalog.json').length, sameIndexReads: calls.filter((x) => x === catalog.discovery_index.path).length };
+
+const scratch = path.resolve('.scratch');
+fs.mkdirSync(scratch, { recursive: true });
+const file = path.join(scratch, `efficiency-collector-${process.pid}.sqlite`);
+assert.equal(path.dirname(file), scratch);
+let dispatcher;
+const collectionDb = new DatabaseSync(file);
+try {
+  createSchema(collectionDb);
+  collectionDb.exec('BEGIN');
+  collectionDb.prepare("INSERT INTO campaigns(id,city,source_path,content_hash,seeds,topics,fence,youtube,created_at) VALUES ('campaign','city','source','hash','[]','[]','{}','[]','2026-10-04')").run();
+  const record = collectionDb.prepare("INSERT INTO raw_records(id,campaign_id,source_type,url,collected_at,city,topics,rights) VALUES (?,'campaign','web',?,'2026-10-04','city','[]','research_only')");
+  const link = collectionDb.prepare("INSERT INTO links(raw_record_id,anchor_text,url,context) VALUES (?,'anchor','https://example.invalid','synthetic')");
+  for (let i = 0; i < 1000; i++) { record.run(`record-${i}`, `https://example.invalid/${i}`); for (let j = 0; j < 10; j++) link.run(`record-${i}`); }
+  collectionDb.exec('COMMIT');
+  const plan = collectionDb.prepare('EXPLAIN QUERY PLAN SELECT r.id, (SELECT COUNT(*) FROM links l WHERE l.raw_record_id = r.id) AS links FROM raw_records r').all().map((row) => row.detail);
+  collectionDb.close();
+  dispatcher = await startDispatcher({ dbPath: file, snapshotsRoot: scratch, port: 0 });
+  const response = await fetch(`http://127.0.0.1:${dispatcher.port}/records`);
+  const html = await response.text();
+  assert.equal(response.status, 200);
+  const rendered = (html.match(/record\?id=record-/g) ?? []).length;
+  assert.equal(rendered, 1000);
+  output.collector = { records: 1000, links: 10000, renderedRows: rendered, responseBytes: Buffer.byteLength(html), linkCountQueryPlan: plan };
+} finally {
+  if (collectionDb.isOpen) collectionDb.close();
+  if (dispatcher) await dispatcher.close();
+  if (fs.existsSync(file)) fs.unlinkSync(file);
+}
+console.log(JSON.stringify(output, null, 2));
