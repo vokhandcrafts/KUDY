@@ -7,10 +7,13 @@
 // stays «захавана на прыладзе», the acknowledged one «адпраўлена»). The
 // language guards (issue #598): the UI-language switch with the form open
 // re-renders the words and keeps the bound target facts, and a stale
-// persisted locale renders the be fallback words.
+// persisted locale renders the be fallback words. The exit guard (issue
+// #599): the real Back press pops the route and the unmount cleanup leaves
+// the form closed in the controller's singleton store.
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
-import { fireEvent, renderRouter, screen } from "expo-router/testing-library";
+import { fireEvent, renderRouter, screen, testRouter } from "expo-router/testing-library";
 import { act } from "@testing-library/react-native";
+import { View } from "react-native";
 
 import FeedbackForm from "./feedback";
 import { createServices } from "../controllers/createServices";
@@ -158,5 +161,27 @@ describe("G16.03: the rating form route (issue #74)", () => {
     expect(screen.getByTestId("feedback-title").props.children).toBe(strings.formTitleGuide);
     expect(screen.getByTestId("btn-feedback-send").props.accessibilityLabel).toBe(strings.send);
     expect(screen.getByTestId("feedback-target-line").props.children).toBe(strings.targetLine("be", "1"));
+  });
+
+  test("the Back press closes the form in the controller store (the cleanup runs on unmount)", async () => {
+    const { services } = feedbackServices();
+    renderRouter(
+      {
+        index: () => <View />,
+        ...withRoutes(services),
+      },
+      { initialUrl: "/" },
+    );
+    // The imperative router is the singleton the BackButton navigates with:
+    // the push gives the back press a real stack entry to pop.
+    testRouter.push("/feedback?kind=guide&id=guide-route-a1&version=1&locale=be");
+    await screen.findByTestId("feedback-title");
+    expect(services.feedback?.controller?.getState().form.kind).toBe("open");
+    fireEvent.press(screen.getByTestId("btn-feedback-back"));
+    // The route exit runs the unmount cleanup: if closeForm stops running,
+    // the form stays open in the singleton store after the surface is gone
+    // (issue #599).
+    expect(services.feedback?.controller?.getState().form.kind).toBe("closed");
+    expect(screen.queryByTestId("feedback-title")).toBeNull();
   });
 });
