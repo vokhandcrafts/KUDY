@@ -1,0 +1,79 @@
+{
+  "teasers": [
+    {
+      "routes": 1,
+      "perRoute": 10,
+      "shownTeasers": 1,
+      "audioReads": 10,
+      "audioBytes": 10485760,
+      "stopsReads": 10,
+      "statCalls": 0
+    },
+    {
+      "routes": 5,
+      "perRoute": 20,
+      "shownTeasers": 5,
+      "audioReads": 100,
+      "audioBytes": 104857600,
+      "stopsReads": 100,
+      "statCalls": 0
+    }
+  ],
+  "events": {
+    "selectedRowsBeforeFirstSend": 20000,
+    "attemptedBatch": 256,
+    "pendingAfterFailure": 20000,
+    "queryPlan": [
+      "SCAN event_queue",
+      "USE TEMP B-TREE FOR ORDER BY"
+    ]
+  },
+  "history": {
+    "selectedRows": 10000,
+    "queryPlan": [
+      "SCAN session",
+      "USE TEMP B-TREE FOR ORDER BY"
+    ]
+  },
+  "map": [
+    {
+      "stops": 10,
+      "geometryElementReads": 75,
+      "engineStopElementReads": 120
+    },
+    {
+      "stops": 100,
+      "geometryElementReads": 5250,
+      "engineStopElementReads": 10200
+    },
+    {
+      "stops": 1000,
+      "geometryElementReads": 502500,
+      "engineStopElementReads": 1002000
+    }
+  ],
+  "catalog": {
+    "calls": [
+      "catalog.json",
+      "discovery/city-a/r-2026-09-14-1/index.json",
+      "catalog.json",
+      "discovery/city-a/r-2026-09-14-1/index.json",
+      "catalog.json",
+      "discovery/city-a/r-2026-09-14-1/index.json",
+      "bundle/guide-route-a1/1/route.json"
+    ],
+    "catalogReads": 3,
+    "sameIndexReads": 3
+  },
+  "collector": {
+    "records": 1000,
+    "links": 10000,
+    "renderedRows": 1000,
+    "responseBytes": 325511,
+    "linkCountQueryPlan": [
+      "SCAN r USING COVERING INDEX sqlite_autoindex_raw_records_1",
+      "CORRELATED SCALAR SUBQUERY 1",
+      "SCAN l"
+    ]
+  }
+}
