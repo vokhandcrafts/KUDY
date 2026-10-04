@@ -16,7 +16,7 @@
     "curl -sL https://iate.europa.eu/em-api/artifacts/full-tbx -o IATE_download.zip  # 303 -> https://s3.eu-central-1.amazonaws.com/iate2-tbx/IATE_download.zip",
     "curl -s https://iate.europa.eu/em-api/inventories/_languages?offset=O&limit=50  # paginated, 132 items, each /inventories/{id} -> {name, code, is_official}",
     "curl -s -X POST https://iate.europa.eu/em-api/entries/_search -H 'Content-Type: application/json' -d '{\"query\":\"back\",\"source\":\"en\",\"targets\":[\"uk\",\"de\",\"es\",\"fr\",\"cs\",\"sv\"],\"search_in_fields\":[0],\"search_in_term_types\":[0,1,2,3,4],\"query_operator\":1,\"offset\":0,\"limit\":3}'",
-    "curl -s https://iate.europa.eu/em-api/entries/{entry-code} -H 'Accept: application/json'  # full entry: language sections with term_entries[].term_value",
+    "curl -s https://iate.europa.eu/em-api/entries/{entry-code} -H 'Accept: application/json'  # full entry: language map (and crossrefs[].languages) with term_entries[].term_value",
     "python3 zip-stream scan of IATE_export_26022019.tbx for xml:lang=\"...\" attribute counts"
   ],
   "artifacts": [
