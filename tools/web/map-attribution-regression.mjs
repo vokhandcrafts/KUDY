@@ -19,35 +19,23 @@
 // Requires a current static export: `npm run build` in web/. Playwright
 // resolves from the root node_modules; the chromium binary comes from
 // `npx playwright install chromium` (not wired into the standard runner —
-// see the collector's loadPlaywright seam for the same pattern).
+// the shared seam lives in regression-common.mjs, the collector's
+// loadPlaywright pattern).
 import assert from 'node:assert/strict';
-import { existsSync, statSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { createStaticServer } from '../serve-static.mjs';
+import { join } from 'node:path';
+import { loadChromium, parseExportArgs, serveExport } from './regression-common.mjs';
 
-const TOOL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)));
-const REPO_ROOT = resolve(TOOL_ROOT, '..', '..');
-const OUT_DIR = process.argv.includes('--out')
-  ? resolve(process.argv[process.argv.indexOf('--out') + 1])
-  : join(REPO_ROOT, 'web', 'out');
-const SHOTS_DIR = process.argv.includes('--shots')
-  ? resolve(process.argv[process.argv.indexOf('--shots') + 1])
-  : null;
+const { outDir: OUT_DIR, shotsDir: SHOTS_DIR } = parseExportArgs(process.argv);
 const LIVE = process.argv.includes('--live');
 const WIDTHS = [320, 390, 1440];
 
-const playwright = await import('playwright').catch(() => null);
-assert.ok(playwright, 'playwright is not installed — the browser regression needs: npm install && npx playwright install chromium');
-const executable = playwright.chromium.executablePath();
-assert.ok(existsSync(executable), `chromium binary is missing at ${executable} — run: npx playwright install chromium`);
+const playwright = await loadChromium();
 assert.ok(existsSync(join(OUT_DIR, 'map.html')), `web/out/map.html is missing (${OUT_DIR}) — run \`npm run build\` in web/ first`);
 
 if (SHOTS_DIR) await mkdir(SHOTS_DIR, { recursive: true });
-const server = createStaticServer(OUT_DIR);
-await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));
-const base = `http://127.0.0.1:${server.address().port}`;
+const { base, close } = await serveExport(OUT_DIR);
 
 const browser = await playwright.chromium.launch();
 const failures = [];
@@ -154,7 +142,7 @@ for (const width of WIDTHS) {
 }
 
 await browser.close();
-server.close();
+close();
 console.log(JSON.stringify({ mode: LIVE ? 'live' : 'deterministic', widths: WIDTHS, failures, summary }, null, 2));
 if (failures.length > 0) {
   console.error(`map-attribution regression failed: ${failures.map((f) => `${f.width}px — ${f.message}`).join('; ')}`);
