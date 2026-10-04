@@ -53,11 +53,14 @@ const MIGRATION_KIND = 'migration';
 
 // The (locale → ids) translation requirements the generator's output plan
 // actually renders. The plan lives in the generator (DOMAINS) and is imported
-// from there — the gate restates nothing (implementation-rules 2), so the two
-// can never drift: a new planned output locale becomes gate-checked the same
-// commit it joins the plan. Records a plan output replaces wholesale (the
-// registry self-names) need no translation record — buildLocaleTree renders
-// them from the registry, not from the set.
+// from there — no plan data is restated (implementation-rules 2), and a new
+// planned output locale becomes gate-checked the same commit it joins the
+// plan. The two selection predicates below (the domain filter and the
+// selfNames skip) deliberately mirror buildLocaleTree's rendering decisions;
+// a divergence turns the freshness leg or standard_gate_green red on the same
+// commit. Records a plan output replaces wholesale (the registry self-names)
+// need no translation record — buildLocaleTree renders them from the
+// registry, not from the set.
 export function plannedTranslationRequirements(sourceDoc) {
   const sourceLocale = sourceDoc.source_locale;
   const required = new Map();
