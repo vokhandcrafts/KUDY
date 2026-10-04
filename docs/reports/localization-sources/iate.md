@@ -42,7 +42,7 @@ IATE 3.2.0 (білд 24.06.2026, абвешчана новае разгортв�
 
 Асноўныя каманды — у манефесце. Даступ без уліковых запісаў і ключоў.
 
-- **Ананімны банка-экспарт**: `https://iate.europa.eu/em-api/artifacts/full-tbx` (303 →
+- **Ананімны масавы экспарт**: `https://iate.europa.eu/em-api/artifacts/full-tbx` (303 →
   S3 `iate2-tbx/IATE_download.zip`). Праверана: 112 828 998 байт,
   `Last-Modified: 30.09.2019`, ETag `"9c5b10aa…-7"`, sha256
   `ac50c2a701484f3108eec6aea80ee23b5da0c0a2062fd5cc72790ac57ccf5c6f`; унутры адзін файл
@@ -89,7 +89,7 @@ purchase, restore, unavailable — з кантэкстам KUDY (гід/экск
 | Back (вяртанне) | back | — | — | Dorsum, Ruecken | — | dos | — | — | негатыў: анатомія |
 | Cancel (скасаванне) | cancel, CAN | — | — | Streichung, Löschung | anulación, cancelación | annulation | — | — | негатыў: сімвал/дакумент |
 | Settings (налады) | settings | — | — | Einstellwerte | características de regulación | caractéristiques de réglage | — | inställningsvärden | негатыў: тэхпараметры |
-| guide (гід-чалавек) | guide | — | — | Begleiter, Zugbegleiter | guía, acompañante | accompagnateur | — | — | негатыў: суправаджэнне ў цягніку |
+| guide (гід-чалавек) | guide | — | — | Begleiter, Zugbegleiter | guía, acompañante | accompagnateur | — | — | змешаны: просты guide — іншыя дамёны, турыстычны сэнс толькі ў «tourist guide» |
 | stop (спыніць аўдыё) | stop | — | — | Anhaltung | alto policial | interpellation | legitimování policií | kvarhållande | негатыў: затрыманне паліцыяй |
 | walk (прагулка) | cat walk | — | — | Laufsteg | pasarela | passavant | — | — | негатыў: кацянка на судне |
 | download (спампаваць) | to download | — | — | herunterladen | descargar | télécharger | stáhnout | ladda ned | **стысны**: дзеяслоў супадае |
@@ -103,8 +103,8 @@ purchase, restore, unavailable — з кантэкстам KUDY (гід/экск
 ### 5.2 Станоўчыя прыклады
 
 - **download / to download** — адзіны тэрмін з прамым UI-сэнсам: дзеяслоў «спампоўваць»
-  у дамене апрацоўкі даных ва ўсіх шасці моваў ЕС, у тым ліку цэжскіх дзеясловах
-  (stáhnout/stahovat) і шведскім лёд-варыянце (ladda ned/hämta).
+  у дамене апрацоўкі даных ва ўсіх шасці моваў ЕС, у тым ліку чэскіх дзеясловах
+  (stáhnout/stahovat) і шведскім варыянце (ladda ned/hämta).
 - **Турыстычны дамейн (праб даследавання)**: «tourist guide» — адна зборка з дакладным сэнсам
   ва ўсіх 24 афіцыйных мовах: de Fremdenführer/Gästeführer, es guía turístico,
   fr guide touristique, cs turistický průvodce, sv turistguide, da turistguide,
