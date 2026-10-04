@@ -1007,7 +1007,10 @@ describe("G16.03: the End invitation (issue #74)", () => {
     return { feedback: { driver, sync } };
   }
 
-  test("after End the quiet invitation offers the walk's own target; dismissing keeps the ended walk", async () => {
+  // The shared arrange of the invitation scenarios: a walk with one heard
+  // story, ended through the confirmation, the invitation on screen (a
+  // sibling copy is a jscpd clone — the G06.04 suite's lesson).
+  async function endedWithInvitation(): Promise<ReturnType<typeof makeRunSession>> {
     const world = makeRunSession();
     const services = createServices({
       bundlesStore: memoryBundles(layerFiles("be")),
@@ -1024,9 +1027,15 @@ describe("G16.03: the End invitation (issue #74)", () => {
     fireEvent.press(screen.getByTestId("btn-run-end"));
     fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
     expect(await screen.findByTestId("run-ended")).toBeTruthy();
+    expect(await screen.findByTestId("run-feedback-invite")).toBeTruthy();
+    return world;
+  }
+
+  test("after End the quiet invitation offers the walk's own target; dismissing keeps the ended walk", async () => {
+    await endedWithInvitation();
     // The invitation names the walk's own pinned identity and renders as a
     // plain card — the map and Back stay reachable (non-modal).
-    expect(await screen.findByTestId("run-feedback-invite")).toBeTruthy();
+    expect(screen.getByTestId("run-feedback-invite")).toBeTruthy();
     fireEvent.press(screen.getByTestId("btn-run-invite-dismiss"));
     await waitFor(() => expect(screen.queryByTestId("run-feedback-invite")).toBeNull());
     // Skipping a rating never blocks anything: the ended surface stays.
@@ -1034,22 +1043,7 @@ describe("G16.03: the End invitation (issue #74)", () => {
   });
 
   test("the rate action opens the form bound to the ended session's pinned identity", async () => {
-    const world = makeRunSession();
-    const services = createServices({
-      bundlesStore: memoryBundles(layerFiles("be")),
-      run: { session: world.session },
-      ...feedbackPorts(),
-    });
-    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
-    await screen.findByTestId("run-map");
-    await soundStop2({ locationPort: world.locationPort, advance: world.advance });
-    act(() => {
-      world.audioPort.finish(1);
-    });
-    await waitFor(() => expect(screen.getByTestId("btn-run-end")).toBeTruthy());
-    fireEvent.press(screen.getByTestId("btn-run-end"));
-    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
-    expect(await screen.findByTestId("run-ended")).toBeTruthy();
+    await endedWithInvitation();
     fireEvent.press(screen.getByTestId("btn-run-invite-rate"));
     // The form route opens with the walk's pinned version/locale (1/be) —
     // the session facts, never a catalog read (acceptance 5).

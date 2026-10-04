@@ -68,6 +68,25 @@ function makeWorld(
   return { controller: createFeedbackController({ driver, sync, repository: feedbackRepository, now: () => NOW, makeMutationId: () => M1 }), transport };
 }
 
+// An identified world whose transport must never be called: for the
+// scenarios that assert local-only behavior (no wire, no stored rows).
+function idleWorld(): { driver: ReturnType<typeof openIdentifiedStore>; controller: Controller; transport: ReturnType<typeof scriptedTransport> } {
+  const driver = openIdentifiedStore();
+  const transport = scriptedTransport(() => err503Never());
+  const sync = createFeedbackSync({
+    driver,
+    secretStore: secretBox('secret-a'),
+    baseUrl: 'https://functions.example.co/functions/v1',
+    transport,
+    now: () => NOW,
+  });
+  return {
+    driver,
+    transport,
+    controller: createFeedbackController({ driver, sync, repository: feedbackRepository, now: () => NOW, makeMutationId: () => M1 }),
+  };
+}
+
 const lastForm = (controller: Controller) => {
   const form = controller.getState().form;
   assert.equal(form.kind, 'open', 'the form must be open');
@@ -123,16 +142,7 @@ describe('G16.03 — the End invitation (20 §7, task step 2)', () => {
 
 describe('G16.03 — the form opens honestly (task step 1, acceptance 1)', () => {
   test('no preselected star and dismissal writes nothing', () => {
-    const driver = openIdentifiedStore();
-    const transport = scriptedTransport(() => err503Never());
-    const sync = createFeedbackSync({
-      driver,
-      secretStore: secretBox('secret-a'),
-      baseUrl: 'https://functions.example.co/functions/v1',
-      transport,
-      now: () => NOW,
-    });
-    const controller = createFeedbackController({ driver, sync, repository: feedbackRepository, now: () => NOW, makeMutationId: () => M1 });
+    const { driver, controller } = idleWorld();
     controller.getState().openForm(GUIDE_TARGET);
     assert.equal(lastForm(controller).score, null, 'no default value (20 §7)');
     assert.equal(lastForm(controller).delivery.kind, 'none');
@@ -199,16 +209,7 @@ describe('G16.03 — the closed kind reasons (task step 2, acceptance 3)', () =>
 
 describe('G16.03 — the explicit Send and the delivery states (task steps 3–4)', () => {
   test('send without a star is a named refusal and stores nothing', async () => {
-    const driver = openIdentifiedStore();
-    const transport = scriptedTransport(() => err503Never());
-    const sync = createFeedbackSync({
-      driver,
-      secretStore: secretBox('secret-a'),
-      baseUrl: 'https://functions.example.co/functions/v1',
-      transport,
-      now: () => NOW,
-    });
-    const controller = createFeedbackController({ driver, sync, repository: feedbackRepository, now: () => NOW, makeMutationId: () => M1 });
+    const { driver, controller, transport } = idleWorld();
     controller.getState().openForm(GUIDE_TARGET);
     await assert.rejects(
       () => controller.getState().send(),
