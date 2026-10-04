@@ -279,7 +279,7 @@ test('a malformed export is rejected before any write', async () => {
   }
   const empty = await db.query('select count(*)::int as count from feedback_target_registry');
   assert.equal(empty.rows[0]?.count, 0, 'a rejected export imports nothing');
-  assert.deepEqual(REGISTRY_LOCALES, ['be', 'en', 'uk'], 'the registry enum is the schema contract');
+  assert.deepEqual(REGISTRY_LOCALES, ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'], 'the registry enum is the schema contract');
 });
 
 // --- CAS and concurrency semantics ---

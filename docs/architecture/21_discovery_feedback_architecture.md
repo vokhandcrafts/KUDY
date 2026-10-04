@@ -100,7 +100,7 @@ Collection захоўвае `collection_id`, `content_version`, лакаліза
 | `collections` на адзін індэкс | ≤ 32 |
 | `members` у collection | ≤ 50, без дубляў |
 | `themes` на адзін індэкс / тэм на offer | ≤ 32 / ≤ 8 |
-| лакалаў на `labels`, `localized` і тэкст прычыны | ≤ 8; allowlist BCP-47 MVP = `be`, `en`, `uk`; `pl` і `de` зарэзерваваныя і не ўваходзяць |
+| лакалаў на `labels`, `localized` і тэкст прычыны | ≤ 8; allowlist BCP-47 = `be`, `en`, `uk`, `de`, `es`, `fr`, `cs`, `sv` (пашыраны G21.16, issue #550; раней MVP be/en/uk) |
 | `title` | ≤ 140 знакаў |
 | `summary`, `why_recommended`, `conditions`, `description`, `overlap_note` | ≤ 400 знакаў |
 | `reason` сезоннай рэкамендацыі | ≤ 280 знакаў |
@@ -110,7 +110,7 @@ Collection захоўвае `collection_id`, `content_version`, лакаліза
 | ідэнтыфікатары (`offer_id`, `place_id`, `collection_id`, `theme_id`, `route_id`) і `revision` | ≤ 64 знакаў з `[a-z0-9._-]` |
 | файл індэкса | ≤ 512 KiB; каталог правярае `bytes` і `sha256` да загрузкі |
 
-Негатыўныя прыклады лімітаў — `index-invalid-limits.json` (адзін named overflow на кожную мяжу) і `catalog-invalid-oversized.json` (`bytes` = 524289, адхіленне да fetch). Ліміт ≤ 8 лакалаў на аб'ект нельга незалежна перапоўніць пры 3 кодах allowlist; G02.01 усё роўна кадзіруе max 8.
+Негатыўныя прыклады лімітаў — `index-invalid-limits.json` (адзін named overflow на кожную мяжу) і `catalog-invalid-oversized.json` (`bytes` = 524289, адхіленне да fetch). Ліміт ≤ 8 лакалаў на аб'ект нельга незалежна перапоўніць пры 8 кодах allowlist; G02.01 усё роўна кадзіруе max 8.
 
 Feedback-ліміты (8 KiB цела, максімум 3 унікальныя прычыны, 30/120 запытаў у хвіліну) зададзеныя ў §5.3 і тут не дублююцца.
 

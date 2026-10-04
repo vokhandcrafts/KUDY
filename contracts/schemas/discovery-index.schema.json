@@ -144,7 +144,7 @@
           "properties": {
             "title": {
               "type": "object",
-              "propertyNames": { "enum": ["be", "en", "uk"] },
+              "propertyNames": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] },
               "maxProperties": 8,
               "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 140 }
             },
@@ -178,7 +178,7 @@
               "season": { "enum": ["spring", "summer", "autumn", "winter"] },
               "reason": {
                 "type": "object",
-                "propertyNames": { "enum": ["be", "en", "uk"] },
+                "propertyNames": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] },
                 "maxProperties": 8,
                 "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 280 }
               }
@@ -191,8 +191,8 @@
           "required": ["text_locales", "audio_locales"],
           "additionalProperties": false,
           "properties": {
-            "text_locales": { "type": "array", "maxItems": 8, "items": { "enum": ["be", "en", "uk"] } },
-            "audio_locales": { "type": "array", "maxItems": 8, "items": { "enum": ["be", "en", "uk"] } }
+            "text_locales": { "type": "array", "maxItems": 8, "items": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] } },
+            "audio_locales": { "type": "array", "maxItems": 8, "items": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] } }
           }
         },
         "access": {
@@ -217,7 +217,7 @@
           "properties": {
             "title": {
               "type": "object",
-              "propertyNames": { "enum": ["be", "en", "uk"] },
+              "propertyNames": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] },
               "maxProperties": 8,
               "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 140 }
             },
@@ -236,7 +236,7 @@
     "text400": {
       "description": "Ліміт 21 §3.2: ≤ 400 знакаў, ≤ 8 лакалаў з allowlist.",
       "type": "object",
-      "propertyNames": { "enum": ["be", "en", "uk"] },
+      "propertyNames": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] },
       "maxProperties": 8,
       "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 400 }
     }

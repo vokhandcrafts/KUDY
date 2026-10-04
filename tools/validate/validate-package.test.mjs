@@ -530,6 +530,45 @@ test('G14.04.b: a claimed audio locale without its audio files is audio-locale-w
   assert.deepEqual(result.errors.filter((e) => e.rule !== 'audio-locale-without-files'), [], JSON.stringify(result.errors));
 });
 
+// G21.16 (issue #550): in the expanded domain text and audio availability
+// stay independent — shipped fr text passes audio-free, and a claimed fr
+// audio locale without published audio files fails on its named rule.
+function addFrTextLayer(d) {
+  fs.cpSync(path.join(d, 'uk', 'base'), path.join(d, 'fr', 'base'), { recursive: true });
+  const voices = readJson(d, 'voices.json');
+  voices.push({ id: 'voice-fr-1', locale: 'fr', narrator_credit: 'Synthétique voix démo', character: 'Le Dragon' });
+  writeJson(d, 'voices.json', voices);
+  const stops = readJson(d, 'fr/base/stops.json');
+  for (const story of stops) {
+    story.voice_id = 'voice-fr-1';
+    story.text = 'Texte démo synthétique pour la vérification de la collecte.';
+    story.transcript = 'Transcription démo synthétique de la couche libre.';
+  }
+  writeJson(d, 'fr/base/stops.json', stops);
+}
+
+test('G21.16: fr text with shipped files passes audio-free; claimed fr audio without files fails', () => {
+  const withFiles = validatePackage(copiedTree((d) => {
+    addFrTextLayer(d);
+    const index = readJson(d, 'discovery.json');
+    index.offers[0].availability = { text_locales: ['be', 'en', 'uk', 'fr'], audio_locales: ['be', 'en'] };
+    writeJson(d, 'discovery.json', index);
+  }));
+  assert.deepEqual(withFiles, { ok: true, errors: [], warnings: [] }, JSON.stringify(withFiles.errors));
+
+  const unbackedAudio = validatePackage(copiedTree((d) => {
+    addFrTextLayer(d);
+    const index = readJson(d, 'discovery.json');
+    index.offers[0].availability = { text_locales: ['be', 'en', 'uk', 'fr'], audio_locales: ['be', 'en', 'fr'] };
+    writeJson(d, 'discovery.json', index);
+  }));
+  assert.ok(!unbackedAudio.ok);
+  assert.deepEqual(rules(unbackedAudio, 'audio-locale-without-files'), [
+    { severity: 'error', rule: 'audio-locale-without-files', path: 'discovery.json#offers[0].availability.audio_locales#fr' },
+  ], JSON.stringify(unbackedAudio.errors));
+  assert.deepEqual(unbackedAudio.errors.filter((e) => e.rule !== 'audio-locale-without-files'), [], JSON.stringify(unbackedAudio.errors));
+});
+
 test('G14.04.b: a corrupt availability shape yields a type diagnostic, not a crash', () => {
   for (const availability of ['uk', ['be'], 7]) {
     const result = validatePackage(copiedTree((d) => {

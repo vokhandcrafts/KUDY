@@ -9,7 +9,7 @@
     "additionalProperties": false,
     "properties": {
       "id": { "$ref": "../schemas/identifier.schema.json" },
-      "locale": { "enum": ["be", "en", "uk"] },
+      "locale": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] },
       "narrator_credit": { "type": "string", "minLength": 1, "maxLength": 140 },
       "character": { "type": "string", "minLength": 1, "maxLength": 140 }
     }

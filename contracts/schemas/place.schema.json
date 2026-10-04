@@ -18,7 +18,7 @@
     "name_audio_refs": {
       "description": "Мапа спасылак на лакалізаваныя Media: «locale → media_id» (09 §3). Вымаўленне назвы па-беларуску і па-англійску — розныя запісы.",
       "type": "object",
-      "propertyNames": { "enum": ["be", "en", "uk"] },
+      "propertyNames": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] },
       "maxProperties": 8,
       "additionalProperties": { "$ref": "../schemas/identifier.schema.json" }
     }

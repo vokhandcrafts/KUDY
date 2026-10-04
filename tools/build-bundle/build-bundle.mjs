@@ -27,7 +27,7 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-export const LOCALE_ALLOWLIST = ['be', 'en', 'uk'];
+export const LOCALE_ALLOWLIST = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'];
 export const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
 export const MAX_INDEX_BYTES = 512 * 1024;
 
