@@ -103,14 +103,26 @@ export async function launchBrowser(binary) {
       return sessionId;
     },
     async close() {
+      let closeTimer;
+      let onClose;
+      // Chromium can close DevTools before acknowledging Browser.close;
+      // cleanup must also finish when the browser stops responding.
+      const stopped = new Promise(resolve => {
+        onClose = resolve;
+        ws.addEventListener('close', onClose, { once: true });
+        closeTimer = setTimeout(resolve, 2000);
+      });
       try {
-        await browser.send('Browser.close');
+        await Promise.race([browser.send('Browser.close'), stopped]);
       } catch {
         child.kill('SIGKILL');
+      } finally {
+        clearTimeout(closeTimer);
+        ws.removeEventListener('close', onClose);
+        ws.close();
+        child.kill('SIGKILL');
+        rmSync(profileDir, { recursive: true, force: true });
       }
-      ws.close();
-      child.kill('SIGKILL');
-      rmSync(profileDir, { recursive: true, force: true });
     },
   };
   return browser;

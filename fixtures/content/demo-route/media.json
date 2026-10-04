@@ -1,42 +1,42 @@
 [
   {
     "media_id": "media-story-1-base-be",
-    "sha256": "833db8a6661be709189e7aec5199c34b54db580c8119f011d46311cfad158911",
-    "bytes": 85,
+    "sha256": "59b038115546e8b889e66749687560dc5b7b2d3630cee398e2282e59bacf02b2",
+    "bytes": 51638,
     "mime": "audio/mp4",
     "locale": "be",
     "voice_id": "voice-be-1",
-    "license": "CC0 1.0, дэма-запіс аўтара KUDY",
-    "credit": "Сінтэтычны дэма-голас, 2026"
+    "license": "CC0 1.0, сінтэтычны тан аўтара KUDY",
+    "credit": "Сінтэтычны дэма-тан, афлайн-генерацыя ffmpeg, 2026"
   },
   {
     "media_id": "media-story-2-ext-be",
-    "sha256": "98a6c4fb2c2e1b69c759dbd41ba0fd2287ddb1142e6b310285fe514db8c785dd",
-    "bytes": 88,
+    "sha256": "8321de282749f803360100ac9b62fe347fbb73a943ca2bdfd00229880bffe1e3",
+    "bytes": 51646,
     "mime": "audio/mp4",
     "locale": "be",
     "voice_id": "voice-be-1",
-    "license": "CC0 1.0, дэма-запіс аўтара KUDY",
-    "credit": "Сінтэтычны дэма-голас, 2026"
+    "license": "CC0 1.0, сінтэтычны тан аўтара KUDY",
+    "credit": "Сінтэтычны дэма-тан, афлайн-генерацыя ffmpeg, 2026"
   },
   {
     "media_id": "media-story-1-base-en",
-    "sha256": "f2cc6b02cac069e9d1aec1cb535d4656130f1705276f9bfc0177e57811a51f93",
-    "bytes": 85,
+    "sha256": "f289d39bcd8bf291d2df58bfdd2da8cda291d68952ae56246fd036469fced834",
+    "bytes": 51739,
     "mime": "audio/mp4",
     "locale": "en",
     "voice_id": "voice-en-1",
-    "license": "CC0 1.0, demo recording by the KUDY author",
-    "credit": "Synthetic demo voice, 2026"
+    "license": "CC0 1.0, synthetic tone by the KUDY author",
+    "credit": "Synthetic demo tone, offline ffmpeg generation, 2026"
   },
   {
     "media_id": "media-story-2-ext-en",
-    "sha256": "c5f45c410894b3c067e44a5a40468c2a2029c7f4998cd5512aa624dad3a4726b",
-    "bytes": 88,
+    "sha256": "2cfe893c84b9d55b755c6994a354ca15b7d3a0d92ecf0231e5b8be7b21c7e313",
+    "bytes": 51617,
     "mime": "audio/mp4",
     "locale": "en",
     "voice_id": "voice-en-1",
-    "license": "CC0 1.0, demo recording by the KUDY author",
-    "credit": "Synthetic demo voice, 2026"
+    "license": "CC0 1.0, synthetic tone by the KUDY author",
+    "credit": "Synthetic demo tone, offline ffmpeg generation, 2026"
   }
 ]
