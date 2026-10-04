@@ -38,6 +38,8 @@
 import { createControllerStore, type ControllerStore } from '../createControllerStore.ts';
 import type { PurchaseChainState } from '../../services/entitlement/purchase-chain.ts';
 import type { PurchaseOutcome } from '../../services/entitlement/types.ts';
+// G21.09 (issue #542): the message shapes live in the shared pure contract zone.
+import type { OfferStrings } from '../../contracts/ui-message-types.ts';
 
 // The composition-root seam (G08.04 Рашэнне 1: «G08.05 чытае stateOf() для
 // выбару Buy/Download»). The root resolves it from the store session (the
@@ -328,19 +330,7 @@ export function createCommerceController(deps: CommerceDeps): ControllerStore<Co
 // The commerce words, per the display locale (the previewStrings idiom: the
 // codes live in the state, these are the words; an unknown locale falls
 // back to Belarusian, the app's first preference).
-export interface OfferStrings {
-  readonly offerTitle: string;
-  readonly offerBody: string;
-  readonly buy: string;
-  readonly dismiss: string;
-  // `11` §8 verbatim: «Куплена · трэба загрузіць» — the honest state after
-  // the store leg, before the verified access.
-  readonly purchasedPending: string;
-  readonly errorTitle: string;
-  readonly errorBody: string;
-  readonly tryAgain: string;
-  readonly continueFree: string;
-}
+export type { OfferStrings } from '../../contracts/ui-message-types.ts';
 
 const OFFER_STRINGS: Record<'be' | 'en' | 'uk', OfferStrings> = {
   be: {

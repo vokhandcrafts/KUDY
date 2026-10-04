@@ -11,6 +11,8 @@
 // sibling copies.
 import type { CatalogService, NearbyOfferFacts } from '../../services/catalog/types.ts';
 import type { MomentFact, MomentFacts } from '../../services/contentRepo/momentFacts.ts';
+// G21.09 (issue #542): the message shapes live in the shared pure contract zone.
+import type { PlaceDetailStrings } from '../../contracts/ui-message-types.ts';
 import { createControllerStore, type ControllerStore } from '../createControllerStore.ts';
 
 // The view types the screens render — re-exported here so the UI layer keeps
@@ -73,35 +75,7 @@ async function load(store: ControllerStore<PlaceDetailState>, deps: PlaceDetailD
 }
 
 // The surface words (09 §0: BE first, EN beside — the nearbyStrings idiom).
-export interface PlaceDetailStrings {
-  readonly loading: string;
-  readonly unavailable: string;
-  readonly error: string;
-  readonly noFacts: string;
-  readonly empty: string;
-  teaserLabel: string;
-  playLabel: string;
-  stopLabel: string;
-  resumeLabel: string;
-  nowPlaying: string;
-  paused: string;
-  guideLink: string;
-  guideLinkHint: string;
-  playHint: string;
-  noAudio: string;
-  durationUnit: string;
-  textLabel: string;
-  audioLabel: string;
-  // G06.05 (issue #280, AC4/AC5): the named moment refusals and the play
-  // failure's words — a refusal states the reason and the way out, a raw
-  // diagnostic code never shows alone. An unknown reason renders as-is.
-  readonly refusalText: Record<
-    'moment#audio-unpublished' | 'moment#session-unroutable' | 'moment#session-refused',
-    string
-  >;
-  readonly playFailed: string;
-  readonly playFailedHint: string;
-}
+export type { PlaceDetailStrings } from '../../contracts/ui-message-types.ts';
 
 // The refusal's rendered word: the known map, else the raw reason itself
 // (the runMapReason idiom).

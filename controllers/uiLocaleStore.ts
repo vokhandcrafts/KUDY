@@ -14,7 +14,12 @@
 // device db adapter is TR-10) the choice lives for the session; when the
 // port lands it writes the durable `settings` row (the consent idiom).
 
-export type UiLocaleSwitchCode = 'be' | 'en' | 'uk';
+// G21.09 (issue #542, criterion 4): the store's vocabulary derives from the
+// one locale registry — the complete catalogues (be/en/uk today); a planned
+// code is not switchable. The unknown-input semantics below are unchanged.
+import { COMPLETE_UI_LOCALES, type CompleteUiLocaleCode } from '../contracts/ui-locales.ts';
+
+export type UiLocaleSwitchCode = CompleteUiLocaleCode;
 
 // The store's surface: read the current value, switch it, subscribe to the
 // switches (the useSyncExternalStore idiom of the hint mount).
@@ -41,7 +46,7 @@ export class UiLocaleError extends Error {
   }
 }
 
-const VOCABULARY: readonly UiLocaleSwitchCode[] = ['be', 'en', 'uk'];
+const VOCABULARY: readonly UiLocaleSwitchCode[] = COMPLETE_UI_LOCALES;
 
 export function createUiLocaleStore(persistence?: UiLocalePersistence): UiLocaleSwitch {
   const stored = persistence?.read() ?? null;

@@ -19,6 +19,8 @@ import { useEffect, useState } from 'react';
 import { byEditorialOrder } from '../../core/discovery/selectDiscovery.ts';
 import type { CatalogService, NearbyOfferFacts } from '../../services/catalog/types.ts';
 import type { LocationMode, LocationStatus } from '../../services/location/types.ts';
+// G21.09 (issue #542): the message shapes live in the shared pure contract zone.
+import type { NearbyStrings } from '../../contracts/ui-message-types.ts';
 import type { LocationService } from '../../services/location/service.ts';
 import { createControllerStore, type ControllerStore } from '../createControllerStore.ts';
 import { useStoreState } from '../useControllerStore.ts';
@@ -164,28 +166,7 @@ export function useNearbySurface(
 
 // --- Words (BE/EN; the language canon is 09 §0 — be + en) ---------------------
 
-export interface NearbyStrings {
-  readonly title: string;
-  readonly proximityHeader: string;
-  readonly reviewHeader: string;
-  readonly noteDenied: string;
-  readonly noteHeldByWalk: string;
-  readonly noteAcquiring: string;
-  readonly noteUnstable: string;
-  readonly empty: string;
-  readonly unavailable: string;
-  readonly loading: string;
-  readonly indexDegraded: string;
-  readonly mapNote: string;
-  readonly cardHint: string;
-  // UX 09 (issue #434) — the offer-kind word the card marker carries for the
-  // screen reader (visual-language.md §9: every icon rendering is named).
-  readonly guideLabel: string;
-  readonly placeLabel: string;
-  readonly textLabel: string;
-  readonly audioLabel: string;
-  readonly durationUnit: string;
-}
+export type { NearbyStrings } from '../../contracts/ui-message-types.ts';
 
 const STRINGS: Record<'be' | 'en' | 'uk', NearbyStrings> = {
   be: {

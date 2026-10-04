@@ -19,6 +19,13 @@ import type { CatalogSurfaceState } from "../../controllers/catalog/catalogContr
 import { useMyKudy } from "../../controllers/myKudyController";
 import type { MyKudyState } from "../../controllers/myKudyController";
 import { useStoreState } from "../../controllers/useControllerStore";
+// G21.09 (issue #542): the picker derives its options and labels from the
+// one locale registry — the registered complete catalogues only.
+import {
+  COMPLETE_UI_LOCALES,
+  uiLocaleNativeName,
+  type CompleteUiLocaleCode,
+} from "../../contracts/ui-locales";
 import { useServices, useUiLocale } from "../_layout";
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
@@ -276,10 +283,10 @@ function UiLocaleRow({
   strings,
 }: {
   locale: string;
-  onPick: (code: "be" | "en" | "uk") => void;
+  onPick: (code: CompleteUiLocaleCode) => void;
   strings: ReturnType<typeof uiStrings>;
 }) {
-  const codes = Object.keys(strings.languageSelfNames) as Array<"be" | "en" | "uk">;
+  const codes = COMPLETE_UI_LOCALES;
   return (
     <View testID="my-ui-locale">
       <ScaledText style={styles.section}>{strings.languageLabel}</ScaledText>
@@ -288,7 +295,7 @@ function UiLocaleRow({
           <PressableSurface
             key={code}
             accessibilityRole="button"
-            accessibilityLabel={strings.languageSelfNames[code]}
+            accessibilityLabel={uiLocaleNativeName(code)}
             accessibilityState={{ selected: locale === code }}
             onPress={() => onPick(code)}
             style={[styles.localeChip, locale === code ? styles.localeChipSelected : null]}
@@ -297,7 +304,7 @@ function UiLocaleRow({
             <ScaledText
               style={[styles.localeChipLabel, locale === code ? styles.localeChipLabelSelected : null]}
             >
-              {strings.languageSelfNames[code]}
+              {uiLocaleNativeName(code)}
             </ScaledText>
           </PressableSurface>
         ))}
