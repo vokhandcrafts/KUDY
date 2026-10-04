@@ -102,5 +102,7 @@
     "read": true,
     "external_modified": false,
     "new_tools_installed": false
-  }
+  },
+  "pull_request": "https://github.com/vokhandcrafts/KUDY/pull/624",
+  "publication_status": "Available in separate PR; main runner inputs after merge."
 }
