@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-04 — Пуш і праверка GPS і «Побач», PR #517
+Дазволь выпраўленне распазнавання `Co-authored-by` у агульным Git-хуку `C:\Users\kamyl\.githooks\run-gitleaks-git.py`: ён блакуе пуш выпраўленых канфліктаў на старых камітах main. Праглядзі PR #517 і вынікі праверак GitHub перад мержам. На Android/iOS правер позні запуск GPS пасля спынення і пераход «Побач» у фон з дзейнай прагулкай: тэсты з заменнікамі даказваюць толькі парадак аперацый і вызваленне падпісак.
+PR: https://github.com/vokhandcrafts/KUDY/pull/517 (задача: https://github.com/vokhandcrafts/KUDY/issues/479)
+
 ### 2026-10-04 — G21.20: зацвердзі ADR ідэнтычнасці моў гіда
 Што зрабіць: прачытай `docs/architecture/decisions/G21.20-language-identity.md` (кантракт §3) і запішы ў issue выразнае зацвярджэнне або правкі; пасля прыняцця перавядзі статус файла ў шапцы ў «прынята». Рэалізацыя G21.21 пачынаецца толькі пасля гэтага зацвярджэння.
 Issue: https://github.com/vokhandcrafts/KUDY/issues/552 (PR: https://github.com/vokhandcrafts/KUDY/pull/593; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
@@ -32,10 +36,6 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/574 (issue: https://github.com/vo
 ### 2026-10-03 — G21.05: пацвердзі на Windows-хасце, што дзве CI-гварды зялёныя
 Што зрабіць: на сваёй Windows-машыне прабягі `node --test tools/ci/deno-typecheck.test.mjs tools/ci/test-discovery.test.mjs` (або поўны `npm test`) і пераканайся, што тэсты з пазнакай (G21.05) зялёныя, а дзве няўдачы з лагу рэтэсту 2026-10-03 (`device\index.ts` і `app\…`-прэфіксы) зніклі. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #538.
 PR: https://github.com/vokhandcrafts/KUDY/pull/572 (issue: https://github.com/vokhandcrafts/KUDY/issues/538; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
-
-### 2026-10-02 — Праверка GPS і «Побач», PR #517
-Праглядзі PR #517 і вынікі праверак GitHub перад мержам. На Android/iOS правер позні запуск GPS пасля спынення і пераход «Побач» у фон з дзейнай прагулкай: тэсты з заменнікамі даказваюць толькі парадак аперацый і вызваленне падпісак.
-PR: https://github.com/vokhandcrafts/KUDY/pull/517 (задача: https://github.com/vokhandcrafts/KUDY/issues/479)
 
 ### 2026-10-02 — Engine mutation gate: дадай `engine-regressions` у required statuses (задача #501)
 Што зрабіць: у GitHub UI (Settings → Branches → protection галіны main) дадай новы статус `engine-regressions` да required checks поруч з `server-typecheck` — бачнасць branch protection з сесіі не праверыць (токен без адпаведных scope), а без гэтага новы job застаецца неабавязковым. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #501.
