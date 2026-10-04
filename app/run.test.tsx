@@ -1049,7 +1049,7 @@ describe("G16.03: the End invitation (issue #74)", () => {
     // the session facts, never a catalog read (acceptance 5).
     expect(await screen.findByTestId("screen-Feedback")).toBeTruthy();
     expect(screen.getByTestId("feedback-title").props.children).toBe(feedbackStrings("be").formTitleGuide);
-    expect(screen.getByTestId("feedback-target-line").props.children).toBe(feedbackStrings("be").targetLine("1", "be"));
+    expect(screen.getByTestId("feedback-target-line").props.children).toBe(feedbackStrings("be").targetLine("be", "1"));
     // The invitation was consumed by the press — the once-per-session guard.
     expect(screen.queryByTestId("run-feedback-invite")).toBeNull();
   });

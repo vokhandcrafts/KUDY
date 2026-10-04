@@ -4,14 +4,19 @@
 // preselected star, the Send disabled without one, the facts line names the
 // bound target (version/locale, no catalog), the kind-closed reason chips,
 // the disclosure block, and the honest delivery words (the offline round
-// stays «захавана на прыладзе», the acknowledged one «адпраўлена»).
+// stays «захавана на прыладзе», the acknowledged one «адпраўлена»). The
+// language guards (issue #598): the UI-language switch with the form open
+// re-renders the words and keeps the bound target facts, and a stale
+// persisted locale renders the be fallback words.
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, renderRouter, screen } from "expo-router/testing-library";
+import { act } from "@testing-library/react-native";
 
 import FeedbackForm from "./feedback";
 import { createServices } from "../controllers/createServices";
 import { layoutWith } from "../test/render-helpers";
 import { feedbackStrings } from "../controllers/useFeedbackController";
+import type { UiLocalePersistence, UiLocaleSwitchCode } from "../controllers/uiLocaleStore";
 import { createFeedbackSync } from "../services/feedbackSync";
 import { okPut, openIdentifiedStore, scriptedTransport, secretBox } from "../tests/feedback/queue-fixture";
 
@@ -33,7 +38,7 @@ afterEach(() => {
 
 // The production world: the real feedback controller over node:sqlite and a
 // scripted transport (the acked put answers revision 1).
-function feedbackServices(answer = () => okPut(1)) {
+function feedbackServices(answer = () => okPut(1), options?: { uiLocalePersistence?: UiLocalePersistence }) {
   const driver = openIdentifiedStore();
   const transport = scriptedTransport(answer);
   const sync = createFeedbackSync({
@@ -42,7 +47,7 @@ function feedbackServices(answer = () => okPut(1)) {
     baseUrl: "https://functions.example.co/functions/v1",
     transport,
   });
-  const services = createServices({ feedback: { driver, sync } });
+  const services = createServices({ feedback: { driver, sync }, ...options });
   return { services, transport };
 }
 
@@ -55,7 +60,7 @@ describe("G16.03: the rating form route (issue #74)", () => {
     expect(await screen.findByTestId("feedback-title")).toBeTruthy();
     expect(screen.getByText(strings.formTitleGuide)).toBeTruthy();
     // The facts line names the bound target, not a catalog fact.
-    expect(screen.getByTestId("feedback-target-line").props.children).toBe(strings.targetLine("1", "be"));
+    expect(screen.getByTestId("feedback-target-line").props.children).toBe(strings.targetLine("be", "1"));
     // No star is preselected: every chip renders its unselected state and
     // the Send stays disabled until one is chosen.
     for (const value of [1, 2, 3, 4, 5]) {
@@ -117,5 +122,41 @@ describe("G16.03: the rating form route (issue #74)", () => {
       initialUrl: "/feedback?kind=guide&id=guide-route-a1&version=1&locale=be",
     });
     expect(await screen.findByTestId("feedback-unavailable")).toBeTruthy();
+  });
+
+  test("switching the UI language with the form open re-renders the words and keeps the bound target facts", async () => {
+    const { services } = feedbackServices();
+    renderRouter(withRoutes(services), {
+      initialUrl: "/feedback?kind=guide&id=guide-route-a1&version=1&locale=be",
+    });
+    await screen.findByTestId("feedback-title");
+    expect(screen.getByTestId("feedback-title").props.children).toBe(strings.formTitleGuide);
+    act(() => services.uiLocale.set("uk"));
+    const uk = feedbackStrings("uk");
+    // The form's words follow the switch in place...
+    expect(screen.getByTestId("feedback-title").props.children).toBe(uk.formTitleGuide);
+    expect(screen.getByTestId("btn-feedback-send").props.accessibilityLabel).toBe(uk.send);
+    expect(screen.queryByText(strings.targetLine("be", "1"))).toBeNull();
+    // ...while the facts line keeps the bound identity — the content locale
+    // be and the pinned version 1 in the new wording; the target's facts
+    // never follow the UI switch (G14.04.d, issue #598).
+    expect(screen.getByTestId("feedback-target-line").props.children).toBe(uk.targetLine("be", "1"));
+  });
+
+  test("a stale persisted locale renders the be fallback words through the composition root", async () => {
+    const { services } = feedbackServices(() => okPut(1), {
+      // A corrupt persisted row seeds the composition root with a code the
+      // closed vocabulary does not know: the store trusts read() at
+      // construction, and the form must answer with the be fallback words,
+      // never a raw unknown state (issue #598).
+      uiLocalePersistence: { read: () => "de" as UiLocaleSwitchCode, write: () => {} },
+    });
+    renderRouter(withRoutes(services), {
+      initialUrl: "/feedback?kind=guide&id=guide-route-a1&version=1&locale=be",
+    });
+    expect(await screen.findByTestId("feedback-title")).toBeTruthy();
+    expect(screen.getByTestId("feedback-title").props.children).toBe(strings.formTitleGuide);
+    expect(screen.getByTestId("btn-feedback-send").props.accessibilityLabel).toBe(strings.send);
+    expect(screen.getByTestId("feedback-target-line").props.children).toBe(strings.targetLine("be", "1"));
   });
 });

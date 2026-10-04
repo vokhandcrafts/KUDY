@@ -219,7 +219,7 @@ export interface FeedbackStrings {
   // content locale and the pinned version, never a fresh-catalog fact.
   readonly formTitleGuide: string;
   readonly formTitlePlace: string;
-  readonly targetLine: (version: string, locale: string) => string;
+  readonly targetLine: (locale: string, version: string) => string;
   readonly scaleHint: string;
   readonly starLabel: (score: number) => string;
   readonly reasonsTitle: string;

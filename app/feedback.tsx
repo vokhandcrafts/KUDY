@@ -181,7 +181,7 @@ export default function FeedbackForm() {
             {open.target.kind === "guide" ? strings.formTitleGuide : strings.formTitlePlace}
           </ScaledText>
           <ScaledText style={styles.factsLine} testID="feedback-target-line">
-            {strings.targetLine(open.target.version, open.target.locale)}
+            {strings.targetLine(open.target.locale, open.target.version)}
           </ScaledText>
           {/* The honest delivery state of `21` §5.4 — saved on the device is
               a different line from sent, a queued delete says so. */}
