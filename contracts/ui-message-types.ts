@@ -187,9 +187,11 @@ export interface OfferStrings {
 }
 
 // UX 09 (issue #434) — the nearby-guide hint card (GuideHintCard.tsx). The
-// card's four words: uk renders through the be fallback until the uk
-// catalogue of this domain lands with the translation data (G21.25) — the
-// interface keeps the domain typed meanwhile.
+// card's four words: since G21.25 (issue #558) they are generated from the
+// canonical records plus the reviewed translations, and uk still renders
+// through the be fallback because the uk words of this domain are not
+// authored yet (uk-release-scope §6.4; the same be fallback the shipped
+// component kept before the generation).
 export interface GuideHintStrings {
   readonly heading: string;
   readonly paid: string;

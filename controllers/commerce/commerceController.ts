@@ -40,6 +40,7 @@ import type { PurchaseChainState } from '../../services/entitlement/purchase-cha
 import type { PurchaseOutcome } from '../../services/entitlement/types.ts';
 // G21.09 (issue #542): the message shapes live in the shared pure contract zone.
 import type { OfferStrings } from '../../contracts/ui-message-types.ts';
+import { OFFER_STRINGS_DATA } from './commerce-strings.generated.ts';
 
 // The composition-root seam (G08.04 Рашэнне 1: «G08.05 чытае stateOf() для
 // выбару Buy/Download»). The root resolves it from the store session (the
@@ -332,45 +333,7 @@ export function createCommerceController(deps: CommerceDeps): ControllerStore<Co
 // back to Belarusian, the app's first preference).
 export type { OfferStrings } from '../../contracts/ui-message-types.ts';
 
-const OFFER_STRINGS: Record<'be' | 'en' | 'uk', OfferStrings> = {
-  be: {
-    offerTitle: 'Усе гісторыі гіда',
-    offerBody: 'Адна пакупка адкрывае гісторыі гэтага гіда.',
-    buy: 'Купіць',
-    dismiss: 'Не цяпер',
-    purchasedPending: 'Куплена · трэба загрузіць',
-    errorTitle: 'Пакупка не скончылася',
-    errorBody: 'Можна паспрабаваць ізноў або працягнуць бясплатна.',
-    tryAgain: 'Паспрабаваць ізноў',
-    continueFree: 'Працягнуць бясплатна',
-  },
-  en: {
-    offerTitle: "All of the guide's stories",
-    offerBody: 'One purchase unlocks this guide’s stories.',
-    buy: 'Buy',
-    dismiss: 'Not now',
-    purchasedPending: 'Purchased · download needed',
-    errorTitle: "The purchase didn't finish",
-    errorBody: 'You can try again or continue for free.',
-    tryAgain: 'Try again',
-    continueFree: 'Continue free',
-  },
-  uk: {
-    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1); the
-    // native-speaker review is the owner's (uk-release-scope §5, §6.4).
-    // `purchasedPending` mirrors the be/en rendering of `11` §8 verbatim
-    // («Куплена · трэба загрузіць»).
-    offerTitle: 'Усі історії гіда',
-    offerBody: 'Одна покупка відкриває історії цього гіда.',
-    buy: 'Купити',
-    dismiss: 'Не зараз',
-    purchasedPending: 'Куплено · треба завантажити',
-    errorTitle: 'Покупка не завершилася',
-    errorBody: 'Можна спробувати ще раз або продовжити безкоштовно.',
-    tryAgain: 'Спробувати ще раз',
-    continueFree: 'Продовжити безкоштовно',
-  },
-};
+const OFFER_STRINGS = OFFER_STRINGS_DATA;
 
 export function offerStrings(locale: string): OfferStrings {
   return locale === 'en' ? OFFER_STRINGS.en : locale === 'uk' ? OFFER_STRINGS.uk : OFFER_STRINGS.be;

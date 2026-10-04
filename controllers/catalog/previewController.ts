@@ -16,6 +16,7 @@ import type {
 } from '../../services/catalog/types.ts';
 import type { InventoryState, Readiness, Tier } from '../../services/contentRepo/types.ts';
 import type { ActivationResult, LayerKey } from '../../services/download/types.ts';
+import { PREVIEW_STRINGS_DATA } from './preview-strings.generated.ts';
 
 // The surface the preview was opened from (11 §16.2): the MVP chain knows
 // the city card and the «Гіды» rubric; the collection, the discovery result
@@ -237,76 +238,7 @@ export interface PreviewStrings {
   readonly retry: string;
 }
 
-const PREVIEW_STRINGS: Record<'be' | 'en' | 'uk', PreviewStrings> = {
-  be: {
-    label: { download: 'Загрузіць', start: 'Пачаць' },
-    reason: {
-      'preview#purchase-required': 'Патрэбна пакупка.',
-      'preview#storage-unknown': 'Сховішча недаступнае.',
-      'preview#verify-unavailable': 'Праверка недаступная.',
-      'preview#download-unavailable': 'Загрузка недаступная на гэтай зборцы.',
-      'preview#not-published': 'Гід не апублікаваны.',
-    },
-    detail: (detail) =>
-      detail.kind === 'damaged'
-        ? 'пакет пашкоджаны: патрэбна паўторная загрузка'
-        : detail.kind === 'missing-files'
-          ? `не хапае файлаў: ${detail.count}`
-          : detail.kind === 'stale'
-            ? 'даступна абнаўленне'
-            : 'пакет няпоўны',
-    downloadFailed: 'Збой загрузкі.',
-    storageFullDetail: (mb) => `не хапае месца: патрэбна яшчэ ${mb} МБ`,
-    storageExit: 'Вызваліць месца ў KUDY',
-    retry: 'Паўтарыць',
-  },
-  en: {
-    label: { download: 'Download', start: 'Start' },
-    reason: {
-      'preview#purchase-required': 'Purchase required.',
-      'preview#storage-unknown': 'Storage unavailable.',
-      'preview#verify-unavailable': 'Verification unavailable.',
-      'preview#download-unavailable': 'Download unavailable in this build.',
-      'preview#not-published': 'Guide not published.',
-    },
-    detail: (detail) =>
-      detail.kind === 'damaged'
-        ? 'package damaged: re-download needed'
-        : detail.kind === 'missing-files'
-          ? `missing files: ${detail.count}`
-          : detail.kind === 'stale'
-            ? 'an update is available'
-            : 'package incomplete',
-    downloadFailed: 'Download failed.',
-    storageFullDetail: (mb) => `not enough space: ${mb} MB more needed`,
-    storageExit: 'Free up space in KUDY',
-    retry: 'Retry',
-  },
-  uk: {
-    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1); the
-    // native-speaker review is the owner's (uk-release-scope §5, §6.4).
-    label: { download: 'Завантажити', start: 'Почати' },
-    reason: {
-      'preview#purchase-required': 'Потрібна покупка.',
-      'preview#storage-unknown': 'Сховище недоступне.',
-      'preview#verify-unavailable': 'Перевірка недоступна.',
-      'preview#download-unavailable': 'Завантаження недоступне в цьому складанні.',
-      'preview#not-published': 'Гід не опублікований.',
-    },
-    detail: (detail) =>
-      detail.kind === 'damaged'
-        ? 'пакет пошкоджений: потрібне повторне завантаження'
-        : detail.kind === 'missing-files'
-          ? `бракує файлів: ${detail.count}`
-          : detail.kind === 'stale'
-            ? 'доступне оновлення'
-            : 'пакет неповний',
-    downloadFailed: 'Збій завантаження.',
-    storageFullDetail: (mb) => `бракує місця: потрібно ще ${mb} МБ`,
-    storageExit: 'Звільнити місце в KUDY',
-    retry: 'Повторити',
-  },
-};
+const PREVIEW_STRINGS = PREVIEW_STRINGS_DATA;
 
 export function previewStrings(locale: string): PreviewStrings {
   return locale === 'en' ? PREVIEW_STRINGS.en : locale === 'uk' ? PREVIEW_STRINGS.uk : PREVIEW_STRINGS.be;

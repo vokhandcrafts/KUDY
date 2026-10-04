@@ -30,8 +30,9 @@ const SCHEMA_FILE = 'schemas/ui-messages-source.schema.json';
 const SOURCE_FILE = 'source.json';
 
 // Schema keywords carry no domain names; each maps to the named diagnostic the
-// negative fixtures assert on.
-const NAMED_BY_KEYWORD = {
+// negative fixtures assert on. Exported for the sibling contract checkers (the
+// translations checker reuses the keyword mapping and overrides only `const`).
+export const NAMED_BY_KEYWORD = {
   additionalProperties: 'unknown_field_denied',
   const: 'source_schema_version_denied',
   enum: 'enum_denied',
@@ -50,13 +51,16 @@ const NAMED_BY_KEYWORD = {
 
 // The placeholder contract: ${name} with a declared parameter name inside. Anything
 // else inside the braces (empty, dotted, callable) is invalid message syntax.
-const PLACEHOLDER = /\$\{([^{}]*)\}/g;
-const PLACEHOLDER_NAME = /^[a-zA-Z0-9_]+$/;
+// Exported for the sibling contract checkers; scan with matchAll (a /g regex's
+// lastIndex must not leak between uses).
+export const PLACEHOLDER = /\$\{([^{}]*)\}/g;
+export const PLACEHOLDER_NAME = /^[a-zA-Z0-9_]+$/;
 
 // Executable-payload denylist for the user-visible strings (source, context,
 // discrete forms, parameter fallbacks/joins). These records are data, never code;
-// a string carrying markup or a call cannot be a UI word.
-const EXECUTABLE_PATTERNS = [
+// a string carrying markup or a call cannot be a UI word. Exported for the
+// sibling contract checkers.
+export const EXECUTABLE_PATTERNS = [
   /<script\b/i,
   /javascript:/i,
   /\beval\s*\(/,
@@ -122,7 +126,7 @@ function recordStrings(record) {
 // The message/parameter contract, cross-field by nature: the format agrees with the
 // placeholders, every placeholder names a declared parameter, every declared
 // parameter is reachable, and the parameter attributes fit their types.
-function checkMessageSyntax(record, errors) {
+function checkMessageSyntax(record, onError) {
   const path = `$.records[id=${record.id}]`;
   const parameters = Array.isArray(record.parameters) ? record.parameters : [];
   const parameterNames = new Set(parameters.map((parameter) => parameter?.name).filter((name) => typeof name === 'string'));
@@ -132,11 +136,11 @@ function checkMessageSyntax(record, errors) {
     for (const match of text.matchAll(PLACEHOLDER)) {
       const name = match[1];
       if (!PLACEHOLDER_NAME.test(name)) {
-        errors.push({ rule: 'message_syntax_denied', path: `${path}.${where}` });
+        onError('message_syntax_denied', `${path}.${where}`);
         continue;
       }
       if (!parameterNames.has(name)) {
-        errors.push({ rule: 'message_syntax_denied', path: `${path}.${where}` });
+        onError('message_syntax_denied', `${path}.${where}`);
         continue;
       }
       used.add(name);
@@ -144,93 +148,110 @@ function checkMessageSyntax(record, errors) {
   };
   if (record.format === 'plain') {
     if (parameters.length > 0 || record.discreteForms !== undefined || record.composed === true) {
-      errors.push({ rule: 'param_syntax_denied', path });
+      onError('param_syntax_denied', path);
     }
     scan(record.source, 'source');
     for (const [key, form] of Object.entries(record.discreteForms ?? {})) scan(form, `discreteForms.${key}`);
   } else {
     if (parameters.length === 0) {
-      errors.push({ rule: 'message_syntax_denied', path });
+      onError('message_syntax_denied', path);
     }
     scan(record.source, 'source');
     for (const [key, form] of Object.entries(record.discreteForms ?? {})) scan(form, `discreteForms.${key}`);
     for (const name of parameterNames) {
-      if (!used.has(name)) errors.push({ rule: 'message_syntax_denied', path: `${path}.parameters.${name}` });
+      if (!used.has(name)) onError('message_syntax_denied', `${path}.parameters.${name}`);
     }
   }
   for (const parameter of parameters) {
     if (!parameter || typeof parameter !== 'object') continue;
     if (parameter.join !== undefined && parameter.type !== 'list') {
-      errors.push({ rule: 'param_syntax_denied', path: `${path}.parameters.${parameter.name}` });
+      onError('param_syntax_denied', `${path}.parameters.${parameter.name}`);
     }
     if (parameter.fallback !== undefined && parameter.type !== 'string') {
-      errors.push({ rule: 'param_syntax_denied', path: `${path}.parameters.${parameter.name}` });
+      onError('param_syntax_denied', `${path}.parameters.${parameter.name}`);
     }
+  }
+}
+
+// The shared record-walk of the ui-messages contract checkers: normalize the
+// records array, skip corrupt entries (their diagnostics come from the schema
+// layer), name duplicate ids, and hand every valid record to the checker's
+// own visit with its diagnostic path.
+export function walkRecords(doc, onError, visit) {
+  const records = Array.isArray(doc.records) ? doc.records : [];
+  const seen = new Set();
+  for (const record of records) {
+    if (!record || typeof record !== 'object' || Array.isArray(record)) continue;
+    const path = `$.records[id=${record.id}]`;
+    if (typeof record.id === 'string') {
+      if (seen.has(record.id)) {
+        onError('duplicate_key_denied', `${path}.id`);
+      }
+      seen.add(record.id);
+    }
+    visit(record, path);
   }
 }
 
 export function checkUiMessages(doc) {
   const errors = [];
+  const onError = (rule, path) => errors.push({ rule, path });
   for (const e of validateSchemaFile(SCHEMA_FILE, doc).errors) {
-    errors.push({ rule: NAMED_BY_KEYWORD[e.keyword] ?? e.keyword, path: e.path });
+    onError(NAMED_BY_KEYWORD[e.keyword] ?? e.keyword, e.path);
   }
   if (doc && typeof doc === 'object' && !Array.isArray(doc)) {
     if (doc.source_locale !== undefined && doc.source_locale !== 'be') {
-      errors.push({ rule: 'source_locale_denied', path: '$.source_locale' });
+      onError('source_locale_denied', '$.source_locale');
     }
-    const records = Array.isArray(doc.records) ? doc.records : [];
-    const seen = new Set();
-    for (const record of records) {
-      if (!record || typeof record !== 'object' || Array.isArray(record)) continue;
-      const path = `$.records[id=${record.id}]`;
-      if (typeof record.id === 'string') {
-        if (seen.has(record.id)) {
-          errors.push({ rule: 'duplicate_key_denied', path: `${path}.id` });
-        }
-        seen.add(record.id);
-      }
+    walkRecords(doc, onError, (record, path) => {
       if (typeof record.context !== 'string' || record.context.trim() === '') {
-        errors.push({ rule: 'context_required', path: `${path}.context` });
+        onError('context_required', `${path}.context`);
       }
       for (const [index, value] of recordStrings(record).entries()) {
         for (const pattern of EXECUTABLE_PATTERNS) {
           if (pattern.test(value)) {
-            errors.push({ rule: 'executable_payload_denied', path: `${path}.strings[${index}]` });
+            onError('executable_payload_denied', `${path}.strings[${index}]`);
             break;
           }
         }
       }
       if (typeof record.format === 'string' && typeof record.id === 'string') {
-        checkMessageSyntax(record, errors);
+        checkMessageSyntax(record, onError);
       }
       if (typeof record.sourceHash === 'string' && record.sourceHash.match(/^[0-9a-f]{64}$/)) {
         if (sourceHash(record) !== record.sourceHash) {
-          errors.push({ rule: 'source_hash_mismatch_denied', path: `${path}.sourceHash` });
+          onError('source_hash_mismatch_denied', `${path}.sourceHash`);
         }
       }
-    }
+    });
   }
   return { ok: errors.length === 0, errors };
 }
 
-// The canonical source document next to this module; the argument is the tests' seam
-// (a fixture path), tooling reads the shipped contract file. A source document that
-// fails its own contract is a build-time defect, not a runtime fallback: a named
-// error, never a silent pass-through (the remote-config loader idiom).
-export function loadUiMessagesSource(path) {
-  const file = path ?? join(dirname(fileURLToPath(import.meta.url)), SOURCE_FILE);
+// The shared fail-closed loader shape of the ui-messages contract files: an
+// unreadable file and a file failing its contract are build-time defects — a
+// named error, never a silent pass-through (the remote-config loader idiom).
+// The sibling translation loader reuses this exact shape.
+export function loadContractJson(file, check, ErrorClass, label) {
   let doc;
   try {
     doc = JSON.parse(readFileSync(file, 'utf8'));
   } catch (error) {
-    throw new UiMessagesContractError(`the canonical ui-messages source file is unreadable: ${file}`, error);
+    throw new ErrorClass(`the ${label} file is unreadable: ${file}`, error);
   }
-  const verdict = checkUiMessages(doc);
+  const verdict = check(doc);
   if (!verdict.ok) {
     const reasons = verdict.errors.map((entry) => `${entry.rule} at ${entry.path}`).join('; ');
-    throw new UiMessagesContractError(`the canonical ui-messages source file failed its contract: ${reasons}`);
+    throw new ErrorClass(`the ${label} file failed its contract: ${reasons}`);
   }
   return doc;
+}
+
+// The canonical source document next to this module; the argument is the tests' seam
+// (a fixture path), tooling reads the shipped contract file.
+export function loadUiMessagesSource(path) {
+  const file = path ?? join(dirname(fileURLToPath(import.meta.url)), SOURCE_FILE);
+  return loadContractJson(file, checkUiMessages, UiMessagesContractError, 'canonical ui-messages source');
 }
 
 export class UiMessagesContractError extends Error {

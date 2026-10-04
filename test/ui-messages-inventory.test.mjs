@@ -2,10 +2,10 @@
 // of contracts/ui-messages/source.json are the actual messages of the shipped
 // catalogs, not an assumed set. Every be leaf of the seven importable catalogs
 // must have exactly one record anchored to it via migratedFrom, plain words
-// verbatim; GuideHintCard.tsx is JSX (node cannot import it) so its four
-// records are checked against the file's inline catalog by hand here. Deleting
-// a record, renaming a key or editing a catalog word fails this test — the
-// source cannot silently drift from the catalogs it documents.
+// verbatim; the guideHint words ride their generated data module (G21.25 —
+// GuideHintCard.tsx itself is JSX, node cannot import it). Deleting a record,
+// renaming a key or editing a catalog word fails this test — the source cannot
+// silently drift from the catalogs it documents.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -16,6 +16,7 @@ import { placeDetailStrings } from '../controllers/place/placeDetailController.t
 import { nearbyStrings } from '../controllers/nearby/nearbySurfaceController.ts';
 import { offerStrings } from '../controllers/commerce/commerceController.ts';
 import { be as webBe } from '../web/lib/i18n/be.ts';
+import { GUIDE_HINT_STRINGS } from '../components/guide-hint-strings.generated.ts';
 
 import { loadUiMessagesSource } from '../contracts/ui-messages/ui-messages.mjs';
 
@@ -29,14 +30,14 @@ const CATALOGS = {
   'web.ui': { value: webBe, file: 'web/lib/i18n/be.ts' },
 };
 
-// GuideHintCard.tsx cannot be imported under node strip-types (JSX); the
-// inline be catalog is restated here verbatim from the component (one place,
-// checked against source.json below).
+// GuideHintCard.tsx cannot be imported under node strip-types (JSX); since
+// G21.25 the card's words live in the generated data module, which is pure
+// TS and imported here — the check reads the shipped words, not a restatement.
 const GUIDE_HINT = {
-  'native.guideHint.heading': 'Побач ёсць гід…',
-  'native.guideHint.paid': 'платны',
-  'native.guideHint.openHint': 'Адкрыць апісанне гіда',
-  'native.guideHint.dismiss': 'Схаваць',
+  'native.guideHint.heading': GUIDE_HINT_STRINGS.be.heading,
+  'native.guideHint.paid': GUIDE_HINT_STRINGS.be.paid,
+  'native.guideHint.openHint': GUIDE_HINT_STRINGS.be.openHint,
+  'native.guideHint.dismiss': GUIDE_HINT_STRINGS.be.dismiss,
 };
 
 function leaves(value, prefix = '') {
