@@ -1,0 +1,1483 @@
+{
+  "task": "G21.29 (issue #561)",
+  "generated_at": "2026-10-04T03:55:00Z",
+  "agent": "zcode-cli (GLM-5.3-Flash)",
+  "subject": {
+    "name": "Microsoft Terminology Collection",
+    "hub_page": {
+      "url": "https://learn.microsoft.com/en-us/globalization/reference/microsoft-language-resources",
+      "ms_date": "2023-06-06",
+      "updated_at": "2023-06-29T14:17:00Z",
+      "git_commit": "022f3d90c5f4817dae19d98ec309e417c42d1778",
+      "canonical_repo": "https://github.com/MicrosoftDocs/globalization"
+    },
+    "terminology_page": {
+      "url": "https://learn.microsoft.com/en-us/globalization/reference/microsoft-terminology",
+      "updated_at": "2024-05-02T22:55:00Z",
+      "git_commit": "2b7809fc571fa67ae95a22c18002752081ebd02c"
+    },
+    "download_url": "https://download.microsoft.com/download/b/2/d/b2db7a7c-8d33-47f3-b2c1-ee5e6445cf45/MicrosoftTermCollection.zip",
+    "zip": {
+      "http_status": 200,
+      "bytes": 176156561,
+      "sha256": "fed7d16955fd4063731712704cbd6584869a9009acf8a9c3c3de31e0d4ebdfe6",
+      "etag": "\"0xBAEBE1991EE435BA7D4BB1A9410665AB85D839C5A821D50E545F82465759A976\"",
+      "last_modified": "2025-02-06T12:32:16Z",
+      "inner_files_dated": "2024-11-06",
+      "version_metadata_inside_artifact": null,
+      "languages_observed": 111,
+      "languages_claimed_by_page": "nearly 100"
+    },
+    "versioning_note": "no release tags or version numbers exist for the collection; the download URL is stable and content is replaced in place, so pinning can only use sha256 + Last-Modified + ETag"
+  },
+  "legacy_endpoints_probed_2026_10_04": [
+    {
+      "url": "https://www.microsoft.com/language",
+      "result": "HTTP 404"
+    },
+    {
+      "url": "https://www.microsoft.com/Language/en-us/Default.aspx",
+      "result": "HTTP 404"
+    },
+    {
+      "url": "https://api.terminology.microsoft.com/TerminologyService.svc",
+      "result": "DNS resolution failure (curl exit code 6)"
+    },
+    {
+      "url": "https://www.terminology.microsoft.com",
+      "result": "DNS resolution failure (curl exit code 6)"
+    }
+  ],
+  "license": {
+    "status": "unknown — not published on any live official page checked; no LICENSE/README/terms file inside the archive (filename grep: 0 hits)",
+    "historical_terms_of_use": "lived on the retired Language Portal; official address now 404",
+    "implication": "any adoption (including committing excerpts) requires an owner decision or a located official license"
+  },
+  "acquisition": {
+    "method": "single HTTPS download of the official ZIP from download.microsoft.com (no accounts, credentials or tokens); local work on the extracted BELARUSIAN.tbx only",
+    "access_date": "2026-10-04",
+    "commands": [
+      "curl -sI 'https://download.microsoft.com/download/b/2/d/b2db7a7c-8d33-47f3-b2c1-ee5e6445cf45/MicrosoftTermCollection.zip'",
+      "curl -sS -A 'Mozilla/5.0 (X11; Linux x86_64)' -o MicrosoftTermCollection.zip '<download_url>'",
+      "sha256sum MicrosoftTermCollection.zip",
+      "unzip -l MicrosoftTermCollection.zip | grep -c '\\.tbx'   # -> 111",
+      "unzip -o MicrosoftTermCollection.zip 'BELARUSIAN.tbx'",
+      "sha256sum BELARUSIAN.tbx",
+      "python3 bench.py   # full XML parse; exact (case-insensitive) and substring matching of the shared 10-term battery"
+    ]
+  },
+  "files": [
+    {
+      "path": "MicrosoftTermCollection.zip",
+      "url": "https://download.microsoft.com/download/b/2/d/b2db7a7c-8d33-47f3-b2c1-ee5e6445cf45/MicrosoftTermCollection.zip",
+      "bytes": 176156561,
+      "sha256": "fed7d16955fd4063731712704cbd6584869a9009acf8a9c3c3de31e0d4ebdfe6"
+    },
+    {
+      "path": "BELARUSIAN.tbx (from the pinned zip)",
+      "bytes": 8828278,
+      "sha256": "49d37e4755317d1f75f09cb761c5674f48b982cf1f724ad9f825cad37c731f14"
+    }
+  ],
+  "coverage": {
+    "be": {
+      "term_entries": 11298,
+      "distinct_en_terms": 8019,
+      "metadata_observed": [
+        "definition (en)",
+        "partOfSpeech",
+        "grammaticalGender",
+        "grammaticalNumber",
+        "geographicalUsage"
+      ],
+      "geographicalUsage_BLR_entries": 1,
+      "product_layers_from_definitions": [
+        "Windows",
+        "Windows Phone Store",
+        "Xbox",
+        "Dynamics/CRM",
+        "Internet Explorer/Edge"
+      ],
+      "data_quality": "termEntry id 25472_1176798_2072187 (en 'drawing guide') holds a Latin character inside a Cyrillic be term — mixed script inside the source data itself"
+    }
+  },
+  "benchmark": {
+    "method": "full XML parse of BELARUSIAN.tbx; English source term matched exactly (case-insensitive) and as substring; counts from one run",
+    "totals": {
+      "exact_matches": 23,
+      "substring_only_matches": 142
+    },
+    "per_term": {
+      "back": {
+        "exact": 1,
+        "substring_only": 92
+      },
+      "cancel": {
+        "exact": 3,
+        "substring_only": 1
+      },
+      "settings": {
+        "exact": 3,
+        "substring_only": 12
+      },
+      "guide": {
+        "exact": 2,
+        "substring_only": 14
+      },
+      "stop": {
+        "exact": 1,
+        "substring_only": 3
+      },
+      "walk": {
+        "exact": 0,
+        "substring_only": 1
+      },
+      "download": {
+        "exact": 8,
+        "substring_only": 9
+      },
+      "purchase": {
+        "exact": 0,
+        "substring_only": 8
+      },
+      "restore": {
+        "exact": 2,
+        "substring_only": 2
+      },
+      "unavailable": {
+        "exact": 3,
+        "substring_only": 0
+      }
+    },
+    "exact_examples": {
+      "back": [
+        {
+          "id": "22823_1055132_1573452",
+          "en": [
+            {
+              "term": "Back",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "Назад",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The navigation button used to return to recently visited Web pages in Internet Explorer, Microsoft Edge, and other internet browsers."
+            }
+          ]
+        }
+      ],
+      "cancel": [
+        {
+          "id": "20151_705248_2296124",
+          "en": [
+            {
+              "term": "Cancel",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "Адмена",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalGender": "Feminine",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The button that stops the task in progress and returns to the previous state."
+            }
+          ]
+        },
+        {
+          "id": "3257_647093_2612141",
+          "en": [
+            {
+              "term": "cancel",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "скасаваць вылучэнне",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To reverse the action of selecting a range of text, cells or objects."
+            }
+          ]
+        },
+        {
+          "id": "3634_27320_1753710",
+          "en": [
+            {
+              "term": "cancel",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "скасаваць",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To revoke an action by quitting it without saving any changes that it would result in."
+            }
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "id": "3777_380742_1816334",
+          "en": [
+            {
+              "term": "Settings",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "Налады",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The area of the product in which you can work with business units, users, security roles, templates, subjects, services, and so on."
+            }
+          ]
+        },
+        {
+          "id": "37873_2167202_2182146",
+          "en": [
+            {
+              "term": "Settings",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalNumber": "Plural"
+            }
+          ],
+          "be": [
+            {
+              "term": "Налады",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalGender": "Feminine",
+              "grammaticalNumber": "Plural"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The app where people can find Windows and device settings."
+            }
+          ]
+        },
+        {
+          "id": "46921_2643753_2652273",
+          "en": [
+            {
+              "term": "Settings",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "Налады",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Plural"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The feature in an app that allows users to change its properties or behavior."
+            }
+          ]
+        }
+      ],
+      "guide": [
+        {
+          "id": "42782_2427892_2542667",
+          "en": [
+            {
+              "term": "guide",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "гід",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "An Xbox One screen overlay that slides in from the left side of the screen, providing quick access to things like profile, friends, and messages."
+            }
+          ]
+        },
+        {
+          "id": "8391_143066_1573734",
+          "en": [
+            {
+              "term": "guide",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "інструкцыя",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A non-printing line or point that can be used to help position or align objects or text."
+            }
+          ]
+        }
+      ],
+      "stop": [
+        {
+          "id": "1565_116540_1574142",
+          "en": [
+            {
+              "term": "stop",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "спыніць",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To halt a process or action, typically without restoring the prior state."
+            }
+          ]
+        }
+      ],
+      "walk": [],
+      "download": [
+        {
+          "id": "24245_1117153_2296248",
+          "en": [
+            {
+              "term": "download",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "спампоўка",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Feminine",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "An installation package that the user downloads from http://download.live.com/?mkt=en-us."
+            }
+          ]
+        },
+        {
+          "id": "32120_2072705_2080531",
+          "en": [
+            {
+              "term": "download",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "спампоўванне",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "Usually apps, games, and music downloaded from Windows Phone Store."
+            }
+          ]
+        },
+        {
+          "id": "32120_2072705_2083385",
+          "en": [
+            {
+              "term": "download",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "спампоўка",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "Usually apps, games, and music downloaded from Windows Phone Store."
+            }
+          ]
+        },
+        {
+          "id": "32130_1636617_1664193",
+          "en": [
+            {
+              "term": "download",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "спампаванне",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Neuter",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The transfer of a copy of a file from a remote device to a requesting device by means of a modem or network."
+            }
+          ]
+        },
+        {
+          "id": "32130_1636617_2057472",
+          "en": [
+            {
+              "term": "download",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "спампоўванне",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Neuter",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The transfer of a copy of a file from a remote device to a requesting device by means of a modem or network."
+            }
+          ]
+        },
+        {
+          "id": "38765_2258898_2542652",
+          "en": [
+            {
+              "term": "download",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "спампаваць",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To transfer content from the Xbox service to the console."
+            }
+          ]
+        },
+        {
+          "id": "38766_2258899_2542653",
+          "en": [
+            {
+              "term": "download",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Mass"
+            }
+          ],
+          "be": [
+            {
+              "term": "спампаванне",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Mass"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The content that is transferred from the Xbox service to a console."
+            }
+          ]
+        },
+        {
+          "id": "4092_817_1755601",
+          "en": [
+            {
+              "term": "download",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "спампаваць",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To transfer a copy of a file from a remote device to a requesting device by means of a modem or network."
+            }
+          ]
+        }
+      ],
+      "purchase": [],
+      "restore": [
+        {
+          "id": "15335_104365_1574044",
+          "en": [
+            {
+              "term": "restore",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "аднавіць",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To copy files from a backup storage device to their normal location, especially if the files are being copied to replace files that were accidentally lost or deleted."
+            }
+          ]
+        },
+        {
+          "id": "40256_2341040_2774635",
+          "en": [
+            {
+              "term": "restore",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "аднавіць",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To reinstate an item to its original state."
+            }
+          ]
+        }
+      ],
+      "unavailable": [
+        {
+          "id": "40756_2362015_2367768",
+          "en": [
+            {
+              "term": "unavailable",
+              "partOfSpeech": "Adjective",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "недаступны",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Adjective",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "Pertaining to contacts who are currently Offline."
+            }
+          ]
+        },
+        {
+          "id": "7852_45966_1574199",
+          "en": [
+            {
+              "term": "unavailable",
+              "partOfSpeech": "Adjective",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "недаступны",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Adjective",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "Pertaining to the state of a control in which normal functionality is not available to a user."
+            }
+          ]
+        },
+        {
+          "id": "7852_45966_1778305",
+          "en": [
+            {
+              "term": "unavailable",
+              "partOfSpeech": "Adjective",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "адключаны",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Adjective",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "Pertaining to the state of a control in which normal functionality is not available to a user."
+            }
+          ]
+        }
+      ]
+    },
+    "substring_examples": {
+      "back": [
+        {
+          "id": "10526_184468_2718864",
+          "en": [
+            {
+              "term": "Be Right Back",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "Хутка вярнуся",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The status that a user can select to indicate that he/she is away from the computer but will return shortly."
+            }
+          ]
+        },
+        {
+          "id": "10561_19019_1816136",
+          "en": [
+            {
+              "term": "background task",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "фонавая задача",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A task that is part of an operating system or program, and is operating without interaction with the user while the user is working on another task."
+            }
+          ]
+        },
+        {
+          "id": "11087_18539_1573453",
+          "en": [
+            {
+              "term": "back up",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "зрабіць рэзервовую копію",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To make a duplicate copy of a program, a disk, or data."
+            }
+          ]
+        },
+        {
+          "id": "11304_18811_1772704",
+          "en": [
+            {
+              "term": "background color",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "колер фону",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Masculine",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The color against which characters and graphics are displayed."
+            }
+          ]
+        }
+      ],
+      "cancel": [
+        {
+          "id": "49950_2827269_2831937",
+          "en": [
+            {
+              "term": "cancel out",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "скараціць",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A mathematical process used for removing subexpressions from a mathematical expression, when this removal does not change the meaning or the value of the expression because the subexpressions have equal and opposing effe"
+            }
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "id": "10695_464492_2488417",
+          "en": [
+            {
+              "term": "privacy settings",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Plural"
+            }
+          ],
+          "be": [
+            {
+              "term": "налады прыватнасці",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Feminine",
+              "grammaticalNumber": "Plural"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "Settings that allow the administrator to control the collection, use, and distribution of personal data."
+            }
+          ]
+        },
+        {
+          "id": "20874_757176_1864748",
+          "en": [
+            {
+              "term": "Language Settings tool",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "Моўныя налады",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Plural"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A tool used to turn on language-specific options for the languages one wants to use with a product."
+            }
+          ]
+        },
+        {
+          "id": "26530_1275661_2296247",
+          "en": [
+            {
+              "term": "domain settings",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "параметры дамена",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Plural"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The settings, related to the domain, a user needs to configure to get messaging up and running."
+            }
+          ]
+        },
+        {
+          "id": "32186_1638275_1755582",
+          "en": [
+            {
+              "term": "Settings charm",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "майстар-кнопка налад",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Feminine",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A user interface element that provides access to PC and app settings."
+            }
+          ]
+        }
+      ],
+      "guide": [
+        {
+          "id": "25472_1176798_2072187",
+          "en": [
+            {
+              "term": "drawing guide",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "накiравальная для аб'екта",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A guide used to position shapes and objects on slides."
+            }
+          ]
+        },
+        {
+          "id": "31803_1624317_2072211",
+          "en": [
+            {
+              "term": "master-level guide",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "накіравальная на ўзроўні ўзору",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A guide that is created and edited in Slide Master view, and that applies to slides that use the master layout in which it was created."
+            }
+          ]
+        },
+        {
+          "id": "31804_1624318_2072213",
+          "en": [
+            {
+              "term": "presentation-level guide",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "накіравальная на ўзроўні прэзентацыі",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A guide that applies to all slides in a presentation."
+            }
+          ]
+        },
+        {
+          "id": "31806_1624321_2072212",
+          "en": [
+            {
+              "term": "ruler guide marker",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "маркер накіравальнай лінейкі",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A marker in the ruler that aligns with the current guide position and enables users to add, edit, or delete a guide from within the ruler."
+            }
+          ]
+        }
+      ],
+      "stop": [
+        {
+          "id": "12872_1790611_2021418",
+          "en": [
+            {
+              "term": "stop responding",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "перастаць рэагаваць",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To be unresponsive."
+            }
+          ]
+        },
+        {
+          "id": "24919_1165832_1864911",
+          "en": [
+            {
+              "term": "multi-stop slider",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "паўзунок з некалькімі інтэравламі",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Masculine",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A slider control where the maximum and minimum values of the range can be modified."
+            }
+          ]
+        },
+        {
+          "id": "5434_119301_1864171",
+          "en": [
+            {
+              "term": "tab stop",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "пазіцыя табуляцыі",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Feminine",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A location on the horizontal ruler that indicates how far to indent text or where to begin a column of text."
+            }
+          ]
+        }
+      ],
+      "walk": [
+        {
+          "id": "43367_2456824_2461720",
+          "en": [
+            {
+              "term": "walking directions",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Plural"
+            }
+          ],
+          "be": [
+            {
+              "term": "указанні для руху пешшу",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Neuter",
+              "grammaticalNumber": "Plural"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The instructions for how to get from one location to another on foot."
+            }
+          ]
+        }
+      ],
+      "download": [
+        {
+          "id": "13678_2037682_2718602",
+          "en": [
+            {
+              "term": "trojan downloader",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "траян-загрузчык",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Masculine",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A trojan that accesses remote Web sites in order to download and install malicious or potentially unwanted software to the computer that the Trojan has infected."
+            }
+          ]
+        },
+        {
+          "id": "13678_502926_2718602",
+          "en": [
+            {
+              "term": "downloader",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "траян-загрузчык",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "Masculine",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A trojan that accesses remote Web sites in order to download and install malicious or potentially unwanted software to the computer that the Trojan has infected."
+            }
+          ]
+        },
+        {
+          "id": "22050_1700972_1865236",
+          "en": [
+            {
+              "term": "Downloads Marketplace",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "Крама Office",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalGender": "Feminine",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "An Internet site that provides a collection of products and services developed by Microsoft partners for Microsoft Office users."
+            }
+          ]
+        },
+        {
+          "id": "25820_1217812_1769287",
+          "en": [
+            {
+              "term": "Downloads",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalNumber": "Plural"
+            }
+          ],
+          "be": [
+            {
+              "term": "Спампоўкі",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The link to the site to download client versions of Windows Live products such as Windows Live Mail, Windows Live Messenger, etc."
+            }
+          ]
+        }
+      ],
+      "purchase": [
+        {
+          "id": "31689_1612739_1791030",
+          "en": [
+            {
+              "term": "in-app purchase",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "купля з праграмы",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A transaction performed by a consumer from within the context of an app to buy additional features for that app."
+            }
+          ]
+        },
+        {
+          "id": "31699_1612765_1791585",
+          "en": [
+            {
+              "term": "purchase at download",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "Аплаціць пры спампаванні",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To purchase an app just before downloading and installing it."
+            }
+          ]
+        },
+        {
+          "id": "31700_1612766_1791584",
+          "en": [
+            {
+              "term": "purchase after trial",
+              "partOfSpeech": "Verb",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "Аплаціць пасля выпрабавальнага перыяду",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Verb",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "To purchase an app after downloading, installing and trying it out."
+            }
+          ]
+        },
+        {
+          "id": "34553_1993266_2011690",
+          "en": [
+            {
+              "term": "purchaseid",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "purchaseid",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A unique code used to identify a purchase for transaction tracking and billing purposes."
+            }
+          ]
+        }
+      ],
+      "restore": [
+        {
+          "id": "34028_1973856_1982184",
+          "en": [
+            {
+              "term": "automatic file restore",
+              "partOfSpeech": "Noun",
+              "grammaticalNumber": "Singular"
+            }
+          ],
+          "be": [
+            {
+              "term": "аўтаматычнае аднаўленне файлаў",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "Noun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "A feature that replaces malware-infected system files with uninfected files from the cloud."
+            }
+          ]
+        },
+        {
+          "id": "37477_2139117_2158032",
+          "en": [
+            {
+              "term": "Restore this version",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "be": [
+            {
+              "term": "Аднавіць гэту версію",
+              "geographicalUsage": "BLR",
+              "partOfSpeech": "ProperNoun",
+              "grammaticalGender": "NotSelected",
+              "grammaticalNumber": "NotSelected"
+            }
+          ],
+          "descrips": [
+            {
+              "type": "definition",
+              "text": "The button in the History pane used to restore the current document to an earlier version"
+            }
+          ]
+        }
+      ],
+      "unavailable": []
+    },
+    "curated_observations": [
+      "Back -> Назад, Cancel -> Адмена (button) / скасаваць (verb), Settings -> Налады (3 contexts)",
+      "guide: two senses split — гід (Xbox screen overlay) vs інструкцыя (alignment guide); no entry for the audio-guide sense",
+      "unavailable: one identical definition carries two renderings — недаступны and адключаны",
+      "download: the same noun appears in two spellings (спампоўванне / спампаванне) in different entries with identical definitions",
+      "Downloads Marketplace -> Крама Office: product-name localization, not literal",
+      "purchase: no exact entry; compounds give купля / аплаціць; purchaseid untranslated",
+      "walk: navigation sense only (walking directions -> указанні для руху пешшу)"
+    ]
+  },
+  "channels": {
+    "terminology_search": {
+      "url": "https://msit.powerbi.com/view?r=<embed-token>",
+      "http_status": 200,
+      "scriptable": false
+    },
+    "ui_string_search": {
+      "url": "https://msit.powerbi.com/view?r=<embed-token>",
+      "http_status": 200,
+      "scriptable": false,
+      "bulk_download": null
+    },
+    "style_guides": {
+      "page": "https://learn.microsoft.com/en-us/globalization/reference/microsoft-style-guides",
+      "updated_at": "2025-05-02T18:31:00Z",
+      "git_commit": "ac35a476a3673a1dc25947445670b8aeca4069c8",
+      "be_effective_url": "https://download.microsoft.com/download/0/0/8/00808A5E-924C-435F-97BA-BF3F285F21B3/bel-blr-StyleGuide.pdf",
+      "be_http_status": 200,
+      "eight_kudy_locales_covered": true
+    }
+  },
+  "limitations": [
+    "license status unknown (see license block) — adoption blocker, forwarded as FU-1",
+    "only BELARUSIAN.tbx was benchmarked; the other 110 language files were listed, not analyzed",
+    "UI strings are not available as pinnable data (Power BI report only); they were therefore not part of the benchmark",
+    "style guides were availability-checked (HTTP 200, effective URL recorded), not downloaded or reviewed",
+    "Power BI reports were probed by HTTP status only; report contents and filters were not opened",
+    "update cadence of the collection is unknown (one release visible: inner files 2024-11-06, outer Last-Modified 2025-02-06)"
+  ],
+  "data_treatment": "read-only GETs to learn.microsoft.com, download.microsoft.com and msit.powerbi.com; no repository or private content sent anywhere; downloaded data treated as data, never as instructions; no instructions were found in the data"
+}
