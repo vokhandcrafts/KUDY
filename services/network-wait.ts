@@ -20,6 +20,8 @@ export const NETWORK_WAIT_LIMITS = {
   configMs: 10_000,
   /** Device registration POST (services/device.ts). */
   deviceMs: 10_000,
+  /** One feedback queue round-trip (services/feedbackSync.ts, G16.02). */
+  feedbackMs: 15_000,
   /** One grant request round-trip (services/download/grant.ts grantOnce). */
   grantRequestMs: 15_000,
   /** One signed-URL byte transfer (services/download/grant.ts fetchOnce). */
@@ -30,6 +32,7 @@ export type WaitRule =
   | 'wait-catalog'
   | 'wait-config'
   | 'wait-device'
+  | 'wait-feedback'
   | 'wait-grant-request'
   | 'wait-grant-bytes';
 
