@@ -1,0 +1,163 @@
+{
+  "verifiedAt": "2026-10-04T20:42:30.564Z",
+  "pr": "https://github.com/vokhandcrafts/KUDY/pull/601",
+  "reviewedDocumentsCommit": "a18d14325a9f334f6c6d9cf5ebbc3db47654eb69",
+  "mainPublication": {
+    "state": "pending",
+    "probe": "GitHub contents API for docs/agent-tasks/efficiency/README.md?ref=main",
+    "result": "HTTP 404"
+  },
+  "githubIssues": {
+    "status": "verified",
+    "count": 10,
+    "dependencyGraph": "acyclic",
+    "openAndUnclaimed": true,
+    "issues": [
+      {
+        "id": "G22",
+        "url": "https://github.com/vokhandcrafts/KUDY/issues/604",
+        "number": 604,
+        "title": "G22 — Bounded reads and predictable work",
+        "state": "OPEN",
+        "labels": [],
+        "assignees": [],
+        "epic": null,
+        "blockedBy": [
+          605
+        ],
+        "bodySha256": "5a866153ca320851ec1f0c029b3452640c5f4b5ae28f5380c7e7cf99065958f8"
+      },
+      {
+        "id": "G22.00",
+        "url": "https://github.com/vokhandcrafts/KUDY/issues/605",
+        "number": 605,
+        "title": "G22.00 — Publish the reviewed efficiency specification to main",
+        "state": "OPEN",
+        "labels": [],
+        "assignees": [],
+        "epic": 604,
+        "blockedBy": [],
+        "bodySha256": "d3201ffa59625ddbf15771ef046f84687a098ca23001a85d805b7ebc7ea2c7b3"
+      },
+      {
+        "id": "G22.01",
+        "url": "https://github.com/vokhandcrafts/KUDY/issues/606",
+        "number": 606,
+        "title": "G22.01 — Close owned PGlite databases on success and failure",
+        "state": "OPEN",
+        "labels": [],
+        "assignees": [],
+        "epic": 604,
+        "blockedBy": [
+          605
+        ],
+        "bodySha256": "11337137351b683e242df8f1ff8509c8ae7677b2fa754c114ae6ce8bc9c5109c"
+      },
+      {
+        "id": "G22.02",
+        "url": "https://github.com/vokhandcrafts/KUDY/issues/607",
+        "number": 607,
+        "title": "G22.02 — Resolve teaser audio without loading the full media file",
+        "state": "OPEN",
+        "labels": [],
+        "assignees": [],
+        "epic": 604,
+        "blockedBy": [
+          605
+        ],
+        "bodySha256": "d1976da395b73a760577d3b132a677acd3faa28f64c86dc0f046922dd76c536d"
+      },
+      {
+        "id": "G22.03",
+        "url": "https://github.com/vokhandcrafts/KUDY/issues/608",
+        "number": 608,
+        "title": "G22.03 — Read analytics events in bounded acknowledged batches",
+        "state": "OPEN",
+        "labels": [],
+        "assignees": [],
+        "epic": 604,
+        "blockedBy": [
+          605
+        ],
+        "bodySha256": "36bba1a2bfa17b5a214823824a53b5796ae691ab962402c97c4d78e08eda594d"
+      },
+      {
+        "id": "G22.04",
+        "url": "https://github.com/vokhandcrafts/KUDY/issues/609",
+        "number": 609,
+        "title": "G22.04 — Paginate collector records and index their links",
+        "state": "OPEN",
+        "labels": [],
+        "assignees": [],
+        "epic": 604,
+        "blockedBy": [
+          605
+        ],
+        "bodySha256": "46cf3542277a03899f8b6ebdb234f46dd55e5914c4ed5ce5e24fae9bc5e44ca0"
+      },
+      {
+        "id": "G22.05",
+        "url": "https://github.com/vokhandcrafts/KUDY/issues/610",
+        "number": 610,
+        "title": "G22.05 — Read teaser media only for the selected place",
+        "state": "OPEN",
+        "labels": [],
+        "assignees": [],
+        "epic": 604,
+        "blockedBy": [
+          605,
+          607
+        ],
+        "bodySha256": "2167fb8e8642609a38e0a49513c431ad0ac494eccd383e0a17eaab9abd7f0c45"
+      },
+      {
+        "id": "G22.06",
+        "url": "https://github.com/vokhandcrafts/KUDY/issues/611",
+        "number": 611,
+        "title": "G22.06 — Page session history and render visible rows",
+        "state": "OPEN",
+        "labels": [],
+        "assignees": [],
+        "epic": 604,
+        "blockedBy": [
+          605,
+          608
+        ],
+        "bodySha256": "bc503db6bcdc26be28833f7dc328335713382d1f6b9db0837f2f7c8826c4031b"
+      },
+      {
+        "id": "G22.07",
+        "url": "https://github.com/vokhandcrafts/KUDY/issues/612",
+        "number": 612,
+        "title": "G22.07 — Project run markers without repeated full-stop scans",
+        "state": "OPEN",
+        "labels": [],
+        "assignees": [],
+        "epic": 604,
+        "blockedBy": [
+          605
+        ],
+        "bodySha256": "7faff42ae9d98026e61d3d2baa14ea172760b7edf4b4b1d709dda081fc97bcd5"
+      },
+      {
+        "id": "G22.08",
+        "url": "https://github.com/vokhandcrafts/KUDY/issues/613",
+        "number": 613,
+        "title": "G22.08 — Remove only the two reverified unused wrappers",
+        "state": "OPEN",
+        "labels": [],
+        "assignees": [],
+        "epic": 604,
+        "blockedBy": [
+          605
+        ],
+        "bodySha256": "8ae9809008b14b1e13e74b8677533b0add3ed20e9221535845d923d53c0bf2df"
+      }
+    ]
+  },
+  "dispatcherBoard": {
+    "status": "unavailable",
+    "probe": "gh project list --owner vokhandcrafts --format json",
+    "reason": "authentication token is missing required scopes [read:project]"
+  }
+}
