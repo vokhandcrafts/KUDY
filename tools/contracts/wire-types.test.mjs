@@ -163,7 +163,7 @@ test('a corrupt schema file yields a named diagnostic, not a stack trace', (t) =
 test('the committed projection keeps the v1-only shapes and the generated header', () => {
   const text = readCommitted();
   assert.match(text, /GENERATED FILE — do not edit by hand/, 'the generated header must be present');
-  assert.match(text, /export const SCHEMA_LOCALES = \['be', 'en', 'uk'\] as const;/, 'the owner list must be derived, in owner order');
+  assert.match(text, /export const SCHEMA_LOCALES = \['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'\] as const;/, 'the owner list must be derived, in owner order');
   assert.match(text, /schema_version: 1;/, 'the pointer keeps the const-1 major');
   assert.match(text, /sizes: \{ base: number; extended\?: number \};/, 'sizes keeps base required, extended optional');
   for (const shape of ['CatalogRouteEntry', 'CatalogPointer', 'CatalogView', 'RouteStop', 'RouteDoc']) {

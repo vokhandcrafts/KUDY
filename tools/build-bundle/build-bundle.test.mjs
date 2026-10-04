@@ -248,6 +248,32 @@ test('AC4: index computes availability from published content; uk stays text-onl
   assert.equal(index.collections[0].members.length, 2);
 });
 
+// G21.16 (issue #550): the expanded allowlist is availability-neutral — a
+// new text locale yields only from its shipped files; audio_locales stays
+// limited to the locales that actually carry .m4a files (21 §3.2
+// «вылічаецца з апублікаванага зместу»).
+test('G21.16: fr text yields from its shipped files; audio_locales stays fr-free', async () => {
+  const work = await tempDir('kudy-author-');
+  await copyTree(fixtureDir, work);
+  await fsp.cp(path.join(work, 'uk', 'base'), path.join(work, 'fr', 'base'), { recursive: true });
+  const voices = JSON.parse(await fsp.readFile(path.join(work, 'voices.json'), 'utf8'));
+  voices.push({ id: 'voice-fr-1', locale: 'fr', narrator_credit: 'Synthétique voix démo', character: 'Le Dragon' });
+  await fsp.writeFile(path.join(work, 'voices.json'), canonicalJson(voices), 'utf8');
+  const stopsRel = path.join(work, 'fr', 'base', 'stops.json');
+  const stops = JSON.parse(await fsp.readFile(stopsRel, 'utf8'));
+  for (const story of stops) {
+    story.voice_id = 'voice-fr-1';
+    story.text = 'Texte démo synthétique pour la vérification de la collecte.';
+    story.transcript = 'Transcription démo synthétique de la couche libre.';
+  }
+  await fsp.writeFile(stopsRel, canonicalJson(stops), 'utf8');
+  const out = await tempDir('kudy-build-');
+  await buildBundle({ inDir: work, outDir: out });
+  const index = readJson(out, 'public/discovery/demo-city/r-demo-1/index.json');
+  const guide = index.offers.find((offer) => offer.offer_id === 'offer-guide-demo');
+  assert.deepEqual(guide.availability, { text_locales: ['be', 'en', 'fr', 'uk'], audio_locales: ['be', 'en'] });
+});
+
 test('AC4: collection projection is built through the real packager path (integration)', async () => {
   const out = await buildDemoFixture();
   const projection = readJson(out, 'public/collections/collection-demo/public.json');

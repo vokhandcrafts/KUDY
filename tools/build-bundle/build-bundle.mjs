@@ -27,7 +27,10 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-export const LOCALE_ALLOWLIST = ['be', 'en', 'uk'];
+// The locale vocabulary copies contracts/schemas/localized-text.schema.json
+// (propertyNames, G21.16) verbatim; an author-tree top-level directory outside
+// it is unknown-author-entry.
+export const LOCALE_ALLOWLIST = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'];
 export const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
 export const MAX_INDEX_BYTES = 512 * 1024;
 
