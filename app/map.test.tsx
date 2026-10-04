@@ -76,7 +76,9 @@ async function openNearby(
   });
   serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
   const rendered = renderRouter(withMapRoutes(services), { initialUrl: "/map" });
-  await screen.findByTestId("nearby-card-offer-e1-place");
+  // G21.17: the be UI shows only the be-text offers — a1-place is the
+  // stable visible card to wait for.
+  await screen.findByTestId("nearby-card-offer-a1-place");
   return { rendered, services };
 }
 
@@ -85,6 +87,43 @@ afterEach(() => {
 });
 
 describe("Nearby surface (G07.01)", () => {
+  // G21.17 (issue #551, AC1/AC5): the Nearby list shows only the offers whose
+  // published text covers the selected UI language; a filtered-empty list is
+  // the language explanation, never a service failure, and the switch back
+  // restores the offers in place.
+  test("G21.17: the offers filter by the selected UI language", async () => {
+    const { services } = await openNearby();
+    // The uk UI shows only the offer with published uk text; switching back
+    // restores the be list in place.
+    act(() => services.uiLocale.set("uk"));
+    const ids = screen.getAllByTestId(/^nearby-card-/).map((card) => card.props.testID);
+    expect(ids).toEqual(["nearby-card-offer-b1-guide"]);
+    act(() => services.uiLocale.set("be"));
+    expect(screen.getByTestId("nearby-card-offer-a1-place")).toBeTruthy();
+  });
+
+  test("G21.17: a valid catalogue without the selected language's text explains the language, not a failure", async () => {
+    // The same published catalogue with every uk text fact removed — valid,
+    // simply no uk text. The uk UI's honest empty is the language
+    // explanation (a service failure renders its own state).
+    const index = JSON.parse(INDEX_TEXT);
+    for (const offer of index.offers) {
+      offer.availability.text_locales = offer.availability.text_locales.filter((l: string) => l !== "uk");
+    }
+    const indexText = JSON.stringify(index);
+    const catalog = JSON.parse(CATALOG_TEXT);
+    catalog.discovery_index.sha256 = await sha256(new TextEncoder().encode(indexText));
+    catalog.discovery_index.bytes = new TextEncoder().encode(indexText).length;
+    serve({ "catalog.json": JSON.stringify(catalog), [POINTER_PATH]: indexText });
+    const services = createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 });
+    act(() => services.uiLocale.set("uk"));
+    renderRouter(withMapRoutes(services), { initialUrl: "/map" });
+    await screen.findByTestId("nearby-mode");
+    // The uk catalogue is complete — the explanation renders in uk.
+    expect(screen.getByTestId("nearby-message").props.children).toBe("Гідів з текстом цією мовою ще немає.");
+    expect(screen.queryByTestId(/^nearby-card-/)).toBeNull();
+  });
+
   test("without a position the surface renders the manual review list in the canon order", async () => {
     // No location port in the build (the adapter lands with G05.02.c) — the
     // review view is the honest default (criterion 2, no dead-end).
@@ -94,11 +133,12 @@ describe("Nearby surface (G07.01)", () => {
     expect(screen.queryByTestId("nearby-location-note")).toBeNull();
     // The review order (21 §4 rule 6): editorial_order, offer_id tiebreak.
     const ids = screen.getAllByTestId(/^nearby-card-/).map((card) => card.props.testID);
+    // G21.17: e1-place (en-only text) is hidden in the be UI — the filter
+    // is the spec's «толькі гіды з тэкстам на выбранай мове».
     expect(ids).toEqual([
       "nearby-card-offer-b1-guide",
       "nearby-card-offer-a1-place",
       "nearby-card-offer-c1-place",
-      "nearby-card-offer-e1-place",
       "nearby-card-offer-g1-place",
       "nearby-card-offer-h1-place",
     ]);
@@ -114,7 +154,6 @@ describe("Nearby surface (G07.01)", () => {
     // sorts after every known one — never a fabricated figure (P02).
     const ids = screen.getAllByTestId(/^nearby-card-/).map((card) => card.props.testID);
     expect(ids).toEqual([
-      "nearby-card-offer-e1-place",
       "nearby-card-offer-a1-place",
       "nearby-card-offer-g1-place",
       "nearby-card-offer-h1-place",
@@ -282,7 +321,7 @@ describe("Nearby surface (G07.01)", () => {
     await openNearby();
     expect(screen.getByTestId("scroll-nearby")).toBeTruthy();
     const ids = screen.getAllByTestId(/^nearby-card-/).map((card) => card.props.testID);
-    expect(ids).toHaveLength(6);
+    expect(ids).toHaveLength(5);
     expect(ids[ids.length - 1]).toBe("nearby-card-offer-h1-place");
   });
 });
@@ -393,14 +432,15 @@ describe("Nearby UI-locale words (issue #523)", () => {
     act(() => {
       services.uiLocale.set("uk");
     });
-    const ukCard = screen.getByTestId("nearby-card-offer-a1-place");
-    // The chrome words follow the switch (criterion 3): the facts labels and
-    // the access badge render in uk...
+    // G21.17: the uk UI shows only the offers with published uk text — the
+    // b1 guide stays, the be/en-only a1-place filters out.
+    const ukCard = screen.getByTestId("nearby-card-offer-b1-guide");
+    // The chrome words follow the switch (criterion 3): the access badge
+    // renders in uk...
     expect(screen.getByText("Поруч")).toBeTruthy();
-    expect(within(ukCard).getByText("Текст: be, en; аудіо: —\n~20—30 хв")).toBeTruthy();
-    expect(within(ukCard).getByText("Безкоштовно")).toBeTruthy();
+    expect(within(ukCard).getByText("Платно")).toBeTruthy();
     // ...and the authored content keeps its language.
-    expect(within(ukCard).getByText("Двор сукнараў")).toBeTruthy();
+    expect(within(ukCard).getByText("Гісторыі сукнараў: ад мытні да порта")).toBeTruthy();
     rendered.unmount();
   });
 });

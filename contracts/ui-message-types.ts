@@ -49,6 +49,11 @@ export interface UiStrings {
   readonly catalogUnavailable: string;
   readonly catalogTemporarilyUnavailable: string;
   readonly notPublished: string;
+  // G21.17 (issue #551): the selected UI language's text-absence
+  // explanation (a valid empty catalogue is never a service failure) and
+  // the deep link's no-substitution unavailable state.
+  readonly textLocaleEmpty: string;
+  readonly previewTextUnavailable: string;
   readonly validCache: string;
   readonly previewUnavailable: string;
   readonly degradedData: string;

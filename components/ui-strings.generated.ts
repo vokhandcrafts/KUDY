@@ -63,6 +63,8 @@ export const UI_STRINGS: Record<CompleteUiLocaleCode, UiStrings> = {
     "pastRowLine": (startedDay: string, finishedDay: string | null, heard: number) => `${startedDay} — ${finishedDay ?? "—"} — праслышана: ${heard}`,
     "pastWalks": "Папярэднія праходы",
     "previewUnavailable": "Прэв'ю часова недаступны",
+    "previewTextUnavailable": "Гэтага гіда няма на выбранай мове інтэрфейсу.",
+    "textLocaleEmpty": "Гідаў з тэкстам на гэтай мове яшчэ няма.",
     "reasonText": {
       "editorial": "рэдакцыйны выбар",
       "season_recommended": "рэкамендавана на гэты сезон",
@@ -145,6 +147,8 @@ export const UI_STRINGS: Record<CompleteUiLocaleCode, UiStrings> = {
     "pastRowLine": (startedDay: string, finishedDay: string | null, heard: number) => `${startedDay} — ${finishedDay ?? "—"} — heard: ${heard}`,
     "pastWalks": "Previous walks",
     "previewUnavailable": "Preview temporarily unavailable",
+    "previewTextUnavailable": "This guide is not available in the selected interface language.",
+    "textLocaleEmpty": "No guides with text in this language yet.",
     "reasonText": {
       "editorial": "editorial pick",
       "season_recommended": "recommended for the season",
@@ -227,6 +231,8 @@ export const UI_STRINGS: Record<CompleteUiLocaleCode, UiStrings> = {
     "pastRowLine": (startedDay: string, finishedDay: string | null, heard: number) => `${startedDay} — ${finishedDay ?? "—"} — прослухано: ${heard}`,
     "pastWalks": "Попередні прогулянки",
     "previewUnavailable": "Прев'ю тимчасово недоступне",
+    "previewTextUnavailable": "Цього гіда немає обраною мовою інтерфейсу.",
+    "textLocaleEmpty": "Гідів з текстом цією мовою ще немає.",
     "reasonText": {
       "editorial": "редакційний вибір",
       "season_recommended": "рекомендовано на цей сезон",

@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
-import { render } from "@testing-library/react-native";
+import { act, render } from "@testing-library/react-native";
 import { fireEvent, renderRouter, screen, within } from "expo-router/testing-library";
 
 import My from "./(tabs)/my";
@@ -142,6 +142,30 @@ describe("route placeholders (19 §2.5)", () => {
   // the catalog ports the root constructs no nearby member and the screen
   // shows its honest unavailable state — no fake offers stand in (the
   // composition root's rule).
+  // G21.17 (issue #551, AC1/AC2): the guides list filters by the selected UI
+  // language and the switch re-projects the cards — the titles ride the
+  // switched preference through the same refresh-at-every-load reader policy.
+  test("G21.17: the guides list filters and re-projects titles on the UI-language switch", async () => {
+    const index = JSON.parse(INDEX_TEXT) as { offers: Array<{ offer_id: string; availability: { text_locales: string[] }; localized: { title: Record<string, string> } }> };
+    const guide = index.offers.find((offer) => offer.offer_id === "offer-b1-guide");
+    if (guide === undefined) throw new Error("the fixture guide offer exists");
+    guide.availability.text_locales = ["be", "en", "uk", "fr"];
+    guide.localized.title.fr = "Guidé : des douanes au port";
+    const indexText = JSON.stringify(index);
+    const catalog = JSON.parse(CATALOG_TEXT);
+    catalog.discovery_index.sha256 = await sha256(new TextEncoder().encode(indexText));
+    catalog.discovery_index.bytes = new TextEncoder().encode(indexText).length;
+    serve({ "catalog.json": JSON.stringify(catalog), [POINTER_PATH]: indexText, "bundle/guide-route-a1/1/route.json": ROUTE_A1_TEXT, "bundle/guide-route-b1/3/route.json": ROUTE_B1_TEXT });
+    const services = createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 });
+    renderRouter(withCatalogRoutes(layoutWith(services)), { initialUrl: "/city/gdansk/guides" });
+    expect(await screen.findByText("Гісторыі сукнараў: ад мытні да порта")).toBeTruthy();
+    act(() => services.uiLocale.set("uk"));
+    expect(await screen.findByText("Історії сукнарів: від митниці до порту")).toBeTruthy();
+    expect(screen.queryByText("Гісторыі сукнараў: ад мытні да порта")).toBeNull();
+    act(() => services.uiLocale.set("en"));
+    expect(await screen.findByText("Cloth Merchants' Stories: from the Customs House to the Port")).toBeTruthy();
+  });
+
   test("the Nearby surface without the catalog ports renders its honest unavailable state", async () => {
     renderRouter({ "_layout": layoutWith(createServices({})), map: Map }, { initialUrl: "/map" });
     const nearby = await screen.findByTestId("screen-Map");

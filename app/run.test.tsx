@@ -326,6 +326,25 @@ describe("run map surface", () => {
     expect(label).toBe("Customs, pending");
   });
 
+  // G21.17 (issue #551, AC3): switching the UI language mid-walk never
+  // re-binds the active session — the run words and the back label keep the
+  // walk's pinned locale, the surface and its progress stay in place
+  // (the chrome independence the ui-locale store guarantees by construction).
+  test("ui_switch_keeps_content_pin: a UI switch mid-walk keeps the pinned session words", async () => {
+    const { session } = makeRunSession();
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("en")), run: { session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    expect(textOf("run-status-stop-1")).toBe("Customs — pending");
+    act(() => services.uiLocale.set("uk"));
+    expect(textOf("run-status-stop-1")).toBe("Customs — pending");
+    expect(textOf("run-status-stop-3")).toBe("Tower — locked");
+    // The back label is chrome, but the walk's own locale wins while a walk
+    // is ready — the same pin, no substituted language.
+    expect(screen.getByText("Back")).toBeTruthy();
+    expect(screen.getByTestId("run-map")).toBeTruthy();
+  });
+
   test("AC4: without the run ports the surface is honestly unavailable", async () => {
     const services = createServices({});
     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });

@@ -24,7 +24,7 @@ import {
 import { useServices, useUiLocale } from "./_layout";
 import { BackButton } from "../components/back-button";
 import { CanonIcon } from "../components/canon-icon";
-import { AccessBadge, StateBanner } from "../components/guide-card";
+import { AccessBadge, offerShownInTextLocale, StateBanner } from "../components/guide-card";
 import { GuideHintMount } from "../components/GuideHintCard";
 import { LoadingIndicator } from "../components/loading-indicator";
 import { PressableSurface } from "../components/pressable-surface";
@@ -211,7 +211,13 @@ export default function Map() {
   const router = useRouter();
   const offers =
     surface && (surface.kind === "ready" || surface.kind === "offline") ? surface.offers : [];
-  const list = nearbyOrder(offers, locationView);
+  // G21.17 (issue #551): the Nearby list shows only the offers whose
+  // published text covers the selected UI language (the one projection rule
+  // of components/guide-card).
+  const list = nearbyOrder(
+    offers.filter((offer) => offerShownInTextLocale(offer.text_locales, uiLocale)),
+    locationView,
+  );
   const note = locationNote(locationView, strings);
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4).
@@ -266,7 +272,9 @@ export default function Map() {
             ) : null}
             {list.length === 0 ? (
               <ScaledText style={styles.message} testID="nearby-message">
-                {strings.empty}
+                {/* G21.17 (issue #551): the language explanation when other
+                    languages have offers, the honest NAV3 empty otherwise. */}
+                {offers.length === 0 ? strings.empty : uiStrings(uiLocale).textLocaleEmpty}
               </ScaledText>
             ) : (
               list.map((offer) => (

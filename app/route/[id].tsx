@@ -27,7 +27,7 @@ import { useStoreState } from "../../controllers/useControllerStore";
 import { BackButton } from "../../components/back-button";
 import { CanonIcon } from "../../components/canon-icon";
 import { tokens } from "../../components/design-tokens";
-import { AccessBadge, LocalesLine, StateBanner } from "../../components/guide-card";
+import { AccessBadge, LocalesLine, offerShownInTextLocale, StateBanner } from "../../components/guide-card";
 import { LoadingIndicator } from "../../components/loading-indicator";
 import {
   ModalDialog,
@@ -281,6 +281,15 @@ export default function RoutePreview() {
           </View>
         ) : null}
         {state.surface.kind === "ready" ? (
+          /* G21.17 (issue #551): a direct link to a guide whose published
+             text does not cover the selected UI language renders the
+             localized unavailable state — the be/en content is never
+             silently substituted (mixed playback stays G21.21's). */
+          !offerShownInTextLocale(state.surface.preview.textLocales, locale) ? (
+            <View testID="preview-text-unavailable">
+              <ScaledText style={styles.unavailable}>{strings.previewTextUnavailable}</ScaledText>
+            </View>
+          ) : (
           <View>
             <ScaledText style={screenStyles.displayTitle}>{state.surface.preview.title}</ScaledText>
             {state.surface.preview.summary ? (
@@ -474,6 +483,7 @@ export default function RoutePreview() {
               </ScaledText>
             ) : null}
           </View>
+          )
         ) : null}
       </ScrollView>
       {state.confirm ? (

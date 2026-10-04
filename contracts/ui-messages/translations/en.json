@@ -392,6 +392,22 @@
       }
     },
     {
+      "id": "native.chrome.previewTextUnavailable",
+      "value": "This guide is not available in the selected interface language.",
+      "reviewedSourceHash": "6eb593b874ec34a4594861008c051696cafb4d710a8ff5473c9cdd35ddc730f8",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.textLocaleEmpty",
+      "value": "No guides with text in this language yet.",
+      "reviewedSourceHash": "886f9de4222ee5680e6beb950cddb086d31f9eb0793730fda31ceeb52a872c23",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
       "id": "native.chrome.reasonText.editorial",
       "value": "editorial pick",
       "reviewedSourceHash": "be32560fb8b57fff44f9193fdeac0d3b5fa3312e6d1526ce09f5c88ec8ac9d56",
