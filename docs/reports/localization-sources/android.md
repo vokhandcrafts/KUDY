@@ -59,7 +59,7 @@ git ls-remote https://android.googlesource.com/platform/frameworks/base "refs/ta
   (найноўшы тэг 16-й лініі).
 - Кожны скарыстаны файл запінаваны blob-id (8 core-файлаў + 8 Settings-файлаў +
   8 DownloadProvider-файлаў + 1 TV-файл = 25; поўны спіс у манефесце). Blob-id адназначна
-  пінуе байты файлу незалежна ад руху main.
+  пінуе байты файла незалежна ад руху main.
 
 Абмежаванне ўзнаўляльнасці: старонкі гісторыі файлаў (+log) у Gitiles на гэтую дату
 аддаюць `403: Forbidden — Please sign in to view the history pages` — дату апошняй
