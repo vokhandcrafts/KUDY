@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-05",
+  "specification": "docs/specifications/technical-completion/2026-10-05-chinese-research.md",
+  "base_commit": "fcbbfc0867f71766c96c4db39cae2f66be98afd8",
+  "owner_request": "Specification and GitHub tasks only; separate PR after #618 merged.",
+  "research_executed": false,
+  "runtime_changed": false,
+  "publication_issue": 619,
+  "previous_publication": {
+    "issue": 565,
+    "pr": 618,
+    "merged": true,
+    "claim_label_removed": true
+  },
+  "tasks": [
+    {
+      "task": "G21.43",
+      "issue": 619,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/619",
+      "title": "G21.43 — Publish the Chinese research specification and task briefs",
+      "brief": "docs/agent-tasks/technical-completion/G21.43.md",
+      "blocked_by": [
+        565
+      ],
+      "state": "OPEN",
+      "labels": [],
+      "assignees": [],
+      "body_sha256_normalized": "16737fe4ed8b32aa2772133b26610e3eb786c337c265339b88129569fffe637c",
+      "open_issues_visible": true
+    },
+    {
+      "task": "G21.39",
+      "issue": 620,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/620",
+      "title": "G21.39 — Compare Chinese language variants and verified terminology sources",
+      "brief": "docs/agent-tasks/technical-completion/G21.39.md",
+      "blocked_by": [
+        619
+      ],
+      "state": "OPEN",
+      "labels": [],
+      "assignees": [],
+      "body_sha256_normalized": "6b6c401c6460c4e972a624d514ee138d07778dbbbc71beb56921d34e099d4b87",
+      "open_issues_visible": true
+    },
+    {
+      "task": "G21.40",
+      "issue": 621,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/621",
+      "title": "G21.40 — Prove Chinese glyphs and layouts with app references and a visual probe",
+      "brief": "docs/agent-tasks/technical-completion/G21.40.md",
+      "blocked_by": [
+        619
+      ],
+      "state": "OPEN",
+      "labels": [],
+      "assignees": [],
+      "body_sha256_normalized": "65f8e1e0940489cd44b70f98766dc2f351ec585f9ea11e394316be0c062fee13",
+      "open_issues_visible": true
+    },
+    {
+      "task": "G21.41",
+      "issue": 622,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/622",
+      "title": "G21.41 — Compare Chinese translation and exportable narration candidates",
+      "brief": "docs/agent-tasks/technical-completion/G21.41.md",
+      "blocked_by": [
+        619
+      ],
+      "state": "OPEN",
+      "labels": [],
+      "assignees": [],
+      "body_sha256_normalized": "8eb2153bd7851d24e31a8e47b21b304d6cbf5ce6d377ed37f6caebbd4fc73202",
+      "open_issues_visible": true
+    },
+    {
+      "task": "G21.42",
+      "issue": 623,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/623",
+      "title": "G21.42 — Approve the Chinese release scope before implementation",
+      "brief": "docs/agent-tasks/technical-completion/G21.42.md",
+      "blocked_by": [
+        619,
+        620,
+        621,
+        622
+      ],
+      "state": "OPEN",
+      "labels": [],
+      "assignees": [],
+      "body_sha256_normalized": "481f1ad6ac7ad630aef267593aa3f13f8c938b374b844f81a0b1ac05a14f4ce3",
+      "open_issues_visible": true
+    }
+  ],
+  "project_verification": "unavailable: authentication token missing read:project; no permission refresh or board changes",
+  "new_documents_on_main": false,
+  "publication_requirement": "Separate PR closing #619 publishes all new runner inputs; research issues depend on #619.",
+  "duplicate_review": "Compared open/closed issues. Reused #566/#543 policy, #553 player identity and #306 Ukrainian narration; no Chinese research contracts existed.",
+  "graph_verification": "619 -> closed 565; 620/621/622 -> 619; 623 -> 619/620/621/622; no cycle.",
+  "tool_registry": {
+    "read": true,
+    "external_modified": false,
+    "new_tools_installed": false
+  },
+  "pull_request": "https://github.com/vokhandcrafts/KUDY/pull/624",
+  "publication_status": "Available in separate PR; main runner inputs after merge."
+}
