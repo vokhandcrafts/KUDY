@@ -1,0 +1,2728 @@
+{
+  "source_schema_version": 1,
+  "source_locale": "be",
+  "records": [
+    {
+      "id": "native.chrome.access.free",
+      "source": "Бясплатна",
+      "context": "Пазнака доступу: бясплатна",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#access.free"
+      ],
+      "sourceHash": "82e16c5b12218d14ab2c468f999861493c22fd508e1f225f286674ecffbac141"
+    },
+    {
+      "id": "native.chrome.access.mixed",
+      "source": "Змешана",
+      "context": "Пазнака доступу: змешана (частка кропак платная)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#access.mixed"
+      ],
+      "sourceHash": "d434ea3d59a4874db509a395e9df857ee017bee8ed9cf40bdf911b4c745459c5"
+    },
+    {
+      "id": "native.chrome.access.paid",
+      "source": "Платна",
+      "context": "Пазнака доступу: платна",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#access.paid"
+      ],
+      "sourceHash": "4b081dc73d3045c6977b49c2140888c6106630d14333a0bc68abd96750d2dffb"
+    },
+    {
+      "id": "native.chrome.back",
+      "source": "Назад",
+      "context": "Кнопка вяртання на папярэдні экран; кароткая подпіс і пазнака чытача экрана",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#back"
+      ],
+      "sourceHash": "b1138bccd114e81d7e8305ace5a529060269c32c1dd21e669ff30f4a2f36d7a0",
+      "constraints": {
+        "accessibility": "label"
+      }
+    },
+    {
+      "id": "native.chrome.backToCity",
+      "source": "Горад",
+      "context": "Кнопка вяртання да экрана горада",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#backToCity"
+      ],
+      "sourceHash": "c3196e598662ddc30063829a3d53b88c16855ef719f72189dcb748a4c7e72200"
+    },
+    {
+      "id": "native.chrome.cancel",
+      "source": "Скасаваць",
+      "context": "Кнопка скасавання дыялога",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#cancel"
+      ],
+      "sourceHash": "0edad8c85ababf7db09011d81672c3470f30745ce80436b8a1e3f77f8fa7150d"
+    },
+    {
+      "id": "native.chrome.catalogTemporarilyUnavailable",
+      "source": "Каталог часова недаступны",
+      "context": "Радок стану: каталог часова недаступны",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#catalogTemporarilyUnavailable"
+      ],
+      "sourceHash": "1db04f4cab5a569077412e68b581db2461473397a0b1f1ba55ce094f9c65f144"
+    },
+    {
+      "id": "native.chrome.catalogUnavailable",
+      "source": "Каталог недаступны",
+      "context": "Радок стану: каталог недаступны",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#catalogUnavailable"
+      ],
+      "sourceHash": "5da4e9377f0d520cf9f61c7ff0fa655d10fd902089cdd63b979ff8f8d19d0745"
+    },
+    {
+      "id": "native.chrome.collectionUnavailable",
+      "source": "Падборка недаступная",
+      "context": "Радок стану: падборка недаступная",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#collectionUnavailable"
+      ],
+      "sourceHash": "f835b71196437961eeaeb3074ef18024e8204716abc2801515bbdf6a8c4b51d3"
+    },
+    {
+      "id": "native.chrome.collectionUnresolved",
+      "source": "Некаторыя члены падборкі пакуль не апублікаваныя.",
+      "context": "Радок стану: частка членаў падборкі не апублікаваная",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#collectionUnresolved"
+      ],
+      "sourceHash": "a5e630ad534dffdc7196d67ccc73dd0266f09f81d681a7a5b811a354ab5fd20b"
+    },
+    {
+      "id": "native.chrome.currentWalk",
+      "source": "Бягучая прагулка",
+      "context": "Загаловак секцыі бягучай прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#currentWalk"
+      ],
+      "sourceHash": "f9408779fd160eda48f9d52e41c0a274afa34f1fc10c34ed16c655a630413f88"
+    },
+    {
+      "id": "native.chrome.degradedData",
+      "source": "Частка звестак часова недаступная",
+      "context": "Банер дэградацыі: частка звестак часова недаступная",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#degradedData"
+      ],
+      "sourceHash": "c6a254fe804abb64bc54bbe20e172db06ed99322075f21a9f868ba5e35a923b1"
+    },
+    {
+      "id": "native.chrome.differenceText.duration_unknown",
+      "source": "час не ацэнены",
+      "context": "Адрозненне прапановы: час не ацэнены",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#differenceText.duration_unknown"
+      ],
+      "sourceHash": "aa5a112078a2bbce5d31cfb2eaf8e7ffc469607accdc26f9e44e18b8d6dbe659"
+    },
+    {
+      "id": "native.chrome.differenceText.over_time",
+      "source": "даўжэй за запыт",
+      "context": "Адрозненне прапановы: даўжэй за запыт",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#differenceText.over_time"
+      ],
+      "sourceHash": "95f858f684ec50f63854358e44ef3e68fb7c3c322ff5732fc957046244703404"
+    },
+    {
+      "id": "native.chrome.differenceText.season_not_recommended",
+      "source": "не для гэтага сезону",
+      "context": "Адрозненне прапановы: не для гэтага сезону",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#differenceText.season_not_recommended"
+      ],
+      "sourceHash": "b3976a641f5d9d01ed1186b8256e629a92bff51fc5f65f14563df0f60da468d0"
+    },
+    {
+      "id": "native.chrome.differenceText.season_unassessed",
+      "source": "сезон не ацэнены",
+      "context": "Адрозненне прапановы: сезон не ацэнены",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#differenceText.season_unassessed"
+      ],
+      "sourceHash": "e06820b8dbcdffc5d4e083b1b251714326a070dd61d11c589dc48b1ab551da42"
+    },
+    {
+      "id": "native.chrome.differenceText.theme_mismatch",
+      "source": "іншая тэма",
+      "context": "Адрозненне прапановы: іншая тэма",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#differenceText.theme_mismatch"
+      ],
+      "sourceHash": "518dfdb5f1459fb582bff8fef2e6f5130e9b6277546581bb5c06a49da31312e4"
+    },
+    {
+      "id": "native.chrome.discoveryAlternatives",
+      "source": "Іншыя варыянты",
+      "context": "Загаловак секцыі іншых варыянтаў падбора",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#discoveryAlternatives"
+      ],
+      "sourceHash": "6b9f5202ccfa8bebff4109104041f656688d06f08ddaa652292d65f40af5ba0e"
+    },
+    {
+      "id": "native.chrome.discoveryEmpty",
+      "source": "Нічога дакладна не падыходзіць — пасмякчыце выбар або паглядзіце іншыя варыянты.",
+      "context": "Пусты стан падбора: падказка пасмякчыць выбар",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#discoveryEmpty"
+      ],
+      "sourceHash": "831cdd7dfd6d729661152d21f5c107ebf2438ec405db988ddc8d2cd62633521d"
+    },
+    {
+      "id": "native.chrome.discoveryTemporarilyUnavailable",
+      "source": "Падбор зараз недаступны",
+      "context": "Радок стану: падбор зараз недаступны",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#discoveryTemporarilyUnavailable"
+      ],
+      "sourceHash": "9252d5d0294115694f781e58a88257ae4b90cca39cb8c14091efd477f0721935"
+    },
+    {
+      "id": "native.chrome.discoveryTitle",
+      "source": "Чым заняцца",
+      "context": "Загаловак экрана падбора",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#discoveryTitle"
+      ],
+      "sourceHash": "73a869d121cfe785ef9b06081df8484b6a878a6bb51140ad668c80a4357bd816"
+    },
+    {
+      "id": "native.chrome.discoveryUnavailable",
+      "source": "Падбор недаступны",
+      "context": "Радок стану: падбор недаступны",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#discoveryUnavailable"
+      ],
+      "sourceHash": "262a86e4e8647e231e8d140b8e62fdbf5d769ab8c08400d9d87afb962676211a"
+    },
+    {
+      "id": "native.chrome.durationLabel",
+      "source": "Працягласць",
+      "context": "Пазнака чытача экрана для ўмяшчальніка працягласці (сам факт — суседні радок)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#durationLabel"
+      ],
+      "sourceHash": "367751046f034b1e95b6562ea3eb4809debffb78ea7af63d3de645321bdeecc9",
+      "constraints": {
+        "accessibility": "label"
+      }
+    },
+    {
+      "id": "native.chrome.durationMinutes",
+      "source": "Час: ${minutes} хв",
+      "context": "Радок працягласці: адзінае значэнне ў хвілінах",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "minutes",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#durationMinutes"
+      ],
+      "sourceHash": "e9a5925bfd57c9831a26edeecf7bcb583cbd7d875c8e9fabbbd4d10449028fe4"
+    },
+    {
+      "id": "native.chrome.durationRange",
+      "source": "Час: ад ${minMinutes} да ${maxMinutes} хв",
+      "context": "Радок працягласці: дыяпазон у хвілінах",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "minMinutes",
+          "type": "number"
+        },
+        {
+          "name": "maxMinutes",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#durationRange"
+      ],
+      "sourceHash": "78add4278ac05d6aa17374a52f30bb5c313f6da5834ace6e464ed213dcafeee9"
+    },
+    {
+      "id": "native.chrome.freeStopsCount",
+      "source": "Кропак бясплатна: ${count}",
+      "context": "Радок факту: колькасць бясплатных кропак",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "count",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#freeStopsCount"
+      ],
+      "sourceHash": "780c5d18130bb93df4355222162c7d4d8cc0cc3510971a9e6376751dff00a953"
+    },
+    {
+      "id": "native.chrome.guidesLink",
+      "source": "Гіды →",
+      "context": "Ссылка на раздзел гідаў",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#guidesLink"
+      ],
+      "sourceHash": "ae59ec899a5964dea00463b49e7dd6348684069736ce95f6183d3c79b94c389c"
+    },
+    {
+      "id": "native.chrome.heardCount",
+      "source": "праслышана: ${count}",
+      "context": "Лічба праслуханых гісторый у радку гісторыі",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "count",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#heardCount"
+      ],
+      "sourceHash": "974ee6f7afa147c26e872b3306efc390dbf3446e84d770041ded77527ab0342a"
+    },
+    {
+      "id": "native.chrome.historyUnavailable",
+      "source": "Гісторыя недаступная.",
+      "context": "Радок стану: гісторыя недаступная (сказ з кропкай)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#historyUnavailable"
+      ],
+      "sourceHash": "e533a4767a8b973cf00efbfea8c16a7163f08f541ae657e853eea36baa0ccdc9"
+    },
+    {
+      "id": "native.chrome.kudyLink",
+      "source": "KUDY →",
+      "context": "Ссылка на паверхню KUDY (гісторыі)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#kudyLink"
+      ],
+      "sourceHash": "6215ec8b2ead10ed524e46f5c1ddd0a0567f909e21330a8e7a0229422917383b"
+    },
+    {
+      "id": "native.chrome.languageLabel",
+      "source": "Мова",
+      "context": "Пазнака рада выбару мовы ў My KUDY",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#languageLabel"
+      ],
+      "sourceHash": "85cd11e030ecf41b369de4b859dfd71a507a92c832924c27ff037d43425b9c92"
+    },
+    {
+      "id": "native.chrome.languageSelfNames.be",
+      "source": "Беларуская",
+      "context": "Уласная назва мовы be (аднолькавая ва ўсіх каталозінах)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#languageSelfNames.be"
+      ],
+      "sourceHash": "e9767b0b2ff2587333d4886278387cf97a6f34fb5dc300bdfe5e84e017b8deb1"
+    },
+    {
+      "id": "native.chrome.languageSelfNames.en",
+      "source": "English",
+      "context": "Уласная назва мовы en",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#languageSelfNames.en"
+      ],
+      "sourceHash": "0ad3add7557937c886b1558b34154e9f8f516e8c43f1320214fb76dddcd7f022"
+    },
+    {
+      "id": "native.chrome.languageSelfNames.uk",
+      "source": "Українська",
+      "context": "Уласная назва мовы uk",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#languageSelfNames.uk"
+      ],
+      "sourceHash": "7fbfd8423ed6d3b16798feae0c977cc7396450f553871251ee16ed605416a378"
+    },
+    {
+      "id": "native.chrome.languagesLine",
+      "source": "Мовы: ${textLocales}",
+      "context": "Радок моваў гіда на картцы каталога",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "textLocales",
+          "type": "list",
+          "join": ", "
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#languagesLine"
+      ],
+      "sourceHash": "39f5323a4494e7cca7ba60c1fd4f2820d3336a75365fcac547b6a37319e7f9a0"
+    },
+    {
+      "id": "native.chrome.liveRowLine",
+      "source": "${state} — з ${day} — праслышана: ${heard}",
+      "context": "Цэлы радок жывой прагулкі ў гісторыі: адзін сказ на мову, без цвёрдага прыназоўніка",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "state",
+          "type": "string"
+        },
+        {
+          "name": "day",
+          "type": "string"
+        },
+        {
+          "name": "heard",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#liveRowLine"
+      ],
+      "sourceHash": "22477d4a8f0fcab537019080057be843ff31fc7ea592e85d5fb8fe5700fe6081"
+    },
+    {
+      "id": "native.chrome.loading",
+      "source": "Загрузка…",
+      "context": "Агульны радок стану загрузкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#loading"
+      ],
+      "sourceHash": "0f54c6960ddd3180b3b6aac5d89f08b7c6f51017a06bf42789acdb26fca33706"
+    },
+    {
+      "id": "native.chrome.locked",
+      "source": "Зачынена",
+      "context": "Пазнака зачыненай кропкі; значок замка ніколі не чытаецца сам",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#locked"
+      ],
+      "sourceHash": "ff9f67bdfdb9c424fe56f9a9bda42414eeb402ea9b2e1ceca7551e8626c019db",
+      "constraints": {
+        "accessibility": "label"
+      }
+    },
+    {
+      "id": "native.chrome.myKudy",
+      "source": "KUDY",
+      "context": "Назва паверхні гісторый (рашэнне ўладара: «KUDY», не «My KUDY»)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#myKudy"
+      ],
+      "sourceHash": "f5ef5b9f4e464f378e5652777e46ce86225013cf03b06a4f66665e92c0b2dfb6"
+    },
+    {
+      "id": "native.chrome.nearby",
+      "source": "Побач →",
+      "context": "Пункт ніжняй навігацыі: побач",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#nearby"
+      ],
+      "sourceHash": "19bbc736b6509867eccfc55e37450d946ccf5ceede28120e16baedd862349d82"
+    },
+    {
+      "id": "native.chrome.noCurrentWalk",
+      "source": "Бягучай прагулкі няма",
+      "context": "Радок адсутнасці бягучай прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#noCurrentWalk"
+      ],
+      "sourceHash": "71cc9155745464cb983daa06f1a7dbedd11879c5af5a0954cdfafd33bd07f7bd"
+    },
+    {
+      "id": "native.chrome.noPastWalks",
+      "source": "Папярэдніх праходаў няма",
+      "context": "Радок адсутнасці папярэдніх праходаў",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#noPastWalks"
+      ],
+      "sourceHash": "0bfbeda8ef7061ce1ba34816528ba7e430b242d9b3f048e4865475cdf7ba8ebf"
+    },
+    {
+      "id": "native.chrome.notFoundHint",
+      "source": "Каталог чакае — вяртайцеся да яго кнопкай «Назад».",
+      "context": "Падказка на экране адсутнага глыбокага лінку: дзе каталог",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#notFoundHint"
+      ],
+      "sourceHash": "28b7420ef0dc476a3c2ffc4b4eeeabd2f9dc647507d9f66a081d1b4fab127d40"
+    },
+    {
+      "id": "native.chrome.notFoundTitle",
+      "source": "Такога экрана няма",
+      "context": "Загаловак экрана, калі глыбокі лінк не знайшоў экран",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#notFoundTitle"
+      ],
+      "sourceHash": "f30571fd886be738567f5f0e1e368307332c1d93251f31339d7290de2cf81928"
+    },
+    {
+      "id": "native.chrome.notPublished",
+      "source": "не апублікавана",
+      "context": "Пазнака неапублікаванага змесціва",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#notPublished"
+      ],
+      "sourceHash": "41760064e818aa82c125dc79e1b2961a5cd566a4419228253f62469206893e03"
+    },
+    {
+      "id": "native.chrome.pastRowLine",
+      "source": "${startedDay} — ${finishedDay} — праслышана: ${heard}",
+      "context": "Цэлы радок завершанай прагулкі: дзень пачатку, дзень канца (ці злучок), праслышана",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "startedDay",
+          "type": "string"
+        },
+        {
+          "name": "finishedDay",
+          "type": "string",
+          "fallback": "—"
+        },
+        {
+          "name": "heard",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#pastRowLine"
+      ],
+      "sourceHash": "3b31a3236db946ff49cd0ec5a56bb0e89a5804eda909cd8793de141584cb70aa"
+    },
+    {
+      "id": "native.chrome.pastWalks",
+      "source": "Папярэднія праходы",
+      "context": "Загаловак секцыі папярэдніх праходаў",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#pastWalks"
+      ],
+      "sourceHash": "639c686aee401287c7c2224cfce2606da6a128852a23771f4fab41e4275081d8"
+    },
+    {
+      "id": "native.chrome.previewUnavailable",
+      "source": "Прэв'ю часова недаступны",
+      "context": "Радок стану: прэв'ю часова недаступнае",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#previewUnavailable"
+      ],
+      "sourceHash": "29f58b35ed2a5502011a9f0b5ad3a15c8eb857bc954349a865e0053875ed8808"
+    },
+    {
+      "id": "native.chrome.reasonText.editorial",
+      "source": "рэдакцыйны выбар",
+      "context": "Прычына прапановы падбора: рэдакцыйны выбар",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#reasonText.editorial"
+      ],
+      "sourceHash": "be32560fb8b57fff44f9193fdeac0d3b5fa3312e6d1526ce09f5c88ec8ac9d56"
+    },
+    {
+      "id": "native.chrome.reasonText.season_recommended",
+      "source": "рэкамендавана на гэты сезон",
+      "context": "Прычына прапановы падбора: рэкамендавана на сезон",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#reasonText.season_recommended"
+      ],
+      "sourceHash": "83c822a95860d2c4821e05dc1b6a51d346b4e5c49e015c2e796ee56b09459002"
+    },
+    {
+      "id": "native.chrome.reasonText.theme_match",
+      "source": "тэма",
+      "context": "Прычына прапановы падбора: супадзенне тэмы",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#reasonText.theme_match"
+      ],
+      "sourceHash": "fe66528dbcc40721fc40e604ec985777b0d5425401ab8d38f58c81124c37470b"
+    },
+    {
+      "id": "native.chrome.reasonText.within_time",
+      "source": "падыходзіць па часе",
+      "context": "Прычына прапановы падбора: падыходзіць па часе",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#reasonText.within_time"
+      ],
+      "sourceHash": "41dcea7bd6cbb320a2935ace330501a46b878eef030a85cf775fed8029ad2575"
+    },
+    {
+      "id": "native.chrome.retry",
+      "source": "Паўтарыць",
+      "context": "Кнопка паўтору спробы",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#retry"
+      ],
+      "sourceHash": "cc165ee110aa25bc187cee0368038bf687085da79f7d388ea91787197328053d"
+    },
+    {
+      "id": "native.chrome.seasonName.autumn",
+      "source": "Восень",
+      "context": "Назва сезона: восень",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#seasonName.autumn"
+      ],
+      "sourceHash": "33f4c1943bc36c7e4550c9987ea85f4a9255b28100446d208517c1a78bd2233d"
+    },
+    {
+      "id": "native.chrome.seasonName.spring",
+      "source": "Вясна",
+      "context": "Назва сезона: вясна",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#seasonName.spring"
+      ],
+      "sourceHash": "94c0fb9dc8cd9aa1175988b7b4a193f53fa1f5348c4e3f1110da3fa842721aa2"
+    },
+    {
+      "id": "native.chrome.seasonName.summer",
+      "source": "Лета",
+      "context": "Назва сезона: лета",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#seasonName.summer"
+      ],
+      "sourceHash": "e58561f7639c8f6bd4aded2de457fa86cdb8c58a31155ca61ba4a34242034346"
+    },
+    {
+      "id": "native.chrome.seasonName.winter",
+      "source": "Зіма",
+      "context": "Назва сезона: зіма",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#seasonName.winter"
+      ],
+      "sourceHash": "d585e12a829acc78ad036bad2de425546dd4ca75f5be37b7049201a909ca5f74"
+    },
+    {
+      "id": "native.chrome.sizeMb",
+      "source": "Памер: ${mb} МБ",
+      "context": "Радок факту: памер пакета ў МБ",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "mb",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#sizeMb"
+      ],
+      "sourceHash": "0979953f9427de22d5b78144e7648e877c2056592ac17ca64512e003e83980f2"
+    },
+    {
+      "id": "native.chrome.stateLabel.active",
+      "source": "актыўная",
+      "context": "Статус прагулкі: актыўная (радкі гісторыі)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#stateLabel.active"
+      ],
+      "sourceHash": "50f925a180afc7d20f1521f3a9576ad1fc36b264eb1ae21a8aa08a8d2e576a19"
+    },
+    {
+      "id": "native.chrome.stateLabel.finished",
+      "source": "завершаная",
+      "context": "Статус прагулкі: завершаная",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#stateLabel.finished"
+      ],
+      "sourceHash": "89521119203d65f39c6f1f334394eb73f3d477408af4a8bc9956f0ccb36cc4bc"
+    },
+    {
+      "id": "native.chrome.stateLabel.paused",
+      "source": "прыпыненая",
+      "context": "Статус прагулкі: прыпыненая",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#stateLabel.paused"
+      ],
+      "sourceHash": "d4525430de737faa9202eba337ae8fdd6979666e06ec6f5de931d5dab20d0669"
+    },
+    {
+      "id": "native.chrome.stopNumber",
+      "source": "Кропка ${position}",
+      "context": "Нумар кропкі на экране прагулкі",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "position",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#stopNumber"
+      ],
+      "sourceHash": "732b0324729bf9f41fd27f86c569da9b0d5b75f6c1081c90b3e611c3fd6113c9"
+    },
+    {
+      "id": "native.chrome.stopsCount",
+      "source": "Кропкі: ${count}",
+      "context": "Радок факту: колькасць кропак гіда",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "count",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#stopsCount"
+      ],
+      "sourceHash": "e6c16b6c3a55c0e09e51b370c85d5604eae87ecfda33b559d4598b68d7a37ba7"
+    },
+    {
+      "id": "native.chrome.stopsLabel",
+      "source": "Кропкі",
+      "context": "Пазнака чытача экрана для ўмяшчальніка колькасці кропак",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#stopsLabel"
+      ],
+      "sourceHash": "543419762c01ac0a64ee4638eca6b11c812136c3c39a11e196be70d391bc7eae",
+      "constraints": {
+        "accessibility": "label"
+      }
+    },
+    {
+      "id": "native.chrome.switchAccept",
+      "source": "Завершыць і пачаць",
+      "context": "Кнопка пацвярджэння пераключэння прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#switchAccept"
+      ],
+      "sourceHash": "09f9461a08fbf1066bb37f8a0c9afc3f52b9c2cb9919ed054ed16a6ec0f4f482"
+    },
+    {
+      "id": "native.chrome.switchConfirm",
+      "source": "Завяршыць «${liveTitle}» і пачаць «${candidateTitle}»?",
+      "context": "Дыялог пераключэння жывой прагулкі: назва бягучай і кандыдатскай прагулкі",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "liveTitle",
+          "type": "string"
+        },
+        {
+          "name": "candidateTitle",
+          "type": "string"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#switchConfirm"
+      ],
+      "sourceHash": "7cb787411af9ba9b7fad2486e30c358743ded0e27b84f0d07be6a89e9500fb7d"
+    },
+    {
+      "id": "native.chrome.textAudioLine",
+      "source": "Тэкст: ${textLocales}; аўдыё: ${audioLocales}",
+      "context": "Радок «тэкст/аўдыё» гіда; сегмент аўдыё — умоўны (толькі калі аўдыё ёсць)",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "textLocales",
+          "type": "list",
+          "join": ", "
+        },
+        {
+          "name": "audioLocales",
+          "type": "list",
+          "join": ", "
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#textAudioLine"
+      ],
+      "sourceHash": "f4933f8d3f6e148b08c0458cfd8c82eda3f2e49657df777c47f9d5dd55e1bd05",
+      "composed": true
+    },
+    {
+      "id": "native.chrome.timeCap",
+      "source": "Да ${minutes} хв",
+      "context": "Верхняя мяжа часу прапановы; дыскрэтныя формы для 60/120/240 хв, агульная — астатнім",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "minutes",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "components/ui-strings.ts#timeCap"
+      ],
+      "sourceHash": "4d2caf84a22f5db795338af5e935fc8654189716b361c93b3dd9cdb468de6eec",
+      "discreteForms": {
+        "60": "Да гадзіны",
+        "120": "Да дзвюх гадзін",
+        "240": "На паўдня"
+      }
+    },
+    {
+      "id": "native.chrome.timeUnlimited",
+      "source": "Без абмежавання",
+      "context": "Пазнака без абмежавання часу",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#timeUnlimited"
+      ],
+      "sourceHash": "8f02cfdec9242fdb41cbc1944150ea1fe80af35eaaa00df319679c664a2c3573"
+    },
+    {
+      "id": "native.chrome.validCache",
+      "source": "Папярэдні валідны кэш",
+      "context": "Радок стану: паказ папярэдняга валіднага кэша",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#validCache"
+      ],
+      "sourceHash": "d69e1aa70b6573e5e7a801e70fcc8ead0ae58ffd214d39a82227fc88b78f86d0"
+    },
+    {
+      "id": "native.chrome.walk",
+      "source": "Прагулка",
+      "context": "Пункт ніжняй навігацыі: прагулка",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#walk"
+      ],
+      "sourceHash": "b8fec3bf3468c4b2444846dc70c2c43539c6323117bad9e4b42a9a6455b6de54"
+    },
+    {
+      "id": "native.chrome.whatToDo",
+      "source": "Чым заняцца →",
+      "context": "Ссылка на паверхню падбора ў ніжняй навігацыі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#whatToDo"
+      ],
+      "sourceHash": "ca14a57064eb242bdc4b06cd3228d38e64e9866fc1e79e9128614b5565e7b179"
+    },
+    {
+      "id": "native.guideHint.dismiss",
+      "source": "Схаваць",
+      "context": "Пазнака і подпіс кнопкі схавання карткі падказкі",
+      "format": "plain",
+      "parameters": [],
+      "constraints": {
+        "accessibility": "label"
+      },
+      "migratedFrom": [
+        "components/GuideHintCard.tsx#dismiss"
+      ],
+      "sourceHash": "ef41daab2552c03555650792656b97d33407771656bc80aea288af4b0527ad24"
+    },
+    {
+      "id": "native.guideHint.heading",
+      "source": "Побач ёсць гід…",
+      "context": "Загаловак ціхай карткі падказкі «побач ёсць гід»",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/GuideHintCard.tsx#heading"
+      ],
+      "sourceHash": "afa6c69cf50b58dde34a24aa9f742b7ebffee946eeb17e76d90f7ae65a8ae6b7"
+    },
+    {
+      "id": "native.guideHint.openHint",
+      "source": "Адкрыць апісанне гіда",
+      "context": "Падказка чытача экрана радка гіда: адкрыццё апісання",
+      "format": "plain",
+      "parameters": [],
+      "constraints": {
+        "accessibility": "hint"
+      },
+      "migratedFrom": [
+        "components/GuideHintCard.tsx#openHint"
+      ],
+      "sourceHash": "c6c3fe285c1f5c311a4672cef712ff39d26fe314541ef3328e3bd2bf66608d3a"
+    },
+    {
+      "id": "native.guideHint.paid",
+      "source": "платны",
+      "context": "Пазнака платнага гіда на радку карткі падказкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/GuideHintCard.tsx#paid"
+      ],
+      "sourceHash": "36ba7c558c7b95ed0958922ae1e2269d9c1099bcd8ed1c65e14ce9d34d29cd07"
+    },
+    {
+      "id": "native.nearby.audioLabel",
+      "source": "аўдыё",
+      "context": "Пазнака чытача экрана для факту аўдыё",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#audioLabel"
+      ],
+      "sourceHash": "cb431707d9d9fd0564a385237b4a2110724296ccb5bc97ac13f1dab07eb4364c",
+      "constraints": {
+        "accessibility": "label"
+      }
+    },
+    {
+      "id": "native.nearby.cardHint",
+      "source": "Картка прапановы. Аўдыё не запускаецца.",
+      "context": "Падказка карткі прапановы: аўдыё не запускаецца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#cardHint"
+      ],
+      "sourceHash": "cf10a7f77cfd055dd909d8128643901c5d57292f5f2c7e57586c31ed7da56c08"
+    },
+    {
+      "id": "native.nearby.durationUnit",
+      "source": "хв",
+      "context": "Адзінка хвіліны ў радках фактаў побач",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#durationUnit"
+      ],
+      "sourceHash": "079d7b14c190534468f60ebb89dd03327a392891ea21637e93923654586f2fa9"
+    },
+    {
+      "id": "native.nearby.empty",
+      "source": "Прапановы пакуль не апублікаваны",
+      "context": "Радок стану: прапановы пакуль не апублікаваны",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#empty"
+      ],
+      "sourceHash": "14efad64c2bf1a387eb5bc911f0fe955d664fb8402c294606a5085094340ae3c"
+    },
+    {
+      "id": "native.nearby.guideLabel",
+      "source": "Гід",
+      "context": "Пазнака чытача экрана для карткі гіда",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#guideLabel"
+      ],
+      "sourceHash": "0f078d9620a6142a92a06859ae6287ba7c43811e3bc9d69951cf9fc1f030161a",
+      "constraints": {
+        "accessibility": "label"
+      }
+    },
+    {
+      "id": "native.nearby.indexDegraded",
+      "source": "Індэкс прапаноў часова недаступны",
+      "context": "Радок дэградацыі: індэкс прапаноў часова недаступны",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#indexDegraded"
+      ],
+      "sourceHash": "c36e91739b7d13aaae6a9e2a1bb1892c27935ef285c05dfc35384667a87945bf"
+    },
+    {
+      "id": "native.nearby.loading",
+      "source": "Загрузка…",
+      "context": "Радок стану загрузкі побач",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#loading"
+      ],
+      "sourceHash": "76864c4c66c674c255382af4c8287404979066900d2b793bd18b722acbce8be4"
+    },
+    {
+      "id": "native.nearby.mapNote",
+      "source": "Карта горада зʼявіцца пасля рашэння пра тайлы",
+      "context": "Заўвага карты: з'явіцца пасля рашэння пра тайлы",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#mapNote"
+      ],
+      "sourceHash": "0be5495b00bd2c309da665137618d7af6ff0427f66e93426eb8944a88bb1e673"
+    },
+    {
+      "id": "native.nearby.noteAcquiring",
+      "source": "Шукаем пазіцыю…",
+      "context": "Заўвага: шукаем пазіцыю",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#noteAcquiring"
+      ],
+      "sourceHash": "f9fe47bc78d531a4f95a80b4eff4b6c272932890908241d99d23f16dcad1d467"
+    },
+    {
+      "id": "native.nearby.noteDenied",
+      "source": "Пазіцыя не дазволена — ручны агляд",
+      "context": "Заўвага: пазіцыя не дазволена — ручны агляд",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#noteDenied"
+      ],
+      "sourceHash": "51d96de0382db6c57b90bc679f3fac2001a7cffe7230898f5f8be0d0fa9d2bfe"
+    },
+    {
+      "id": "native.nearby.noteHeldByWalk",
+      "source": "Прагулка выкарыстоўвае пазіцыю — ручны агляд",
+      "context": "Заўвага: прагулка выкарыстоўвае пазіцыю — ручны агляд",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#noteHeldByWalk"
+      ],
+      "sourceHash": "0da6932f1e990ff833d7c1eacbd3bb65469cda844e7f5e6658b41c2e4bd4db2d"
+    },
+    {
+      "id": "native.nearby.noteUnstable",
+      "source": "Пазіцыя нестабільная",
+      "context": "Заўвага: пазіцыя нестабільная",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#noteUnstable"
+      ],
+      "sourceHash": "8a9fc12e97a5c012d92b4e4e4d80dd068ce0fcf39c225583dc9dd7ec9f22d7d6"
+    },
+    {
+      "id": "native.nearby.placeLabel",
+      "source": "Месца",
+      "context": "Пазнака чытача экрана для карткі месца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#placeLabel"
+      ],
+      "sourceHash": "13a42dfb51ce1366b0e65f3501044e2c663561c12bceb5e1eefd1c1ba648f15a",
+      "constraints": {
+        "accessibility": "label"
+      }
+    },
+    {
+      "id": "native.nearby.proximityHeader",
+      "source": "Паблізу",
+      "context": "Загаловак секцыі паблізу",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#proximityHeader"
+      ],
+      "sourceHash": "b5941200d2dc75a64cfe58b3c12d1545651c2d2c64bd1991cbca8907bd5fdbce"
+    },
+    {
+      "id": "native.nearby.reviewHeader",
+      "source": "Агляд",
+      "context": "Загаловак секцыі ручнога агляду",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#reviewHeader"
+      ],
+      "sourceHash": "b0a03f871419d1e16a7933749a3525cadf600c0fa064d06255ebb70426f00c08"
+    },
+    {
+      "id": "native.nearby.textLabel",
+      "source": "Тэкст",
+      "context": "Пазнака чытача экрана для факту тэксту",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#textLabel"
+      ],
+      "sourceHash": "aa2bf96ea1849308fd1afb7c10aa4de03d87adc7b9c115e7b4071b777c684e3e",
+      "constraints": {
+        "accessibility": "label"
+      }
+    },
+    {
+      "id": "native.nearby.title",
+      "source": "Побач",
+      "context": "Загаловак экрана «Побач»",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#title"
+      ],
+      "sourceHash": "ceb1585e913e83295e615727dc433f621f160b3acd8ed18e40faea444c847749"
+    },
+    {
+      "id": "native.nearby.unavailable",
+      "source": "Каталог недаступны",
+      "context": "Радок стану: каталог недаступны",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/nearby/nearbySurfaceController.ts#unavailable"
+      ],
+      "sourceHash": "04fe5b8f33920f11dafd234f90a5d21ab4b0181eb6d3da85d1d569d755da2a65"
+    },
+    {
+      "id": "native.offer.buy",
+      "source": "Купіць",
+      "context": "Кнопка пакупкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/commerce/commerceController.ts#buy"
+      ],
+      "sourceHash": "6e1f4eb2c0e8449facc0335b8898b51fab9b11e827e31dcbecda830f9419d02a"
+    },
+    {
+      "id": "native.offer.continueFree",
+      "source": "Працягнуць бясплатна",
+      "context": "Кнопка працягу без пакупкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/commerce/commerceController.ts#continueFree"
+      ],
+      "sourceHash": "f2baa69bab47ea9162dea9324f9eff5abb2a07b1975929b3bedf9e26d72d3072"
+    },
+    {
+      "id": "native.offer.dismiss",
+      "source": "Не цяпер",
+      "context": "Кнопка адмовы: не цяпер",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/commerce/commerceController.ts#dismiss"
+      ],
+      "sourceHash": "e5a837b139f912633fb94f4a98e64036a82ed35e7b6a1bc4b71560c725427e49"
+    },
+    {
+      "id": "native.offer.errorBody",
+      "source": "Можна паспрабаваць ізноў або працягнуць бясплатна.",
+      "context": "Тэкст збою: можна паўтарыць або працягнуць бясплатна",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/commerce/commerceController.ts#errorBody"
+      ],
+      "sourceHash": "87664abf9c7fce9953aa6feaec27017bb4357b50cf8e3ca6055f12ac1c693b0f"
+    },
+    {
+      "id": "native.offer.errorTitle",
+      "source": "Пакупка не скончылася",
+      "context": "Загаловак збою пакупкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/commerce/commerceController.ts#errorTitle"
+      ],
+      "sourceHash": "ad99eb072eccd3dd6856951ed1bf49b93585795feb10cf036caa86b53e5a10ce"
+    },
+    {
+      "id": "native.offer.offerBody",
+      "source": "Адна пакупка адкрывае гісторыі гэтага гіда.",
+      "context": "Тэкст прапановы: адна пакупка адкрывае гісторыі гіда",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/commerce/commerceController.ts#offerBody"
+      ],
+      "sourceHash": "889d9131c470607574c44341056ad5a06e938fbd72b2c8d9eba39d86642421be"
+    },
+    {
+      "id": "native.offer.offerTitle",
+      "source": "Усе гісторыі гіда",
+      "context": "Загаловак прапановы пакупкі: усе гісторыі гіда",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/commerce/commerceController.ts#offerTitle"
+      ],
+      "sourceHash": "4a049233a864eaccd079db45a0db5435b7f443eb40f4c4f77e300ee153cce067"
+    },
+    {
+      "id": "native.offer.purchasedPending",
+      "source": "Куплена · трэба загрузіць",
+      "context": "Радок стану пасля крамы: куплена, трэба загрузіць (11 §8 даслоўна)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/commerce/commerceController.ts#purchasedPending"
+      ],
+      "sourceHash": "73351aee750908e898ef326402d359a6064c68200c51608aba858cd3512cffac"
+    },
+    {
+      "id": "native.offer.tryAgain",
+      "source": "Паспрабаваць ізноў",
+      "context": "Кнопка паўтору пакупкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/commerce/commerceController.ts#tryAgain"
+      ],
+      "sourceHash": "a1dbc2b68cb546fc6d006f50fbaae7e8f536bd97c68b0e15aaa9102d8bb237e4"
+    },
+    {
+      "id": "native.place.audioLabel",
+      "source": "аўдыё",
+      "context": "Пазнака наяўнасці аўдыё",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#audioLabel"
+      ],
+      "sourceHash": "9cba9aefe283b909867ca3c7b7fdfa081738a88eda904be2c8857e8b4dbaecda"
+    },
+    {
+      "id": "native.place.durationUnit",
+      "source": "хв",
+      "context": "Адзінка хвіліны ў радках фактаў месца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#durationUnit"
+      ],
+      "sourceHash": "5fb07a573d2f240d1203235ebd8c9730bd39304c864a7b4674fb00c5a40e8cbb"
+    },
+    {
+      "id": "native.place.empty",
+      "source": "Тэйзераў для гэтага месца няма",
+      "context": "Радок стану: тэйзераў для месца няма",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#empty"
+      ],
+      "sourceHash": "c10b21985ac88ed9bb6b0ae9d95e3ce080839a622e1d3f09b92ec534ee0040ff"
+    },
+    {
+      "id": "native.place.error",
+      "source": "Не ўдалося адкрыць месца",
+      "context": "Радок стану: не ўдалося адкрыць месца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#error"
+      ],
+      "sourceHash": "78a267a1e105f648cf74264ed59e4a3ee9b334ade5135f94b24826e31fd9abda"
+    },
+    {
+      "id": "native.place.guideLink",
+      "source": "Прэв'ю гіда",
+      "context": "Ссылка на прэв'ю гіда з карткі месца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#guideLink"
+      ],
+      "sourceHash": "6689ad59dbaf7e5400f58ed1c55c89ef10dfca451dc4c1d9e4d9d257200211d5"
+    },
+    {
+      "id": "native.place.guideLinkHint",
+      "source": "Адкрывае прэв'ю гіда, не запуск прагулкі.",
+      "context": "Падказка ссылки: адкрывае прэв'ю, не запуск прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#guideLinkHint"
+      ],
+      "sourceHash": "2d8e625a33b415b8a144097cf43e9b9b7566c68f36fc80fdf472b01d4ca79714"
+    },
+    {
+      "id": "native.place.loading",
+      "source": "Загрузка…",
+      "context": "Радок стану загрузкі дэталі месца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#loading"
+      ],
+      "sourceHash": "9fdf727adcd5b226497b6726d48906a85ffbf4ea7192fb2f52f9c5569577671f"
+    },
+    {
+      "id": "native.place.noAudio",
+      "source": "Аўдыё тэйзера не апублікавана",
+      "context": "Радок стану: аўдыё тэйзера не апублікавана",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#noAudio"
+      ],
+      "sourceHash": "f10b57d945775369b50aa834570f60cb191aad9445d68ea7c11549e2b433aaf3"
+    },
+    {
+      "id": "native.place.noFacts",
+      "source": "Месца пакуль не апублікавана ў каталога",
+      "context": "Радок стану: месца пакуль не апублікавана ў каталога",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#noFacts"
+      ],
+      "sourceHash": "6a837f315b4fc07df8e72f31ac5802801e3e69123b032eb3ddbe6990ef5ec9be"
+    },
+    {
+      "id": "native.place.nowPlaying",
+      "source": "Зараз грае",
+      "context": "Пазнака «зараз грае» для тэйзера",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#nowPlaying"
+      ],
+      "sourceHash": "31c53b2b89b3c44e240d3860a4995fab290ac654eaabbfa98283f52915cc70e4"
+    },
+    {
+      "id": "native.place.paused",
+      "source": "Паўза",
+      "context": "Пазнака паўзы тэйзера",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#paused"
+      ],
+      "sourceHash": "36eaaecbe287e6c605f6875703cfd53540fa068c8b32c36eb140109003df230e"
+    },
+    {
+      "id": "native.place.playFailed",
+      "source": "Гук не пачаўся.",
+      "context": "Радок збою запуску гуку (сказ з кропкай)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#playFailed"
+      ],
+      "sourceHash": "7057a04fb254bea27c4c76ad7523f0b96822383dbe1b0b3a275667acbde5655d"
+    },
+    {
+      "id": "native.place.playFailedHint",
+      "source": "Паспрабуйце запусціць яшчэ раз.",
+      "context": "Падказка пасля збою: паспрабаваць яшчэ раз",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#playFailedHint"
+      ],
+      "sourceHash": "a5244be645a80ce3e76fcc8f58e81ba9ecd87663b73973ff264dbf01b068178c"
+    },
+    {
+      "id": "native.place.playHint",
+      "source": "Яўны Play тэйзера праз адзіны плэер.",
+      "context": "Падказка кнопкі: яўны Play тэйзера праз адзіны плэер",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#playHint"
+      ],
+      "sourceHash": "0bd0d8468494d897c96315c9ad3ac8f5633afb4d4a9af15acddcaca6e981f1f6"
+    },
+    {
+      "id": "native.place.playLabel",
+      "source": "Паслухаць тэйзер",
+      "context": "Кнопка: паслухаць тэйзер",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#playLabel"
+      ],
+      "sourceHash": "98676c06c005f69e0596c1aa422f373aea133813f59122713f352e99f388cba4"
+    },
+    {
+      "id": "native.place.refusalText.moment#audio-unpublished",
+      "source": "Гук тэйзера не апублікаваны.",
+      "context": "Адмова гуку: тэйзер не апублікаваны (сказ з кропкай)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#refusalText.moment#audio-unpublished"
+      ],
+      "sourceHash": "75adba4e79892068236ecd0f592b01a59142ad866d4e157556c2d8f7ee690a9b"
+    },
+    {
+      "id": "native.place.refusalText.moment#session-refused",
+      "source": "Тэйзер зараз не запускаецца — паспрабуйце яшчэ раз.",
+      "context": "Адмова гуку: тэйзер зараз не запускаецца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#refusalText.moment#session-refused"
+      ],
+      "sourceHash": "27f2c6c3a5f9c950a31c4bd3719c6197ccbb81c08574f11f589d9ee1c548f137"
+    },
+    {
+      "id": "native.place.refusalText.moment#session-unroutable",
+      "source": "Тэйзер не гучыць у прагулцы — запусціце яго тут яшчэ раз.",
+      "context": "Адмова гуку: тэйзер не гучыць у прагулцы",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#refusalText.moment#session-unroutable"
+      ],
+      "sourceHash": "b4a69a45fa3ce27bf828742abaf9056f319804794f2ee31db62bca527194b08b"
+    },
+    {
+      "id": "native.place.resumeLabel",
+      "source": "Працягнуць",
+      "context": "Кнопка: працягнуць тэйзер",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#resumeLabel"
+      ],
+      "sourceHash": "b8246a13f259bdb46e8425d790c5ffbeba1bf2905c36f9b0e81c71ae30246870"
+    },
+    {
+      "id": "native.place.stopLabel",
+      "source": "Спыніць",
+      "context": "Кнопка: спыніць тэйзер",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#stopLabel"
+      ],
+      "sourceHash": "7c29f6636e7181c50f70cb3990251dd5a2b40e1823d9a27135fd168bdf559a90"
+    },
+    {
+      "id": "native.place.teaserLabel",
+      "source": "Тэйзер",
+      "context": "Пазнака тэйзера",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#teaserLabel"
+      ],
+      "sourceHash": "e81ae6243c1a8f05cd365f4dfe9c2b18e0ff1ad2419f103a55573d9b9e2991b8"
+    },
+    {
+      "id": "native.place.textLabel",
+      "source": "Тэкст",
+      "context": "Пазнака наяўнасці тэксту",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#textLabel"
+      ],
+      "sourceHash": "9d32629dfe52f43658702381d2ab2c662cca5a395dbde1e8177280f0b94c43a6"
+    },
+    {
+      "id": "native.place.unavailable",
+      "source": "Дэталь месца недаступная",
+      "context": "Радок стану: дэталь месца недаступная",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/place/placeDetailController.ts#unavailable"
+      ],
+      "sourceHash": "04c287ef15935302a75cab52776883ca52481197e2e22798268a4436c64413a9"
+    },
+    {
+      "id": "native.preview.detail",
+      "source": "пакет няпоўны",
+      "context": "Дэталь стану пакета прэв'ю паводле падзеі (damaged/incomplete/missing-files/stale)",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "count",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#detail"
+      ],
+      "sourceHash": "22fe4c2b5e44f41bb7cafc1b0262f1f737e96b86317ce4830a1a8160b57e57eb",
+      "discreteForms": {
+        "damaged": "пакет пашкоджаны: патрэбна паўторная загрузка",
+        "missing-files": "не хапае файлаў: ${count}",
+        "stale": "даступна абнаўленне"
+      }
+    },
+    {
+      "id": "native.preview.downloadFailed",
+      "source": "Збой загрузкі.",
+      "context": "Радок збою загрузкі прэв'ю (сказ з кропкай)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#downloadFailed"
+      ],
+      "sourceHash": "4470dfde12ba5d2478989694d06ff50d49447bc872a0d0ef153c02fda3e77a40"
+    },
+    {
+      "id": "native.preview.label.download",
+      "source": "Загрузіць",
+      "context": "Кнопка прэв'ю: загрузіць",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#label.download"
+      ],
+      "sourceHash": "a549fbfb60c21722178889b8deb230cc530a13f81c505c996076e24826545daf"
+    },
+    {
+      "id": "native.preview.label.start",
+      "source": "Пачаць",
+      "context": "Кнопка прэв'ю: пачаць",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#label.start"
+      ],
+      "sourceHash": "d86b1af3ba0b10036ebc2e53b826d50440fda0416b79bdcdcf0b6cc548277293"
+    },
+    {
+      "id": "native.preview.reason.preview#download-unavailable",
+      "source": "Загрузка недаступная на гэтай зборцы.",
+      "context": "Адмова прэв'ю: загрузка недаступная на гэтай зборцы",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#reason.preview#download-unavailable"
+      ],
+      "sourceHash": "c92fa779597efd3693633519bd657c144bf3c77398a05850305192c9834424ff"
+    },
+    {
+      "id": "native.preview.reason.preview#not-published",
+      "source": "Гід не апублікаваны.",
+      "context": "Адмова прэв'ю: гід не апублікаваны",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#reason.preview#not-published"
+      ],
+      "sourceHash": "f4026de96b2bf6d2f5337774d08a4a6e28073ac9a55e76292f5cf6bc6998359d"
+    },
+    {
+      "id": "native.preview.reason.preview#purchase-required",
+      "source": "Патрэбна пакупка.",
+      "context": "Адмова прэв'ю: патрэбна пакупка (сказ з кропкай)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#reason.preview#purchase-required"
+      ],
+      "sourceHash": "e786d174f1074f25fbb00fd84bf85cca15b645d1967c920ab8b61812aa8315e4"
+    },
+    {
+      "id": "native.preview.reason.preview#storage-unknown",
+      "source": "Сховішча недаступнае.",
+      "context": "Адмова прэв'ю: сховішча недаступнае",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#reason.preview#storage-unknown"
+      ],
+      "sourceHash": "662280ea45ace6b68da87b0c542fdc84235041ae588aa93b2c0e6e45c4137b7a"
+    },
+    {
+      "id": "native.preview.reason.preview#verify-unavailable",
+      "source": "Праверка недаступная.",
+      "context": "Адмова прэв'ю: праверка недаступная",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#reason.preview#verify-unavailable"
+      ],
+      "sourceHash": "03f7bad1b0dd05221dcbf5a4acf62a639853decfcbe6ca6490ddb5c2cea9b7b0"
+    },
+    {
+      "id": "native.preview.retry",
+      "source": "Паўтарыць",
+      "context": "Кнопка паўтору ў прэв'ю",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#retry"
+      ],
+      "sourceHash": "0cc5f813736728a6851f72c2b114f9add2a61f58d47c1a5781e3d445464c9d3b"
+    },
+    {
+      "id": "native.preview.storageExit",
+      "source": "Вызваліць месца ў KUDY",
+      "context": "Кнопка выхаду на вызваленне месца ў KUDY",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#storageExit"
+      ],
+      "sourceHash": "7694206992bd6471e7d0db23d132c82854618caee70263270c8f2fe3e6ef3a35"
+    },
+    {
+      "id": "native.preview.storageFullDetail",
+      "source": "не хапае месца: патрэбна яшчэ ${mb} МБ",
+      "context": "Дэталь поўнага сховішча: колькасць МБ, якіх не хапае",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "mb",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "controllers/catalog/previewController.ts#storageFullDetail"
+      ],
+      "sourceHash": "246c064641fd53a3c0f04b126c2a29f5b161c9b846290e2595292279abf0ae08"
+    },
+    {
+      "id": "native.run.attribution",
+      "source": "Дадзеныя © удзельнікі OpenStreetMap, ODbL",
+      "context": "Атрыбуцыя даных OpenStreetMap, ODbL",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#attribution"
+      ],
+      "sourceHash": "c2b14d03ca62503c507e49ef77155a31d8423716a313ab878c7b0d751bcd23d3"
+    },
+    {
+      "id": "native.run.autoplaySuspendedTitle",
+      "source": "Аўтаматычныя гісторыі прыпыненыя",
+      "context": "Загаловак прыпынення аўтапрайгравання",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#autoplaySuspendedTitle"
+      ],
+      "sourceHash": "127dc05744cfc9564cbbe4cb47cfc30c780ee2c30b55e7a16c84c19d04c134f7"
+    },
+    {
+      "id": "native.run.close",
+      "source": "Зачыніць",
+      "context": "Кнопка зачынення экрана",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#close"
+      ],
+      "sourceHash": "fdcf5f36d5dc627a9fe0d52a9fb62fdcad04dae25ac94910de28dcadebf566df"
+    },
+    {
+      "id": "native.run.deniedGps",
+      "source": "Аўтаматычныя гісторыі не працуюць — я не бачу вашай пазіцыі",
+      "context": "Банер адмовы GPS: аўтаматычныя гісторыі не працуюць",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#deniedGps"
+      ],
+      "sourceHash": "4c2d57377f5bee5ce40cccc7e2393893218a2c5c87e74e60c3065cff7b28af0b"
+    },
+    {
+      "id": "native.run.endConfirmAccept",
+      "source": "Завяршыць",
+      "context": "Кнопка пацвярджэння завяршэння",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#endConfirmAccept"
+      ],
+      "sourceHash": "a8437ed726559ff94e98019d7f0d093963e380d035f5f61215a0fe521d9871e2"
+    },
+    {
+      "id": "native.run.endConfirmCancel",
+      "source": "Скасаваць",
+      "context": "Кнопка скасавання завяршэння",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#endConfirmCancel"
+      ],
+      "sourceHash": "6f2c024243297acae4ebcd87bbd44dadb04f728c836f0c126e069ecb0705bbca"
+    },
+    {
+      "id": "native.run.endConfirmTitle",
+      "source": "Завяршыць прагулку?",
+      "context": "Загаловак дыялога завяршэння прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#endConfirmTitle"
+      ],
+      "sourceHash": "914dc880a971016df429bf5b22ea8f703e1287530f6e50654589ee9a40aa3b34"
+    },
+    {
+      "id": "native.run.endWalk",
+      "source": "Завяршыць прагулку",
+      "context": "Пункт меню сесіі: завяршыць прагулку",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#endWalk"
+      ],
+      "sourceHash": "1d896d738e1170ab489de6baa61a4fbf015a3482ad6f1ea26d5ace4663e9775c"
+    },
+    {
+      "id": "native.run.endedTitle",
+      "source": "Прагулка завершана",
+      "context": "Загаловак экрана завершанай прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#endedTitle"
+      ],
+      "sourceHash": "39f780e448149f38eb59cf40d230c2ab1539f1082ad7d357a191d46bd0f20739"
+    },
+    {
+      "id": "native.run.gpsStalled",
+      "source": "Пазіцыя састарэлая",
+      "context": "Банер: пазіцыя састарэлая",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#gpsStalled"
+      ],
+      "sourceHash": "dcb4aab6a116aa3dfec4b0cc420890b7291cec06bb1d00ecc640e66632c25c0d"
+    },
+    {
+      "id": "native.run.gpsStalledDetail",
+      "source": "Аўтазапуск і чарга заблакаваныя",
+      "context": "Дэталь банеру: аўтазапуск і чарга заблакаваныя",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#gpsStalledDetail"
+      ],
+      "sourceHash": "c0f1d04f075143656fd943a339c28fb79f392bc8837d049a52ba499398f3f55c"
+    },
+    {
+      "id": "native.run.loading",
+      "source": "Загрузка…",
+      "context": "Радок стану загрузкі карты прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#loading"
+      ],
+      "sourceHash": "040940eda93e7404d57a64daf645d628ab55ebf399ce3b32883736cf9bf238fc"
+    },
+    {
+      "id": "native.run.lockedHint",
+      "source": "Даступна пасля куплі",
+      "context": "Падказка зачыненай карткі: даступна пасля куплі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#lockedHint"
+      ],
+      "sourceHash": "8a2f3f3dd06cc4f068baefe2af315554d551a6ed4b1920ff46455715bcc3d166"
+    },
+    {
+      "id": "native.run.manualPlayHint",
+      "source": "Кожная гісторыя запускаецца рукамі з карткі кропкі",
+      "context": "Падказка ручнога рэжыму: кожная гісторыя запускаецца рукамі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#manualPlayHint"
+      ],
+      "sourceHash": "001c5d5c664209b77fd781de374acc525f425af430263b370b05c3de2a980c05"
+    },
+    {
+      "id": "native.run.markerHint",
+      "source": "Прагляд кропкі. Аўдыё не запускаецца.",
+      "context": "Падказка прагляду кропкі: аўдыё не запускаецца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#markerHint"
+      ],
+      "sourceHash": "c93b6f3471a36cc43c3089c07070a0a7bc55d14d900f12e49c4454c3cfdf8ee5"
+    },
+    {
+      "id": "native.run.nothingPlaying",
+      "source": "Нічога не грае",
+      "context": "Просты стан бару прайгравання: нічога не грае",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#nothingPlaying"
+      ],
+      "sourceHash": "3fa2e1172cf976d39cdaf06d27f957c31e00afa29d29a2d8caddc8b2690203da"
+    },
+    {
+      "id": "native.run.nowPlayingLabel",
+      "source": "Зараз грае",
+      "context": "Пазнака «зараз грае» на радку вяртання",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#nowPlayingLabel"
+      ],
+      "sourceHash": "0410c32b080f07cb67c2f1263ffe9887008786f97a5f011e7e7c75237dec7759"
+    },
+    {
+      "id": "native.run.pauseAudio",
+      "source": "Паўза",
+      "context": "Кнопка паўзы аўдыё",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#pauseAudio"
+      ],
+      "sourceHash": "fb5c796b96e75da399f5c2807919772e99309921718eb232cf8e2081d0bac312"
+    },
+    {
+      "id": "native.run.pauseWalk",
+      "source": "Прыпыніць прагулку",
+      "context": "Пункт меню сесіі: прыпыніць прагулку",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#pauseWalk"
+      ],
+      "sourceHash": "9d38a19be03985d1f816485664843efdc5472ef71c462500c868d744d6efd978"
+    },
+    {
+      "id": "native.run.pausedTitle",
+      "source": "Прагулка прыпынена",
+      "context": "Загаловак прыпыненай прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#pausedTitle"
+      ],
+      "sourceHash": "166ec9cb061eebb2770a359e48eb2be38c3ecbb4d8f6a613a4c9ad91400a6d2c"
+    },
+    {
+      "id": "native.run.playAudio",
+      "source": "Граць",
+      "context": "Кнопка запуску аўдыё",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#playAudio"
+      ],
+      "sourceHash": "c511387ceea931680ada61ac8be6aefde228ae5a310e471ff5d091f3c09ffb49"
+    },
+    {
+      "id": "native.run.playStoryHint",
+      "source": "Запускае гук гэтай гісторыі",
+      "context": "Падказка карткі гісторыі: запускае гук гэтай гісторыі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#playStoryHint"
+      ],
+      "sourceHash": "d3c9a3ebd3822df15a6417d6aa92f55565d3572b61cfd9f2f98aba808bafe554"
+    },
+    {
+      "id": "native.run.poiKind.sight",
+      "source": "Славутасць",
+      "context": "Назва тыпу кропкі (places.json kind): славутасць; невядомы тып не рэндэрыцца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#poiKind.sight"
+      ],
+      "sourceHash": "42e94abcf55015b5817b57f0395ce601910d38d1eb02af1c761d091f1cdbc79b"
+    },
+    {
+      "id": "native.run.readMore",
+      "source": "Чытаць",
+      "context": "Кнопка разгортвання поўнага транскрыпта",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#readMore"
+      ],
+      "sourceHash": "8dfb154f8883603f925a09be40080f3693a1788640a0be59cbcf0e0848dc54db"
+    },
+    {
+      "id": "native.run.reasonText.fallback",
+      "source": "Збой.",
+      "context": "Апошняя адмова без канкрэтнай прычыны (сказ з кропкай)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.fallback"
+      ],
+      "sourceHash": "0da87870411b9e1873d84f74989b9f36d3178c3bc2f945c6c8b2a73a4bbc8710"
+    },
+    {
+      "id": "native.run.reasonText.live-session-exists",
+      "source": "Ужо ёсць жывая прагулка.",
+      "context": "Адмова старта: ужо ёсць жывая прагулка",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.live-session-exists"
+      ],
+      "sourceHash": "38876047ff189a5c3cc8b4aaad58364154accfcfa128fee9758d8de7b072b59a"
+    },
+    {
+      "id": "native.run.reasonText.package-access-locked",
+      "source": "Доступ да гіда яшчэ не адкрыты.",
+      "context": "Адмова старта: доступ да гіда яшчэ не адкрыты",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.package-access-locked"
+      ],
+      "sourceHash": "305486b141166aae4f39c37fd522ba73ca70cad152735f62c7b6ea8f4c62b899"
+    },
+    {
+      "id": "native.run.reasonText.package-incomplete",
+      "source": "Гід не поўны.",
+      "context": "Адмова старта: гід не поўны (сказ з кропкай)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.package-incomplete"
+      ],
+      "sourceHash": "8d26cfe8dc716a252873caead724a2a04f2feba74d796194d51c96f869b943ef"
+    },
+    {
+      "id": "native.run.reasonText.package-needs-recovery",
+      "source": "Гід патрабуе аднаўлення.",
+      "context": "Адмова старта: гід патрабуе аднаўлення",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.package-needs-recovery"
+      ],
+      "sourceHash": "b8b4c2c7f540bb529eb784dc36f405b7b2e7c818a813a2aa5c6001e5eb12861e"
+    },
+    {
+      "id": "native.run.reasonText.run#locale-missing",
+      "source": "Мова гіда не знойдзена.",
+      "context": "Адмова прагулкі: мова гіда не знойдзена",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.run#locale-missing"
+      ],
+      "sourceHash": "69fb0a7ed42523063e1634201b51bfbfe554e375e3a5a3a8fe3831bff4b4a937"
+    },
+    {
+      "id": "native.run.reasonText.run#package-ambiguous",
+      "source": "На дыску некалькі версій гіда.",
+      "context": "Адмова прагулкі: на дыску некалькі версій гіда",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.run#package-ambiguous"
+      ],
+      "sourceHash": "fdd1faa5c76b85d38f095cfdfdc5a95f2735d003bf0cfd1d04605ca19d3faa19"
+    },
+    {
+      "id": "native.run.reasonText.run#package-not-downloaded",
+      "source": "Гід не спампаваны.",
+      "context": "Адмова прагулкі: гід не спампаваны",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.run#package-not-downloaded"
+      ],
+      "sourceHash": "5912049b75ae0d205c03dc16c4766fbb92a49f85a06dd5fbf43979b076f3a6f4"
+    },
+    {
+      "id": "native.run.reasonText.run#package-read-failed",
+      "source": "Гід не чытаецца.",
+      "context": "Адмова прагулкі: гід не чытаецца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.run#package-read-failed"
+      ],
+      "sourceHash": "cb97f828950ec915bd80a937e1c569a2e255c380aa2dc70db18883b66eeeb0ea"
+    },
+    {
+      "id": "native.run.reasonText.run#recovery-failed",
+      "source": "Збой чытання жывой сесіі.",
+      "context": "Адмова прагулкі: збой чытання жывой сесіі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.run#recovery-failed"
+      ],
+      "sourceHash": "dc38ee4a64a7e63371d24d15a8811bec2db3a5cc769f78da944fe0c00d11f75b"
+    },
+    {
+      "id": "native.run.reasonText.run#unsafe-route-id",
+      "source": "Няверны ідэнтыфікатар маршруту.",
+      "context": "Адмова прагулкі: няверны ідэнтыфікатар маршруту",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.run#unsafe-route-id"
+      ],
+      "sourceHash": "d340822c39b89b886e5951a52bc64b20fca3d6f84871c9e1e5a862235c7b033c"
+    },
+    {
+      "id": "native.run.reasonText.switch-no-live-session",
+      "source": "Жывой прагулкі ўжо няма — пачніце нанова.",
+      "context": "Адмова пераключэння: жывой прагулкі ўжо няма",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#reasonText.switch-no-live-session"
+      ],
+      "sourceHash": "8db71669436a5adb6fe155900507136c66e4bc436e26865e0408659b50457ecd"
+    },
+    {
+      "id": "native.run.restoredTitle",
+      "source": "Прагулка працягнута са захаванай сесіі",
+      "context": "Загаловак аднаўлення прагулкі са захаванай сесіі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#restoredTitle"
+      ],
+      "sourceHash": "0e2062fc47a4936d773e4e014d5f1f11c31481de99dceb81a4aa9166acdc30f1"
+    },
+    {
+      "id": "native.run.resume",
+      "source": "Працягнуць",
+      "context": "Кнопка працягу прыпыненай прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#resume"
+      ],
+      "sourceHash": "eebc12f1f868df6992e266f4de878022ad7ba731a55d869b203f5e44b2562286"
+    },
+    {
+      "id": "native.run.schematicNote",
+      "source": "Схема кропак маршруту — карта горада зʼявіцца пасля рашэння пра тайлы",
+      "context": "Заўвага схематычнай карты: тайлы чакаюць рашэння",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#schematicNote"
+      ],
+      "sourceHash": "7202049786e88c0cfb035a2fcf10a56d78f72c8911d0a3a06810d076909d7939"
+    },
+    {
+      "id": "native.run.status.available",
+      "source": "даступна",
+      "context": "Статус кропкі: даступна",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#status.available"
+      ],
+      "sourceHash": "9793aad53a23abdc305d5548a29cb946b00e25523d81d73dd6fc44ec65584cf2"
+    },
+    {
+      "id": "native.run.status.locked",
+      "source": "зачынена",
+      "context": "Статус кропкі: зачынена",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#status.locked"
+      ],
+      "sourceHash": "6a99f5e753bfc059766d06244cd27adca7e2aef32f319d076e3df63d742e94a7"
+    },
+    {
+      "id": "native.run.status.pending",
+      "source": "чакае",
+      "context": "Статус кропкі: чакае",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#status.pending"
+      ],
+      "sourceHash": "9f528a418df5a9a0b3669164831060f48a64ee91f09944317edbf68f59fccda9"
+    },
+    {
+      "id": "native.run.status.played",
+      "source": "праслухана",
+      "context": "Статус кропкі: праслухана",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#status.played"
+      ],
+      "sourceHash": "a502b3cc111fa9e67cfd2cf9ed81c5255f9e620b48382d72345b3dc81661fe36"
+    },
+    {
+      "id": "native.run.status.playing",
+      "source": "гучыць",
+      "context": "Статус кропкі на карце: гучыць",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#status.playing"
+      ],
+      "sourceHash": "d1eef5a55b531148b786b73a9273d9f72d6de945391799a4b8c69b6f9b5ad31b"
+    },
+    {
+      "id": "native.run.storyBase",
+      "source": "Асноўная гісторыя",
+      "context": "Пазнака асноўнай гісторыі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#storyBase"
+      ],
+      "sourceHash": "6c2b75554d07c595a721ae6fa62de6e6e5f0157b2d7bc79dd445ca7dcbd3fd08"
+    },
+    {
+      "id": "native.run.storyExtended",
+      "source": "Дадатковая гісторыя",
+      "context": "Пазнака дадатковай гісторыі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#storyExtended"
+      ],
+      "sourceHash": "3570a8bfad2653d9dcd5fe9b60241a9ec8313f4a1a3ad34085dd92117b7b044b"
+    },
+    {
+      "id": "native.run.tierUnavailable",
+      "source": "Дадатковы ярус недаступны ў адноўленай сесіі",
+      "context": "Заўвага: дадатковы ярус недаступны ў адноўленай сесіі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#tierUnavailable"
+      ],
+      "sourceHash": "96e6c8ab2f1326360751f35cbe3a8f97c05b372dbe078097523afeb01a06201c"
+    },
+    {
+      "id": "native.run.transcript",
+      "source": "Транскрыпт",
+      "context": "Загаловак транскрыпта",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#transcript"
+      ],
+      "sourceHash": "ed28a2f5c9457fcfa1fa39bec597498948a3909f658583f316145309b493a477"
+    },
+    {
+      "id": "native.run.transcriptPending",
+      "source": "Тэкст прыйдзе з кантэнтам пакета",
+      "context": "Ганаровая заўвага: тэкст прыйдзе з кантэнтам пакета",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#transcriptPending"
+      ],
+      "sourceHash": "e4d1078ae54a91a1baba09622433a75af468a6b88cbe1d1fb319edf4126fbada"
+    },
+    {
+      "id": "native.run.unavailableTitle",
+      "source": "Сесія недаступная",
+      "context": "Загаловак недаступнай сесіі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#unavailableTitle"
+      ],
+      "sourceHash": "749dd4d5710f98ecf3c7147c540c4f2f65368b228adcaf1d050f9c738fed73a6"
+    },
+    {
+      "id": "web.ui.appBenefitFullRoutes",
+      "source": "Поўныя маршруты: усе кропкі і ўсё аўдыё",
+      "context": "Выгода дадатку: поўныя маршруты, усе кропкі і аўдыё",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#appBenefitFullRoutes"
+      ],
+      "sourceHash": "d4b091d52be3bca3e28259c32c45de553cdae2bff23890f1466f43539a648fb6"
+    },
+    {
+      "id": "web.ui.appBenefitGps",
+      "source": "GPS-аўтазапуск гісторый на месцы",
+      "context": "Выгода дадатку: GPS-аўтазапуск гісторый на месцы",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#appBenefitGps"
+      ],
+      "sourceHash": "dd1f0b20a9989171a0f7ee937b8a2b300e77510c6fede71cea44091ffd88075e"
+    },
+    {
+      "id": "web.ui.appBenefitOffline",
+      "source": "Офлайн: маршруты пад рукой без інтэрнэту",
+      "context": "Выгода дадатку: офлайн маршруты",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#appBenefitOffline"
+      ],
+      "sourceHash": "0938d9674742b7ca8d10e18f403e12aec968da0f2d0727b9159f6718ec177d9e"
+    },
+    {
+      "id": "web.ui.appPageStores",
+      "source": "Знайсці дадатак:",
+      "context": "Пазнака секцыі крам на старонцы дадатку",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#appPageStores"
+      ],
+      "sourceHash": "41e9d325b3f4b67c7a5286cc11354b0a207839e2fee05e651cc270869ed5f0ec"
+    },
+    {
+      "id": "web.ui.appPageTitle",
+      "source": "Поўная версія — у дадатку KUDY",
+      "context": "Загаловак старонкі дадатку",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#appPageTitle"
+      ],
+      "sourceHash": "a824a45caa613d7d9d0cb29d968595e6d42c3db635115d8aa4946823e2bbbebe"
+    },
+    {
+      "id": "web.ui.appStoreName",
+      "source": "App Store",
+      "context": "Назва крамы App Store (назва брэнда)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#appStoreName"
+      ],
+      "sourceHash": "7047842a47bf44a3707f7389b795b8484c66306e2026e9dcd5ea02e387c9c54c"
+    },
+    {
+      "id": "web.ui.audioAndText",
+      "source": "аўдыё і тэкст",
+      "context": "Пазнака набору: аўдыё і тэкст",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#audioAndText"
+      ],
+      "sourceHash": "0f4aff6c5476865b0bd3977657d0f3361fd3d04dcea6e8e4734b6bfdbdba5a0a"
+    },
+    {
+      "id": "web.ui.audioHeading",
+      "source": "Аўдыё",
+      "context": "Загаловак секцыі аўдыё",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#audioHeading"
+      ],
+      "sourceHash": "42ce7ded17f5749b83970a0155fde0b9503d572f14685c475940bbf1dc3a4022"
+    },
+    {
+      "id": "web.ui.audioUnavailable",
+      "source": "Аўдыё-файла няма ў публічным пакеце; тэкст гісторыі ніжэй чытаецца як звычайна.",
+      "context": "Ганаровая заўвага: аўдыё-файла няма ў публічным пакеце",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#audioUnavailable"
+      ],
+      "sourceHash": "97c74598be80ccfc34d8de9326cccdd19a2e3131cd88bcd8d5a36907f528157e"
+    },
+    {
+      "id": "web.ui.backToGuide",
+      "source": "Да старонкі гіда",
+      "context": "Ссылка вяртання да старонкі гіда",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#backToGuide"
+      ],
+      "sourceHash": "d74d46d2484a23efcb8b7fe0c7c0cad37cd687fd47b549476567a7551dcb1fde"
+    },
+    {
+      "id": "web.ui.brand",
+      "source": "KUDY",
+      "context": "Назва брэнда ў шапцы сайта",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#brand"
+      ],
+      "sourceHash": "1885cd40ff3259455dab4cd3fda86af65df621059911963040af3482180755bd"
+    },
+    {
+      "id": "web.ui.calmOfferCta",
+      "source": "Адкрыць дадатак",
+      "context": "Кнопка ціхай прапановы: адкрыць дадатак",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#calmOfferCta"
+      ],
+      "sourceHash": "59b840b0a9ba1fb1402597545ca1e919111a9825e9ddc94d8ab8270c7ddcafef"
+    },
+    {
+      "id": "web.ui.calmOfferText",
+      "source": "Поўная версія — у дадатку: GPS-аўтазапуск, офлайн, поўныя маршруты.",
+      "context": "Ціхая прапанова дадатку: GPS-аўтазапуск, офлайн, поўныя маршруты (план §3.2 даслоўна)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#calmOfferText"
+      ],
+      "sourceHash": "fca9b8721b8f42038c5bd8672d0019ca3e492ba30ac6fa7f2fb175bdf404ea2e"
+    },
+    {
+      "id": "web.ui.catalogTitle",
+      "source": "Гіды па горадзе",
+      "context": "Загаловак каталога гідаў на галоўнай",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#catalogTitle"
+      ],
+      "sourceHash": "670058fc54d284f2e46f7e8e09997332a46ab937ce627c51f1f2cfaa998f82ff"
+    },
+    {
+      "id": "web.ui.distance",
+      "source": "Адлегласць",
+      "context": "Пазнака рада адлегласці",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#distance"
+      ],
+      "sourceHash": "bee0a3a7d35a29807e46345e626e3bca28a4970e701c0b66c236c9d84c074c04"
+    },
+    {
+      "id": "web.ui.duration",
+      "source": "Працягласць",
+      "context": "Пазнака рада працягласці",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#duration"
+      ],
+      "sourceHash": "9276104996f45e284d966794e70c4fc2d52b329a5a5f4666515e718f8bf12f16"
+    },
+    {
+      "id": "web.ui.homeLink",
+      "source": "На галоўную",
+      "context": "Ссылка на галоўную",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#homeLink"
+      ],
+      "sourceHash": "30e2d60f17153ff35aa1adda3bab5116845e1991e0e4143d79ea1b50bb13389e"
+    },
+    {
+      "id": "web.ui.kilometersShort",
+      "source": "км",
+      "context": "Кароткая адзінка кіламетра",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#kilometersShort"
+      ],
+      "sourceHash": "f0799d4b6ae84c9fafe93c5a3e8ae85bf7675912cad3a7737f48c0448aa00f50"
+    },
+    {
+      "id": "web.ui.langSwitchName",
+      "source": "English",
+      "context": "Назва мовы-пераключальніка (уласная назва мовы прызначэння)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#langSwitchName"
+      ],
+      "sourceHash": "08fee1e01a8191946fa7c18d58791822c1e28bfcbd50006a82592c408e10f28a"
+    },
+    {
+      "id": "web.ui.languages",
+      "source": "Мовы",
+      "context": "Пазнака рада моваў гіда",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#languages"
+      ],
+      "sourceHash": "c06833252de3a6b56c05b65b42dfa0b95e4005eedd8189e5bf9f2f64b4490716"
+    },
+    {
+      "id": "web.ui.lockedLabel",
+      "source": "кропка пад замком",
+      "context": "Пазнака зачыненай кропкі ў спісе",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#lockedLabel"
+      ],
+      "sourceHash": "aafde1b7e9811c639b3f9340e59d0b53d6879b56fffc2cb6bcd74a616b2870e8"
+    },
+    {
+      "id": "web.ui.mapAttribution",
+      "source": "Даныя карты © удзельнікі OpenStreetMap (ліцэнзія ODbL)",
+      "context": "Атрыбуцыя карт OpenStreetMap, ODbL",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#mapAttribution"
+      ],
+      "sourceHash": "1044b87f28683a787262f17f1017ec49cf859cf8ba6c9773717fc8be6f16a536"
+    },
+    {
+      "id": "web.ui.mapError",
+      "source": "Карта часова недаступная. Спіс маршрутаў ніжэй працуе звычайна.",
+      "context": "Радок збою карты: спіс маршрутаў працуе звычайна",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#mapError"
+      ],
+      "sourceHash": "5d6c08e18afd5e725fb09490c6227e3ea83cadb649a78c776408948b6fa9963e"
+    },
+    {
+      "id": "web.ui.mapIntro",
+      "source": "Агляд публічных маршрутаў і кропак. Пазіцыя наведвальніка не вызначаецца і не выкарыстоўваецца.",
+      "context": "Уводзін карты: пазіцыя наведвальніка не вызначаецца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#mapIntro"
+      ],
+      "sourceHash": "c597a6c22daf0b31484af6251a55b92c9ddf3827aaac5719073d93a17caec838"
+    },
+    {
+      "id": "web.ui.mapRoutesHeading",
+      "source": "Маршруты на карце",
+      "context": "Загаловак секцыі маршрутаў на карце",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#mapRoutesHeading"
+      ],
+      "sourceHash": "35d577ece11ecfe53eb50cc7fd5ce8f60212ada6f4e892602acb5b06449a21f1"
+    },
+    {
+      "id": "web.ui.mapTitle",
+      "source": "Карта горада",
+      "context": "Загаловак старонкі карты горада",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#mapTitle"
+      ],
+      "sourceHash": "9ef7a5aa47a5315ef13466f4ff1aa67b6286c442ff261c0bbaccfc208ab85887"
+    },
+    {
+      "id": "web.ui.minutesShort",
+      "source": "хв",
+      "context": "Кароткая адзінка хвіліны",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#minutesShort"
+      ],
+      "sourceHash": "e8c16fd4349955ecde6b8e54ca7e348713cdfc4bea556dfba5ed9c03fd384e93"
+    },
+    {
+      "id": "web.ui.nextStop",
+      "source": "Наступная кропка",
+      "context": "Кнопка/ссылка наступнай кропкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#nextStop"
+      ],
+      "sourceHash": "371e0d77c5507a43edee3b356ad0cfb56f8b7c21a246ea346daed28f22a10799"
+    },
+    {
+      "id": "web.ui.playStoreName",
+      "source": "Google Play",
+      "context": "Назва крамы Google Play (назва брэнда)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#playStoreName"
+      ],
+      "sourceHash": "4d2b5bdd1768b08ed60798c2baf6ea51b51a4a14c75d19063d9f16134116ce03"
+    },
+    {
+      "id": "web.ui.prevStop",
+      "source": "Папярэдняя кропка",
+      "context": "Кнопка/ссылка папярэдняй кропкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#prevStop"
+      ],
+      "sourceHash": "91521bae33c1fc37a67fc215efdc36f06c0e7fd6c7bab32e70f3e7b7443f53dd"
+    },
+    {
+      "id": "web.ui.privacyAnalytics",
+      "source": "Аналітыка — толькі па яўнай згодзе. Падзеі адпраўляюцца на сервер не раней, чым дадзена згода; адмова азначае, што лог застаецца толькі на прыладзе, а дадатак працуе цалкам. Каардынаты, імёны і ўведзены карыстальнікам тэкст не адсылаюцца ніколі.",
+      "context": "Параграф прыватнасці: аналітыка толькі па яўнай згодзе",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#privacyAnalytics"
+      ],
+      "sourceHash": "d02dc665b1db4856113cad4e30c33fb438f48dd157f66c4da39aa242b941340b"
+    },
+    {
+      "id": "web.ui.privacyAppData",
+      "source": "Дадатак працуе без акаўнта. Ён вядзе на прыладзе лакальны лог падзей (якія гісторыі адкрываліся, якія маршруты загрузіліся) і захоўвае загрузкі кантэнту. Лог не змяшчае ні імён, ні вольнага тэксту і прывязаны да выпадковага ідэнтыфікатара прылады — гэта псеўданімізаваныя, а не ананімныя даныя.",
+      "context": "Параграф прыватнасці: лакальны лог дадатку, псеўданімізаваныя даныя",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#privacyAppData"
+      ],
+      "sourceHash": "440680a83706fc8e822376da9efc4e06bef21b3f33ecc4566ef35f3c68ec5470"
+    },
+    {
+      "id": "web.ui.privacyContact",
+      "source": "Пытанні пра гэтую палітыку прыватнасці можна задаваць у issues публічнага рэпазіторыя праекта:",
+      "context": "Параграф прыватнасці: пытанні праз issues рэпазіторыя",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#privacyContact"
+      ],
+      "sourceHash": "8155e69060cfd2c7c434816554419619f7c6880d668891dd3d836b609cf425c6"
+    },
+    {
+      "id": "web.ui.privacyDeletion",
+      "source": "Выдаленне даных: у дадатку, у раздзеле My KUDY, ёсць кнопка выдалення прылады — яна ачышчае лог падзей на серверы і запіс прылады; загрузкі кантэнту застаюцца. Ліст ці заяўку дасылаць не трэба.",
+      "context": "Параграф прыватнасці: выдаленне даных прылады ў My KUDY",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#privacyDeletion"
+      ],
+      "sourceHash": "6620748446af7ada3e3599b198bf82640983b0568c88d3c19f97e59b25bfc897"
+    },
+    {
+      "id": "web.ui.privacyIntro",
+      "source": "KUDY — аўдыёгіды для гарадскіх прагулак. Гэтая старонка апісвае, якія даныя апрацоўвае праект: вольны пласт вэб-канала і мабільны дадатак.",
+      "context": "Уводзін палітыкі прыватнасці",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#privacyIntro"
+      ],
+      "sourceHash": "87c3fd8b911d11bafbc0a20e65b2312422d246dd45ebb630ee9d3942b301e33a"
+    },
+    {
+      "id": "web.ui.privacyLocation",
+      "source": "Лакацыя выкарыстоўваецца толькі ў дадатку і толькі падчас актыўнай прагулкі: фонавае вызначэнне месца працуе, пакуль ідзе прагулка, і спыняецца разам з ёй. Каардынаты не пакідаюць прыладу — яны не перадаюцца на сервер і не трапляюць у лог падзей. На вэб-канале пазіцыя наведвальніка не вызначаецца зусім.",
+      "context": "Параграф прыватнасці: лакацыя толькі ў дадатку падчас прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#privacyLocation"
+      ],
+      "sourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58"
+    },
+    {
+      "id": "web.ui.privacyPurchases",
+      "source": "Пакупкі праходзяць праз крамы прыкладанняў (App Store, Google Play): плацёжныя даныя апрацоўвае крама, а дадатак запісвае толькі факт падзеі пакупкі — маршрут, варыянт, вынік — без банкаўскіх рэквізітаў.",
+      "context": "Параграф прыватнасці: пакупкі праз крамы прыкладанняў",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#privacyPurchases"
+      ],
+      "sourceHash": "9befc36b7704fa57cf77cb50c7277a86c5dd0ebd6fcdd4ee8f69d48d6a993dce"
+    },
+    {
+      "id": "web.ui.privacyRetention",
+      "source": "Тэрмін захавання: сырыя адпраўленыя падзеі захоўваюцца 14 месяцаў, потым выдаляюцца заданнем; агрэгаваныя лічбы па маршрутах застаюцца без ідэнтыфікатара прылады.",
+      "context": "Параграф прыватнасці: тэрмін захавання сырых падзей",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#privacyRetention"
+      ],
+      "sourceHash": "e859c436d72b484bfcf48110c474213d847ef7326797107354710ba929c6fa52"
+    },
+    {
+      "id": "web.ui.privacyTitle",
+      "source": "Прыватнасць",
+      "context": "Загаловак старонкі прыватнасці",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#privacyTitle"
+      ],
+      "sourceHash": "22162a33a385d2a42f1db6a44f8673e8d8d2f0b0180dfecf547178cfeac498fb"
+    },
+    {
+      "id": "web.ui.privacyWeb",
+      "source": "Бясплатны вэб-канал не збірае акаўнтаў: рэгістрацыі і ўваходу няма, кантактныя даныя не запытваюцца. Старонкі каталога, гідаў і карт адкрываюцца без уводу асабістых даных.",
+      "context": "Параграф прыватнасці: вэб-канал не збірае акаўнтаў",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#privacyWeb"
+      ],
+      "sourceHash": "4d4fe908d535fe3996570f0917999a33a649dc1b85d21a9444352b0f2ad6341c"
+    },
+    {
+      "id": "web.ui.stopListHeading",
+      "source": "Кропкі маршруту",
+      "context": "Загаловак спіса кропак маршруту",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#stopListHeading"
+      ],
+      "sourceHash": "379fd21b7a21e645950a361e2a27c81ffb28a9b8c5ff5d3b40ae867ed3aa4244"
+    },
+    {
+      "id": "web.ui.stops",
+      "source": "Кропкі",
+      "context": "Пазнака рада колькасці кропак",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#stops"
+      ],
+      "sourceHash": "f01a41e8069f5a10f7446d7892a4663bc206dcc63d79c0f0bcd747d09ef05a9d"
+    },
+    {
+      "id": "web.ui.storeComingSoon",
+      "source": "Хутка",
+      "context": "Пазнака «хутка» для крам",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#storeComingSoon"
+      ],
+      "sourceHash": "a4a928d1751b51e8124728e4b4f8cc411f60787f509a56129e2e6ffcbdf6f679"
+    },
+    {
+      "id": "web.ui.storyTextHeading",
+      "source": "Тэкст гісторыі",
+      "context": "Загаловак тэксту гісторыі на старонцы кропкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#storyTextHeading"
+      ],
+      "sourceHash": "c8c99c777db7f030957de2c87bb2807e6453c815734d5c6fcfdf762c4649be5a"
+    },
+    {
+      "id": "web.ui.textOnly",
+      "source": "толькі тэкст",
+      "context": "Пазнака набору: толькі тэкст",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#textOnly"
+      ],
+      "sourceHash": "60adcac9c17b1b2348bdc25bf9408963fe25e9d161f6b51d2a82561c7e470515"
+    },
+    {
+      "id": "web.ui.versionUnavailable",
+      "source": "Версія недаступная",
+      "context": "Радок стану: версія недаступная",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#versionUnavailable"
+      ],
+      "sourceHash": "6d0903ab3a0d160167c966e6b09cdce71900eb1271487b48f51ecb738379bd8e"
+    }
+  ]
+}
