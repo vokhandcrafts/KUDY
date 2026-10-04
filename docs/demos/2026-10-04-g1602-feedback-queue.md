@@ -22,16 +22,19 @@ rm -rf /tmp/kudy-g1602-demo && node --experimental-strip-types tests/feedback/qu
 ```output
 after Send   : local={"state":"pending","revision":0,"score":null,"draft":null} outbox=[{"transport_state":"pending","attempts":0,"next_attempt_at":null}]
 first flush  : dispatched=1 acknowledged=0 requeued=1
-after 503    : local={"state":"pending","revision":0,"score":null,"draft":null} outbox=[{"transport_state":"pending","attempts":1,"next_attempt_at":1770000120000}]
+after 503    : local={"state":"pending","revision":0,"score":null,"draft":null} outbox=[{"transport_state":"pending","attempts":1,"next_attempt_at":1770000062248.245}]
 second flush : dispatched=1 acknowledged=1 requeued=0
 after ACK    : local={"state":"sent","revision":1,"score":2,"draft":null} outbox=[]
 ```
 
 Reading the trace: after Send the draft is consumed into one queued operation
-(`pending`, revision 0). The restart re-arms the claimed mutation; the server's
-503 answers `requeued=1` with `attempts=1` and the next attempt scheduled
-exactly 60 s later (`next_attempt_at` = 1770000000000 + 120000). The second
-flush replays the same mutation id, the acknowledgement lands and the target
-ends `sent` at revision 1 with score 2 — one record, no duplicates, no lost
-vote. The scenario is the queue-crash window of `queue-durability.test.ts`;
-the full acceptance suite is `tests/feedback/queue*.test.ts`.
+(`pending`, revision 0). The restart re-arms the committed queue; the server's
+503 answers `requeued=1` with `attempts=1` and the next attempt scheduled by
+the §5.4 ladder — «backoff 2, 4, 8… секунд, мяжа 5 хвілін, з jitter»: 2 s
+jittered by this mutation id, so ~2.25 s after the failed attempt
+(`next_attempt_at` = 1770000000000 + 62248.245, the restart moment
+1770000060000 included). The second flush replays the same mutation id, the
+acknowledgement lands and the target ends `sent` at revision 1 with score 2 —
+one record, no duplicates, no lost vote. The scenario is the send-crash window
+of `queue-durability.test.ts`; the full acceptance suite is
+`tests/feedback/queue*.test.ts`.

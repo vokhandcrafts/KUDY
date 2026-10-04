@@ -69,10 +69,11 @@ function toWireTarget(target: FeedbackTarget): FeedbackTargetWire {
 export const FEEDBACK_SYNC_LIMITS = {
   /** One feedback round-trip including the body (the device idiom). */
   waitMs: 15_000,
-  /** First transient backoff window in seconds; doubled per attempt. */
-  baseRetryDelayS: 60,
-  /** The hard cap of any backoff or Retry-After schedule, in seconds. */
-  maxRetryDelayS: 3_600,
+  /** First transient backoff window — `21` §5.4 pins the ladder verbatim:
+   *  «backoff 2, 4, 8… секунд». */
+  baseRetryDelayS: 2,
+  /** The hard cap of any backoff schedule — `21` §5.4: «мяжа 5 хвілін». */
+  maxRetryDelayS: 300,
   /** `21` §6: auto-retry is limited to seven days, then explicit reconfirmation. */
   reconfirmAfterS: 7 * 24 * 3_600,
 } as const;
@@ -84,8 +85,24 @@ interface SyncLimits {
   reconfirmAfterS: number;
 }
 
-function backoffDelayS(attempts: number, limits: SyncLimits): number {
-  return Math.min(limits.baseRetryDelayS * 2 ** attempts, limits.maxRetryDelayS);
+// `21` §5.4: «з jitter». The factor is derived from the mutation id — stable
+// per mutation (evidence and tests stay reproducible) yet different across
+// targets, which is what staggers retry herds.
+function jitterFactor(mutationId: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < mutationId.length; i++) {
+    hash ^= mutationId.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return 0.8 + (0.4 * (hash / 0x100000000));
+}
+
+// The schedule of the next automatic attempt: the §5.4 ladder, jittered per
+// mutation and hard-capped. A server-sent Retry-After is honored as given
+// (clamped to the cap) — the server asked for that exact wait.
+export function nextDelayS(attempts: number, mutationId: string, limits: SyncLimits = FEEDBACK_SYNC_LIMITS): number {
+  const base = Math.min(limits.baseRetryDelayS * 2 ** attempts, limits.maxRetryDelayS);
+  return Math.min(base * jitterFactor(mutationId), limits.maxRetryDelayS);
 }
 
 interface OutboxRow extends Record<string, SqlValue> {
@@ -327,13 +344,13 @@ export function createFeedbackSync(deps: {
     }
     if (response.status === 429) {
       const serverDelay = Number.isFinite(response.retryAfterSeconds) ? Number(response.retryAfterSeconds) : undefined;
-      const delayS = Math.max(1, Math.min(serverDelay ?? backoffDelayS(row.attempts, limits), limits.maxRetryDelayS));
+      const delayS = Math.max(1, Math.min(serverDelay ?? nextDelayS(Number(row.attempts), row.mutation_id), limits.maxRetryDelayS));
       markAttempt(row.mutation_id, row.target, delayS);
       report.requeued++;
       return;
     }
     // 503 and everything else: temporary — bounded backoff, same mutation.
-    markAttempt(row.mutation_id, row.target, backoffDelayS(row.attempts, limits));
+    markAttempt(row.mutation_id, row.target, nextDelayS(Number(row.attempts), row.mutation_id));
     report.requeued++;
   }
 
@@ -371,7 +388,7 @@ export function createFeedbackSync(deps: {
     try {
       response = await request;
     } catch {
-      markAttempt(row.mutation_id, row.target, backoffDelayS(Number(row.attempts), limits));
+      markAttempt(row.mutation_id, row.target, nextDelayS(Number(row.attempts), row.mutation_id));
       report.requeued++;
       return;
     }

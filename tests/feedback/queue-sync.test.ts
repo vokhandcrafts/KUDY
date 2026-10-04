@@ -15,7 +15,7 @@ import {
   saveDraft,
   sendNow,
 } from '../../services/feedbackRepository.ts';
-import { createFeedbackSync, FEEDBACK_SYNC_LIMITS, type FeedbackSync } from '../../services/feedbackSync.ts';
+import { createFeedbackSync, FEEDBACK_SYNC_LIMITS, nextDelayS, type FeedbackSync } from '../../services/feedbackSync.ts';
 import { stubGlobalFetch } from '../../services/fetch-stub-test-fixture.ts';
 import {
   DRAFT,
@@ -216,25 +216,40 @@ test('429 honors Retry-After and gates the next dispatch', async () => {
   assert.equal(rawLocal(driver, GUIDE_TARGET)!.state, 'sent');
 });
 
-test('a transient failure backs off exponentially with a hard cap', async () => {
+test('a transient failure backs off exponentially with a hard cap, jittered per mutation', async () => {
   const driver = openIdentifiedStore();
   queueOne(driver);
   const clock = { value: NOW };
   const transport = scriptedTransport(({ index }) => (index < 2 ? err503() : okPut(1)));
   const sync = makeSync(driver, secretBox(SECRET), transport, clock);
   assert.equal((await sync.flush()).requeued, 1);
-  clock.value = NOW + (FEEDBACK_SYNC_LIMITS.baseRetryDelayS - 1) * 1000;
+  // The schedule is the §5.4 ladder jittered by the mutation id: the next
+  // attempt fires exactly then — not before, not after the window.
+  const first = nextDelayS(0, M1);
+  clock.value = NOW + first * 1000 - 1;
   assert.equal((await sync.flush()).dispatched, 0, 'inside the first backoff window');
-  clock.value = NOW + FEEDBACK_SYNC_LIMITS.baseRetryDelayS * 1000;
-  assert.equal((await sync.flush()).requeued, 1, 'second failure doubles the delay');
-  clock.value = NOW + (FEEDBACK_SYNC_LIMITS.baseRetryDelayS * 3 - 1) * 1000;
+  clock.value = NOW + first * 1000;
+  assert.equal((await sync.flush()).requeued, 1, 'second failure doubles the window');
+  const second = nextDelayS(1, M1);
+  clock.value = NOW + (first + second) * 1000 - 1;
   assert.equal((await sync.flush()).dispatched, 0, 'inside the doubled window');
-  // The cap: with 20 recorded attempts the delay is maxRetryDelayS, never more.
-  driver.prepare('UPDATE feedback_outbox SET attempts = 20 WHERE mutation_id = ?').run(M1);
-  clock.value = NOW + 60_000 + FEEDBACK_SYNC_LIMITS.maxRetryDelayS * 1000;
+  clock.value = NOW + (first + second) * 1000;
   const capped = await sync.flush();
   assert.equal(capped.dispatched, 1);
   assert.equal(rawLocal(driver, GUIDE_TARGET)!.state, 'sent');
+});
+
+test('the jittered schedule is deterministic per mutation, ladder-shaped and hard-capped', () => {
+  // §5.4: «backoff 2, 4, 8… секунд, мяжа 5 хвілін, з jitter» — the same
+  // mutation always schedules the same wait, the ladder grows, and no
+  // schedule ever exceeds the five-minute cap.
+  const first = nextDelayS(0, M1);
+  const doubled = nextDelayS(1, M1);
+  assert.equal(nextDelayS(0, M1), first, 'same mutation id — same schedule');
+  assert.ok(first >= FEEDBACK_SYNC_LIMITS.baseRetryDelayS * 0.8 && first < FEEDBACK_SYNC_LIMITS.baseRetryDelayS * 1.2, 'the first window is the 2 s step jittered');
+  assert.equal(doubled, first * 2, 'the ladder doubles within the same mutation');
+  assert.ok(nextDelayS(30, M1) <= FEEDBACK_SYNC_LIMITS.maxRetryDelayS, 'the cap holds at five minutes');
+  assert.ok(nextDelayS(0, M2) !== first || nextDelayS(1, M2) !== doubled, 'different mutations stagger differently');
 });
 
 test('mutations older than seven days stop auto-retry until explicit reconfirmation', async () => {

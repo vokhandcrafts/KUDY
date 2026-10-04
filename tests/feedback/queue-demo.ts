@@ -39,11 +39,12 @@ saveDraft(
 sendNow(first.driver, TARGET, { now: NOW, mutationId: MUTATION });
 state(first.driver, 'after Send   ');
 
-// 2. The process dies mid-fetch — the claimed operation stays 'sending'.
+// 2. The process dies before any flush — the committed operation stays
+// honestly 'pending', nothing reached the wire.
 first.close();
 
-// 3. Restart: the queue re-arms the same mutation; the server answers 503
-// once and the bounded backoff schedules the retry (60 s later).
+// 3. Restart: the queue is due again; the server answers 503 once and the
+// §5.4 backoff ladder (jittered per mutation id) schedules the retry.
 const second = nodeSqliteFileDriver(FILE);
 openDatabase(second.driver);
 let clock = NOW + 60_000;
