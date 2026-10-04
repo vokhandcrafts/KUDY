@@ -14,6 +14,7 @@ import type { MomentFact, MomentFacts } from '../../services/contentRepo/momentF
 // G21.09 (issue #542): the message shapes live in the shared pure contract zone.
 import type { PlaceDetailStrings } from '../../contracts/ui-message-types.ts';
 import { createControllerStore, type ControllerStore } from '../createControllerStore.ts';
+import { PLACE_DETAIL_STRINGS_DATA } from './placeDetail-strings.generated.ts';
 
 // The view types the screens render — re-exported here so the UI layer keeps
 // importing its view types from the controllers (the nearby controller's
@@ -83,91 +84,7 @@ export function placeRefusalText(refusal: string, strings: PlaceDetailStrings): 
   return strings.refusalText[refusal as keyof PlaceDetailStrings['refusalText']] ?? refusal;
 }
 
-const STRINGS: Record<'be' | 'en' | 'uk', PlaceDetailStrings> = {
-  be: {
-    loading: 'Загрузка…',
-    unavailable: 'Дэталь месца недаступная',
-    error: 'Не ўдалося адкрыць месца',
-    noFacts: 'Месца пакуль не апублікавана ў каталога',
-    empty: 'Тэйзераў для гэтага месца няма',
-    teaserLabel: 'Тэйзер',
-    playLabel: 'Паслухаць тэйзер',
-    stopLabel: 'Спыніць',
-    resumeLabel: 'Працягнуць',
-    nowPlaying: 'Зараз грае',
-    paused: 'Паўза',
-    guideLink: "Прэв'ю гіда",
-    guideLinkHint: "Адкрывае прэв'ю гіда, не запуск прагулкі.",
-    playHint: 'Яўны Play тэйзера праз адзіны плэер.',
-    noAudio: 'Аўдыё тэйзера не апублікавана',
-    durationUnit: 'хв',
-    textLabel: 'Тэкст',
-    audioLabel: 'аўдыё',
-    refusalText: {
-      'moment#audio-unpublished': 'Гук тэйзера не апублікаваны.',
-      'moment#session-unroutable': 'Тэйзер не гучыць у прагулцы — запусціце яго тут яшчэ раз.',
-      'moment#session-refused': 'Тэйзер зараз не запускаецца — паспрабуйце яшчэ раз.',
-    },
-    playFailed: 'Гук не пачаўся.',
-    playFailedHint: 'Паспрабуйце запусціць яшчэ раз.',
-  },
-  en: {
-    loading: 'Loading…',
-    unavailable: 'The place detail is unavailable',
-    error: 'Could not open the place',
-    noFacts: 'The place is not published in the catalog yet',
-    empty: 'No teasers for this place',
-    teaserLabel: 'Teaser',
-    playLabel: 'Play the teaser',
-    stopLabel: 'Stop',
-    resumeLabel: 'Resume',
-    nowPlaying: 'Now playing',
-    paused: 'Paused',
-    guideLink: 'Guide preview',
-    guideLinkHint: "Opens the guide's preview, never a walk start.",
-    playHint: 'Explicit teaser play through the single player.',
-    noAudio: 'The teaser audio is not published',
-    durationUnit: 'min',
-    textLabel: 'Text',
-    audioLabel: 'audio',
-    refusalText: {
-      'moment#audio-unpublished': 'The teaser audio is not published.',
-      'moment#session-unroutable': 'The teaser cannot sound inside a walk — play it here again.',
-      'moment#session-refused': 'The teaser cannot start right now — try again.',
-    },
-    playFailed: 'The audio did not start.',
-    playFailedHint: 'Try starting it again.',
-  },
-  uk: {
-    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1); the
-    // native-speaker review is the owner's (uk-release-scope §5, §6.4).
-    loading: 'Завантаження…',
-    unavailable: 'Деталі місця недоступні',
-    error: 'Не вдалося відкрити місце',
-    noFacts: 'Місце поки не опубліковане в каталозі',
-    empty: 'Тізерів для цього місця немає',
-    teaserLabel: 'Тізер',
-    playLabel: 'Послухати тізер',
-    stopLabel: 'Зупинити',
-    resumeLabel: 'Продовжити',
-    nowPlaying: 'Зараз грає',
-    paused: 'Пауза',
-    guideLink: "Прев'ю гіда",
-    guideLinkHint: "Відкриває прев'ю гіда, не запуск прогулянки.",
-    playHint: 'Явний Play тізера через єдиний плеєр.',
-    noAudio: 'Аудіо тізера не опубліковане',
-    durationUnit: 'хв',
-    textLabel: 'Текст',
-    audioLabel: 'аудіо',
-    refusalText: {
-      'moment#audio-unpublished': 'Звук тізера не опублікований.',
-      'moment#session-unroutable': 'Тізер не звучить у прогулянці — запустіть його тут ще раз.',
-      'moment#session-refused': 'Тізер зараз не запускається — спробуйте ще раз.',
-    },
-    playFailed: 'Звук не почався.',
-    playFailedHint: 'Спробуйте запустити ще раз.',
-  },
-};
+const STRINGS = PLACE_DETAIL_STRINGS_DATA;
 
 export function placeDetailStrings(locale: string): PlaceDetailStrings {
   return locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
