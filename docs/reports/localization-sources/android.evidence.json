@@ -5,7 +5,16 @@
   "report": "docs/reports/localization-sources/android.md",
   "accessed_utc": "2026-10-03T23:44Z - 2026-10-03T23:58Z",
   "executor": "zcode session (GLM-5.3-Flash)",
-  "locales_requested": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"],
+  "locales_requested": [
+    "be",
+    "en",
+    "uk",
+    "de",
+    "es",
+    "fr",
+    "cs",
+    "sv"
+  ],
   "revision": {
     "fetched_from": "refs/heads/main (development)",
     "release_tags_verified": {
@@ -29,37 +38,161 @@
     ]
   },
   "sources": [
-    {"repo": "platform/frameworks/base", "path": "core/res/res/values/strings.xml", "blob_id": "cfc3ddca27eb389ea0f2d482906c2d72d4e810af"},
-    {"repo": "platform/frameworks/base", "path": "core/res/res/values-be/strings.xml", "blob_id": "d1a2104dfa2578df3720cc5237d5ef4fed3401f9"},
-    {"repo": "platform/frameworks/base", "path": "core/res/res/values-uk/strings.xml", "blob_id": "dcf15a0ff01c849733775504150319658ed7c902"},
-    {"repo": "platform/frameworks/base", "path": "core/res/res/values-de/strings.xml", "blob_id": "66bc41fbb82b7f8ebeb6652e71a91f54f73b6b81"},
-    {"repo": "platform/frameworks/base", "path": "core/res/res/values-es/strings.xml", "blob_id": "1f10c5d0fb8807884f39357a67af657b1bf61ff2"},
-    {"repo": "platform/frameworks/base", "path": "core/res/res/values-fr/strings.xml", "blob_id": "8b0b4f14e9070d8e366a52fec85cf285e450e84f"},
-    {"repo": "platform/frameworks/base", "path": "core/res/res/values-cs/strings.xml", "blob_id": "ed95fab0e3e1f15125c6ac198beead2e9cd1d547"},
-    {"repo": "platform/frameworks/base", "path": "core/res/res/values-sv/strings.xml", "blob_id": "4b22b7df0c8c911fbd940bfc16f3e4d2160dfc26"},
-    {"repo": "platform/packages/apps/Settings", "path": "res/values/strings.xml", "blob_id": "d96554d7bcc734ebbb4349d97749d956f037e711"},
-    {"repo": "platform/packages/apps/Settings", "path": "res/values-be/strings.xml", "blob_id": "cc1e6d4580d60520e7a462a855a485e99092cef2"},
-    {"repo": "platform/packages/apps/Settings", "path": "res/values-uk/strings.xml", "blob_id": "ad4cb110cf286e8e3f42616b6b14ab04fc35382a"},
-    {"repo": "platform/packages/apps/Settings", "path": "res/values-de/strings.xml", "blob_id": "ba3e34314fdcb3a82bd61f544bfb5d650297bb43"},
-    {"repo": "platform/packages/apps/Settings", "path": "res/values-es/strings.xml", "blob_id": "ad06766fb1360bf6f9b481b249e6144a78d8200c"},
-    {"repo": "platform/packages/apps/Settings", "path": "res/values-fr/strings.xml", "blob_id": "bda49f27783ddb4d2dc50786f42dd0fd068f6f17"},
-    {"repo": "platform/packages/apps/Settings", "path": "res/values-cs/strings.xml", "blob_id": "4f57c2267c5f9e8c0dfc9c68a92e8bd65c16d7e4"},
-    {"repo": "platform/packages/apps/Settings", "path": "res/values-sv/strings.xml", "blob_id": "0d4c358ec69323d334ff98d32aba95a3ea568347"},
-    {"repo": "platform/packages/providers/DownloadProvider", "path": "res/values/strings.xml", "blob_id": "4d4bb12ad1240892fbda7cbd03f35f53cad57aa3"},
-    {"repo": "platform/packages/providers/DownloadProvider", "path": "res/values-be/strings.xml", "blob_id": "43613fd0fa14b06f6e96d62d8a2a77f6eabbad5d"},
-    {"repo": "platform/packages/providers/DownloadProvider", "path": "res/values-uk/strings.xml", "blob_id": "dafc6f3151f09ea05a6996e36ca20fe81ec6874e"},
-    {"repo": "platform/packages/providers/DownloadProvider", "path": "res/values-de/strings.xml", "blob_id": "7a03fbb1d46375516ef9c8db307b8d78b2dec841"},
-    {"repo": "platform/packages/providers/DownloadProvider", "path": "res/values-es/strings.xml", "blob_id": "0ed7bced8765e530c941bec95f802aa1474626fa"},
-    {"repo": "platform/packages/providers/DownloadProvider", "path": "res/values-fr/strings.xml", "blob_id": "96c4ec58684c86152a06a60c0ef32ef8e2964278"},
-    {"repo": "platform/packages/providers/DownloadProvider", "path": "res/values-cs/strings.xml", "blob_id": "04143ecee2514ca749348e7485e783466a122999"},
-    {"repo": "platform/packages/providers/DownloadProvider", "path": "res/values-sv/strings.xml", "blob_id": "e8fc3695450ac384bc94df291eb4fd1786152d29"},
-    {"repo": "platform/packages/apps/TV", "path": "res/values/strings.xml", "blob_id": "a83935194904a6aa3dc070bd8ab4bf6857c36400", "note": "values-be absent in this repo (151 values-* dirs, no values-be)"}
+    {
+      "repo": "platform/frameworks/base",
+      "path": "core/res/res/values/strings.xml",
+      "blob_id": "cfc3ddca27eb389ea0f2d482906c2d72d4e810af"
+    },
+    {
+      "repo": "platform/frameworks/base",
+      "path": "core/res/res/values-be/strings.xml",
+      "blob_id": "d1a2104dfa2578df3720cc5237d5ef4fed3401f9"
+    },
+    {
+      "repo": "platform/frameworks/base",
+      "path": "core/res/res/values-uk/strings.xml",
+      "blob_id": "dcf15a0ff01c849733775504150319658ed7c902"
+    },
+    {
+      "repo": "platform/frameworks/base",
+      "path": "core/res/res/values-de/strings.xml",
+      "blob_id": "66bc41fbb82b7f8ebeb6652e71a91f54f73b6b81"
+    },
+    {
+      "repo": "platform/frameworks/base",
+      "path": "core/res/res/values-es/strings.xml",
+      "blob_id": "1f10c5d0fb8807884f39357a67af657b1bf61ff2"
+    },
+    {
+      "repo": "platform/frameworks/base",
+      "path": "core/res/res/values-fr/strings.xml",
+      "blob_id": "8b0b4f14e9070d8e366a52fec85cf285e450e84f"
+    },
+    {
+      "repo": "platform/frameworks/base",
+      "path": "core/res/res/values-cs/strings.xml",
+      "blob_id": "ed95fab0e3e1f15125c6ac198beead2e9cd1d547"
+    },
+    {
+      "repo": "platform/frameworks/base",
+      "path": "core/res/res/values-sv/strings.xml",
+      "blob_id": "4b22b7df0c8c911fbd940bfc16f3e4d2160dfc26"
+    },
+    {
+      "repo": "platform/packages/apps/Settings",
+      "path": "res/values/strings.xml",
+      "blob_id": "d96554d7bcc734ebbb4349d97749d956f037e711"
+    },
+    {
+      "repo": "platform/packages/apps/Settings",
+      "path": "res/values-be/strings.xml",
+      "blob_id": "cc1e6d4580d60520e7a462a855a485e99092cef2"
+    },
+    {
+      "repo": "platform/packages/apps/Settings",
+      "path": "res/values-uk/strings.xml",
+      "blob_id": "ad4cb110cf286e8e3f42616b6b14ab04fc35382a"
+    },
+    {
+      "repo": "platform/packages/apps/Settings",
+      "path": "res/values-de/strings.xml",
+      "blob_id": "ba3e34314fdcb3a82bd61f544bfb5d650297bb43"
+    },
+    {
+      "repo": "platform/packages/apps/Settings",
+      "path": "res/values-es/strings.xml",
+      "blob_id": "ad06766fb1360bf6f9b481b249e6144a78d8200c"
+    },
+    {
+      "repo": "platform/packages/apps/Settings",
+      "path": "res/values-fr/strings.xml",
+      "blob_id": "bda49f27783ddb4d2dc50786f42dd0fd068f6f17"
+    },
+    {
+      "repo": "platform/packages/apps/Settings",
+      "path": "res/values-cs/strings.xml",
+      "blob_id": "4f57c2267c5f9e8c0dfc9c68a92e8bd65c16d7e4"
+    },
+    {
+      "repo": "platform/packages/apps/Settings",
+      "path": "res/values-sv/strings.xml",
+      "blob_id": "0d4c358ec69323d334ff98d32aba95a3ea568347"
+    },
+    {
+      "repo": "platform/packages/providers/DownloadProvider",
+      "path": "res/values/strings.xml",
+      "blob_id": "4d4bb12ad1240892fbda7cbd03f35f53cad57aa3"
+    },
+    {
+      "repo": "platform/packages/providers/DownloadProvider",
+      "path": "res/values-be/strings.xml",
+      "blob_id": "43613fd0fa14b06f6e96d62d8a2a77f6eabbad5d"
+    },
+    {
+      "repo": "platform/packages/providers/DownloadProvider",
+      "path": "res/values-uk/strings.xml",
+      "blob_id": "dafc6f3151f09ea05a6996e36ca20fe81ec6874e"
+    },
+    {
+      "repo": "platform/packages/providers/DownloadProvider",
+      "path": "res/values-de/strings.xml",
+      "blob_id": "7a03fbb1d46375516ef9c8db307b8d78b2dec841"
+    },
+    {
+      "repo": "platform/packages/providers/DownloadProvider",
+      "path": "res/values-es/strings.xml",
+      "blob_id": "0ed7bced8765e530c941bec95f802aa1474626fa"
+    },
+    {
+      "repo": "platform/packages/providers/DownloadProvider",
+      "path": "res/values-fr/strings.xml",
+      "blob_id": "96c4ec58684c86152a06a60c0ef32ef8e2964278"
+    },
+    {
+      "repo": "platform/packages/providers/DownloadProvider",
+      "path": "res/values-cs/strings.xml",
+      "blob_id": "04143ecee2514ca749348e7485e783466a122999"
+    },
+    {
+      "repo": "platform/packages/providers/DownloadProvider",
+      "path": "res/values-sv/strings.xml",
+      "blob_id": "e8fc3695450ac384bc94df291eb4fd1786152d29"
+    },
+    {
+      "repo": "platform/packages/apps/TV",
+      "path": "res/values/strings.xml",
+      "blob_id": "a83935194904a6aa3dc070bd8ab4bf6857c36400",
+      "note": "values-be absent in this repo (151 values-* dirs at access date 2026-10-03, no values-be)"
+    }
   ],
   "coverage": {
     "core_res": {
       "en_unique_keys": 2314,
       "locale_unique_keys_each": 2293,
-      "missing_in_each_locale": ["alternate_eri_file", "bluetooth_a2dp_audio_route_id", "bugreport_status", "crossSimFormat_spn", "date_picker_day_of_week_typeface", "date_picker_day_typeface", "date_picker_mode", "date_picker_month_typeface", "default_audio_route_id", "face_acquired_dark_glasses_detected", "face_acquired_mouth_covering_detected", "locale_replacement", "network_available_sign_in_detailed", "notification_header_divider_symbol", "notification_header_divider_symbol_with_spaces", "notification_inbox_ellipsis", "radial_numbers_typeface", "sans_serif", "scCellularNetworkSecurityLearnMore", "time_picker_mode", "time_placeholder", "wfcSpnFormat_spn"],
+      "missing_in_each_locale": [
+        "alternate_eri_file",
+        "bluetooth_a2dp_audio_route_id",
+        "bugreport_status",
+        "crossSimFormat_spn",
+        "date_picker_day_of_week_typeface",
+        "date_picker_day_typeface",
+        "date_picker_mode",
+        "date_picker_month_typeface",
+        "default_audio_route_id",
+        "face_acquired_dark_glasses_detected",
+        "face_acquired_mouth_covering_detected",
+        "locale_replacement",
+        "network_available_sign_in_detailed",
+        "notification_header_divider_symbol",
+        "notification_header_divider_symbol_with_spaces",
+        "notification_inbox_ellipsis",
+        "radial_numbers_typeface",
+        "sans_serif",
+        "scCellularNetworkSecurityLearnMore",
+        "time_picker_mode",
+        "time_placeholder",
+        "wfcSpnFormat_spn"
+      ],
       "stale_extra_in_each_locale": "rating_label (present in all 7 locale files, absent from en default; be value is an ICU plural template with one/few/many/other categories)",
       "settings_repo": "values + all 7 locales present",
       "download_provider_repo": "values + all 7 locales present",
@@ -67,21 +200,218 @@
     }
   },
   "benchmark": [
-    {"term": "back", "context": "return to previous screen", "repo": "platform/frameworks/base", "key": "back_button_label", "values": {"en": "Back", "be": "Назад", "uk": "Назад", "de": "Zurück", "es": "Atrás", "fr": "Retour", "cs": "Zpět", "sv": "Tillbaka"}, "verdict": "positive"},
-    {"term": "back", "context": "accessibility up navigation", "repo": "platform/frameworks/base", "key": "action_bar_up_description", "values": {"en": "Navigate up", "be": "Перайсці ўверх", "uk": "Перейти вгору", "de": "Nach oben navigieren", "es": "Desplazarse hacia arriba", "fr": "Parcourir vers le haut", "cs": "Přejít nahoru", "sv": "Navigera uppåt"}, "verdict": "positive"},
-    {"term": "cancel", "context": "dismiss dialog action", "repo": "platform/frameworks/base", "key": "cancel", "values": {"en": "Cancel", "be": "Скасаваць", "uk": "Скасувати", "de": "Abbrechen", "es": "Cancelar", "fr": "Annuler", "cs": "Zrušit", "sv": "Avbryt"}, "verdict": "positive"},
-    {"term": "settings", "context": "open app settings", "repo": "platform/packages/apps/Settings", "key": "settings_label", "values": {"en": "Settings", "be": "Налады", "uk": "Налаштування", "de": "Einstellungen", "es": "Ajustes", "fr": "Paramètres", "cs": "Nastavení", "sv": "Inställningar"}, "verdict": "positive (not in core res; lives in Settings app repo)"},
-    {"term": "stop", "context": "stop media playback", "repo": "platform/frameworks/base", "key": "lockscreen_transport_stop_description", "values": {"en": "Stop", "be": "Спыніць", "uk": "Зупинити", "de": "Beenden", "es": "Detener", "fr": "Arrêter", "cs": "Zastavit", "sv": "Avbryt"}, "verdict": "positive with notes (de chooses Beenden; sv Avbryt is identical to sv Cancel - in-source collision)"},
-    {"term": "ok", "context": "confirm dialog", "repo": "platform/frameworks/base", "key": "ok", "values": {"en": "OK", "be": "ОК", "uk": "OK", "de": "OK", "es": "Aceptar", "fr": "OK", "cs": "OK", "sv": "OK"}, "verdict": "positive with note (be uses Cyrillic ОК, uk Latin OK)"},
-    {"term": "restore", "context": "restore from backup", "repo": "platform/packages/apps/Settings", "key": "restore", "values": {"en": "Restore", "be": "Аднавіць", "uk": "Відновити", "de": "Wiederherstellen", "es": "Restaurar", "fr": "Restaurer", "cs": "Obnovit", "sv": "Återställ"}, "verdict": "positive, sense = backup restore; restore purchases not covered"},
-    {"term": "restore", "context": "reset to default (contrast)", "repo": "platform/packages/apps/Settings", "key": "menu_restore", "values": {"en": "Reset to default", "be": "Скінуць налады", "uk": "Скинути налаштування", "de": "Auf Standard zurücksetzen", "es": "Restablecer ajustes", "fr": "Rétablir param. par défaut", "cs": "Obnovit výchozí", "sv": "Återställ standardinst."}, "verdict": "sense/context mismatch example: same English stem, different target words per context"},
-    {"term": "download", "context": "download completion status", "repo": "platform/packages/providers/DownloadProvider", "key": "notification_download_complete", "values": {"en": "Download complete.", "be": "Спампаванне завершана", "uk": "Завантаження закінчено.", "de": "Download abgeschlossen", "es": "Descarga completada", "fr": "Téléchargement terminé.", "cs": "Stahování dokončeno.", "sv": "Nedladdningen har slutförts."}, "verdict": "partial: status phrases only; no download verb button in core"},
-    {"term": "unavailable", "context": "generic unavailability", "repo": null, "key": null, "values": {}, "verdict": "negative: only narrow senses (biometric hw, print service, licenses, hotspot, display mirror)"},
-    {"term": "unavailable", "context": "example narrow sense (license load error)", "repo": "platform/packages/apps/Settings", "key": "settings_license_activity_unavailable", "values": {"en": "There is a problem loading the licenses.", "be": "Немагчыма загрузіць ліцэнзіі.", "uk": "Під час завантаж. ліцензій виникла пробл.", "de": "Beim Laden der Lizenzen ist ein Problem aufgetreten.", "es": "Se ha producido un problema al intentar cargar las licencias.", "fr": "Un problème est survenu lors du chargement des licences.", "cs": "Při načítání licencí došlo k chybě.", "sv": "Ett problem inträffade när licenserna lästes in."}, "verdict": "example only; note uk abbreviated style"},
-    {"term": "guide", "context": "tour guide (KUDY sense)", "repo": null, "key": null, "values": {}, "verdict": "negative: AOSP guide = TV program guide (EPG), different sense"},
-    {"term": "guide", "context": "TV program guide (EPG)", "repo": "platform/packages/apps/TV", "key": "channels_item_program_guide", "values": {"en": "Program guide"}, "verdict": "sense mismatch example; values-be absent in TV repo, so no be value exists"},
-    {"term": "walk", "context": "walking tour (KUDY sense)", "repo": null, "key": null, "values": {}, "verdict": "negative: absent in all inspected repos"},
-    {"term": "purchase", "context": "buy / restore purchase (KUDY sense)", "repo": null, "key": null, "values": {}, "verdict": "negative: absent in all inspected repos; Play Store sources are not part of AOSP"}
+    {
+      "term": "back",
+      "context": "return to previous screen",
+      "repo": "platform/frameworks/base",
+      "key": "back_button_label",
+      "values": {
+        "en": "Back",
+        "be": "Назад",
+        "uk": "Назад",
+        "de": "Zurück",
+        "es": "Atrás",
+        "fr": "Retour",
+        "cs": "Zpět",
+        "sv": "Tillbaka"
+      },
+      "verdict": "positive"
+    },
+    {
+      "term": "back",
+      "context": "accessibility up navigation",
+      "repo": "platform/frameworks/base",
+      "key": "action_bar_up_description",
+      "values": {
+        "en": "Navigate up",
+        "be": "Перайсці ўверх",
+        "uk": "Перейти вгору",
+        "de": "Nach oben navigieren",
+        "es": "Desplazarse hacia arriba",
+        "fr": "Parcourir vers le haut",
+        "cs": "Přejít nahoru",
+        "sv": "Navigera uppåt"
+      },
+      "verdict": "positive"
+    },
+    {
+      "term": "cancel",
+      "context": "dismiss dialog action",
+      "repo": "platform/frameworks/base",
+      "key": "cancel",
+      "values": {
+        "en": "Cancel",
+        "be": "Скасаваць",
+        "uk": "Скасувати",
+        "de": "Abbrechen",
+        "es": "Cancelar",
+        "fr": "Annuler",
+        "cs": "Zrušit",
+        "sv": "Avbryt"
+      },
+      "verdict": "positive"
+    },
+    {
+      "term": "settings",
+      "context": "open app settings",
+      "repo": "platform/packages/apps/Settings",
+      "key": "settings_label",
+      "values": {
+        "en": "Settings",
+        "be": "Налады",
+        "uk": "Налаштування",
+        "de": "Einstellungen",
+        "es": "Ajustes",
+        "fr": "Paramètres",
+        "cs": "Nastavení",
+        "sv": "Inställningar"
+      },
+      "verdict": "positive (not in core res; lives in Settings app repo)"
+    },
+    {
+      "term": "stop",
+      "context": "stop media playback",
+      "repo": "platform/frameworks/base",
+      "key": "lockscreen_transport_stop_description",
+      "values": {
+        "en": "Stop",
+        "be": "Спыніць",
+        "uk": "Зупинити",
+        "de": "Beenden",
+        "es": "Detener",
+        "fr": "Arrêter",
+        "cs": "Zastavit",
+        "sv": "Avbryt"
+      },
+      "verdict": "positive with notes (de chooses Beenden; sv Avbryt is identical to sv Cancel - in-source collision)"
+    },
+    {
+      "term": "ok",
+      "context": "confirm dialog",
+      "repo": "platform/frameworks/base",
+      "key": "ok",
+      "values": {
+        "en": "OK",
+        "be": "ОК",
+        "uk": "OK",
+        "de": "OK",
+        "es": "Aceptar",
+        "fr": "OK",
+        "cs": "OK",
+        "sv": "OK"
+      },
+      "verdict": "positive with note (be uses Cyrillic ОК, uk Latin OK)"
+    },
+    {
+      "term": "restore",
+      "context": "restore from backup",
+      "repo": "platform/packages/apps/Settings",
+      "key": "restore",
+      "values": {
+        "en": "Restore",
+        "be": "Аднавіць",
+        "uk": "Відновити",
+        "de": "Wiederherstellen",
+        "es": "Restaurar",
+        "fr": "Restaurer",
+        "cs": "Obnovit",
+        "sv": "Återställ"
+      },
+      "verdict": "positive, sense = backup restore; restore purchases not covered"
+    },
+    {
+      "term": "restore",
+      "context": "reset to default (contrast)",
+      "repo": "platform/packages/apps/Settings",
+      "key": "menu_restore",
+      "values": {
+        "en": "Reset to default",
+        "be": "Скінуць налады",
+        "uk": "Скинути налаштування",
+        "de": "Auf Standard zurücksetzen",
+        "es": "Restablecer ajustes",
+        "fr": "Rétablir param. par défaut",
+        "cs": "Obnovit výchozí",
+        "sv": "Återställ standardinst."
+      },
+      "verdict": "sense/context mismatch example: same English stem, different target words per context"
+    },
+    {
+      "term": "download",
+      "context": "download completion status",
+      "repo": "platform/packages/providers/DownloadProvider",
+      "key": "notification_download_complete",
+      "values": {
+        "en": "Download complete.",
+        "be": "Спампаванне завершана",
+        "uk": "Завантаження закінчено.",
+        "de": "Download abgeschlossen",
+        "es": "Descarga completada",
+        "fr": "Téléchargement terminé.",
+        "cs": "Stahování dokončeno.",
+        "sv": "Nedladdningen har slutförts."
+      },
+      "verdict": "partial: status phrases only; no download verb button in core"
+    },
+    {
+      "term": "unavailable",
+      "context": "generic unavailability",
+      "repo": null,
+      "key": null,
+      "values": {},
+      "verdict": "negative: only narrow senses (biometric hw, print service, licenses, hotspot, display mirror)"
+    },
+    {
+      "term": "unavailable",
+      "context": "example narrow sense (license load error)",
+      "repo": "platform/packages/apps/Settings",
+      "key": "settings_license_activity_unavailable",
+      "values": {
+        "en": "There is a problem loading the licenses.",
+        "be": "Немагчыма загрузіць ліцэнзіі.",
+        "uk": "Під час завантаж. ліцензій виникла пробл.",
+        "de": "Beim Laden der Lizenzen ist ein Problem aufgetreten.",
+        "es": "Se ha producido un problema al intentar cargar las licencias.",
+        "fr": "Un problème est survenu lors du chargement des licences.",
+        "cs": "Při načítání licencí došlo k chybě.",
+        "sv": "Ett problem inträffade när licenserna lästes in."
+      },
+      "verdict": "example only; note uk abbreviated style"
+    },
+    {
+      "term": "guide",
+      "context": "tour guide (KUDY sense)",
+      "repo": null,
+      "key": null,
+      "values": {},
+      "verdict": "negative: AOSP guide = TV program guide (EPG), different sense"
+    },
+    {
+      "term": "guide",
+      "context": "TV program guide (EPG)",
+      "repo": "platform/packages/apps/TV",
+      "key": "channels_item_program_guide",
+      "values": {
+        "en": "Program guide"
+      },
+      "verdict": "sense mismatch example; values-be absent in TV repo, so no be value exists"
+    },
+    {
+      "term": "walk",
+      "context": "walking tour (KUDY sense)",
+      "repo": null,
+      "key": null,
+      "values": {},
+      "verdict": "negative: absent in all inspected repos"
+    },
+    {
+      "term": "purchase",
+      "context": "buy / restore purchase (KUDY sense)",
+      "repo": null,
+      "key": null,
+      "values": {},
+      "verdict": "negative: absent in all inspected repos; Play Store sources are not part of AOSP"
+    }
   ],
   "limitations": [
     "Gitiles +log history pages return 403 without sign-in; last-modified dates not anonymously obtainable, version pinning relies on blob ids",
