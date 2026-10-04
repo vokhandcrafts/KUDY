@@ -64,3 +64,19 @@ test('every native record matches its catalog leaf shape and parameter count', (
   // dropped from the guard.
   assert.deepEqual([...checkedDomains].sort(), Object.keys(CATALOGS).sort());
 });
+
+test('every canonical domain is guarded or in the documented exception list', () => {
+  // A domain added to source.json must extend CATALOGS (runtime walk) or the
+  // exception list below — never silently skip the guard. Exceptions:
+  // native.guideHint is JSX-anchored by the inventory suite (GuideHintCard
+  // cannot be imported under node strip-types); web.ui rides the web
+  // channel's own parity tests.
+  const EXCEPTIONS = ['native.guideHint', 'web.ui'];
+  const recordDomains = new Set(doc.records.map((record) => record.id.split('.').slice(0, 2).join('.')));
+  for (const domain of recordDomains) {
+    assert.ok(
+      domain in CATALOGS || EXCEPTIONS.includes(domain),
+      `domain ${domain} from source.json is not guarded: extend CATALOGS or EXCEPTIONS`,
+    );
+  }
+});
