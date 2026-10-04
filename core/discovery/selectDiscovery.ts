@@ -15,7 +15,7 @@
 
 export type DiscoverySeason = 'spring' | 'summer' | 'autumn' | 'winter';
 
-// localized-text.schema.json: a map of allowlist locales (be/en/uk) to text.
+// localized-text.schema.json: a map of allowlist locales (be/en/uk/de/es/fr/cs/sv) to text.
 export type LocalizedText = Record<string, string>;
 
 // DiscoveryRef (21 §3.1): in each variant only its own fields are allowed.
