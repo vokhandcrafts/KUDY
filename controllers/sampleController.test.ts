@@ -46,12 +46,15 @@ test('criterion 2: without the port the root constructs no contentRepo (the app 
   // as the twelfth with G15.03; the one hint controller as the thirteenth
   // with G07.05; the ui-locale switch as the fourteenth with G14.04.d —
   // chrome state over an optional persistence seam, constructed without
-  // ports, with the display locale reading through it).
+  // ports, with the display locale reading through it; the one feedback
+  // controller as the fifteenth with G16.03 — the voluntary rating member,
+  // constructed only with its driver+sync ports).
   assert.deepEqual(Object.keys(services).sort(), [
     'catalog',
     'commerce',
     'contentRepo',
     'discovery',
+    'feedback',
     'hints',
     'history',
     'locale',

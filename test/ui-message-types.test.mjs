@@ -18,6 +18,7 @@ import { runMapStrings } from '../controllers/run/runMap.ts';
 import { placeDetailStrings } from '../controllers/place/placeDetailController.ts';
 import { nearbyStrings } from '../controllers/nearby/nearbySurfaceController.ts';
 import { offerStrings } from '../controllers/commerce/commerceController.ts';
+import { feedbackStrings } from '../controllers/useFeedbackController.ts';
 
 const CATALOGS = {
   'native.chrome': () => uiStrings('be'),
@@ -26,6 +27,7 @@ const CATALOGS = {
   'native.place': () => placeDetailStrings('be'),
   'native.nearby': () => nearbyStrings('be'),
   'native.offer': () => offerStrings('be'),
+  'native.feedback': () => feedbackStrings('be'),
 };
 
 function leaf(obj, path) {
