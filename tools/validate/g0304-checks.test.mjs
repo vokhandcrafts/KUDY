@@ -51,7 +51,7 @@ test('criterion 1: an uncovered media file is unlicensed-media', () => {
 test('criterion 1: a record whose sha256 matches no file is media-sha-unmatched', () => {
   const result = validatePackage(copiedTree((d) => {
     const media = readJson(d, 'media.json');
-    media[0].sha256 = media[0].sha256.replace(/^8/, '9');
+    media[0].sha256 = '0'.repeat(64);
     writeJson(d, 'media.json', media);
   }));
   assert.ok(
