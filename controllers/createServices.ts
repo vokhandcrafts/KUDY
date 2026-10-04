@@ -54,6 +54,13 @@ import {
 import type { RunControllerState } from './useRunController.ts';
 import { createMyKudyController, type MyKudyState, type SessionHistoryPort } from './myKudyController.ts';
 import { createUiLocaleStore, type UiLocalePersistence, type UiLocaleSwitch } from './uiLocaleStore.ts';
+import {
+  createFeedbackController,
+  type FeedbackUiState,
+} from './useFeedbackController.ts';
+import type { FeedbackSync } from '../services/feedbackSync.ts';
+import type { SqlDriver } from '../services/db/types.ts';
+import * as feedbackRepository from '../services/feedbackRepository.ts';
 import type { ControllerStore } from './createControllerStore.ts';
 import {
   createCommerceController,
@@ -159,6 +166,15 @@ export interface ServicePorts {
     readonly points: () => readonly GuideHintPoint[];
     readonly foreground?: () => boolean;
     readonly telemetry?: GuideHintTelemetryPort;
+  };
+  // G16.03 (issue #74) — the feedback seams over the durable zone B tables:
+  // the device driver the G16.02 repository reads and the delivery sync
+  // (services/feedbackSync). Both are device-adapter territory (TR-10 and
+  // the functions origin); absent, the root constructs no feedback member
+  // and the surfaces render their honest unavailable state.
+  readonly feedback?: {
+    readonly driver: SqlDriver;
+    readonly sync: FeedbackSync;
   };
 }
 
@@ -268,6 +284,15 @@ export interface Services {
   // landed — a hint feature without its durable limits, its public points or
   // its values document is no feature.
   readonly hints: NearbyHintBinding | undefined;
+  // G16.03 (issue #74) — the ONE feedback controller (19 §2.2): the voluntary
+  // rating form, the once-per-session End invitation and the own-ratings
+  // list. Exists only with the driver+sync feedback ports; the surfaces
+  // render their honest unavailable state without it.
+  readonly feedback:
+    | {
+        readonly controller: ControllerStore<FeedbackUiState>;
+      }
+    | undefined;
 }
 
 export function createServices(ports: ServicePorts): Services {
@@ -424,6 +449,17 @@ export function createServices(ports: ServicePorts): Services {
           ...(now ? { now } : {}),
         })
       : undefined;
+  // G16.03 (issue #74) — the ONE feedback controller (19 §2.2): the form, the
+  // End invitation and the own-ratings list over the G16.02 repository and
+  // sync. Exists only with both feedback ports — the honest absence rule.
+  const feedbackController = ports.feedback
+    ? createFeedbackController({
+        driver: ports.feedback.driver,
+        sync: ports.feedback.sync,
+        repository: feedbackRepository,
+        ...(now ? { now } : {}),
+      })
+    : undefined;
   // The idle launch facts Start reads (ADR §3.8: Start inherits the sounding
   // moment instead of stopping it) — a paused launch inherits nothing.
   const currentMomentPlay = momentPlay
@@ -708,6 +744,11 @@ export function createServices(ports: ServicePorts): Services {
         }),
     },
     hints,
+    // G16.03 (issue #74) — the rating surfaces' member (the form route, the
+    // End invitation, the place action, the My KUDY list read it).
+    feedback: feedbackController && {
+      controller: feedbackController,
+    },
     place: catalogService && {
       create: (placeId) =>
         createPlaceDetailController({

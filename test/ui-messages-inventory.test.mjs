@@ -15,6 +15,7 @@ import { runMapStrings } from '../controllers/run/runMap.ts';
 import { placeDetailStrings } from '../controllers/place/placeDetailController.ts';
 import { nearbyStrings } from '../controllers/nearby/nearbySurfaceController.ts';
 import { offerStrings } from '../controllers/commerce/commerceController.ts';
+import { feedbackStrings } from '../controllers/useFeedbackController.ts';
 import { be as webBe } from '../web/lib/i18n/be.ts';
 import { GUIDE_HINT_STRINGS } from '../components/guide-hint-strings.generated.ts';
 
@@ -27,6 +28,7 @@ const CATALOGS = {
   'native.place': { value: placeDetailStrings('be'), file: 'controllers/place/placeDetailController.ts' },
   'native.nearby': { value: nearbyStrings('be'), file: 'controllers/nearby/nearbySurfaceController.ts' },
   'native.offer': { value: offerStrings('be'), file: 'controllers/commerce/commerceController.ts' },
+  'native.feedback': { value: feedbackStrings('be'), file: 'controllers/useFeedbackController.ts' },
   'web.ui': { value: webBe, file: 'web/lib/i18n/be.ts' },
 };
 

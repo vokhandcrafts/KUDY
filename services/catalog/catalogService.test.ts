@@ -771,6 +771,8 @@ describe('loadNearby — the Nearby offer projection (G07.01)', () => {
       audio_locales: [],
       access: 'free',
       estimated_duration: null,
+      content_version: null,
+      content_locale: null,
     },
   ];
 

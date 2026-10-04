@@ -14,12 +14,13 @@
 // The walk itself lives in the run controller the composition root built —
 // this surface owns no GPS, no player and no engine (AC4).
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/runMap";
 import { useRunState, useRunSurface } from "../../controllers/run/runSurfaceController";
+import { feedbackStrings, useFeedbackState } from "../../controllers/useFeedbackController";
 import { BackButton } from "../../components/back-button";
 import { uiStrings } from "../../components/ui-strings";
 import { GuideHintMount } from "../../components/GuideHintCard";
@@ -337,6 +338,38 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
+  // G16.03 (issue #74): the End invitation's quiet card — the invite sits in
+  // the scroll flow under the ended word, never over the map or the controls.
+  feedbackInvite: {
+    backgroundColor: tokens.colorCard,
+    borderColor: tokens.colorLine,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    marginBottom: tokens.spaceM,
+    marginTop: tokens.spaceM,
+    padding: tokens.spaceM,
+  },
+  feedbackInviteText: {
+    color: tokens.colorInk,
+    fontSize: tokens.fontBaseSize,
+    marginBottom: tokens.spaceS,
+  },
+  feedbackInviteRow: {
+    columnGap: tokens.spaceS,
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  feedbackInviteButton: {
+    alignSelf: "flex-start",
+    backgroundColor: tokens.colorAccent,
+    borderRadius: tokens.radiusBase,
+    paddingHorizontal: tokens.spaceM,
+    paddingVertical: tokens.spaceS,
+  },
+  feedbackInviteButtonLabel: {
+    color: tokens.colorAccentInk,
+    fontSize: tokens.fontBaseSize,
+  },
 });
 
 export default function Run() {
@@ -378,6 +411,24 @@ export default function Run() {
     stopId: null,
     layer: "base",
   });
+  // G16.03 (issue #74): the once-per-session End invitation — the controller
+  // owns the dedupe and the heard-use guard; the surface only offers the
+  // ended session's own identity (its pinned version/locale, no catalog).
+  const feedbackController = services.feedback?.controller ?? null;
+  const feedbackState = useFeedbackState(feedbackController);
+  const feedbackWords = feedbackStrings(ready?.locale ?? locale);
+  useEffect(() => {
+    if (run === null || run.run.phase !== "Ended") return;
+    feedbackController?.getState().offerEndInvitation({
+      sessionId: run.run.sessionId,
+      routeId: run.run.routeId,
+      version: run.run.version,
+      locale: run.run.locale,
+      heardCount: run.run.heard.length,
+    });
+  }, [feedbackController, run]);
+  const invitation =
+    feedbackState?.invitation !== null && feedbackState?.invitation !== undefined ? feedbackState.invitation : null;
 
   if (surface === null || surface.status === "unavailable") {
     return (
@@ -547,6 +598,46 @@ export default function Run() {
         <ScaledText style={styles.centered} testID="run-ended" accessibilityLiveRegion="polite">
           {strings.endedTitle}
         </ScaledText>
+      ) : null}
+      {run.run.phase === "Ended" && session !== null && invitation !== null && session.sessionId === invitation.sessionId ? (
+        // The End invitation of 20 §7 (G16.03): quiet, non-modal by
+        // construction — a plain card in the flow, the map and Back stay
+        // reachable — and once per session by the controller's guard. Only
+        // this walk's own invitation renders here.
+        <View style={styles.feedbackInvite} testID="run-feedback-invite">
+          <ScaledText style={styles.feedbackInviteText}>{feedbackWords.inviteTitle}</ScaledText>
+          <View style={styles.feedbackInviteRow}>
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={feedbackWords.inviteRate}
+              onPress={() => {
+                feedbackController?.getState().dismissInvitation();
+                router.push({
+                  pathname: "/feedback",
+                  params: {
+                    kind: "guide",
+                    id: invitation.target.id,
+                    version: invitation.target.version,
+                    locale: invitation.target.locale,
+                  },
+                });
+              }}
+              style={styles.feedbackInviteButton}
+              testID="btn-run-invite-rate"
+            >
+              <ScaledText style={styles.feedbackInviteButtonLabel}>{feedbackWords.inviteRate}</ScaledText>
+            </PressableSurface>
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={feedbackWords.inviteDismiss}
+              onPress={() => feedbackController?.getState().dismissInvitation()}
+              style={styles.feedbackInviteButton}
+              testID="btn-run-invite-dismiss"
+            >
+              <ScaledText style={styles.feedbackInviteButtonLabel}>{feedbackWords.inviteDismiss}</ScaledText>
+            </PressableSurface>
+          </View>
+        </View>
       ) : null}
       {session && session.phase !== "Ended" ? (
         // The session menu of 11 §4.2/§4.3 (G06.04): the whole-walk pause

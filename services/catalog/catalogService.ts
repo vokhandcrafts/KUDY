@@ -40,17 +40,24 @@ const CATALOG_PATH = 'catalog.json';
 const DEFAULT_LOCALE_PREFERENCE: readonly string[] = ['be', 'en'];
 
 function localizedLabel(value: unknown, preference: readonly string[]): string | null {
+  return pickLocalized(value, preference)?.text ?? null;
+}
+
+// G16.03 (issue #74): the winner of the label pick — the locale the card's
+// text actually rendered in, the rating target's content locale. One mapping
+// with localizedLabel: no second walk of the preference.
+function pickLocalized(value: unknown, preference: readonly string[]): { text: string; locale: string } | null {
   if (!value || typeof value !== 'object') return null;
   const labels = value as Record<string, unknown>;
   for (const locale of preference) {
     const label = labels[locale];
-    if (typeof label === 'string' && label.length > 0) return label;
+    if (typeof label === 'string' && label.length > 0) return { text: label, locale };
   }
   // No preferred label published — fall back to any published one rather
   // than rendering an untitled card; the availability list stays the honest
   // language statement.
-  for (const label of Object.values(labels)) {
-    if (typeof label === 'string' && label.length > 0) return label;
+  for (const [locale, label] of Object.entries(labels)) {
+    if (typeof label === 'string' && label.length > 0) return { text: label, locale };
   }
   return null;
 }
@@ -65,6 +72,10 @@ function projectOfferCore(value: unknown, preference: readonly string[]): {
   access: 'free' | 'paid' | 'mixed';
   estimated_duration: CatalogOfferFacts['estimated_duration'];
   distance_m: number | null;
+  // G16.03 (issue #74): the locale the card's text rendered in — the place
+  // offer's rating-target content locale (21 §5.1). Guides carry null (the
+  // ended session's own locale is the rating fact, not the card's).
+  content_locale: string | null;
   ref: Record<string, unknown>;
 } | null {
   if (!value || typeof value !== 'object') return null;
@@ -118,6 +129,8 @@ function projectOfferCore(value: unknown, preference: readonly string[]): {
     access,
     estimated_duration: duration,
     distance_m: distance,
+    content_locale:
+      pickLocalized(localized.title, preference)?.locale ?? pickLocalized(localized.summary, preference)?.locale ?? null,
     ref,
   };
 }
@@ -163,6 +176,10 @@ function projectNearbyOffer(value: unknown, preference: readonly string[]): Near
       audio_locales: core.audio_locales,
       access: core.access,
       estimated_duration: core.estimated_duration,
+      // The guide's rating target is the ended session's own pinned
+      // version/locale (G16.03); the card's facts never stand in for it.
+      content_version: null,
+      content_locale: null,
     };
   }
   if (core.ref.kind === 'place') {
@@ -180,6 +197,14 @@ function projectNearbyOffer(value: unknown, preference: readonly string[]): Near
       audio_locales: core.audio_locales,
       access: core.access,
       estimated_duration: core.estimated_duration,
+      // The opened card's content identity (G16.03): the ref's published
+      // content_version — a corrupt or missing one is null, and the rating
+      // action stays off rather than inventing a version.
+      content_version:
+        typeof core.ref.content_version === 'string' && core.ref.content_version.length > 0
+          ? core.ref.content_version
+          : null,
+      content_locale: core.content_locale,
     };
   }
   return null;

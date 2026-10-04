@@ -66,6 +66,8 @@ const offer = (routeId: string, access: 'free' | 'paid' | 'mixed' = 'free') => (
   audio_locales: ['be'],
   access,
   estimated_duration: null,
+  content_version: null,
+  content_locale: null,
 });
 
 // The show ladder every presentation scenario walks: one qualifying fix

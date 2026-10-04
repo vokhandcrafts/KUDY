@@ -32,6 +32,8 @@ function offer(
     audio_locales: [],
     access: 'free',
     estimated_duration: null,
+    content_version: null,
+    content_locale: null,
   };
 }
 
