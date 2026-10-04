@@ -52,7 +52,10 @@ function parameterTsType(parameter) {
 // carries the one record whose function argument is a state object rather
 // than the raw parameters (preview.detail — the controller-owned
 // PreviewDetail vocabulary, restated structurally, not imported).
-const DOMAINS = [
+// G21.26: exported as the single owner of the plan — the shipped-locale gate
+// (check-messages.mjs) derives its required translations from this same
+// object instead of restating it, so the plan and the gate cannot drift.
+export const DOMAINS = [
   {
     domain: 'native.chrome',
     note: 'the shared UI chrome words (G06.05 #280; G14.04.d #305; G06.10 #432, #403; UX 05 #351; G15.03 #70)',

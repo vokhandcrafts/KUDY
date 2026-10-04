@@ -23,6 +23,7 @@
     "contracts:wire:check": "node tools/contracts/generate-wire-types.mjs --check",
     "messages:generate": "node --experimental-strip-types tools/i18n/generate-messages.mjs",
     "messages:generate:check": "node --experimental-strip-types tools/i18n/generate-messages.mjs --check",
+    "messages:check": "node --experimental-strip-types tools/i18n/check-messages.mjs",
     "ledger:baseline": "node tools/docs-ledger/ledger-baseline.mjs",
     "ledger:check": "node tools/docs-ledger/ledger-check.mjs",
     "tools:check": "node tools/validate/tools-check.mjs",
