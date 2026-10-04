@@ -67,9 +67,9 @@
 ✔ source_revision_changes: any input change changes the fingerprint (0.474ms)
 ✔ source_revision_changes: provenance and metadata edits never change the fingerprint (0.0778ms)
 ✔ corrupt input answers with diagnostics, never a throw (1.154ms)
-(node:30668) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/catalog/catalogController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:30668) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/catalog/catalogController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ▶ catalog controller
   ✔ boots into the ready surface with the published guides (2.6272ms)
@@ -77,9 +77,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
   ✔ renders the honest error when there is no cache to fall back to (0.9532ms)
   ✔ a superseded refresh never overwrites the newer result (0.602ms)
 ✔ catalog controller (6.1034ms)
-(node:32436) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/catalog/previewController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:32436) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/catalog/previewController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ▶ derivePreviewButton — the Download/Start meaning table (09 §6.5, 11 §7)
   ✔ not_downloaded downloads; without the download port it states the reason (1.0433ms)
@@ -116,9 +116,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
   ✔ initial_refresh_terminal: a boot facts-read failure lands in a terminal, recoverable state (5.452ms)
   ✔ stale_refresh_failure: a late rejected run never overwrites a newer result (0.9583ms)
 ✔ G20.23 (R6): the operation ends when the facts read fails (9.7418ms)
-(node:26884) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/commerce/commerceController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:26884) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/commerce/commerceController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ deriveOffer: the visibility table (the Proof target) (1.1889ms)
 ✔ purchaseFailureReason: the closed outcomes land on the table enum, verbatim (0.5315ms)
@@ -129,9 +129,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ the finished purchase: succeeded event, the §8 paid line, the offer never returns (0.2283ms)
 ✔ the double-tap guard: a busy attempt is a no-op, the store is called once (0.2681ms)
 ✔ the free route and the missing port surface: nothing commerce renders or records (0.319ms)
-(node:48416) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/moment/momentPlayController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:48416) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/moment/momentPlayController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ the idle play mints a moment token and drives the one player; finish releases (2.8573ms)
 ✔ a failed launch is a visible failed state; foreign tokens are ignored entirely (§3.5) (0.5348ms)
@@ -144,16 +144,16 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ PROOF: a manual Play Moment over a sounding guide launch takes the player in one transition (2.7943ms)
 ✔ the revert guard: without the session routing the same play is a named refusal (0.6305ms)
 ✔ Start inherits the sounding no-session Moment (ADR §3.8) instead of stopping it (0.7914ms)
-(node:8644) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/myKudyController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:8644) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/myKudyController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ G06.04: the history is the live walk beside the finished runs, the store order kept (8.8634ms)
 ✔ G06.04: a failed read is the named unavailable, not fake rows (13.7963ms)
 ✔ G06.04: a slower earlier read never overwrites a newer one (16.0986ms)
-(node:39712) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/nearby/nearbySurfaceController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:39712) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/nearby/nearbySurfaceController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ▶ nearbyArmingDecision (criterion 4)
   ✔ arms the city subscription only when no walk holds the mode (0.4747ms)
@@ -168,25 +168,25 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
   ✔ carries the same word set in BE and EN (0.2848ms)
   ✔ carries the uk words and falls back to Belarusian for an unknown locale (G14.04.d; 09 §0) (0.0998ms)
 ✔ nearbyStrings (criterion 5) (0.5116ms)
-(node:16680) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/place/placeDetailController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:16680) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/place/placeDetailController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ the detail resolves the place offer facts and only this place’s teasers (1.9367ms)
 ✔ a place the index does not offer renders its teasers with the honest no-facts state (0.3317ms)
 ✔ a failed catalog leaves the teasers rendering (library truth), facts null (0.3189ms)
 ✔ a failed moments reader is the honest empty — never a throw (0.2467ms)
 ✔ a thrown load is the named error state (0.3215ms)
-(node:47864) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/reason-strings.test.ts is not specified and it doesn't parse as CommonJS.
+(node:47864) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/reason-strings.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ G06.10 #433: preview reason lines read as phrases (be+en+uk) (1.3011ms)
 ✔ G06.10 #433: run reason lines read as phrases (be+en+uk) (0.3653ms)
 ✔ G06.10 #433: place refusal lines read as phrases (be+en+uk) (0.2789ms)
-(node:15236) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/run/runOrchestrator.test.ts is not specified and it doesn't parse as CommonJS.
+(node:15236) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/run/runOrchestrator.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1: the newest other stop displaces the queue; after A finishes C plays and B keeps manual access (5.4427ms)
 ✔ criterion 1: a repeated trigger of the playing stop displaces nothing; the queued stop never evicts itself (1.5308ms)
@@ -208,16 +208,16 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G20.04 stale_owner_cleanup: a released old owner never detaches the walk that replaced it (0.8339ms)
 ✔ G20.04: repeated open/dispose cycles leave no listener on the shared services (4.2179ms)
 ✔ G20.04: a moment finishing in the Ended window leaves no phantom playing in the fresh session (0.8704ms)
-(node:25056) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/run/runPanel.test.ts is not specified and it doesn't parse as CommonJS.
+(node:25056) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/run/runPanel.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ a marker tap lands Peek on Half and keeps the position above Peek (2.7337ms)
 ✔ re-opening the open card changes nothing; the expand raises one position up (0.3154ms)
 ✔ the close step is one position down and keeps the last inspected card (0.7393ms)
-(node:44380) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/run/runSurfaceController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:44380) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/run/runSurfaceController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:44380) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ AC1: a fresh walk renders all five marker states from the engine (21.0082ms)
@@ -237,23 +237,23 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G07.03: the no-session Moment over the same root still launches on the idle controller (0.6945ms)
 ✔ G07.05: the fresh Start carries the foreground-window hint ids into session scope (ADR G01.03 §3.9) (17.9285ms)
 ✔ G20.04 refused_second_run_keeps_fixes: a refused second surface leaves the live walk the fix owner (29.4339ms)
-(node:45792) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/sampleController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:45792) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/sampleController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 2: the root with a fake port drives the sample controller end to end (97.4802ms)
 ✔ criterion 2: without the port the root constructs no contentRepo (the app build today) (0.4836ms)
 ✔ criterion 2: a failing port surfaces as a readiness card, not a crash (0.4782ms)
 ✔ criterion 2: a superseded refresh never overwrites the newer result (145.913ms)
-(node:50548) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/strings-parity.test.ts is not specified and it doesn't parse as CommonJS.
+(node:50548) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/strings-parity.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ G14.04.d #305: every controller word dictionary carries the same be/en/uk key shape (2.5645ms)
 ✔ G14.04.d #305: no word is empty in any locale of any controller dictionary (1.1946ms)
-(node:28308) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/uiLocaleStore.test.ts is not specified and it doesn't parse as CommonJS.
+(node:28308) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/uiLocaleStore.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ G14.04.d #305: the store starts on be, the first preference (1.1577ms)
 ✔ G14.04.d #305: the store starts on the persisted choice when the port carries one (0.2396ms)
@@ -261,9 +261,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G14.04.d #305: an unknown value is a named error and moves nothing (0.6685ms)
 ✔ G14.04.d #305: setting the current value is a no-op — no event, no write (0.221ms)
 ✔ G14.04.d #305: the listener sees the new value inside the notification (0.2186ms)
-(node:50200) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/useDiscoveryController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:50200) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/useDiscoveryController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ▶ useDiscoveryController — boot over the real index service
   ✔ loads the fixture index fresh: 6 be-eligible exact offers, en-only one excluded (5.2654ms)
@@ -289,9 +289,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
   ✔ a superseded refresh never overwrites the newer result (5.8482ms)
   ✔ criteria survive a refresh: the limits re-apply to the next index (1.0293ms)
 ✔ useDiscoveryController — refresh policy (7.0349ms)
-(node:17496) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/useNearbyController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:17496) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/useNearbyController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:17496) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ AC1: hints propose only public guide previews — no audio, no Start, no second GPS owner (8.8954ms)
@@ -314,9 +314,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G07.06 AC5: the paid guide row carries the public preview facts only — locked content never leaks (2.362ms)
 ✔ G07.06 AC6: without the analytics recorder the hint limits still hold (2.2651ms)
 ✔ G07.06: the commercial dialog keeps the card quiet — the gap PR #437 recorded (16.5131ms)
-(node:29892) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/useRunController.test.ts is not specified and it doesn't parse as CommonJS.
+(node:29892) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/useRunController.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:29892) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 1: Start on a ready package inserts the row and starts the engine after the commit (86.9781ms)
@@ -357,16 +357,16 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G20.03 criterion 1: a refused progress checkpoint keeps the row and the screen without the credit (172.7927ms)
 ✔ G20.03 criterion 2: a failed Pause stops only the guide sound — a Moment is not session property (93.97ms)
 ✔ G20.03 criterion 3: rapid ordered actions around one failed transition keep one consistent row (106.454ms)
-(node:19808) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/controllers/wiring.test.ts is not specified and it doesn't parse as CommonJS.
+(node:19808) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/controllers/wiring.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ wiring: the controllers suite runs in npm test (2.1542ms)
 ✔ wiring: root tsc accepts the explicit .ts specifiers node strip-types requires (1.0135ms)
 ✔ wiring: useRunController reads no clock or GPS API of its own (1.3564ms)
-(node:41456) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/discovery/selectDiscovery.test.ts is not specified and it doesn't parse as CommonJS.
+(node:41456) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/discovery/selectDiscovery.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1: 60 minutes rejects [45,75] from exact (case B-over-time) (2.2354ms)
 ✔ criterion 1: 120 minutes accepts [45,75] into exact, editorial order (case B-exact) (0.3867ms)
@@ -386,9 +386,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ step 4 guard: a non-array theme_ids degrades fail-closed — nothing exact, theme gate labeled (0.1048ms)
 ✔ wiring: the discovery core suite runs in the default npm test command (0.7793ms)
 ✔ wiring: core is typechecked by its own pass, excluded from the Expo root config (0.6378ms)
-(node:31500) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/engine/autotrigger.test.ts is not specified and it doesn't parse as CommonJS.
+(node:31500) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/engine/autotrigger.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1 (§4.8.1): a dwell in a Paused session is ignored entirely — and fires after Resume (11 C9) (3.8162ms)
 ✔ criterion 1 (§4.8.2): a trigger under a suspended automation gives manual access, not a play (0.8862ms)
@@ -420,9 +420,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 6 (11 C33): a locked stop never plays by hand or automation and never enters the lists (3.8966ms)
 ✔ criterion 6 (§4.4): a paid-only stop becomes a normal eligible stop after the unlock (0.8748ms)
 ✔ criterion 7 (11 C31): all six permutations of three stops play without an order check (6.75ms)
-(node:6820) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/engine/model-parity.test.ts is not specified and it doesn't parse as CommonJS.
+(node:6820) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/engine/model-parity.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ C2: accepted arrival starts audio and spends automatic attempt (2.4498ms)
 ✔ C6: completed automatic stop never autoplays twice; manual replay works (0.4449ms)
@@ -500,9 +500,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ invariant 6: FocusLoss never finishes a launch (seeded) (2.7098ms)
 ✔ invariant 8: an unusable position never auto-plays, immediately or deferred (18.6297ms)
 ✔ invariant 9: Pause and End clear the queue and release geofences; Ended never revives (0.6187ms)
-(node:24468) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/engine/ownership.test.ts is not specified and it doesn't parse as CommonJS.
+(node:24468) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/engine/ownership.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1: the guide token is the (session_id, play_id) pair and rides the command (3.5624ms)
 ✔ criterion 1: a moment launch echoes the controller token, never mints one (0.5535ms)
@@ -525,9 +525,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 5: Start injects a playing moment and the autotrigger waits for a free player (0.4292ms)
 ✔ criterion 5: a malformed playingNow is refused at the boundary (0.889ms)
 ✔ criterion 5: a malformed PlayMoment event is refused without mutation (0.3734ms)
-(node:1112) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/engine/reducer.test.ts is not specified and it doesn't parse as CommonJS.
+(node:1112) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/engine/reducer.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1: the session state carries the 09 §6.1 Active fields under one mapped spelling (1.3792ms)
 ✔ criterion 2: step() does not mutate the previous state and is deterministic (0.4467ms)
@@ -551,9 +551,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 5: a repeat of the same identity is a no-op (0.3214ms)
 ✔ criterion 5: a tier-only payload widens the tier (run-model applyAccess parity) (0.2416ms)
 ✔ criterion 5: a paused session is a live addressee — AccessReady applies there too (0.3585ms)
-(node:49680) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/engine/state.test.ts is not specified and it doesn't parse as CommonJS.
+(node:49680) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/engine/state.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 6: the primary story of a paid-only stop is its extended story (1.0543ms)
 ✔ criterion 6: pending — accessible, not fired, not heard (2.1447ms)
@@ -563,17 +563,17 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 6: a live pause keeps the launch but the marker follows the audible state (0.1524ms)
 ✔ criterion 6: a moment launch never marks its teaser stop as playing (0.4584ms)
 ✔ criterion 6: the status is derived through the reducer flow — locked until the unlock (1.1295ms)
-(node:11068) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/geo/haversine.test.ts is not specified and it doesn't parse as CommonJS.
+(node:11068) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/geo/haversine.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ haversine: identical points are zero meters apart (0.688ms)
 ✔ haversine: the distance is symmetric in its arguments (0.1486ms)
 ✔ haversine: one degree of longitude on the equator is ~111.195 km (0.1463ms)
 ✔ haversine: a longitude degree shortens away from the equator (cos factor) (0.1027ms)
-(node:26488) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/pipeline/pipeline.test.ts is not specified and it doesn't parse as CommonJS.
+(node:26488) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/pipeline/pipeline.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1: a corrupt fix leaves the window and dwell accumulators deep-equal (2.1526ms)
 ✔ criterion 1: an accuracy-gate rejection leaves the window and dwell accumulators deep-equal (0.236ms)
@@ -671,9 +671,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G01.03.b: start refuses a package claiming no verified layer or an unknown layer (0.2848ms)
 ✔ G01.03.b: start refuses accessibleStopIds naming stops outside the pinned package (0.1552ms)
 ✔ bounded exploration: invariants across all 4-event sequences (16 choices per step) (2469.3666ms)
-(node:31296) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/analytics.test.ts is not specified and it doesn't parse as CommonJS.
+(node:31296) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/analytics.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:31296) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 1: no consent asked — zero sends, nothing marked, the queue untouched (3.1245ms)
@@ -691,18 +691,18 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G20.06 N3: a valid configured https endpoint keeps the wire behavior with redirect refused (18.3007ms)
 ✔ G20.06 N3: when the platform refuses the redirect, the send fails closed with network_failed (0.2443ms)
 ✔ G20.06 N3: a response redirected away from the endpoint is not accepted (0.1643ms)
-(node:16152) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/audio/expo/expo-audio-port.test.ts is not specified and it doesn't parse as CommonJS.
+(node:16152) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/audio/expo/expo-audio-port.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:16152) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
 ✔ physical_play_called: play starts the physical player exactly once, after identity and listener setup (1.246ms)
 ✔ replaced_player_released: replacing removes the old player once and its late ticks cannot reach the new owner (0.4047ms)
 ✔ play_failure_cleanup: creation failure reaches the failed path and leaves the port valid (0.2319ms)
 ✔ play_failure_cleanup: start failure removes the player exactly once and reports the failure once (0.1703ms)
-(node:28936) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/audio/expo/lock-screen.test.ts is not specified and it doesn't parse as CommonJS.
+(node:28936) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/audio/expo/lock-screen.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ next selects the next accessible story, skipping locked entries (1.1018ms)
 ✔ prev selects the previous accessible story, skipping locked entries (0.1232ms)
@@ -711,16 +711,16 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ a selection outside the list and an empty list select nothing (0.1313ms)
 ✔ every mapped selection is an entry of the given list — no Moment path (0.2098ms)
 ✔ skipping locked entries never touches progress (0.3828ms)
-(node:17180) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/audio/expo/speech-mode.test.ts is not specified and it doesn't parse as CommonJS.
+(node:17180) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/audio/expo/speech-mode.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ repeated calls set the mode exactly once (0.9927ms)
 ✔ calls racing while the first attempt is in flight share it (6.0037ms)
 ✔ a rejection propagates to the caller and the next call retries (0.9828ms)
-(node:23236) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/audio/expo/status-mapping.test.ts is not specified and it doesn't parse as CommonJS.
+(node:23236) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/audio/expo/status-mapping.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ a launch opens without an event and the state is computed in milliseconds (3.3102ms)
 ✔ a pause command maps to paused and a resume command to resumed (0.1891ms)
@@ -730,9 +730,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ each new launch echoes its own key and stop drops the late statuses (0.13ms)
 ✔ a focus loss revokes a pending resume; a denied resume does not leak into the next pause (0.4366ms)
 ✔ NaN and zero durations pass through the mapping; the service guard fails non-finite (0.8533ms)
-(node:9048) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/audio/service.test.ts is not specified and it doesn't parse as CommonJS.
+(node:9048) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/audio/service.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1: a second play stops the first by command before starting (1.6115ms)
 ✔ criterion 1: rapid play and stop commands end in the state of the last command (0.5348ms)
@@ -752,9 +752,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 5: dispose with no player and a second dispose are no-ops (0.0849ms)
 ✔ criterion 6: the services/audio sources import nothing from core/engine (11.141ms)
 ✔ G20.04: each onEvent registration returns its own release (0.4227ms)
-(node:24760) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/catalog/catalogService.test.ts is not specified and it doesn't parse as CommonJS.
+(node:24760) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/catalog/catalogService.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ▶ envelope parity with contracts/reader.mjs
   ✔ status routing matches the canon for catalog-with-discovery.json (3.7369ms)
@@ -808,16 +808,16 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
   ✔ stalled_catalog_uses_cache: a deadline failure falls back to the validated previous copy (30.2155ms)
   ✔ stalled_catalog_uses_cache: without a copy the existing error state surfaces, named (33.9554ms)
 ✔ G20.10 bounded catalog waits (issue #481) (64.9752ms)
-(node:21992) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/config.test.ts is not specified and it doesn't parse as CommonJS.
+(node:21992) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/config.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ loadGuideHintValues reads the canonical file: the accepted ADR numbers, no restatement (3.3847ms)
 ✔ a contract-invalid file answers with the named rule, not a default (18.9358ms)
 ✔ an unreadable file answers with the unreadable rule (0.3174ms)
-(node:22964) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/contentRepo/contentRepo.test.ts is not specified and it doesn't parse as CommonJS.
+(node:22964) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/contentRepo/contentRepo.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1: a missing structural file blocks start with a named reason (67.6698ms)
 ✔ criterion 1: every structural absence and broken reference is named, none crash (78.1007ms)
@@ -844,9 +844,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G20.24: structural stop faults do not suppress identity or reference checks (92.4155ms)
 ✔ G20.24 denied_layer_stays_locked: damaged stops never turn a denied layer ready (161.5842ms)
 ✔ G20.24 valid_route_readiness: valid two-tier stops keep base and granted-extended readiness (115.7276ms)
-(node:48988) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/contentRepo/discoveryIndex.test.ts is not specified and it doesn't parse as CommonJS.
+(node:48988) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/contentRepo/discoveryIndex.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ▶ loadDiscoveryIndex — fresh path
   ✔ serves the committed fixture pair fresh and writes the snapshot (1.8673ms)
@@ -874,9 +874,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
   ✔ a fresh load replaces the snapshot and the next offline session reads it (restart) (0.7784ms)
   ✔ a bad refresh preserves the snapshot bytes byte-for-byte (0.3616ms)
 ✔ loadDiscoveryIndex — snapshot lifecycle (1.2712ms)
-(node:50016) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/contentRepo/inventory.test.ts is not specified and it doesn't parse as CommonJS.
+(node:50016) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/contentRepo/inventory.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ AC1: not_downloaded — catalog versions without a layer on disk are listed, an absent bundles tree is an empty library, not a fault (18.506ms)
 ✔ AC1: ready — every lock file present at its declared size, bytes derived from lock and disk (29.8067ms)
@@ -898,9 +898,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ AC4: a layer directory without a lock is partial with an unknowable count (5.784ms)
 ✔ the listing is deterministic: multi-route output is sorted and repeatable (76.0883ms)
 ✔ G04.04.c: an empty lock.json is partial with an unknowable count and the empty fault (7.6047ms)
-(node:11004) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/contentRepo/momentFacts.test.ts is not specified and it doesn't parse as CommonJS.
+(node:11004) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/contentRepo/momentFacts.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ the manifest of a downloaded package resolves the teaser facts and the base audio path (1.5568ms)
 ✔ the staging tree is never a package and a staging entry is never a version (the inventory skip) (0.2434ms)
@@ -910,9 +910,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ an unsafe story_id from the manifest yields a null path with its own diagnostic, never a path (09 §7) (0.4379ms)
 ✔ a damaged stops.json never blocks the teaser — the honest null text, no manifest diagnostics (rule 14) (0.6165ms)
 ✔ an absent manifest is the honest empty; a gone store is the named refusal (0.3651ms)
-(node:30448) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/contentRepo/presence.test.ts is not specified and it doesn't parse as CommonJS.
+(node:30448) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/contentRepo/presence.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1+2: an intact ready layer verifies at the metadata level, an ordinary restart hashes nothing (54.9182ms)
 ✔ criterion 1: a short media file moves the layer to needs-recovery, never to Play (41.394ms)
@@ -926,27 +926,27 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 1: unsafe segments are rejected on input before any filesystem call (20.5894ms)
 ✔ criterion 4: the check reads only the pinned layer — another version never contributes (54.0011ms)
 ✔ criterion 1: a batch checks every ready layer and keeps the input order (73.2284ms)
-(node:19112) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/contentRepo/runStoryFacts.test.ts is not specified and it doesn't parse as CommonJS.
+(node:19112) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/contentRepo/runStoryFacts.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ the pinned layer’s transcripts read beside the map facts (1.7784ms)
 ✔ a missing stops.json is the named diagnostic, never a throw (0.3161ms)
 ✔ an unreadable stops.json is the named diagnostic (0.227ms)
 ✔ corrupt stops.json yields the invalid diagnostic — wrong types and broken JSON included (0.3015ms)
 ✔ entries without a story id are skipped; a story without a readable transcript is null (0.3064ms)
-(node:46964) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/contentRepo/wiring.test.ts is not specified and it doesn't parse as CommonJS.
+(node:46964) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/contentRepo/wiring.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ wiring: the services suite runs in the default npm test command (2.7608ms)
 ✔ wiring: services is typechecked by its own pass, not swept by the Expo root config (1.411ms)
 ✔ wiring: the readiness core stays network-free (G04.03 criterion 3) (1.1407ms)
 ✔ wiring: the inventory derives sizes and never writes (G04.04.a criterion 3) (1.0584ms)
 ✔ wiring: the presence check stays read-only, network-free and database-free (G04.04.c) (0.9774ms)
-(node:20232) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/crash.test.ts is not specified and it doesn't parse as CommonJS.
+(node:20232) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/crash.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:20232) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ buildCrashReport returns the closed scrubbed shape (3.1221ms)
@@ -961,9 +961,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 2: the analytics consent never opens the crash gate (1.1138ms)
 ✔ criterion 2: the crash consent never opens the analytics gate (1.4695ms)
 ✔ criterion 2: each decision writes only its own settings row (0.8218ms)
-(node:54968) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/db/db.test.ts is not specified and it doesn't parse as CommonJS.
+(node:54968) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/db/db.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:54968) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 1: rebuildDerived keeps every durable row and recreates zone A empty (6.3753ms)
@@ -991,9 +991,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G07.05: a dismissal updates only an existing shown row and stamps the cooldown carrier (1.5947ms)
 ✔ G07.05: the cooldown boundary is exclusive — a guide at exactly the window edge is free (1.1341ms)
 ✔ G07.05: invalid hint records answer with named rules, not crashes or rows (2.6534ms)
-(node:13120) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/device.test.ts is not specified and it doesn't parse as CommonJS.
+(node:13120) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/device.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:13120) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ first ensure registers once, saves the secret and writes the device_id row (4.0722ms)
@@ -1018,9 +1018,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G09.03 N3: the default delete transport rejects an unsafe endpoint before any network call (1.761ms)
 ✔ G09.03 N3: a redirected delete response is refused and wipes nothing (1.7754ms)
 ✔ G09.03: through the default transport a 204 deletes over the validated endpoint and wipes the account (3.1143ms)
-(node:54544) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/download/access.test.ts is not specified and it doesn't parse as CommonJS.
+(node:54544) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/download/access.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:54544) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 1: one commit delivers exactly one event; an outside-built object has no delivery path (142.9647ms)
@@ -1036,9 +1036,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 5: a download finishing during a live session mutates no session row either (36.4331ms)
 ✔ a handler that throws is isolated: the remaining handlers still receive the event, the failure surfaces (44.0975ms)
 ✔ G20.04: the access release removes only its own handler (0.737ms)
-(node:45804) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/download/delete.test.ts is not specified and it doesn't parse as CommonJS.
+(node:45804) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/download/delete.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:45804) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 1: an active session pins its version — refused with the reason; after End the same deletion succeeds (57.2095ms)
@@ -1049,9 +1049,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 4: staging leftovers of an interrupted download are cancelled with the package (25.0176ms)
 ✔ criterion 5: unsafe ids are refused with named diagnostics before any filesystem call (1.8006ms)
 ✔ deleting a package that was never downloaded is still deleted (idempotent) (2.4332ms)
-(node:34880) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/download/download.test.ts is not specified and it doesn't parse as CommonJS.
+(node:34880) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/download/download.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:34880) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 1: an interrupted transfer stays partial, never ready, and resume completes (152.2256ms)
@@ -1074,9 +1074,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G20.09 cancel_delete_overlap: a pinned version refuses deletion and the overlap finishes untouched (63.5129ms)
 ✔ G20.09 unrelated_keys_independent: a parked download of one package never blocks another package (305.283ms)
 ✔ G20.10 cancelled_late_bytes: a late reply after cancellation is discarded, never staged (140.0286ms)
-(node:8784) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/download/grant.test.ts is not specified and it doesn't parse as CommonJS.
+(node:8784) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/download/grant.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:8784) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 1: the request is exactly the 09 §5 shape with Bearer from the port, paths only from the verified lock (4.7957ms)
@@ -1098,9 +1098,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 5: no secret, token or signed URL reaches diagnostics, errors or persisted state (51.0426ms)
 ✔ G20.10 stalled_grant_lock_media_bytes: a stalled grant request answers offline with the named wait diagnostic (27.4309ms)
 ✔ G20.10 stalled_grant_lock_media_bytes: an unresolved byte transfer rejects redacted at the deadline (36.3823ms)
-(node:53616) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/download/repair.test.ts is not specified and it doesn't parse as CommonJS.
+(node:53616) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/download/repair.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:53616) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 3: a repair restores a whole orphaned subdirectory of the final layer (112.4249ms)
@@ -1115,15 +1115,15 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 3: an interrupted transfer yields partial with the failure surfaced (44.7876ms)
 ✔ criterion 3: lack of space yields insufficient-space and fetches nothing (72.4122ms)
 ✔ criterion 3: a successful repair emits no AccessReady — activation stays the single site (60.8067ms)
-(node:5040) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/download/wiring.test.ts is not specified and it doesn't parse as CommonJS.
+(node:5040) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/download/wiring.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ wiring: the download core stays network-free — the byte source is a port (G04.02.a) (2.1614ms)
 ✔ wiring: the download fixtures stay byte-pinned (G04.02.a criterion 6, rule 4) (207.5205ms)
-(node:25156) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/entitlement/purchase-chain.test.ts is not specified and it doesn't parse as CommonJS.
+(node:25156) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/entitlement/purchase-chain.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:25156) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 1: a download failure after payment keeps the product paid — the retry is a download, the store is never asked again (101.8029ms)
@@ -1135,9 +1135,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ boundary: a corrupt request is invalid-input before any store, grant or filesystem call (50.7374ms)
 ✔ concurrent unlocks of one product share one chain run — the store, the grant and the activation run once (52.7975ms)
 ✔ overlapping unlocks of one product with different layers are different requests — each runs its own chain (378.133ms)
-(node:40868) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/entitlement/service.test.ts is not specified and it doesn't parse as CommonJS.
+(node:40868) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/entitlement/service.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ a corrupt device identity is invalid-input and no store call happens (2.5488ms)
 ✔ a missing identity object is invalid-input, not a thrown error (0.5083ms)
@@ -1157,9 +1157,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ restore failures answer in the restore vocabulary, honestly (0.2738ms)
 ✔ a corrupt restore ack is unknown, fail closed (0.109ms)
 ✔ diagnostics are named lines and never carry the store failure text (1.0177ms)
-(node:22344) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/entitlement/store-error-mapping.test.ts is not specified and it doesn't parse as CommonJS.
+(node:22344) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/entitlement/store-error-mapping.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ the closed table covers exactly the pinned RC error-code enum (1.7513ms)
 ✔ every user-meaningful store answer lands on its honest category (0.2667ms)
@@ -1167,9 +1167,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ a thrown value without a code shape is unknown, never a crash (0.1379ms)
 ✔ empty-string code is a shape failure, not a recognized code (0.103ms)
 ✔ executor codes refine to the app defect they name (0.1022ms)
-(node:3144) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/eventLog.test.ts is not specified and it doesn't parse as CommonJS.
+(node:3144) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/eventLog.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:3144) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 1: a failed send resends the same event_ids; success drains the queue (5.2181ms)
@@ -1182,9 +1182,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ the beforeBatch gate stops the flush between chunks — acknowledged chunks stay marked, the tail stays pending (6.9359ms)
 ✔ emit refuses a payload that is not a JSON object — named diagnostic, nothing stored (0.9668ms)
 ✔ flush surfaces a corrupt stored row as a named diagnostic and sends nothing (0.8966ms)
-(node:36612) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/location/expo/expo-location-port.test.ts is not specified and it doesn't parse as CommonJS.
+(node:36612) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/location/expo/expo-location-port.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:36612) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
 ✔ foreground_granted_background_denied: a background denial keeps the granted foreground session running (6.2393ms)
@@ -1194,9 +1194,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ initial_permission_read_superseded: the constructor read cannot overwrite a newer ask (0.5213ms)
 ✔ background_granted_starts_updates: the granted background scope still starts and stops the background task (0.4339ms)
 location adapter: the background scope is not granted — the session continues on the foreground watch
-(node:49492) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/location/expo/fix-mapping.test.ts is not specified and it doesn't parse as CommonJS.
+(node:49492) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/location/expo/fix-mapping.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ AC1: a well-formed OS location maps onto the port FixInput as is (2.0187ms)
 ✔ AC1 proof: a missing accuracy is rejected missing-accuracy, never mapped to 0 (0.2906ms)
@@ -1208,25 +1208,25 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ AC1: a non-finite timestamp is rejected non-finite-timestamp (0.1744ms)
 ✔ AC1: a rejected fix carries no fix field at all — nothing is passed on (0.2689ms)
 ✔ AC1: an OS entry without readable coords answers with a named reason, never a throw (0.3115ms)
-(node:6844) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/location/expo/location-config.test.ts is not specified and it doesn't parse as CommonJS.
+(node:6844) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/location/expo/location-config.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ config: the real app.json carries the extras shape the adapter reads (2.5101ms)
 ✔ config: a config without extras fails fast with a named error (1.0812ms)
 ✔ config: every missing extras entry is its own named error, isolated one per test (0.4779ms)
 ✔ config: an empty string is as missing — no silent defaults (0.2278ms)
-(node:36536) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/location/expo/permission-mapping.test.ts is not specified and it doesn't parse as CommonJS.
+(node:36536) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/location/expo/permission-mapping.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ foreground_answer_sets_foreground_only (1.1337ms)
 ✔ foreground_stands_under_background_denied (0.1152ms)
 ✔ background_grant_implies_foreground (0.1097ms)
 ✔ corrupt_status_lands_undetermined (0.0907ms)
-(node:48924) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/location/service.test.ts is not specified and it doesn't parse as CommonJS.
+(node:48924) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/location/service.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1: repeated setMode calls hold exactly one subscription (3.1967ms)
 ✔ criterion 1: a change between armed modes carries the one subscription over (0.4872ms)
@@ -1261,9 +1261,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G07.05: the tap adds no location command — the modes and the window stay setMode business (0.0731ms)
 ✔ G20.04: the onFix release removes only its own registration (0.0652ms)
 ✔ G20.04: a release of the same handler registered twice does not kill the later registration (0.0456ms)
-(node:21080) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/metricsReport.test.ts is not specified and it doesn't parse as CommonJS.
+(node:21080) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/metricsReport.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:21080) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ registry guard: categories partition the canonical event table exactly once, no invented names (1.5799ms)
@@ -1276,9 +1276,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ corrupt input: a non-numeric stored at is a named diagnostic, not a crash (8.3891ms)
 ✔ window bounds are validated and filter the report inclusively (1.2518ms)
 ✔ labels and readings are stable across runs: sorted labels, all declared readings present (1.911ms)
-(node:35716) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/network-wait.test.ts is not specified and it doesn't parse as CommonJS.
+(node:35716) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/network-wait.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ timeout_cleanup: the timer is cleared on success — the deadline never fires after the wait settled (2.3482ms)
 ✔ timeout_cleanup: the deadline fires the named error and aborts the signal (0.469ms)
@@ -1286,9 +1286,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ the wait limits have one owner: every rule carries its NETWORK_WAIT_LIMITS value (0.0906ms)
 ✔ stalled_catalog_loader_deadline: an unresolved catalog fetch rejects named at the deadline (34.5201ms)
 ✔ timeout_cleanup: an owner already gone before the wait answers cancelled immediately (0.646ms)
-(node:38500) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/remote-config.test.ts is not specified and it doesn't parse as CommonJS.
+(node:38500) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/remote-config.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:38500) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ✔ criterion 3: a valid network document is applied and cached (3.4487ms)
@@ -1302,16 +1302,16 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ offline read: a corrupt cache row answers with the named diagnostic and the defaults (1.3863ms)
 ✔ offline read: a contract-invalid cache row is not trusted and not repaired (1.4329ms)
 ✔ G20.10 stalled_config_defaults: an unresolved config fetch falls back to defaults at the deadline (42.7845ms)
-(node:49116) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/safe-path.test.ts is not specified and it doesn't parse as CommonJS.
+(node:49116) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/safe-path.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ isSafeSegment accepts plain single segments and rejects the documented violations (1.2544ms)
 ✔ isSafeRel accepts multi-segment rel paths and rejects the documented violations (0.7197ms)
 ✔ isSafeRel rejects drive-absolute paths on every platform (issue #338) (0.1989ms)
-(node:43256) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/services/secure-url.test.ts is not specified and it doesn't parse as CommonJS.
+(node:43256) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/services/secure-url.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ G20.06 a parseable https endpoint passes and is returned as the URL object to fetch (1.0615ms)
 ✔ G20.06 http, malformed and credential-bearing endpoints are rejected with named diagnostics (0.5995ms)
@@ -1378,9 +1378,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ matching environments on both sides still grant (control) (24.9469ms)
 ✔ an expired URL stays dead after a fresh regrant (1180.4516ms)
 ✔ new negative probes keep secrets, device ids and URLs out of the logs (41.4879ms)
-(node:17760) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/discovery/selectDiscovery.ts is not specified and it doesn't parse as CommonJS.
+(node:17760) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/discovery/selectDiscovery.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ discovery-index.json is a verbatim copy of the canonical fixture (1.4526ms)
 ✔ criterion-1 walkthrough keeps the whole chain on the accepted model (3.1752ms)
@@ -1390,9 +1390,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ synthetic city feeds the model: paid-only stop has no base story (0.4198ms)
 ✔ shared static server contains traversal before touching the disk (0.5655ms)
 ✔ both byte-compared fixture paths keep the pinned eol=lf (rule 4) (122.4391ms)
-(node:50172) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/device-core.test.ts is not specified and it doesn't parse as CommonJS.
+(node:50172) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/device-core.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ registerDevice: UUID + 32-byte base64url secret + sha256 hash, secret returned once (2.0823ms)
 ✔ registerDevice: two registrations never share a secret or id (0.2192ms)
@@ -1410,9 +1410,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ SQL constants are pinned exactly: the statements the RLS suite proves by behavior (0.1518ms)
 ✔ G09.03 PGlite: DELETE removes the devices row and the cascades take event_log, entitlement_cache and event_send_rate (2639.7403ms)
 ✔ G09.03: a repeated delete, a wrong secret and a non-DELETE method follow the closed answer list (2511.5367ms)
-(node:24208) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/device-wire.test.ts is not specified and it doesn't parse as CommonJS.
+(node:24208) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/device-wire.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1: the first registration succeeds through asynchronous SQL (29.4801ms)
 ✔ criterion 1: deviceClientIp keeps the rightmost forwarded address and the unknown bucket (0.3223ms)
@@ -1426,9 +1426,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G09.03: a live device deletes through the production handler with an empty 204 (1.2262ms)
 ✔ G09.03: auth denials answer 403 before any storage call, with no diagnostic (1.2336ms)
 ✔ G09.03: a storage fault on the delete path answers 500 with one redacted diagnostic (0.7958ms)
-(node:22124) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/events-core.test.ts is not specified and it doesn't parse as CommonJS.
+(node:22124) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/events-core.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ method: only POST exists (5.0619ms)
 ✔ criterion 4: device-bearer auth is the only identity — malformed, absent, unknown (0.8785ms)
@@ -1468,9 +1468,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ G09.03: after device-delete the same batch answers 403 and stores nothing (2331.055ms)
 ✔ closed-list cross-check: the client transport handles every answer the core emits (1.1797ms)
 ✔ config: the pinned defaults match the documented constants (0.2085ms)
-(node:51972) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/events-wire.test.ts is not specified and it doesn't parse as CommonJS.
+(node:51972) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/events-wire.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ criterion 1: the first event batch is inserted exactly once through asynchronous SQL (42.3931ms)
 ✔ criterion 2: the limit boundary and one beyond retain the 429/retry contract (26.2524ms)
@@ -1479,17 +1479,17 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ criterion 3: one atomic increment per request — concurrency never reads-then-writes (6.3646ms)
 ✔ criterion 5: an internal failure emits one redacted diagnostic (0.7566ms)
 ✔ criterion 5: ordinary denials produce no diagnostic (0.7555ms)
-(node:15900) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/fixtures-hygiene.test.ts is not specified and it doesn't parse as CommonJS.
+(node:15900) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/fixtures-hygiene.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ guard: fixture surface enumerates the expected trees (0.7135ms)
 ✔ guard: no JWT-shaped token is committed in the fixture surface (63.199ms)
 ✔ guard: secret-bearing env names are never committed with values (102.4713ms)
 ✔ guard: no 43-char base64url literal (32-byte secret shape) is committed (47.611ms)
-(node:32456) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/grant-core.test.ts is not specified and it doesn't parse as CommonJS.
+(node:32456) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/grant-core.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ isUnsafePath refuses traversal, absolute, home, drive/scheme, backslash, NUL and empty forms (1.1884ms)
 ✔ isUnsafeUrlTtl: only finite positive integers up to the canonical 600 s pass (N5) (0.1905ms)
@@ -1511,9 +1511,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ concurrent_grant_limit: parallel rounds cannot bypass counting (G20.26 criterion 3) (12770.6483ms)
 ✔ limiter_failure_denied: a limiter fault propagates fail-closed, never as an allow or a limit denial (6081.0999ms)
 ✔ second_device_budget: another device works within its own budget after one device exhausts its limit (4504.371ms)
-(node:22192) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/grant-wire.test.ts is not specified and it doesn't parse as CommonJS.
+(node:22192) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/grant-wire.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ corrupt_manifest_403_no_provider: malformed manifest bytes answer the closed 403 through the production handler (26.574ms)
 ✔ null_manifest_403: a stored JSON null answers 403, never the fault-boundary 503 (1.1375ms)
@@ -1522,9 +1522,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ provider transport failure answers the same closed 503 through the production RevenueCat adapter (0.9657ms)
 ✔ valid_manifest_membership: a valid manifest with a matching-environment cache hit mints only member paths (1.6785ms)
 ✔ a foreign-environment cache row falls through to the provider — no cross-environment reuse (0.6634ms)
-(node:45260) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/rc-webhook-core.test.ts is not specified and it doesn't parse as CommonJS.
+(node:45260) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/rc-webhook-core.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ a signed refund (CANCELLATION) persists the event and drops the cached rights of app_user_id and uuid aliases (3415.4434ms)
 ✔ a tampered signature is 401 and changes no rights (issue proof: падроблены подпіс → правы не змяніліся) (2425.4268ms)
@@ -1542,9 +1542,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ webhook_payload_minimized: the durable payload keeps only the accounting fields — device identity and subscriber personal data never reach the row (G20.12, spec N6) (8314.7748ms)
 ✔ replay_does_not_resurrect: after the retention sweep purges the event row, the replayed delivery re-persists it but can only drop cache rows — rights and the device account never come back (G20.12) (10307.3499ms)
 ✔ guard: the grant and device paths import nothing from the webhook core — integration off ⇒ grant/restore unchanged (17.7688ms)
-(node:41500) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/retention-core.test.ts is not specified and it doesn't parse as CommonJS.
+(node:41500) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/retention-core.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ term: 14 months subtract with day-of-month clamping, matching SQL interval arithmetic (0.7186ms)
 ✔ rate counters: a window older than the bound is dead, a fresh one is never touched (0.1159ms)
@@ -1591,9 +1591,9 @@ FATAL ERROR: Zone Allocation failed - process out of memory
 31: 00007FFB356ECD87 BaseThreadInitThunk+23
 32: 00007FFB36D0CAEC RtlUserThreadStart+44
 ✖ supabase\functions\_shared\retention-core.test.ts (8277.1203ms)
-(node:45704) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/rls.test.ts is not specified and it doesn't parse as CommonJS.
+(node:45704) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/rls.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ guard: replayed steps stay in sync with the committed migration files (6.7109ms)
 ✔ guard: every server table is RLS-enabled, revoked from clients, granted to service_role (1.16ms)
@@ -1609,15 +1609,15 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ service role writes through; device delete cascades to cache and events (1629.221ms)
 ✔ webhook_events is invisible to anon and writable only by the service role (1961.8145ms)
 ✔ rate counter table bumps attempts per (ip_hash, window_start) (4681.1628ms)
-(node:49256) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-contract.test.ts is not specified and it doesn't parse as CommonJS.
+(node:49256) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/tests/feedback/feedback-contract.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ every feedback-cases.json case passes through the production wiring (2785.5482ms)
 ✔ rejected writes leave no data and the ledger dedupes replays (fixture companions) (2902.3516ms)
-(node:23924) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-core.test.ts is not specified and it doesn't parse as CommonJS.
+(node:23924) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/tests/feedback/feedback-core.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ guard: the identifier pattern is the schema file verbatim (1.6842ms)
 ✔ guard: the target schema shape matches the validation contract (1.1893ms)
@@ -1627,9 +1627,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ validatePutBody: canonical reasons and a stable payload hash (1.2648ms)
 ✔ validatePutBody: closed envelope and per-field failure codes (0.3753ms)
 ✔ validateDeleteBody and validateReadBody: closed envelopes (0.4082ms)
-(node:14240) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts is not specified and it doesn't parse as CommonJS.
+(node:14240) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ guard: every feedback table is RLS-enabled, revoked from clients, granted to service_role (3.2583ms)
 ✔ guard: the device-owned feedback tables cascade on device delete (0.7071ms)
@@ -1702,18 +1702,18 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ scheme doc covers exactly the screens of the G06.08 package (4.1388ms)
 ✔ every screen scheme has a cited transition map with a Back/«Прагулка» return (0.9878ms)
 ✔ state-coverage table has a non-empty row per screen (1.1101ms)
-(node:36408) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/components/ui-strings.ts is not specified and it doesn't parse as CommonJS.
+(node:36408) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/components/ui-strings.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ every catalog key path has exactly one canonical record anchored to it (2.8015ms)
 ✔ plain catalog words are verbatim in the canonical records (1.4014ms)
 ✔ the four composites the walk cannot express carry their canonical shape (0.2537ms)
 ✔ the JSX card catalog is inventoried verbatim (hand-anchored) (0.3484ms)
 ✔ every record is anchored to a real repository file (0.803ms)
-(node:6256) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/tests/discovery/discovery-acceptance.test.ts is not specified and it doesn't parse as CommonJS.
+(node:6256) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/tests/discovery/discovery-acceptance.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:6256) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ▶ G15.04 discovery integration acceptance
@@ -1730,9 +1730,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
   ✔ the criteria boundary rejects unknown themes and unnamed limits without widening (8.8896ms)
   ✔ consent revoked before any flush: the choice still works, recording stays local (2.1644ms)
 ✔ G15.04 discovery integration acceptance (44.7858ms)
-(node:54792) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/tests/discovery/discovery-analytics.test.ts is not specified and it doesn't parse as CommonJS.
+(node:54792) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/tests/discovery/discovery-analytics.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 (node:54792) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 ▶ G15.04 discovery analytics consent gate
@@ -1740,9 +1740,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
   ✔ a collection card carries no shown/opened event; the opened payload follows the same allowlist (4.2504ms)
   ✔ a withdrawal stops the sending and keeps the tail pending for the next grant (4.5113ms)
 ✔ G15.04 discovery analytics consent gate (25.3523ms)
-(node:7940) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/tests/discovery/discovery-publication.test.ts is not specified and it doesn't parse as CommonJS.
+(node:7940) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/tests/discovery/discovery-publication.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ▶ G15.04 publication rollback and the downloaded guide
   ✔ a fresh publication replaces the snapshot and serves the new revision (2.6707ms)
@@ -1805,7 +1805,7 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ AC4: index-invalid-foreign-city.json fails the builder on foreign-city (22.1456ms)
 ✔ AC4: index-invalid-private-path.json fails the builder on private-path (27.8772ms)
 ✔ AC4: index-invalid-missing-overlap-note.json fails the builder on missing-overlap-note (7.6393ms)
-warning: unable to access 'C:\Users\kamyl/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\<user>/.config/git/ignore': Permission denied
 ✔ AC4: index-invalid-duration-range.json fails the builder on duration-range (15.8016ms)
 ✔ AC4: unknown-ref — an offer ref the context cannot resolve fails assembly (0.7038ms)
 ✔ AC4: detail-ref-mismatch — a public path of another entity/version fails assembly (0.3519ms)
@@ -1817,9 +1817,9 @@ warning: unable to access 'C:\Users\kamyl/.config/git/ignore': Permission denied
 ✔ AC4: index-oversized — an index beyond the 512 KiB budget fails assembly (270.3758ms)
 ✔ guard: build output directory is gitignored (implementation-rules 5) (110.088ms)
 ✔ guard: non-empty output directory is refused (2424.3219ms)
-(node:21040) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/contracts/fixtures/leak-scanner-cases.ts is not specified and it doesn't parse as CommonJS.
+(node:21040) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/contracts/fixtures/leak-scanner-cases.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ TR-7 parity [source-map]: the packager rejects the fixture with source-map-in-public (435.7364ms)
 ✔ TR-7 parity [source-map]: the packager accepts the clean twin (564.5976ms)
@@ -2167,7 +2167,7 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ decisions_survive_reindex: rebuilding the index or replacing machine results keeps Cases and author decisions (214.6625ms)
 ✔ writer_lock: a second write session answers db-busy, not a hang or a silent queue (75.9406ms)
 ✔ the store ships the migration contract: versions are recorded and foreign keys are enforced (43.9805ms)
-C:\Users\kamyl\WebstormProjects\KUDY\assets\paper-grain.png: 180x180 seed 20260930 sha256 90e070a87a12ea9eae9db55748e785b8509a4b893ef7ce4be2942fb1015b76f9
+C:\Users\<user>\WebstormProjects\KUDY\assets\paper-grain.png: 180x180 seed 20260930 sha256 90e070a87a12ea9eae9db55748e785b8509a4b893ef7ce4be2942fb1015b76f9
 ✔ regenerating from the seed rebuilds the committed tile pixels (38.6562ms)
 ✔ the committed CLI script writes the same pixels to any target (234.0273ms)
 ✔ every tile pixel is opaque — the 4–5% belongs to the layer token (12.9053ms)
@@ -2209,9 +2209,9 @@ C:\Users\kamyl\WebstormProjects\KUDY\assets\paper-grain.png: 180x180 seed 202609
 ✔ AC6: schema-invalid v1 target refuses the publish (1176.1445ms)
 ✔ parity: the published entry and pointer match deriveInterimCatalog (1353.2473ms)
 ✔ G14.04.b: the catalog lists uk only when its base stops.json is published (2714.9341ms)
-(node:32704) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/pipeline/pipeline.ts is not specified and it doesn't parse as CommonJS.
+(node:32704) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/pipeline/pipeline.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ AC1: the simulator runs the production acceptFix and step — the re-exports are identity (0.7788ms)
 ✔ AC1: the arch rules behind the simulate exemption are present and pinned (0.672ms)
@@ -2230,9 +2230,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ AC5: the M1 five-stop walk passes — all fire, none twice, nothing hangs, Ended only after End (12.1909ms)
 ✔ AC5: a partial walk is not a failure and never reaches Ended without End (1.5538ms)
 ✔ AC5: a manual play is reported as a manual play, not as an auto fire (1.1034ms)
-(node:21144) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/core/pipeline/pipeline.ts is not specified and it doesn't parse as CommonJS.
+(node:21144) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/core/pipeline/pipeline.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ AC5: the committed trace set verifies against its own expectations (50.5001ms)
 ✔ AC1: every committed trace is byte-reproducible from its seeded generator (11.105ms)
@@ -2420,9 +2420,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ the free stop card description is the public route summary (12.8605ms)
 ✔ no extended narration reaches any card, in any locale (50.4441ms)
 ✔ card images exist only against a live site origin (0.1761ms)
-(node:10572) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/contracts/fixtures/bundle-docs.ts is not specified and it doesn't parse as CommonJS.
+(node:10572) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/contracts/fixtures/bundle-docs.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ TR-5: the schema enum domain free_base|paid reads through the web reader (2.7637ms)
 ✔ TR-5: access "free" is not in the schema domain — rejected with the enum diagnostic (0.7633ms)
@@ -2457,9 +2457,9 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ a private segment inside a path-typed string fails with private-path-in-public (224.0033ms)
 ✔ an 8-word run of private narration in a public string fails with private-text-leak (206.0907ms)
 ✔ a corrupt public file cannot be verified and fails with invalid-json (207.8574ms)
-(node:19604) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/contracts/fixtures/leak-scanner-cases.ts is not specified and it doesn't parse as CommonJS.
+(node:19604) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/<user>/WebstormProjects/KUDY/contracts/fixtures/leak-scanner-cases.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+To eliminate this warning, add "type": "module" to C:\Users\<user>\WebstormProjects\KUDY\package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
 ✔ TR-7 parity [source-map]: leak-guard rejects the fixture with source-map-in-public (421.4041ms)
 ✔ TR-7 parity [source-map]: leak-guard accepts the clean twin (405.7654ms)
@@ -2507,7 +2507,7 @@ To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjec
 ✔ a missing audio file is a user-visible failure state, not silence; the transcript stays readable (106.6762ms)
 ✔ the stop pages keep the stable URL scheme the future deep links mirror (09 §13 M7) (18.6108ms)
 ✔ the stop components stay server-rendered and manual — no client JS, no storage, no autoplay (2.1476ms)
-warning: unable to access 'C:\Users\kamyl/.config/git/ignore': Permission denied
+warning: unable to access 'C:\Users\<user>/.config/git/ignore': Permission denied
 ✔ npm test wires the web suite (reverting the glob removes the suite from the count) (2.0528ms)
 ✔ root tsconfig excludes web/ (reverting it sweeps Next sources under the Expo config) (1.0699ms)
 ✔ generated web output and content trees are gitignored in the same change (65.6007ms)
@@ -2538,12 +2538,12 @@ warning: unable to access 'C:\Users\kamyl/.config/git/ignore': Permission denied
 test at supabase\functions\_shared\rc-webhook-core.test.ts:150:1
 ✖ an oversized body is 400 before the signature gate: nothing is persisted or executed (1563.3282ms)
   Error: PGlite failed to initialize properly
-      at N._t (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:5:3139)
-      at N.Ye (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:293078)
-      at async N._checkReady (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:286252)
-      at async N.query (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-JDT7TZ73.js:8:255)
-      at async freshMigratedDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/test-db.ts:103:34)
-      at async TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/rc-webhook-core.test.ts:151:14)
+      at N._t (file:///C:/Users/<user>/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:5:3139)
+      at N.Ye (file:///C:/Users/<user>/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:293078)
+      at async N._checkReady (file:///C:/Users/<user>/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:286252)
+      at async N.query (file:///C:/Users/<user>/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-JDT7TZ73.js:8:255)
+      at async freshMigratedDatabase (file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/test-db.ts:103:34)
+      at async TestContext.<anonymous> (file:///C:/Users/<user>/WebstormProjects/KUDY/supabase/functions/_shared/rc-webhook-core.test.ts:151:14)
       at async Test.run (node:internal/test_runner/test:1113:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)
 
@@ -2568,7 +2568,7 @@ test at tools\docs-ledger\counts-guard.test.mjs:64:1
   + ]
   - []
   
-      at TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/tools/docs-ledger/counts-guard.test.mjs:72:10)
+      at TestContext.<anonymous> (file:///C:/Users/<user>/WebstormProjects/KUDY/tools/docs-ledger/counts-guard.test.mjs:72:10)
       at Test.runInAsyncScope (node:async_hooks:214:14)
       at Test.run (node:internal/test_runner/test:1106:25)
       at Test.start (node:internal/test_runner/test:1003:17)
@@ -2587,7 +2587,7 @@ test at web\lib\content\exported-language.test.ts:12:1
   
   false !== true
   
-      at TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/web/lib/content/exported-language.test.ts:30:10)
+      at TestContext.<anonymous> (file:///C:/Users/<user>/WebstormProjects/KUDY/web/lib/content/exported-language.test.ts:30:10)
       at Test.runInAsyncScope (node:async_hooks:214:14)
       at Test.run (node:internal/test_runner/test:1106:25)
       at Test.start (node:internal/test_runner/test:1003:17)
@@ -2615,7 +2615,7 @@ test at web\lib\content\exported-language.test.ts:33:1
   -   'en/privacy.html'
     ]
   
-      at TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/web/lib/content/exported-language.test.ts:46:10)
+      at TestContext.<anonymous> (file:///C:/Users/<user>/WebstormProjects/KUDY/web/lib/content/exported-language.test.ts:46:10)
       at Test.runInAsyncScope (node:async_hooks:214:14)
       at Test.run (node:internal/test_runner/test:1106:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:788:18)

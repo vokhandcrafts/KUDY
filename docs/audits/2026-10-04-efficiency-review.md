@@ -179,7 +179,7 @@ Jest: Tests: 183 passed, 183 total
 PGlite, serial: tests 39; pass 39; fail 0; skipped 0
 ```
 
-Падрабязныя збоі і вынікі захаваныя ў [журнале агульнага запуску](evidence/2026-10-04-efficiency/npm-test.log), [Jest](evidence/2026-10-04-efficiency/jest.log), [паслядоўнага PGlite](evidence/2026-10-04-efficiency/pglite-serial.log) і [пошуку копій](evidence/2026-10-04-efficiency/jscpd.log). Збой праверкі лічбаў паказвае на `docs/agent-tasks/technical-completion/G21.34.md:18`; гэты файл ужо быў чужой незавершанай працай. Збоі шляхоў маюць адкрытую [#591](https://github.com/vokhandcrafts/KUDY/issues/591), таму не выдаюцца за новую знаходку гэтага аўдыту.
+Падрабязныя збоі і вынікі захаваныя ў [журнале агульнага запуску](evidence/2026-10-04-efficiency/npm-test.log), [Jest](evidence/2026-10-04-efficiency/jest.log), [паслядоўнага PGlite](evidence/2026-10-04-efficiency/pglite-serial.log) і [пошуку копій](evidence/2026-10-04-efficiency/jscpd.log). Імя лакальнага карыстальніка ў шляхах заменена на `<user>`; лічбы, паведамленні і нумары радкоў захаваныя. Збой праверкі лічбаў паказвае на `docs/agent-tasks/technical-completion/G21.34.md:18`; гэты файл ужо быў чужой незавершанай працай. Збоі шляхоў маюць адкрытую [#591](https://github.com/vokhandcrafts/KUDY/issues/591), таму не выдаюцца за новую знаходку гэтага аўдыту.
 
 ## Доказы і паўтор доследаў
 
