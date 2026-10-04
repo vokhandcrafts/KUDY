@@ -1,0 +1,14 @@
+Starting a Gradle Daemon, 1 busy Daemon could not be reused, use --status for details
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+The specified initialization script 'C:\Users\kamyl\WebstormProjects\KUDY\android\.scratch\ui-2026-10-02\android-build.init.gradle' does not exist.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 27s

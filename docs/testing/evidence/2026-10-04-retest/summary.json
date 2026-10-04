@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-04",
+  "head": "46cddb1974d0a96b0fdcefdb4fe92a9a834bfe41",
+  "typecheckExit": 0,
+  "archExit": 0,
+  "archModules": 496,
+  "node": {
+    "tests": 1998,
+    "passed": 1954,
+    "failed": 2,
+    "skipped": 42,
+    "concurrency": 4,
+    "exit": 1
+  },
+  "jest": {
+    "passed": 183,
+    "failed": 0,
+    "suites": 24,
+    "exit": 0
+  },
+  "android": {
+    "passed": 26,
+    "checks": 26,
+    "failed": 0
+  },
+  "web": {
+    "passed": 77,
+    "failed": 0,
+    "blocked": 1,
+    "pages": 42
+  },
+  "webBuildExit": 1,
+  "androidFreshBuildExit": 1,
+  "nativeApk": "cached, native configuration/dependencies unchanged; current main loaded via Metro",
+  "knownDefect": "expectedDocumentLocale treats Windows backslash paths as default be; two Node failures and six export scanner violations",
+  "limitations": [
+    "Real catalog, walk, audio, location and history flows have no device adapters in this build.",
+    "No physical phone or iOS test.",
+    "Font scale was changed with the app stopped; clean launch at 150% tested.",
+    "Host memory pressure and System UI ANR required emulator restart before the final UI run.",
+    "Fresh native rebuild failed on host cache cleanup; native package/config unchanged since the cached APK."
+  ],
+  "canonicalLfRefresh": [
+    "authoring/gdansk/review/gdansk-artushof-base-be.review.md",
+    "authoring/gdansk/review/gdansk-artushof-base-uk.review.md",
+    "authoring/gdansk/review/gdansk-artushof-extended-be.review.md",
+    "authoring/gdansk/review/gdansk-stmary-be.review.md",
+    "authoring/gdansk/review/gdansk-stmary-en.review.md",
+    "authoring/gdansk/review/gdansk-stmary-extended-be.review.md",
+    "authoring/gdansk/review/gdansk-stmary-uk.review.md",
+    "authoring/gdansk/review/gdansk-townhall-base-be.review.md",
+    "authoring/gdansk/review/gdansk-townhall-base-uk.review.md",
+    "authoring/gdansk/review/gdansk-townhall-extended-be.review.md",
+    "contracts/wire/wire-types.ts",
+    "fixtures/discovery-contract/index-stop-places.json",
+    "tools/simulate/traces/clean-walk.json",
+    "tools/simulate/traces/fast-walk.json",
+    "tools/simulate/traces/focus-loss.json",
+    "tools/simulate/traces/gps-gap.json",
+    "tools/simulate/traces/locked-unlock.json",
+    "tools/simulate/traces/mid-route-start.json",
+    "tools/simulate/traces/replay-heard-stop.json",
+    "tools/simulate/traces/reverse-order.json",
+    "tools/simulate/traces/standing-every-stop.json"
+  ]
+}

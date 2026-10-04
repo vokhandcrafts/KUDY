@@ -1,0 +1,170 @@
+{
+  "date": "2026-10-04",
+  "head": "46cddb1974d0a96b0fdcefdb4fe92a9a834bfe41",
+  "device": {
+    "bootCompleted": "1",
+    "profile": "Pixel 6",
+    "density": 420,
+    "avd": "KUDY_API36",
+    "android": "16",
+    "serial": "emulator-5556",
+    "abi": "x86_64",
+    "screen": "1080x2400",
+    "api": 36
+  },
+  "build": {
+    "variant": "debug",
+    "apkSha256": "AFAD802E4B779C13727F51558AFF5F428F8326D0CE2DBAB2C0DF72A1C68C4D16",
+    "emulatorMemoryMb": 1024,
+    "result": "fresh rebuild failed on host cache cleanup; unchanged native APK with current main Metro bundle tested",
+    "apkBytes": 95973249,
+    "emulatorCores": 2,
+    "metroWorkers": 2
+  },
+  "totals": {
+    "passed": 26,
+    "checks": 26,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "Cold launch reaches Explore",
+      "status": "passed",
+      "evidence": "cold-start-normal.xml"
+    },
+    {
+      "name": "Catalog has a visible unavailable message",
+      "status": "passed",
+      "evidence": "explore-be.xml"
+    },
+    {
+      "name": "Explore tap opens Nearby",
+      "status": "passed",
+      "evidence": "nearby-be.xml"
+    },
+    {
+      "name": "Nearby Back returns to Explore",
+      "status": "passed",
+      "evidence": "before-discovery.xml"
+    },
+    {
+      "name": "Explore tap opens Discovery",
+      "status": "passed",
+      "evidence": "discovery-be.xml"
+    },
+    {
+      "name": "Discovery Back returns to Explore",
+      "status": "passed",
+      "evidence": "before-kudy.xml"
+    },
+    {
+      "name": "Explore tap opens KUDY",
+      "status": "passed",
+      "evidence": "kudy-be.xml"
+    },
+    {
+      "name": "English applies without restart and is selected",
+      "status": "passed",
+      "evidence": "kudy-en.xml"
+    },
+    {
+      "name": "Explore uses English after switch",
+      "status": "passed",
+      "evidence": "explore-en.xml"
+    },
+    {
+      "name": "Nearby uses English after switch",
+      "status": "passed",
+      "evidence": "nearby-after-en.xml"
+    },
+    {
+      "name": "Android Back returns to Explore",
+      "status": "passed",
+      "evidence": "before-discovery-en.xml"
+    },
+    {
+      "name": "Discovery uses English after switch",
+      "status": "passed",
+      "evidence": "discovery-en.xml"
+    },
+    {
+      "name": "Ukrainian applies without restart and is selected",
+      "status": "passed",
+      "evidence": "kudy-uk.xml"
+    },
+    {
+      "name": "Explore uses Ukrainian after switch",
+      "status": "passed",
+      "evidence": "explore-uk.xml"
+    },
+    {
+      "name": "Nearby uses Ukrainian after switch",
+      "status": "passed",
+      "evidence": "nearby-after-uk.xml"
+    },
+    {
+      "name": "Unknown link shows localized explanation",
+      "status": "passed",
+      "evidence": "unknown-route-uk.xml"
+    },
+    {
+      "name": "Unknown link Back returns to Explore",
+      "status": "passed",
+      "evidence": "unknown-back-explore.xml"
+    },
+    {
+      "name": "Unavailable guide uses Ukrainian",
+      "status": "passed",
+      "evidence": "guide-unavailable-uk.xml"
+    },
+    {
+      "name": "Unavailable run uses Ukrainian",
+      "status": "passed",
+      "evidence": "run-unavailable-uk.xml"
+    },
+    {
+      "name": "Place link shows an unavailable state",
+      "status": "passed",
+      "evidence": "place-unavailable.xml"
+    },
+    {
+      "name": "Collection link shows an unavailable state",
+      "status": "passed",
+      "evidence": "collection-unavailable.xml"
+    },
+    {
+      "name": "City guides link shows an unavailable state",
+      "status": "passed",
+      "evidence": "city-guides-unavailable.xml"
+    },
+    {
+      "name": "Large font keeps all three language buttons visible",
+      "status": "passed",
+      "evidence": "kudy-font-150-clean.xml"
+    },
+    {
+      "name": "Large font grows the language label",
+      "status": "passed",
+      "evidence": "kudy-font-150-clean.xml"
+    },
+    {
+      "name": "Large font keeps all Explore links visible",
+      "status": "passed",
+      "evidence": "explore-font-150-clean.xml"
+    },
+    {
+      "name": "Background return preserves KUDY screen and English",
+      "status": "passed",
+      "evidence": "after-background-en.xml"
+    }
+  ],
+  "limitations": [
+    "Real catalog, walk, audio, location and history flows have no device adapters in this build.",
+    "No physical phone or iOS test.",
+    "Font scale was changed with the app stopped; clean launch at 150% tested.",
+    "Host memory pressure and System UI ANR required emulator restart before the final UI run.",
+    "Fresh native rebuild failed on host cache cleanup; native package/config unchanged since the cached APK."
+  ],
+  "crashBufferLines": 1,
+  "restoredFontScale": "1.0"
+}

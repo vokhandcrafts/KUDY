@@ -1,0 +1,212 @@
+(node:6676) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/retention-core.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ term: 14 months subtract with day-of-month clamping, matching SQL interval arithmetic (0.7171ms)
+✔ rate counters: a window older than the bound is dead, a fresh one is never touched (0.6064ms)
+✔ PGlite term: the sweep deletes exactly the events past the 14-month boundary — recent and boundary rows stay (2311.9339ms)
+✔ PGlite volume: five hundred aged-out events go in one pass, ordered by the cutoff alone (5174.573ms)
+✔ PGlite order: a second sweep deletes nothing, and the sweep never resurrects newer rows (6958.4398ms)
+✔ PGlite rate counters: dead windows of live devices are swept, fresh windows and both tables stay usable (6220.9483ms)
+✔ webhook_expiry_purge: webhook bookkeeping rows past the protective bound are swept by received_at, the boundary row stays, a repeated pass deletes nothing (4071.0083ms)
+(node:39376) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-contract.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ every feedback-cases.json case passes through the production wiring (2202.6548ms)
+✔ rejected writes leave no data and the ledger dedupes replays (fixture companions) (2357.7394ms)
+(node:6840) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\kamyl\WebstormProjects\KUDY\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ guard: every feedback table is RLS-enabled, revoked from clients, granted to service_role (2.3424ms)
+✔ guard: the device-owned feedback tables cascade on device delete (0.5709ms)
+✔ guard: the current-row shape is schema-checked (scale, tombstone state, revision) (0.7261ms)
+✔ guard: the CAS lock statement serializes same-key writers (0.1801ms)
+✔ guard: the contract limits are the spec numbers (0.1601ms)
+✔ anon and authenticated cannot touch the feedback tables, even with a grant re-added (2042.5927ms)
+✔ the registry and rows survive device deletion; the device-owned rows do not (2019.7076ms)
+✔ deleted device credentials cannot recreate rows (2306.2744ms)
+✔ prepared targets fail closed with 503; publication reconciles an interrupted import (3113.0679ms)
+✖ a malformed export is rejected before any write (583.4407ms)
+✖ same-revision writes yield one success and one conflict; stale deletes cannot overwrite (586.5352ms)
+✖ a different payload under the same mutation_id conflicts with 409 (779.3329ms)
+✖ a duplicate that raced past the original replays after the lock, never 503s (224.7352ms)
+✖ forged-bearer failures count toward the shared IP bucket (555.0899ms)
+✖ the device and IP limits answer 429 with Retry-After; reads count too (171.8516ms)
+✔ envelope failures: unknown path, oversized body, invalid JSON (3072.9419ms)
+✔ prints the hand-verified fixture surface (59.6017ms)
+✔ output is deterministic across runs (byte-identical, no timestamps) (99.9732ms)
+✔ trailing separators in <dir> do not change the output (52.5423ms)
+✔ a directory with no source files says so (47.3485ms)
+✔ missing argument prints usage and exits 2 (54.96ms)
+✔ nonexistent directory is a diagnostic, not a crash (55.9681ms)
+✔ a file instead of a directory is a diagnostic, not a crash (46.8859ms)
+✔ the fixtures stay valid TypeScript for the repo typecheck scope (0.5449ms)
+﹣ an unreadable file is marked (unreadable), not misreported as empty (0.0781ms) # POSIX file permissions
+✔ arch-check wiring is guarded (package.json scripts, npm-test glob, config, baseline) (1.4738ms)
+✔ clean sandbox passes the checker (938.0961ms)
+✔ planted two-file cycle fails and names the no-cycles rule (894.6313ms)
+✔ core/ production file importing node:fs fails and names core-zone-closed (1039.5496ms)
+✔ layer-direction violation (services -> web) fails and names services-zone-closed (903.2632ms)
+✔ app/ importing services/ directly fails and names app-no-services (19 §4.2 edge rule) (959.8206ms)
+✔ app/ importing core/ directly fails and names app-no-core (G06.09.b) (1060.8332ms)
+✔ a controller value-importing services/ fails and names controllers-services-type-only (issue #209 AC1) (1197.6638ms)
+✔ controllers that follow the port rules pass: type-only services import, root value import, core import (issue #209 AC1–AC2) (1040.0045ms)
+✔ services/ importing controllers/ fails and names services-zone-closed (1189.3929ms)
+✔ core/ importing controllers/ fails and names core-zone-closed (1318.335ms)
+✔ contracts/ importing controllers/ fails and names contracts-zone-closed (review round 1) (1152.0162ms)
+✔ web/ importing controllers/ fails and names web-zone-closed (review round 1) (872.4897ms)
+✔ tools/ importing controllers/ fails and names tools-zone-closed (review round 1) (965.6623ms)
+✔ contracts/ importing app/ fails and names contracts-zone-closed (app direction, review round 1) (1116.1562ms)
+✔ web/ importing app/ fails and names web-zone-closed (app direction, review round 1) (977.1448ms)
+✔ tools/ importing app/ fails and names tools-zone-closed (app direction, review round 1) (1025.0606ms)
+✔ corrupt baseline yields a diagnostic, not a crash (79.6124ms)
+✔ a baselined violation passes; the same violation without the baseline fails (2448.2423ms)
+✔ workflow_gate_invocation: the committed arch:check command rejects a planted violation (1310.1538ms)
+✖ a clean export passes: en pages declare en, be pages and the shared 404 declare the default (72.1803ms)
+✖ an en page reporting be is a wrong-document-language violation (the issue defect) (48.2635ms)
+✔ a page without a lang attribute is a missing-document-language violation (5.917ms)
+✔ the shared 404.html carries the site default, not a URL locale (6.162ms)
+✔ the locale expectation follows the URL prefix in flat and nested export layouts (0.1498ms)
+✔ non-html assets are not read as pages (4.9564ms)
+ℹ tests 60
+ℹ suites 0
+ℹ pass 51
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 96598.5087
+
+✖ failing tests:
+
+test at supabase\tests\feedback\feedback-pglite.test.ts:267:1
+✖ a malformed export is rejected before any write (583.4407ms)
+  RangeError: WebAssembly.Memory(): could not allocate memory
+      at file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-DDJLRBDX.js:1:14527
+      at async Yr (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-DDJLRBDX.js:2:64451)
+      at async At (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-DDJLRBDX.js:2:66008)
+      at async N.Ye (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:292648)
+      at async N._checkReady (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:286252)
+      at async N.query (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-JDT7TZ73.js:8:255)
+      at async freshMigratedDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/test-db.ts:103:34)
+      at async freshFeedbackDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/test-support.ts:33:14)
+      at async TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts:268:14)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+
+test at supabase\tests\feedback\feedback-pglite.test.ts:304:1
+✖ same-revision writes yield one success and one conflict; stale deletes cannot overwrite (586.5352ms)
+  RangeError: WebAssembly.Memory(): could not allocate memory
+      at file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-DDJLRBDX.js:1:14527
+      at async Yr (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-DDJLRBDX.js:2:64451)
+      at async At (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-DDJLRBDX.js:2:66008)
+      at async N.Ye (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:292648)
+      at async N._checkReady (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:286252)
+      at async N.query (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-JDT7TZ73.js:8:255)
+      at async freshMigratedDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/test-db.ts:103:34)
+      at async freshFeedbackDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/test-support.ts:33:14)
+      at async ratingScenario (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts:289:14)
+      at async TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts:305:32)
+
+test at supabase\tests\feedback\feedback-pglite.test.ts:339:1
+✖ a different payload under the same mutation_id conflicts with 409 (779.3329ms)
+  RangeError: Array buffer allocation failed
+      at new ArrayBuffer (<anonymous>)
+      at Uint8Array.slice (<anonymous>)
+      at Yr (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-DDJLRBDX.js:2:64441)
+      at At (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-DDJLRBDX.js:2:66014)
+      at N.Ye (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:292654)
+      at async N._checkReady (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:286252)
+      at async N.query (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-JDT7TZ73.js:8:255)
+      at async freshMigratedDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/test-db.ts:103:34)
+      at async freshFeedbackDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/test-support.ts:33:14)
+      at async ratingScenario (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts:289:14)
+
+test at supabase\tests\feedback\feedback-pglite.test.ts:357:1
+✖ a duplicate that raced past the original replays after the lock, never 503s (224.7352ms)
+  RangeError: WebAssembly.Memory(): could not allocate memory
+      at N.Ye (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:289785)
+      at async N._checkReady (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:286252)
+      at async N.query (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-JDT7TZ73.js:8:255)
+      at async freshMigratedDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/test-db.ts:103:34)
+      at async freshFeedbackDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/test-support.ts:33:14)
+      at async ratingScenario (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts:289:14)
+      at async TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts:358:28)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at supabase\tests\feedback\feedback-pglite.test.ts:387:1
+✖ forged-bearer failures count toward the shared IP bucket (555.0899ms)
+  RangeError: Array buffer allocation failed
+      at new ArrayBuffer (<anonymous>)
+      at Uint8Array.slice (<anonymous>)
+      at Yr (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-DDJLRBDX.js:2:64441)
+      at At (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-DDJLRBDX.js:2:66014)
+      at N.Ye (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:292654)
+      at async N._checkReady (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:286252)
+      at async N.query (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-JDT7TZ73.js:8:255)
+      at async freshMigratedDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/test-db.ts:103:34)
+      at async freshFeedbackDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/test-support.ts:33:14)
+      at async TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts:388:14)
+
+test at supabase\tests\feedback\feedback-pglite.test.ts:415:1
+✖ the device and IP limits answer 429 with Retry-After; reads count too (171.8516ms)
+  RangeError: WebAssembly.Memory(): could not allocate memory
+      at N.Ye (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:289785)
+      at async N._checkReady (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/index.js:3:286252)
+      at async N.query (file:///C:/Users/kamyl/WebstormProjects/KUDY/node_modules/@electric-sql/pglite/dist/chunk-JDT7TZ73.js:8:255)
+      at async freshMigratedDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/functions/_shared/test-db.ts:103:34)
+      at async freshFeedbackDatabase (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/test-support.ts:33:14)
+      at async TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/supabase/tests/feedback/feedback-pglite.test.ts:416:14)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at web\lib\content\exported-language.test.ts:12:1
+✖ a clean export passes: en pages declare en, be pages and the shared 404 declare the default (72.1803ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/web/lib/content/exported-language.test.ts:30:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at web\lib\content\exported-language.test.ts:33:1
+✖ an en page reporting be is a wrong-document-language violation (the issue defect) (48.2635ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'en.html',
+  -   'en/app.html',
+  -   'en/guides/demo-route-a1.html',
+  -   'en/guides/demo-route-a1/stops/stop-1.html',
+  -   'en/guides/demo-route-a1/stops/stop-2.html',
+  -   'en/map.html',
+  -   'en/privacy.html'
+    ]
+  
+      at TestContext.<anonymous> (file:///C:/Users/kamyl/WebstormProjects/KUDY/web/lib/content/exported-language.test.ts:46:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'en.html' ],
+    expected: [ 'en.html', 'en/app.html', 'en/guides/demo-route-a1.html', 'en/guides/demo-route-a1/stops/stop-1.html', 'en/guides/demo-route-a1/stops/stop-2.html', 'en/map.html', 'en/privacy.html' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
