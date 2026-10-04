@@ -1,0 +1,664 @@
+{
+  "task": "G21.30 (issue #562)",
+  "generated_at": "2026-10-04T00:37:02Z",
+  "agent": "zcode-cli (GLM-5.3-Flash)",
+  "subject": {
+    "name": "Unicode Common Locale Data Repository (CLDR)",
+    "release": "48.2",
+    "release_date": "2026-03-17",
+    "packaging_repo": "https://github.com/unicode-org/cldr-json",
+    "packaging_tag": "48.2.3",
+    "packaging_tag_published": "2026-09-30",
+    "beta_observed": "49.0.0-BETA1 (2026-09-23) — not assessed, not production",
+    "downloads_page": "https://cldr.unicode.org/index/downloads",
+    "raw_data_catalog": "https://unicode.org/Public/cldr/48.2/ (HTTP 200 on 2026-10-04; json.zip not present there — HTTP 404)"
+  },
+  "license": {
+    "name": "Unicode License v3 (LICENSE file of the cldr-json repository at the tag)",
+    "copyright": "Copyright © 2015-2024 Unicode, Inc.",
+    "text_url": "https://github.com/unicode-org/cldr-json/blob/48.2.3/LICENSE",
+    "permissions_observed": "free use, copy, modify, merge, publish, distribute, sell — provided the copyright and permission notice accompanies copies (condition (a) of the license text); no per-file attribution beyond retaining the notice"
+  },
+  "acquisition": {
+    "method": "direct file download over HTTPS from the pinned release tag (no accounts, no credentials, no tokens)",
+    "access_date": "2026-10-04",
+    "files_total": 45,
+    "bytes_total": 1047683,
+    "files": [
+      {
+        "path": "cldr-core/supplemental/plurals.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-core/supplemental/plurals.json",
+        "bytes": 76105,
+        "sha256": "6c0a48e9bcfc25856f90202f703c2c7f89c105d6868f7712a943a6ed2dcbe8f4"
+      },
+      {
+        "path": "cldr-core/supplemental/ordinals.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-core/supplemental/ordinals.json",
+        "bytes": 18839,
+        "sha256": "8a945afc483a4f677fb5641f08a2ccc62948ee05f316d21996be6561c2f83155"
+      },
+      {
+        "path": "cldr-core/supplemental/pluralRanges.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-core/supplemental/pluralRanges.json",
+        "bytes": 24710,
+        "sha256": "fb56214321fb18675196eda503779b8576fe785084bc0573e1def41dd0e39027"
+      },
+      {
+        "path": "cldr-localenames-full/main/be/languages.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/be/languages.json",
+        "bytes": 19649,
+        "sha256": "627127e211dacb96ae2551249f5ea7bcc9ef908b4ff1444aae5be1f14ff9d474"
+      },
+      {
+        "path": "cldr-localenames-full/main/en/languages.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/en/languages.json",
+        "bytes": 20815,
+        "sha256": "a5960d2371bc7d982da7fcfd9a0e237429d3467a5cc76f680bc3af5bcef9fb4e"
+      },
+      {
+        "path": "cldr-localenames-full/main/uk/languages.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/uk/languages.json",
+        "bytes": 23377,
+        "sha256": "9d6c2e4b4cffcc3ce06e180b5cad217f2fd7becbc466e071c77e202e70b15a37"
+      },
+      {
+        "path": "cldr-localenames-full/main/de/languages.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/de/languages.json",
+        "bytes": 19782,
+        "sha256": "86f24c579d26d91e0a8176f2b2509bb224c97a538097d2cfa197f310c2c2b5b1"
+      },
+      {
+        "path": "cldr-localenames-full/main/es/languages.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/es/languages.json",
+        "bytes": 17592,
+        "sha256": "fd5b463e664c4d21c40eb4a8e8cff1b355654057275853c644762104de059a37"
+      },
+      {
+        "path": "cldr-localenames-full/main/fr/languages.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/fr/languages.json",
+        "bytes": 19965,
+        "sha256": "49c4f489e321f62ec64e3950045225a6aa2d4accc71584dfde262083679215d9"
+      },
+      {
+        "path": "cldr-localenames-full/main/cs/languages.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/cs/languages.json",
+        "bytes": 22207,
+        "sha256": "bbf611c53187c3634d88d234be35a3146fe14e5de0380a0d192cd1d18bf0e7ef"
+      },
+      {
+        "path": "cldr-localenames-full/main/sv/languages.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/sv/languages.json",
+        "bytes": 20064,
+        "sha256": "60d69b254abf8c194c115a7d021b12eeef56e19b5840f66c8c0836930a09bcf1"
+      },
+      {
+        "path": "cldr-numbers-full/main/be/numbers.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-numbers-full/main/be/numbers.json",
+        "bytes": 9901,
+        "sha256": "cd1f649e6a2ae4df50b3fb5bc514ba0090b2f44160f2bcd510e0072ee2977e5f"
+      },
+      {
+        "path": "cldr-numbers-full/main/en/numbers.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-numbers-full/main/en/numbers.json",
+        "bytes": 8089,
+        "sha256": "07a58e473f6d28dcc5d5562539d3ab5c8fbe37e435414969e3a2672525a80d5f"
+      },
+      {
+        "path": "cldr-numbers-full/main/uk/numbers.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-numbers-full/main/uk/numbers.json",
+        "bytes": 10251,
+        "sha256": "381561ae3773e06016eac499492628dffbacfeb176dd44907ebdbc92fad41285"
+      },
+      {
+        "path": "cldr-numbers-full/main/de/numbers.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-numbers-full/main/de/numbers.json",
+        "bytes": 6771,
+        "sha256": "e8ab22c6d7a1ed1f1fc71c4bf0da7ba57a32a46c7ead5ad8e36f40563c18c00f"
+      },
+      {
+        "path": "cldr-numbers-full/main/es/numbers.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-numbers-full/main/es/numbers.json",
+        "bytes": 6550,
+        "sha256": "c479642ce277f82b1c40ea0d7092cc5894a38767fb6c7d33c47fbef26eed3c0b"
+      },
+      {
+        "path": "cldr-numbers-full/main/fr/numbers.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-numbers-full/main/fr/numbers.json",
+        "bytes": 6613,
+        "sha256": "f18f89da2e35b477626c21577e509583cd7831e651caccef2d82799b5c8c93e8"
+      },
+      {
+        "path": "cldr-numbers-full/main/cs/numbers.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-numbers-full/main/cs/numbers.json",
+        "bytes": 9719,
+        "sha256": "a982c4c839bb38efcad62bf1fb52839556aaa53111d4abafcd3287a682f8af4b"
+      },
+      {
+        "path": "cldr-numbers-full/main/sv/numbers.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-numbers-full/main/sv/numbers.json",
+        "bytes": 6656,
+        "sha256": "ddac28bb8212b28dacc9eebbedf1d3a2254ee12150f6150a36bd5c309b9e0efc"
+      },
+      {
+        "path": "cldr-dates-full/main/be/ca-gregorian.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/be/ca-gregorian.json",
+        "bytes": 17442,
+        "sha256": "2ed04e467a6933dbb9862fb280f5bca350b922136d4595841d11637a16a48c1c"
+      },
+      {
+        "path": "cldr-dates-full/main/en/ca-gregorian.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/en/ca-gregorian.json",
+        "bytes": 19266,
+        "sha256": "099b5dadb358c1d951f228ad97758467dac872af845cada3019cf56ce5455c9c"
+      },
+      {
+        "path": "cldr-dates-full/main/uk/ca-gregorian.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/uk/ca-gregorian.json",
+        "bytes": 19301,
+        "sha256": "a9b0bc4b2c4042c3d0943ee733e14aea50e9f4a3aa9652e00eef861ae0a2f326"
+      },
+      {
+        "path": "cldr-dates-full/main/de/ca-gregorian.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/de/ca-gregorian.json",
+        "bytes": 18792,
+        "sha256": "afa871ef7f2b4b9a7d680342e18dcf6a37a910e81af8d7d9561722d790b6d20b"
+      },
+      {
+        "path": "cldr-dates-full/main/es/ca-gregorian.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/es/ca-gregorian.json",
+        "bytes": 19236,
+        "sha256": "159f621f147875bbd66daec061da512b20be7eb04cd18a245c8133a162555355"
+      },
+      {
+        "path": "cldr-dates-full/main/fr/ca-gregorian.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/fr/ca-gregorian.json",
+        "bytes": 18124,
+        "sha256": "0a82c7914d023e375888e914d63be846cb9815c03db25308ae303c1ce3d8bace"
+      },
+      {
+        "path": "cldr-dates-full/main/cs/ca-gregorian.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/cs/ca-gregorian.json",
+        "bytes": 19514,
+        "sha256": "42bd425b8b0665187cf1a08af1c2dcc275cc9a8d74adab30d8789b84f112c6d4"
+      },
+      {
+        "path": "cldr-dates-full/main/sv/ca-gregorian.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/sv/ca-gregorian.json",
+        "bytes": 18215,
+        "sha256": "0ecdd2d2bb847cf515d902a340ed647bdf58fc85f6ee618c4371cae24ac3d961"
+      },
+      {
+        "path": "cldr-misc-full/main/be/characters.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/be/characters.json",
+        "bytes": 1921,
+        "sha256": "5629a6ee6c8b8b543c323dbd0cd823829fc6ade9c667019ca430a129e029668f"
+      },
+      {
+        "path": "cldr-misc-full/main/en/characters.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/en/characters.json",
+        "bytes": 1890,
+        "sha256": "ef76908ae3564d072b2c578f1bcfe2eee69fa0010024111d1bcf50cb6bd0c88a"
+      },
+      {
+        "path": "cldr-misc-full/main/uk/characters.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/uk/characters.json",
+        "bytes": 1935,
+        "sha256": "c3e2d33121596614a35f7430fd595ca59fc3826b102f133ef3b125a01eecfa3c"
+      },
+      {
+        "path": "cldr-misc-full/main/de/characters.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/de/characters.json",
+        "bytes": 1890,
+        "sha256": "37d98b83e378e5eb11bb8220ed6a44ffc3e86f79f3828069219daca11392ee57"
+      },
+      {
+        "path": "cldr-misc-full/main/es/characters.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/es/characters.json",
+        "bytes": 1892,
+        "sha256": "3ae8a542158dbb0b86e90056a8a8709a7d27eb17ead7090f932a32eaf1b93b17"
+      },
+      {
+        "path": "cldr-misc-full/main/fr/characters.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/fr/characters.json",
+        "bytes": 1897,
+        "sha256": "a070c85d31d70089ac0d5d525096b2dd69adb7147deb13214ca3035be2bf13e0"
+      },
+      {
+        "path": "cldr-misc-full/main/cs/characters.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/cs/characters.json",
+        "bytes": 1916,
+        "sha256": "7aeb2057bd71f786aed364b54a05a258504b37a944c89765eebc561f093c4eec"
+      },
+      {
+        "path": "cldr-misc-full/main/sv/characters.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/sv/characters.json",
+        "bytes": 1856,
+        "sha256": "8de066618eeee30043db9305250892a5c35b89e9aa0304befbf5047259a8ba15"
+      },
+      {
+        "path": "cldr-misc-full/main/be/listPatterns.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/be/listPatterns.json",
+        "bytes": 1668,
+        "sha256": "782d225eeb6a0d38ec0fd40068fcef85f683cdca74b29b83681bd3a765f6ef3d"
+      },
+      {
+        "path": "cldr-misc-full/main/en/listPatterns.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/en/listPatterns.json",
+        "bytes": 1665,
+        "sha256": "e68b0612a0c0f129836460c150bf58045a60a7516c9705e147f2192fce0449e8"
+      },
+      {
+        "path": "cldr-misc-full/main/uk/listPatterns.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/uk/listPatterns.json",
+        "bytes": 1700,
+        "sha256": "aa20edf8301a335001619b393a957c6d8f418fd2710a3878aca1ef250594563c"
+      },
+      {
+        "path": "cldr-misc-full/main/de/listPatterns.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/de/listPatterns.json",
+        "bytes": 1695,
+        "sha256": "d010586775f0e6db1f8c3e8dc76c3a34476c0623332a1f4076a9f490557e2e26"
+      },
+      {
+        "path": "cldr-misc-full/main/es/listPatterns.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/es/listPatterns.json",
+        "bytes": 1655,
+        "sha256": "5cacc4173563fbf44da2db2192041683ca5f69b2a84258d423e7de6afe27660b"
+      },
+      {
+        "path": "cldr-misc-full/main/fr/listPatterns.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/fr/listPatterns.json",
+        "bytes": 1668,
+        "sha256": "835c2f5f70461e277f95312105eafb4866c3973240aaf27160e7cfd42545286d"
+      },
+      {
+        "path": "cldr-misc-full/main/cs/listPatterns.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/cs/listPatterns.json",
+        "bytes": 1678,
+        "sha256": "56af617b621f0b65a2d775c4463998e95d782746c863bf492cc9e4f2ce6b7563"
+      },
+      {
+        "path": "cldr-misc-full/main/sv/listPatterns.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/sv/listPatterns.json",
+        "bytes": 1682,
+        "sha256": "246369c9c5605a071ad7cad36676309f56ef68b44841a69c7cef10887923bf82"
+      },
+      {
+        "path": "cldr-units-full/main/be/units.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-units-full/main/be/units.json",
+        "bytes": 217960,
+        "sha256": "fd72623c982bb6a29653a91fc47be34ae6f9bbd947c1af3fcb9ea57bdacb18c0"
+      },
+      {
+        "path": "cldr-units-full/main/cs/units.json",
+        "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-units-full/main/cs/units.json",
+        "bytes": 303570,
+        "sha256": "790013b770312c36dc041138a7d75e011e36cbf388d8ec80e36b696a13473556"
+      }
+    ],
+    "commands": [
+      "base=https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json",
+      "curl -fsSL $base/<path> -o <target>   # per file, see files[].url; locales be,en,uk,de,es,fr,cs,sv",
+      "sha256sum <downloaded files>   # hashes recorded in files[].sha256",
+      "node .scratch/cldr-research/verify-plurals.mjs   # evaluator self-check vs official examples (scratch, not committed)",
+      "grep -ril '<term>' <downloaded files>   # benchmark, case-insensitive substring over files[].path"
+    ],
+    "reproducibility": "each file pinned by tag URL + sha256; a re-run must reproduce the hashes while the tag exists"
+  },
+  "verification": {
+    "method": "own minimal UTS#35 plural-rule evaluator (scratch script, not committed) validated against the official @integer/@decimal examples embedded in plurals.json/ordinals.json for the eight locales",
+    "official_examples_total": 449,
+    "official_examples_failed": 0,
+    "note": "the evaluator only reads out categories for sample values; rule conditions and official examples are quoted verbatim from the data",
+    "verified_findings": {
+      "czech_integers": "one: 1; few: 2-4; other: 0, 5-20, 11/111 (1 in the last position of another ten), 21-25, 101, 1001, 1000000 — probe grid in probe.cs.cardinal.integers",
+      "czech_fractions": "every value with visible fraction digits (v != 0) is many — including 1.0 and 2.0 (probe.cs.cardinal.decimals)",
+      "belarusian_fractions": "x.0 forms follow the integer part (1.0 one, 2.0-4.0 few, 5.0 many); non-integer decimals (0.5, 1.1, 4.5) are other",
+      "be_uk_divergence": "uk rules guard with v = 0, be rules operate on n: the string \"1.0\" is one in be but other in uk; the same holds for 2.0 (few vs other)",
+      "french_spanish_millions": "exact millions (1000000, 2000000) are many in es and fr; 0 is one in fr but other in es; fr decimals 0.5/1.5 are one, 2.0 is other"
+    }
+  },
+  "coverage": {
+    "language_name_matrix": {
+      "be": {
+        "be": "беларуская",
+        "en": "англійская",
+        "uk": "украінская",
+        "de": "нямецкая",
+        "es": "іспанская",
+        "fr": "французская",
+        "cs": "чэшская",
+        "sv": "шведская"
+      },
+      "en": {
+        "be": "Belarusian",
+        "en": "English",
+        "uk": "Ukrainian",
+        "de": "German",
+        "es": "Spanish",
+        "fr": "French",
+        "cs": "Czech",
+        "sv": "Swedish"
+      },
+      "uk": {
+        "be": "білоруська",
+        "en": "англійська",
+        "uk": "українська",
+        "de": "німецька",
+        "es": "іспанська",
+        "fr": "французька",
+        "cs": "чеська",
+        "sv": "шведська"
+      },
+      "de": {
+        "be": "Belarussisch",
+        "en": "Englisch",
+        "uk": "Ukrainisch",
+        "de": "Deutsch",
+        "es": "Spanisch",
+        "fr": "Französisch",
+        "cs": "Tschechisch",
+        "sv": "Schwedisch"
+      },
+      "es": {
+        "be": "bielorruso",
+        "en": "inglés",
+        "uk": "ucraniano",
+        "de": "alemán",
+        "es": "español",
+        "fr": "francés",
+        "cs": "checo",
+        "sv": "sueco"
+      },
+      "fr": {
+        "be": "biélorusse",
+        "en": "anglais",
+        "uk": "ukrainien",
+        "de": "allemand",
+        "es": "espagnol",
+        "fr": "français",
+        "cs": "tchèque",
+        "sv": "suédois"
+      },
+      "cs": {
+        "be": "běloruština",
+        "en": "angličtina",
+        "uk": "ukrajinština",
+        "de": "němčina",
+        "es": "španělština",
+        "fr": "francouzština",
+        "cs": "čeština",
+        "sv": "švédština"
+      },
+      "sv": {
+        "be": "belarusiska",
+        "en": "engelska",
+        "uk": "ukrainska",
+        "de": "tyska",
+        "es": "spanska",
+        "fr": "franska",
+        "cs": "tjeckiska",
+        "sv": "svenska"
+      }
+    },
+    "language_name_matrix_missing": [],
+    "cardinal_rules": {
+      "be": {
+        "one": "n % 10 = 1 and n % 100 != 11",
+        "few": "n % 10 = 2..4 and n % 100 != 12..14",
+        "many": "n % 10 = 0 or n % 10 = 5..9 or n % 100 = 11..14",
+        "other": ""
+      },
+      "en": {
+        "one": "i = 1 and v = 0",
+        "other": ""
+      },
+      "uk": {
+        "one": "v = 0 and i % 10 = 1 and i % 100 != 11",
+        "few": "v = 0 and i % 10 = 2..4 and i % 100 != 12..14",
+        "many": "v = 0 and i % 10 = 0 or v = 0 and i % 10 = 5..9 or v = 0 and i % 100 = 11..14",
+        "other": ""
+      },
+      "de": {
+        "one": "i = 1 and v = 0",
+        "other": ""
+      },
+      "es": {
+        "one": "n = 1",
+        "many": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0..5",
+        "other": ""
+      },
+      "fr": {
+        "one": "i = 0,1",
+        "many": "e = 0 and i != 0 and i % 1000000 = 0 and v = 0 or e != 0..5",
+        "other": ""
+      },
+      "cs": {
+        "one": "i = 1 and v = 0",
+        "few": "i = 2..4 and v = 0",
+        "many": "v != 0",
+        "other": ""
+      },
+      "sv": {
+        "one": "i = 1 and v = 0",
+        "other": ""
+      }
+    },
+    "ordinal_rules": {
+      "be": {
+        "few": "n % 10 = 2,3 and n % 100 != 12,13",
+        "other": ""
+      },
+      "en": {
+        "one": "n % 10 = 1 and n % 100 != 11",
+        "two": "n % 10 = 2 and n % 100 != 12",
+        "few": "n % 10 = 3 and n % 100 != 13",
+        "other": ""
+      },
+      "uk": {
+        "few": "n % 10 = 3 and n % 100 != 13",
+        "other": ""
+      },
+      "de": {
+        "other": ""
+      },
+      "es": {
+        "other": ""
+      },
+      "fr": {
+        "one": "n = 1",
+        "other": ""
+      },
+      "cs": {
+        "other": ""
+      },
+      "sv": {
+        "one": "n % 10 = 1,2 and n % 100 != 11,12",
+        "other": ""
+      }
+    },
+    "plural_ranges": {
+      "source": "cldr-core/supplemental/pluralRanges.json",
+      "be_uk_cs": "full start/end matrix over one/few/many/other",
+      "de_en_es_fr_sv": "reduced sets (see file)"
+    },
+    "number_symbols": {
+      "be": {
+        "decimal": ",",
+        "decimal_cp": [
+          "U+002C"
+        ],
+        "group": " ",
+        "group_cp": [
+          "U+00A0"
+        ]
+      },
+      "en": {
+        "decimal": ".",
+        "decimal_cp": [
+          "U+002E"
+        ],
+        "group": ",",
+        "group_cp": [
+          "U+002C"
+        ]
+      },
+      "uk": {
+        "decimal": ",",
+        "decimal_cp": [
+          "U+002C"
+        ],
+        "group": " ",
+        "group_cp": [
+          "U+00A0"
+        ]
+      },
+      "de": {
+        "decimal": ",",
+        "decimal_cp": [
+          "U+002C"
+        ],
+        "group": ".",
+        "group_cp": [
+          "U+002E"
+        ]
+      },
+      "es": {
+        "decimal": ",",
+        "decimal_cp": [
+          "U+002C"
+        ],
+        "group": ".",
+        "group_cp": [
+          "U+002E"
+        ]
+      },
+      "fr": {
+        "decimal": ",",
+        "decimal_cp": [
+          "U+002C"
+        ],
+        "group": " ",
+        "group_cp": [
+          "U+202F"
+        ]
+      },
+      "cs": {
+        "decimal": ",",
+        "decimal_cp": [
+          "U+002C"
+        ],
+        "group": " ",
+        "group_cp": [
+          "U+00A0"
+        ]
+      },
+      "sv": {
+        "decimal": ",",
+        "decimal_cp": [
+          "U+002C"
+        ],
+        "group": " ",
+        "group_cp": [
+          "U+00A0"
+        ]
+      }
+    },
+    "date_samples": {
+      "be_full_date_format": "EEEE, d MMMM y 'г'.",
+      "be_month_format_wide_january": "студзеня",
+      "be_month_stand_alone_wide_january": "студзень",
+      "uk_month_format_wide_january": "січня",
+      "cs_month_format_wide_january": "ledna",
+      "note": "format context uses oblique-case month names in be/uk/cs; the stand-alone context exists in the same files"
+    },
+    "parameterized_patterns": {
+      "be_unit_hour": [
+        "{0} гадзіна (one)",
+        "{0} гадзіны (few)",
+        "{0} гадзін (many)",
+        "{0} гадзіны (other)",
+        "{0} у гадзіну (per-unit)"
+      ],
+      "cs_unit_hour_note": "case x count matrix (accusative/dative/genitive/instrumental/locative x one/few/many/other), gender feminine",
+      "be_list_pattern_standard": "{0}, {1} … {0} і {1}",
+      "ellipsis_final": "{0}…",
+      "minimal_pairs": "plural minimal pairs present for all eight locales; case/gender minimal pairs present for uk/cs/de/sv (see numbers.json minimalPairs)"
+    },
+    "ui_phrase_dictionary": {
+      "conclusion": "CLDR supplies locale rules and names, not application phrase dictionaries; the only UI-adjacent slot inspected (characters.moreInformation) is the unfilled placeholder \"?\" in be/en/cs",
+      "benchmark": [
+        {
+          "term": "back",
+          "files_with_substring_hits": [
+            "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/be/ca-gregorian.json",
+            "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/en/ca-gregorian.json",
+            "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/uk/ca-gregorian.json",
+            "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/de/ca-gregorian.json",
+            "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/es/ca-gregorian.json",
+            "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/fr/ca-gregorian.json",
+            "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/cs/ca-gregorian.json",
+            "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/sv/ca-gregorian.json"
+          ],
+          "hit_count": 8
+        },
+        {
+          "term": "cancel",
+          "files_with_substring_hits": [],
+          "hit_count": 0
+        },
+        {
+          "term": "settings",
+          "files_with_substring_hits": [],
+          "hit_count": 0
+        },
+        {
+          "term": "guide",
+          "files_with_substring_hits": [],
+          "hit_count": 0
+        },
+        {
+          "term": "stop",
+          "files_with_substring_hits": [
+            "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-dates-full/main/cs/ca-gregorian.json",
+            "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-units-full/main/cs/units.json"
+          ],
+          "hit_count": 2
+        },
+        {
+          "term": "walk",
+          "files_with_substring_hits": [],
+          "hit_count": 0
+        },
+        {
+          "term": "download",
+          "files_with_substring_hits": [],
+          "hit_count": 0
+        },
+        {
+          "term": "purchase",
+          "files_with_substring_hits": [],
+          "hit_count": 0
+        },
+        {
+          "term": "restore",
+          "files_with_substring_hits": [],
+          "hit_count": 0
+        },
+        {
+          "term": "unavailable",
+          "files_with_substring_hits": [],
+          "hit_count": 0
+        }
+      ],
+      "benchmark_note": "case-insensitive substring scan over exactly the files listed in acquisition.files; back hits are only inside \"intervalFormatFallback\"; stop hits are Czech \"listopadu\" (November) and \"stopy čtvereční\" (square feet)"
+    }
+  },
+  "limitations": [
+    "coverage verified over the 45 manifested files, not over every file of the release; transforms, annotations, keyboards, segments, subdivisions and person names were not inspected",
+    "the plural evaluator is a scratch verification tool, not production code; it reproduces 449/449 official examples, which validates it for these locales but does not make it a maintained artifact",
+    "GitHub tag URLs and the unicode.org catalog can change or disappear; hashes pin content only while the tag exists",
+    "CLDR coverage-level metadata was not analyzed; name absence was tested only for the eight UI locales in localenames-full",
+    "access date 2026-10-04; release-specific facts refer to CLDR 48.2 / cldr-json 48.2.3 and must be re-verified for any later release"
+  ]
+}
