@@ -7,8 +7,9 @@
 // preview the usual way and starts no audio (R07), and the dismissal clears
 // the card. The durable limit rows are the node suites' provenance; this
 // world's store is the memory wiring.
-import { afterEach, describe, expect, jest, test } from "@jest/globals";
+import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
+import { AppState } from "react-native";
 
 import Map from "./map";
 import PlaceDetail from "./place/[id]";
@@ -86,6 +87,8 @@ async function openMapWithHints(foreground: { current: boolean }, events: GuideH
 }
 
 describe("Guide hint card (G07.05)", () => {
+  beforeEach(() => { AppState.currentState = "active"; });
+
   afterEach(() => {
     jest.restoreAllMocks();
   });

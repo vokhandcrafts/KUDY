@@ -21,6 +21,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 Што зрабіць: праглядзі і змержы PR #602 у main. Змена дробная (новы тэст + must-flag радок, бяз продакшн-кода), пайплайн па hook v3 крок 0 ідзе без рэвью-агентаў і без аўтамержу, таму мерж за чалавекам; пасля мержу задача #599 закрываецца аўтаматычна (Closes #599).
 PR: https://github.com/vokhandcrafts/KUDY/pull/602 (issue: https://github.com/vokhandcrafts/KUDY/issues/599)
 
+### 2026-10-04 — Праверка GPS і «Побач», PR #517
+Праглядзі PR #517 і вынікі праверак GitHub перад мержам. На Android/iOS правер позні запуск GPS пасля спынення і пераход «Побач» у фон з дзейнай прагулкай: тэсты з заменнікамі даказваюць толькі парадак аперацый і вызваленне падпісак.
+PR: https://github.com/vokhandcrafts/KUDY/pull/517 (задача: https://github.com/vokhandcrafts/KUDY/issues/479)
+
 ### 2026-10-04 — G21.20: зацвердзі ADR ідэнтычнасці моў гіда
 Што зрабіць: прачытай `docs/architecture/decisions/G21.20-language-identity.md` (кантракт §3) і запішы ў issue выразнае зацвярджэнне або правкі; пасля прыняцця перавядзі статус файла ў шапцы ў «прынята». Рэалізацыя G21.21 пачынаецца толькі пасля гэтага зацвярджэння.
 Issue: https://github.com/vokhandcrafts/KUDY/issues/552 (PR: https://github.com/vokhandcrafts/KUDY/pull/593; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)

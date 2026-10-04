@@ -27,14 +27,17 @@ interface PermissionResponseLike {
 interface Deferred<T> {
   promise: Promise<T>;
   resolve(value: T): void;
+  reject(error: Error): void;
 }
 
 function deferred<T>(): Deferred<T> {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((res) => {
+  let reject!: (error: Error) => void;
+  const promise = new Promise<T>((res, rej) => {
     resolve = res;
+    reject = rej;
   });
-  return { promise, resolve };
+  return { promise, resolve, reject };
 }
 
 // Every ask hands out its own deferred: the tests hold replies pending and
@@ -45,6 +48,9 @@ let foregroundAsks: Array<Deferred<PermissionResponseLike>>;
 let backgroundAsks: Array<Deferred<PermissionResponseLike>>;
 let watchStart: Deferred<{ remove(): void }>;
 let backgroundStarted: boolean;
+let startGate: Deferred<void> | null;
+let stopGate: Deferred<void> | null;
+let checkGate: Deferred<boolean> | null;
 
 interface RecordingWatch {
   callback(location: OsLocationObject): void;
@@ -63,7 +69,9 @@ function resetStandIns(): void {
   watchStart = deferred();
   backgroundStarted = false;
   watches.length = 0;
-  definedTasks.clear();
+  startGate = null;
+  stopGate = null;
+  checkGate = null;
   locationCalls.length = 0;
 }
 
@@ -103,14 +111,12 @@ mock.module('expo-location', {
     },
     startLocationUpdatesAsync: (taskName: string) => {
       locationCalls.push(`startUpdates:${taskName}`);
-      backgroundStarted = true;
-      return Promise.resolve();
+      return (startGate?.promise ?? Promise.resolve()).then(() => { backgroundStarted = true; });
     },
-    hasStartedLocationUpdatesAsync: () => Promise.resolve(backgroundStarted),
+    hasStartedLocationUpdatesAsync: () => checkGate?.promise ?? Promise.resolve(backgroundStarted),
     stopLocationUpdatesAsync: () => {
       locationCalls.push('stopUpdates');
-      backgroundStarted = false;
-      return Promise.resolve();
+      return (stopGate?.promise ?? Promise.resolve()).then(() => { backgroundStarted = false; });
     },
   },
 });
@@ -326,4 +332,135 @@ test('background_granted_starts_updates: the granted background scope still star
   service.setMode('paused');
   await flush();
   assert.ok(locationCalls.includes('stopUpdates'), 'the background task is stopped with the subscription');
+});
+
+async function backgroundPort() {
+  const world = setup();
+  world.port.onPortEvent(event => { if (event.type === 'fix') world.fixes.push(event.fix); });
+  world.port.requestPermission('background', 'bg-why');
+  backgroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  return world;
+}
+
+test('delayed_start_after_stop: a late native start leaves no background task', async () => {
+  const { port } = await backgroundPort();
+  startGate = deferred();
+  port.startFixes(1);
+  await flush();
+  port.stopFixes(1);
+  await flush();
+  startGate.resolve();
+  await flush();
+  assert.equal(backgroundStarted, false, 'stopped owner must leave zero native tasks');
+});
+
+test('old_stop_new_start: a pending native stop finishes before the replacement starts', async () => {
+  const { port, fixes } = await backgroundPort();
+  port.startFixes(1);
+  await flush();
+  stopGate = deferred();
+  port.stopFixes(1);
+  await flush();
+  port.startFixes(2);
+  await flush();
+  stopGate.resolve();
+  await flush();
+  assert.equal(backgroundStarted, true, 'old cleanup must not stop the replacement');
+  definedTasks.get(TASK)?.({ data: { locations: [osFix(1)] } });
+  assert.equal(fixes.length, 1, 'the current port receives background fixes');
+  port.stopFixes(2);
+  await flush();
+  assert.equal(backgroundStarted, false);
+});
+
+test('pending_stop_check_new_start: a delayed status answer cannot stop the replacement', async () => {
+  const { port } = await backgroundPort();
+  port.startFixes(1);
+  await flush();
+  checkGate = deferred();
+  port.stopFixes(1);
+  await flush();
+  port.startFixes(2);
+  checkGate.resolve(true);
+  await flush();
+  assert.equal(backgroundStarted, true);
+  assert.ok(!locationCalls.includes('stopUpdates'));
+  checkGate = null;
+  port.stopFixes(2);
+  await flush();
+  assert.equal(backgroundStarted, false);
+});
+
+test('start_rejection_after_stop: a rejected obsolete start never creates a fallback watch', async () => {
+  const { port } = await backgroundPort();
+  startGate = deferred();
+  port.startFixes(1);
+  await flush();
+  port.stopFixes(1);
+  startGate.reject(new Error('native start refused'));
+  await flush();
+  assert.equal(watches.length, 0, 'obsolete rejection must not start new work');
+  assert.equal(backgroundStarted, false);
+});
+
+test('current_start_rejection: the foreground fallback remains usable and is released', async () => {
+  const { port, fixes } = await backgroundPort();
+  startGate = deferred();
+  port.startFixes(1);
+  await flush();
+  startGate.reject(new Error('native start refused'));
+  watchStart.resolve({ remove() {} });
+  await flush();
+  watches[0].callback(osFix(1));
+  assert.equal(fixes.length, 1);
+  port.stopFixes(1);
+  await flush();
+  assert.equal(watches[0].removeCalls, 1);
+});
+
+test('obsolete_foreground_callback: an old watcher cannot tag its fix as the new owner', async () => {
+  const { port, fixes } = setup();
+  port.onPortEvent(event => { if (event.type === 'fix') fixes.push(event.fix); });
+  port.startFixes(1);
+  watchStart.resolve({ remove() {} });
+  await flush();
+  port.stopFixes(1);
+  port.startFixes(2);
+  await flush();
+  watches[0].callback(osFix(1));
+  assert.equal(fixes.length, 0, 'old callbacks must be discarded before retagging');
+  watches[1].callback(osFix(2));
+  assert.equal(fixes.length, 1);
+  port.stopFixes(2);
+  await flush();
+  assert.deepEqual(watches.map(w => w.removeCalls), [1, 1]);
+});
+
+test('delayed_foreground_after_stop: a pending foreground handle removes itself', async () => {
+  const { port } = setup();
+  port.startFixes(1);
+  port.stopFixes(1);
+  watchStart.resolve({ remove() {} });
+  await flush();
+  assert.equal(watches[0].removeCalls, 1);
+  assert.equal(backgroundStarted, false);
+});
+
+test('background_to_foreground: a delayed stopped task cannot survive under a city watch', async () => {
+  const { port } = await backgroundPort();
+  startGate = deferred();
+  port.startFixes(1);
+  await flush();
+  port.stopFixes(1);
+  port.requestPermission('foreground', 'fg-why');
+  port.startFixes(2);
+  watchStart.resolve({ remove() {} });
+  startGate.resolve();
+  await flush();
+  assert.equal(backgroundStarted, false, 'the old background task is released');
+  assert.equal(watches[0].removeCalls, 0, 'the city watch remains active');
+  port.stopFixes(2);
+  await flush();
+  assert.equal(watches[0].removeCalls, 1);
 });

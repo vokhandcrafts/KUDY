@@ -8,8 +8,9 @@
 // geofence window (criterion 3, R04 — fails if one is wired), a live walk
 // keeps its own subscription (criterion 4), and the cards carry
 // screen-reader labels (criterion 5).
-import { afterEach, describe, expect, jest, test } from "@jest/globals";
+import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
+import { AppState, type AppStateStatus } from "react-native";
 import { Svg } from "react-native-svg";
 
 import Map from "./map";
@@ -19,6 +20,8 @@ import { createServices } from "../controllers/createServices";
 import { fixtureText, layoutWith, makeRunSession, serve, sha256 } from "../test/render-helpers";
 import type { FakeAudioPlayerPort } from "../services/audio/fake-port";
 import type { FakeLocationOsPort } from "../services/location/fake-port";
+
+beforeEach(() => { AppState.currentState = "active"; });
 
 const CATALOG_TEXT = fixtureText("catalog-with-discovery.json");
 const INDEX_TEXT = fixtureText("index-valid.json");
@@ -441,6 +444,80 @@ describe("Nearby UI-locale words (issue #523)", () => {
     expect(within(ukCard).getByText("Платно")).toBeTruthy();
     // ...and the authored content keeps its language.
     expect(within(ukCard).getByText("Гісторыі сукнараў: ад мытні да порта")).toBeTruthy();
+    rendered.unmount();
+  });
+});
+
+describe("Nearby app lifecycle (G20.08)", () => {
+  function appStates() {
+    const listeners = new Set<(state: AppStateStatus) => void>();
+    jest.spyOn(AppState, "addEventListener").mockImplementation((_event, listener) => {
+      listeners.add(listener);
+      return { remove: () => { listeners.delete(listener); } };
+    });
+    return {
+      listeners,
+      change(state: AppStateStatus) {
+        AppState.currentState = state;
+        act(() => { for (const listener of listeners) listener(state); });
+      },
+    };
+  }
+
+  test("nearby_background_foreground: stops its watch and resumes once without duplicates", async () => {
+    const lifecycle = appStates();
+    const env = makeRunSession();
+    const { rendered } = await openNearby(env);
+    expect(env.locationPort.activeSubscriptions()).toBe(1);
+    lifecycle.change("background");
+    expect(env.locationPort.activeSubscriptions()).toBe(0);
+    expect(env.location.currentMode()).toBe("idle");
+    act(() => { jest.advanceTimersByTime(1500); });
+    expect(env.locationPort.activeSubscriptions()).toBe(0);
+    lifecycle.change("active");
+    lifecycle.change("active");
+    expect(env.locationPort.activeSubscriptions()).toBe(1);
+    expect(startsOf(env.locationPort)).toEqual(["start 1", "start 2"]);
+    rendered.unmount();
+    expect(env.locationPort.activeSubscriptions()).toBe(0);
+    expect(lifecycle.listeners.size).toBe(0);
+  });
+
+  test("nearby_background_active_run: background and unmount preserve the walk owner", async () => {
+    const lifecycle = appStates();
+    const env = makeRunSession();
+    const { rendered } = await openNearby(env);
+    act(() => { env.location.setMode("active-guide"); });
+    lifecycle.change("background");
+    lifecycle.change("active");
+    expect(env.location.currentMode()).toBe("active-guide");
+    expect(env.locationPort.activeSubscriptions()).toBe(1);
+    rendered.unmount();
+    expect(env.locationPort.activeSubscriptions()).toBe(1);
+    expect(stopsOf(env.locationPort)).toEqual([]);
+    expect(lifecycle.listeners.size).toBe(0);
+    env.location.setMode("idle");
+  });
+
+  test("nearby_disposed_callback: a removed lifecycle listener cannot restart location", async () => {
+    const lifecycle = appStates();
+    const env = makeRunSession();
+    const { rendered } = await openNearby(env);
+    const lateCallbacks = [...lifecycle.listeners];
+    rendered.unmount();
+    act(() => { for (const callback of lateCallbacks) callback("active"); });
+    expect(env.locationPort.activeSubscriptions()).toBe(0);
+    expect(env.location.currentMode()).toBe("idle");
+  });
+
+  test("nearby_initial_background: a mounted screen waits for foreground before arming", async () => {
+    const lifecycle = appStates();
+    AppState.currentState = "background";
+    const env = makeRunSession();
+    const { rendered } = await openNearby(env);
+    expect(env.locationPort.activeSubscriptions()).toBe(0);
+    lifecycle.change("active");
+    expect(env.locationPort.activeSubscriptions()).toBe(1);
     rendered.unmount();
   });
 });

@@ -1,0 +1,1757 @@
+{
+  "task": {
+    "id": "G21.31",
+    "issue": 563,
+    "epic": 532,
+    "assessed_at_utc": "2026-10-04T00:56:50Z",
+    "report": "docs/reports/localization-sources/wiktionary.md"
+  },
+  "provenance": {
+    "live_editions": {
+      "fetched_live": "en.wiktionary.org (operator egress allowlist)",
+      "not_fetched_live": "be/uk/de/es/fr/cs/sv.wiktionary.org - separate hostnames, not in the operator allowlist during the session; their coverage is evidenced through the official dump metadata only"
+    },
+    "dumps": {
+      "host": "dumps.wikimedia.org",
+      "allowlisted": true,
+      "downloads_performed": "none - metadata pages only, per the no-full-corpus constraint"
+    }
+  },
+  "siteinfo_en": {
+    "source_url": "https://en.wiktionary.org/w/api.php?action=query&meta=siteinfo&siprop=general%7Cstatistics&format=json",
+    "sitename": "Wiktionary",
+    "server": "en.wiktionary.org",
+    "generator": "MediaWiki 1.47.0-wmf.22",
+    "content_lang": "en",
+    "statistics": {
+      "articles": 9204056,
+      "pages": 11328932,
+      "edits": 93369181
+    }
+  },
+  "editions_and_dumps": {
+    "editions_requested": [
+      "be",
+      "en",
+      "uk",
+      "de",
+      "es",
+      "fr",
+      "cs",
+      "sv"
+    ],
+    "dump_dirs": {
+      "en": "enwiktionary",
+      "be": "bewiktionary",
+      "uk": "ukwiktionary",
+      "de": "dewiktionary",
+      "es": "eswiktionary",
+      "fr": "frwiktionary",
+      "cs": "cswiktionary",
+      "sv": "svwiktionary"
+    },
+    "all_present": true,
+    "latest_dump_dir_all_eight": "20261001 (2026-10-01)",
+    "enwiktionary_file_level": {
+      "status_page": "https://dumps.wikimedia.org/enwiktionary/20261001/",
+      "pages_articles_multistream": "1.8 GB",
+      "multistream_index": "74.3 MB",
+      "chunked_into_streams": "yes (e.g. multistream1.xml-p1p1500000.bz2 = 352.8 MB)",
+      "dump_status": "done (2026-10-01 15:59:29)",
+      "dated_dirs_in_listing": 10
+    },
+    "bewiktionary_listing": "monthly dated dirs (20260901, 20261001 observed)"
+  },
+  "license": {
+    "dual_license": [
+      "Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)",
+      "GNU Free Documentation License (GFDL) 1.1 or later, no invariant sections, no front/back-cover texts"
+    ],
+    "source_page": "https://en.wiktionary.org/wiki/Wiktionary:Copyrights (fetched via ?action=raw, 2026-10-04)",
+    "evidence_quote": "The original texts of Wiktionary entries are dual-licensed to the public under both the Creative Commons Attribution-ShareAlike 4.0 International License (CC-BY-SA) and the GNU Free Documentation License (GFDL).",
+    "share_alike": true,
+    "attribution": "authorship (history page) acknowledgement and link back to the original copy required when redistributing",
+    "not_reviewed": [
+      "full license texts",
+      "whether Wikimedia trademark/branding rules add constraints for derived products"
+    ]
+  },
+  "benchmark": {
+    "words_fetched": [
+      "back",
+      "cancel",
+      "settings",
+      "stop",
+      "walk",
+      "guide",
+      "download",
+      "purchase",
+      "restore",
+      "unavailable"
+    ],
+    "follow_up_probe": "setting (singular) fetched after 'settings' proved to be a plural-of stub",
+    "method": "raw wikitext via https://en.wiktionary.org/wiki/<word>?action=raw; ==English== section; every ====Translations==== subsection; senses from {{trans-top|...}} headers; targets from {{t|be|...}}, {{t+|...}}, {{tt|...}} templates; single fetch session 2026-10-04",
+    "parsed_blocks": {
+      "back": {
+        "bytes": 73490,
+        "translation_blocks": [
+          {
+            "pos": "Etymology 1",
+            "sense": "near the rear",
+            "translations": {
+              "be": [
+                "за́дні",
+                "ты́льны"
+              ],
+              "cs": [
+                "zadní"
+              ],
+              "fr": [
+                "derrière",
+                "postérieur"
+              ],
+              "de": [
+                "hinterer",
+                "rück-"
+              ],
+              "es": [
+                "atrás",
+                "trasero",
+                "posterior"
+              ],
+              "sv": [
+                "bak"
+              ],
+              "uk": [
+                "за́дній",
+                "ти́льний"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "not current",
+            "translations": {
+              "cs": [
+                "starý"
+              ],
+              "de": [
+                "früher",
+                "alt",
+                "veraltet"
+              ],
+              "es": [
+                "anterior",
+                "viejo",
+                "atrasado"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "away from the main area",
+            "translations": {
+              "cs": [
+                "odlehlý"
+              ],
+              "fr": [
+                "écarté"
+              ],
+              "de": [
+                "abgelegen"
+              ],
+              "es": [
+                "apartado",
+                "arrinconado",
+                "distante"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "phonetics: produced in the back of the mouth",
+            "translations": {
+              "cs": [
+                "zadní",
+                "zadopatrový"
+              ],
+              "fr": [
+                "postérieur"
+              ],
+              "de": [
+                "hinterer",
+                "Hinterzungen-"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to or in a previous condition or place",
+            "translations": {
+              "be": [
+                "наза́д"
+              ],
+              "cs": [
+                "zpět",
+                "zpátky"
+              ],
+              "fr": [
+                "de retour"
+              ],
+              "de": [
+                "zurück",
+                "wieder da"
+              ],
+              "es": [
+                "[[hacia]] [[atrás]]",
+                "de vuelta",
+                "de regreso"
+              ],
+              "sv": [
+                "tillbaka"
+              ],
+              "uk": [
+                "наза́д"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "away from the front or from an edge",
+            "translations": {
+              "cs": [
+                "vzadu",
+                "dozadu"
+              ],
+              "es": [
+                "atrás",
+                "arredro"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "in a manner that impedes",
+            "translations": {
+              "cs": [
+                "zpět",
+                "zpátky"
+              ],
+              "sv": [
+                "tillbaka"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "-see|the rear of body|lumbar",
+            "translations": {
+              "be": [
+                "спі́на"
+              ],
+              "cs": [
+                "záda",
+                "hřbet"
+              ],
+              "fr": [
+                "dos"
+              ],
+              "de": [
+                "Rücken"
+              ],
+              "es": [
+                "espalda",
+                "dorso",
+                "lomo"
+              ],
+              "sv": [
+                "rygg"
+              ],
+              "uk": [
+                "спи́на"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "-see|the reverse side|rear",
+            "translations": {
+              "be": [
+                "зад"
+              ],
+              "cs": [
+                "rub"
+              ],
+              "fr": [
+                "derrière",
+                "revers"
+              ],
+              "de": [
+                "Rückseite",
+                "Kehrseite"
+              ],
+              "es": [
+                "revés",
+                "envés",
+                "reverso",
+                "dorso"
+              ],
+              "sv": [
+                "baksida"
+              ],
+              "uk": [
+                "зад"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "-see|that which is farthest away from the front|rear",
+            "translations": {
+              "be": [
+                "зад"
+              ],
+              "cs": [
+                "zadek",
+                "[[zadní]] [[část]]"
+              ],
+              "fr": [
+                "fond"
+              ],
+              "de": [
+                "Ende",
+                "Fond",
+                "Hintergrund",
+                "Hinterseite"
+              ],
+              "es": [
+                "parte de atrás",
+                "fondo",
+                "trasero"
+              ],
+              "sv": [
+                "bakände",
+                "slut"
+              ],
+              "uk": [
+                "зад"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "the part of something that goes last",
+            "translations": {
+              "be": [
+                "зад"
+              ],
+              "cs": [
+                "část"
+              ],
+              "fr": [
+                "fin"
+              ],
+              "de": [
+                "Ende",
+                "Hinterende"
+              ],
+              "es": [
+                "fondo",
+                "extremo",
+                "cabo"
+              ],
+              "sv": [
+                "bakände"
+              ],
+              "uk": [
+                "зад"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "-also|the backrest, the part of a piece of furniture which receives the human back|backrest",
+            "translations": {
+              "be": [
+                "спі́нка"
+              ],
+              "de": [
+                "Rückenlehne"
+              ],
+              "es": [
+                "respaldo",
+                "espaldar"
+              ],
+              "sv": [
+                "rygg"
+              ],
+              "uk": [
+                "спи́нка"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "a position behind most players on the team",
+            "translations": {
+              "be": [
+                "абаро́нца"
+              ],
+              "cs": [
+                "obránce",
+                "bek",
+                "útočník"
+              ],
+              "fr": [
+                "arrière"
+              ],
+              "de": [
+                "Verteidiger"
+              ],
+              "es": [
+                "defensa"
+              ],
+              "sv": [
+                "back"
+              ],
+              "uk": [
+                "захисни́к"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to go in the reverse direction",
+            "translations": {
+              "cs": [
+                "couvat"
+              ],
+              "fr": [
+                "reculer",
+                "arrière"
+              ],
+              "de": [
+                "zurücksetzen"
+              ],
+              "es": [
+                "atrás",
+                "atrás",
+                "retroceder"
+              ],
+              "sv": [
+                "backa"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to support",
+            "translations": {
+              "cs": [
+                "podporovat"
+              ],
+              "fr": [
+                "soutenir"
+              ],
+              "es": [
+                "respaldar",
+                "sostener"
+              ],
+              "sv": [
+                "backa upp"
+              ],
+              "uk": [
+                "підтримувати",
+                "підтримати"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "of wind: to shift in an anticlockwise direction",
+            "translations": {
+              "de": [
+                "rückdrehen"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 2",
+            "sense": "cistern",
+            "translations": {
+              "cs": [
+                "káď"
+              ],
+              "de": [
+                "Würzpfanne",
+                "Pfanne",
+                "Wanne",
+                "Bottich",
+                "Küpe"
+              ]
+            }
+          }
+        ]
+      },
+      "cancel": {
+        "bytes": 18076,
+        "translation_blocks": [
+          {
+            "pos": "Verb",
+            "sense": "cross out",
+            "translations": {
+              "cs": [
+                "škrtnout",
+                "škrtat"
+              ],
+              "de": [
+                "ausstreichen",
+                "durchstreichen",
+                "kanzellieren"
+              ],
+              "es": [
+                "tachar"
+              ],
+              "sv": [
+                "stryka"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "invalidate, annul",
+            "translations": {
+              "be": [
+                "касава́ць",
+                "скасо́ўваць",
+                "скасава́ць",
+                "адмяня́ць",
+                "адмяні́ць"
+              ],
+              "cs": [
+                "zrušit",
+                "stornovat"
+              ],
+              "fr": [
+                "annuler",
+                "résilier",
+                "se désabonner",
+                "mettre fin",
+                "décommander"
+              ],
+              "de": [
+                "annullieren",
+                "streichen",
+                "stornieren",
+                "absagen",
+                "canceln",
+                "abbestellen",
+                "kanzellieren"
+              ],
+              "es": [
+                "cancelar",
+                "funar"
+              ],
+              "sv": [
+                "annullera",
+                "avbryta",
+                "upphäva"
+              ],
+              "uk": [
+                "касува́ти",
+                "скасо́вувати",
+                "скасува́ти"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "mark to prevent reuse",
+            "translations": {
+              "fr": [
+                "oblitérer"
+              ],
+              "de": [
+                "entwerten",
+                "abstempeln",
+                "kanzellieren",
+                "entwerten (postage)"
+              ],
+              "sv": [
+                "stämpla"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "offset, equalize",
+            "translations": {
+              "cs": [
+                "vyrušit"
+              ],
+              "fr": [
+                "neutraliser",
+                "compenser"
+              ],
+              "de": [
+                "aufheben",
+                "auslöschen"
+              ],
+              "sv": [
+                "upphäva",
+                "släcka ut",
+                "ta ut"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "remove a common factor",
+            "translations": {
+              "cs": [
+                "krátit"
+              ],
+              "fr": [
+                "éliminer",
+                "annuler"
+              ],
+              "de": [
+                "kürzen"
+              ],
+              "sv": [
+                "förkorta"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "stop production",
+            "translations": {
+              "de": [
+                "einstellen"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "printing, dated: suppress or omit",
+            "translations": {
+              "de": [
+                "weglassen"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "slang: kill",
+            "translations": {
+              "de": [
+                "auslöschen"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "cease to provide financial or moral support to (someone deemed unacceptable)",
+            "translations": {
+              "de": [
+                "canceln",
+                "kanzellieren",
+                "(Unterstützung) streichen"
+              ],
+              "es": [
+                "funar",
+                "cancelar"
+              ]
+            }
+          },
+          {
+            "pos": "Noun",
+            "sense": "cancellation",
+            "translations": {
+              "fr": [
+                "annulation"
+              ],
+              "de": [
+                "Lösch-Mitteilung",
+                "Cancel-Anweisung"
+              ],
+              "es": [
+                "funa"
+              ]
+            }
+          },
+          {
+            "pos": "Noun",
+            "sense": "printing: suppression on striking out of matter",
+            "translations": {
+              "de": [
+                "Undelete (utility)"
+              ]
+            }
+          },
+          {
+            "pos": "Noun",
+            "sense": "mark cancelling a sharp or flat",
+            "translations": {
+              "fr": [
+                "bécarre"
+              ],
+              "sv": [
+                "återställningstecken"
+              ]
+            }
+          }
+        ]
+      },
+      "settings": {
+        "bytes": 230,
+        "translation_blocks": []
+      },
+      "stop": {
+        "bytes": 52177,
+        "translation_blocks": [
+          {
+            "pos": "Etymology 1",
+            "sense": "to cease moving|id=cease moving",
+            "translations": {
+              "be": [
+                "спыня́цца",
+                "спыні́цца"
+              ],
+              "cs": [
+                "zastavit"
+              ],
+              "fr": [
+                "s'arrêter"
+              ],
+              "de": [
+                "anhalten",
+                "stehen bleiben",
+                "stoppen"
+              ],
+              "es": [
+                "parar",
+                "pararse"
+              ],
+              "sv": [
+                "stanna"
+              ],
+              "uk": [
+                "зупиня́тися",
+                "зупини́тися"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "-see|not to continue|cease|desist",
+            "translations": {
+              "be": [
+                "перастава́ць",
+                "пераста́ць"
+              ],
+              "cs": [
+                "skončit"
+              ],
+              "fr": [
+                "cesser",
+                "s'arrêter",
+                "arrêter"
+              ],
+              "de": [
+                "aufhören"
+              ],
+              "es": [
+                "[[dejar]] [[de]]",
+                "[[parar]] [[de]]"
+              ],
+              "sv": [
+                "sluta",
+                "upphöra"
+              ],
+              "uk": [
+                "перестава́ти",
+                "переста́ти",
+                "припиня́тися",
+                "припини́тися"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "-see|to cause to cease moving|detain",
+            "translations": {
+              "be": [
+                "спыня́ць",
+                "спыні́ць"
+              ],
+              "cs": [
+                "zastavit"
+              ],
+              "fr": [
+                "arrêter"
+              ],
+              "de": [
+                "anhalten",
+                "stoppen",
+                "aufhalten"
+              ],
+              "es": [
+                "parar",
+                "entullecer"
+              ],
+              "sv": [
+                "stanna",
+                "stoppa",
+                "stanna"
+              ],
+              "uk": [
+                "зупиня́ти",
+                "зупини́ти"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "-see|to cause to come to an end|discontinue",
+            "translations": {
+              "cs": [
+                "ukončit"
+              ],
+              "fr": [
+                "arrêter"
+              ],
+              "de": [
+                "stoppen",
+                "beenden"
+              ],
+              "es": [
+                "parar"
+              ],
+              "sv": [
+                "stoppa",
+                "avbryta"
+              ],
+              "uk": [
+                "припиня́ти",
+                "припини́ти"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to close an opening",
+            "translations": {
+              "de": [
+                "stopfen"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to stay a while",
+            "translations": {
+              "cs": [
+                "zůstat"
+              ],
+              "fr": [
+                "s'arrêter"
+              ],
+              "sv": [
+                "stanna"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to tarry",
+            "translations": {
+              "cs": [
+                "pobývat"
+              ],
+              "fr": [
+                "s'arrêter"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "place to get on and off mass transport",
+            "translations": {
+              "be": [
+                "прыпы́нак"
+              ],
+              "cs": [
+                "zastávka"
+              ],
+              "fr": [
+                "arrêt",
+                "halte"
+              ],
+              "de": [
+                "Haltestelle",
+                "Busstopp"
+              ],
+              "es": [
+                "parada",
+                "paradero"
+              ],
+              "sv": [
+                "hållplats"
+              ],
+              "uk": [
+                "зупи́нка"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "interruption of travel",
+            "translations": {
+              "cs": [
+                "zastávka"
+              ],
+              "fr": [
+                "arrêt",
+                "halte"
+              ],
+              "de": [
+                "Stopp"
+              ],
+              "sv": [
+                "stopp"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "device to block a moving object",
+            "translations": {
+              "de": [
+                "Stopper"
+              ],
+              "sv": [
+                "stopp"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "punctuation symbol",
+            "translations": {
+              "fr": [
+                "point"
+              ],
+              "de": [
+                "Punkt"
+              ],
+              "es": [
+                "punto",
+                "punto final"
+              ],
+              "sv": [
+                "punkt"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "music: knob or pin to regulate the flow of air in an organ",
+            "translations": {
+              "de": [
+                "Register"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "tennis: very short shot",
+            "translations": {
+              "fr": [
+                "ammorti"
+              ],
+              "de": [
+                "Stoppball"
+              ],
+              "sv": [
+                "stoppboll"
+              ]
+            }
+          }
+        ]
+      },
+      "walk": {
+        "bytes": 44926,
+        "translation_blocks": [
+          {
+            "pos": "Etymology 1",
+            "sense": "to move on the feet",
+            "translations": {
+              "be": [
+                "ісці́",
+                "хадзі́ць",
+                "гуля́ць",
+                "[[ісці́]] [[пе́шшу]]"
+              ],
+              "cs": [
+                "jít",
+                "chodit"
+              ],
+              "fr": [
+                "marcher",
+                "se promener"
+              ],
+              "de": [
+                "gehen"
+              ],
+              "es": [
+                "caminar",
+                "andar"
+              ],
+              "sv": [
+                "gå",
+                "gå till fots"
+              ],
+              "uk": [
+                "ходи́ти",
+                "іти́",
+                "[[іти́]] [[кро́ком]]",
+                "гуля́ти",
+                "[[іти́]] [[пі́шки]]"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "colloquial: to avoid a criminal court case",
+            "translations": {
+              "fr": [
+                "ficher le camp"
+              ],
+              "de": [
+                "[[freilassen",
+                "freikommen"
+              ],
+              "sv": [
+                "slippa lös"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "colloquial: to be stolen",
+            "translations": {
+              "fr": [
+                "s'envoler",
+                "se barrer"
+              ],
+              "de": [
+                "wegkommen"
+              ],
+              "es": [
+                "estar robado"
+              ],
+              "sv": [
+                "få fötter"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to travel a distance by walking",
+            "translations": {
+              "cs": [
+                "jít"
+              ],
+              "fr": [
+                "marcher",
+                "[[faire]] [distance] [[à pied]]"
+              ],
+              "de": [
+                "laufen"
+              ],
+              "es": [
+                "caminar",
+                "pasear"
+              ],
+              "sv": [
+                "gå",
+                "promenera",
+                "vandra"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to take for a walk or accompany",
+            "translations": {
+              "fr": [
+                "accompagner",
+                "raccompagner",
+                "promener"
+              ],
+              "de": [
+                "ausführen",
+                "begleiten"
+              ],
+              "es": [
+                "pasear",
+                "acompañar"
+              ],
+              "sv": [
+                "gå ut och gå",
+                "gå ut med hunden"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to full cloth",
+            "translations": {
+              "fr": [
+                "battre"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to traverse by walking (or analogous gradual movement)",
+            "translations": {
+              "fr": [
+                "parcourir"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "colloquial: to leave, resign",
+            "translations": {
+              "fr": [
+                "se barrer",
+                "se tirer",
+                "se casser"
+              ],
+              "sv": [
+                "gå",
+                "sluta"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "to push vehicle alongside oneself",
+            "translations": {
+              "sv": [
+                "leda"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 2",
+            "sense": "trip made by walking",
+            "translations": {
+              "be": [
+                "пагуля́нка",
+                "прагу́лка",
+                "спа́цыр",
+                "шпа́цыр"
+              ],
+              "cs": [
+                "procházka"
+              ],
+              "fr": [
+                "promenade",
+                "balade",
+                "marche"
+              ],
+              "de": [
+                "Spaziergang"
+              ],
+              "es": [
+                "paseo",
+                "caminata"
+              ],
+              "sv": [
+                "promenad",
+                "vandring"
+              ],
+              "uk": [
+                "прогуля́нка",
+                "прогу́лька"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 2",
+            "sense": "distance walked",
+            "translations": {
+              "de": [
+                "Weg"
+              ],
+              "es": [
+                "trecho",
+                "trayecto"
+              ],
+              "sv": [
+                "promenad",
+                "vandring"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 2",
+            "sense": "manner of walking",
+            "translations": {
+              "fr": [
+                "démarche"
+              ],
+              "es": [
+                "andar",
+                "andares"
+              ],
+              "sv": [
+                "gång"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 2",
+            "sense": "maintained place on which to walk",
+            "translations": {
+              "fr": [
+                "allée"
+              ],
+              "es": [
+                "paseo"
+              ],
+              "sv": [
+                "gång"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 2",
+            "sense": "baseball: instance of walking a batter",
+            "translations": {
+              "fr": [
+                "but-sur-balles"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 2",
+            "sense": "graph theory: a sequence of alternating vertices and edges",
+            "translations": {
+              "de": [
+                "Kantenzug"
+              ]
+            }
+          }
+        ]
+      },
+      "guide": {
+        "bytes": 22060,
+        "translation_blocks": [
+          {
+            "pos": "Etymology 1",
+            "sense": "-see|someone who guides|leader",
+            "translations": {
+              "be": [
+                "гід",
+                "экскурсаво́д",
+                "правадні́к",
+                "правадні́ца"
+              ],
+              "cs": [
+                "průvodce",
+                "průvodkyně"
+              ],
+              "fr": [
+                "guide"
+              ],
+              "de": [
+                "Reiseleiter",
+                "Reiseleiterin",
+                "Fremdenführer",
+                "Fremdenführerin"
+              ],
+              "es": [
+                "guía"
+              ],
+              "sv": [
+                "guide"
+              ],
+              "uk": [
+                "гід",
+                "екскурсово́д",
+                "провідни́к",
+                "провідни́ця"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "document, book",
+            "translations": {
+              "be": [
+                "кіраўні́цтва",
+                "даве́днік",
+                "даро́жнiк"
+              ],
+              "cs": [
+                "průvodce",
+                "příručka"
+              ],
+              "fr": [
+                "guide"
+              ],
+              "de": [
+                "Anleitung",
+                "Führer"
+              ],
+              "es": [
+                "guía"
+              ],
+              "sv": [
+                "guidebok",
+                "guide"
+              ],
+              "uk": [
+                "керівни́цтво",
+                "путівни́к"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "-see|sign|sign|signal",
+            "translations": {
+              "be": [
+                "паказа́льнік",
+                "знак"
+              ],
+              "uk": [
+                "пока́жчик",
+                "знак"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 1",
+            "sense": "any marking or object that provides quick reference",
+            "translations": {
+              "be": [
+                "арыенці́р",
+                "арыенты́р"
+              ],
+              "uk": [
+                "орієнти́р"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 2",
+            "sense": "to serve as a guide person",
+            "translations": {
+              "be": [
+                "праводзіць"
+              ],
+              "cs": [
+                "provést"
+              ],
+              "fr": [
+                "guider"
+              ],
+              "de": [
+                "führen"
+              ],
+              "es": [
+                "guiar"
+              ],
+              "sv": [
+                "guida"
+              ],
+              "uk": [
+                "проводи́ти",
+                "вести́",
+                "[[бу́ти]] [[провідник"
+              ]
+            }
+          },
+          {
+            "pos": "Etymology 2",
+            "sense": "to supervise education",
+            "translations": {
+              "es": [
+                "guiar"
+              ]
+            }
+          }
+        ]
+      },
+      "download": {
+        "bytes": 16369,
+        "translation_blocks": [
+          {
+            "pos": "Noun",
+            "sense": "file transfer to the local computer",
+            "translations": {
+              "cs": [
+                "stažení",
+                "stahování"
+              ],
+              "fr": [
+                "téléchargement"
+              ],
+              "de": [
+                "Download",
+                "Herunterladen"
+              ],
+              "es": [
+                "descarga",
+                "transferencia directa",
+                "bajada",
+                "[[bajamiento]] [[cibernético]]",
+                "ciberbajamiento"
+              ],
+              "sv": [
+                "nedladdning",
+                "nerladdning"
+              ],
+              "uk": [
+                "заванта́ження"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "to transfer data from a remote computer to a local one",
+            "translations": {
+              "be": [
+                "спампава́ць"
+              ],
+              "cs": [
+                "stáhnout",
+                "stahovat"
+              ],
+              "fr": [
+                "télécharger"
+              ],
+              "de": [
+                "herunterladen",
+                "downloaden"
+              ],
+              "es": [
+                "descargar",
+                "bajar",
+                "[[bajar]] [[cibernéticamente]]",
+                "ciberbajar"
+              ],
+              "sv": [
+                "ladda ner",
+                "ladda hem",
+                "tanka ner",
+                "tanka hem",
+                "tanka",
+                "dra ner",
+                "dra hem",
+                "ta hem",
+                "plocka hem"
+              ],
+              "uk": [
+                "заванта́жувати",
+                "заванта́жити",
+                "ска́чувати",
+                "скача́ти"
+              ]
+            }
+          }
+        ]
+      },
+      "purchase": {
+        "bytes": 16127,
+        "translation_blocks": [
+          {
+            "pos": "Noun",
+            "sense": "the acquisition of title to, or property in, anything for a price",
+            "translations": {
+              "be": [
+                "паку́пка",
+                "ку́пля"
+              ],
+              "cs": [
+                "nákup"
+              ],
+              "fr": [
+                "achat",
+                "acquisition"
+              ],
+              "de": [
+                "Einkauf",
+                "Kauf",
+                "Anschaffung"
+              ],
+              "es": [
+                "compra",
+                "adquisición",
+                "merca"
+              ],
+              "sv": [
+                "köp"
+              ],
+              "uk": [
+                "купі́вля",
+                "купува́ння"
+              ]
+            }
+          },
+          {
+            "pos": "Noun",
+            "sense": "that which is obtained for a price in money or its equivalent",
+            "translations": {
+              "cs": [
+                "koupě"
+              ],
+              "fr": [
+                "achat",
+                "acquisition"
+              ],
+              "de": [
+                "Kauf",
+                "Anschaffung"
+              ],
+              "es": [
+                "adquisición",
+                "compra"
+              ],
+              "sv": [
+                "köp"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "-also|to obtain by paying money or its equivalent; to buy for a price|buy",
+            "translations": {
+              "fr": [
+                "acheter"
+              ],
+              "de": [
+                "kaufen",
+                "anschaffen",
+                "erwerben",
+                "erstehen"
+              ],
+              "es": [
+                "comprar",
+                "mercar"
+              ],
+              "sv": [
+                "köpa"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "to pursue and obtain; to acquire by seeking; to gain, obtain or acquire",
+            "translations": {
+              "cs": [
+                "koupit",
+                "sehnat"
+              ],
+              "fr": [
+                "acquérir"
+              ],
+              "sv": [
+                "köpa"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "to obtain by any outlay, as of labor, danger or sacrifice",
+            "translations": {
+              "cs": [
+                "získat"
+              ]
+            }
+          }
+        ]
+      },
+      "restore": {
+        "bytes": 8149,
+        "translation_blocks": [
+          {
+            "pos": "Verb",
+            "sense": "to reestablish, or bring back into existence",
+            "translations": {
+              "be": [
+                "аднаўля́ць",
+                "аднаві́ць"
+              ],
+              "cs": [
+                "opravovat",
+                "opravit",
+                "obnovovat",
+                "obnovit"
+              ],
+              "fr": [
+                "restaurer",
+                "rétablir"
+              ],
+              "de": [
+                "wiederherstellen",
+                "restaurieren"
+              ],
+              "es": [
+                "restablecer"
+              ],
+              "sv": [
+                "återställa"
+              ],
+              "uk": [
+                "відно́влювати",
+                "відновля́ти",
+                "віднови́ти"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "to bring back to a previous condition or state",
+            "translations": {
+              "fr": [
+                "rétablir"
+              ],
+              "de": [
+                "restaurieren"
+              ],
+              "es": [
+                "restaurar"
+              ],
+              "sv": [
+                "återställ"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "to give back, or make restitution",
+            "translations": {
+              "fr": [
+                "rendre",
+                "restituer"
+              ],
+              "sv": [
+                "återställ"
+              ]
+            }
+          },
+          {
+            "pos": "Verb",
+            "sense": "(no trans-top header)",
+            "translations": {
+              "fr": []
+            }
+          }
+        ]
+      },
+      "unavailable": {
+        "bytes": 3082,
+        "translation_blocks": [
+          {
+            "pos": "Adjective",
+            "sense": "not available",
+            "translations": {
+              "be": [
+                "недаступны"
+              ],
+              "cs": [
+                "nedostupný"
+              ],
+              "fr": [
+                "indisponible"
+              ],
+              "de": [
+                "unerhältlich",
+                "[[nicht]] [[verfügbar]]",
+                "[[nicht]] [[erhältlich]]",
+                "unerhältlich",
+                "nicht erreichbar",
+                "nicht zugänglich",
+                "verschlossen"
+              ],
+              "sv": [
+                "otillgänglig",
+                "oanträffbar"
+              ],
+              "uk": [
+                "недосту́пний"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "settings_note": "'settings' is a 230-byte 'plural of setting' stub with NO Translations section; the singular 'setting' page has Translations sections but no Belarusian line"
+  },
+  "headword_probes": {
+    "purpose": "test whether translations referenced from the English side have their own be articles (direction coverage)",
+    "probes": [
+      {
+        "word": "спыніць",
+        "exists_as_be_article": true,
+        "bytes": 436,
+        "note": "full verb entry: senses, audio Be-спыніць.ogg, conjugation"
+      },
+      {
+        "word": "спампаваць",
+        "exists_as_be_article": true,
+        "bytes": 1805,
+        "note": "Belarusian verb entry exists - matches KUDY's adopted 'спампоўка' terminology"
+      },
+      {
+        "word": "гід",
+        "exists_as_be_article": false,
+        "note": "page is a Ukrainian-only entry (Uk-гід.ogg, SUM-11 reference); no Belarusian section"
+      },
+      {
+        "word": "недаступны",
+        "exists_as_be_article": false,
+        "note": "fetch returned 404 - no article, although недаступны IS referenced from the 'unavailable' translations table"
+      }
+    ]
+  },
+  "data_quality_findings": [
+    {
+      "finding": "Latin 'i' inside the Cyrillic word 'даро́жнiк' (guide → document/book sense, Belarusian list)",
+      "locator": "https://en.wiktionary.org/wiki/guide?action=raw line 216, fetched 2026-10-04",
+      "expected_form": "дарожнік (Cyrillic і)",
+      "consequence": "any sourced row needs a mixed-script check; the repo's implementation-rules rule-12 grep is a ready-made check"
+    },
+    {
+      "finding": "translations carry dictionary stress marks (наза́д, недосту́пний)",
+      "consequence": "UI use needs unstressed forms - a transformation step plus sense re-verification"
+    },
+    {
+      "finding": "uk 'недосту́пний' here vs AOSP 'Недоступно' (Android report) - the dictionary form corroborates the suspicion raised in the Android assessment"
+    }
+  ],
+  "limitations": [
+    "live access only to en.wiktionary.org; the seven other editions are evidenced through dump metadata pages only",
+    "dumps were not downloaded (metadata only) - no full-corpus verification of be translation quality inside dumps",
+    "single fetch session; wiki content changes continuously - re-verification date is recorded per fetch",
+    "the parser covers {{t|...}}, {{t+|...}}, {{tt|...}} targets inside 'Language:' translation lines; complex wrapped templates (e.g. multi-word collocations) may be under-captured",
+    "exact article counts for the 7 non-en editions not verified (their APIs not allowlisted)",
+    "API etiquette/rate-limit policy pages live on mediawiki.org which is not allowlisted - recorded as not reviewed"
+  ],
+  "commands": [
+    "curl -A 'KUDY-source-assessment/1.0' 'https://en.wiktionary.org/w/api.php?action=query&meta=siteinfo&siprop=general%7Cstatistics&format=json'",
+    "curl -A 'KUDY-source-assessment/1.0' 'https://en.wiktionary.org/wiki/<word>?action=raw'  (words: back cancel settings stop walk guide download purchase restore unavailable; probe: setting)",
+    "curl -A 'KUDY-source-assessment/1.0' 'https://en.wiktionary.org/wiki/Wiktionary:Copyrights?action=raw'",
+    "curl -A 'KUDY-source-assessment/1.0' 'https://en.wiktionary.org/wiki/<BE-WORD>?action=raw'  (probes: спыніць недаступны гід спампаваць)",
+    "curl -A 'KUDY-source-assessment/1.0' 'https://dumps.wikimedia.org/<edition>/'  (enwiktionary bewiktionary ukwiktionary dewiktionary eswiktionary frwiktionary cswiktionary svwiktionary)",
+    "curl -A 'KUDY-source-assessment/1.0' 'https://dumps.wikimedia.org/enwiktionary/20261001/'"
+  ]
+}
