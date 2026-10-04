@@ -276,4 +276,72 @@ describe('useDiscoveryController — refresh policy', () => {
     assert.equal(controller.getState().timeLimit, 60);
     assert.equal(surface.result.exact.length, 3);
   });
+
+  // G21.17 (issue #551): the query language is the selected UI language —
+  // the switch re-selects over the loaded index, the published-text filter
+  // follows, and an unknown code never moves the state (the setTimeLimit
+  // boundary idiom).
+  it('selected_text_locale_filter: the switch re-selects over all eight UI locales', async () => {
+    const controller = controllerOver({ 'catalog.json': CATALOG, [POINTER]: INDEX });
+    await booted(controller);
+    const bootedSurface = controller.getState().surface;
+    assert.ok(bootedSurface.kind === 'ready');
+    assert.ok(bootedSurface.result.exact.length > 0, 'be text offers are eligible at boot');
+    const bootCount = bootedSurface.result.exact.length;
+    for (const locale of ['de', 'es', 'fr', 'cs', 'sv'] as const) {
+      controller.getState().setCriteriaLocale(locale);
+      const surface = controller.getState().surface;
+      assert.ok(surface.kind === 'ready');
+      assert.deepEqual(surface.result.exact, [], `${locale} has no published guide text in the fixture`);
+    }
+    // The fixture's offers carry per-locale availability: uk and en each see
+    // their own published subset — never the full be answer.
+    for (const locale of ['uk', 'en'] as const) {
+      controller.getState().setCriteriaLocale(locale);
+      const surface = controller.getState().surface;
+      assert.ok(surface.kind === 'ready');
+      assert.ok(surface.result.exact.length > 0, `${locale} text offers stay eligible`);
+      assert.ok(surface.result.exact.length <= bootCount, 'the filter never widens the be answer');
+    }
+    controller.getState().setCriteriaLocale('en');
+    const enSurface = controller.getState().surface;
+    assert.ok(enSurface.kind === 'ready');
+    assert.ok(enSurface.result.exact.length > 0, 'en text offers return');
+    controller.getState().setCriteriaLocale('be');
+    const backSurface = controller.getState().surface;
+    assert.ok(backSurface.kind === 'ready');
+    assert.equal(backSurface.result.exact.length, bootCount, 'the boot locale restores the full answer');
+  });
+
+  it('selected_text_locale_filter: an unknown code is rejected, the previous locale stays', async () => {
+    const controller = controllerOver({ 'catalog.json': CATALOG, [POINTER]: INDEX });
+    await booted(controller);
+    controller.getState().setCriteriaLocale('fr');
+    controller.getState().setCriteriaLocale('ua');
+    controller.getState().setCriteriaLocale('');
+    assert.equal(controller.getState().criteriaLocale, 'fr');
+  });
+
+  it('selected_text_locale_filter: the analytics payload carries the switched locale', async () => {
+    const spy = analyticsSpy();
+    const controller = controllerOver({ 'catalog.json': CATALOG, [POINTER]: INDEX }, memorySnapshot(), spy.port);
+    await booted(controller);
+    controller.getState().setCriteriaLocale('fr');
+    const surface = controller.getState().surface;
+    assert.ok(surface.kind === 'ready');
+    const offer = surface.index.offers[0];
+    if (offer === undefined) throw new Error('the fixture carries offers');
+    controller.getState().recordShown([offer], 'discovery');
+    assert.equal(spy.shown[0]?.content_locale, 'fr');
+  });
+
+  it('setCriteriaLocale recomputes the controls over the locale-eligible offers', async () => {
+    const controller = controllerOver({ 'catalog.json': CATALOG, [POINTER]: INDEX });
+    await booted(controller);
+    const before = controller.getState().controls;
+    controller.getState().setCriteriaLocale('fr');
+    const after = controller.getState().controls;
+    assert.deepEqual(after, { timeLimits: [], themeIds: [], seasons: [] });
+    assert.notDeepEqual(before, after);
+  });
 });

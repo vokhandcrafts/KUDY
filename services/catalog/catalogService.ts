@@ -651,14 +651,18 @@ export async function loadPreview(
 
 // The composition root constructs the service over its ports (the loader
 // bound to the configured public origin, the digest) and hands it to the
-// catalog controller; nothing else value-imports this module.
+// catalog controller; nothing else value-imports this module. The display
+// options may be a factory: the G21.17 UI-language switch re-projects the
+// cached cards through the same reader policy, so every call resolves the
+// preference fresh instead of a construction-time snapshot.
 export function createCatalogService(
   deps: CatalogDeps,
-  options: CatalogDisplayOptions,
+  options: CatalogDisplayOptions | (() => CatalogDisplayOptions),
 ): CatalogService {
+  const resolve = (): CatalogDisplayOptions => (typeof options === "function" ? options() : options);
   return {
-    load: (previous) => loadCatalog(deps, options, previous),
-    loadPreview: (routeId, previous) => loadPreview(deps, options, routeId, previous),
-    loadNearby: (previous) => loadNearby(deps, options, previous),
+    load: (previous) => loadCatalog(deps, resolve(), previous),
+    loadPreview: (routeId, previous) => loadPreview(deps, resolve(), routeId, previous),
+    loadNearby: (previous) => loadNearby(deps, resolve(), previous),
   };
 }

@@ -43,6 +43,22 @@ describe("KUDY surface (UX 01)", () => {
 
   // Issue #426: the display name is «KUDY» (the owner's 2026-10-01 decision),
   // not «My KUDY» — reverting the string turns this red.
+  // G21.17 (issue #551, AC3): the history row labels its content language —
+  // an existing differently localized session stays resumable and labelled;
+  // an unknown stored code renders as-is, never rewritten into a guess.
+  test("the history rows label their content language from the registry", async () => {
+    const rows = [
+      { ...finishedRow(1), locale: "uk" },
+      { ...finishedRow(2), locale: "en" },
+      { ...finishedRow(3), locale: "unknown-code" },
+    ];
+    const services = createServices({ sessionHistory: { list: async () => rows } });
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect((await screen.findByTestId("my-session-locale-walk-render-1")).props.children).toBe("Українська");
+    expect(screen.getByTestId("my-session-locale-walk-render-2").props.children).toBe("English");
+    expect(screen.getByTestId("my-session-locale-walk-render-3").props.children).toBe("unknown-code");
+  });
+
   test("the surface's title renders «KUDY» in the display locale", async () => {
     renderRouter({ _layout: layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
     expect(await screen.findByTestId("screen-KUDY")).toBeTruthy();

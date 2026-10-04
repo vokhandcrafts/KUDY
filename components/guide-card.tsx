@@ -29,6 +29,17 @@ export const ACTIVE_CITY_ID = "gdansk";
 // services; one value here so the screens never invent a second order).
 export const DISPLAY_LOCALES: readonly string[] = ["be", "en"];
 
+// G21.17 (issue #551) — the one text-locale selection rule of the surfaces
+// (the G21 spec decision: «Паказваць толькі гіды з тэкстам на выбранай мове»):
+// an offer is shown in a UI language only when its published text covers it.
+// The discovery selector applies the same gate over the criteria
+// (core/discovery/selectDiscovery `localeOk` — the core cannot import this
+// zone, so the rule is spelled here for the catalog/nearby/preview
+// projections and names its canon there).
+export function offerShownInTextLocale(textLocales: readonly string[], uiLocale: string): boolean {
+  return Array.isArray(textLocales) && textLocales.includes(uiLocale);
+}
+
 // The scheme's responsive split (screens-and-transitions.md, Explore row):
 // one column below 821 px, two columns at 821 px and above.
 export function isWide(width: number): boolean {
@@ -397,10 +408,36 @@ export function CatalogStateView({
           detail={state.reason}
           testID="catalog-banner"
         />
-        <GuideCardsList guides={state.guides} variant={variant} locale={locale} />
+        {(() => {
+          // G21.17 (issue #551): the offline cache filters by the selected UI
+          // language with the same two honest empty states as the ready list.
+          const visible = visibleGuides(state.guides, locale);
+          if (visible.length === 0) {
+            return <CityMessage text={state.guides.length === 0 ? strings.notPublished : strings.textLocaleEmpty} />;
+          }
+          return <GuideCardsList guides={visible} variant={variant} locale={locale} />;
+        })()}
       </View>
     );
   }
-  if (state.guides.length === 0) return <CityMessage text={strings.notPublished} />;
-  return <GuideCardsList guides={state.guides} variant={variant} locale={locale} />;
+  // G21.17 (issue #551): the ready list is filtered to the selected UI
+  // language's published text. An empty filtered list is the language
+  // explanation when other languages have guides, and NAV3's «не апублікавана»
+  // when nothing is published at all — neither is a service failure.
+  const visible = visibleGuides(state.guides, locale);
+  if (visible.length === 0) {
+    return <CityMessage text={state.guides.length === 0 ? strings.notPublished : strings.textLocaleEmpty} />;
+  }
+  return <GuideCardsList guides={visible} variant={variant} locale={locale} />;
+}
+
+// The G21.17 projection filter of one city-catalog state: only the guides
+// whose published text covers the selected UI language stay. Exported for the
+// tests' single-spelling assertion (the screens pass the same state through
+// this one function).
+export function visibleGuides(
+  guides: readonly CatalogGuideCard[],
+  uiLocale: string,
+): readonly CatalogGuideCard[] {
+  return guides.filter((card) => offerShownInTextLocale(card.textLocales, uiLocale));
 }

@@ -72,7 +72,7 @@ async function openMapWithHints(foreground: { current: boolean }, events: GuideH
     },
   });
   renderRouter(withHintRoutes(services), { initialUrl: "/map" });
-  await screen.findByTestId("nearby-card-offer-e1-place");
+  await screen.findByTestId("nearby-card-offer-a1-place");
   // The open surface armed the one subscription (G07.01's guard); the hint
   // controller rides exactly that subscription.
   await waitFor(() => expect(env.locationPort.commands.filter((c) => c.startsWith("start"))).toHaveLength(1));
