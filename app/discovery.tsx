@@ -225,6 +225,8 @@ function DiscoveryBody({
         // G21.17 (issue #551): with no alternatives either, the criteria are
         // not the reason — the selected UI language's text absence is the
         // honest explanation (a service failure renders its own state above).
+        // A fully empty index answers the same word truthfully: no guides
+        // with text in this language exist yet.
         <Text testID="discovery-empty" style={styles.facts}>
           {result.alternatives.length === 0 ? strings.textLocaleEmpty : strings.discoveryEmpty}
         </Text>

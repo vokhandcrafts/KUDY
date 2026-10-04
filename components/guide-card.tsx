@@ -408,7 +408,15 @@ export function CatalogStateView({
           detail={state.reason}
           testID="catalog-banner"
         />
-        <GuideCardsList guides={visibleGuides(state.guides, locale)} variant={variant} locale={locale} />
+        {(() => {
+          // G21.17 (issue #551): the offline cache filters by the selected UI
+          // language with the same two honest empty states as the ready list.
+          const visible = visibleGuides(state.guides, locale);
+          if (visible.length === 0) {
+            return <CityMessage text={state.guides.length === 0 ? strings.notPublished : strings.textLocaleEmpty} />;
+          }
+          return <GuideCardsList guides={visible} variant={variant} locale={locale} />;
+        })()}
       </View>
     );
   }
