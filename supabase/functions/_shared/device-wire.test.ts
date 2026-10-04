@@ -9,10 +9,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  createSqlDeviceDeletePort,
+  DEVICE_DELETE_SQL,
   DEVICE_INSERT_SQL,
+  DEVICE_LOOKUP_SQL,
   DEVICE_RATE_LIMIT,
   hashIp,
   RATE_INCREMENT_SQL,
+  registerDevice,
 } from './device-core.ts';
 import { deviceClientIp, handleDeviceRequest, type DeviceSqlClient, type RequestLike } from './device-wire.ts';
 import { captureConsoleError } from './wire-test-support.ts';
@@ -29,22 +33,32 @@ interface DeviceSqlSeed {
   rateEmptyRows?: boolean;
   rateError?: Error;
   insertError?: Error;
+  /** The `device_id` the delete lookup answers; `null` = no row (unknown secret). */
+  lookupResult?: string | null;
+  lookupError?: Error;
+  deleteError?: Error;
 }
 
 interface DeviceSqlSpy extends DeviceSqlClient {
   calls: SqlCall[];
   rateCalls(): number;
   insertCalls(): number;
+  lookupCalls(): number;
+  deleteCalls(): number;
 }
 
 function asyncDeviceSql(seed: DeviceSqlSeed = {}): DeviceSqlSpy {
   const calls: SqlCall[] = [];
   let rateCalls = 0;
   let insertCalls = 0;
+  let lookupCalls = 0;
+  let deleteCalls = 0;
   return {
     calls,
     rateCalls: () => rateCalls,
     insertCalls: () => insertCalls,
+    lookupCalls: () => lookupCalls,
+    deleteCalls: () => deleteCalls,
     async unsafe(sql, params) {
       calls.push({ sql, params });
       if (sql === RATE_INCREMENT_SQL) {
@@ -57,6 +71,17 @@ function asyncDeviceSql(seed: DeviceSqlSeed = {}): DeviceSqlSpy {
       if (sql === DEVICE_INSERT_SQL) {
         if (seed.insertError) throw seed.insertError;
         insertCalls += 1;
+        return [];
+      }
+      if (sql === DEVICE_LOOKUP_SQL) {
+        if (seed.lookupError) throw seed.lookupError;
+        lookupCalls += 1;
+        if (seed.lookupResult === null || seed.lookupResult === undefined) return [];
+        return [{ device_id: seed.lookupResult }];
+      }
+      if (sql === DEVICE_DELETE_SQL) {
+        if (seed.deleteError) throw seed.deleteError;
+        deleteCalls += 1;
         return [];
       }
       throw new Error(`unexpected statement: ${sql}`);
@@ -209,4 +234,58 @@ test('criterion 5: ordinary denials produce no diagnostic', async () => {
   );
   assert.equal(notFound.status, 404);
   assert.equal(notFoundLines.length, 0, 'a non-POST answer logs nothing');
+});
+
+// --- G09.03 — DELETE /v1/device through the production handler (the same
+// function the Deno entrypoint calls). The suites fail when the delete branch
+// leaves the closed answer list, deletes without auth, or logs an ordinary
+// denial (implementation-rules 1/15).
+
+function deleteRequest(authorization: string | null): RequestLike {
+  return { method: 'DELETE', headers: { get: (name) => (name === 'authorization' ? authorization : null) } };
+}
+
+test('G09.03: a live device deletes through the production handler with an empty 204', async () => {
+  const registration = registerDevice();
+  const db = asyncDeviceSql({ lookupResult: registration.deviceId });
+  const response = await handleDeviceRequest(deleteRequest(`Bearer ${registration.deviceSecret}`), db);
+  assert.equal(response.status, 204);
+  assert.equal(await response.text(), '', 'the 204 carries no body — the client wipes its state only after it');
+  assert.equal(db.rateCalls(), 0, 'the delete path never consumes a registration increment');
+  assert.equal(db.lookupCalls(), 1);
+  assert.equal(db.deleteCalls(), 1);
+  assert.equal(db.calls[0]!.sql, DEVICE_LOOKUP_SQL);
+  assert.equal(db.calls[1]!.sql, DEVICE_DELETE_SQL);
+  assert.deepEqual(db.calls[1]!.params, [registration.deviceId], 'the row is removed by the looked-up id');
+});
+
+test('G09.03: auth denials answer 403 before any storage call, with no diagnostic', async () => {
+  for (const authorization of [null, 'not-a-bearer', 'Bearer unknown-secret-value', 'Bearer '] as const) {
+    const db = asyncDeviceSql({ lookupResult: null });
+    const { result, lines } = await captureConsoleError(() => handleDeviceRequest(deleteRequest(authorization), db));
+    assert.equal(result.status, 403, `authorization ${String(authorization)} is denied`);
+    assert.equal(((await result.json()) as { error: string }).error, 'device_auth_failed');
+    if (authorization === null || authorization === 'not-a-bearer') {
+      assert.equal(db.lookupCalls(), 0, 'a malformed header never reaches the storage');
+    }
+    assert.equal(db.deleteCalls(), 0, 'a denied request never deletes');
+    assert.equal(lines.length, 0, 'an ordinary auth denial is not an internal failure');
+  }
+});
+
+test('G09.03: a storage fault on the delete path answers 500 with one redacted diagnostic', async () => {
+  const marker = 'SYNTHETIC-G0903-SQLFAILURE';
+  const bearer = 'SYNTHETIC-G0903-BEARER';
+  const db = asyncDeviceSql({ lookupError: new Error(`pq: broken (${marker})`) });
+  const { result, lines } = await captureConsoleError(() =>
+    handleDeviceRequest(deleteRequest(`Bearer ${bearer}`), db),
+  );
+  assert.equal(result.status, 500);
+  assert.equal(((await result.json()) as { error: string }).error, 'server_error');
+  assert.equal(lines.length, 1, 'exactly one diagnostic reaches the server log');
+  const entry = JSON.parse(lines[0]!) as { operation: string; reason: string };
+  assert.deepEqual(entry, { operation: 'device_delete', reason: 'device_delete_failed' });
+  const logged = lines.join('\n');
+  assert.ok(!logged.includes(marker), 'the SQL failure message is not logged');
+  assert.ok(!logged.includes(bearer), 'the bearer never reaches the log');
 });

@@ -21,14 +21,20 @@ import {
 import { logServerDiagnostic } from '../_shared/server-diagnostics.ts';
 import type { EventSqlRunner, EventTableSpec } from '../_shared/events-core.ts';
 
-const eventTable = eventTableJson as EventTableSpec;
+// The table's canonical shape is machine-checked against the contract rules by
+// contracts/events/event-contract.test.mjs in the standard suite; TypeScript's
+// JSON-module inference cannot prove the Record<string, EventTableFieldSpec>
+// index signature, so the assertion stays a boundary restatement of that proof.
+const eventTable = eventTableJson as unknown as EventTableSpec;
 
 // postgres.js answers an unsafe call with an array-like; the core's port
-// reads `{ rows }` (the PGlite-compatible surface, test-db idiom).
+// reads `{ rows }` (the PGlite-compatible surface, test-db idiom). The port's
+// primitive parameter list is copied into a fresh mutable array — the pinned
+// driver's `unsafe` takes a mutable `ParameterOrJSON[]`.
 function sqlRunner(db: postgres.Sql): EventSqlRunner {
   return {
     async query(sql, params) {
-      const rows = await db.unsafe(sql, params as unknown[]);
+      const rows = await db.unsafe(sql, params ? [...params] : []);
       return { rows: Array.from(rows as Array<Record<string, unknown>>) };
     },
   };

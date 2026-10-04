@@ -39,6 +39,28 @@ try {
   // no-problem case must be undefined, never null.
   const skip = browserProblem ?? undefined;
 
+// The traversal_and_junction cases create real symlinks, and the privilege to
+// create them is host-gated (Windows: elevated shell or Developer Mode), not
+// platform-gated (A26-08). Probe the capability instead of assuming it from
+// the platform: capable hosts keep the security cases mandatory, incapable
+// ones skip with the limitation named — never silently.
+let symlinkProblem = null;
+{
+  const probeRoot = mkdtempSync(path.join(os.tmpdir(), 'corpus-symlink-probe-'));
+  const probeTarget = path.join(probeRoot, 'target.html');
+  writeFileSync(probeTarget, 'probe');
+  try {
+    symlinkSync(probeTarget, path.join(probeRoot, 'probe.html'));
+  } catch (error) {
+    symlinkProblem =
+      `symlinks cannot be created on this host (${error.code}) — the traversal/junction ` +
+      'security cases need the symlink privilege (Windows: elevated shell or Developer Mode); ' +
+      'they stay mandatory on capable platforms';
+  } finally {
+    rmSync(probeRoot, { recursive: true, force: true });
+  }
+}
+
 let factoryPromise = null;
 const sharedFactory = async () => {
   if (!factoryPromise) factoryPromise = createExtractionBrowserFactory();
@@ -171,7 +193,7 @@ test('named_diagnostics_for_limits_and_formats', { skip }, async (t) => {
   assert.deepEqual(registered, [], 'no revision registered after any diagnostic');
 });
 
-test('traversal_and_junction', { skip }, async (t) => {
+test('traversal_and_junction', { skip: browserProblem ?? symlinkProblem ?? undefined }, async (t) => {
   const base = mkdtempSync(path.join(os.tmpdir(), 'corpus-escape-'));
   const inputRoot = path.join(base, 'input');
   const libraryRoot = path.join(base, 'library');

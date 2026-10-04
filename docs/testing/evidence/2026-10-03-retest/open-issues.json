@@ -1,0 +1,293 @@
+[
+  {
+    "labels": [],
+    "number": 492,
+    "title": "G20.21 — Verify sandbox entitlement and signed-media access end to end\r"
+  },
+  {
+    "labels": [],
+    "number": 491,
+    "title": "G20.20 — Compose real device services at the application root\r"
+  },
+  {
+    "labels": [],
+    "number": 485,
+    "title": "G20.14 — Run real Expo adapter behavior in the standard test command"
+  },
+  {
+    "labels": [],
+    "number": 483,
+    "title": "G20.12 — Verify payment-event minimization and retention after G09.03"
+  },
+  {
+    "labels": [
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC0cvcEw",
+        "name": "agent:running",
+        "description": "",
+        "color": "ededed"
+      }
+    ],
+    "number": 479,
+    "title": "G20.08 — Prove and enforce GPS start-stop and screen ownership"
+  },
+  {
+    "labels": [],
+    "number": 470,
+    "title": "G20 — Надзейнасць прагулкі, бяспечныя межы і праверкі архітэктуры"
+  },
+  {
+    "labels": [],
+    "number": 466,
+    "title": "G19.09 — Private end-to-end pilot and bulk-run decision"
+  },
+  {
+    "labels": [],
+    "number": 465,
+    "title": "G19.07 — Author review and private research export"
+  },
+  {
+    "labels": [],
+    "number": 464,
+    "title": "G19.06 — Selected facts and relationships with exact evidence"
+  },
+  {
+    "labels": [],
+    "number": 463,
+    "title": "G19.05 — Search and explicit research-case selection"
+  },
+  {
+    "labels": [],
+    "number": 462,
+    "title": "G19.04 — Budgeted first-level model annotation"
+  },
+  {
+    "labels": [
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC0ne6Gg",
+        "name": "agent:blocked",
+        "description": "",
+        "color": "ededed"
+      }
+    ],
+    "number": 461,
+    "title": "G19.08 — Private pilot inputs and approved model policy"
+  },
+  {
+    "labels": [],
+    "number": 456,
+    "title": "G19 — Бібліятэка матэрыялаў і пошук гісторый"
+  },
+  {
+    "labels": [
+      {
+        "id": "LA_kwDOUDG1ts8AAAACyAO89g",
+        "name": "enhancement",
+        "description": "New feature or request",
+        "color": "a2eeef"
+      },
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC1xZqTw",
+        "name": "prio:5",
+        "description": "",
+        "color": "ededed"
+      }
+    ],
+    "number": 436,
+    "title": "Цёмная тэма (tracking, рашэнне ўладара)"
+  },
+  {
+    "labels": [
+      {
+        "id": "LA_kwDOUDG1ts8AAAACyAO8xA",
+        "name": "bug",
+        "description": "Something isn't working",
+        "color": "d73a4a"
+      },
+      {
+        "id": "LA_kwDOUDG1ts8AAAACyAO80Q",
+        "name": "accessibility",
+        "description": "Barrier affecting people with disabilities",
+        "color": "f143ab"
+      },
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC0ZQ1TQ",
+        "name": "prio:2",
+        "description": "",
+        "color": "ededed"
+      },
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC0cvcEw",
+        "name": "agent:running",
+        "description": "",
+        "color": "ededed"
+      }
+    ],
+    "number": 430,
+    "title": "Чытэльны disabled-стан галоўнай кнопкі прэв"
+  },
+  {
+    "labels": [
+      {
+        "id": "LA_kwDOUDG1ts8AAAACyAO89g",
+        "name": "enhancement",
+        "description": "New feature or request",
+        "color": "a2eeef"
+      },
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC1xZqTw",
+        "name": "prio:5",
+        "description": "",
+        "color": "ededed"
+      }
+    ],
+    "number": 429,
+    "title": "Брэнд-іконка і splash дадатка (гейчана асетам ўладара)"
+  },
+  {
+    "labels": [],
+    "number": 400,
+    "title": "G06.10 — стылёвы пакет «Гліна і папера» (эпік)"
+  },
+  {
+    "labels": [
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC0ZQbRw",
+        "name": "epic",
+        "description": "",
+        "color": "ededed"
+      }
+    ],
+    "number": 346,
+    "title": "Эпік: дызайн-выпраўленні мабільнага дадатку па рэвью 2026-09-28"
+  },
+  {
+    "labels": [
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC0ne6Gg",
+        "name": "agent:blocked",
+        "description": "",
+        "color": "ededed"
+      },
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC4pcRAA",
+        "name": "no-commit",
+        "description": "Results stay local (never committed); contract in issue body; no PR",
+        "color": "D93F0B"
+      }
+    ],
+    "number": 330,
+    "title": "[чалавечы крок] Акаўнты крам: Google Play Console і Apple Developer Program — рэгістрацыя, верыфікацыя і тэст-гейт"
+  },
+  {
+    "labels": [],
+    "number": 320,
+    "title": "G10.02.b — SEO, публікацыя на Vercel і правераны адкат"
+  },
+  {
+    "labels": [],
+    "number": 307,
+    "title": "G14.04.f — uk-прыёмка: L01/L02 і сумесны прагон"
+  },
+  {
+    "labels": [],
+    "number": 306,
+    "title": "G14.04.e — uk-аўдыё-запіс першага гіда"
+  },
+  {
+    "labels": [],
+    "number": 299,
+    "title": "G11.04 — Рэліз у крамы і reviewer-рэжым"
+  },
+  {
+    "labels": [],
+    "number": 298,
+    "title": "G11.03 — Runbook кантэнту, доступу і аднаўлення"
+  },
+  {
+    "labels": [],
+    "number": 297,
+    "title": "G11.02 — Палявыя праходы і канфігурацыя"
+  },
+  {
+    "labels": [],
+    "number": 296,
+    "title": "G11.01 — Скразная прыёмка MVP"
+  },
+  {
+    "labels": [
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC0cvcEw",
+        "name": "agent:running",
+        "description": "",
+        "color": "ededed"
+      }
+    ],
+    "number": 288,
+    "title": "G09.03 — Выдаленне і тэрмін захавання"
+  },
+  {
+    "labels": [],
+    "number": 154,
+    "title": "G17 epic — Web collection: sources → raw library → cleaned Source for 07"
+  },
+  {
+    "labels": [],
+    "number": 112,
+    "title": "G10.02 — лінкі, QR, індэксацыя і публікацыя (вэб, пераход у дадатак)"
+  },
+  {
+    "labels": [],
+    "number": 110,
+    "title": "G03.05 — першы апублікаваны гід і правераны бясплатны вэб-пласт (tracking)"
+  },
+  {
+    "labels": [],
+    "number": 108,
+    "title": "G10 — вэб як канал бясплатнага кантэнту (вэб-аўдыёверсія)"
+  },
+  {
+    "labels": [],
+    "number": 75,
+    "title": "G16.04 — Справаздача, захаванне і прыёмка водгукаў"
+  },
+  {
+    "labels": [],
+    "number": 74,
+    "title": "G16.03 — Добраахвотная форма ацэнкі"
+  },
+  {
+    "labels": [],
+    "number": 73,
+    "title": "G16.02 — Чарга і сховішча ўласных ацэнак"
+  },
+  {
+    "labels": [],
+    "number": 72,
+    "title": "G16.01 — Прыватнае сховішча і API ацэнак"
+  },
+  {
+    "labels": [
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC0ZQbRw",
+        "name": "epic",
+        "description": "",
+        "color": "ededed"
+      }
+    ],
+    "number": 37,
+    "title": "G16 — Непублічныя ацэнкі і справаздача аўтара"
+  },
+  {
+    "labels": [
+      {
+        "id": "LA_kwDOUDG1ts8AAAAC0ZQbRw",
+        "name": "epic",
+        "description": "",
+        "color": "ededed"
+      }
+    ],
+    "number": 36,
+    "title": "G15 — Аўтарскі падбор месцаў, падборак і гідаў"
+  }
+]

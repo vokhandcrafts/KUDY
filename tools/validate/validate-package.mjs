@@ -249,7 +249,7 @@ export function validatePackage(dir, options = {}) {
   // media.schema.json allows); a Media record must match exactly one of
   // them, and a tree that ships media files must manifest every one of them.
   const MEDIA_EXTENSIONS = new Set(['.m4a', '.webp']);
-  const MEDIA_LOCALES = new Set(['be', 'en', 'uk']); // media.schema.json locale enum
+  const MEDIA_LOCALES = new Set(['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']); // media.schema.json locale enum
   const mediaFiles = new Map(); // rel -> { sha, bytes }
   for (const rel of files) {
     if (!MEDIA_EXTENSIONS.has(path.extname(rel))) continue;

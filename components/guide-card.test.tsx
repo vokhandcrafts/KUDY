@@ -12,3 +12,57 @@ describe("responsive split (one column < 821 px, two ≥ 821 px)", () => {
     expect(isWide(821)).toBe(true);
   });
 });
+
+// G21.17 (issue #551) — the surfaces' text-locale selection rule: the pure
+// filter over the card facts (all eight UI locales) and the two honest empty
+// states of the city catalog view (the language explanation vs NAV3's «не
+// апублікавана»; neither is a service failure).
+import { render, screen } from "@testing-library/react-native";
+
+import type { CatalogGuideCard } from "../controllers/catalog/catalogController";
+import { CatalogStateView, visibleGuides } from "./guide-card";
+import { uiStrings } from "./ui-strings";
+
+const card = (routeId: string, textLocales: readonly string[]): CatalogGuideCard => ({
+  routeId,
+  version: "1",
+  offerId: `offer-${routeId}`,
+  title: routeId,
+  summary: null,
+  textLocales,
+  audioLocales: [],
+  localesKnown: true,
+  access: "free",
+  editorialOrder: 1,
+  estimatedDuration: null,
+});
+
+const ready = (guides: readonly CatalogGuideCard[]) => ({ kind: "ready" as const, guides, degraded: null });
+
+describe("selected_text_locale_filter", () => {
+  test("the be/en-only list is visible to be and en, hidden to the six other UI locales", () => {
+    const guides = [card("g1", ["be", "en"])];
+    for (const locale of ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] as const) {
+      const visible = visibleGuides(guides, locale);
+      expect(visible).toHaveLength(locale === "be" || locale === "en" ? 1 : 0);
+    }
+  });
+
+  test("an offer shows only in the locales its published text covers", () => {
+    const guides = [card("fr-only", ["fr"]), card("multi", ["be", "en", "uk", "de", "es", "fr", "cs", "sv"])];
+    expect(visibleGuides(guides, "fr").map((c) => c.routeId)).toEqual(["fr-only", "multi"]);
+    expect(visibleGuides(guides, "be").map((c) => c.routeId)).toEqual(["multi"]);
+  });
+});
+
+describe("empty_locale_catalogue", () => {
+  test("guides exist in other languages — the filtered-empty state explains the language", () => {
+    render(<CatalogStateView state={ready([card("g1", ["be", "en"])])} variant="rubric" locale="fr" />);
+    expect(screen.getByTestId("city-message").props.children).toBe(uiStrings("be").textLocaleEmpty);
+  });
+
+  test("nothing is published at all — NAV3's honest empty stays", () => {
+    render(<CatalogStateView state={ready([])} variant="rubric" locale="fr" />);
+    expect(screen.getByTestId("city-message").props.children).toBe(uiStrings("be").notPublished);
+  });
+});

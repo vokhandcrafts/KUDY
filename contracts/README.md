@@ -15,9 +15,11 @@
 | `schemas/voice.schema.json` | Даведнік галасоў (voices.json) |
 | `schemas/discovery-index.schema.json` | DiscoveryIndexV1: offers, collections, themes, ref, detail_ref і ўсе ліміты `21` §3.2 |
 | `schemas/public-projection.schema.json` | public.json месцаў і падборак |
-| `schemas/catalog.schema.json` | Versіяваны envelope каталогу: `{catalog_schema_version, generated_at?, routes[], discovery_index?}` |
+| `schemas/catalog.schema.json` | Версіяваны envelope каталогу: `{catalog_schema_version, generated_at?, routes[], discovery_index?}` |
 | `schemas/feedback-target.schema.json` | Мэты водгукаў з `21` §5.1 |
-| `schemas/localized-text.schema.json`, `schemas/identifier.schema.json` | Агульныя тыпы: локалі allowlist `be/en/uk`, ідэнтыфікатары `[a-z0-9._-]` ≤ 64 |
+| `schemas/localized-text.schema.json`, `schemas/identifier.schema.json` | Агульныя тыпы: локалі allowlist `be/en/uk/de/es/fr/cs/sv` (G21.16), ідэнтыфікатары `[a-z0-9._-]` ≤ 64 |
+| `schemas/ui-messages-source.schema.json` + `ui-messages/` | Кананічная крыніца UI-паведамленняў (G21.24): адзін запіс на паведамленне — id, беларускі арыгінал, кантэкст, параметры, абмежаванні, фармат; `source.json` + чэкер `ui-messages.mjs` (дублі ідэнтыфікатараў, кантэкст, сінтаксіс шаблонаў, выканальны код у радках, спраўджанне `sourceHash`) |
+| `schemas/ui-messages-translations.schema.json` + `ui-messages/translations/` | Перакладныя наборы па мовах (G21.25): на запіс — значэнне з пазіцыямі `${name}`, `forms` (толькі для запісаў з `discreteForms`, тыя ж ключы), `reviewedSourceHash` — адбітак праверанай версіі арыгіналу, `review` — вынік праверкі; чэкер `translations.mjs` (невядомыя/дублыя ідэнтыфікатары, састарэлы хэш, неспадзяванне форм і параметраў, выканальны код); набору `be` няма — be-каталог праецыруецца са `source.json` |
 | `reader.mjs` | Ядро інтэрпрэтацыі схем + named-правілы + чытанне каталогу |
 | `contracts.test.mjs` | Прыёмачная сюіта (у `npm test`) |
 | `wire/wire-types.ts` | Згенераваная TS-праекцыя wire-формаў каталогу і route.json + пераліку моваў; уладальнік — схемы, рукамі не рэдагаваць |
@@ -48,6 +50,14 @@
 `wire/wire-types.ts` — дэтэрмінаваная праекцыя схем у TypeScript: v1-форма каталогу (`CatalogRouteEntry`, `CatalogPointer`, `CatalogView`), bundle-wire (`RouteDoc`, `RouteStop`) і пералік моваў. Уладальнік фармату — схемы: генератар `tools/contracts/generate-wire-types.mjs` чытае іх пры кожным запуску, allowlist моваў выводзіць з `localized-text.schema.json` (кананічны ўладальнік, не новая вытворная) і fail-closed адхіляе люзр, што разышоўся з уладальнікам. Праверка састарэлага вываду — `npm run contracts:wire:check` (захаваны ў `npm test` праз `tools/contracts/wire-types.test.mjs`), рэгенерацыя — `npm run contracts:wire` (G20.19, issue #490; спецафікацыя §V4).
 
 Праекцыя не замяняе праверку даных падчас чытання: pattern'ы, ліміты і ўмоўныя required (`allOf` if/then у stop.schema.json) застаюцца працай `reader.mjs`. Расслабленыя праекцыі старых версіяў (`services/catalog/envelope.ts` — legacy-v0/unknown-major) — асобныя задакументаваныя мадэлі, іх наўмысна не тыпізуе строгі v1-тып.
+
+## Згенераваныя каталогі UI-паведамленняў (G21.25)
+
+Натыўныя, кантролеравыя і вэб-каталогі слоў (`components/ui-strings.generated.ts`, `components/guide-hint-strings.generated.ts`, пяць `controllers/**/*-strings.generated.ts`, `web/lib/i18n/<locale>.ts`) — дэтэрмінаваныя праекцыі адной крыніцы: `ui-messages/source.json` (беларускі арыгінал) + `ui-messages/translations/<locale>.json` (правераныя пераклады). Уладальнік тэксту — гэтыя даныя; каталёгі пазначаныя як згенераваныя і рукамі не рэдагуюцца. Генератар `tools/i18n/generate-messages.mjs` чытае іх пры кожным запуску (рэгістр моў — з `ui-locales.ts`, адзінае месца вызначэння), падтрымлівае запісаныя фарматы (`plain`, шаблон `${name}`, спіс з join, fallback, лічбавыя/іменаваныя `discreteForms`, умоўны хвост `composed`) і экрануе статычны тэкст — eval і выканальных урыўкаў у даных няма. Праверка састарэлага вываду — `npm run messages:generate:check`, рэгенерацыя — `npm run messages:generate`; байт-ідэнтычнасць, свежасць і бяспека рэндэру захаваныя ў `npm test` праз `tools/i18n/generate-messages.test.mjs` і залатую матрыцу `test/ui-messages-render-golden.*` — вярджэнне праз жывыя селектары супадае са здымкам вываду старых ручных каталогаў. Гейт паўнаты і актуальнасці перакладаў — наступны раздзел (G21.26).
+
+## Гейт выпушчаных моў UI-паведамленняў (G21.26)
+
+`tools/i18n/check-messages.mjs` — абавязковая праверка выпушчаных моў: спіс бярэцца з рэестра (`COMPLETE_UI_LOCALES` з `ui-locales.ts`), не з фіксаванага пераліку — мова ўваходзіць пад гейт разам з уваходам у рэестр. Падаюць з іменаванымі дыягностыкамі (мова/ключ/прычына): адсутны файл перакладаў (`missing_locale`), запланаваны генератарам радок без запісу ў наборы (`missing_locale_key`), састарэлы `reviewedSourceHash` і іншыя парушэнні кантракту набору (`translation_contract` — правілы `translations.mjs`), незацверджаны запіс (`review_evidence_required`), праход паўторнай праверкі без прычын запісаў (`review_reason_required` — паза-міграцыйны `provenance.kind` мусіць тлумачыць захаванне кожнага перакладу; слепы зварот хэша праверкай не лічыцца). Свежасць згенераваных файлаў гейт бярэ з `--check` генератара (`generated_output_stale`) — адзіны ўладар плана вогдаў не дублюецца. Праверка ўваходзіць у `npm test` (required-шлях CI) праз `tools/i18n/check-messages.test.mjs`, wire-інг пад guard-ам; асобны запуск — `npm run messages:check`. Праверка даказвае механічную паўнату, актуальнасць і запісы праверкі, не сэнсавую якасць перакладу — яна застаюцца адказнасцю запісанага рэв'ю.
 
 ## Запуск
 

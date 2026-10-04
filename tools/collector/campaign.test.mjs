@@ -170,8 +170,12 @@ test('AC1 (G17.19): an unknown transport is rejected naming the field', () => {
 // author copies into a campaign file — it must carry every key the schema
 // accepts for the copy flow, and never invent keys the strictObject schema
 // rejects. Removing a key from the block (or adding an unknown one) fails here.
+// G21.06: text-only extraction, so the doc is read through the LF idiom — the
+// ```yaml fence must match on CRLF checkouts too (rule 3; the block is parsed
+// as text, never hashed).
 test('the canonical campaign YAML block in docs/24 stays in sync with the schema', () => {
-  const doc = readFileSync(new URL('../../docs/24_web_collection.md', import.meta.url), 'utf8');
+  const doc = readFileSync(new URL('../../docs/24_web_collection.md', import.meta.url), 'utf8')
+    .replace(/\r\n/g, '\n');
   const section = doc.slice(doc.indexOf('## Кампанія'));
   const block = section.match(/```yaml\n([\s\S]*?)```/)?.[1];
   assert.ok(block, 'the «Кампанія» section carries a yaml block');

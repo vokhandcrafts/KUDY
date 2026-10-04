@@ -326,6 +326,25 @@ describe("run map surface", () => {
     expect(label).toBe("Customs, pending");
   });
 
+  // G21.17 (issue #551, AC3): switching the UI language mid-walk never
+  // re-binds the active session — the run words and the back label keep the
+  // walk's pinned locale, the surface and its progress stay in place
+  // (the chrome independence the ui-locale store guarantees by construction).
+  test("ui_switch_keeps_content_pin: a UI switch mid-walk keeps the pinned session words", async () => {
+    const { session } = makeRunSession();
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("en")), run: { session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    expect(textOf("run-status-stop-1")).toBe("Customs — pending");
+    act(() => services.uiLocale.set("uk"));
+    expect(textOf("run-status-stop-1")).toBe("Customs — pending");
+    expect(textOf("run-status-stop-3")).toBe("Tower — locked");
+    // The back label is chrome, but the walk's own locale wins while a walk
+    // is ready — the same pin, no substituted language.
+    expect(screen.getByText("Back")).toBeTruthy();
+    expect(screen.getByTestId("run-map")).toBeTruthy();
+  });
+
   test("AC4: without the run ports the surface is honestly unavailable", async () => {
     const services = createServices({});
     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
@@ -882,5 +901,87 @@ describe("G06.10.f live walk progress (issue #406)", () => {
     await landProgress(audioPort, 1500, "Граць");
     expect(flatStyle(screen.getByTestId("run-bar-progress-fill")).width).toBe("25%");
     expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+// Issue #524 — the unavailable and not-ready words follow the UI-locale
+// choice (the #305 store): without a ready session the fixed "be" fallback
+// kept «Сесія недаступная» on screen after choosing Українська or English.
+// The real store (createServices' uiLocale) drives every case; reverting the
+// `?? locale` fallbacks in app/run/[id].tsx turns the unavailable and
+// loading cases red while the pinned-locale case stays green
+// (implementation-rules 1).
+describe("Run unavailable words follow the UI-locale choice (issue #524)", () => {
+  // The empty bundles store: readiness cannot pin the package, so the
+  // surface answers unavailable with the package reason — a title plus a
+  // reason line, all of it in the chosen locale.
+  function unavailableServices(): ReturnType<typeof createServices> {
+    return createServices({
+      bundlesStore: memoryBundles({}),
+      run: { session: makeRunSession().session },
+    });
+  }
+
+  test("without the run service the uk choice words the unavailable title", async () => {
+    const services = createServices({});
+    services.uiLocale.set("uk");
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    expect(await screen.findByText("Сесія недоступна")).toBeTruthy();
+    // The be fallback's wording is gone (criterion 1); the reason line never
+    // renders without a surface (surface === null here).
+    expect(screen.queryByText("Сесія недаступная")).toBeNull();
+    expect(screen.queryByTestId("run-unavailable-reason")).toBeNull();
+    expect(screen.getByTestId("btn-run-back")).toBeTruthy();
+  });
+
+  test("an unavailable session words the title and the reason with the uk choice", async () => {
+    const services = unavailableServices();
+    services.uiLocale.set("uk");
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    expect(await screen.findByText("Сесія недоступна")).toBeTruthy();
+    expect(screen.getByTestId("run-unavailable-reason").props.children).toBe("Гід не завантажений.");
+    expect(screen.queryByText("Сесія недаступная")).toBeNull();
+    expect(screen.queryByText("Гід не чытаецца.")).toBeNull();
+  });
+
+  test("switching the locale on the open unavailable screen rewords it in place", async () => {
+    const services = unavailableServices();
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    expect(await screen.findByText("Сесія недаступная")).toBeTruthy();
+    act(() => {
+      services.uiLocale.set("en");
+    });
+    // The switch re-renders the words in place, no restart (criterion 2) —
+    // en.back («Back») differs from the be default and proves the switch
+    // reached the back element too.
+    expect(screen.getByText("Session unavailable")).toBeTruthy();
+    expect(screen.getByTestId("run-unavailable-reason").props.children).toBe("Guide not downloaded.");
+    expect(within(screen.getByTestId("btn-run-back")).getByText("Back")).toBeTruthy();
+    expect(screen.queryByText("Сесія недаступная")).toBeNull();
+  });
+
+  test("the loading state without a session locale follows the uk choice", async () => {
+    const pending = new Promise<Readiness>(() => {});
+    const { session } = makeRunSession({ readiness: { evaluate: () => pending } });
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
+    services.uiLocale.set("uk");
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    expect(await screen.findByText("Завантаження…")).toBeTruthy();
+    expect(screen.queryByText("Загрузка…")).toBeNull();
+  });
+
+  test("a ready en session keeps its words when the UI switches to uk", async () => {
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("en")), run: { session: makeRunSession().session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    act(() => {
+      services.uiLocale.set("uk");
+    });
+    // The session's pinned locale wins over the UI choice (criterion 3):
+    // the walk's words stay en, the back element keeps en too, the map and
+    // its statuses are untouched.
+    expect(textOf("run-status-stop-1")).toBe("Customs — pending");
+    expect(within(screen.getByTestId("btn-run-back")).getByText("Back")).toBeTruthy();
+    expect(screen.queryByText("Мытня — чакае")).toBeNull();
   });
 });

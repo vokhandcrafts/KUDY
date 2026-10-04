@@ -9,12 +9,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { contrast } from './wcag-contrast.mjs';
 import { loadCanon } from './design-canon.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+// Git-style repo-relative spelling for comparisons: the expected lists quote
+// `/`, a walk produces the host separator (A26-08).
+const repoRel = (filePath) => filePath.slice(root.length + 1).split(sep).join('/');
 const canonPath = join(root, 'docs/design/visual-language.md');
 const cssPath = join(root, 'spikes/G06.08-prototype/prototype/styles.css');
 const packageScreensPath = join(root, 'spikes/G06.08-prototype/package/screens.md');
@@ -104,7 +107,7 @@ test('the paper grain is consumed only by the canon-allowed places (G06.10.e)', 
       if (entry.isDirectory()) scan(filePath);
       else if (/\.(tsx|ts)$/.test(entry.name) && entry.name !== 'paper-surface.tsx' &&
         /from "[^"]*paper-surface"/.test(readFileSync(filePath, 'utf8'))) {
-        importers.push(filePath.slice(root.length + 1));
+        importers.push(repoRel(filePath));
       }
     }
   };
@@ -324,10 +327,10 @@ test('the display family renders only guide and history names (canon §3, issue 
       else if (/\.(tsx|ts)$/.test(entry.name) && !entry.name.includes('.test.')) {
         const source = readFileSync(filePath, 'utf8');
         if (dir === join(root, 'app') && /fontFamilyDisplay/.test(source)) {
-          displayConsumers.push(`${filePath.slice(root.length + 1)}: hard-coded display token`);
+          displayConsumers.push(`${repoRel(filePath)}: hard-coded display token`);
         }
         if (/screenStyles\.displayTitle/.test(source)) {
-          displayConsumers.push(filePath.slice(root.length + 1));
+          displayConsumers.push(repoRel(filePath));
         }
       }
     }
@@ -363,6 +366,8 @@ test('surface styles consume the canon title token — no hardcoded title size (
 
 test('guard is wired into npm test (implementation-rules 1 and 7)', () => {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  assert.match(pkg.scripts.test, /test\/design-tokens\.test\.mjs/,
-    'npm test must run test/design-tokens.test.mjs');
+  // G20.28: the zone glob replaced the manual path list; file-level ownership
+  // of this suite is named by tools/ci/test-discovery.test.mjs.
+  assert.match(pkg.scripts.test, /"test\/\*\.test\.mjs"/,
+    'npm test must run the test/ zone that owns design-tokens.test.mjs');
 });

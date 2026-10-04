@@ -16,6 +16,7 @@
 // persisted (criterion 5): diagnostics carry named events only, and error
 // messages are constant redacted strings.
 import { parseLock, validateKey } from './download.ts';
+import { NETWORK_WAIT_LIMITS, WaitTimeoutError, withWaitLimit } from '../network-wait.ts';
 import type { FetchPort, LayerKey, LockEntry } from './types.ts';
 
 // `19` §3.6 — the closed list, verbatim:
@@ -178,6 +179,8 @@ export interface GrantDeps {
   delay: (ms: number) => Promise<void>;
   policy?: Partial<GrantRetryPolicy>;
   onDiagnostics?: (line: string) => void;
+  /** Wait limit overrides (G20.10); the owner is NETWORK_WAIT_LIMITS. */
+  waitLimits?: { requestMs?: number };
 }
 
 // The layer grant request (criterion 1): paths are not an input — they are
@@ -194,6 +197,7 @@ interface ResolvedDeps {
   delay: (ms: number) => Promise<void>;
   policy: GrantRetryPolicy;
   diagnostic: (line: string) => void;
+  waitRequestMs: number;
 }
 
 function resolveDeps(deps: GrantDeps): ResolvedDeps {
@@ -206,6 +210,7 @@ function resolveDeps(deps: GrantDeps): ResolvedDeps {
       defaultRetryAfterMs: deps.policy?.defaultRetryAfterMs ?? DEFAULT_GRANT_RETRY.defaultRetryAfterMs,
     },
     diagnostic: (line) => deps.onDiagnostics?.(line),
+    waitRequestMs: deps.waitLimits?.requestMs ?? NETWORK_WAIT_LIMITS.grantRequestMs,
   };
 }
 
@@ -351,9 +356,16 @@ async function grantOnce(key: LayerKey, paths: string[], deps: ResolvedDeps): Pr
     }
     let response: GrantHttpResponse;
     try {
-      response = await deps.transport({ body, bearer });
-    } catch {
-      deps.diagnostic('grant:offline');
+      // G20.10 (§N4): one grant round-trip is finite; a deadline is a named
+      // diagnostic and the documented offline outcome — never an endless
+      // retry loop (the loop below retries only bounded-wait answers).
+      response = await withWaitLimit('wait-grant-request', deps.waitRequestMs, async () =>
+        deps.transport({ body, bearer }),
+      );
+    } catch (error) {
+      deps.diagnostic(
+        error instanceof WaitTimeoutError ? `grant:wait-timeout rule=${error.rule}` : 'grant:offline',
+      );
       return { kind: 'offline' };
     }
     const code = responseCode(response.body);
@@ -451,12 +463,14 @@ const DEFAULT_EXPIRY_MARGIN_MS = 60_000;
 export interface GrantFetchDeps {
   transport: GrantTransport;
   credential: () => Promise<string>;
-  fetchBytes: (url: string) => Promise<{ status: number; body: Uint8Array | null }>;
+  fetchBytes: (url: string, signal?: AbortSignal) => Promise<{ status: number; body: Uint8Array | null }>;
   delay: (ms: number) => Promise<void>;
   now: () => number;
   policy?: Partial<GrantRetryPolicy>;
   onDiagnostics?: (line: string) => void;
   expiryMarginMs?: number;
+  /** Wait limit overrides (G20.10); the owner is NETWORK_WAIT_LIMITS. */
+  waitLimits?: { requestMs?: number; bytesMs?: number };
 }
 
 function decodeJsonBody(bytes: Uint8Array | null): unknown {
@@ -474,12 +488,14 @@ export function createGrantFetchSource(
 ): FetchPort {
   const paths = input.entries.map((entry) => entry.path);
   const marginMs = deps.expiryMarginMs ?? DEFAULT_EXPIRY_MARGIN_MS;
+  const waitBytesMs = deps.waitLimits?.bytesMs ?? NETWORK_WAIT_LIMITS.grantBytesMs;
   const resolved = resolveDeps({
     transport: deps.transport,
     credential: deps.credential,
     delay: deps.delay,
     policy: deps.policy,
     onDiagnostics: deps.onDiagnostics,
+    waitLimits: deps.waitLimits,
   });
   // The current portion of signed URLs, covering paths[start..start+limit).
   let portion: GrantedUrl[] = [];
@@ -498,8 +514,13 @@ export function createGrantFetchSource(
     if (granted === undefined) throw new Error('grant-fetch#grant-missing-url');
     let response: { status: number; body: Uint8Array | null };
     try {
-      response = await deps.fetchBytes(granted.url);
-    } catch {
+      // G20.10 (§N4): the byte transfer — headers AND the whole body read —
+      // is finite; the deadline aborts and the reply stays redacted.
+      response = await withWaitLimit('wait-grant-bytes', waitBytesMs, async (signal) =>
+        deps.fetchBytes(granted.url, signal),
+      );
+    } catch (error) {
+      if (error instanceof WaitTimeoutError) deps.onDiagnostics?.(`grant-fetch:wait-timeout rule=${error.rule}`);
       // Fetch adapters typically put the URL into rejection messages —
       // replace it with the named redacted line (criterion 5).
       throw new Error('grant-fetch#transfer-failed');

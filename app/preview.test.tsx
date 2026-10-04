@@ -44,6 +44,25 @@ const withPreviewRoutes = (services: ReturnType<typeof createServices>) => ({
 // The read-only bundles store over an in-memory layer: the layer directory
 // exists only after setDownloaded(true) — the disk truth the inventory port
 // reads (09 §7 layout, one lock-declared stops.json of 5 bytes).
+// The b1 button suites' shared arrange (a sibling copy is a jscpd clone):
+// the published fixtures over the real service with the in-memory disk
+// truth and the recording download channel, mounted at the b1 preview.
+async function openB1ButtonPreview() {
+  serve(CATALOG_FIXTURES);
+  renderRouter(
+    withPreviewRoutes(
+      createServices({
+        catalogOrigin: "https://catalog.test",
+        catalogSha256: sha256,
+        bundlesStore: memoryBundles().store,
+        downloadLayer: recordingDownload().downloadLayer,
+      }),
+    ),
+    { initialUrl: "/route/guide-route-b1" },
+  );
+  return screen.findByTestId("btn-download");
+}
+
 function memoryBundles(): { store: BundlesStore; setDownloaded: (value: boolean) => void } {
   const lock = JSON.stringify([{ path: "stops.json", bytes: 5, sha256: "f".repeat(64) }]);
   let downloaded = false;
@@ -152,6 +171,36 @@ describe("guide preview surface (G06.01.b)", () => {
     fireEvent.press(screen.getByTestId("btn-start"));
     expect(screen.queryByTestId("confirm-dialog")).toBeNull();
     expect(screen.getByTestId("screen-Route preview")).toBeTruthy();
+  });
+
+  // G21.17 (issue #551, AC4): a direct link to a guide whose published text
+  // does not cover the selected UI language renders the localized
+  // unavailable state — the be/en content is never silently substituted;
+  // switching back restores the preview in place.
+  test("G21.17 AC4: a deep link without the selected language's text stays unavailable, no substitution", async () => {
+    // The same published guide with its uk text fact removed — a valid
+    // publication that simply has no uk text; the uk UI's direct link shows
+    // the localized unavailable state, never the be/en substitute.
+    const index = JSON.parse(fixtureText("index-valid.json")) as { offers: Array<{ offer_id: string; availability: { text_locales: string[] }; localized: { title: Record<string, string> } }> };
+    const guide = index.offers.find((offer) => offer.offer_id === "offer-b1-guide");
+    if (guide === undefined) throw new Error("the fixture guide offer exists");
+    guide.availability.text_locales = guide.availability.text_locales.filter((l: string) => l !== "uk");
+    const indexText = JSON.stringify(index);
+    const catalog = JSON.parse(fixtureText("catalog-with-discovery.json"));
+    catalog.discovery_index.sha256 = await sha256(new TextEncoder().encode(indexText));
+    catalog.discovery_index.bytes = new TextEncoder().encode(indexText).length;
+    serve({ ...CATALOG_FIXTURES, "catalog.json": JSON.stringify(catalog), [CATALOG_POINTER]: indexText });
+    const services = createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 });
+    renderRouter(withPreviewRoutes(services), { initialUrl: "/route/guide-route-a1?from=rubric" });
+    expect(await screen.findByText("Гісторыі сукнараў: ад мытні да порта")).toBeTruthy();
+    act(() => services.uiLocale.set("uk"));
+    expect(screen.getByTestId("preview-text-unavailable")).toBeTruthy();
+    // The uk catalogue is complete — the unavailable word renders in uk.
+    expect(screen.getByText("Цього гіда немає обраною мовою інтерфейсу.")).toBeTruthy();
+    expect(screen.queryByText("Гісторыі сукнараў: ад мытні да порта")).toBeNull();
+    act(() => services.uiLocale.set("be"));
+    expect(await screen.findByText("Гісторыі сукнараў: ад мытні да порта")).toBeTruthy();
+    expect(screen.queryByTestId("preview-text-unavailable")).toBeNull();
   });
 
   test("open and locked stops are distinguishable; the locked row shows name, place, announce and lock only (NAV5)", async () => {
@@ -399,14 +448,7 @@ describe("guide preview loading indicator (UX 07)", () => {
 // insufficient space, the exit to the storage surface — never a dead end.
 describe("G06.05 preview a11y and failure exits (issue #280)", () => {
   test("AC1: the main button is a button with its label and the disabled state", async () => {
-    serve(CATALOG_FIXTURES);
-    renderRouter(withPreviewRoutes(createServices({
-      catalogOrigin: "https://catalog.test",
-      catalogSha256: sha256,
-      bundlesStore: memoryBundles().store,
-      downloadLayer: recordingDownload().downloadLayer,
-    })), { initialUrl: "/route/guide-route-b1" });
-    const button = await screen.findByTestId("btn-download");
+    const button = await openB1ButtonPreview();
     expect(button.props.accessibilityRole).toBe("button");
     expect(button.props.accessibilityLabel).toBe("Загрузіць");
     expect(button.props.accessibilityState).toEqual({ disabled: false });
@@ -480,6 +522,28 @@ describe("G08.05 quiet commerce offer (issue #292)", () => {
     return { events, purchases, commerce, telemetry };
   }
 
+  // The commerce suites' shared arrange (a sibling copy is a jscpd clone):
+  // the published fixtures over the real service with the commerce rig,
+  // mounted at the a1 preview. Returns the rig for the assertions.
+  async function openCommercePreview(
+    rig: ReturnType<typeof commerceRig>,
+    initialUrl = "/route/guide-route-a1",
+  ): Promise<ReturnType<typeof commerceRig>> {
+    serve(CATALOG_FIXTURES);
+    renderRouter(
+      withPreviewRoutes(
+        createServices({
+          catalogOrigin: "https://catalog.test",
+          catalogSha256: sha256,
+          commerce: rig.commerce,
+          events: rig.telemetry,
+        }),
+      ),
+      { initialUrl },
+    );
+    return rig;
+  }
+
   // The render fact (AC3): RN dispatches onLayout after the actual layout —
   // the test drives the same callback through the host props.
   const fireLayout = (testID: string) => {
@@ -491,19 +555,7 @@ describe("G08.05 quiet commerce offer (issue #292)", () => {
   };
 
   test("the paid preview shows the quiet offer; the impression is the render fact (AC1, AC3)", async () => {
-    serve(CATALOG_FIXTURES);
-    const rig = commerceRig();
-    renderRouter(
-      withPreviewRoutes(
-        createServices({
-          catalogOrigin: "https://catalog.test",
-          catalogSha256: sha256,
-          commerce: rig.commerce,
-          events: rig.telemetry,
-        }),
-      ),
-      { initialUrl: "/route/guide-route-a1?from=rubric" },
-    );
+    const rig = await openCommercePreview(commerceRig(), "/route/guide-route-a1?from=rubric");
     expect(await screen.findByTestId("upgrade-offer")).toBeTruthy();
     expect(screen.getByText("Купіць")).toBeTruthy();
     expect(screen.getByText("Не цяпер")).toBeTruthy();
@@ -519,19 +571,7 @@ describe("G08.05 quiet commerce offer (issue #292)", () => {
   });
 
   test("the decline is respected: the card is gone and buys nothing (AC4)", async () => {
-    serve(CATALOG_FIXTURES);
-    const rig = commerceRig();
-    renderRouter(
-      withPreviewRoutes(
-        createServices({
-          catalogOrigin: "https://catalog.test",
-          catalogSha256: sha256,
-          commerce: rig.commerce,
-          events: rig.telemetry,
-        }),
-      ),
-      { initialUrl: "/route/guide-route-a1" },
-    );
+    const rig = await openCommercePreview(commerceRig());
     await screen.findByTestId("upgrade-offer");
     fireLayout("upgrade-offer");
     fireEvent.press(screen.getByTestId("btn-upgrade-dismiss"));
@@ -544,19 +584,7 @@ describe("G08.05 quiet commerce offer (issue #292)", () => {
   });
 
   test("repeated errors keep both exits; Continue free returns to the working offer (AC2, C28)", async () => {
-    serve(CATALOG_FIXTURES);
-    const rig = commerceRig();
-    renderRouter(
-      withPreviewRoutes(
-        createServices({
-          catalogOrigin: "https://catalog.test",
-          catalogSha256: sha256,
-          commerce: rig.commerce,
-          events: rig.telemetry,
-        }),
-      ),
-      { initialUrl: "/route/guide-route-a1" },
-    );
+    const rig = await openCommercePreview(commerceRig());
     fireEvent.press(await screen.findByTestId("btn-upgrade-buy"));
     expect(await screen.findByTestId("purchase-error-dialog")).toBeTruthy();
     expect(screen.getByText("Пакупка не скончылася")).toBeTruthy();
@@ -579,19 +607,7 @@ describe("G08.05 quiet commerce offer (issue #292)", () => {
   });
 
   test("the finished purchase shows the §8 words and the offer never returns", async () => {
-    serve(CATALOG_FIXTURES);
-    const rig = commerceRig({ kind: "transaction-finished", productId: "route_a1_prod" });
-    renderRouter(
-      withPreviewRoutes(
-        createServices({
-          catalogOrigin: "https://catalog.test",
-          catalogSha256: sha256,
-          commerce: rig.commerce,
-          events: rig.telemetry,
-        }),
-      ),
-      { initialUrl: "/route/guide-route-a1" },
-    );
+    const rig = await openCommercePreview(commerceRig({ kind: "transaction-finished", productId: "route_a1_prod" }));
     fireEvent.press(await screen.findByTestId("btn-upgrade-buy"));
     expect(await screen.findByTestId("preview-purchased-pending")).toBeTruthy();
     expect(screen.getByText("Куплена · трэба загрузіць")).toBeTruthy();
@@ -660,17 +676,11 @@ describe("guide preview font layer (G06.10.b)", () => {
 // screen carries the accent shelf of the canon tokens (through the token
 // mirror — a hardcoded literal in the surfaces fails these assertions),
 // the secondary actions take the line shade, and the disabled contract
-// (canon §5: opacity 0.5, no dip, the reason next to the button) holds.
+// (canon §5 after the owner's variant А, issue #430: the ghost pair, no
+// shelf, no dip, the reason next to the button) holds.
 describe("guide preview clay buttons (G06.10.d)", () => {
   test("the primary action renders the accent shelf from the token mirror; the text pair is unchanged", async () => {
-    serve(CATALOG_FIXTURES);
-    renderRouter(withPreviewRoutes(createServices({
-      catalogOrigin: "https://catalog.test",
-      catalogSha256: sha256,
-      bundlesStore: memoryBundles().store,
-      downloadLayer: recordingDownload().downloadLayer,
-    })), { initialUrl: "/route/guide-route-b1" });
-    const button = await screen.findByTestId("btn-download");
+    const button = await openB1ButtonPreview();
     const style = flatStyle(button);
     expect(style.borderBottomWidth).toBe(4);
     expect(style.borderBottomColor).toBe(tokens.colorShelfAccent);
@@ -679,7 +689,11 @@ describe("guide preview clay buttons (G06.10.d)", () => {
     expect(flatStyle(label).color).toBe(tokens.colorAccentInk);
   });
 
-  test("the disabled primary keeps opacity 0.5, never dips, and the reason stays next to the button", async () => {
+  // Issue #430 (owner's variant А): the disabled primary reads — the canon
+  // ghost pair through the mirror, no opacity substitute anywhere in the
+  // layers, no shelf. Reverting to the dimmed accent copy fails the border,
+  // the fill and the label-color queries (implementation-rules 1).
+  test("the disabled primary renders the ghost pair, no shelf, never dips, and the reason stays next to the button", async () => {
     serve(CATALOG_FIXTURES);
     renderRouter(
       withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
@@ -687,9 +701,18 @@ describe("guide preview clay buttons (G06.10.d)", () => {
     );
     const button = await screen.findByTestId("btn-start");
     const resting = flatStyle(button);
-    expect(resting.opacity).toBe(0.5);
+    // No opacity layer — the dimmed copy of the enabled button is gone.
+    expect(resting.opacity).toBeUndefined();
+    // The ghost: transparent fill on the paper, the canon disabled border.
+    expect(resting.backgroundColor).toBe("transparent");
+    expect(resting.borderWidth).toBe(1);
+    expect(resting.borderColor).toBe(tokens.colorDisabledLine);
+    // The shelf drops with the pressable look: no clay base while disabled.
+    expect(resting.borderBottomWidth).toBeUndefined();
     expect(resting.transform).toBeUndefined();
-    expect(resting.borderBottomWidth).toBe(4);
+    // The label leaves the white-on-accent pair for the disabled ink.
+    const label = within(button).getByText("Пачаць");
+    expect(flatStyle(label).color).toBe(tokens.colorDisabledInk);
     // A disabled press fires no dip: the style holds its resting shape.
     fireEvent.press(button);
     expect(flatStyle(screen.getByTestId("btn-start")).transform).toBeUndefined();

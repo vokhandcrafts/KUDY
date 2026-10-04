@@ -16,7 +16,7 @@
         "properties": {
           "route_id": { "$ref": "../schemas/identifier.schema.json" },
           "version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 },
-          "locales": { "type": "array", "minItems": 1, "maxItems": 8, "items": { "enum": ["be", "en", "uk"] } },
+          "locales": { "type": "array", "minItems": 1, "maxItems": 8, "items": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] } },
           "layers": {
             "type": "array",
             "minItems": 1,

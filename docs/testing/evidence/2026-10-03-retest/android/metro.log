@@ -1,0 +1,52 @@
+Networking has been disabled
+Starting project at C:\Users\kamyl\WebstormProjects\KUDY
+Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
+Starting Metro Bundler
+Waiting on http://localhost:8083
+Logs for your project will appear below.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 67.9% (758/920)
+| (node:42528) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 92.4% (1169/1251)
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:51048) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:39388) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:52896) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:21528) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:51460) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+Android Bundled 9179ms node_modules\expo-router\entry.js (1645 modules)
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 670ms node_modules\expo-router\entry.js (1 module)
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 65ms node_modules\expo-router\entry.js (1 module)
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 92ms node_modules\expo-router\entry.js (1 module)
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 55ms node_modules\expo-router\entry.js (1 module)
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 83ms node_modules\expo-router\entry.js (1 module)
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 77ms node_modules\expo-router\entry.js (1 module)
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Warning: Unable to resolve manifest assets. Icons and fonts might not work. This operation was aborted.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android Bundled 43ms node_modules\expo-router\entry.js (1 module)

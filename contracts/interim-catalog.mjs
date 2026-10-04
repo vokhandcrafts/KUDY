@@ -1,0 +1,148 @@
+// Derivation of the interim catalog.json from a built public tree (G10.01.b).
+// Real publication and the catalog pointer belong to G02.04; this stands in
+// for the fixture stage so the pointer-driven pages have a catalog to read.
+// One implementation serves both the prebuild script and the test fixture —
+// no second variant. G20.18 (issue #489): the derivation lives in the
+// contracts zone as the single owner — the web prebuild and the
+// tools/publish-catalog parity test both import it from here, so no
+// zone-crossing import remains (the tools/arch baseline entries are gone).
+// routes: one entry per built bundle; locales by fact (a locale exists when
+// its base stops.json was published — 09 §8); sizes from the base tree on
+// disk (09 §4: sizes per layer, base required by catalog.schema.json);
+// discovery pointer: the built index.json with bytes/sha256 (verified at load
+// by the reader).
+import { createHash } from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { isIdentifier } from './identifier.mjs';
+
+// The producer-side derivation model: locales/layers are read from the
+// directories on disk, not the schema wire projection — the wire owner is
+// contracts/wire/wire-types.ts (generated, G20.19); the published output is
+// schema-validated downstream.
+
+// Walk trust boundary (implementation-rules 14): names that reach a read or
+// stat path are type-checked against links and re-pinned to the real tree
+// root — recursive readdir may descend through directory symlinks (node ≥26
+// yields their files as plain entries), so containment is verified on
+// realpath, never on the lexical path.
+function containedFilePath(rootReal, dirReal, name) {
+  const real = fs.realpathSync(path.resolve(dirReal, name));
+  if (real !== rootReal && !real.startsWith(rootReal + path.sep)) {
+    throw new Error(`unsafe bundle entry: ${path.relative(rootReal, real)}`);
+  }
+  return real;
+}
+
+function containedDirNames(dirReal) {
+  return fs
+    .readdirSync(dirReal, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !entry.isSymbolicLink())
+    .map((entry) => entry.name)
+    .filter((name) => name !== '.' && name !== '..')
+    .filter((name) => {
+      const real = fs.realpathSync(path.resolve(dirReal, name));
+      return real === dirReal || real.startsWith(dirReal + path.sep);
+    })
+    .sort();
+}
+
+// Entry names are interpolated into read paths and into the diagnostic text;
+// only the packager's identifier shape is accepted, so a tampered tree fails
+// with a named diagnostic instead of reading arbitrary files. The rejected
+// name is tree-controlled, so its control characters are rendered as \uXXXX —
+// a raw newline in the name would corrupt the log line itself.
+function requireIdentifier(name, parentPath) {
+  if (name === '.' || name === '..' || !isIdentifier(name)) {
+    const shown = name.replace(/[\p{C}\u2028\u2029]/gu, (ch) => {
+      const cp = ch.codePointAt(0);
+      return cp > 0xffff ? `\\u{${cp.toString(16)}}` : `\\u${cp.toString(16).padStart(4, '0')}`;
+    });
+    throw new Error(`unsafe bundle entry name: ${parentPath}/${shown}`);
+  }
+}
+
+function dirSize(dir) {
+  const dirReal = fs.realpathSync(dir);
+  let total = 0;
+  for (const entry of fs.readdirSync(dirReal, { withFileTypes: true, recursive: true })) {
+    if (entry.isSymbolicLink() || !entry.isFile()) continue;
+    const real = fs.realpathSync(path.resolve(entry.parentPath, entry.name));
+    if (real === dirReal || real.startsWith(dirReal + path.sep)) total += fs.statSync(real).size;
+  }
+  return total;
+}
+
+export function deriveInterimCatalog(publicDir) {
+  const publicReal = fs.realpathSync(publicDir);
+  // The containment anchors themselves must belong to the public tree: a
+  // symlink planted at `bundle` or `discovery` would otherwise move the
+  // boundary outside and legitimize reads from a foreign tree.
+  const bundleRootReal = containedFilePath(publicReal, publicReal, 'bundle');
+  const discoveryRootReal = containedFilePath(publicReal, publicReal, 'discovery');
+  const routes = [];
+  for (const routeId of containedDirNames(bundleRootReal)) {
+    requireIdentifier(routeId, 'bundle');
+    const routeDir = path.resolve(bundleRootReal, routeId);
+    const routeDirReal = fs.realpathSync(routeDir);
+    if (routeDirReal !== bundleRootReal && !routeDirReal.startsWith(bundleRootReal + path.sep)) continue;
+    for (const version of containedDirNames(routeDirReal)) {
+      requireIdentifier(version, `bundle/${routeId}`);
+      const bundleDir = path.resolve(routeDirReal, version);
+      const bundleDirReal = fs.realpathSync(bundleDir);
+      if (bundleDirReal !== bundleRootReal && !bundleDirReal.startsWith(bundleRootReal + path.sep)) continue;
+      const route = JSON.parse(fs.readFileSync(containedFilePath(bundleRootReal, bundleDirReal, 'route.json'), 'utf8'));
+      const locales = [];
+      for (const locale of containedDirNames(bundleDirReal)) {
+        // Locale names reach the stat path below, so they pass the same
+        // identifier gate as route/version — a plain `existsSync` on an
+        // unvalidated name would probe an attacker-chosen path.
+        requireIdentifier(locale, `bundle/${routeId}/${version}`);
+        // The existence probe is a stat path too: a symlinked `base/` or
+        // `stops.json` tail must not answer for a foreign tree. Existence is
+        // proven on the realpath-pinned path; an unresolvable or out-of-tree
+        // tail means the locale was not published (same skip idiom as the
+        // route/version containment guards above).
+        try {
+          const stopsReal = containedFilePath(
+            bundleDirReal,
+            path.resolve(bundleDirReal, locale),
+            path.join('base', 'stops.json'),
+          );
+          if (fs.existsSync(stopsReal)) locales.push(locale);
+        } catch {
+          // no published base/stops.json within the bundle tree
+        }
+      }
+      const layers = route.stops.some((s) => s.access_tier === 'extended')
+        ? ['base', 'extended']
+        : ['base'];
+      routes.push({ route_id: route.route_id, version, locales, layers, sizes: { base: dirSize(bundleDir) } });
+    }
+  }
+
+  const indexFiles = [];
+  for (const entry of fs.readdirSync(discoveryRootReal, { withFileTypes: true, recursive: true })) {
+    if (entry.isSymbolicLink() || !entry.isFile() || entry.name !== 'index.json') continue;
+    const real = fs.realpathSync(path.resolve(entry.parentPath, entry.name));
+    if (real === discoveryRootReal || real.startsWith(discoveryRootReal + path.sep)) indexFiles.push(real);
+  }
+  if (indexFiles.length !== 1) {
+    throw new Error(`expected exactly one discovery index, found ${indexFiles.length}`);
+  }
+  const indexBytes = fs.readFileSync(indexFiles[0]);
+  const indexPath = path.relative(publicReal, indexFiles[0]).replaceAll('\\', '/');
+  const segments = indexPath.split('/');
+  return {
+    catalog_schema_version: 1,
+    generated_at: new Date().toISOString(),
+    routes,
+    discovery_index: {
+      schema_version: 1,
+      revision: segments[2],
+      path: indexPath,
+      bytes: indexBytes.length,
+      sha256: createHash('sha256').update(indexBytes).digest('hex'),
+    },
+  };
+}

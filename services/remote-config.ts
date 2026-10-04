@@ -20,6 +20,7 @@
 // one — a rejected response never overwrites it (criterion 4).
 import { getSetting, setSetting } from './db/db.ts';
 import type { SqlDriver } from './db/types.ts';
+import { NETWORK_WAIT_LIMITS, withWaitLimit } from './network-wait.ts';
 
 // The `09` §5 GET /v1/config document, fields verbatim; the envelope field
 // follows the catalog_schema_version precedent (contracts README).
@@ -47,20 +48,25 @@ export interface ConfigHttpTransport {
   getConfig(url: string): Promise<{ status: number; body: unknown }>;
 }
 
-function defaultConfigHttpTransport(): ConfigHttpTransport {
+function defaultConfigHttpTransport(waitLimitMs: number): ConfigHttpTransport {
   return {
     async getConfig(url) {
-      const response = await fetch(url);
-      const text = await response.text();
-      let parsed: unknown = null;
-      if (text !== '') {
-        try {
-          parsed = JSON.parse(text);
-        } catch {
-          parsed = null;
+      // G20.10 (§N4): the config wait is finite and covers the body; on the
+      // deadline the WaitTimeoutError rejects and the refresh falls through
+      // to its existing cache → defaults policy (never a fabricated value).
+      return withWaitLimit('wait-config', waitLimitMs, async (signal) => {
+        const response = await fetch(url, { signal });
+        const text = await response.text();
+        let parsed: unknown = null;
+        if (text !== '') {
+          try {
+            parsed = JSON.parse(text);
+          } catch {
+            parsed = null;
+          }
         }
-      }
-      return { status: response.status, body: parsed };
+        return { status: response.status, body: parsed };
+      });
     },
   };
 }
@@ -74,6 +80,8 @@ export interface RemoteConfigDeps {
   /** The canonical default document (the contract's defaults file). */
   defaults: RemoteConfigDocument;
   transport?: ConfigHttpTransport;
+  /** Wait limit override for the default transport (tests; the owner is NETWORK_WAIT_LIMITS.configMs). */
+  waitLimitMs?: number;
 }
 
 export type RemoteConfigSource = 'network' | 'cache' | 'defaults';
@@ -129,7 +137,7 @@ export function readRemoteConfig(
 // an invalid response is a diagnostic plus the last accepted or default
 // document, never a crash and never a cache overwrite).
 export async function refreshRemoteConfig(deps: RemoteConfigDeps): Promise<RemoteConfigResult> {
-  const http = deps.transport ?? defaultConfigHttpTransport();
+  const http = deps.transport ?? defaultConfigHttpTransport(deps.waitLimitMs ?? NETWORK_WAIT_LIMITS.configMs);
   const diagnostics: RemoteConfigDiagnostic[] = [];
   let accepted: RemoteConfigDocument | null = null;
   try {

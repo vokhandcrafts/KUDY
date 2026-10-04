@@ -15,8 +15,8 @@ jobs:
         node: [22, 24]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ matrix.node }}
       - name: install (root)
@@ -26,11 +26,26 @@ jobs:
         working-directory: web
       - name: tests
         run: npm test
+  windows-portable:
+    # A26-08 (issue #488): the portable path-boundary guards run on Windows,
+    # the main development host — git prints `/` while path.relative prints
+    # `\`. Both files are dependency-free (node builtins only), so no install
+    # step. The symlink-privilege security cases stay mandatory on the Linux
+    # tests job above; on an incapable host they self-skip with the
+    # limitation named, never silently.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: portable path-boundary checks (design-tokens + fixture hygiene)
+        run: node --test --experimental-strip-types test/design-tokens.test.mjs supabase/functions/_shared/fixtures-hygiene.test.ts
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
       - name: install (root)
@@ -42,11 +57,56 @@ jobs:
         run: npm run typecheck
       - name: typecheck (web)
         run: npx tsc --noEmit -p web
+      - name: arch:check (real repository graph)
+        # G20.15 (#486): the required gate cruises the real checkout's
+        # dependency graph, not checker fixtures. Operator authorization for
+        # this exact step is recorded in issue #493 (closed 2026-10-02); the
+        # invocation is pinned by tools/ci/check-required-checks.mjs and the
+        # failure semantics by the arch-check sandbox suite (tools/arch).
+        run: npm run arch:check
+  server-typecheck:
+    # G20.13 (#484): the production Deno entrypoints are type-checked in the
+    # environment their code runs in. Operator authorization for this exact
+    # job is recorded in issue #493 (closed 2026-10-02). The version owner is
+    # the committed supabase/functions/.deno-version — the action reads it
+    # directly and tools/ci/deno-typecheck.mjs verifies the runtime against
+    # the same file, so CI and the check script cannot drift apart.
+    # setup-deno is pinned to its verified upstream commit (V6 full-SHA
+    # policy); every checkout/setup-node reference in every workflow is pinned
+    # the same way by G20.27 (#500) — the tag stays only as a version
+    # annotation, and tools/ci/check-required-checks.mjs fails the guard when
+    # a pin is dropped.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version-file: supabase/functions/.deno-version
+      - name: typecheck (production Deno entrypoints)
+        run: npm run server:typecheck
+  engine-regressions:
+    # G20.28 (#501, spec verification-integration.md §V7): the 21-mutation
+    # engine gate runs in the required check, not only locally. Operator
+    # authorization for this exact step is recorded in issue #493 (zone 7,
+    # closed 2026-10-02); the invocation is pinned by
+    # tools/ci/check-required-checks.mjs (missing_engine_workflow_step), the
+    # mutation semantics by the runner itself. Each mutation fails with its
+    # named guard test, so a planted missed mutation names its guard.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: install (root)
+        run: npm ci
+      - name: engine mutation regressions (each miss fails with its guard name)
+        run: npm run engine:regressions
   web-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
       - name: install (web)
@@ -58,12 +118,15 @@ jobs:
   gitleaks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - name: gitleaks
-        run: |
-          curl -sSL -o /tmp/gitleaks.tgz \
-            https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz
-          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
-          /tmp/gitleaks detect --source . --verbose --no-banner
+      - name: gitleaks (digest-pinned download)
+        # G20.27 (#500, spec V6): the archive is fetched over HTTPS with an
+        # HTTP-success check, its sha256 is verified against the digest pinned
+        # in tools/ci/fetch-gitleaks.mjs BEFORE extraction, and only then the
+        # scanner executes — with --redact, so findings never print secrets
+        # into the job log. Any missing/wrong digest or HTTP failure exits
+        # nonzero with zero scanner executions
+        # (tools/ci/gitleaks-fetch.test.mjs proves all four cases).
+        run: node tools/ci/fetch-gitleaks.mjs

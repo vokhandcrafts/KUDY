@@ -11,7 +11,7 @@
         "kind": { "const": "guide" },
         "route_id": { "$ref": "../schemas/identifier.schema.json" },
         "version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 },
-        "locale": { "enum": ["be", "en", "uk"] }
+        "locale": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] }
       }
     },
     {
@@ -22,7 +22,7 @@
         "kind": { "const": "place" },
         "place_id": { "$ref": "../schemas/identifier.schema.json" },
         "content_version": { "type": "string", "pattern": "^[0-9]+$", "maxLength": 64 },
-        "locale": { "enum": ["be", "en", "uk"] }
+        "locale": { "enum": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"] }
       }
     }
   ]

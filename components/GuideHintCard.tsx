@@ -11,30 +11,23 @@
 import { useSyncExternalStore } from "react";
 import { StyleSheet, View } from "react-native";
 
+// G21.09 (issue #542): the hint card's message shapes live in the shared
+// pure contract zone. G21.25 (issue #558): the words are the generated
+// projection of the canonical records plus the reviewed translations —
+// the base text never lives in this component.
+import type { GuideHintStrings } from "../contracts/ui-message-types";
+import { GUIDE_HINT_STRINGS } from "./guide-hint-strings.generated";
+
 import { PressableSurface } from "./pressable-surface";
 import { ScaledText } from "./scaled-text";
 import { tokens } from "./design-tokens";
 import type { NearbyHintBinding, NearbyHintState } from "../controllers/useNearbyController";
 
-export function guideHintStrings(locale: string): {
-  readonly heading: string;
-  readonly paid: string;
-  readonly openHint: string;
-  readonly dismiss: string;
-} {
-  const be = {
-    heading: "Побач ёсць гід…",
-    paid: "платны",
-    openHint: "Адкрыць апісанне гіда",
-    dismiss: "Схаваць",
-  };
-  const en = {
-    heading: "A guide is nearby…",
-    paid: "paid",
-    openHint: "Open the guide's description",
-    dismiss: "Hide",
-  };
-  return locale === "en" ? en : be;
+export function guideHintStrings(locale: string): GuideHintStrings {
+  // The words are the generated projection of the canonical records plus the
+  // reviewed translations (G21.25, issue #558); uk keeps the documented be
+  // fallback (uk-release-scope §6.4) until its words are authored (G21.19).
+  return locale === "en" ? GUIDE_HINT_STRINGS.en : GUIDE_HINT_STRINGS.be;
 }
 
 const styles = StyleSheet.create({

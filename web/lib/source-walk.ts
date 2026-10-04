@@ -1,5 +1,5 @@
 // Shared source-tree walk for the guard tests (map-config, app-links-scan).
-// Walk idiom from interim-catalog.ts (implementation-rules 14): symlinks are
+// Walk idiom from contracts/interim-catalog.mjs (implementation-rules 14): symlinks are
 // skipped and every read is pinned to the realpath of the walked root, so a
 // planted link can never pull a guard over files outside web/.
 import fs from 'node:fs';

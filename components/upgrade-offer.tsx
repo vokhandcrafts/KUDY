@@ -41,13 +41,21 @@ const styles = StyleSheet.create({
     marginTop: tokens.spaceM,
     padding: tokens.spaceM,
   },
+  // Issue #430 (варыянт А): the disabled buy reads through the canon ghost
+  // pair (canon §5) — the transparent fill shows the card, no opacity
+  // substitute.
   buyDisabled: {
-    opacity: 0.5,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: tokens.colorDisabledLine,
   },
   buyLabel: {
     color: tokens.colorAccentInk,
     fontSize: tokens.fontBaseSize,
     fontWeight: tokens.fontWeightStrong,
+  },
+  buyLabelDisabled: {
+    color: tokens.colorDisabledInk,
   },
   // The decline stays quiet: a plain text row, not a second accent button —
   // the card keeps one main action (the visual-language buttons rule).
@@ -94,7 +102,7 @@ export function UpgradeOffer({
         style={[styles.buy, busy && styles.buyDisabled]}
         testID="btn-upgrade-buy"
       >
-        <ScaledText style={styles.buyLabel}>{buyLabel}</ScaledText>
+        <ScaledText style={[styles.buyLabel, busy && styles.buyLabelDisabled]}>{buyLabel}</ScaledText>
       </PressableSurface>
       <PressableSurface
         accessibilityRole="button"

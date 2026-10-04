@@ -61,8 +61,12 @@ function checkSizeGuideline(filePath = RULES) {
 }
 
 // Writes a mutated copy of the rules file to a temp path and runs the guard on it.
+// G21.06: the removal patterns are LF-anchored and this is a text-level
+// mutation, so the source text is read through the LF idiom first — on a CRLF
+// checkout the raw bytes would otherwise defeat the removal and mask the
+// defect the mutation asserts (rule 3).
 function checkMutated(mutate) {
-  const text = mutate(fs.readFileSync(RULES, 'utf8'));
+  const text = mutate(fs.readFileSync(RULES, 'utf8').replace(/\r\n/g, '\n'));
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'g1804-'));
   try {
     const copy = path.join(dir, 'code-review.md');

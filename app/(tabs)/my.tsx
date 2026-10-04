@@ -19,6 +19,14 @@ import type { CatalogSurfaceState } from "../../controllers/catalog/catalogContr
 import { useMyKudy } from "../../controllers/myKudyController";
 import type { MyKudyState } from "../../controllers/myKudyController";
 import { useStoreState } from "../../controllers/useControllerStore";
+// G21.09 (issue #542): the picker derives its options and labels from the
+// one locale registry — the registered complete catalogues only.
+import {
+  COMPLETE_UI_LOCALES,
+  isUiLocaleCode,
+  uiLocaleNativeName,
+  type CompleteUiLocaleCode,
+} from "../../contracts/ui-locales";
 import { useServices, useUiLocale } from "../_layout";
 import { BackButton } from "../../components/back-button";
 import { tokens } from "../../components/design-tokens";
@@ -200,6 +208,24 @@ export default function My() {
   );
 }
 
+// G21.17 (issue #551): the history row's content-language label — a
+// differently localized session stays resumable and labelled (AC3). The
+// registry's native name for a known code; an unknown stored code renders
+// as-is — the durable row is never rewritten into a guess.
+function sessionLanguageLabel(locale: string): string {
+  return isUiLocaleCode(locale) ? uiLocaleNativeName(locale) : locale;
+}
+
+// The row's language line (G21.17): one spelling for the live and the
+// finished rows — a sibling copy is a jscpd clone.
+function SessionLocaleLine({ row }: { row: { sessionId: string; locale: string } }) {
+  return (
+    <ScaledText style={styles.rowLine} testID={`my-session-locale-${row.sessionId}`}>
+      {sessionLanguageLabel(row.locale)}
+    </ScaledText>
+  );
+}
+
 function MyKudyRows({
   state,
   catalog,
@@ -238,6 +264,7 @@ function MyKudyRows({
                 row.heard.length,
               )}
             </ScaledText>
+            <SessionLocaleLine row={row} />
           </View>
         ))
       ) : (
@@ -257,6 +284,7 @@ function MyKudyRows({
                 row.heard.length,
               )}
             </ScaledText>
+            <SessionLocaleLine row={row} />
           </View>
         ))
       ) : (
@@ -276,10 +304,10 @@ function UiLocaleRow({
   strings,
 }: {
   locale: string;
-  onPick: (code: "be" | "en" | "uk") => void;
+  onPick: (code: CompleteUiLocaleCode) => void;
   strings: ReturnType<typeof uiStrings>;
 }) {
-  const codes = Object.keys(strings.languageSelfNames) as Array<"be" | "en" | "uk">;
+  const codes = COMPLETE_UI_LOCALES;
   return (
     <View testID="my-ui-locale">
       <ScaledText style={styles.section}>{strings.languageLabel}</ScaledText>
@@ -288,7 +316,7 @@ function UiLocaleRow({
           <PressableSurface
             key={code}
             accessibilityRole="button"
-            accessibilityLabel={strings.languageSelfNames[code]}
+            accessibilityLabel={uiLocaleNativeName(code)}
             accessibilityState={{ selected: locale === code }}
             onPress={() => onPick(code)}
             style={[styles.localeChip, locale === code ? styles.localeChipSelected : null]}
@@ -297,7 +325,7 @@ function UiLocaleRow({
             <ScaledText
               style={[styles.localeChipLabel, locale === code ? styles.localeChipLabelSelected : null]}
             >
-              {strings.languageSelfNames[code]}
+              {uiLocaleNativeName(code)}
             </ScaledText>
           </PressableSurface>
         ))}

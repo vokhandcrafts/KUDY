@@ -6,6 +6,7 @@
 import { be } from './be.ts';
 import { en } from './en.ts';
 import { uk } from './uk.ts';
+import type { CompleteUiLocaleCode } from '../../../contracts/ui-locales.ts';
 
 // The live web UI locales (plan §4): be is the default at the root, en is the
 // prefixed fallback — the one list the QR builder and the language switch
@@ -21,6 +22,20 @@ export type UiStringsLocale = UiLocale | 'uk';
 // The UI locales of the web channel with live routes (plan §4) — uk joins
 // here with the release unit, never before it.
 export const uiLocales: UiLocale[] = ['be', 'en'];
+// G21.09 (issue #542, criterion 4): the advertised picker codes are a subset
+// of the registered complete UI catalogues (contracts/ui-locales.ts) — the
+// assignment below fails the build if uiLocales ever advertises a code
+// without a complete catalogue. uk owns a complete strings file but stays
+// off the live routes until its release unit (uk-release-scope §6.3) — a
+// subset, not equality.
+const advertisedComplete: readonly CompleteUiLocaleCode[] = uiLocales;
+void advertisedComplete;
+
+// The locale the URLs without a prefix serve (plan §4): the single default
+// mapping point behind localePath and the exported document language
+// (G21.01) — the shared 404.html serves unknown URLs of both locales and
+// carries this default.
+export const defaultUiLocale: UiLocale = 'be';
 
 export interface UiStrings {
   brand: string;
@@ -45,6 +60,7 @@ export interface UiStrings {
   mapIntro: string;
   mapRoutesHeading: string;
   mapAttribution: string;
+  mapError: string;
   storyTextHeading: string;
   audioHeading: string;
   audioUnavailable: string;

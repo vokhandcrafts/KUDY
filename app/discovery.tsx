@@ -24,7 +24,6 @@ import {
   AccessBadge,
   cardStyle,
   CityMessage,
-  DISPLAY_LOCALES,
   LocalesLine,
   StateBanner,
 } from "../components/guide-card";
@@ -76,6 +75,7 @@ function OfferCard({
   reasons,
   differences,
   strings,
+  locale,
   onOpen,
 }: {
   offer: DiscoveryOffer;
@@ -83,10 +83,14 @@ function OfferCard({
   reasons: readonly string[];
   differences: readonly string[];
   strings: ReturnType<typeof uiStrings>;
+  // G21.17 (issue #551): the picks read the selected UI language first —
+  // localizedPick falls back to any published text rather than an untitled
+  // card; the offer is shown only when its text covers this locale.
+  locale: string;
   onOpen: (offer: DiscoveryOffer) => void;
 }) {
-  const title = localizedPick(offer.localized.title, DISPLAY_LOCALES);
-  const summary = localizedPick(offer.localized.summary, DISPLAY_LOCALES);
+  const title = localizedPick(offer.localized.title, [locale]);
+  const summary = localizedPick(offer.localized.summary, [locale]);
   const href =
     offer.ref.kind === "guide"
       ? { pathname: `/route/${offer.ref.route_id}`, params: { from } }
@@ -98,11 +102,12 @@ function OfferCard({
       <PressableSurface style={cardStyle} testID={`offer-card-${offer.offer_id}`}>
         <Text style={styles.sectionTitle}>{title}</Text>
         {summary ? <Text style={styles.facts}>{summary}</Text> : null}
-        <AccessBadge access={offer.access} />
+        <AccessBadge access={offer.access} locale={locale} />
         <LocalesLine
           textLocales={offer.availability.text_locales}
           audioLocales={offer.availability.audio_locales}
           localesKnown
+          locale={locale}
         />
         {reasons.length > 0 ? (
           <Text style={styles.facts}>
@@ -122,9 +127,11 @@ function OfferCard({
 function DiscoveryBody({
   state,
   strings,
+  locale,
 }: {
   state: DiscoveryControllerState;
   strings: ReturnType<typeof uiStrings>;
+  locale: string;
 }) {
   if (state.surface.kind === "loading") return <CityMessage text={strings.loading} />;
   if (state.surface.kind === "unavailable") {
@@ -153,6 +160,7 @@ function DiscoveryBody({
         reasons={match.reasons}
         differences={match.differences}
         strings={strings}
+        locale={locale}
         onOpen={(opened) => state.recordOpened(opened, "discovery")}
       />
     );
@@ -189,7 +197,7 @@ function DiscoveryBody({
             return (
               <Chip
                 key={themeId}
-                label={localizedPick(theme?.labels, DISPLAY_LOCALES) ?? themeId}
+                label={localizedPick(theme?.labels, [locale]) ?? themeId}
                 active={state.themeIds.includes(themeId)}
                 onPress={() => state.toggleTheme(themeId)}
                 testID={`theme-${themeId}`}
@@ -214,8 +222,13 @@ function DiscoveryBody({
       <View style={styles.gap} />
       {result.exact.map(renderMatch)}
       {result.exact.length === 0 ? (
+        // G21.17 (issue #551): with no alternatives either, the criteria are
+        // not the reason — the selected UI language's text absence is the
+        // honest explanation (a service failure renders its own state above).
+        // A fully empty index answers the same word truthfully: no guides
+        // with text in this language exist yet.
         <Text testID="discovery-empty" style={styles.facts}>
-          {strings.discoveryEmpty}
+          {result.alternatives.length === 0 ? strings.textLocaleEmpty : strings.discoveryEmpty}
         </Text>
       ) : null}
       {resolve(result.alternatives).length > 0 && result.exact.length > 0 && !alternativesVisible ? (
@@ -277,7 +290,7 @@ export default function Discovery() {
         {state === null ? (
           <CityMessage text={strings.discoveryUnavailable} />
         ) : (
-          <DiscoveryBody state={state} strings={strings} />
+          <DiscoveryBody state={state} strings={strings} locale={locale} />
         )}
       </ScrollView>
     </View>

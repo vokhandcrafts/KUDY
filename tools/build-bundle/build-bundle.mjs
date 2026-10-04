@@ -21,12 +21,16 @@
 // walks, canonical JSON with sorted keys, no timestamps in any artifact.
 
 import { createHash } from 'node:crypto';
+import { isIdentifier } from '../../contracts/identifier.mjs';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-export const LOCALE_ALLOWLIST = ['be', 'en', 'uk'];
+// The locale vocabulary copies contracts/schemas/localized-text.schema.json
+// (propertyNames, G21.16) verbatim; an author-tree top-level directory outside
+// it is unknown-author-entry.
+export const LOCALE_ALLOWLIST = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'];
 export const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
 export const MAX_INDEX_BYTES = 512 * 1024;
 
@@ -99,8 +103,6 @@ async function writeFileRel(outAbs, rel, buf) {
   await fsp.mkdir(path.dirname(abs), { recursive: true });
   await fsp.writeFile(abs, buf);
 }
-
-export const isIdentifier = (value) => typeof value === 'string' && /^[a-z0-9._-]{1,64}$/.test(value);
 
 const isPathSafe = (value, forbidEmptySegments = false) =>
   value.split('/').every((segment) =>

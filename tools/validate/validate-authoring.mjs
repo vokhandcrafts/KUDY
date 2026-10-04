@@ -31,7 +31,7 @@ const DATE = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const SEASONS = new Set(['spring', 'summer', 'autumn', 'winter']);
 // The locale vocabulary copies contracts/schemas/localized-text.schema.json
 // (propertyNames, G14.04.b) verbatim; used by locale-id-mismatch below.
-const LOCALES = new Set(['be', 'en', 'uk']);
+const LOCALES = new Set(['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']);
 
 // Causal connectives a fact block may use only when a cited claim itself
 // states the connection (07, risk 4: the «таму што»/«і тады» class). The uk

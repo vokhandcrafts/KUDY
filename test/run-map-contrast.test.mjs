@@ -106,6 +106,8 @@ test('the peek bar progress strip stays identifiable on the card (≥3:1 edge)',
 
 test('guard is wired into npm test (implementation-rules 1 and 7)', () => {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  assert.match(pkg.scripts.test, /test\/run-map-contrast\.test\.mjs/,
-    'npm test must run test/run-map-contrast.test.mjs');
+  // G20.28: the zone glob replaced the manual path list; file-level ownership
+  // of this suite is named by tools/ci/test-discovery.test.mjs.
+  assert.match(pkg.scripts.test, /"test\/\*\.test\.mjs"/,
+    'npm test must run the test/ zone that owns run-map-contrast.test.mjs');
 });

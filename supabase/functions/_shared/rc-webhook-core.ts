@@ -99,6 +99,41 @@ export interface WebhookPortDeps {
   store: WebhookSqlRunner;
 }
 
+// The accounting record stored in `webhook_events.payload` (spec N6 of the
+// architecture-hardening set: the minimal data set). The full event drives
+// the delivery, but the durable row keeps only the fields with a named
+// accounting purpose (09 §5: «Рэфанды, экспірацыі, TRANSFER → бухгалтэрыя і
+// аналітыка»): which product, in which environment and store, why a
+// CANCELLATION happened, when an EXPIRATION takes effect. The
+// device-identifying fields (app_user_id, aliases, transferred_from,
+// transferred_to) and the subscriber personal fields RevenueCat may attach
+// (email, ip, country, …) are consumed transiently by the rights effects —
+// computed from the parsed event before the persist — and never reach the
+// durable row. The field -> purpose -> retention -> deletion matrix lives in
+// docs/agent-tasks/results/G20.12.md.
+export const WEBHOOK_ACCOUNTING_PAYLOAD_FIELDS = [
+  'product_id',
+  'environment',
+  'store',
+  'cancel_reason',
+  'expiration_at_ms',
+] as const;
+
+// Corrupt shapes contribute nothing (implementation-rules 14): only a
+// whitelisted field holding a plain scalar is copied; objects, arrays and
+// nulls are dropped, and event_timestamp_ms stays out because the event_at
+// column already carries it.
+export function accountingPayload(event: Record<string, unknown>): Record<string, unknown> {
+  const record: Record<string, unknown> = {};
+  for (const field of WEBHOOK_ACCOUNTING_PAYLOAD_FIELDS) {
+    const value = event[field];
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      record[field] = value;
+    }
+  }
+  return record;
+}
+
 // The SQL of the durable bookkeeping. The idempotency key is the event id
 // (RevenueCat reuses it on retries; delivery is at-least-once), and
 // `effects_applied` marks the crash window between persist and effects: a
@@ -155,7 +190,7 @@ export function affectedDeviceIds(event: Record<string, unknown>): string[] {
   const type = event['type'];
   if (type === 'TRANSFER') {
     collectDeviceIds(ids, event['transferred_from']);
-  } else if (CACHE_INVALIDATING_EVENT_TYPES.has(type)) {
+  } else if (typeof type === 'string' && CACHE_INVALIDATING_EVENT_TYPES.has(type)) {
     if (typeof event['app_user_id'] === 'string' && DEVICE_ID_PATTERN.test(event['app_user_id'])) {
       ids.push(event['app_user_id']);
     }
@@ -196,7 +231,7 @@ export async function handleWebhook(
     eventId: event.id,
     type: event.type,
     eventTimestampMs: eventTimestampMs(event),
-    payload: event,
+    payload: accountingPayload(event),
   });
   if (inserted) {
     await applyRightsEffects(event, deps);

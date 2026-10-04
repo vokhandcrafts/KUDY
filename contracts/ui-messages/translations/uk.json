@@ -1,0 +1,1877 @@
+{
+  "translation_schema_version": 1,
+  "locale": "uk",
+  "provenance": {
+    "kind": "migration",
+    "reviewer": "owner",
+    "evidence": "словы перанесены даслоўна з дзеючых uk-каталогаў (G06.05 #280, G14.04.d #305, вэб 09 §8); запісаная роля uk-рэв'ю — уладар (uk-release-scope §6.4)"
+  },
+  "records": [
+    {
+      "id": "native.chrome.access.free",
+      "value": "Безкоштовно",
+      "reviewedSourceHash": "82e16c5b12218d14ab2c468f999861493c22fd508e1f225f286674ecffbac141",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.access.mixed",
+      "value": "Змішано",
+      "reviewedSourceHash": "d434ea3d59a4874db509a395e9df857ee017bee8ed9cf40bdf911b4c745459c5",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.access.paid",
+      "value": "Платно",
+      "reviewedSourceHash": "4b081dc73d3045c6977b49c2140888c6106630d14333a0bc68abd96750d2dffb",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.back",
+      "value": "Назад",
+      "reviewedSourceHash": "b1138bccd114e81d7e8305ace5a529060269c32c1dd21e669ff30f4a2f36d7a0",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.backToCity",
+      "value": "Місто",
+      "reviewedSourceHash": "c3196e598662ddc30063829a3d53b88c16855ef719f72189dcb748a4c7e72200",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.cancel",
+      "value": "Скасувати",
+      "reviewedSourceHash": "0edad8c85ababf7db09011d81672c3470f30745ce80436b8a1e3f77f8fa7150d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.catalogTemporarilyUnavailable",
+      "value": "Каталог тимчасово недоступний",
+      "reviewedSourceHash": "1db04f4cab5a569077412e68b581db2461473397a0b1f1ba55ce094f9c65f144",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.catalogUnavailable",
+      "value": "Каталог недоступний",
+      "reviewedSourceHash": "5da4e9377f0d520cf9f61c7ff0fa655d10fd902089cdd63b979ff8f8d19d0745",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.collectionUnavailable",
+      "value": "Підбірка недоступна",
+      "reviewedSourceHash": "f835b71196437961eeaeb3074ef18024e8204716abc2801515bbdf6a8c4b51d3",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.collectionUnresolved",
+      "value": "Деякі члени підбірки ще не опубліковані.",
+      "reviewedSourceHash": "a5e630ad534dffdc7196d67ccc73dd0266f09f81d681a7a5b811a354ab5fd20b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.currentWalk",
+      "value": "Поточна прогулянка",
+      "reviewedSourceHash": "f9408779fd160eda48f9d52e41c0a274afa34f1fc10c34ed16c655a630413f88",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.degradedData",
+      "value": "Частина даних тимчасово недоступна",
+      "reviewedSourceHash": "c6a254fe804abb64bc54bbe20e172db06ed99322075f21a9f868ba5e35a923b1",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.duration_unknown",
+      "value": "час не оцінено",
+      "reviewedSourceHash": "aa5a112078a2bbce5d31cfb2eaf8e7ffc469607accdc26f9e44e18b8d6dbe659",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.over_time",
+      "value": "довше за запит",
+      "reviewedSourceHash": "95f858f684ec50f63854358e44ef3e68fb7c3c322ff5732fc957046244703404",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.season_not_recommended",
+      "value": "не для цього сезону",
+      "reviewedSourceHash": "b3976a641f5d9d01ed1186b8256e629a92bff51fc5f65f14563df0f60da468d0",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.season_unassessed",
+      "value": "сезон не оцінено",
+      "reviewedSourceHash": "e06820b8dbcdffc5d4e083b1b251714326a070dd61d11c589dc48b1ab551da42",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.theme_mismatch",
+      "value": "інша тема",
+      "reviewedSourceHash": "518dfdb5f1459fb582bff8fef2e6f5130e9b6277546581bb5c06a49da31312e4",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryAlternatives",
+      "value": "Інші варіанти",
+      "reviewedSourceHash": "6b9f5202ccfa8bebff4109104041f656688d06f08ddaa652292d65f40af5ba0e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryEmpty",
+      "value": "Нічого точно не підходить — послабте вибір або подивіться інші варіанти.",
+      "reviewedSourceHash": "831cdd7dfd6d729661152d21f5c107ebf2438ec405db988ddc8d2cd62633521d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryTemporarilyUnavailable",
+      "value": "Підбір зараз недоступний",
+      "reviewedSourceHash": "9252d5d0294115694f781e58a88257ae4b90cca39cb8c14091efd477f0721935",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryTitle",
+      "value": "Чим зайнятися",
+      "reviewedSourceHash": "73a869d121cfe785ef9b06081df8484b6a878a6bb51140ad668c80a4357bd816",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryUnavailable",
+      "value": "Підбір недоступний",
+      "reviewedSourceHash": "262a86e4e8647e231e8d140b8e62fdbf5d769ab8c08400d9d87afb962676211a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.durationLabel",
+      "value": "Тривалість",
+      "reviewedSourceHash": "367751046f034b1e95b6562ea3eb4809debffb78ea7af63d3de645321bdeecc9",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.durationMinutes",
+      "value": "Час: ${minutes} хв",
+      "reviewedSourceHash": "e9a5925bfd57c9831a26edeecf7bcb583cbd7d875c8e9fabbbd4d10449028fe4",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.durationRange",
+      "value": "Час: від ${minMinutes} до ${maxMinutes} хв",
+      "reviewedSourceHash": "78add4278ac05d6aa17374a52f30bb5c313f6da5834ace6e464ed213dcafeee9",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.freeStopsCount",
+      "value": "Точок безкоштовно: ${count}",
+      "reviewedSourceHash": "780c5d18130bb93df4355222162c7d4d8cc0cc3510971a9e6376751dff00a953",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.guidesLink",
+      "value": "Гіди →",
+      "reviewedSourceHash": "ae59ec899a5964dea00463b49e7dd6348684069736ce95f6183d3c79b94c389c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.heardCount",
+      "value": "прослухано: ${count}",
+      "reviewedSourceHash": "974ee6f7afa147c26e872b3306efc390dbf3446e84d770041ded77527ab0342a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.historyUnavailable",
+      "value": "Історія недоступна.",
+      "reviewedSourceHash": "e533a4767a8b973cf00efbfea8c16a7163f08f541ae657e853eea36baa0ccdc9",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.kudyLink",
+      "value": "KUDY →",
+      "reviewedSourceHash": "6215ec8b2ead10ed524e46f5c1ddd0a0567f909e21330a8e7a0229422917383b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.languageLabel",
+      "value": "Мова",
+      "reviewedSourceHash": "85cd11e030ecf41b369de4b859dfd71a507a92c832924c27ff037d43425b9c92",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.languageSelfNames.be",
+      "value": "Беларуская",
+      "reviewedSourceHash": "e9767b0b2ff2587333d4886278387cf97a6f34fb5dc300bdfe5e84e017b8deb1",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.languageSelfNames.en",
+      "value": "English",
+      "reviewedSourceHash": "0ad3add7557937c886b1558b34154e9f8f516e8c43f1320214fb76dddcd7f022",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.languageSelfNames.uk",
+      "value": "Українська",
+      "reviewedSourceHash": "7fbfd8423ed6d3b16798feae0c977cc7396450f553871251ee16ed605416a378",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.languagesLine",
+      "value": "Мови: ${textLocales}",
+      "reviewedSourceHash": "39f5323a4494e7cca7ba60c1fd4f2820d3336a75365fcac547b6a37319e7f9a0",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.liveRowLine",
+      "value": "${state} — з ${day} — прослухано: ${heard}",
+      "reviewedSourceHash": "22477d4a8f0fcab537019080057be843ff31fc7ea592e85d5fb8fe5700fe6081",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.loading",
+      "value": "Завантаження…",
+      "reviewedSourceHash": "0f54c6960ddd3180b3b6aac5d89f08b7c6f51017a06bf42789acdb26fca33706",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.locked",
+      "value": "Зачинено",
+      "reviewedSourceHash": "ff9f67bdfdb9c424fe56f9a9bda42414eeb402ea9b2e1ceca7551e8626c019db",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.myKudy",
+      "value": "KUDY",
+      "reviewedSourceHash": "f5ef5b9f4e464f378e5652777e46ce86225013cf03b06a4f66665e92c0b2dfb6",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.nearby",
+      "value": "Поруч →",
+      "reviewedSourceHash": "19bbc736b6509867eccfc55e37450d946ccf5ceede28120e16baedd862349d82",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.noCurrentWalk",
+      "value": "Поточної прогулянки немає",
+      "reviewedSourceHash": "71cc9155745464cb983daa06f1a7dbedd11879c5af5a0954cdfafd33bd07f7bd",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.noPastWalks",
+      "value": "Попередніх прогулянок немає",
+      "reviewedSourceHash": "0bfbeda8ef7061ce1ba34816528ba7e430b242d9b3f048e4865475cdf7ba8ebf",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.notFoundHint",
+      "value": "Каталог чекає — повертайтеся до нього кнопкою «Назад».",
+      "reviewedSourceHash": "28b7420ef0dc476a3c2ffc4b4eeeabd2f9dc647507d9f66a081d1b4fab127d40",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.notFoundTitle",
+      "value": "Такого екрана немає",
+      "reviewedSourceHash": "f30571fd886be738567f5f0e1e368307332c1d93251f31339d7290de2cf81928",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.notPublished",
+      "value": "не опубліковано",
+      "reviewedSourceHash": "41760064e818aa82c125dc79e1b2961a5cd566a4419228253f62469206893e03",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.pastRowLine",
+      "value": "${startedDay} — ${finishedDay} — прослухано: ${heard}",
+      "reviewedSourceHash": "3b31a3236db946ff49cd0ec5a56bb0e89a5804eda909cd8793de141584cb70aa",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.pastWalks",
+      "value": "Попередні прогулянки",
+      "reviewedSourceHash": "639c686aee401287c7c2224cfce2606da6a128852a23771f4fab41e4275081d8",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.previewUnavailable",
+      "value": "Прев'ю тимчасово недоступне",
+      "reviewedSourceHash": "29f58b35ed2a5502011a9f0b5ad3a15c8eb857bc954349a865e0053875ed8808",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.previewTextUnavailable",
+      "value": "Цього гіда немає обраною мовою інтерфейсу.",
+      "reviewedSourceHash": "6eb593b874ec34a4594861008c051696cafb4d710a8ff5473c9cdd35ddc730f8",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.textLocaleEmpty",
+      "value": "Гідів з текстом цією мовою ще немає.",
+      "reviewedSourceHash": "886f9de4222ee5680e6beb950cddb086d31f9eb0793730fda31ceeb52a872c23",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.editorial",
+      "value": "редакційний вибір",
+      "reviewedSourceHash": "be32560fb8b57fff44f9193fdeac0d3b5fa3312e6d1526ce09f5c88ec8ac9d56",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.season_recommended",
+      "value": "рекомендовано на цей сезон",
+      "reviewedSourceHash": "83c822a95860d2c4821e05dc1b6a51d346b4e5c49e015c2e796ee56b09459002",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.theme_match",
+      "value": "тема",
+      "reviewedSourceHash": "fe66528dbcc40721fc40e604ec985777b0d5425401ab8d38f58c81124c37470b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.within_time",
+      "value": "підходить за часом",
+      "reviewedSourceHash": "41dcea7bd6cbb320a2935ace330501a46b878eef030a85cf775fed8029ad2575",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.retry",
+      "value": "Повторити",
+      "reviewedSourceHash": "cc165ee110aa25bc187cee0368038bf687085da79f7d388ea91787197328053d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.autumn",
+      "value": "Осінь",
+      "reviewedSourceHash": "33f4c1943bc36c7e4550c9987ea85f4a9255b28100446d208517c1a78bd2233d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.spring",
+      "value": "Весна",
+      "reviewedSourceHash": "94c0fb9dc8cd9aa1175988b7b4a193f53fa1f5348c4e3f1110da3fa842721aa2",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.summer",
+      "value": "Літо",
+      "reviewedSourceHash": "e58561f7639c8f6bd4aded2de457fa86cdb8c58a31155ca61ba4a34242034346",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.winter",
+      "value": "Зима",
+      "reviewedSourceHash": "d585e12a829acc78ad036bad2de425546dd4ca75f5be37b7049201a909ca5f74",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.sizeMb",
+      "value": "Розмір: ${mb} МБ",
+      "reviewedSourceHash": "0979953f9427de22d5b78144e7648e877c2056592ac17ca64512e003e83980f2",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.stateLabel.active",
+      "value": "активна",
+      "reviewedSourceHash": "50f925a180afc7d20f1521f3a9576ad1fc36b264eb1ae21a8aa08a8d2e576a19",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.stateLabel.finished",
+      "value": "завершена",
+      "reviewedSourceHash": "89521119203d65f39c6f1f334394eb73f3d477408af4a8bc9956f0ccb36cc4bc",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.stateLabel.paused",
+      "value": "призупинена",
+      "reviewedSourceHash": "d4525430de737faa9202eba337ae8fdd6979666e06ec6f5de931d5dab20d0669",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.stopNumber",
+      "value": "Точка ${position}",
+      "reviewedSourceHash": "732b0324729bf9f41fd27f86c569da9b0d5b75f6c1081c90b3e611c3fd6113c9",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.stopsCount",
+      "value": "Точки: ${count}",
+      "reviewedSourceHash": "e6c16b6c3a55c0e09e51b370c85d5604eae87ecfda33b559d4598b68d7a37ba7",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.stopsLabel",
+      "value": "Точки",
+      "reviewedSourceHash": "543419762c01ac0a64ee4638eca6b11c812136c3c39a11e196be70d391bc7eae",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.switchAccept",
+      "value": "Завершити й почати",
+      "reviewedSourceHash": "09f9461a08fbf1066bb37f8a0c9afc3f52b9c2cb9919ed054ed16a6ec0f4f482",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.switchConfirm",
+      "value": "Завершити «${liveTitle}» і почати «${candidateTitle}»?",
+      "reviewedSourceHash": "7cb787411af9ba9b7fad2486e30c358743ded0e27b84f0d07be6a89e9500fb7d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.textAudioLine",
+      "value": "Текст: ${textLocales}; аудіо: ${audioLocales}",
+      "reviewedSourceHash": "f4933f8d3f6e148b08c0458cfd8c82eda3f2e49657df777c47f9d5dd55e1bd05",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.timeCap",
+      "value": "До ${minutes} хв",
+      "reviewedSourceHash": "4d2caf84a22f5db795338af5e935fc8654189716b361c93b3dd9cdb468de6eec",
+      "review": {
+        "outcome": "approved"
+      },
+      "forms": {
+        "60": "До години",
+        "120": "До двох годин",
+        "240": "На пів дня"
+      }
+    },
+    {
+      "id": "native.chrome.timeUnlimited",
+      "value": "Без обмеження",
+      "reviewedSourceHash": "8f02cfdec9242fdb41cbc1944150ea1fe80af35eaaa00df319679c664a2c3573",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.validCache",
+      "value": "Попередній валідний кеш",
+      "reviewedSourceHash": "d69e1aa70b6573e5e7a801e70fcc8ead0ae58ffd214d39a82227fc88b78f86d0",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.walk",
+      "value": "Прогулянка",
+      "reviewedSourceHash": "b8fec3bf3468c4b2444846dc70c2c43539c6323117bad9e4b42a9a6455b6de54",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.chrome.whatToDo",
+      "value": "Чим зайнятися →",
+      "reviewedSourceHash": "ca14a57064eb242bdc4b06cd3228d38e64e9866fc1e79e9128614b5565e7b179",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.audioLabel",
+      "value": "аудіо",
+      "reviewedSourceHash": "cb431707d9d9fd0564a385237b4a2110724296ccb5bc97ac13f1dab07eb4364c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.cardHint",
+      "value": "Картка пропозиції. Аудіо не запускається.",
+      "reviewedSourceHash": "cf10a7f77cfd055dd909d8128643901c5d57292f5f2c7e57586c31ed7da56c08",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.durationUnit",
+      "value": "хв",
+      "reviewedSourceHash": "079d7b14c190534468f60ebb89dd03327a392891ea21637e93923654586f2fa9",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.empty",
+      "value": "Пропозиції поки не опубліковані",
+      "reviewedSourceHash": "14efad64c2bf1a387eb5bc911f0fe955d664fb8402c294606a5085094340ae3c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.guideLabel",
+      "value": "Гід",
+      "reviewedSourceHash": "0f078d9620a6142a92a06859ae6287ba7c43811e3bc9d69951cf9fc1f030161a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.indexDegraded",
+      "value": "Індекс пропозицій тимчасово недоступний",
+      "reviewedSourceHash": "c36e91739b7d13aaae6a9e2a1bb1892c27935ef285c05dfc35384667a87945bf",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.loading",
+      "value": "Завантаження…",
+      "reviewedSourceHash": "76864c4c66c674c255382af4c8287404979066900d2b793bd18b722acbce8be4",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.mapNote",
+      "value": "Карта міста з’явиться після рішення про тайли",
+      "reviewedSourceHash": "0be5495b00bd2c309da665137618d7af6ff0427f66e93426eb8944a88bb1e673",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.noteAcquiring",
+      "value": "Шукаємо позицію…",
+      "reviewedSourceHash": "f9fe47bc78d531a4f95a80b4eff4b6c272932890908241d99d23f16dcad1d467",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.noteDenied",
+      "value": "Позицію не дозволено — ручний огляд",
+      "reviewedSourceHash": "51d96de0382db6c57b90bc679f3fac2001a7cffe7230898f5f8be0d0fa9d2bfe",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.noteHeldByWalk",
+      "value": "Прогулянка використовує позицію — ручний огляд",
+      "reviewedSourceHash": "0da6932f1e990ff833d7c1eacbd3bb65469cda844e7f5e6658b41c2e4bd4db2d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.noteUnstable",
+      "value": "Позиція нестабільна",
+      "reviewedSourceHash": "8a9fc12e97a5c012d92b4e4e4d80dd068ce0fcf39c225583dc9dd7ec9f22d7d6",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.placeLabel",
+      "value": "Місце",
+      "reviewedSourceHash": "13a42dfb51ce1366b0e65f3501044e2c663561c12bceb5e1eefd1c1ba648f15a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.proximityHeader",
+      "value": "Поблизу",
+      "reviewedSourceHash": "b5941200d2dc75a64cfe58b3c12d1545651c2d2c64bd1991cbca8907bd5fdbce",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.reviewHeader",
+      "value": "Огляд",
+      "reviewedSourceHash": "b0a03f871419d1e16a7933749a3525cadf600c0fa064d06255ebb70426f00c08",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.textLabel",
+      "value": "Текст",
+      "reviewedSourceHash": "aa2bf96ea1849308fd1afb7c10aa4de03d87adc7b9c115e7b4071b777c684e3e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.title",
+      "value": "Поруч",
+      "reviewedSourceHash": "ceb1585e913e83295e615727dc433f621f160b3acd8ed18e40faea444c847749",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.nearby.unavailable",
+      "value": "Каталог недоступний",
+      "reviewedSourceHash": "04fe5b8f33920f11dafd234f90a5d21ab4b0181eb6d3da85d1d569d755da2a65",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.offer.buy",
+      "value": "Купити",
+      "reviewedSourceHash": "6e1f4eb2c0e8449facc0335b8898b51fab9b11e827e31dcbecda830f9419d02a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.offer.continueFree",
+      "value": "Продовжити безкоштовно",
+      "reviewedSourceHash": "f2baa69bab47ea9162dea9324f9eff5abb2a07b1975929b3bedf9e26d72d3072",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.offer.dismiss",
+      "value": "Не зараз",
+      "reviewedSourceHash": "e5a837b139f912633fb94f4a98e64036a82ed35e7b6a1bc4b71560c725427e49",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.offer.errorBody",
+      "value": "Можна спробувати ще раз або продовжити безкоштовно.",
+      "reviewedSourceHash": "87664abf9c7fce9953aa6feaec27017bb4357b50cf8e3ca6055f12ac1c693b0f",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.offer.errorTitle",
+      "value": "Покупка не завершилася",
+      "reviewedSourceHash": "ad99eb072eccd3dd6856951ed1bf49b93585795feb10cf036caa86b53e5a10ce",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.offer.offerBody",
+      "value": "Одна покупка відкриває історії цього гіда.",
+      "reviewedSourceHash": "889d9131c470607574c44341056ad5a06e938fbd72b2c8d9eba39d86642421be",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.offer.offerTitle",
+      "value": "Усі історії гіда",
+      "reviewedSourceHash": "4a049233a864eaccd079db45a0db5435b7f443eb40f4c4f77e300ee153cce067",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.offer.purchasedPending",
+      "value": "Куплено · треба завантажити",
+      "reviewedSourceHash": "73351aee750908e898ef326402d359a6064c68200c51608aba858cd3512cffac",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.offer.tryAgain",
+      "value": "Спробувати ще раз",
+      "reviewedSourceHash": "a1dbc2b68cb546fc6d006f50fbaae7e8f536bd97c68b0e15aaa9102d8bb237e4",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.audioLabel",
+      "value": "аудіо",
+      "reviewedSourceHash": "9cba9aefe283b909867ca3c7b7fdfa081738a88eda904be2c8857e8b4dbaecda",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.durationUnit",
+      "value": "хв",
+      "reviewedSourceHash": "5fb07a573d2f240d1203235ebd8c9730bd39304c864a7b4674fb00c5a40e8cbb",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.empty",
+      "value": "Тізерів для цього місця немає",
+      "reviewedSourceHash": "c10b21985ac88ed9bb6b0ae9d95e3ce080839a622e1d3f09b92ec534ee0040ff",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.error",
+      "value": "Не вдалося відкрити місце",
+      "reviewedSourceHash": "78a267a1e105f648cf74264ed59e4a3ee9b334ade5135f94b24826e31fd9abda",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.guideLink",
+      "value": "Прев'ю гіда",
+      "reviewedSourceHash": "6689ad59dbaf7e5400f58ed1c55c89ef10dfca451dc4c1d9e4d9d257200211d5",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.guideLinkHint",
+      "value": "Відкриває прев'ю гіда, не запуск прогулянки.",
+      "reviewedSourceHash": "2d8e625a33b415b8a144097cf43e9b9b7566c68f36fc80fdf472b01d4ca79714",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.loading",
+      "value": "Завантаження…",
+      "reviewedSourceHash": "9fdf727adcd5b226497b6726d48906a85ffbf4ea7192fb2f52f9c5569577671f",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.noAudio",
+      "value": "Аудіо тізера не опубліковане",
+      "reviewedSourceHash": "f10b57d945775369b50aa834570f60cb191aad9445d68ea7c11549e2b433aaf3",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.noFacts",
+      "value": "Місце поки не опубліковане в каталозі",
+      "reviewedSourceHash": "6a837f315b4fc07df8e72f31ac5802801e3e69123b032eb3ddbe6990ef5ec9be",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.nowPlaying",
+      "value": "Зараз грає",
+      "reviewedSourceHash": "31c53b2b89b3c44e240d3860a4995fab290ac654eaabbfa98283f52915cc70e4",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.paused",
+      "value": "Пауза",
+      "reviewedSourceHash": "36eaaecbe287e6c605f6875703cfd53540fa068c8b32c36eb140109003df230e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.playFailed",
+      "value": "Звук не почався.",
+      "reviewedSourceHash": "7057a04fb254bea27c4c76ad7523f0b96822383dbe1b0b3a275667acbde5655d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.playFailedHint",
+      "value": "Спробуйте запустити ще раз.",
+      "reviewedSourceHash": "a5244be645a80ce3e76fcc8f58e81ba9ecd87663b73973ff264dbf01b068178c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.playHint",
+      "value": "Явний Play тізера через єдиний плеєр.",
+      "reviewedSourceHash": "0bd0d8468494d897c96315c9ad3ac8f5633afb4d4a9af15acddcaca6e981f1f6",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.playLabel",
+      "value": "Послухати тізер",
+      "reviewedSourceHash": "98676c06c005f69e0596c1aa422f373aea133813f59122713f352e99f388cba4",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.refusalText.moment#audio-unpublished",
+      "value": "Звук тізера не опублікований.",
+      "reviewedSourceHash": "75adba4e79892068236ecd0f592b01a59142ad866d4e157556c2d8f7ee690a9b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.refusalText.moment#session-refused",
+      "value": "Тізер зараз не запускається — спробуйте ще раз.",
+      "reviewedSourceHash": "27f2c6c3a5f9c950a31c4bd3719c6197ccbb81c08574f11f589d9ee1c548f137",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.refusalText.moment#session-unroutable",
+      "value": "Тізер не звучить у прогулянці — запустіть його тут ще раз.",
+      "reviewedSourceHash": "b4a69a45fa3ce27bf828742abaf9056f319804794f2ee31db62bca527194b08b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.resumeLabel",
+      "value": "Продовжити",
+      "reviewedSourceHash": "b8246a13f259bdb46e8425d790c5ffbeba1bf2905c36f9b0e81c71ae30246870",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.stopLabel",
+      "value": "Зупинити",
+      "reviewedSourceHash": "7c29f6636e7181c50f70cb3990251dd5a2b40e1823d9a27135fd168bdf559a90",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.teaserLabel",
+      "value": "Тізер",
+      "reviewedSourceHash": "e81ae6243c1a8f05cd365f4dfe9c2b18e0ff1ad2419f103a55573d9b9e2991b8",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.textLabel",
+      "value": "Текст",
+      "reviewedSourceHash": "9d32629dfe52f43658702381d2ab2c662cca5a395dbde1e8177280f0b94c43a6",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.place.unavailable",
+      "value": "Деталі місця недоступні",
+      "reviewedSourceHash": "04c287ef15935302a75cab52776883ca52481197e2e22798268a4436c64413a9",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.detail",
+      "value": "пакет неповний",
+      "reviewedSourceHash": "22fe4c2b5e44f41bb7cafc1b0262f1f737e96b86317ce4830a1a8160b57e57eb",
+      "review": {
+        "outcome": "approved"
+      },
+      "forms": {
+        "damaged": "пакет пошкоджений: потрібне повторне завантаження",
+        "missing-files": "бракує файлів: ${count}",
+        "stale": "доступне оновлення"
+      }
+    },
+    {
+      "id": "native.preview.downloadFailed",
+      "value": "Збій завантаження.",
+      "reviewedSourceHash": "4470dfde12ba5d2478989694d06ff50d49447bc872a0d0ef153c02fda3e77a40",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.label.download",
+      "value": "Завантажити",
+      "reviewedSourceHash": "a549fbfb60c21722178889b8deb230cc530a13f81c505c996076e24826545daf",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.label.start",
+      "value": "Почати",
+      "reviewedSourceHash": "d86b1af3ba0b10036ebc2e53b826d50440fda0416b79bdcdcf0b6cc548277293",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#download-unavailable",
+      "value": "Завантаження недоступне в цьому складанні.",
+      "reviewedSourceHash": "c92fa779597efd3693633519bd657c144bf3c77398a05850305192c9834424ff",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#not-published",
+      "value": "Гід не опублікований.",
+      "reviewedSourceHash": "f4026de96b2bf6d2f5337774d08a4a6e28073ac9a55e76292f5cf6bc6998359d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#purchase-required",
+      "value": "Потрібна покупка.",
+      "reviewedSourceHash": "e786d174f1074f25fbb00fd84bf85cca15b645d1967c920ab8b61812aa8315e4",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#storage-unknown",
+      "value": "Сховище недоступне.",
+      "reviewedSourceHash": "662280ea45ace6b68da87b0c542fdc84235041ae588aa93b2c0e6e45c4137b7a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#verify-unavailable",
+      "value": "Перевірка недоступна.",
+      "reviewedSourceHash": "03f7bad1b0dd05221dcbf5a4acf62a639853decfcbe6ca6490ddb5c2cea9b7b0",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.retry",
+      "value": "Повторити",
+      "reviewedSourceHash": "0cc5f813736728a6851f72c2b114f9add2a61f58d47c1a5781e3d445464c9d3b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.storageExit",
+      "value": "Звільнити місце в KUDY",
+      "reviewedSourceHash": "7694206992bd6471e7d0db23d132c82854618caee70263270c8f2fe3e6ef3a35",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.preview.storageFullDetail",
+      "value": "бракує місця: потрібно ще ${mb} МБ",
+      "reviewedSourceHash": "246c064641fd53a3c0f04b126c2a29f5b161c9b846290e2595292279abf0ae08",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.attribution",
+      "value": "Дані © учасники OpenStreetMap, ODbL",
+      "reviewedSourceHash": "c2b14d03ca62503c507e49ef77155a31d8423716a313ab878c7b0d751bcd23d3",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.autoplaySuspendedTitle",
+      "value": "Автоматичні історії призупинені",
+      "reviewedSourceHash": "127dc05744cfc9564cbbe4cb47cfc30c780ee2c30b55e7a16c84c19d04c134f7",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.close",
+      "value": "Зачинити",
+      "reviewedSourceHash": "fdcf5f36d5dc627a9fe0d52a9fb62fdcad04dae25ac94910de28dcadebf566df",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.deniedGps",
+      "value": "Автоматичні історії не працюють — я не бачу вашої позиції",
+      "reviewedSourceHash": "4c2d57377f5bee5ce40cccc7e2393893218a2c5c87e74e60c3065cff7b28af0b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.endConfirmAccept",
+      "value": "Завершити",
+      "reviewedSourceHash": "a8437ed726559ff94e98019d7f0d093963e380d035f5f61215a0fe521d9871e2",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.endConfirmCancel",
+      "value": "Скасувати",
+      "reviewedSourceHash": "6f2c024243297acae4ebcd87bbd44dadb04f728c836f0c126e069ecb0705bbca",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.endConfirmTitle",
+      "value": "Завершити прогулянку?",
+      "reviewedSourceHash": "914dc880a971016df429bf5b22ea8f703e1287530f6e50654589ee9a40aa3b34",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.endWalk",
+      "value": "Завершити прогулянку",
+      "reviewedSourceHash": "1d896d738e1170ab489de6baa61a4fbf015a3482ad6f1ea26d5ace4663e9775c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.endedTitle",
+      "value": "Прогулянка завершена",
+      "reviewedSourceHash": "39f780e448149f38eb59cf40d230c2ab1539f1082ad7d357a191d46bd0f20739",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.gpsStalled",
+      "value": "Позиція застаріла",
+      "reviewedSourceHash": "dcb4aab6a116aa3dfec4b0cc420890b7291cec06bb1d00ecc640e66632c25c0d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.gpsStalledDetail",
+      "value": "Автозапуск і черга заблоковані",
+      "reviewedSourceHash": "c0f1d04f075143656fd943a339c28fb79f392bc8837d049a52ba499398f3f55c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.loading",
+      "value": "Завантаження…",
+      "reviewedSourceHash": "040940eda93e7404d57a64daf645d628ab55ebf399ce3b32883736cf9bf238fc",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.lockedHint",
+      "value": "Доступно після купівлі",
+      "reviewedSourceHash": "8a2f3f3dd06cc4f068baefe2af315554d551a6ed4b1920ff46455715bcc3d166",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.manualPlayHint",
+      "value": "Кожна історія запускається руками з картки точки",
+      "reviewedSourceHash": "001c5d5c664209b77fd781de374acc525f425af430263b370b05c3de2a980c05",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.markerHint",
+      "value": "Перегляд точки. Аудіо не запускається.",
+      "reviewedSourceHash": "c93b6f3471a36cc43c3089c07070a0a7bc55d14d900f12e49c4454c3cfdf8ee5",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.nothingPlaying",
+      "value": "Нічого не грає",
+      "reviewedSourceHash": "3fa2e1172cf976d39cdaf06d27f957c31e00afa29d29a2d8caddc8b2690203da",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.nowPlayingLabel",
+      "value": "Зараз грає",
+      "reviewedSourceHash": "0410c32b080f07cb67c2f1263ffe9887008786f97a5f011e7e7c75237dec7759",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.pauseAudio",
+      "value": "Пауза",
+      "reviewedSourceHash": "fb5c796b96e75da399f5c2807919772e99309921718eb232cf8e2081d0bac312",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.pauseWalk",
+      "value": "Призупинити прогулянку",
+      "reviewedSourceHash": "9d38a19be03985d1f816485664843efdc5472ef71c462500c868d744d6efd978",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.pausedTitle",
+      "value": "Прогулянка призупинена",
+      "reviewedSourceHash": "166ec9cb061eebb2770a359e48eb2be38c3ecbb4d8f6a613a4c9ad91400a6d2c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.playAudio",
+      "value": "Грати",
+      "reviewedSourceHash": "c511387ceea931680ada61ac8be6aefde228ae5a310e471ff5d091f3c09ffb49",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.playStoryHint",
+      "value": "Запускає звук цієї історії",
+      "reviewedSourceHash": "d3c9a3ebd3822df15a6417d6aa92f55565d3572b61cfd9f2f98aba808bafe554",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.poiKind.sight",
+      "value": "Пам’ятка",
+      "reviewedSourceHash": "42e94abcf55015b5817b57f0395ce601910d38d1eb02af1c761d091f1cdbc79b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.readMore",
+      "value": "Читати",
+      "reviewedSourceHash": "8dfb154f8883603f925a09be40080f3693a1788640a0be59cbcf0e0848dc54db",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.fallback",
+      "value": "Збій.",
+      "reviewedSourceHash": "0da87870411b9e1873d84f74989b9f36d3178c3bc2f945c6c8b2a73a4bbc8710",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.live-session-exists",
+      "value": "Вже є жива прогулянка.",
+      "reviewedSourceHash": "38876047ff189a5c3cc8b4aaad58364154accfcfa128fee9758d8de7b072b59a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.package-access-locked",
+      "value": "Доступ до гіда ще не відкритий.",
+      "reviewedSourceHash": "305486b141166aae4f39c37fd522ba73ca70cad152735f62c7b6ea8f4c62b899",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.package-incomplete",
+      "value": "Гід неповний.",
+      "reviewedSourceHash": "8d26cfe8dc716a252873caead724a2a04f2feba74d796194d51c96f869b943ef",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.package-needs-recovery",
+      "value": "Гід потребує відновлення.",
+      "reviewedSourceHash": "b8b4c2c7f540bb529eb784dc36f405b7b2e7c818a813a2aa5c6001e5eb12861e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#locale-missing",
+      "value": "Мова гіда не знайдена.",
+      "reviewedSourceHash": "69fb0a7ed42523063e1634201b51bfbfe554e375e3a5a3a8fe3831bff4b4a937",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#package-ambiguous",
+      "value": "На диску кілька версій гіда.",
+      "reviewedSourceHash": "fdd1faa5c76b85d38f095cfdfdc5a95f2735d003bf0cfd1d04605ca19d3faa19",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#package-not-downloaded",
+      "value": "Гід не завантажений.",
+      "reviewedSourceHash": "5912049b75ae0d205c03dc16c4766fbb92a49f85a06dd5fbf43979b076f3a6f4",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#package-read-failed",
+      "value": "Гід не читається.",
+      "reviewedSourceHash": "cb97f828950ec915bd80a937e1c569a2e255c380aa2dc70db18883b66eeeb0ea",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#recovery-failed",
+      "value": "Збій читання живої сесії.",
+      "reviewedSourceHash": "dc38ee4a64a7e63371d24d15a8811bec2db3a5cc769f78da944fe0c00d11f75b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#unsafe-route-id",
+      "value": "Неправильний ідентифікатор маршруту.",
+      "reviewedSourceHash": "d340822c39b89b886e5951a52bc64b20fca3d6f84871c9e1e5a862235c7b033c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.reasonText.switch-no-live-session",
+      "value": "Живої прогулянки вже немає — почніть наново.",
+      "reviewedSourceHash": "8db71669436a5adb6fe155900507136c66e4bc436e26865e0408659b50457ecd",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.restoredTitle",
+      "value": "Прогулянка продовжена зі збереженої сесії",
+      "reviewedSourceHash": "0e2062fc47a4936d773e4e014d5f1f11c31481de99dceb81a4aa9166acdc30f1",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.resume",
+      "value": "Продовжити",
+      "reviewedSourceHash": "eebc12f1f868df6992e266f4de878022ad7ba731a55d869b203f5e44b2562286",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.schematicNote",
+      "value": "Схема точок маршруту — карта міста з’явиться після рішення про тайли",
+      "reviewedSourceHash": "7202049786e88c0cfb035a2fcf10a56d78f72c8911d0a3a06810d076909d7939",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.status.available",
+      "value": "доступно",
+      "reviewedSourceHash": "9793aad53a23abdc305d5548a29cb946b00e25523d81d73dd6fc44ec65584cf2",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.status.locked",
+      "value": "зачинено",
+      "reviewedSourceHash": "6a99f5e753bfc059766d06244cd27adca7e2aef32f319d076e3df63d742e94a7",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.status.pending",
+      "value": "чекає",
+      "reviewedSourceHash": "9f528a418df5a9a0b3669164831060f48a64ee91f09944317edbf68f59fccda9",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.status.played",
+      "value": "прослухано",
+      "reviewedSourceHash": "a502b3cc111fa9e67cfd2cf9ed81c5255f9e620b48382d72345b3dc81661fe36",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.status.playing",
+      "value": "звучить",
+      "reviewedSourceHash": "d1eef5a55b531148b786b73a9273d9f72d6de945391799a4b8c69b6f9b5ad31b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.storyBase",
+      "value": "Основна історія",
+      "reviewedSourceHash": "6c2b75554d07c595a721ae6fa62de6e6e5f0157b2d7bc79dd445ca7dcbd3fd08",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.storyExtended",
+      "value": "Додаткова історія",
+      "reviewedSourceHash": "3570a8bfad2653d9dcd5fe9b60241a9ec8313f4a1a3ad34085dd92117b7b044b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.tierUnavailable",
+      "value": "Додатковий рівень недоступний у відновленій сесії",
+      "reviewedSourceHash": "96e6c8ab2f1326360751f35cbe3a8f97c05b372dbe078097523afeb01a06201c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.transcript",
+      "value": "Транскрипт",
+      "reviewedSourceHash": "ed28a2f5c9457fcfa1fa39bec597498948a3909f658583f316145309b493a477",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.transcriptPending",
+      "value": "Текст прийде з контентом пакета",
+      "reviewedSourceHash": "e4d1078ae54a91a1baba09622433a75af468a6b88cbe1d1fb319edf4126fbada",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.run.unavailableTitle",
+      "value": "Сесія недоступна",
+      "reviewedSourceHash": "749dd4d5710f98ecf3c7147c540c4f2f65368b228adcaf1d050f9c738fed73a6",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.appBenefitFullRoutes",
+      "value": "Повні маршрути: всі точки і все аудіо",
+      "reviewedSourceHash": "d4b091d52be3bca3e28259c32c45de553cdae2bff23890f1466f43539a648fb6",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.appBenefitGps",
+      "value": "GPS-автозапуск історій на місці",
+      "reviewedSourceHash": "dd1f0b20a9989171a0f7ee937b8a2b300e77510c6fede71cea44091ffd88075e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.appBenefitOffline",
+      "value": "Офлайн: маршрути під рукою без інтернету",
+      "reviewedSourceHash": "0938d9674742b7ca8d10e18f403e12aec968da0f2d0727b9159f6718ec177d9e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.appPageStores",
+      "value": "Знайти додаток:",
+      "reviewedSourceHash": "41e9d325b3f4b67c7a5286cc11354b0a207839e2fee05e651cc270869ed5f0ec",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.appPageTitle",
+      "value": "Повна версія — у додатку KUDY",
+      "reviewedSourceHash": "a824a45caa613d7d9d0cb29d968595e6d42c3db635115d8aa4946823e2bbbebe",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.appStoreName",
+      "value": "App Store",
+      "reviewedSourceHash": "7047842a47bf44a3707f7389b795b8484c66306e2026e9dcd5ea02e387c9c54c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.audioAndText",
+      "value": "аудіо і текст",
+      "reviewedSourceHash": "0f4aff6c5476865b0bd3977657d0f3361fd3d04dcea6e8e4734b6bfdbdba5a0a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.audioHeading",
+      "value": "Аудіо",
+      "reviewedSourceHash": "42ce7ded17f5749b83970a0155fde0b9503d572f14685c475940bbf1dc3a4022",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.audioUnavailable",
+      "value": "Аудіофайла немає в публічному пакеті; текст історії нижче читається як зазвичай.",
+      "reviewedSourceHash": "97c74598be80ccfc34d8de9326cccdd19a2e3131cd88bcd8d5a36907f528157e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.backToGuide",
+      "value": "До сторінки гіда",
+      "reviewedSourceHash": "d74d46d2484a23efcb8b7fe0c7c0cad37cd687fd47b549476567a7551dcb1fde",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.brand",
+      "value": "KUDY",
+      "reviewedSourceHash": "1885cd40ff3259455dab4cd3fda86af65df621059911963040af3482180755bd",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.calmOfferCta",
+      "value": "Відкрити додаток",
+      "reviewedSourceHash": "59b840b0a9ba1fb1402597545ca1e919111a9825e9ddc94d8ab8270c7ddcafef",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.calmOfferText",
+      "value": "Повна версія — у додатку: GPS-автозапуск, офлайн, повні маршрути.",
+      "reviewedSourceHash": "fca9b8721b8f42038c5bd8672d0019ca3e492ba30ac6fa7f2fb175bdf404ea2e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.catalogTitle",
+      "value": "Гіди містом",
+      "reviewedSourceHash": "670058fc54d284f2e46f7e8e09997332a46ab937ce627c51f1f2cfaa998f82ff",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.distance",
+      "value": "Відстань",
+      "reviewedSourceHash": "bee0a3a7d35a29807e46345e626e3bca28a4970e701c0b66c236c9d84c074c04",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.duration",
+      "value": "Тривалість",
+      "reviewedSourceHash": "9276104996f45e284d966794e70c4fc2d52b329a5a5f4666515e718f8bf12f16",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.homeLink",
+      "value": "На головну",
+      "reviewedSourceHash": "30e2d60f17153ff35aa1adda3bab5116845e1991e0e4143d79ea1b50bb13389e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.kilometersShort",
+      "value": "км",
+      "reviewedSourceHash": "f0799d4b6ae84c9fafe93c5a3e8ae85bf7675912cad3a7737f48c0448aa00f50",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.langSwitchName",
+      "value": "English",
+      "reviewedSourceHash": "08fee1e01a8191946fa7c18d58791822c1e28bfcbd50006a82592c408e10f28a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.languages",
+      "value": "Мови",
+      "reviewedSourceHash": "c06833252de3a6b56c05b65b42dfa0b95e4005eedd8189e5bf9f2f64b4490716",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.lockedLabel",
+      "value": "точка під замком",
+      "reviewedSourceHash": "aafde1b7e9811c639b3f9340e59d0b53d6879b56fffc2cb6bcd74a616b2870e8",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.mapAttribution",
+      "value": "Дані карти © учасники OpenStreetMap (ліцензія ODbL)",
+      "reviewedSourceHash": "1044b87f28683a787262f17f1017ec49cf859cf8ba6c9773717fc8be6f16a536",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.mapError",
+      "value": "Карта тимчасово недоступна. Список маршрутів нижче працює як зазвичай.",
+      "reviewedSourceHash": "5d6c08e18afd5e725fb09490c6227e3ea83cadb649a78c776408948b6fa9963e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.mapIntro",
+      "value": "Огляд публічних маршрутів і точок. Позиція відвідувача не визначається і не використовується.",
+      "reviewedSourceHash": "c597a6c22daf0b31484af6251a55b92c9ddf3827aaac5719073d93a17caec838",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.mapRoutesHeading",
+      "value": "Маршрути на карті",
+      "reviewedSourceHash": "35d577ece11ecfe53eb50cc7fd5ce8f60212ada6f4e892602acb5b06449a21f1",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.mapTitle",
+      "value": "Карта міста",
+      "reviewedSourceHash": "9ef7a5aa47a5315ef13466f4ff1aa67b6286c442ff261c0bbaccfc208ab85887",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.minutesShort",
+      "value": "хв",
+      "reviewedSourceHash": "e8c16fd4349955ecde6b8e54ca7e348713cdfc4bea556dfba5ed9c03fd384e93",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.nextStop",
+      "value": "Наступна точка",
+      "reviewedSourceHash": "371e0d77c5507a43edee3b356ad0cfb56f8b7c21a246ea346daed28f22a10799",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.playStoreName",
+      "value": "Google Play",
+      "reviewedSourceHash": "4d2b5bdd1768b08ed60798c2baf6ea51b51a4a14c75d19063d9f16134116ce03",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.prevStop",
+      "value": "Попередня точка",
+      "reviewedSourceHash": "91521bae33c1fc37a67fc215efdc36f06c0e7fd6c7bab32e70f3e7b7443f53dd",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.privacyAnalytics",
+      "value": "Аналітика — лише за явною згодою. Події надсилаються на сервер не раніше, ніж дана згода; відмова означає, що лог залишається лише на пристрої, а додаток працює повністю. Координати, імена і введений користувачем текст не надсилаються ніколи.",
+      "reviewedSourceHash": "d02dc665b1db4856113cad4e30c33fb438f48dd157f66c4da39aa242b941340b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.privacyAppData",
+      "value": "Додаток працює без акаунта. Він веде на пристрої локальний лог подій (які історії відкривалися, які маршрути завантажилися) і зберігає завантаження контенту. Лог не містить ні імен, ні вільного тексту і прив’язаний до випадкового ідентифікатора пристрою — це псевдонімізовані, а не анонімні дані.",
+      "reviewedSourceHash": "440680a83706fc8e822376da9efc4e06bef21b3f33ecc4566ef35f3c68ec5470",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.privacyContact",
+      "value": "Питання про цю політику приватності можна ставити в issues публічного репозиторію проєкту:",
+      "reviewedSourceHash": "8155e69060cfd2c7c434816554419619f7c6880d668891dd3d836b609cf425c6",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.privacyDeletion",
+      "value": "Видалення даних: у додатку, у розділі My KUDY, є кнопка видалення пристрою — вона очищає лог подій на сервері і запис пристрою; завантаження контенту залишаються. Лист чи заявку надсилати не треба.",
+      "reviewedSourceHash": "6620748446af7ada3e3599b198bf82640983b0568c88d3c19f97e59b25bfc897",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.privacyIntro",
+      "value": "KUDY — аудіогіди для міських прогулянок. Ця сторінка описує, які дані обробляє проєкт: вільний пласт веб-каналу і мобільний додаток.",
+      "reviewedSourceHash": "87c3fd8b911d11bafbc0a20e65b2312422d246dd45ebb630ee9d3942b301e33a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.privacyLocation",
+      "value": "Локація використовується лише в додатку і лише під час активної прогулянки: фонове визначення місця працює, поки йде прогулянка, і зупиняється разом з нею. Координати не залишають пристрій — вони не передаються на сервер і не потрапляють у лог подій. На веб-каналі позиція відвідувача не визначається взагалі.",
+      "reviewedSourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.privacyPurchases",
+      "value": "Покупки проходять через крамниці застосунків (App Store, Google Play): платіжні дані обробляє крамниця, а додаток записує лише факт події покупки — маршрут, варіант, результат — без банківських реквізитів.",
+      "reviewedSourceHash": "9befc36b7704fa57cf77cb50c7277a86c5dd0ebd6fcdd4ee8f69d48d6a993dce",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.privacyRetention",
+      "value": "Термін зберігання: сирі надіслані події зберігаються 14 місяців, потім видаляються заданням; агреговані числа за маршрутами залишаються без ідентифікатора пристрою.",
+      "reviewedSourceHash": "e859c436d72b484bfcf48110c474213d847ef7326797107354710ba929c6fa52",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.privacyTitle",
+      "value": "Приватність",
+      "reviewedSourceHash": "22162a33a385d2a42f1db6a44f8673e8d8d2f0b0180dfecf547178cfeac498fb",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.privacyWeb",
+      "value": "Безкоштовний веб-канал не збирає акаунтів: реєстрації і входу немає, контактні дані не запитуються. Сторінки каталогу, гідів і карт відкриваються без уведення особистих даних.",
+      "reviewedSourceHash": "4d4fe908d535fe3996570f0917999a33a649dc1b85d21a9444352b0f2ad6341c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.stopListHeading",
+      "value": "Точки маршруту",
+      "reviewedSourceHash": "379fd21b7a21e645950a361e2a27c81ffb28a9b8c5ff5d3b40ae867ed3aa4244",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.stops",
+      "value": "Точки",
+      "reviewedSourceHash": "f01a41e8069f5a10f7446d7892a4663bc206dcc63d79c0f0bcd747d09ef05a9d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.storeComingSoon",
+      "value": "Скоро",
+      "reviewedSourceHash": "a4a928d1751b51e8124728e4b4f8cc411f60787f509a56129e2e6ffcbdf6f679",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.storyTextHeading",
+      "value": "Текст історії",
+      "reviewedSourceHash": "c8c99c777db7f030957de2c87bb2807e6453c815734d5c6fcfdf762c4649be5a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.textOnly",
+      "value": "лише текст",
+      "reviewedSourceHash": "60adcac9c17b1b2348bdc25bf9408963fe25e9d161f6b51d2a82561c7e470515",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.versionUnavailable",
+      "value": "Версія недоступна",
+      "reviewedSourceHash": "6d0903ab3a0d160167c966e6b09cdce71900eb1271487b48f51ecb738379bd8e",
+      "review": {
+        "outcome": "approved"
+      }
+    }
+  ]
+}

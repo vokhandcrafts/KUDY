@@ -19,9 +19,12 @@ import { useEffect, useState } from 'react';
 import { byEditorialOrder } from '../../core/discovery/selectDiscovery.ts';
 import type { CatalogService, NearbyOfferFacts } from '../../services/catalog/types.ts';
 import type { LocationMode, LocationStatus } from '../../services/location/types.ts';
+// G21.09 (issue #542): the message shapes live in the shared pure contract zone.
+import type { NearbyStrings } from '../../contracts/ui-message-types.ts';
 import type { LocationService } from '../../services/location/service.ts';
 import { createControllerStore, type ControllerStore } from '../createControllerStore.ts';
 import { useStoreState } from '../useControllerStore.ts';
+import { NEARBY_STRINGS_DATA } from './nearbySurface-strings.generated.ts';
 
 // The offer facts type the screens render — re-exported here so the UI layer
 // keeps importing its view types from the controllers (the catalog
@@ -185,93 +188,9 @@ export function useNearbySurface(
 
 // --- Words (BE/EN; the language canon is 09 §0 — be + en) ---------------------
 
-export interface NearbyStrings {
-  readonly title: string;
-  readonly proximityHeader: string;
-  readonly reviewHeader: string;
-  readonly noteDenied: string;
-  readonly noteHeldByWalk: string;
-  readonly noteAcquiring: string;
-  readonly noteUnstable: string;
-  readonly empty: string;
-  readonly unavailable: string;
-  readonly loading: string;
-  readonly indexDegraded: string;
-  readonly mapNote: string;
-  readonly cardHint: string;
-  // UX 09 (issue #434) — the offer-kind word the card marker carries for the
-  // screen reader (visual-language.md §9: every icon rendering is named).
-  readonly guideLabel: string;
-  readonly placeLabel: string;
-  readonly textLabel: string;
-  readonly audioLabel: string;
-  readonly durationUnit: string;
-}
+export type { NearbyStrings } from '../../contracts/ui-message-types.ts';
 
-const STRINGS: Record<'be' | 'en' | 'uk', NearbyStrings> = {
-  be: {
-    title: 'Побач',
-    proximityHeader: 'Паблізу',
-    reviewHeader: 'Агляд',
-    noteDenied: 'Пазіцыя не дазволена — ручны агляд',
-    noteHeldByWalk: 'Прагулка выкарыстоўвае пазіцыю — ручны агляд',
-    noteAcquiring: 'Шукаем пазіцыю…',
-    noteUnstable: 'Пазіцыя нестабільная',
-    empty: 'Прапановы пакуль не апублікаваны',
-    unavailable: 'Каталог недаступны',
-    loading: 'Загрузка…',
-    indexDegraded: 'Індэкс прапаноў часова недаступны',
-    mapNote: 'Карта горада зʼявіцца пасля рашэння пра тайлы',
-    cardHint: 'Картка прапановы. Аўдыё не запускаецца.',
-    guideLabel: 'Гід',
-    placeLabel: 'Месца',
-    textLabel: 'Тэкст',
-    audioLabel: 'аўдыё',
-    durationUnit: 'хв',
-  },
-  en: {
-    title: 'Nearby',
-    proximityHeader: 'Near you',
-    reviewHeader: 'Browse',
-    noteDenied: 'Location not allowed — manual browse',
-    noteHeldByWalk: 'A walk is using the location — manual browse',
-    noteAcquiring: 'Looking for your position…',
-    noteUnstable: 'Position is unstable',
-    empty: 'No offers published yet',
-    unavailable: 'Catalog unavailable',
-    loading: 'Loading…',
-    indexDegraded: 'The offers index is temporarily unavailable',
-    mapNote: 'The city map arrives after the tiles decision',
-    cardHint: 'Offer card. Audio does not start.',
-    guideLabel: 'Guide',
-    placeLabel: 'Place',
-    textLabel: 'Text',
-    audioLabel: 'audio',
-    durationUnit: 'min',
-  },
-  uk: {
-    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1); the
-    // native-speaker review is the owner's (uk-release-scope §5, §6.4).
-    title: 'Поруч',
-    proximityHeader: 'Поблизу',
-    reviewHeader: 'Огляд',
-    noteDenied: 'Позицію не дозволено — ручний огляд',
-    noteHeldByWalk: 'Прогулянка використовує позицію — ручний огляд',
-    noteAcquiring: 'Шукаємо позицію…',
-    noteUnstable: 'Позиція нестабільна',
-    empty: 'Пропозиції поки не опубліковані',
-    unavailable: 'Каталог недоступний',
-    loading: 'Завантаження…',
-    indexDegraded: 'Індекс пропозицій тимчасово недоступний',
-    mapNote: 'Карта міста з’явиться після рішення про тайли',
-    cardHint: 'Картка пропозиції. Аудіо не запускається.',
-    guideLabel: 'Гід',
-    placeLabel: 'Місце',
-    textLabel: 'Текст',
-    audioLabel: 'аудіо',
-    durationUnit: 'хв',
-  },
-};
+const STRINGS = NEARBY_STRINGS_DATA;
 
 export function nearbyStrings(locale: string): NearbyStrings {
   return locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;

@@ -20,6 +20,7 @@ import {
   type DiscoverySeason,
 } from '../core/discovery/selectDiscovery.ts';
 import type { DiscoveryIndexState } from '../services/contentRepo/discoveryIndex.ts';
+import { isUiLocaleCode } from '../contracts/ui-locales.ts';
 
 export type {
   DiscoveryCollection,
@@ -95,11 +96,21 @@ export interface DiscoveryControls {
 export interface DiscoveryControllerState {
   readonly surface: DiscoverySurfaceState;
   readonly refreshing: boolean;
+  // G21.17 (issue #551): the query's text locale — the selected UI language
+  // (the spec decision: catalogues show only guides with published text in
+  // it). Lives in the state so the analytics events and the re-selection
+  // read the switched value, never a construction-time snapshot.
+  readonly criteriaLocale: string;
   readonly timeLimit: number | null;
   readonly themeIds: readonly string[];
   readonly season: DiscoverySeason | null;
   readonly alternativesShown: boolean;
   readonly controls: DiscoveryControls;
+  // G21.17 (issue #551): the UI-locale switch moves the query language and
+  // re-selects over the loaded index (controls recomputed — they derive from
+  // the locale-eligible offers). An unknown code is rejected at the boundary
+  // (the setTimeLimit idiom): the previous locale stays, nothing widens.
+  setCriteriaLocale(locale: string): void;
   setTimeLimit(minutes: number | null): void;
   toggleTheme(themeId: string): void;
   setSeason(season: DiscoverySeason | null): void;
@@ -164,7 +175,7 @@ function controlsFor(index: DiscoveryIndexV1, criteriaLocale: string): Discovery
 }
 
 export function createDiscoveryController(deps: DiscoveryDeps): ControllerStore<DiscoveryControllerState> {
-  const { service, criteriaLocale, analytics } = deps;
+  const { service, analytics } = deps;
   let seq = 0;
   const shown = new Set<string>();
 
@@ -175,7 +186,7 @@ export function createDiscoveryController(deps: DiscoveryDeps): ControllerStore<
       set({
         surface: {
           ...state.surface,
-          result: selectDiscovery(state.surface.index, toCriteria(state, state.surface.index, criteriaLocale)),
+          result: selectDiscovery(state.surface.index, toCriteria(state, state.surface.index, state.criteriaLocale)),
         },
       });
     };
@@ -191,14 +202,22 @@ export function createDiscoveryController(deps: DiscoveryDeps): ControllerStore<
           revision: loaded.revision,
           stale: loaded.stale,
           staleReason: loaded.reason,
-          result: selectDiscovery(loaded.index, toCriteria(get(), loaded.index, criteriaLocale)),
+          result: selectDiscovery(loaded.index, toCriteria(get(), loaded.index, get().criteriaLocale)),
         },
-        controls: controlsFor(loaded.index, criteriaLocale),
+        controls: controlsFor(loaded.index, get().criteriaLocale),
       });
     };
     return {
       surface: { kind: 'loading' },
       refreshing: false,
+      criteriaLocale: deps.criteriaLocale,
+      setCriteriaLocale: (locale) => {
+        if (typeof locale !== 'string' || !isUiLocaleCode(locale) || locale === get().criteriaLocale) return;
+        set({ criteriaLocale: locale });
+        reselect();
+        const state = get();
+        if (state.surface.kind === 'ready') set({ controls: controlsFor(state.surface.index, locale) });
+      },
       timeLimit: null,
       themeIds: [],
       season: null,
@@ -268,7 +287,7 @@ export function createDiscoveryController(deps: DiscoveryDeps): ControllerStore<
             discovery_revision: state.surface.revision,
             offer_id: offer.offer_id,
             kind: offer.ref.kind,
-            content_locale: criteriaLocale,
+            content_locale: state.criteriaLocale,
             surface,
           });
         }
@@ -283,7 +302,7 @@ export function createDiscoveryController(deps: DiscoveryDeps): ControllerStore<
           discovery_revision: state.surface.revision,
           offer_id: offer.offer_id,
           kind: offer.ref.kind,
-          content_locale: criteriaLocale,
+          content_locale: get().criteriaLocale,
           surface,
         });
       },

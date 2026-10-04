@@ -15,7 +15,7 @@
 
 export type DiscoverySeason = 'spring' | 'summer' | 'autumn' | 'winter';
 
-// localized-text.schema.json: a map of allowlist locales (be/en/uk) to text.
+// localized-text.schema.json: a map of allowlist locales (be/en/uk/de/es/fr/cs/sv) to text.
 export type LocalizedText = Record<string, string>;
 
 // DiscoveryRef (21 §3.1): in each variant only its own fields are allowed.
@@ -172,6 +172,9 @@ export function selectDiscovery(index: DiscoveryIndexV1, criteria: DiscoveryCrit
     const refOk = isWellFormedRef(offer?.ref);
     const cityOk = offer?.city_id === criteria.city_id;
     const textLocales = Array.isArray(offer?.availability?.text_locales) ? offer.availability.text_locales : [];
+    // G21.17 (issue #551): the canon gate of the text locale — the UI
+    // projections repeat it through components/guide-card.tsx
+    // offerShownInTextLocale (the core cannot import that zone).
     const localeOk = textLocales.includes(criteria.content_locale);
     const orderOk = typeof offer?.editorial_order === 'number' && Number.isInteger(offer.editorial_order) && offer.editorial_order >= 0;
     if (!refOk || !cityOk || !localeOk || !orderOk) continue;

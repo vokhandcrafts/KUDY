@@ -17,10 +17,33 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-04 — G21.20: зацвердзі ADR ідэнтычнасці моў гіда
+Што зрабіць: прачытай `docs/architecture/decisions/G21.20-language-identity.md` (кантракт §3) і запішы ў issue выразнае зацвярджэнне або правкі; пасля прыняцця перавядзі статус файла ў шапцы ў «прынята». Рэалізацыя G21.21 пачынаецца толькі пасля гэтага зацвярджэння.
+Issue: https://github.com/vokhandcrafts/KUDY/issues/552 (PR: https://github.com/vokhandcrafts/KUDY/pull/593; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
+
+### 2026-10-03 — G21.07: пацвердзі на Windows-хасце named-скіпы filesystem-сютаў
+Што зрабіць: на сваёй Windows-машыне прабягі `node --test --experimental-strip-types web/lib/content/entry-boundary.test.ts` і `node --test tools/collector/cli.test.mjs` і пераканайся, што дзесяць capability-тэстаў з #540 даюць именаваныя скіпы (EPERM / EINVAL / «mode bits are not enforced»), а астатнія тэсты зялёныя. Альтэрнатыўна — аўтарызуй агенту даданне абодвух сют у job `windows-portable` (`.github/workflows/required-checks.yml` без аўтарызацыі змяняць забаронена). Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #540.
+PR: https://github.com/vokhandcrafts/KUDY/pull/575 (issue: https://github.com/vokhandcrafts/KUDY/issues/540; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
+
+### 2026-10-03 — G21.08: пацвердзі на Windows-хасце, што карпусныя сьюты зялёныя без EPERM
+Што зрабіць: на сваёй Windows-машыне прабягі `node --test tools/corpus/store.test.mjs tools/corpus/backup.test.mjs` (або поўны `npm test`) і пераканайся, што cleanup прыбірае часовыя тэчкі без восьмі EPERM-няўдач, запісаных у #541, а тэстар не пакідае жывых хэндлаў. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #541.
+PR: https://github.com/vokhandcrafts/KUDY/pull/574 (issue: https://github.com/vokhandcrafts/KUDY/issues/541; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
+
+### 2026-10-03 — G21.05: пацвердзі на Windows-хасце, што дзве CI-гварды зялёныя
+Што зрабіць: на сваёй Windows-машыне прабягі `node --test tools/ci/deno-typecheck.test.mjs tools/ci/test-discovery.test.mjs` (або поўны `npm test`) і пераканайся, што тэсты з пазнакай (G21.05) зялёныя, а дзве няўдачы з лагу рэтэсту 2026-10-03 (`device\index.ts` і `app\…`-прэфіксы) зніклі. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #538.
+PR: https://github.com/vokhandcrafts/KUDY/pull/572 (issue: https://github.com/vokhandcrafts/KUDY/issues/538; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
 
 ### 2026-10-02 — Праверка GPS і «Побач», PR #517
 Праглядзі PR #517 і вынікі праверак GitHub перад мержам. На Android/iOS правер позні запуск GPS пасля спынення і пераход «Побач» у фон з дзейнай прагулкай: тэсты з заменнікамі даказваюць толькі парадак аперацый і вызваленне падпісак.
 PR: https://github.com/vokhandcrafts/KUDY/pull/517 (задача: https://github.com/vokhandcrafts/KUDY/issues/479)
+
+### 2026-10-02 — Engine mutation gate: дадай `engine-regressions` у required statuses (задача #501)
+Што зрабіць: у GitHub UI (Settings → Branches → protection галіны main) дадай новы статус `engine-regressions` да required checks поруч з `server-typecheck` — бачнасць branch protection з сесіі не праверыць (токен без адпаведных scope), а без гэтага новы job застаецца неабавязковым. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #501.
+PR: https://github.com/vokhandcrafts/KUDY/pull/529 (issue: https://github.com/vokhandcrafts/KUDY/issues/501; эпік: https://github.com/vokhandcrafts/KUDY/issues/470)
+
+### 2026-10-02 — Deno type-check: дадай `server-typecheck` у required statuses (задача #484)
+Што зрабіць: у GitHub UI (Settings → Branches → protection галіны main) дадай новы статус `server-typecheck` да required checks — з сесіі бачнасць branch protection не праверыць (токен без адпаведных scope), а без гэтага новы job застаецца неабавязковым. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #484.
+PR: https://github.com/vokhandcrafts/KUDY/pull/519 (issue: https://github.com/vokhandcrafts/KUDY/issues/484; эпік: https://github.com/vokhandcrafts/KUDY/issues/470)
 
 ### 2026-10-02 — Ліміт grant-запытаў: правераная ква deployment-а (задача #499)
 Што зрабіць: перад рэальным запускам grant-функцыі запішы ў задачу #499 правераную квоту RevenueCat гэтага deployment-а і, калі дэфолт 30 запытаў/год на прыладу (канстанты ў `grant-core.ts`) не пасуе, назаві патрэбнае значэнне — агульнай праверанай квоты зараз няма, і агент наўмысна яе не выдумаў. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #499.
@@ -29,6 +52,9 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/514 (issue: https://github.com/vo
 ### 2026-10-02 — Правер раздзеленых скопаў дазволу GPS і мерж PR G20.07 (закрывае #478)
 Што зрабіць: праглядзі дэма і выніковы файл задачы — раздзяленне foreground/background дазволаў у GPS-адаптары, фонавая адмова больш не дэзармуе жывую сесію (дыялогі Android/iOS і фізічная фонавая праца свядома не правераныя мокамі і застаюцца прыёмкай на прыладзе). Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #478.
 PR: https://github.com/vokhandcrafts/KUDY/pull/509 (issue: https://github.com/vokhandcrafts/KUDY/issues/478; эпік: https://github.com/vokhandcrafts/KUDY/issues/470)
+### 2026-10-02 — Хук `run-gitleaks-git.py` блакуе пуш squash-комітаў main з `Co-authored-by:`
+Што зрабіць: у `C:\Users\kamyl\.githooks\run-gitleaks-git.py` зрабі праверку трэйлера email-адчувальнай да рэгістра (GitHub піше `Co-authored-by:`, а хук дазваляе толькі кананічнае `Co-Authored-By:`) — зараз кожны пуш, што нясе мерж main з чужымі squash-комітамі, спыняецца з «Push blocked … email». Каманда для хуткай праверкі: `grep -n "Co-Authored-By" C:\\Users\\kamyl\\.githooks\\run-gitleaks-git.py`.
+PR: https://github.com/vokhandcrafts/KUDY/pull/512 (задача #475 — пуш фіксаў упёрсяся ў хук; абмінуты праз адмову ад лакальнага мержу main, не праз --no-verify)
 
 ### 2026-10-02 — Прагляд спецыфікацый выпраўленняў архітэктуры і чаргі G20
 Паўторна праглядзі выпраўленні рэвью, тры спецыфікацыі і чаргу G20 у PR #494: дададзеныя G20.23–28, бясплатнае падключэнне больш не чакае акаўнтаў крам. Калі патрэбныя праўкі або публікацыю трэба спыніць — скажы агенту да мержу; пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам, гэта закрывае #471. Пазнакі гатоўнасці задач не дадавай да праверкі іх перадумоў; дазвол на дакладныя змены workflow запісваецца асобна ў #493.

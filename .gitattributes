@@ -18,3 +18,20 @@ spikes/G06.08-prototype/data/discovery-index.json eol=lf
 # paths, otherwise a CRLF checkout produces different hashes and the raw-byte
 # hashing guard cannot hold (implementation-rules 4, AR-1).
 services/download/fixtures/** -text
+
+# G21.06 (#539): catalog-discovery-stop-places.json pins the discovery index
+# at 14475 bytes over canonical LF bytes; a CRLF checkout breaks the preview
+# integrity verification. Same class as the index-valid.json pin above.
+fixtures/discovery-contract/index-stop-places.json eol=lf
+
+# G21.06 (#539): the wire-types freshness check compares the committed output
+# byte-wise against what the generator renders; the generator always writes LF.
+contracts/wire/wire-types.ts eol=lf
+
+# G21.06 (#539): every committed trace must regenerate byte for byte from its
+# seeded generator; the generator serializes LF.
+tools/simulate/traces/*.json eol=lf
+
+# G21.06 (#539): the committed review reports are regenerated and compared
+# byte-wise against the renderer output, which writes LF.
+authoring/**/review/*.review.md eol=lf

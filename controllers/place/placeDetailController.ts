@@ -11,7 +11,10 @@
 // sibling copies.
 import type { CatalogService, NearbyOfferFacts } from '../../services/catalog/types.ts';
 import type { MomentFact, MomentFacts } from '../../services/contentRepo/momentFacts.ts';
+// G21.09 (issue #542): the message shapes live in the shared pure contract zone.
+import type { PlaceDetailStrings } from '../../contracts/ui-message-types.ts';
 import { createControllerStore, type ControllerStore } from '../createControllerStore.ts';
+import { PLACE_DETAIL_STRINGS_DATA } from './placeDetail-strings.generated.ts';
 
 // The view types the screens render — re-exported here so the UI layer keeps
 // importing its view types from the controllers (the nearby controller's
@@ -73,35 +76,7 @@ async function load(store: ControllerStore<PlaceDetailState>, deps: PlaceDetailD
 }
 
 // The surface words (09 §0: BE first, EN beside — the nearbyStrings idiom).
-export interface PlaceDetailStrings {
-  readonly loading: string;
-  readonly unavailable: string;
-  readonly error: string;
-  readonly noFacts: string;
-  readonly empty: string;
-  teaserLabel: string;
-  playLabel: string;
-  stopLabel: string;
-  resumeLabel: string;
-  nowPlaying: string;
-  paused: string;
-  guideLink: string;
-  guideLinkHint: string;
-  playHint: string;
-  noAudio: string;
-  durationUnit: string;
-  textLabel: string;
-  audioLabel: string;
-  // G06.05 (issue #280, AC4/AC5): the named moment refusals and the play
-  // failure's words — a refusal states the reason and the way out, a raw
-  // diagnostic code never shows alone. An unknown reason renders as-is.
-  readonly refusalText: Record<
-    'moment#audio-unpublished' | 'moment#session-unroutable' | 'moment#session-refused',
-    string
-  >;
-  readonly playFailed: string;
-  readonly playFailedHint: string;
-}
+export type { PlaceDetailStrings } from '../../contracts/ui-message-types.ts';
 
 // The refusal's rendered word: the known map, else the raw reason itself
 // (the runMapReason idiom).
@@ -109,91 +84,7 @@ export function placeRefusalText(refusal: string, strings: PlaceDetailStrings): 
   return strings.refusalText[refusal as keyof PlaceDetailStrings['refusalText']] ?? refusal;
 }
 
-const STRINGS: Record<'be' | 'en' | 'uk', PlaceDetailStrings> = {
-  be: {
-    loading: 'Загрузка…',
-    unavailable: 'Дэталь месца недаступная',
-    error: 'Не ўдалося адкрыць месца',
-    noFacts: 'Месца пакуль не апублікавана ў каталога',
-    empty: 'Тэйзераў для гэтага месца няма',
-    teaserLabel: 'Тэйзер',
-    playLabel: 'Паслухаць тэйзер',
-    stopLabel: 'Спыніць',
-    resumeLabel: 'Працягнуць',
-    nowPlaying: 'Зараз грае',
-    paused: 'Паўза',
-    guideLink: "Прэв'ю гіда",
-    guideLinkHint: "Адкрывае прэв'ю гіда, не запуск прагулкі.",
-    playHint: 'Яўны Play тэйзера праз адзіны плэер.',
-    noAudio: 'Аўдыё тэйзера не апублікавана',
-    durationUnit: 'хв',
-    textLabel: 'Тэкст',
-    audioLabel: 'аўдыё',
-    refusalText: {
-      'moment#audio-unpublished': 'Гук тэйзера не апублікаваны.',
-      'moment#session-unroutable': 'Тэйзер не гучыць у прагулцы — запусціце яго тут яшчэ раз.',
-      'moment#session-refused': 'Тэйзер зараз не запускаецца — паспрабуйце яшчэ раз.',
-    },
-    playFailed: 'Гук не пачаўся.',
-    playFailedHint: 'Паспрабуйце запусціць яшчэ раз.',
-  },
-  en: {
-    loading: 'Loading…',
-    unavailable: 'The place detail is unavailable',
-    error: 'Could not open the place',
-    noFacts: 'The place is not published in the catalog yet',
-    empty: 'No teasers for this place',
-    teaserLabel: 'Teaser',
-    playLabel: 'Play the teaser',
-    stopLabel: 'Stop',
-    resumeLabel: 'Resume',
-    nowPlaying: 'Now playing',
-    paused: 'Paused',
-    guideLink: 'Guide preview',
-    guideLinkHint: "Opens the guide's preview, never a walk start.",
-    playHint: 'Explicit teaser play through the single player.',
-    noAudio: 'The teaser audio is not published',
-    durationUnit: 'min',
-    textLabel: 'Text',
-    audioLabel: 'audio',
-    refusalText: {
-      'moment#audio-unpublished': 'The teaser audio is not published.',
-      'moment#session-unroutable': 'The teaser cannot sound inside a walk — play it here again.',
-      'moment#session-refused': 'The teaser cannot start right now — try again.',
-    },
-    playFailed: 'The audio did not start.',
-    playFailedHint: 'Try starting it again.',
-  },
-  uk: {
-    // G14.04.d (issue #305) — the third catalog (uk-release-scope §3.1); the
-    // native-speaker review is the owner's (uk-release-scope §5, §6.4).
-    loading: 'Завантаження…',
-    unavailable: 'Деталі місця недоступні',
-    error: 'Не вдалося відкрити місце',
-    noFacts: 'Місце поки не опубліковане в каталозі',
-    empty: 'Тізерів для цього місця немає',
-    teaserLabel: 'Тізер',
-    playLabel: 'Послухати тізер',
-    stopLabel: 'Зупинити',
-    resumeLabel: 'Продовжити',
-    nowPlaying: 'Зараз грає',
-    paused: 'Пауза',
-    guideLink: "Прев'ю гіда",
-    guideLinkHint: "Відкриває прев'ю гіда, не запуск прогулянки.",
-    playHint: 'Явний Play тізера через єдиний плеєр.',
-    noAudio: 'Аудіо тізера не опубліковане',
-    durationUnit: 'хв',
-    textLabel: 'Текст',
-    audioLabel: 'аудіо',
-    refusalText: {
-      'moment#audio-unpublished': 'Звук тізера не опублікований.',
-      'moment#session-unroutable': 'Тізер не звучить у прогулянці — запустіть його тут ще раз.',
-      'moment#session-refused': 'Тізер зараз не запускається — спробуйте ще раз.',
-    },
-    playFailed: 'Звук не почався.',
-    playFailedHint: 'Спробуйте запустити ще раз.',
-  },
-};
+const STRINGS = PLACE_DETAIL_STRINGS_DATA;
 
 export function placeDetailStrings(locale: string): PlaceDetailStrings {
   return locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;

@@ -14,7 +14,7 @@ import { en } from './lib/i18n/en.ts';
 
 const WEB_ROOT = path.dirname(fileURLToPath(import.meta.url));
 
-const ROUTE_FILES = ['app/privacy/page.tsx', 'app/en/privacy/page.tsx'];
+const ROUTE_FILES = ['app/(be)/privacy/page.tsx', 'app/(en)/en/privacy/page.tsx'];
 
 // Short markers of the required statements (issue #331 criterion 2); they
 // assert the claim, not the wording.

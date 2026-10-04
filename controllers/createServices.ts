@@ -305,9 +305,14 @@ export function createServices(ports: ServicePorts): Services {
   // build today, the device db adapter is TR-10) the choice lives for the
   // session; the durable `settings` row joins with the adapter.
   const uiLocale = createUiLocaleStore(uiLocalePersistence);
+  // G21.17 (issue #551): the projection preference resolves per call — the
+  // selected UI language first, the composition fallback after — so a switch
+  // re-projects the titles through the same refresh (the subscription below).
   const catalogService = catalogLoader &&
     catalogSha256 &&
-    createCatalogService({ loader: catalogLoader, sha256: catalogSha256 }, { localePreference });
+    createCatalogService({ loader: catalogLoader, sha256: catalogSha256 }, () => ({
+      localePreference: [uiLocale.current(), ...localePreference],
+    }));
   // G15.03 — the verified index service: the same origin loader and digest
   // the catalog uses, plus the derived snapshot store (zone A). The
   // controller is constructed only over the complete port set.
@@ -432,8 +437,11 @@ export function createServices(ports: ServicePorts): Services {
   // G07.02 — the moment facts reader over the downloaded packages (the root
   // is the one module that value-imports services); absent without a bundles
   // store — the place detail renders without teasers.
+  // G21.17 (issue #551): the teasers' display order reads the switched UI
+  // language first, the composition fallback after — the reader runs per
+  // place-detail open, so the pick is per-open fresh.
   const momentsReader = bundlesStore
-    ? () => readMomentFacts(bundlesStore, { locales: localePreference })
+    ? () => readMomentFacts(bundlesStore, { locales: [uiLocale.current(), ...localePreference] })
     : undefined;
   // The preview button's inventory port: the asked layer's disk facts read
   // through the shared readLayerFacts reader (G04.04.a) — the version
@@ -497,7 +505,13 @@ export function createServices(ports: ServicePorts): Services {
               if (!locales || locales.length === 0) {
                 return { kind: 'refused', reason: 'run#locale-missing' };
               }
-              locale = localePreference.find((candidate) => locales.includes(candidate)) ?? locales[0];
+              // G21.17 (issue #551): a fresh walk rides the selected UI
+              // language when the downloaded package carries it — the person
+              // starts the guide they are reading; an absent layer falls to
+              // the composition preference, never a substitution beyond it.
+              locale =
+                [uiLocale.current(), ...localePreference].find((candidate) => locales.includes(candidate)) ??
+                locales[0];
               tier = ['base'];
             }
             const facts = await readRunMapFacts(
@@ -580,6 +594,27 @@ export function createServices(ports: ServicePorts): Services {
       },
     },
   };
+  // G21.17 (issue #551) — the content selection boundaries ride the selected
+  // UI language: the catalog controller re-projects (titles ride the switched
+  // preference through the same refresh-at-every-load reader policy) and the
+  // discovery controller re-selects (its criteriaLocale is the switched code)
+  // whenever the switch moves. The switch is the human choice; neither
+  // subscription touches a live walk (the run's pinned package is out of
+  // both stores' reach).
+  const catalogController = catalogService ? createCatalogController(catalogService) : undefined;
+  if (catalogController) {
+    uiLocale.subscribe(() => void catalogController.getState().refresh());
+  }
+  const discoveryController = discoveryService
+    ? createDiscoveryController({
+        service: discoveryService,
+        criteriaLocale: uiLocale.current(),
+        ...(discoveryAnalytics ? { analytics: discoveryAnalytics } : {}),
+      })
+    : undefined;
+  if (discoveryController) {
+    uiLocale.subscribe(() => discoveryController.getState().setCriteriaLocale(uiLocale.current()));
+  }
   return {
     // G14.04.d — the display locale reads through the ui-locale store (the
     // L02 switch): a getter, so the screens' per-render uiStrings(...) sees
@@ -596,8 +631,8 @@ export function createServices(ports: ServicePorts): Services {
     // A service member exists only when its port is provided (the root's
     // rule): with no origin bound there is no catalog to render and the
     // surfaces show their honest unavailable state.
-    catalog: catalogService && {
-      controller: createCatalogController(catalogService),
+    catalog: catalogController && {
+      controller: catalogController,
     },
     preview: catalogService && {
       create: (routeId) =>
@@ -608,7 +643,9 @@ export function createServices(ports: ServicePorts): Services {
             evaluate: evaluateLayer ? { evaluate: evaluateLayer } : undefined,
             download: downloadLayer ? { activate: downloadLayer } : undefined,
             runSession,
-            localePreference,
+            // G21.17 (issue #551): the preview's display order reads the
+            // switched UI language first — evaluated per route open.
+            localePreference: [uiLocale.current(), ...localePreference],
           },
           routeId,
         ),
@@ -664,7 +701,10 @@ export function createServices(ports: ServicePorts): Services {
         createNearbySurfaceController({
           service: catalogService,
           location,
-          locale: localePreference[0] ?? 'be',
+          // G21.17 (issue #551): the binding is one surface opening — the
+          // snapshot is the switched locale at open time; the open list
+          // re-filters per render over the same facts.
+          locale: uiLocale.current(),
         }),
     },
     hints,
@@ -687,12 +727,8 @@ export function createServices(ports: ServicePorts): Services {
           routeId,
         }),
     },
-    discovery: discoveryService && {
-      controller: createDiscoveryController({
-        service: discoveryService,
-        criteriaLocale: localePreference[0],
-        ...(discoveryAnalytics ? { analytics: discoveryAnalytics } : {}),
-      }),
+    discovery: discoveryController && {
+      controller: discoveryController,
     },
   };
 }

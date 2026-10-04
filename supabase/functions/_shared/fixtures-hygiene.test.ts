@@ -37,7 +37,13 @@ test('guard: fixture surface enumerates the expected trees', () => {
 });
 
 test('guard: no JWT-shaped token is committed in the fixture surface', () => {
-  const selfPath = path.relative(repoRoot, fileURLToPath(import.meta.url));
+  // git ls-files prints forward slashes on every platform, path.relative
+  // follows the host separator (A26-08) — normalize at the comparison
+  // boundary (tools/validate/tools-check.mjs idiom).
+  const selfPath = path
+    .relative(repoRoot, fileURLToPath(import.meta.url))
+    .split(path.sep)
+    .join('/');
   for (const rel of committedFiles) {
     // A guard cannot flag its own source: its message names the marker itself.
     if (rel === selfPath) continue;
@@ -63,7 +69,11 @@ test('guard: no 43-char base64url literal (32-byte secret shape) is committed', 
   // verified by its contract suite). fixtures/content/ media.json records
   // carry sha256 hex over fixture content bytes — the media.schema.json
   // contract's own file-hash data (G03.04), not credentials.
-  const allowlistedPrefixes = ['fixtures/discovery-contract/', 'fixtures/content/'];
+  // supabase/functions/deno.lock carries npm `integrity` checksums — public
+  // registry metadata over the published tarball (G20.13); its base64
+  // contains 43-char [A-Za-z0-9_-] runs cut by `+`/`=` of the standard
+  // alphabet, which is this guard's secret shape by coincidence.
+  const allowlistedPrefixes = ['fixtures/discovery-contract/', 'fixtures/content/', 'supabase/functions/deno.lock'];
   const secretShape = /[A-Za-z0-9_-]{43}(?![A-Za-z0-9_-])/g;
   for (const rel of committedFiles) {
     if (rel.endsWith('.svg')) continue;

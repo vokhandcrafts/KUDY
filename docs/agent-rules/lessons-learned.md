@@ -243,6 +243,10 @@ failing once.
 Enforced today: jscpd copy-paste gate (code), `check-regressions.mjs` mutation suite,
 `tsc --noEmit`, the test-wiring guard (with its self-check gap from #105), and rule 12's
 mixed-script grep run by hand.
+Update (2026-10-02, issue #501 / G20.28): the substring test-wiring guard is replaced by
+the real-discovery guard `tools/ci/test-discovery.*` (zone-glob expansion, file-level
+unowned check); its own removal is pinned from the independent
+`guard-required-checks` workflow, closing the #105 self-check gap for the npm test wiring.
 
 Proposed cheap gates (each a small script; candidates for follow-up issues):
 
