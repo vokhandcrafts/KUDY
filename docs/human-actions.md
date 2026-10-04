@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-04 — Праверка GPS і «Побач», PR #517
+Праглядзі PR #517 і вынікі праверак GitHub перад мержам. На Android/iOS правер позні запуск GPS пасля спынення і пераход «Побач» у фон з дзейнай прагулкай: тэсты з заменнікамі даказваюць толькі парадак аперацый і вызваленне падпісак.
+PR: https://github.com/vokhandcrafts/KUDY/pull/517 (задача: https://github.com/vokhandcrafts/KUDY/issues/479)
+
 ### 2026-10-04 — G21.20: зацвердзі ADR ідэнтычнасці моў гіда
 Што зрабіць: прачытай `docs/architecture/decisions/G21.20-language-identity.md` (кантракт §3) і запішы ў issue выразнае зацвярджэнне або правкі; пасля прыняцця перавядзі статус файла ў шапцы ў «прынята». Рэалізацыя G21.21 пачынаецца толькі пасля гэтага зацвярджэння.
 Issue: https://github.com/vokhandcrafts/KUDY/issues/552 (PR: https://github.com/vokhandcrafts/KUDY/pull/593; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
