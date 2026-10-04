@@ -344,13 +344,13 @@ export function createFeedbackSync(deps: {
     }
     if (response.status === 429) {
       const serverDelay = Number.isFinite(response.retryAfterSeconds) ? Number(response.retryAfterSeconds) : undefined;
-      const delayS = Math.max(1, Math.min(serverDelay ?? nextDelayS(Number(row.attempts), row.mutation_id), limits.maxRetryDelayS));
+      const delayS = Math.max(1, Math.min(serverDelay ?? nextDelayS(Number(row.attempts), row.mutation_id, limits), limits.maxRetryDelayS));
       markAttempt(row.mutation_id, row.target, delayS);
       report.requeued++;
       return;
     }
     // 503 and everything else: temporary — bounded backoff, same mutation.
-    markAttempt(row.mutation_id, row.target, nextDelayS(Number(row.attempts), row.mutation_id));
+    markAttempt(row.mutation_id, row.target, nextDelayS(Number(row.attempts), row.mutation_id, limits));
     report.requeued++;
   }
 
@@ -388,7 +388,7 @@ export function createFeedbackSync(deps: {
     try {
       response = await request;
     } catch {
-      markAttempt(row.mutation_id, row.target, nextDelayS(Number(row.attempts), row.mutation_id));
+      markAttempt(row.mutation_id, row.target, nextDelayS(Number(row.attempts), row.mutation_id, limits));
       report.requeued++;
       return;
     }
