@@ -92,14 +92,14 @@ GFDL цягне share-alike і атрыбуцыю для любога масав
 
 | Тэрмін | Рэлевантны сэнс (trans-top) | be | uk | Заўвагі |
 |---|---|---|---|---|
-| Back | «to or in a previous condition or place» | наза́д | наза́д | дзеяслоўны сэнс «to go in the reverse direction» — б/у адсутнічаюць (толькі cs, sv…) |
+| Back | «to or in a previous condition or place» | наза́д | наза́д | дзеяслоўны сэнс «to go in the reverse direction»: be/uk адсутнічаюць (ёсць cs, fr, de, es, sv) |
 | Cancel | «invalidate, annul» | касава́ць, скасо́ўваць, скасава́ць, адмяня́ць | касува́ти, скасо́вувати, скасува́ти | 12 сэнсаў у артыкуле; інтэрфейсны сэнс адпавядае AOSP «Скасаваць» |
 | Settings | — | — | — | «settings» — заглушка «plural of setting» без перакладаў; у sing. «setting» беларускага таксама няма |
 | guide | «someone who guides» | гід, экскурсаво́д, правадні́к | гід, екскурсово́д | тур-сэнс ёсць (у AOSP яго няма); «document» → кіраўні́цтва, даве́днік, даро́жнiк (з дэфектам, гл. ніжэй) |
 | stop | «to cause to cease moving» / «place to get on and off mass transport» | спыні́ць / прыпы́нак | зупини́ти / зупи́нка | абодва тур-рэлевантныя сэнсы поўныя |
 | walk | «trip made by walking» | пагуля́нка, прагу́лка, спа́цыр, шпа́цыр | прогуля́нка | назоўнікавы тур-сэнс ёсць; дзеяслоў → ісці́, хадзі́ць |
-| download | «file transfer to the local computer» | — | заванта́ження | беларускага радка ў табліцы няма |
-| purchase | «the acquisition of … for a price» | паку́пка, ку́пля | купі́вля | іменнік; дзеяслоў-кнопка «набыць» слоўнік дае асобна |
+| download | «file transfer to the local computer» | — | заванта́ження | у гэтым назоўнікавым сэнсе be-радка няма; дзеяслоўны сэнс мае «спампава́ць» |
+| purchase | «the acquisition of … for a price» | паку́пка, ку́пля | купі́вля | іменнік з be/uk; у дзеяслоўных сэнсах артыкула be/uk радкоў няма |
 | restore | «to reestablish, or bring back into existence» | аднаўля́ць, аднаві́ць | відно́влювати, віднови́ти | адпавядае AOSP «Аднавіць»; «restore purchase» — не слоўнікавы кантэкст |
 | unavailable | «not available» | недаступны | недосту́пний | uk-форма з наголосам пацвярджае падазроную AOSP-«Недоступно» з Android-справаздачы |
 
