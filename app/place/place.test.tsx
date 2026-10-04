@@ -12,6 +12,10 @@ import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
 
 import PlaceDetail from "./[id]";
+import FeedbackForm from "../feedback";
+import { feedbackStrings } from "../../controllers/useFeedbackController";
+import { createFeedbackSync } from "../../services/feedbackSync";
+import { NOW, okPut, openIdentifiedStore, scriptedTransport, secretBox } from "../../tests/feedback/queue-fixture";
 // NOT `Map` — the import would shadow the global Map constructor the fake
 // stores below construct (`new Map(...)` would render the screen instead).
 import MapScreen from "../map";
@@ -87,13 +91,18 @@ const withPlaceRoutes = (services: ReturnType<typeof createServices>) => ({
   map: MapScreen,
   "place/[id]": PlaceDetail,
   "route/[id]": RoutePreview,
+  feedback: FeedbackForm,
 });
 
 // The composition root of one scenario: the ONE AudioService over the test's
 // port, the teasers store, the fixtures' catalog — the shared arrange (a
 // sibling copy is a jscpd clone). The audio instance returns for scenarios
 // that hold a foreign launch before the screen opens.
-function placeServices(audioPort: FakeAudioPlayerPort, momentCount = 1): {
+function placeServices(
+  audioPort: FakeAudioPlayerPort,
+  momentCount = 1,
+  feedback?: { driver: ReturnType<typeof openIdentifiedStore>; sync: ReturnType<typeof createFeedbackSync> },
+): {
   services: ReturnType<typeof createServices>;
   audio: AudioService;
 } {
@@ -104,6 +113,7 @@ function placeServices(audioPort: FakeAudioPlayerPort, momentCount = 1): {
       catalogSha256: sha256,
       bundlesStore: new MomentStore(momentCount),
       audio,
+      ...(feedback ? { feedback } : {}),
     }),
     audio,
   };
@@ -253,5 +263,48 @@ describe("Place detail font role (issue #435)", () => {
     await openPlace();
     const title = screen.getByText("Двор сукнараў");
     expect(flatStyle(title).fontFamily).toBe(tokens.fontFamilyUi);
+  });
+});
+
+// G16.03 (issue #74): the place rating action over the published fixtures —
+// a card with a published content_version offers the rating only through the
+// self-reported visit confirmation, and the confirm carries the opened
+// card's own content identity (version 1, be — the fixture's ref) into the
+// form route. No feedback member, no rating action (fail closed).
+describe("G16.03: the place rating action (issue #74)", () => {
+  function feedbackPorts() {
+    const driver = openIdentifiedStore();
+    const sync = createFeedbackSync({
+      driver,
+      secretStore: secretBox("secret-a"),
+      baseUrl: "https://functions.example.co/functions/v1",
+      transport: scriptedTransport(() => okPut(1)),
+      now: () => NOW,
+    });
+    return { driver, sync };
+  }
+
+  test("the published place card rates through the visit confirmation into the bound form", async () => {
+    const { driver, sync } = feedbackPorts();
+    const audioPort = new FakeAudioPlayerPort();
+    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
+    renderRouter(withPlaceRoutes(placeServices(audioPort, 1, { driver, sync }).services), {
+      initialUrl: "/place/place-a1",
+    });
+    await screen.findByTestId("place-moment-m-a1");
+    const words = feedbackStrings("be");
+    fireEvent.press(screen.getByTestId("btn-place-rate"));
+    // The self-reported visit confirmation (20 §7): the dialog names the
+    // self-report, the accept opens the form.
+    expect(screen.getByTestId("place-visit-dialog")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("btn-place-visit-accept"));
+    expect(await screen.findByTestId("screen-Feedback")).toBeTruthy();
+    expect(screen.getByTestId("feedback-title").props.children).toBe(words.formTitlePlace);
+    expect(screen.getByTestId("feedback-target-line").props.children).toBe(words.targetLine("1", "be"));
+  });
+
+  test("without the feedback member the card offers no rating", async () => {
+    await openPlace();
+    expect(screen.queryByTestId("btn-place-rate")).toBeNull();
   });
 });

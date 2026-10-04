@@ -10,7 +10,23 @@ import { describe, expect, test } from "@jest/globals";
 import { fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
 
 import My from "./(tabs)/my";
+import FeedbackForm from "./feedback";
 import { createServices } from "../controllers/createServices";
+import {
+  FEEDBACK_DISCLOSURE_VERSION,
+  feedbackStrings,
+} from "../controllers/useFeedbackController";
+import { createFeedbackSync } from "../services/feedbackSync";
+import { saveDraft, sendNow } from "../services/feedbackRepository";
+import {
+  GUIDE_TARGET,
+  M1,
+  NOW,
+  okPut,
+  openIdentifiedStore,
+  scriptedTransport,
+  secretBox,
+} from "../tests/feedback/queue-fixture";
 import { tokens } from "../components/design-tokens";
 import { CATALOG_FIXTURES, flatStyle, layoutWith, serve, sha256 } from "../test/render-helpers";
 import type { SessionRow } from "../services/db/types";
@@ -182,5 +198,62 @@ describe("KUDY language row (G14.04.d)", () => {
     fireEvent.press(screen.getByTestId("btn-ui-locale-en"));
     expect(await screen.findByText("History unavailable.")).toBeTruthy();
     expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
+  });
+});
+
+// G16.03 (issue #74): the own-ratings list over the real feedback controller
+// (rule 15) — a rating stored and acknowledged through the production
+// repository before the surface mounts lists with its honest state word, and
+// the row's edit opens the form bound to the row's own target with the
+// person's previous choice preselected.
+describe("KUDY own ratings (G16.03)", () => {
+  test("a sent own rating lists, and its edit opens the form with the acknowledged star", async () => {
+    const driver = openIdentifiedStore();
+    const transport = scriptedTransport(() => okPut(1));
+    const sync = createFeedbackSync({
+      driver,
+      secretStore: secretBox("secret-a"),
+      baseUrl: "https://functions.example.co/functions/v1",
+      transport,
+      now: () => NOW,
+    });
+    saveDraft(
+      driver,
+      GUIDE_TARGET,
+      { score: 4, reasonCodes: ["audio_problem"], disclosureVersion: FEEDBACK_DISCLOSURE_VERSION },
+      { now: NOW },
+    );
+    sendNow(driver, GUIDE_TARGET, { now: NOW, mutationId: M1 });
+    await sync.flush();
+    const services = createServices({
+      sessionHistory: { list: async () => [] },
+      feedback: { driver, sync },
+    });
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My, feedback: FeedbackForm }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("my-ratings-section")).toBeTruthy();
+    expect(screen.getByTestId("my-rating-0")).toBeTruthy();
+    expect(screen.getByTestId("my-rating-state-0").props.children).toBe(feedbackStrings("be").stateSent);
+    fireEvent.press(screen.getByTestId("btn-rating-edit-0"));
+    expect(await screen.findByTestId("screen-Feedback")).toBeTruthy();
+    // The form opened bound to the row's target: the acknowledged star comes
+    // back preselected (the person's own choice, not a default).
+    expect(screen.getByTestId("feedback-star-4").props.accessibilityState.selected).toBe(true);
+  });
+
+  test("an empty own list says so honestly", async () => {
+    const driver = openIdentifiedStore();
+    const sync = createFeedbackSync({
+      driver,
+      secretStore: secretBox("secret-a"),
+      baseUrl: "https://functions.example.co/functions/v1",
+      transport: scriptedTransport(() => okPut(1)),
+      now: () => NOW,
+    });
+    const services = createServices({
+      sessionHistory: { list: async () => [] },
+      feedback: { driver, sync },
+    });
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("my-ratings-empty")).toBeTruthy();
   });
 });

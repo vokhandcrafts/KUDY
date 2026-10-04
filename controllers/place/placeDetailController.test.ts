@@ -22,6 +22,8 @@ const PLACE_OFFER: NearbyOfferFacts = {
   audio_locales: [],
   access: 'free',
   estimated_duration: null,
+  content_version: '1',
+  content_locale: 'be',
 };
 
 const TEASER: MomentFacts = {

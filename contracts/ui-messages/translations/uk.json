@@ -1872,6 +1872,382 @@
       "review": {
         "outcome": "approved"
       }
+    },
+    {
+      "id": "native.feedback.unavailable",
+      "value": "Відгук недоступний",
+      "reviewedSourceHash": "f64d18490a73d3cc2bfe6f4fdd502f5347a84b5ae7d0234ec4a53cbb9ed5169b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.invalidTarget",
+      "value": "Посилання на оцінку неповне",
+      "reviewedSourceHash": "13b2ca38180a286de285582a9e0d9af9a6ce1f8c163e55ce33187fbae8a3c081",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.formTitleGuide",
+      "value": "Як тобі гід?",
+      "reviewedSourceHash": "2faf43c1b42bc5021922c44730c5c9bec3c25f40dcca3ff3e7123112831c8dca",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.formTitlePlace",
+      "value": "Чи варто було сюди зайти?",
+      "reviewedSourceHash": "0154a38c9b8759273bc0d13d11d6db7ec3cbad6506a780c86a8aef5b46bdf0e7",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.targetLine",
+      "value": "мова контенту: ${locale} · версія: ${version}",
+      "reviewedSourceHash": "ba6f03bbf78712a759d9a3623817dea04b241abb111d12cf07475fde952c50fb",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.scaleHint",
+      "value": "1 — зовсім не сподобалося · 5 — дуже сподобалося",
+      "reviewedSourceHash": "763a359b696b12e109cb8be62e435ed8f2b9e0b4fcf1a0a18a345ff13159b8b9",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.starLabel",
+      "value": "${score} з 5",
+      "reviewedSourceHash": "0ffa854d51fbc16346c56b9bf020629ca9ac9b116243731cdd0e5611c9e401d0",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.reasonsTitle",
+      "value": "Причини (необов'язково, до трьох)",
+      "reviewedSourceHash": "1d9b758cdb750b52ef9c0194691f66b411f1446cf47d274509fe7c43bf465776",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.disclosureTitle",
+      "value": "Хто бачить оцінку",
+      "reviewedSourceHash": "7cd4231b4890b4597dee9a5246054c686599f0528b8346290fdbf329cb81087f",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.disclosureBody",
+      "value": "Оцінку бачить команда KUDY і використовує її, щоб покращувати пропозиції. Публічно вона не показується.",
+      "reviewedSourceHash": "40ac74ccd705297733e68136eb9bbad6d682c6be1a731e09562eb577f35439d8",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.disclosureAnalytics",
+      "value": "Це не аналітика: надсилання відгуку не включає згоду на аналітику і не залежить від неї.",
+      "reviewedSourceHash": "5c3e76cd244614b2707e554c450e8f58db3b6a2ab3330ff2e2de572e1f6419d3",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.send",
+      "value": "Надіслати",
+      "reviewedSourceHash": "5d1b61cf3441db7560a769aee30416dc0c9b5d5e4d0cb6c5e5af2fdc227e7bdb",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.deleteButton",
+      "value": "Видалити оцінку",
+      "reviewedSourceHash": "d18d68ce08b0873d2405ed8b503398644dc5a660e3c4c4c326ba456eee781cf9",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.resolveConflict",
+      "value": "Перевірити на сервері",
+      "reviewedSourceHash": "1c75021c3be06110e2689aed8eaf2ec49e49f0145f7e4daef51eded800b0d138",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.stateDraft",
+      "value": "Чернетку збережено на пристрої",
+      "reviewedSourceHash": "1f9828d67e933d0c4365984ed54b521600ffe764cf76ea26fe372c564c4d70a4",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.statePending",
+      "value": "Збережено на пристрої — надішлемо, коли буде мережа",
+      "reviewedSourceHash": "7195387e99f36c3ed874cba5e91a09c9bda100636d233899ecb181ac4950d043",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.stateSent",
+      "value": "Надіслано",
+      "reviewedSourceHash": "ee6e31c6ff3e7f4a976a16d2cf3e05e945fd2497f20240eead476c966b9cd470",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.stateConflict",
+      "value": "Конфлікт: на сервері новіша зміна",
+      "reviewedSourceHash": "1fefa8a95ccc366bf67ebe9edffb1259c1f3264030082b01a1ab678b762205ac",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.stateActionRequired",
+      "value": "Надсилання зупинено: потрібна увага",
+      "reviewedSourceHash": "9d3a4807b3c9bbffd40f0adb70348a542c4935461df074bcb77bb0bc9fda1b2e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.stateDeletePending",
+      "value": "Видалення чекає мережі",
+      "reviewedSourceHash": "5e80f91330578bbbc12509891dacb61ccf3d86569cd63e2c19c8b0061b3dac4a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.inviteTitle",
+      "value": "Як тобі гід? Можеш оцінити — це необов'язково.",
+      "reviewedSourceHash": "c7bee40548b81ff38a6a66ec43b05e53fbddef58c6708cda09261e14969ac192",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.inviteRate",
+      "value": "Оцінити гід",
+      "reviewedSourceHash": "bff14adc9bcb8d672c62ee6ff83e10e26542a927104e7a053ac287c5bda11c3f",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.inviteDismiss",
+      "value": "Ні, дякую",
+      "reviewedSourceHash": "974b4b9cc64413a1293c3743bc76db631f6dd4c5f5639b0631869c67474cfeaf",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.ratePlace",
+      "value": "Оцінити місце",
+      "reviewedSourceHash": "6e2584651cd2326b0266694baa27f4fff406f1f8b837f0d8a71ad801cc5d466b",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.placeVisitTitle",
+      "value": "Чи був ти тут?",
+      "reviewedSourceHash": "0994331436fdf28985b497ebebc27eda56b5554fe582e29ce82b2b30f853be3a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.placeVisitBody",
+      "value": "Оцінка місця — самооцінка візиту, не перевірене відвідування.",
+      "reviewedSourceHash": "e89b4ab7e51c7a16d7d4fabf295cfec3cda0541e67d1e43625e17ccfaa08efad",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.placeVisitAccept",
+      "value": "Був тут — оцінити",
+      "reviewedSourceHash": "0e1ffe61222b1128e9dbd9f7cfa8b3ee8434076f10e2de057164a605e328737a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.mySection",
+      "value": "Мої оцінки",
+      "reviewedSourceHash": "18fa60ddb291c97c36851de7137bef11352764d5351e9feefa70017f9dd00f46",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.myEmpty",
+      "value": "Власних оцінок поки немає",
+      "reviewedSourceHash": "ee12ec4175a34a04399cba704ce02b3f82083d2997d3b3797b32c2310a8bdf8a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.myEdit",
+      "value": "Змінити",
+      "reviewedSourceHash": "1e2c31b3f9c9402946eb392ff6897700c2c783770a794069b734a01a42a35a04",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.guideWord",
+      "value": "Гід",
+      "reviewedSourceHash": "70a569cfca827aef72de7c814f0c0b3760b520f5c21dc43a67fdaad90af74272",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.placeWord",
+      "value": "Місце",
+      "reviewedSourceHash": "e176e75a0103ac1243532bb956a4ee2dcc9af7aaad80c35938170679577839f7",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.ratingOf",
+      "value": "${score} з 5",
+      "reviewedSourceHash": "c71e6b03486be62dcfc58bf64e222b7d93e4f974732e5f621d966b031562bc69",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.interesting_stories",
+      "value": "цікаві історії",
+      "reviewedSourceHash": "9959daf3a456d2382c1efd4faca72b689f0df1ed2923ab0cd4e821446c3120d6",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.clear_delivery",
+      "value": "зрозуміла подача",
+      "reviewedSourceHash": "d74083aa9de049473fa1b5f857260c195797d52ddcbe3c1fa64c49748c08adc1",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.too_long",
+      "value": "задовго",
+      "reviewedSourceHash": "14403d1bc95f6a5d57217237ac27a05879d0191466a34aafa1cd624ee9ebe116",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.hard_to_navigate",
+      "value": "важко орієнтуватися",
+      "reviewedSourceHash": "079108e7d5462f0bcbd157ec5da0e366f87e54d39e35364ce6debfc82a419ca8",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.audio_problem",
+      "value": "проблема звуку",
+      "reviewedSourceHash": "c3ef154e822117153d07ef625a31c3a886cf523099025dcf69b3941542c6e61a",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.description_mismatch",
+      "value": "не збіглося з описом",
+      "reviewedSourceHash": "75d78626465f6da0aa52eaf8b48754720f68b28c6af0c8feeea58eef98bfbce2",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.worth_visiting",
+      "value": "варто відвідати",
+      "reviewedSourceHash": "2ae5e44e2805dc7511473cce8c1d43338792b3eef17802eb05c01193bbe53643",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.hard_to_reach",
+      "value": "важко дістатися",
+      "reviewedSourceHash": "f97aeea0ff8926e5bf06bddaa142ec75cc4be468a7bdb601c486504f12b5f7bd",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.access_problem",
+      "value": "проблема доступу",
+      "reviewedSourceHash": "f4417031a4fef7cc54c3916e66770fcda831e75baa3bb6e70b3dd08b9cf9f54e",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-input-invalid",
+      "value": "Відомості не прийнято: перевірте вибір",
+      "reviewedSourceHash": "b22dd71560cdeeb665203c01ed389749a1e6a9c1bf8f642df722e8896dd5bd94",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-write-failed",
+      "value": "Запис не вдався: повторіть",
+      "reviewedSourceHash": "4a76d282ed50222f4700e03541a4b46ea0fa43e4c7f715bd742c082c694b2999",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-transport-failed",
+      "value": "Мережа не відповіла: повторіть",
+      "reviewedSourceHash": "ca9f043892af3e9f4cbb37a64b494f6162aef9910123df3b2221f133621b462d",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-send-no-draft",
+      "value": "Немає чернетки для надсилання",
+      "reviewedSourceHash": "606c54918b744dbaf923e0375c7be1d96fed06d613e39668887c420ab7b3855c",
+      "review": {
+        "outcome": "approved"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-resolution-required",
+      "value": "Спочатку перевірте стан на сервері",
+      "reviewedSourceHash": "d16eb424c719e978864af4ab241f6608a78f9eead95acc2db963e3829b630555",
+      "review": {
+        "outcome": "approved"
+      }
     }
   ]
 }

@@ -12,6 +12,10 @@ import { act } from "@testing-library/react-native";
 import { Modal } from "react-native";
 
 import Run from "./run/[id]";
+import FeedbackForm from "./feedback";
+import { feedbackStrings } from "../controllers/useFeedbackController";
+import { createFeedbackSync } from "../services/feedbackSync";
+import { NOW, okPut, openIdentifiedStore, scriptedTransport, secretBox } from "../tests/feedback/queue-fixture";
 import { createServices } from "../controllers/createServices";
 import type { RunSessionPorts } from "../controllers/run/runSurfaceController";
 import type { BundlesStore, Readiness, Tier } from "../services/contentRepo/types";
@@ -169,6 +173,7 @@ function memoryBundles(files: Record<string, string>): BundlesStore {
 const withRunRoutes = (services: ReturnType<typeof createServices>) => ({
   _layout: layoutWith(services),
   "run/[id]": Run,
+  feedback: FeedbackForm,
 });
 
 // The stateful session for the AC4 walk: the fake row records the durable
@@ -983,5 +988,83 @@ describe("Run unavailable words follow the UI-locale choice (issue #524)", () =>
     expect(textOf("run-status-stop-1")).toBe("Customs — pending");
     expect(within(screen.getByTestId("btn-run-back")).getByText("Back")).toBeTruthy();
     expect(screen.queryByText("Мытня — чакае")).toBeNull();
+  });
+});
+
+// G16.03 (issue #74): the End invitation over the real composition root —
+// the production feedback controller rides the same services object. The
+// walk reaches End through the same flow the G06.04 suite drives.
+describe("G16.03: the End invitation (issue #74)", () => {
+  function feedbackPorts() {
+    const driver = openIdentifiedStore();
+    const sync = createFeedbackSync({
+      driver,
+      secretStore: secretBox("secret-a"),
+      baseUrl: "https://functions.example.co/functions/v1",
+      transport: scriptedTransport(() => okPut(1)),
+      now: () => NOW,
+    });
+    return { feedback: { driver, sync } };
+  }
+
+  // The shared arrange of the invitation scenarios: a walk with one heard
+  // story, ended through the confirmation, the invitation on screen (a
+  // sibling copy is a jscpd clone — the G06.04 suite's lesson).
+  async function endedWithInvitation(): Promise<ReturnType<typeof makeRunSession>> {
+    const world = makeRunSession();
+    const services = createServices({
+      bundlesStore: memoryBundles(layerFiles("be")),
+      run: { session: world.session },
+      ...feedbackPorts(),
+    });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    await soundStop2({ locationPort: world.locationPort, advance: world.advance });
+    act(() => {
+      world.audioPort.finish(1);
+    });
+    await waitFor(() => expect(screen.getByTestId("btn-run-end")).toBeTruthy());
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
+    expect(await screen.findByTestId("run-ended")).toBeTruthy();
+    expect(await screen.findByTestId("run-feedback-invite")).toBeTruthy();
+    return world;
+  }
+
+  test("after End the quiet invitation offers the walk's own target; dismissing keeps the ended walk", async () => {
+    await endedWithInvitation();
+    // The invitation names the walk's own pinned identity and renders as a
+    // plain card — the map and Back stay reachable (non-modal).
+    expect(screen.getByTestId("run-feedback-invite")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("btn-run-invite-dismiss"));
+    await waitFor(() => expect(screen.queryByTestId("run-feedback-invite")).toBeNull());
+    // Skipping a rating never blocks anything: the ended surface stays.
+    expect(screen.getByTestId("run-ended")).toBeTruthy();
+  });
+
+  test("the rate action opens the form bound to the ended session's pinned identity", async () => {
+    await endedWithInvitation();
+    fireEvent.press(screen.getByTestId("btn-run-invite-rate"));
+    // The form route opens with the walk's pinned version/locale (1/be) —
+    // the session facts, never a catalog read (acceptance 5).
+    expect(await screen.findByTestId("screen-Feedback")).toBeTruthy();
+    expect(screen.getByTestId("feedback-title").props.children).toBe(feedbackStrings("be").formTitleGuide);
+    expect(screen.getByTestId("feedback-target-line").props.children).toBe(feedbackStrings("be").targetLine("1", "be"));
+    // The invitation was consumed by the press — the once-per-session guard.
+    expect(screen.queryByTestId("run-feedback-invite")).toBeNull();
+  });
+
+  test("a walk ended with zero heard stories invites nothing; no feedback member renders nothing", async () => {
+    const world = makeRunSession();
+    const services = createServices({
+      bundlesStore: memoryBundles(layerFiles("be")),
+      run: { session: world.session },
+    });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
+    expect(await screen.findByTestId("run-ended")).toBeTruthy();
+    expect(screen.queryByTestId("run-feedback-invite")).toBeNull();
   });
 });

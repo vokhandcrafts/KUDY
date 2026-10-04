@@ -11,13 +11,21 @@
 // state. The read re-runs on focus: a walk started elsewhere is on the list
 // when the surface returns.
 import { useCallback } from "react";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { CatalogSurfaceState } from "../../controllers/catalog/catalogController";
 import { useMyKudy } from "../../controllers/myKudyController";
 import type { MyKudyState } from "../../controllers/myKudyController";
+import {
+  deliveryOfView,
+  feedbackDeliveryWord,
+  feedbackStrings,
+  useFeedbackState,
+  type FeedbackStateView,
+  type FeedbackUiState,
+} from "../../controllers/useFeedbackController";
 import { useStoreState } from "../../controllers/useControllerStore";
 // G21.09 (issue #542): the picker derives its options and labels from the
 // one locale registry — the registered complete catalogues only.
@@ -145,10 +153,18 @@ export default function My() {
   // surface beside its refresh bookkeeping; the rows render the surface.
   const catalogState = useStoreState(services.catalog?.controller ?? null);
   const catalog = catalogState?.surface ?? null;
+  // G16.03 (issue #74): the own-ratings list rides the same focus refresh —
+  // a rating sent or changed elsewhere is on the list when the surface
+  // returns.
+  const feedbackController = services.feedback?.controller ?? null;
+  const feedbackState = useFeedbackState(feedbackController);
+  const feedbackWords = feedbackStrings(locale);
+  const router = useRouter();
   useFocusEffect(
     useCallback(() => {
       void historyStore?.getState().refresh();
-    }, [historyStore]),
+      feedbackController?.getState().refreshItems();
+    }, [historyStore, feedbackController]),
   );
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4).
@@ -175,6 +191,22 @@ export default function My() {
             other surfaces' words in place (the run's pinned locale stays the
             walk's own — ADR G01.03 §3.4). */}
         <UiLocaleRow locale={locale} onPick={(code) => services.uiLocale.set(code)} strings={strings} />
+        {feedbackController !== null && feedbackState !== null ? (
+          // G16.03 (issue #74): the own ratings (20 §7 «пазней у My KUDY») —
+          // without the feedback member the section stays out, the honest
+          // absence the surfaces render everywhere.
+          <OwnRatings
+            state={feedbackState}
+            catalog={catalog}
+            strings={feedbackWords}
+            onEdit={(target) =>
+              router.push({
+                pathname: "/feedback",
+                params: { kind: target.kind, id: target.id, version: target.version, locale: target.locale },
+              })
+            }
+          />
+        ) : null}
         {controller === null || controller.status === "unavailable" ? (
           // No member (the db adapter has not landed) and a failed read are
           // the same honest surface: no history is invented either way.
@@ -226,6 +258,19 @@ function SessionLocaleLine({ row }: { row: { sessionId: string; locale: string }
   );
 }
 
+// UX 05 (issue #351): the title comes verbatim from the catalog's ready
+// projection (the last valid cache of an offline catalog counts); no
+// catalog, or a route it does not name — the row falls back to the raw id,
+// the one fact the durable zone keeps. Module-level so the own-ratings rows
+// share the same lookup (no sibling copy, implementation-rules 3).
+function catalogGuideTitle(catalog: CatalogSurfaceState | null, routeId: string): string {
+  if (catalog && (catalog.kind === "ready" || catalog.kind === "offline")) {
+    const card = catalog.guides.find((guide) => guide.routeId === routeId);
+    if (card) return card.title;
+  }
+  return routeId;
+}
+
 function MyKudyRows({
   state,
   catalog,
@@ -235,17 +280,7 @@ function MyKudyRows({
   catalog: CatalogSurfaceState | null;
   strings: ReturnType<typeof uiStrings>;
 }) {
-  // UX 05 (issue #351): the title comes verbatim from the catalog's ready
-  // projection (the last valid cache of an offline catalog counts); no
-  // catalog, or a route it does not name — the row falls back to the raw id,
-  // the one fact the durable zone keeps.
-  const guideTitle = (routeId: string): string => {
-    if (catalog && (catalog.kind === "ready" || catalog.kind === "offline")) {
-      const card = catalog.guides.find((guide) => guide.routeId === routeId);
-      if (card) return card.title;
-    }
-    return routeId;
-  };
+  const guideTitle = (routeId: string): string => catalogGuideTitle(catalog, routeId);
   const live = state.rows.filter((row) => row.state === "active" || row.state === "paused");
   const finished = state.rows.filter((row) => row.state === "finished");
   return (
@@ -289,6 +324,69 @@ function MyKudyRows({
         ))
       ) : (
         <ScaledText style={styles.rowLine}>{strings.noPastWalks}</ScaledText>
+      )}
+    </View>
+  );
+}
+
+// G16.03 (issue #74): the own-ratings list — the durable zone's own rows
+// with their honest delivery words (feedbackDeliveryWord, the one mapping).
+// The row shows the person's latest desired value (a draft edit outranks the
+// acknowledged score) and the rated target's own identity facts; edit
+// re-opens the form bound to the row's target. The list deletes and
+// resolves through the form — one place owns those actions.
+function OwnRatings({
+  state,
+  catalog,
+  strings,
+  onEdit,
+}: {
+  state: FeedbackUiState;
+  catalog: CatalogSurfaceState | null;
+  strings: ReturnType<typeof feedbackStrings>;
+  onEdit: (target: FeedbackStateView["target"]) => void;
+}) {
+  return (
+    <View testID="my-ratings">
+      <ScaledText style={styles.section} testID="my-ratings-section">
+        {strings.mySection}
+      </ScaledText>
+      {state.items.length === 0 ? (
+        <ScaledText style={styles.rowLine} testID="my-ratings-empty">
+          {strings.myEmpty}
+        </ScaledText>
+      ) : (
+        state.items.map((item, index) => {
+          const desiredScore =
+            item.draft !== null && item.draft.op === "put"
+              ? item.draft.score
+              : item.score;
+          return (
+            <View key={item.targetKey} style={styles.row} testID={`my-rating-${index}`}>
+              <ScaledText style={styles.rowTitle}>
+                {item.target.kind === "guide"
+                  ? `${strings.guideWord}: ${catalogGuideTitle(catalog, item.target.id)}`
+                  : `${strings.placeWord}: ${item.target.id}`}
+              </ScaledText>
+              <ScaledText style={styles.rowLine}>
+                {desiredScore === null ? "—" : strings.ratingOf(desiredScore)} ·{" "}
+                {strings.targetLine(item.target.version, item.target.locale)}
+              </ScaledText>
+              <ScaledText style={styles.rowLine} testID={`my-rating-state-${index}`}>
+                {feedbackDeliveryWord(deliveryOfView(item), strings)}
+              </ScaledText>
+              <PressableSurface
+                accessibilityRole="button"
+                accessibilityLabel={strings.myEdit}
+                onPress={() => onEdit(item.target)}
+                style={styles.retryButton}
+                testID={`btn-rating-edit-${index}`}
+              >
+                <ScaledText style={styles.retryLabel}>{strings.myEdit}</ScaledText>
+              </PressableSurface>
+            </View>
+          );
+        })
       )}
     </View>
   );

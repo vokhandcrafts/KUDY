@@ -155,6 +155,17 @@ export const DOMAINS = [
     ],
   },
   {
+    domain: 'native.feedback',
+    note: 'the voluntary private rating words (20 §7, 21 §5/§6; G16.03 #74): the End invitation, the shared form, the delivery states, the own-ratings list',
+    outputs: [
+      {
+        file: 'controllers/feedback-strings.generated.ts',
+        exportName: 'FEEDBACK_STRINGS_DATA',
+        locales: ['be', 'en', 'uk'],
+      },
+    ],
+  },
+  {
     domain: 'web.ui',
     note: 'the web channel\'s UI words (09 §8: «ніводнага зашытага радка нідзе»; G14.04.d #305)',
     outputs: [

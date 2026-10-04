@@ -95,6 +95,15 @@ export interface NearbyOfferFacts {
   readonly audio_locales: readonly string[];
   readonly access: 'free' | 'paid' | 'mixed';
   readonly estimated_duration: CatalogOfferFacts['estimated_duration'];
+  // G16.03 (issue #74) — the opened place card's content identity: the ref's
+  // content_version and the locale the card's text actually rendered in (21
+  // §5.1: the place rating binds to the opened card's version and the used
+  // content locale). A card without a published version carries null and
+  // offers no rating — no version is ever invented. A guide offer carries
+  // null for both: its rating target is the ended session's own pinned
+  // version/locale, never the catalog's current one.
+  readonly content_version: string | null;
+  readonly content_locale: string | null;
 }
 
 // The Nearby load outcome — the same reader-policy states the city list uses

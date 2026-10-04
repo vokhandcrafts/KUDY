@@ -2745,6 +2745,542 @@
         "web/lib/i18n/be.ts#versionUnavailable"
       ],
       "sourceHash": "6d0903ab3a0d160167c966e6b09cdce71900eb1271487b48f51ecb738379bd8e"
+    },
+    {
+      "id": "native.feedback.unavailable",
+      "source": "Водгук недаступны",
+      "context": "Стан: сэрвіс водгуку не сабраны (няма парту кампазіцыі)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#unavailable"
+      ],
+      "sourceHash": "f64d18490a73d3cc2bfe6f4fdd502f5347a84b5ae7d0234ec4a53cbb9ed5169b"
+    },
+    {
+      "id": "native.feedback.invalidTarget",
+      "source": "Спасылка на ацэнку няпоўная",
+      "context": "Форма адкрыта з маршрута з неваліднымі параметрамі мэты",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#invalidTarget"
+      ],
+      "sourceHash": "13b2ca38180a286de285582a9e0d9af9a6ce1f8c163e55ce33187fbae8a3c081"
+    },
+    {
+      "id": "native.feedback.formTitleGuide",
+      "source": "Як табе гайд?",
+      "context": "Пытанне формы водгуку гіда (20 §7)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#formTitleGuide"
+      ],
+      "sourceHash": "2faf43c1b42bc5021922c44730c5c9bec3c25f40dcca3ff3e7123112831c8dca"
+    },
+    {
+      "id": "native.feedback.formTitlePlace",
+      "source": "Ці варта было сюды зайсці?",
+      "context": "Пытанне формы водгуку месца (20 §7)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#formTitlePlace"
+      ],
+      "sourceHash": "0154a38c9b8759273bc0d13d11d6db7ec3cbad6506a780c86a8aef5b46bdf0e7"
+    },
+    {
+      "id": "native.feedback.targetLine",
+      "source": "мова зместу: ${locale} · версія: ${version}",
+      "context": "Радок ідэнтычнасці ацэненай мэты: фактычная мова зместу і прышпіленая версія",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "locale",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "string"
+        }
+      ],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#targetLine"
+      ],
+      "sourceHash": "ba6f03bbf78712a759d9a3623817dea04b241abb111d12cf07475fde952c50fb"
+    },
+    {
+      "id": "native.feedback.scaleHint",
+      "source": "1 — вельмі не спадабалася · 5 — вельмі спадабалася",
+      "context": "Падказка шкалы 1–5 без загадзя выбранага значэння",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#scaleHint"
+      ],
+      "sourceHash": "763a359b696b12e109cb8be62e435ed8f2b9e0b4fcf1a0a18a345ff13159b8b9"
+    },
+    {
+      "id": "native.feedback.starLabel",
+      "source": "${score} з 5",
+      "context": "Асобная зорка: экранавы чытач і ціску",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "score",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#starLabel"
+      ],
+      "sourceHash": "0ffa854d51fbc16346c56b9bf020629ca9ac9b116243731cdd0e5611c9e401d0"
+    },
+    {
+      "id": "native.feedback.reasonsTitle",
+      "source": "Прычыны (неабавязкова, да трох)",
+      "context": "Загаловак выбару прычын з замкнёнага спісу",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#reasonsTitle"
+      ],
+      "sourceHash": "1d9b758cdb750b52ef9c0194691f66b411f1446cf47d274509fe7c43bf465776"
+    },
+    {
+      "id": "native.feedback.disclosureTitle",
+      "source": "Хто бачыць ацэнку",
+      "context": "Загаловак раскрыцця мэты перад адпраўкай (21 §6)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#disclosureTitle"
+      ],
+      "sourceHash": "7cd4231b4890b4597dee9a5246054c686599f0528b8346290fdbf329cb81087f"
+    },
+    {
+      "id": "native.feedback.disclosureBody",
+      "source": "Ацэнку бачыць каманда KUDY і выкарыстоўвае яе, каб паляпшаць прапановы. Публічна яна не паказваецца.",
+      "context": "Тэкст раскрыцця мэты",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#disclosureBody"
+      ],
+      "sourceHash": "40ac74ccd705297733e68136eb9bbad6d682c6be1a731e09562eb577f35439d8"
+    },
+    {
+      "id": "native.feedback.disclosureAnalytics",
+      "source": "Гэта не аналітыка: адпраўка водгуку не ўключае згоду на аналітыку і не залежыць ад яе.",
+      "context": "Размежаванне водгуку і аналітыкі (21 §6)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#disclosureAnalytics"
+      ],
+      "sourceHash": "5c3e76cd244614b2707e554c450e8f58db3b6a2ab3330ff2e2de572e1f6419d3"
+    },
+    {
+      "id": "native.feedback.send",
+      "source": "Адправіць",
+      "context": "Яўная адпраўка водгуку (21 §5.4)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#send"
+      ],
+      "sourceHash": "5d1b61cf3441db7560a769aee30416dc0c9b5d5e4d0cb6c5e5af2fdc227e7bdb"
+    },
+    {
+      "id": "native.feedback.deleteButton",
+      "source": "Выдаліць ацэнку",
+      "context": "Выдаленне ўласнай ацэнкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#deleteButton"
+      ],
+      "sourceHash": "d18d68ce08b0873d2405ed8b503398644dc5a660e3c4c4c326ba456eee781cf9"
+    },
+    {
+      "id": "native.feedback.resolveConflict",
+      "source": "Праверыць на серверы",
+      "context": "Дзеянне разбору канфлікту: чытанне ўласнага стану (21 §5.3)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#resolveConflict"
+      ],
+      "sourceHash": "1c75021c3be06110e2689aed8eaf2ec49e49f0145f7e4daef51eded800b0d138"
+    },
+    {
+      "id": "native.feedback.stateDraft",
+      "source": "Чарнавік захаваны на прыладзе",
+      "context": "Стан дастаўкі: чарнавік",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#stateDraft"
+      ],
+      "sourceHash": "1f9828d67e933d0c4365984ed54b521600ffe764cf76ea26fe372c564c4d70a4"
+    },
+    {
+      "id": "native.feedback.statePending",
+      "source": "Захавана на прыладзе — адправім пры сетцы",
+      "context": "Стан дастаўкі: чакае адпраўкі (20 §7)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#statePending"
+      ],
+      "sourceHash": "7195387e99f36c3ed874cba5e91a09c9bda100636d233899ecb181ac4950d043"
+    },
+    {
+      "id": "native.feedback.stateSent",
+      "source": "Адпраўлена",
+      "context": "Стан дастаўкі: пацверджана серверам",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#stateSent"
+      ],
+      "sourceHash": "ee6e31c6ff3e7f4a976a16d2cf3e05e945fd2497f20240eead476c966b9cd470"
+    },
+    {
+      "id": "native.feedback.stateConflict",
+      "source": "Канфлікт: на серверы наведшая змена",
+      "context": "Стан дастаўкі: 409, патрэбна праверка ўласнага стану",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#stateConflict"
+      ],
+      "sourceHash": "1fefa8a95ccc366bf67ebe9edffb1259c1f3264030082b01a1ab678b762205ac"
+    },
+    {
+      "id": "native.feedback.stateActionRequired",
+      "source": "Адпраўка спынена: патрэбна ўвага",
+      "context": "Стан дастаўкі: 401/422/пашкоджаныя даныя",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#stateActionRequired"
+      ],
+      "sourceHash": "9d3a4807b3c9bbffd40f0adb70348a542c4935461df074bcb77bb0bc9fda1b2e"
+    },
+    {
+      "id": "native.feedback.stateDeletePending",
+      "source": "Выдаленне чакае сеткі",
+      "context": "Стан дастаўкі: CAS-выдаленне яшчэ не пацверджана (21 §5.4)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#stateDeletePending"
+      ],
+      "sourceHash": "5e80f91330578bbbc12509891dacb61ccf3d86569cd63e2c19c8b0061b3dac4a"
+    },
+    {
+      "id": "native.feedback.inviteTitle",
+      "source": "Як табе гайд? Можна ацаніць — гэта неабавязкова.",
+      "context": "Ціхае запрашэнне пасля End: не мадальнае, адзін раз за сесію",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#inviteTitle"
+      ],
+      "sourceHash": "c7bee40548b81ff38a6a66ec43b05e53fbddef58c6708cda09261e14969ac192"
+    },
+    {
+      "id": "native.feedback.inviteRate",
+      "source": "Ацаніць гайд",
+      "context": "Дзеянне запрашэння адкрывае форму",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#inviteRate"
+      ],
+      "sourceHash": "bff14adc9bcb8d672c62ee6ff83e10e26542a927104e7a053ac287c5bda11c3f"
+    },
+    {
+      "id": "native.feedback.inviteDismiss",
+      "source": "Не, дзякуй",
+      "context": "Адмова ад запрашэння; ніколі не блакуе",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#inviteDismiss"
+      ],
+      "sourceHash": "974b4b9cc64413a1293c3743bc76db631f6dd4c5f5639b0631869c67474cfeaf"
+    },
+    {
+      "id": "native.feedback.ratePlace",
+      "source": "Ацаніць месца",
+      "context": "Яўнае дзеянне на картцы месца (20 §7)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#ratePlace"
+      ],
+      "sourceHash": "6e2584651cd2326b0266694baa27f4fff406f1f8b837f0d8a71ad801cc5d466b"
+    },
+    {
+      "id": "native.feedback.placeVisitTitle",
+      "source": "Ці быў ты тут?",
+      "context": "Пацвярджэнне ўласнага візіту перад ацэнкай месца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#placeVisitTitle"
+      ],
+      "sourceHash": "0994331436fdf28985b497ebebc27eda56b5554fe582e29ce82b2b30f853be3a"
+    },
+    {
+      "id": "native.feedback.placeVisitBody",
+      "source": "Ацэнка месца — самаацэнка візіту, не праверанае наведванне.",
+      "context": "Тэкст пацвярджэння візіту (20 §7)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#placeVisitBody"
+      ],
+      "sourceHash": "e89b4ab7e51c7a16d7d4fabf295cfec3cda0541e67d1e43625e17ccfaa08efad"
+    },
+    {
+      "id": "native.feedback.placeVisitAccept",
+      "source": "Быў тут — ацаніць",
+      "context": "Пацвярджэнне візіту адкрывае форму месца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#placeVisitAccept"
+      ],
+      "sourceHash": "0e1ffe61222b1128e9dbd9f7cfa8b3ee8434076f10e2de057164a605e328737a"
+    },
+    {
+      "id": "native.feedback.mySection",
+      "source": "Мае ацэнкі",
+      "context": "Раздзел уласных ацэнак у KUDY (20 §7)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#mySection"
+      ],
+      "sourceHash": "18fa60ddb291c97c36851de7137bef11352764d5351e9feefa70017f9dd00f46"
+    },
+    {
+      "id": "native.feedback.myEmpty",
+      "source": "Уласных ацэнак пакуль няма",
+      "context": "Пусты спіс уласных ацэнак",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#myEmpty"
+      ],
+      "sourceHash": "ee12ec4175a34a04399cba704ce02b3f82083d2997d3b3797b32c2310a8bdf8a"
+    },
+    {
+      "id": "native.feedback.myEdit",
+      "source": "Змяніць",
+      "context": "Дзеянне радка ўласнай ацэнкі: адкрывае форму з дасланым значэннем",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#myEdit"
+      ],
+      "sourceHash": "1e2c31b3f9c9402946eb392ff6897700c2c783770a794069b734a01a42a35a04"
+    },
+    {
+      "id": "native.feedback.guideWord",
+      "source": "Гід",
+      "context": "Пазнака віду мэты: гід",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#guideWord"
+      ],
+      "sourceHash": "70a569cfca827aef72de7c814f0c0b3760b520f5c21dc43a67fdaad90af74272"
+    },
+    {
+      "id": "native.feedback.placeWord",
+      "source": "Месца",
+      "context": "Пазнака віду мэты: месца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#placeWord"
+      ],
+      "sourceHash": "e176e75a0103ac1243532bb956a4ee2dcc9af7aaad80c35938170679577839f7"
+    },
+    {
+      "id": "native.feedback.ratingOf",
+      "source": "${score} з 5",
+      "context": "Радок уласнай ацэнкі ў спісе",
+      "format": "template",
+      "parameters": [
+        {
+          "name": "score",
+          "type": "number"
+        }
+      ],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#ratingOf"
+      ],
+      "sourceHash": "c71e6b03486be62dcfc58bf64e222b7d93e4f974732e5f621d966b031562bc69"
+    },
+    {
+      "id": "native.feedback.reasonText.interesting_stories",
+      "source": "цікавыя гісторыі",
+      "context": "Прычына гіда: цікавыя гісторыі (20 §7)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#reasonText.interesting_stories"
+      ],
+      "sourceHash": "9959daf3a456d2382c1efd4faca72b689f0df1ed2923ab0cd4e821446c3120d6"
+    },
+    {
+      "id": "native.feedback.reasonText.clear_delivery",
+      "source": "зразумелая падача",
+      "context": "Прычына гіда: зразумелая падача",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#reasonText.clear_delivery"
+      ],
+      "sourceHash": "d74083aa9de049473fa1b5f857260c195797d52ddcbe3c1fa64c49748c08adc1"
+    },
+    {
+      "id": "native.feedback.reasonText.too_long",
+      "source": "задоўга",
+      "context": "Прычына гіда: задоўга",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#reasonText.too_long"
+      ],
+      "sourceHash": "14403d1bc95f6a5d57217237ac27a05879d0191466a34aafa1cd624ee9ebe116"
+    },
+    {
+      "id": "native.feedback.reasonText.hard_to_navigate",
+      "source": "цяжка арыентавацца",
+      "context": "Прычына гіда: цяжка арыентавацца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#reasonText.hard_to_navigate"
+      ],
+      "sourceHash": "079108e7d5462f0bcbd157ec5da0e366f87e54d39e35364ce6debfc82a419ca8"
+    },
+    {
+      "id": "native.feedback.reasonText.audio_problem",
+      "source": "праблема гуку",
+      "context": "Прычына гіда: праблема гуку — застаецца прычынай гіда",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#reasonText.audio_problem"
+      ],
+      "sourceHash": "c3ef154e822117153d07ef625a31c3a886cf523099025dcf69b3941542c6e61a"
+    },
+    {
+      "id": "native.feedback.reasonText.description_mismatch",
+      "source": "не супала з апісаннем",
+      "context": "Агульная прычына: не супала з апісаннем",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#reasonText.description_mismatch"
+      ],
+      "sourceHash": "75d78626465f6da0aa52eaf8b48754720f68b28c6af0c8feeea58eef98bfbce2"
+    },
+    {
+      "id": "native.feedback.reasonText.worth_visiting",
+      "source": "варта наведаць",
+      "context": "Прычына месца: варта наведаць",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#reasonText.worth_visiting"
+      ],
+      "sourceHash": "2ae5e44e2805dc7511473cce8c1d43338792b3eef17802eb05c01193bbe53643"
+    },
+    {
+      "id": "native.feedback.reasonText.hard_to_reach",
+      "source": "цяжка дабрацца",
+      "context": "Прычына месца: цяжка дабрацца",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#reasonText.hard_to_reach"
+      ],
+      "sourceHash": "f97aeea0ff8926e5bf06bddaa142ec75cc4be468a7bdb601c486504f12b5f7bd"
+    },
+    {
+      "id": "native.feedback.reasonText.access_problem",
+      "source": "праблема доступу",
+      "context": "Прычына месца: праблема доступу",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#reasonText.access_problem"
+      ],
+      "sourceHash": "f4417031a4fef7cc54c3916e66770fcda831e75baa3bb6e70b3dd08b9cf9f54e"
+    },
+    {
+      "id": "native.feedback.errorText.feedback-input-invalid",
+      "source": "Звесткі не прынятыя: праверце выбар",
+      "context": "Названая памылка формы: невалідны ўвод (правіла feedback-input-invalid)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#errorText.feedback-input-invalid"
+      ],
+      "sourceHash": "b22dd71560cdeeb665203c01ed389749a1e6a9c1bf8f642df722e8896dd5bd94"
+    },
+    {
+      "id": "native.feedback.errorText.feedback-write-failed",
+      "source": "Запіс не ўдаўся: паўтарыце",
+      "context": "Названая памылка формы: збой запісу (правіла feedback-write-failed)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#errorText.feedback-write-failed"
+      ],
+      "sourceHash": "4a76d282ed50222f4700e03541a4b46ea0fa43e4c7f715bd742c082c694b2999"
+    },
+    {
+      "id": "native.feedback.errorText.feedback-transport-failed",
+      "source": "Сетка не адказала: паўтарыце",
+      "context": "Названая памылка формы: збой транспарту (правіла feedback-transport-failed)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#errorText.feedback-transport-failed"
+      ],
+      "sourceHash": "ca9f043892af3e9f4cbb37a64b494f6162aef9910123df3b2221f133621b462d"
+    },
+    {
+      "id": "native.feedback.errorText.feedback-send-no-draft",
+      "source": "Няма чарнавіка для адпраўкі",
+      "context": "Названая памылка формы: адпраўка без чарнавіка (правіла feedback-send-no-draft)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#errorText.feedback-send-no-draft"
+      ],
+      "sourceHash": "606c54918b744dbaf923e0375c7be1d96fed06d613e39668887c420ab7b3855c"
+    },
+    {
+      "id": "native.feedback.errorText.feedback-resolution-required",
+      "source": "Спачатку праверце стан на серверы",
+      "context": "Названая памылка формы: патрэбны чытанне ўласнага стану (правіла feedback-resolution-required)",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/useFeedbackController.ts#errorText.feedback-resolution-required"
+      ],
+      "sourceHash": "d16eb424c719e978864af4ab241f6608a78f9eead95acc2db963e3829b630555"
     }
   ]
 }

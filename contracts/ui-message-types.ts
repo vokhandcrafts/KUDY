@@ -203,3 +203,60 @@ export interface GuideHintStrings {
   readonly openHint: string;
   readonly dismiss: string;
 }
+
+// G16.03 (issue #74) — the voluntary private rating words (20 §7, 21 §5/§6):
+// the End invitation, the shared rating form, the honest delivery states and
+// the My KUDY own-ratings list. The delivery-state words carry the §5.4
+// distinction the person must see: saved on the device is not sent, a delete
+// that has not reached the server says so.
+export interface FeedbackStrings {
+  // The feedback service's honest absence (no driver/sync port — the root's
+  // rule) and an unparseable form route target.
+  readonly unavailable: string;
+  readonly invalidTarget: string;
+  // The two 20 §7 questions: the guide's whole experience, the place's
+  // physical worth. The form's facts line names the rated identity — the
+  // content locale and the pinned version, never a fresh-catalog fact.
+  readonly formTitleGuide: string;
+  readonly formTitlePlace: string;
+  readonly targetLine: (version: string, locale: string) => string;
+  readonly scaleHint: string;
+  readonly starLabel: (score: number) => string;
+  readonly reasonsTitle: string;
+  // The closed 21 §5.1 reason vocabulary of both kinds; an unknown code
+  // renders as-is (the runMapReason idiom).
+  readonly reasonText: Record<string, string>;
+  // The versioned purpose disclosure (21 §6): who sees the rating, that it
+  // is never public, and that it is separate from the analytics consent.
+  readonly disclosureTitle: string;
+  readonly disclosureBody: string;
+  readonly disclosureAnalytics: string;
+  readonly send: string;
+  readonly deleteButton: string;
+  readonly resolveConflict: string;
+  readonly stateDraft: string;
+  readonly statePending: string;
+  readonly stateSent: string;
+  readonly stateConflict: string;
+  readonly stateActionRequired: string;
+  readonly stateDeletePending: string;
+  // The named synchronous-failure rules (FeedbackErrorRule) in words; an
+  // unknown rule renders raw (the runMapReason fallback idiom).
+  readonly errorText: Record<string, string>;
+  // The End invitation (20 §7: quiet, non-modal, once per session) and the
+  // place card's explicit action with the self-reported visit confirmation.
+  readonly inviteTitle: string;
+  readonly inviteRate: string;
+  readonly inviteDismiss: string;
+  readonly ratePlace: string;
+  readonly placeVisitTitle: string;
+  readonly placeVisitBody: string;
+  readonly placeVisitAccept: string;
+  // The My KUDY own-ratings list (the «пазней у My KUDY» path of 20 §7).
+  readonly mySection: string;
+  readonly myEmpty: string;
+  readonly myEdit: string;
+  readonly guideWord: string;
+  readonly placeWord: string;
+  readonly ratingOf: (score: number) => string;
+}

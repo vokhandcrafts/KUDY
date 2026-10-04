@@ -9,7 +9,7 @@
 // State rendering only: every decision lives in the controllers (19 §4.2);
 // the physical playback fact arrives through the binding's read (09 §6.3,
 // the run surface's `playback` idiom), never a services import.
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,6 +19,7 @@ import {
   placeRefusalText,
   type MomentFact,
 } from "../../controllers/place/placeDetailController";
+import { feedbackStrings } from "../../controllers/useFeedbackController";
 import type { MomentPlayBinding, MomentPlayOutcome } from "../../controllers/moment/momentPlayController";
 import { useStoreState } from "../../controllers/useControllerStore";
 import { useServices, useUiLocale } from "../_layout";
@@ -26,6 +27,11 @@ import { AccessBadge } from "../../components/guide-card";
 import { BackButton } from "../../components/back-button";
 import { uiStrings } from "../../components/ui-strings";
 import { LoadingIndicator } from "../../components/loading-indicator";
+import {
+  ModalDialog,
+  ModalDialogAccept,
+  ModalDialogCancel,
+} from "../../components/modal-dialog";
 import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
 import { screenStyles } from "../../components/screen-styles";
@@ -108,6 +114,15 @@ const styles = StyleSheet.create({
     fontFamily: tokens.fontFamilyUiStrong,
     fontSize: tokens.fontBaseSize,
     fontWeight: tokens.fontWeightStrong,
+  },
+  // G16.03 (issue #74): the visit confirmation's words — the dialog shell
+  // carries the card and the two action styles.
+  confirmText: {
+    color: tokens.colorInk,
+    fontFamily: tokens.fontFamilyUiStrong,
+    fontSize: tokens.fontBaseSize,
+    fontWeight: tokens.fontWeightStrong,
+    marginBottom: tokens.spaceM,
   },
 });
 
@@ -232,11 +247,28 @@ export default function PlaceDetail() {
   // G06.10 (issue #432): the back word is the shared chrome catalog's — the
   // place dictionary holds no copy of it (one back image, one dictionary).
   const back = uiStrings(locale).back;
+  // G16.03 (issue #74): the place rating words — the action, the visit
+  // confirmation and its accept.
+  const feedbackWords = feedbackStrings(locale);
   // UX 02 (issue #348): the frame's top inset — the content starts below the
   // status bar and the notch with the native header off (AC4).
   const insets = useSafeAreaInsets();
+  // G16.03 (issue #74): the self-reported visit confirmation — the dialog is
+  // a surface-side gate (the finish confirmation's pattern); the confirm
+  // navigates to the rating form with the opened card's own content
+  // identity, no version or locale is invented here.
+  const [visitConfirm, setVisitConfirm] = useState(false);
+  const router = useRouter();
   const facts = state !== null && state.kind === "ready" ? state.facts : null;
   const title = facts?.title ?? placeId;
+  // The rating action exists only for a card with a published content
+  // version AND the locale its text rendered in — a card without both
+  // offers no rating (no invented target identity, 21 §5.1).
+  const rateable =
+    services.feedback !== undefined &&
+    facts !== null &&
+    facts.content_version !== null &&
+    facts.content_locale !== null;
   return (
     <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Place detail">
       {/* UX 02 (issue #348): the back sits in the frame above the scroll —
@@ -274,6 +306,46 @@ export default function PlaceDetail() {
                 </ScaledText>
               </>
             )}
+            {rateable && facts !== null ? (
+              // G16.03 (issue #74): the explicit place rating (20 §7) — the
+              // action only opens the self-reported visit confirmation, it
+              // never starts a Run, a purchase or any event.
+              <PressableSurface
+                accessibilityRole="button"
+                accessibilityLabel={feedbackWords.ratePlace}
+                onPress={() => setVisitConfirm(true)}
+                style={styles.playButton}
+                testID="btn-place-rate"
+              >
+                <ScaledText style={styles.playText}>{feedbackWords.ratePlace}</ScaledText>
+              </PressableSurface>
+            ) : null}
+            {visitConfirm && facts !== null && facts.place_id !== null && facts.content_version !== null ? (
+              // The visit confirmation's words (20 §7: самарепорт, не
+              // праверанае наведванне) — the accept carries the card's own
+              // content identity into the form route.
+              <ModalDialog onRequestClose={() => setVisitConfirm(false)} testID="place-visit-dialog">
+                <ScaledText style={styles.confirmText}>{feedbackWords.placeVisitTitle}</ScaledText>
+                <ScaledText style={styles.summary}>{feedbackWords.placeVisitBody}</ScaledText>
+                <ModalDialogAccept
+                  label={feedbackWords.placeVisitAccept}
+                  onPress={() => {
+                    setVisitConfirm(false);
+                    router.push({
+                      pathname: "/feedback",
+                      params: {
+                        kind: "place",
+                        id: facts.place_id ?? "",
+                        version: facts.content_version ?? "",
+                        locale: facts.content_locale ?? "",
+                      },
+                    });
+                  }}
+                  testID="btn-place-visit-accept"
+                />
+                <ModalDialogCancel label={back} onPress={() => setVisitConfirm(false)} testID="btn-place-visit-cancel" />
+              </ModalDialog>
+            ) : null}
             {/* G06.05 (AC4/AC5): the play failure is named, announced, and its
                 exit is the play button itself — the note says so, nothing is
                 silently swallowed. */}
