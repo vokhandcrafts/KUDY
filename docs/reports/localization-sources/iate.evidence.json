@@ -1,0 +1,144 @@
+{
+  "task": "G21.32",
+  "issue": "https://github.com/vokhandcrafts/KUDY/issues/564",
+  "epic": "https://github.com/vokhandcrafts/KUDY/issues/532",
+  "report": "docs/reports/localization-sources/iate.md",
+  "accessed_utc": "2026-10-04T09:55Z - 2026-10-04T11:25Z",
+  "executor": "zcode session (GLM-5.3-Flash)",
+  "locales_requested": ["be", "en", "uk", "de", "es", "fr", "cs", "sv"],
+  "live_system": {
+    "version": "IATE 3.2.0",
+    "last_build_date": "2026-06-24",
+    "release_note": "https://iate.europa.eu/info/release-note",
+    "maintenance_notice_observed": "A new release will be deployed on Thursday 8 October [2026] at around 9.00."
+  },
+  "commands": [
+    "curl -sL https://iate.europa.eu/em-api/artifacts/full-tbx -o IATE_download.zip  # 303 -> https://s3.eu-central-1.amazonaws.com/iate2-tbx/IATE_download.zip",
+    "curl -s https://iate.europa.eu/em-api/inventories/_languages?offset=O&limit=50  # paginated, 132 items, each /inventories/{id} -> {name, code, is_official}",
+    "curl -s -X POST https://iate.europa.eu/em-api/entries/_search -H 'Content-Type: application/json' -d '{\"query\":\"back\",\"source\":\"en\",\"targets\":[\"uk\",\"de\",\"es\",\"fr\",\"cs\",\"sv\"],\"search_in_fields\":[0],\"search_in_term_types\":[0,1,2,3,4],\"query_operator\":1,\"offset\":0,\"limit\":3}'",
+    "curl -s https://iate.europa.eu/em-api/entries/{entry-code} -H 'Accept: application/json'  # full entry: language sections with term_entries[].term_value",
+    "python3 zip-stream scan of IATE_export_26022019.tbx for xml:lang=\"...\" attribute counts"
+  ],
+  "artifacts": [
+    {
+      "name": "IATE_download.zip (the anonymous public bulk export)",
+      "request_url": "https://iate.europa.eu/em-api/artifacts/full-tbx",
+      "redirect_target": "https://s3.eu-central-1.amazonaws.com/iate2-tbx/IATE_download.zip",
+      "http_headers": {
+        "content_length": 112828998,
+        "last_modified": "Mon, 30 Sep 2019 07:41:10 GMT",
+        "etag": "\"9c5b10aa6992bfd186563ff557b7b4f0-7\"",
+        "content_type": "application/zip"
+      },
+      "sha256": "ac50c2a701484f3108eec6aea80ee23b5da0c0a2062fd5cc72790ac57ccf5c6f",
+      "contains": "IATE_export_26022019.tbx (uncompressed 1859969923 bytes)",
+      "storage": "local git-ignored scratch only; never committed (parsed-content rule)",
+      "observed_age": "export snapshot dated 2019-02-26, file last modified 2019-09-30 - stale at access date 2026-10-04"
+    },
+    {
+      "name": "IATExtract.jar (official local TBX cutter)",
+      "url": "https://s3.eu-central-1.amazonaws.com/iate2-tbx/IATExtract.jar",
+      "size_bytes": 160861,
+      "sha256": "a8d47ba3a075c370184f690596ad3c3862dad4f5c2d087a06b641de0cc353131",
+      "fact": "Java tool cdt.iate.diffusion.tbx (CutTbxIntoLg) that slices the big TBX per language locally; makes no network calls"
+    },
+    {
+      "name": "IATE2_Search.xml (official SoapUI project with public-API example queries)",
+      "url": "https://s3.eu-central-1.amazonaws.com/iate2-api/IATE2_Search.xml",
+      "size_bytes": 21512,
+      "sha256": "4acecd1c53c240c62aea1a6c114834fb04c5e5f623393f4d249bd0114033fe88",
+      "fact": "documents POST https://iate.europa.eu/em-api/entries/_search and inventories _languages, _query-operators, _searchable-fields, _term-types, domains/_tree"
+    }
+  ],
+  "export_2019_language_scan": {
+    "method": "streamed zip read, regex count of xml:lang attributes",
+    "total_language_attributes": 5747407,
+    "per_language": {
+      "en": 809919, "fr": 751975, "de": 530857, "nl": 471415, "it": 456744,
+      "es": 435111, "da": 417390, "el": 373142, "pt": 370878, "fi": 266955,
+      "sv": 251423, "ga": 65173, "pl": 64723, "sl": 48688, "mt": 48338,
+      "lt": 46238, "ro": 45032, "et": 41295, "lv": 41039, "sk": 40803,
+      "hu": 39280, "bg": 37060, "la": 34357, "cs": 34284, "hr": 20281, "mul": 5007
+    },
+    "be": 0,
+    "uk": 0,
+    "conclusion": "the anonymous bulk export contains exactly the 24 official EU languages plus la and mul; no Belarusian, no Ukrainian"
+  },
+  "live_language_inventory": {
+    "endpoint": "https://iate.europa.eu/em-api/inventories/_languages",
+    "total": 132,
+    "official_count": 26,
+    "official_codes": ["bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "ga", "hr", "hu", "it", "la", "lt", "lv", "mt", "mul", "nl", "pl", "pt", "ro", "sk", "sl", "sv"],
+    "non_official_count": 106,
+    "be_present_in_inventory": true,
+    "be_record": {"code": "be", "name": "Belarusian", "is_official": false},
+    "uk_present_in_inventory": true,
+    "uk_record": {"code": "uk", "name": "Ukrainian", "is_official": false},
+    "ui_language_pickers": "the /search page source/target language radio+checkbox groups list only the 24 official EU codes plus la and mul; be and uk are not offered in the UI"
+  },
+  "api_contract": {
+    "search": "POST /em-api/entries/_search (JSON body; example in IATE2_Search.xml)",
+    "inventories": "GET /em-api/inventories/_languages, _query-operators, _searchable-fields, _term-types, domains/_tree",
+    "url_search": "https://iate.europa.eu/search/byUrl?term=<term>&sl=<lang> (official, /developers page)",
+    "unsigned_policy": "large volumes of unsigned queries that impact performance are not processed; a token is issued by the IATE Support & Development Team (iate@cdt.europa.eu)",
+    "observed_rate_limiting": "short bursts of ~130 small GETs followed by searches received empty responses; single spaced queries succeeded again after a pause",
+    "user_agent_note": "the edge rejects some non-browser client fingerprints (python urllib -> 403/empty); curl with an identified custom User-Agent worked for the same payloads"
+  },
+  "be_blocker": {
+    "targets_be": "POST /entries/_search with targets containing \"be\" returns HTTP 403 with an empty body (reproduced; benchmark/repro-target-be-403.json)",
+    "source_be": "POST /entries/_search with source \"be\" returns HTTP 403 with an empty body",
+    "conclusion": "Belarusian is listed in the language inventory but is not searchable via the public API and is not offered in the UI"
+  },
+  "uk_state": {
+    "targets_uk": "searches with targets [\"uk\"] return entries whose language sections contain no uk term entries (20 sampled entries over the benchmark: 0 uk sections)",
+    "source_uk": "source \"uk\" query for \"Європейський Союз\" -> size 0; query \"назад\" -> size 0",
+    "any_field_probe": "unfiltered query \"назад\" -> size 0",
+    "conclusion": "Ukrainian exists as inventory metadata and in the entry-view URL template, but no public Ukrainian term content was reachable; consistent with uk=0 in the 2019 export"
+  },
+  "benchmark": {
+    "terms": ["back", "cancel", "settings", "guide", "stop", "walk", "download", "purchase", "restore", "unavailable"],
+    "method": "POST /entries/_search source=en targets=[uk,de,es,fr,cs,sv] limit=3; top 2 entries fetched per term; raw JSON responses kept locally in git-ignored scratch; only quoted values recorded here",
+    "results_summary": [
+      {"term": "back", "context": "return to previous screen", "results": 668, "verdict": "negative - anatomy (de Dorsum/Ruecken, fr dos) and mechanical engineering (minor flank) senses only"},
+      {"term": "cancel", "context": "cancel an action", "results": 152, "verdict": "negative - data-link cancel character CAN and document cancellation (de Streichung/Löschung, es anulación, fr annulation); no UI Cancel button sense"},
+      {"term": "settings", "context": "app settings", "results": 978, "verdict": "negative - technical adjustment values (de Einstellwerte, sv inställningsvärden) and nightlife settings (de Nachtleben); no app-settings screen sense"},
+      {"term": "guide", "context": "tour guide (person)", "results": 406, "verdict": "mixed - standalone guide gives railway escort (de Begleiter/Zugbegleiter) and engineering tube senses; the exact tourism sense exists only under the composite term \"tourist guide\" (see travel_probe)"},
+      {"term": "stop", "context": "stop audio playback", "results": 396, "verdict": "negative - police stop (de Anhaltung, es alto policial, cs legitimování policií) and industrial close-down; no media-transport sense"},
+      {"term": "walk", "context": "walk / walking route", "results": 74, "verdict": "negative - ship catwalk (de Laufsteg, es pasarela) and pathologic gait (de Hahnentritt); no pedestrian walk sense"},
+      {"term": "download", "context": "download a guide", "results": 10, "verdict": "positive - data-processing entries match the UI verb: to download = de herunterladen, es descargar, fr télécharger, cs stáhnout, sv ladda ned/hämta; uk and be absent"},
+      {"term": "purchase", "context": "buy a guide", "results": 358, "verdict": "partial - procurement noun sense (de Kauf, es compra, fr achat, sv köp); no verb-button sense and no in-app purchase context"},
+      {"term": "restore", "context": "restore a purchase", "results": 137, "verdict": "negative - EU programme acronym RESTORE and legal rétablir un jugement; no restore-purchases or restore-backup sense"},
+      {"term": "unavailable", "context": "content unavailable", "results": 26, "verdict": "negative - banking deposits (de nichtverfügbare Einlage, cs nedisponibilní vklad); no UI unavailability label sense"}
+    ],
+    "entries_with_be_section": 0,
+    "entries_sampled": 20
+  },
+  "travel_probe": [
+    {"query": "tourist guide", "results": 2, "fact": "the top entry carries the exact tourism sense in 24 EU languages: en tourist guide/tour guide, de Fremdenführer/Gästeführer, es guía turístico, fr guide touristique, cs turistický průvodce, sv turistguide, da turistguide, pl przewodnik turystyczny, ...; be and uk absent", "verdict": "positive for KUDY's core domain noun"},
+    {"query": "guided tour", "results": 2, "fact": "de geführte Tour, fr tour guidé, nl rondleiding, pt visita guiada; cs and sv absent from the top entry", "verdict": "partial"},
+    {"query": "sightseeing", "results": 1, "fact": "only the aviation sense (sightseeing flight) was found", "verdict": "negative for the city-walk sense"}
+  ],
+  "license": {
+    "legal_notice": "https://iate.europa.eu/legal-notice (© European Union, 2021)",
+    "site_widget_api": "Copying from the IATE website or from results made available via the search widget or search API is forbidden unless explicitly allowed; copyright in data retrieved via the website/widget/API belongs to the rightholders as defined by law; the EU is not in a position to authorise free reproduction of all such data for commercial purposes.",
+    "download_file": "The data made available via the download page is not copyright protected and can be freely downloaded and reproduced, for personal use or for further non-commercial or commercial dissemination; the EU retains the copyright of the database structure of the downloadable file and authorises its reproduction as well. Required attribution: \"Download IATE, European Union, [year].\"",
+    "boundary": "the authorisation is restricted to the downloadable file and does NOT include data retrieved via the search widget, the search API or the IATE website",
+    "widget_restriction": "neither the IATE search widget nor the data obtained via the widget can be used for commercial purposes (developers page)",
+    "access_rights": "data.europa.eu dataset IATE (publisher Translation Centre/CDT) access_right PUBLIC"
+  },
+  "limitations": [
+    "the anonymous public bulk export is a stale 2019-02-26 snapshot (file Last-Modified 2019-09-30); no refresh schedule is documented on the pages consulted",
+    "filtered per-language TBX/CSV exports exist but require an EU Login account (external guest user); no account was created per task constraints",
+    "a search-API token for larger volumes requires contacting iate@cdt.europa.eu; not requested",
+    "Belarusian search returns HTTP 403 on the public API both as source and as target; the cause (WAF rule vs backend policy) is not documented publicly",
+    "the public API/UI expose no Ukrainian term content despite the inventory listing uk; only inventory metadata was observed",
+    "entry-level domain codes are opaque hashes in the API; human-readable domain labels were not resolved (would require the domains/_tree inventory)",
+    "downloaded TBX/zip and raw API responses stayed in local git-ignored scratch; only quoted values and metadata are recorded in this manifest"
+  ],
+  "follow_up_drafts": [
+    "F1 - documented rejection of IATE as a source of UI strings for KUDY: be is blocked/unavailable (HTTP 403; absent from UI pickers and the 2019 export), uk has no public term content, and the EU-official languages cover 1.5/10 benchmark UI terms with EU-jargon domains; G21.33 records the decision, no integration task",
+    "F2 - optional reference use for tourism terminology: when reviewing the sense of domain words (tourist guide, guided tour) a translation record may cite the IATE entry URL (https://iate.europa.eu/em-api/entries/{code}) as one reference for the six EU-official locales; consultation only, no copying (license boundary); depends on G21.27 record form",
+    "F3 - human decision if deeper IATE use is ever approved: creating an EU Login guest account unlocks filtered per-language TBX/CSV exports (kept 7 days, attribution \"Download IATE, European Union, [year]\"); this is a human account step, not an agent action",
+    "F4 - any bulk adoption of IATE terms must come from the downloadable file (the only channel whose license explicitly allows reproduction), never from API/widget/site results; the anonymous full-tbx is stale 2019, so a fresh filtered export via EU Login would be the only current licensed source"
+  ]
+}
