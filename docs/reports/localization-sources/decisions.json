@@ -318,5 +318,86 @@
     "project_board": "unavailable: authentication token missing read:project; no scope refresh attempted",
     "issues_readback": "616/617 OPEN, no labels/assignees, bodies matched local drafts, Blocked-by #565; both present in open Issues list",
     "dependency_graph": "543 -> 566 -> 565 -> closed source/publication issues; 616/617 -> 565; no new cycles"
+  },
+  "reuse_decision": {
+    "task": "G21.37",
+    "issue": 616,
+    "decision_date": "2026-10-05",
+    "input_main": "c3270c752c94f18b4b21c87b878cc345fa255a2d",
+    "decision_authority": "Operator delegation via #616 (agent:ready queue); the executor records defer/reject under the brief's conservative default (unknown rights mean defer/reject). No import is authorized; any future approval requires confirmed rights and a fresh owner decision, never this closure.",
+    "report": "docs/reports/localization-sources/reuse-decision.md",
+    "import_approved": false,
+    "connector_issue_created": null,
+    "measured_need_summary": "The authoring pipeline consumes single-record canonical messages (contracts/ui-messages/source.json), authored translations with reviewedSourceHash and G21.27 terminology provenance, generated native/web outputs and the per-term glossary; no bulk or corpus consumer of localization source data exists (tools/i18n holds checks and generation only; tools/corpus/import.mjs is the G19.02 story-article importer).",
+    "channels": [
+      {
+        "source": "android",
+        "channel": "strings.xml rows from values*/strings.xml",
+        "status": "defer",
+        "measured_need": "none: chrome-term consultation follows G21.27 provenance lookups; whole files are incompatible with the one-record-one-key rule of the 2026-10-03 specification",
+        "rights": "Apache-2.0 with per-repo NOTICE; copying a row requires verifying that exact file and its notice, not an inference about all repositories",
+        "terms_locator": "blob-id pins in android.evidence.json; file history (+log) remains 403",
+        "attribution": "The Android Open Source Project + repository + blob-id",
+        "redistribution": "file-level copying stays rejected; row-level copying blocked by the missing measured need and per-file notice verification"
+      },
+      {
+        "source": "microsoft",
+        "channel": "TBX excerpts from MicrosoftTermCollection.zip",
+        "status": "defer",
+        "measured_need": "none: human term consultation is covered by G21.27 lookups; no bulk consumer of excerpts exists",
+        "rights": "unknown: usage terms are not published on live pages or inside the archive (microsoft.md section 4); the historical ToU is gone with the closed portal",
+        "terms_locator": "ZIP sha256 fed7d16955fd4063731712704cbd6584869a9009acf8a9c3c3de31e0d4ebdfe6, Last-Modified 2025-02-06, no release version",
+        "attribution": "undefined until official terms are found or an owner decision resolves report FU-1",
+        "redistribution": "excerpt redistribution boundaries unknown; the source is not called forbidden, import waits for verified terms"
+      },
+      {
+        "source": "cldr",
+        "channel": "data subset (plurals/rules JSON)",
+        "status": "defer",
+        "measured_need": "none: canonical messages carry no plural format and the generator proposal is already deferred in G21.33; rules consultation happens at semantic review",
+        "rights": "Unicode License v3 on cldr-json tag 48.2.3; copies must be accompanied by the copyright and permission notice",
+        "terms_locator": "tag 48.2.3 + per-file sha256 in cldr-evidence.json",
+        "attribution": "Unicode copyright and permission notice transfer with any adopted subset",
+        "redistribution": "notice transfer applies only if a subset is ever proposed; nothing is proposed now"
+      },
+      {
+        "source": "wiktionary",
+        "channel": "entry text (definitions, translation tables)",
+        "status": "defer",
+        "measured_need": "none: sense-specific consultation with independently reviewed wording suffices; automatic substitution is unusable (dictionary stress marks, mixed-script defects)",
+        "rights": "CC BY-SA 4.0 + GFDL dual license per Wiktionary:Copyrights; full license texts unreviewed; share-alike applies to corpus-scale extraction",
+        "terms_locator": "Wiktionary:Copyrights fetched 2026-10-04; official dumps metadata 2026-10-01",
+        "attribution": "authorship history plus a source link accompany any transferred material",
+        "redistribution": "per-excerpt license boundaries must be determined before dissemination; corpus extraction stays deferred"
+      },
+      {
+        "source": "iate",
+        "channel": "Download export (TBX)",
+        "status": "defer",
+        "measured_need": "none: tourism-sense consultation for the six covered EU languages is reference use; be/uk are not covered",
+        "rights": "free reproduction applies only to the download file with mandatory attribution; the anonymous export is frozen at 2019-02-26 and current filtered exports require an EU Login account",
+        "terms_locator": "anonymous full-tbx sha256 ac50c2a701484f3108eec6aea80ee23b5da0c0a2062fd5cc72790ac57ccf5c6f; legal notice and download-iate conditions",
+        "attribution": "Download IATE, European Union, [year]",
+        "redistribution": "blocked by the stale export, the EU Login human prerequisite and the missing measured need; the Download permission does not transfer to website/widget/API"
+      },
+      {
+        "source": "iate",
+        "channel": "website/widget/API results",
+        "status": "reject",
+        "measured_need": "none: copying from these channels is forbidden by the legal notice; consultation is citation of a sense, not copying",
+        "rights": "copying from the website, widget or API results is forbidden unless explicitly allowed",
+        "terms_locator": "https://iate.europa.eu/legal-notice (copyright European Union, 2021)",
+        "attribution": "not applicable: no copying",
+        "redistribution": "the Download permission explicitly does not include data retrieved via the widget, API or website"
+      }
+    ],
+    "consultation_use_unchanged": "The G21.33 statuses for consultation (use for AOSP/CLDR/Wiktionary/IATE as references, owner-decision-required for Microsoft and the IATE filtered export) remain in effect; this section decides copying only.",
+    "human_prerequisites_named": [
+      "Microsoft: locate official usage terms or record an owner decision (report FU-1)",
+      "IATE: owner decision on an EU Login account before any filtered export (report F3)",
+      "IATE: API token contact via iate@cdt.europa.eu only if bulk API volumes are ever needed",
+      "Wiktionary: full license text review and an owner share-alike decision before any corpus extraction",
+      "Egress allowlist extension (for example *.wiktionary.org) is a host settings change, not an agent step"
+    ]
   }
 }
