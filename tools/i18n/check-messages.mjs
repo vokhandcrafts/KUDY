@@ -27,6 +27,14 @@
 //                            translation survives a source change only with
 //                            an explicit renewed review and reason, not a
 //                            blanket hash bump.
+//   terminology_unresolved  — (G21.27) a record's terminology lookup is marked
+//                            unresolved: honest, but the message stays
+//                            unpublished until an approved source resolves it;
+//   terminology_source_unsupported — (G21.27) a resolved looked-up trace cites
+//                            a source without a `use` decision in the G21.33
+//                            decisions file (or an unknown source id);
+//   terminology_decisions_unavailable — (G21.27) the decisions file itself is
+//                            unreadable: the membership check fails closed.
 // When the data-level gate is clean, generated freshness rides the
 // generator's own --check (the single owner of the plan and the byte
 // comparison) — the gate surfaces its problems as generated_output_stale.
@@ -38,7 +46,7 @@
 // (.dependency-cruiser.cjs tools-zone-closed); run with
 // `node --experimental-strip-types` — the locale registry is imported from
 // contracts/ui-locales.ts so the shipped set stays defined once.
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -50,6 +58,29 @@ import { DOMAINS, run as checkGeneratedOutputs } from './generate-messages.mjs';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const TRANSLATIONS_DIR = 'contracts/ui-messages/translations';
 const MIGRATION_KIND = 'migration';
+const DECISIONS_FILE = 'docs/reports/localization-sources/decisions.json';
+
+// G21.27 (issue #566) — the approved terminology sources are the G21.33
+// decisions' own words, derived from the decision file rather than restated
+// (implementation-rules 2): every source holding at least one `use` decision
+// is approved for contextual consultation (android, cldr, wiktionary, iate);
+// a source parked at owner-decision-required (microsoft) is not, until the
+// decision file itself changes. An unreadable file fails closed: the caller
+// reports terminology_decisions_unavailable instead of skipping the check.
+export function approvedTerminologySources(root) {
+  let doc;
+  try {
+    doc = JSON.parse(readFileSync(join(root, DECISIONS_FILE), 'utf8'));
+  } catch {
+    return null;
+  }
+  const approved = new Set();
+  for (const source of Array.isArray(doc?.sources) ? doc.sources : []) {
+    const usable = Array.isArray(source?.decisions) && source.decisions.some((decision) => decision?.status === 'use');
+    if (usable && typeof source.source === 'string') approved.add(source.source);
+  }
+  return approved;
+}
 
 // The (locale → ids) translation requirements the generator's output plan
 // actually renders. The plan lives in the generator (DOMAINS) and is imported
@@ -102,6 +133,15 @@ export function checkShippedMessages({ root = ROOT } = {}) {
   const sourceLocale = sourceDoc.source_locale;
   const required = plannedTranslationRequirements(sourceDoc);
   const allowedLocales = UI_LOCALES.map((entry) => entry.code);
+  // The terminology-source membership check needs the decision file; without
+  // it the gate fails closed instead of waving looked-up traces through.
+  const approvedSources = approvedTerminologySources(root);
+  if (!approvedSources) {
+    problems.push({
+      rule: 'terminology_decisions_unavailable',
+      reason: `${DECISIONS_FILE} is unreadable — looked-up terminology sources cannot be validated (fail-closed)`,
+    });
+  }
   for (const locale of COMPLETE_UI_LOCALES) {
     if (locale === sourceLocale) continue;
     const relative = `${TRANSLATIONS_DIR}/${locale}.json`;
@@ -159,6 +199,38 @@ export function checkShippedMessages({ root = ROOT } = {}) {
           key: record.id,
           reason: `the review pass (provenance.kind ${JSON.stringify(set.provenance?.kind)}) is not the migration and must give every record its renewed-review reason`,
         });
+      }
+      // G21.27 (issue #566) — terminology provenance. An unresolved lookup is
+      // a contract-legal honest state, but it stops this message's
+      // publication: the record stays out of the shipped catalogue until an
+      // approved source resolves it. A resolved looked-up trace citing a
+      // source without a `use` decision (or an unknown source id) is an
+      // unsupported reference — the trace must cite the decision file's
+      // approved sources; semantic fit stays the recorded review's job.
+      const terminology = record.terminology;
+      if (terminology && typeof terminology === 'object' && !Array.isArray(terminology)) {
+        if (terminology.status === 'unresolved') {
+          problems.push({
+            rule: 'terminology_unresolved',
+            locale,
+            key: record.id,
+            reason: 'terminology lookup is unresolved — the message stays unpublished until an approved source resolves it',
+          });
+        }
+        if (
+          approvedSources &&
+          terminology.status === 'resolved' &&
+          terminology.kind === 'looked-up' &&
+          typeof terminology.source === 'string' &&
+          !approvedSources.has(terminology.source)
+        ) {
+          problems.push({
+            rule: 'terminology_source_unsupported',
+            locale,
+            key: record.id,
+            reason: `terminology source ${JSON.stringify(terminology.source)} has no use decision in ${DECISIONS_FILE} — resolve the term with an approved source or mark it unresolved`,
+          });
+        }
       }
     }
   }

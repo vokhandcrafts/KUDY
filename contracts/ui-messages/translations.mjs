@@ -100,6 +100,31 @@ export function checkUiMessageTranslations(doc, sourceDoc, allowedLocales) {
           }
         }
       }
+      // G21.27 (issue #566) — terminology provenance: the trace a translator
+      // records when uncertain. The schema holds the shape (enums, date
+      // pattern, non-empty strings); the per-kind completeness of a RESOLVED
+      // trace is a cross-field rule a single-document schema cannot express:
+      // a looked-up resolution names its source, entry locator, chosen term
+      // and lookup date; citing existing reviewed terminology names locator
+      // and term; a reviewer judgment still names the term. An unresolved
+      // record stays contract-legal (honest uncertainty is never rejected
+      // here) — publication stops at the gate's terminology_unresolved.
+      const terminology = record.terminology;
+      if (terminology && typeof terminology === 'object' && !Array.isArray(terminology) && terminology.status === 'resolved') {
+        const required =
+          terminology.kind === 'looked-up'
+            ? ['source', 'locator', 'term', 'date']
+            : terminology.kind === 'reviewed-terminology'
+              ? ['locator', 'term']
+              : terminology.kind === 'reviewer-judgment'
+                ? ['term']
+                : null;
+        for (const field of required ?? []) {
+          if (!(typeof terminology[field] === 'string' && terminology[field].trim() !== '')) {
+            errors.push({ rule: 'terminology_trace_required', path: `${path}.terminology.${field}` });
+          }
+        }
+      }
     }
   }
   return { ok: errors.length === 0, errors };
