@@ -34,16 +34,17 @@ print(gate.stdout.strip())
 ok 1 - the shipped glossary passes schema and cross-file rules
 ok 3 - glossary_anchor_unknown: an entry anchored outside the canonical source is rejected
 ok 4 - glossary_locale_missing: a shipped locale without a reviewed term is rejected
-ok 5 - glossary_locator_mismatch: the locator path must name the entry locale
-ok 6 - glossary_locator_unresolved: a locator record missing from the shipped set is rejected
-ok 8 - glossary_schema_version_denied: a foreign envelope version is rejected
-ok 12 - the canonical source has no date-typed parameters (rendered dates are pre-formatted strings)
-ok 13 - [be] stopsCount: values 0/1/2/5/11/21/5.5 render substituted, never blank or raw
-ok 21 - [be] timeCap: discrete forms switch exactly at 60/120/240, everything else interpolates
-ok 22 - [en] stopsCount: values 0/1/2/5/11/21/5.5 render substituted, never blank or raw
-ok 30 - [en] timeCap: discrete forms switch exactly at 60/120/240, everything else interpolates
-ok 31 - [uk] stopsCount: values 0/1/2/5/11/21/5.5 render substituted, never blank or raw
-ok 39 - [uk] timeCap: discrete forms switch exactly at 60/120/240, everything else interpolates
-1..39
+ok 5 - glossary_locale_unshipped: a locale outside the registry never passes silently
+ok 7 - glossary_locator_mismatch: the locator path must name the entry locale
+ok 8 - glossary_locator_unresolved: a locator record missing from the shipped set is rejected
+ok 10 - glossary_schema_version_denied: a foreign envelope version is rejected
+ok 14 - the canonical source has no date-typed parameters (rendered dates are pre-formatted strings)
+ok 15 - [be] stopsCount: values 0/1/2/5/11/21/5.5 render substituted, never blank or raw
+ok 23 - [be] timeCap: discrete forms switch exactly at 60/120/240, everything else interpolates
+ok 24 - [en] stopsCount: values 0/1/2/5/11/21/5.5 render substituted, never blank or raw
+ok 32 - [en] timeCap: discrete forms switch exactly at 60/120/240, everything else interpolates
+ok 33 - [uk] stopsCount: values 0/1/2/5/11/21/5.5 render substituted, never blank or raw
+ok 41 - [uk] timeCap: discrete forms switch exactly at 60/120/240, everything else interpolates
+1..41
 check-messages: shipped locales complete, reviewed and fresh
 ```

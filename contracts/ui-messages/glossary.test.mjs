@@ -6,10 +6,13 @@
 // 14). Node stdlib only (contracts-zone-closed).
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { COMPLETE_UI_LOCALES } from '../ui-locales.ts';
+import { validateSchemaFile } from '../reader.mjs';
 import { loadUiMessagesSource } from './ui-messages.mjs';
 import { loadUiMessageTranslations } from './translations.mjs';
 import { checkUiMessagesGlossary, GlossaryContractError, loadUiMessagesGlossary } from './glossary.mjs';
@@ -63,6 +66,37 @@ test('glossary_locale_missing: a shipped locale without a reviewed term is rejec
   const doc = shippedGlossary();
   delete doc.entries[0].locales.uk;
   assert.deepEqual(rulesOf(doc), ['glossary_locale_missing']);
+});
+
+test('glossary_locale_unshipped: a locale outside the registry never passes silently', () => {
+  const doc = shippedGlossary();
+  // A typo or a future locale: the key is not in the shipped registry, so no
+  // per-locale rule would ever see it — the unshipped rule names it instead.
+  // The locator is made key-consistent so the fixture isolates this rule.
+  doc.entries[0].locales.xx = JSON.parse(JSON.stringify(doc.entries[0].locales.en));
+  doc.entries[0].locales.xx.provenance.locator = 'translations/xx.json#native.nearby.guideLabel';
+  assert.deepEqual(rulesOf(doc), ['glossary_locale_unshipped']);
+});
+
+test('ref-unresolved: a $ref fragment that walks to nothing is a named diagnostic, not a tacit pass', () => {
+  // The reader seam takes absolute paths; a throwaway target file that EXISTS
+  // but lacks the cited definition proves the kernel answers ref-unresolved
+  // instead of silently accepting anything.
+  const fake = mkdtempSync(join(tmpdir(), 'kudy-g2119-ref-'));
+  try {
+    writeFileSync(join(fake, 'nowhere.schema.json'), JSON.stringify({ type: 'string' }), 'utf8');
+    const schema = {
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      type: 'object',
+      properties: { term: { $ref: 'nowhere.schema.json#/$defs/Missing' } },
+    };
+    writeFileSync(join(fake, 'broken.schema.json'), JSON.stringify(schema), 'utf8');
+    const verdict = validateSchemaFile(join(fake, 'broken.schema.json'), { term: 'whatever' });
+    assert.equal(verdict.ok, false);
+    assert.deepEqual(verdict.errors.map((error) => error.keyword), ['ref-unresolved']);
+  } finally {
+    rmSync(fake, { recursive: true, force: true });
+  }
 });
 
 test('glossary_locator_mismatch: the locator path must name the entry locale', () => {

@@ -67,6 +67,14 @@ export function checkUiMessagesGlossary(doc, { sourceDoc, allowedLocales, transl
       }
     }
     const locales = entry.locales && typeof entry.locales === 'object' && !Array.isArray(entry.locales) ? entry.locales : {};
+    for (const locale of Object.keys(locales)) {
+      // A glossary entry speaks for shipped languages only; a locale outside
+      // the registry (or a typo like «xx») must not pass silently — its
+      // locator would otherwise dodge every per-locale rule.
+      if (!allowedLocales.includes(locale)) {
+        errors.push({ rule: 'glossary_locale_unshipped', path: `${path}.locales.${locale}` });
+      }
+    }
     for (const locale of shippedLocales) {
       if (!(locale in locales)) {
         errors.push({ rule: 'glossary_locale_missing', path: `${path}.locales.${locale}` });

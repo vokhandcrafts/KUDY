@@ -101,8 +101,9 @@ function checkSimple(schema, value, errors, rule) {
 function validateNode(schema, value, errors, rule, ctx) {
   if (!schema || typeof schema !== 'object') return true;
   if (schema.$ref) {
-    const { schema: target, file, root } = resolveRef(ctx.root, ctx.rootFile, ctx.file, schema.$ref);
-    return validateNode(target, value, errors, rule, { root: root ?? ctx.root, rootFile: ctx.rootFile, file });
+    const resolved = resolveRefNode(ctx.root, ctx.rootFile, ctx.file, schema.$ref, errors, rule);
+    if (resolved === null) return false;
+    return validateNode(resolved.schema, value, errors, rule, { root: resolved.root ?? ctx.root, rootFile: ctx.rootFile, file: resolved.file });
   }
   let ok = checkSimple(schema, value, errors, rule);
   // Object keywords apply whenever the value IS an object, not only when the
@@ -153,6 +154,18 @@ function validateNode(schema, value, errors, rule, ctx) {
     if (matched && schema.then) validateNode(schema.then, value, errors, rule, ctx);
   }
   return ok && errors.length === 0;
+}
+
+// A $ref that walks to nothing (a typo in a fragment, a renamed def) is a
+// named diagnostic, never a tacit pass — validateNode treats a missing
+// schema as unknown and would otherwise accept anything.
+function resolveRefNode(root, rootFile, schemaFile, ref, errors, rule) {
+  const resolved = resolveRef(root, rootFile, schemaFile, ref);
+  if (resolved.schema === undefined) {
+    errors.push(fails('ref-unresolved', rule));
+    return null;
+  }
+  return resolved;
 }
 
 export function validateSchemaFile(schemaFile, doc) {
