@@ -47,8 +47,9 @@ test('guard: the retention file is deletes only, with the pinned windows', () =>
 
 // --- behavioral sweep over the production path ---
 
-test('the sweep removes expired rows and keeps fresh ones, then deletes nothing new', async () => {
+test('the sweep removes expired rows and keeps fresh ones, then deletes nothing new', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   await publishFixtureTargets(db, [guide('guide-route-a1', '1', 'be'), guide('guide-route-b2', '1', 'be')]);
   const oldDevice = await registerFeedbackDevice(db);
   const freshDevice = await registerFeedbackDevice(db);
@@ -103,8 +104,9 @@ test('the sweep removes expired rows and keeps fresh ones, then deletes nothing 
   );
 });
 
-test('a queued edit replayed after the sweep conflicts instead of reviving', async () => {
+test('a queued edit replayed after the sweep conflicts instead of reviving', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   await publishFixtureTargets(db, [guide('guide-route-a1', '1', 'be')]);
   const device = await registerFeedbackDevice(db);
 

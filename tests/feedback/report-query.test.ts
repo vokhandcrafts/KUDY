@@ -42,9 +42,10 @@ test('guard: the report query is a single read-only statement with no identity c
   assert.doesNotMatch(withoutComments, /\bdevice_id\b|\bmutation_id\b|\bpayload_hash\b|\bip_hash\b|\bsecret\b/i, 'no identity column is selectable');
 });
 
-test('guard: the wire exposes no report route for mobile credentials', async () => {
+test('guard: the wire exposes no report route for mobile credentials', async (t) => {
   assert.equal(feedbackOperation({ method: 'POST', url: `${EDGE_URL}/report`, headers: { get: () => null }, arrayBuffer: async () => new ArrayBuffer(0) }), null);
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   const response = await handleFeedbackEdgeRequest(
     feedbackRequest({ method: 'POST', url: `${EDGE_URL}/report`, body: {}, secret: null }),
     pgliteFeedbackClient(db),
@@ -92,8 +93,9 @@ test('guard: discovery, nearby and catalog code imports nothing from feedback', 
 
 // --- behavioral aggregation over the production path ---
 
-test('an edit updates the one vote it already contributed', async () => {
+test('an edit updates the one vote it already contributed', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   await publishFixtureTargets(db, [guide('guide-route-a1', '1', 'be')]);
   const device = await registerFeedbackDevice(db);
 
@@ -112,8 +114,9 @@ test('an edit updates the one vote it already contributed', async () => {
   assert.deepEqual(row.reason_counts, { clear_delivery: 1 }, 'the edit replaced the reasons too');
 });
 
-test('a delete removes the next report contribution; a device-delete does the same', async () => {
+test('a delete removes the next report contribution; a device-delete does the same', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   await publishFixtureTargets(db, [guide('guide-route-a1', '1', 'be')]);
   const first = await registerFeedbackDevice(db);
   const second = await registerFeedbackDevice(db);
@@ -136,8 +139,9 @@ test('a delete removes the next report contribution; a device-delete does the sa
   assert.equal(findRow(afterDeviceDelete, guide('guide-route-a1', '1', 'be')).rating_count, 1, 'the device cascade removed its contribution');
 });
 
-test('kind, version and locale are never merged by default', async () => {
+test('kind, version and locale are never merged by default', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   await publishFixtureTargets(db, [
     guide('guide-route-a1', '1', 'be'),
     guide('guide-route-a1', '2', 'be'),
@@ -162,8 +166,9 @@ test('kind, version and locale are never merged by default', async () => {
   assert.equal(findRow(rows, place('place-a1', '1', 'be')).rating_count, 1);
 });
 
-test('evidence weight stays visible: one five-star vote is not thirty ratings', async () => {
+test('evidence weight stays visible: one five-star vote is not thirty ratings', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   await publishFixtureTargets(db, [guide('guide-route-a1', '1', 'be'), guide('guide-route-b2', '1', 'be')]);
   const single = await registerFeedbackDevice(db);
   await putRating(db, single.secret, guide('guide-route-a1', '1', 'be'), 5);
@@ -198,8 +203,9 @@ test('evidence weight stays visible: one five-star vote is not thirty ratings', 
   assert.equal(Number(exact.mean_score), 4.6, 'two 4s and three 5s average exactly 4.6 on their own target');
 });
 
-test('reason counts aggregate per code without merging kinds', async () => {
+test('reason counts aggregate per code without merging kinds', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   await publishFixtureTargets(db, [guide('guide-route-a1', '1', 'be')]);
   const first = await registerFeedbackDevice(db);
   const second = await registerFeedbackDevice(db);
@@ -210,8 +216,9 @@ test('reason counts aggregate per code without merging kinds', async () => {
   assert.deepEqual(findRow(rows, guide('guide-route-a1', '1', 'be')).reason_counts, { audio_problem: 2, too_long: 1 });
 });
 
-test('the report row shape is exactly the export allowlist', async () => {
+test('the report row shape is exactly the export allowlist', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   await publishFixtureTargets(db, [guide('guide-route-a1', '1', 'be')]);
   const device = await registerFeedbackDevice(db);
   await putRating(db, device.secret, guide('guide-route-a1', '1', 'be'), 3, ['too_long']);
@@ -220,8 +227,9 @@ test('the report row shape is exactly the export allowlist', async () => {
   assert.deepEqual(Object.keys(rows[0]).sort(), [...AGGREGATE_FIELDS].sort());
 });
 
-test('anonymous and authenticated mobile roles cannot read the rated rows', async () => {
+test('anonymous and authenticated mobile roles cannot read the rated rows', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   await publishFixtureTargets(db, [guide('guide-route-a1', '1', 'be')]);
   const device = await registerFeedbackDevice(db);
   await putRating(db, device.secret, guide('guide-route-a1', '1', 'be'), 3);

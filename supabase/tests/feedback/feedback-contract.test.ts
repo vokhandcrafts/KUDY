@@ -39,8 +39,9 @@ const fixture = JSON.parse(readFileSync(FEEDBACK_CASES_PATH, 'utf8')) as {
   cases: FixtureCase[];
 };
 
-test('every feedback-cases.json case passes through the production wiring', async () => {
+test('every feedback-cases.json case passes through the production wiring', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   const client = pgliteFeedbackClient(db);
   const config = testFeedbackConfig();
 
@@ -83,8 +84,9 @@ test('every feedback-cases.json case passes through the production wiring', asyn
   assert.equal(outcomes.length, fixture.cases.length);
 });
 
-test('rejected writes leave no data and the ledger dedupes replays (fixture companions)', async () => {
+test('rejected writes leave no data and the ledger dedupes replays (fixture companions)', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   const client = pgliteFeedbackClient(db);
   const config = testFeedbackConfig();
   const deviceA = await registerFeedbackDevice(db);

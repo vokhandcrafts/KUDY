@@ -138,15 +138,17 @@ test('guard: grant_products admits at most one product per (route_id, tier)', ()
   assert.match(create!, /unique \(route_id, tier\)/, 'the single-match rule must be a schema constraint (09 §5)');
 });
 
-test('anon is denied outright without grants (REVOKE layer)', async () => {
+test('anon is denied outright without grants (REVOKE layer)', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   await db.query('set role anon');
   await assert.rejects(db.query('select * from devices'), /permission denied/i);
   await assert.rejects(db.query('select * from event_log'), /permission denied/i);
 });
 
-test('RLS hides devices from anon even when a grant is re-added', async () => {
+test('RLS hides devices from anon even when a grant is re-added', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   await db.query('set role service_role');
   await db.query('insert into devices (device_id, secret_hash) values (gen_random_uuid(), md5(random()::text))');
   await db.query('reset role');
@@ -161,8 +163,9 @@ test('RLS hides devices from anon even when a grant is re-added', async () => {
   );
 });
 
-test('authenticated cannot read the rate counter or write the event log', async () => {
+test('authenticated cannot read the rate counter or write the event log', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   await db.query('set role authenticated');
   await assert.rejects(db.query('select * from device_registration_rate'), /permission denied/i);
   await assert.rejects(
@@ -171,8 +174,9 @@ test('authenticated cannot read the rate counter or write the event log', async 
   );
 });
 
-test('grant_products is invisible to anon and writable only by the service role', async () => {
+test('grant_products is invisible to anon and writable only by the service role', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   await db.query('set role service_role');
   await db.query("insert into grant_products (product_id, route_id, tier) values ('kudy.spike.g00_03.story_01', 'g00-03-spike', 'extended')");
   await db.query('reset role');
@@ -198,8 +202,9 @@ test('grant_products is invisible to anon and writable only by the service role'
   assert.equal(readable.rows.length, 1);
 });
 
-test('service role writes through; device delete cascades to cache and events', async () => {
+test('service role writes through; device delete cascades to cache and events', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   await db.query('set role service_role');
   await db.query('insert into devices (device_id, secret_hash) values (gen_random_uuid(), md5(random()::text))');
   // event_log.type and payload reuse the seeded row's own columns (or an
@@ -217,8 +222,9 @@ test('service role writes through; device delete cascades to cache and events', 
   assert.equal(cache.rows[0]?.count, 0, 'entitlement_cache must cascade on device delete (09 §5)');
 });
 
-test('webhook_events is invisible to anon and writable only by the service role', async () => {
+test('webhook_events is invisible to anon and writable only by the service role', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   await db.query('set role service_role');
   await db.query(
     "insert into webhook_events (event_id, type, event_at, payload) values ('8f0d0f1c-0000-4000-8000-000000000001', 'TEST', now(), jsonb_build_object())",
@@ -235,8 +241,9 @@ test('webhook_events is invisible to anon and writable only by the service role'
   await db.query('reset role');
 });
 
-test('rate counter table bumps attempts per (ip_hash, window_start)', async () => {
+test('rate counter table bumps attempts per (ip_hash, window_start)', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   await db.query('insert into device_registration_rate (ip_hash, window_start, attempts) values (md5(random()::text), to_timestamp(1700000000), 1)');
   await db.query('update device_registration_rate set attempts = attempts + 1');
   const attempts = await db.query('select attempts from device_registration_rate');

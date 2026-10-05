@@ -23,6 +23,7 @@ export interface GrantDemoHarness {
   mintCalls: number;
   setVerdict(verdict: EntitlementVerdict): void;
   setManifest(paths: string[] | null): void;
+  close(): Promise<void>;
 }
 
 export async function createGrantDemoHarness(manifestPaths: string[]): Promise<GrantDemoHarness> {
@@ -76,6 +77,9 @@ export async function createGrantDemoHarness(manifestPaths: string[]): Promise<G
     },
     setManifest(next) {
       manifest = next;
+    },
+    async close() {
+      await db.close();
     },
   };
 }

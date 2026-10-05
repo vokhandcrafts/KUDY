@@ -12,7 +12,7 @@
 // client contract (services/download/grant.ts GRANT_ERRORS, `19` §3.6): an
 // answer the server emits must exist on the client list with the same status.
 import assert from 'node:assert/strict';
-import test from 'node:test';
+import test, { type TestContext } from 'node:test';
 
 import { GRANT_ERRORS } from '../../../services/download/grant.ts';
 
@@ -83,8 +83,8 @@ test('isUnsafeUrlTtl: only finite positive integers up to the canonical 600 s pa
   }
 });
 
-test('shape gate: malformed bodies are 400 invalid_request before any mapping, manifest or provider probe', async () => {
-  const h = await wiredDeps();
+test('shape gate: malformed bodies are 400 invalid_request before any mapping, manifest or provider probe', async (t) => {
+  const h = await wiredDeps(t);
   const bodies: unknown[] = [
     null,
     42,
@@ -154,8 +154,9 @@ interface Harness {
   cacheRows(): Promise<Array<{ route_id: string; tier: string; env: string | null; expires_in_s: number }>>;
 }
 
-async function wiredDeps(): Promise<Harness> {
+async function wiredDeps(t: TestContext): Promise<Harness> {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const runner = pgliteGrantRunner(db);
   const registration = registerDevice();
   await db.query('insert into devices (device_id, secret_hash) values ($1, $2)', [registration.deviceId, registration.secretHash]);
@@ -225,24 +226,24 @@ function grantRequest(paths: string[]) {
   return { route_id: ROUTE, version: VERSION, locale: LOCALE, tier: TIER, paths };
 }
 
-test('gate order: unsafe paths are refused before any mapping or manifest probe', async () => {
-  const h = await wiredDeps();
+test('gate order: unsafe paths are refused before any mapping or manifest probe', async (t) => {
+  const h = await wiredDeps(t);
   const answer = await handleGrant(grantRequest(['../escape.mp3']), h.deviceId, environment(), h.deps);
   assert.deepEqual(answer, { status: 403, code: 'path_not_allowed' });
   assert.deepEqual(h.manifestLoads, [], 'no manifest load may happen for an unsafe path');
   assert.deepEqual(h.providerCalls, [], 'no provider call may happen for an unsafe path');
 });
 
-test('unknown route × tier is refused against the real grant_products table', async () => {
-  const h = await wiredDeps();
+test('unknown route × tier is refused against the real grant_products table', async (t) => {
+  const h = await wiredDeps(t);
   const request = { route_id: 'other-route', version: VERSION, locale: LOCALE, tier: TIER, paths: ['a.mp3'] };
   const answer = await handleGrant(request, h.deviceId, environment(), h.deps);
   assert.deepEqual(answer, { status: 403, code: 'unknown_route_tier' });
   assert.deepEqual(h.manifestLoads, [], 'no manifest load may happen without a product');
 });
 
-test('manifest of the exact version/locale/tier: missing manifest and non-member paths are refused', async () => {
-  const h = await wiredDeps();
+test('manifest of the exact version/locale/tier: missing manifest and non-member paths are refused', async (t) => {
+  const h = await wiredDeps(t);
   h.setManifest(null);
   const missing = await handleGrant(grantRequest(MANIFEST_PATHS), h.deviceId, environment(), h.deps);
   assert.deepEqual(missing, { status: 403, code: 'manifest_not_found' });
@@ -253,8 +254,8 @@ test('manifest of the exact version/locale/tier: missing manifest and non-member
   assert.deepEqual(h.providerCalls, [], 'entitlement must not be consulted before the manifest gate passes');
 });
 
-test('no_entitlement and provider outage land on different sides of the 403/503 line', async () => {
-  const h = await wiredDeps();
+test('no_entitlement and provider outage land on different sides of the 403/503 line', async (t) => {
+  const h = await wiredDeps(t);
 
   h.setVerdict({ ok: true, entitled: false, environment: null });
   const refused = await handleGrant(grantRequest(MANIFEST_PATHS), h.deviceId, environment(), h.deps);
@@ -273,8 +274,8 @@ test('no_entitlement and provider outage land on different sides of the 403/503 
   assert.equal(h.providerCalls.length, 3, 'each refused round must have verified the provider afresh');
 });
 
-test('sandbox entitlement never opens the production server and vice versa', async () => {
-  const h = await wiredDeps();
+test('sandbox entitlement never opens the production server and vice versa', async (t) => {
+  const h = await wiredDeps(t);
 
   h.setVerdict({ ok: true, entitled: true, environment: 'sandbox' });
   const production = await handleGrant(grantRequest(MANIFEST_PATHS), h.deviceId, { environment: 'production' }, h.deps);
@@ -286,8 +287,8 @@ test('sandbox entitlement never opens the production server and vice versa', asy
   assert.deepEqual(await h.cacheRows(), [], 'a mismatched-environment verdict must not be cached');
 });
 
-test('a grant mirrors exactly the requested manifest members with short-lived URLs', async () => {
-  const h = await wiredDeps();
+test('a grant mirrors exactly the requested manifest members with short-lived URLs', async (t) => {
+  const h = await wiredDeps(t);
   const paths = [MANIFEST_PATHS[1]!, MANIFEST_PATHS[0]!];
   const answer = await handleGrant(grantRequest(paths), h.deviceId, environment(), h.deps);
   assert.equal(answer.status, 200);
@@ -312,8 +313,8 @@ test('a grant mirrors exactly the requested manifest members with short-lived UR
   );
 });
 
-test('an out-of-policy URL TTL fails the whole round closed: the signer never mints and no layer is probed', async () => {
-  const h = await wiredDeps();
+test('an out-of-policy URL TTL fails the whole round closed: the signer never mints and no layer is probed', async (t) => {
+  const h = await wiredDeps(t);
   for (const ttl of [0, -1, 0.5, 601, NaN, Infinity]) {
     const answer = await handleGrant(grantRequest(MANIFEST_PATHS), h.deviceId, { ...environment(), urlTtlSeconds: ttl }, h.deps);
     assert.deepEqual(
@@ -328,8 +329,8 @@ test('an out-of-policy URL TTL fails the whole round closed: the signer never mi
   assert.deepEqual(await h.cacheRows(), [], 'a misconfigured round must not write cache rows');
 });
 
-test('the URL TTL cap: 600 mints exactly 600 s, 601 never reaches the signer', async () => {
-  const h = await wiredDeps();
+test('the URL TTL cap: 600 mints exactly 600 s, 601 never reaches the signer', async (t) => {
+  const h = await wiredDeps(t);
   const granted = await handleGrant(grantRequest(MANIFEST_PATHS), h.deviceId, { ...environment(), urlTtlSeconds: 600 }, h.deps);
   assert.equal(granted.status, 200);
   if (granted.status === 200) {
@@ -348,8 +349,8 @@ test('the URL TTL cap: 600 mints exactly 600 s, 601 never reaches the signer', a
   assert.equal(h.providerCalls.length, 1, 'the 601 round must fail before the provider');
 });
 
-test('the URL TTL and the entitlement-cache TTL are distinct policies', async () => {
-  const h = await wiredDeps();
+test('the URL TTL and the entitlement-cache TTL are distinct policies', async (t) => {
+  const h = await wiredDeps(t);
   const answer = await handleGrant(
     grantRequest(MANIFEST_PATHS),
     h.deviceId,
@@ -366,8 +367,8 @@ test('the URL TTL and the entitlement-cache TTL are distinct policies', async ()
   );
 });
 
-test('positive cache: a fresh row answers without the provider; an expired row never grants', async () => {
-  const h = await wiredDeps();
+test('positive cache: a fresh row answers without the provider; an expired row never grants', async (t) => {
+  const h = await wiredDeps(t);
   const first = await handleGrant(grantRequest(MANIFEST_PATHS), h.deviceId, environment(), h.deps);
   assert.equal(first.status, 200);
   assert.equal(h.providerCalls.length, 1);
@@ -392,8 +393,8 @@ test('positive cache: a fresh row answers without the provider; an expired row n
   assert.equal(h.providerCalls.length, 2);
 });
 
-test('a cache row written under another environment never grants under this one', async () => {
-  const h = await wiredDeps();
+test('a cache row written under another environment never grants under this one', async (t) => {
+  const h = await wiredDeps(t);
   const first = await handleGrant(grantRequest(MANIFEST_PATHS), h.deviceId, environment(), h.deps);
   assert.equal(first.status, 200);
   assert.equal(h.providerCalls.length, 1);
@@ -405,8 +406,8 @@ test('a cache row written under another environment never grants under this one'
   assert.deepEqual(rows.map((row) => row.env), ['sandbox'], 'the sandbox row must survive untouched');
 });
 
-test('the cache is bounded: expired rows are swept and the per-device cap holds', async () => {
-  const h = await wiredDeps();
+test('the cache is bounded: expired rows are swept and the per-device cap holds', async (t) => {
+  const h = await wiredDeps(t);
   // This test exercises the cache cap past its bound, not the request gate —
   // the N8 gate would deny rounds 31+ of the same window before the cache
   // write. The rate port keeps the production runner with a raised limit.
@@ -435,8 +436,8 @@ test('the cache is bounded: expired rows are swept and the per-device cap holds'
 
 // --- N8: the per-device request gate before the provider --------------------
 
-test('grant_limit_no_provider_call: beyond the per-device limit the answer is 429 and the provider is never called again', async () => {
-  const h = await wiredDeps();
+test('grant_limit_no_provider_call: beyond the per-device limit the answer is 429 and the provider is never called again', async (t) => {
+  const h = await wiredDeps(t);
   const request = grantRequest([MANIFEST_PATHS[0]]);
   for (let round = 1; round <= GRANT_RATE_LIMIT; round += 1) {
     const answer = await handleGrant(request, h.deviceId, environment(), h.deps);
@@ -463,8 +464,8 @@ test('grant_limit_no_provider_call: beyond the per-device limit the answer is 42
   assert.equal(h.minted.length, mintedAtLimit, 'the denied rounds mint nothing');
 });
 
-test('concurrent_grant_limit: parallel rounds cannot bypass counting (G20.26 criterion 3)', async () => {
-  const h = await wiredDeps();
+test('concurrent_grant_limit: parallel rounds cannot bypass counting (G20.26 criterion 3)', async (t) => {
+  const h = await wiredDeps(t);
   // limit + 5 concurrent rounds: the atomic window increment serializes in
   // the real database, so exactly the limit answers may pass the gate.
   const rounds = GRANT_RATE_LIMIT + 5;
@@ -480,8 +481,8 @@ test('concurrent_grant_limit: parallel rounds cannot bypass counting (G20.26 cri
   assert.ok(h.providerCalls.length <= GRANT_RATE_LIMIT, 'no provider call may bypass the gate');
 });
 
-test('limiter_failure_denied: a limiter fault propagates fail-closed, never as an allow or a limit denial', async () => {
-  const h = await wiredDeps();
+test('limiter_failure_denied: a limiter fault propagates fail-closed, never as an allow or a limit denial', async (t) => {
+  const h = await wiredDeps(t);
   // The limiter storage dies: the round must not answer 200 (no bypass) nor
   // 429 (a storage fault is not a limit — spec N1), and must not reach the
   // provider; the Deno wrapper maps the fault to its closed 503.
@@ -513,8 +514,8 @@ test('limiter_failure_denied: a limiter fault propagates fail-closed, never as a
   assert.deepEqual(h.providerCalls, [], 'a malformed count never reaches the provider');
 });
 
-test('second_device_budget: another device works within its own budget after one device exhausts its limit', async () => {
-  const h = await wiredDeps();
+test('second_device_budget: another device works within its own budget after one device exhausts its limit', async (t) => {
+  const h = await wiredDeps(t);
   // A second device in the SAME deployment: its counter row is its own, so
   // it works while device A waits out its window (one shared provider
   // budget, per-device buckets).

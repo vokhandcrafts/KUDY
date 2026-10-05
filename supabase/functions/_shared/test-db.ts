@@ -98,13 +98,29 @@ export const MIGRATIONS: Array<{ file: string; steps: MigrationStep[] }> = [
   { file: '20261002000000_grant_request_rate.sql', steps: GRANT_REQUEST_RATE_MIGRATION_STEPS },
 ];
 
-export async function freshMigratedDatabase(): Promise<PGlite> {
+// The caller owns a successful return (close it via node:test teardown or a
+// scoped try/finally); the factory owns the half-migrated database before a
+// failed return — a migration step failure is closed here and rethrown
+// unchanged. The optional migrations argument exists only for fault
+// injection at the migration boundary (test-db-lifecycle.test.ts).
+export async function freshMigratedDatabase(
+  migrations: Array<{ file: string; steps: MigrationStep[] }> = MIGRATIONS,
+): Promise<PGlite> {
   const db = new PGlite();
-  for (const step of ROLE_STEPS) await step(db);
-  for (const migration of MIGRATIONS) {
-    for (const step of migration.steps) await step(db);
+  try {
+    for (const step of ROLE_STEPS) await step(db);
+    for (const migration of migrations) {
+      for (const step of migration.steps) await step(db);
+    }
+    return db;
+  } catch (error) {
+    try {
+      await db.close();
+    } catch (closeError) {
+      if (error instanceof Error) (error as { cause?: unknown }).cause ??= closeError;
+    }
+    throw error;
   }
-  return db;
 }
 
 // The SQL runner the grant core's ports run against in tests: PGlite instead

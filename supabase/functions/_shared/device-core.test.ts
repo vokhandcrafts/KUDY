@@ -182,8 +182,9 @@ test('SQL constants are pinned exactly: the statements the RLS suite proves by b
 
 // --- G09.03 — device data deletion ---
 
-test('G09.03 PGlite: DELETE removes the devices row and the cascades take event_log, entitlement_cache and event_send_rate', async () => {
+test('G09.03 PGlite: DELETE removes the devices row and the cascades take event_log, entitlement_cache and event_send_rate', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const registration = registerDevice();
   await db.query(DEVICE_INSERT_SQL, [registration.deviceId, registration.secretHash]);
   await db.query(
@@ -209,8 +210,9 @@ test('G09.03 PGlite: DELETE removes the devices row and the cascades take event_
   }
 });
 
-test('G09.03: a repeated delete, a wrong secret and a non-DELETE method follow the closed answer list', async () => {
+test('G09.03: a repeated delete, a wrong secret and a non-DELETE method follow the closed answer list', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const registration = registerDevice();
   await db.query(DEVICE_INSERT_SQL, [registration.deviceId, registration.secretHash]);
   const port = createSqlDeviceDeletePort(db);

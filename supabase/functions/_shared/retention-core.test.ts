@@ -61,8 +61,9 @@ function nextEventId(): string {
   return `88888888-8884-4888-8888-${String(eventSeq).padStart(12, '0')}`;
 }
 
-test('PGlite term: the sweep deletes exactly the events past the 14-month boundary — recent and boundary rows stay', async () => {
+test('PGlite term: the sweep deletes exactly the events past the 14-month boundary — recent and boundary rows stay', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const cutoff = eventRetentionCutoffMs(NOW_MS);
   await seedDeviceWithEvents(db, [
     { id: nextEventId(), at: cutoff - 1 }, // strictly past the term — deletable
@@ -77,8 +78,9 @@ test('PGlite term: the sweep deletes exactly the events past the 14-month bounda
   assert.equal(left.rows[0]!.count, 2, 'the boundary and fresh rows survive the sweep');
 });
 
-test('PGlite volume: five hundred aged-out events go in one pass, ordered by the cutoff alone', async () => {
+test('PGlite volume: five hundred aged-out events go in one pass, ordered by the cutoff alone', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const registration = registerDevice();
   await db.query(DEVICE_INSERT_SQL, [registration.deviceId, registration.secretHash]);
   await db.query(
@@ -92,8 +94,9 @@ test('PGlite volume: five hundred aged-out events go in one pass, ordered by the
   assert.equal(left.rows[0]!.count, 0);
 });
 
-test('PGlite order: a second sweep deletes nothing, and the sweep never resurrects newer rows', async () => {
+test('PGlite order: a second sweep deletes nothing, and the sweep never resurrects newer rows', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const cutoff = eventRetentionCutoffMs(NOW_MS);
   await seedDeviceWithEvents(db, [{ id: nextEventId(), at: cutoff - 1 }]);
 
@@ -105,8 +108,9 @@ test('PGlite order: a second sweep deletes nothing, and the sweep never resurrec
   assert.equal(left.rows[0]!.count, 0);
 });
 
-test('PGlite rate counters: dead windows of live devices are swept, fresh windows and both tables stay usable', async () => {
+test('PGlite rate counters: dead windows of live devices are swept, fresh windows and both tables stay usable', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const registration = registerDevice();
   await db.query(DEVICE_INSERT_SQL, [registration.deviceId, registration.secretHash]);
   const deadWindow = rateRetentionCutoffMs(NOW_MS) - HOUR_MS;
@@ -136,8 +140,9 @@ async function seedWebhookRow(db: Awaited<ReturnType<typeof freshMigratedDatabas
   );
 }
 
-test('webhook_expiry_purge: webhook bookkeeping rows past the protective bound are swept by received_at, the boundary row stays, a repeated pass deletes nothing', async () => {
+test('webhook_expiry_purge: webhook bookkeeping rows past the protective bound are swept by received_at, the boundary row stays, a repeated pass deletes nothing', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   assert.equal(WEBHOOK_RETENTION_DAYS, 30, 'the protective bound is 30 days — the G20.12 matrix proposal, not the analytics term');
   const cutoff = webhookRetentionCutoffMs(NOW_MS);
   assert.equal(cutoff, NOW_MS - WEBHOOK_RETENTION_DAYS * 24 * HOUR_MS);

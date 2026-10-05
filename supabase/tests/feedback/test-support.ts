@@ -29,9 +29,20 @@ export function feedbackMigrationSql(): string {
   return readFileSync(FEEDBACK_MIGRATION_PATH, 'utf8');
 }
 
+// Same ownership contract as the shared factory: the caller closes a
+// successful return; a failed feedback migration leaves no live database.
 export async function freshFeedbackDatabase(): Promise<PGlite> {
   const db = await freshMigratedDatabase();
-  await db.exec(feedbackMigrationSql());
+  try {
+    await db.exec(feedbackMigrationSql());
+  } catch (error) {
+    try {
+      await db.close();
+    } catch (closeError) {
+      if (error instanceof Error) (error as { cause?: unknown }).cause ??= closeError;
+    }
+    throw error;
+  }
   return db;
 }
 
