@@ -25,7 +25,7 @@ import { fixtureText, flatStyle, layoutWith, serve, sha256 } from "../../test/re
 import { tokens } from "../../components/design-tokens";
 import { AudioService } from "../../services/audio/service";
 import { FakeAudioPlayerPort } from "../../services/audio/fake-port";
-import type { BundlesStore, FileFacts } from "../../services/contentRepo/types";
+import type { BundlesStore, FileFacts, TeaserAudioProbe } from "../../services/contentRepo/types";
 
 const CATALOG_TEXT = fixtureText("catalog-with-discovery.json");
 const INDEX_TEXT = fixtureText("index-valid.json");
@@ -86,6 +86,14 @@ class MomentStore implements BundlesStore {
   }
 }
 
+// The teaser-audio probe beside the store (G22.02): the composition passes
+// both or neither — true is exactly a present, nonempty audio file of the
+// fake's files map.
+const probeFromStore = (store: MomentStore): TeaserAudioProbe => async (rel: string) => {
+  const file = store.files.get(rel);
+  return file?.kind === "present" && file.bytes.length > 0;
+};
+
 const withPlaceRoutes = (services: ReturnType<typeof createServices>) => ({
   _layout: layoutWith(services),
   map: MapScreen,
@@ -113,10 +121,7 @@ function placeServices(
       catalogOrigin: "https://catalog.test",
       catalogSha256: sha256,
       bundlesStore: momentStore,
-      teaserAudioProbe: async (rel: string) => {
-        const file = momentStore.files.get(rel);
-        return file?.kind === "present" && file.bytes.length > 0;
-      },
+      teaserAudioProbe: probeFromStore(momentStore),
       audio,
       ...(feedback ? { feedback } : {}),
     }),
@@ -213,10 +218,7 @@ describe("Place detail surface (G07.02)", () => {
       catalogOrigin: "https://catalog.test",
       catalogSha256: sha256,
       bundlesStore: momentStore,
-      teaserAudioProbe: async (rel: string) => {
-        const file = momentStore.files.get(rel);
-        return file?.kind === "present" && file.bytes.length > 0;
-      },
+      teaserAudioProbe: probeFromStore(momentStore),
       audio: new AudioService({ createPort: () => audioPort }),
     });
     serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });

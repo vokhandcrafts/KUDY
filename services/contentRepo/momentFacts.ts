@@ -179,6 +179,7 @@ async function resolveAudioPath(
   }
   return null;
 }
+
 // The teaser story's text from the package's stops.json (the same layer the
 // audio resolves in). A missing or damaged stops.json yields null — the card
 // renders its label only, never invented text.
