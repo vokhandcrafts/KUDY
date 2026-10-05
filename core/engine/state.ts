@@ -156,18 +156,81 @@ export type StopStatus = 'locked' | 'playing' | 'played' | 'available' | 'pendin
 // locked → playing → played → available → pending, first match wins. The
 // playing marker requires the audible guide launch: a live pause keeps the
 // launch but the marker follows the audible state (ADR G01.02 §3.4).
-export const stopStatus = (state: RunSessionState, stopId: StopId): StopStatus => {
-  const stop = findStop(state, stopId);
+//
+// E7 (G22.07): the ladder exists once. statusFromLookups is its single
+// spelling; the single-stop stopStatus and the one-pass stopStatusTable
+// both ask it. The lookups reproduce storyAccessible's first-owner find
+// (the first stop whose stories carry a story owns its access and tier),
+// so the batch answers match the single-stop rule stop for stop.
+interface StatusLookups {
+  readonly storyOwner: ReadonlyMap<StoryId, { readonly stopId: StopId; readonly tier: Tier }>;
+  readonly accessibleStops: ReadonlySet<StopId>;
+  readonly tierAvailable: ReadonlySet<Tier>;
+  readonly heard: ReadonlySet<StoryId>;
+  readonly autoFired: ReadonlySet<StopId>;
+}
+
+const statusLookups = (state: RunSessionState): StatusLookups => {
+  const storyOwner = new Map<StoryId, { stopId: StopId; tier: Tier }>();
+  for (const stop of state.stops) {
+    for (const storyId of storiesOf(stop)) {
+      if (!storyOwner.has(storyId)) {
+        storyOwner.set(storyId, { stopId: stop.stopId, tier: storyTierOf(stop, storyId) });
+      }
+    }
+  }
+  return {
+    storyOwner,
+    accessibleStops: new Set(state.accessibleStopIds),
+    tierAvailable: new Set(state.tierAvailable),
+    heard: new Set(state.heard),
+    autoFired: new Set(state.autoFired),
+  };
+};
+
+const statusFromLookups = (
+  state: RunSessionState,
+  stop: PackageStop,
+  lookups: StatusLookups,
+): StopStatus => {
   const primary = primaryStoryOf(stop);
-  if (!primary || !storyAccessible(state, primary)) return 'locked';
+  const owner = primary === undefined ? undefined : lookups.storyOwner.get(primary);
+  if (
+    !primary ||
+    !owner ||
+    !lookups.accessibleStops.has(owner.stopId) ||
+    !lookups.tierAvailable.has(owner.tier)
+  ) {
+    return 'locked';
+  }
   if (
     state.playing &&
     state.playing.owner === 'guide' &&
     !state.playing.paused &&
-    state.playing.stopId === stopId
+    state.playing.stopId === stop.stopId
   ) {
     return 'playing';
   }
-  if (state.heard.includes(primary)) return 'played';
-  return state.autoFired.includes(stopId) ? 'available' : 'pending';
+  if (lookups.heard.has(primary)) return 'played';
+  return lookups.autoFired.has(stop.stopId) ? 'available' : 'pending';
+};
+
+export const stopStatus = (state: RunSessionState, stopId: StopId): StopStatus => {
+  const stop = findStop(state, stopId);
+  return stop ? statusFromLookups(state, stop, statusLookups(state)) : 'locked';
+};
+
+// E7 (G22.07) — the projection's derived status table: every stop of the
+// session answered by one pass over the state, work proportional to the
+// stop count. Read-only and ephemeral: the engine keeps owning the heard/
+// access state, the table is rebuilt from the current session state on
+// every projection and is never written back or stored.
+export const stopStatusTable = (state: RunSessionState): ReadonlyMap<StopId, StopStatus> => {
+  const lookups = statusLookups(state);
+  const table = new Map<StopId, StopStatus>();
+  for (const stop of state.stops) {
+    // First occurrence wins, matching findStop's answer for a repeated id.
+    if (!table.has(stop.stopId)) table.set(stop.stopId, statusFromLookups(state, stop, lookups));
+  }
+  return table;
 };
