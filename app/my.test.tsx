@@ -242,7 +242,7 @@ describe("KUDY language row (G14.04.d)", () => {
     expect(screen.getByTestId("btn-ui-locale-uk").props.accessibilityState).toEqual({ selected: true });
   });
 
-  test("the row offers the four self-named locales and marks the current one", async () => {
+  test("the row offers the five self-named locales and marks the current one", async () => {
     renderRouter({ _layout: layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
     expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
     expect(screen.getByText("Беларуская")).toBeTruthy();
@@ -251,6 +251,9 @@ describe("KUDY language row (G14.04.d)", () => {
     // G21.10 (issue #544): the de catalogue landed, the picker derives the
     // fourth chip from the registry's complete set.
     expect(screen.getByText("Deutsch")).toBeTruthy();
+    // G21.11 (issue #545): the es catalogue lands, the picker derives the
+    // fifth chip the same way.
+    expect(screen.getByText("Español")).toBeTruthy();
     expect(screen.getByTestId("btn-ui-locale-be").props.accessibilityState).toEqual({ selected: true });
     expect(screen.getByTestId("btn-ui-locale-en").props.accessibilityState).toEqual({ selected: false });
     // Switching to en re-renders the chrome in English (AC3: no restart) —
@@ -275,6 +278,21 @@ describe("KUDY language row (G14.04.d)", () => {
     expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
     expect(services.uiLocale.current()).toBe("de");
     expect(screen.getByTestId("btn-ui-locale-de").props.accessibilityState).toEqual({ selected: true });
+  });
+
+  test("G21.11 (issue #545): the es switch round-trips through the same store", async () => {
+    // The Spanish merge point's own proof, asserted from the store outward:
+    // pick es, the current() moves, the Spanish chrome word renders, and the
+    // selector marks the es chip. The no-restart property needs no second
+    // proof — the uk and de siblings above exercise the same mechanism.
+    const services = createServices({});
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("btn-ui-locale-es"));
+    expect(services.uiLocale.current()).toBe("es");
+    expect(await screen.findByText("El historial no está disponible.")).toBeTruthy();
+    expect(screen.getByTestId("btn-ui-locale-es").props.accessibilityState).toEqual({ selected: true });
+    expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
   });
 });
 

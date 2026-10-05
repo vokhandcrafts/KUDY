@@ -27,8 +27,8 @@ export function guideHintStrings(locale: string): GuideHintStrings {
   // The words are the generated projection of the canonical records plus the
   // reviewed translations (G21.25, issue #558); uk keeps the documented be
   // fallback (uk-release-scope §6.4) until its words are authored (G21.19),
-  // de renders its own catalogue (G21.10, issue #544).
-  return locale === "en" ? GUIDE_HINT_STRINGS.en : locale === "de" ? GUIDE_HINT_STRINGS.de : GUIDE_HINT_STRINGS.be;
+  // de renders its own catalogue (G21.10, issue #544); es too (G21.11, issue #545).
+  return locale === "es" ? GUIDE_HINT_STRINGS.es : locale === "en" ? GUIDE_HINT_STRINGS.en : locale === "de" ? GUIDE_HINT_STRINGS.de : GUIDE_HINT_STRINGS.be;
 }
 
 const styles = StyleSheet.create({

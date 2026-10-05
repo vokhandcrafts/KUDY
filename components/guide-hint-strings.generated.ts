@@ -6,11 +6,11 @@
 // G21.25 (issue #558): the catalogues are generated projections — edit the
 // source/translation data, never this file; the generator's --check mode
 // fails on any hand edit.
-// the nearby guide-hint card's words (G07.05 #284); uk keeps the documented be fallback (uk-release-scope §6.4) until its words are authored, de renders its own catalogue (G21.10 #544)
+// the nearby guide-hint card's words (G07.05 #284); uk keeps the documented be fallback (uk-release-scope §6.4) until its words are authored, de renders its own catalogue (G21.10 #544), es too (G21.11 #545)
 
 import type { GuideHintStrings } from "../contracts/ui-message-types.ts";
 
-export const GUIDE_HINT_STRINGS: Record<"be" | "en" | "de", GuideHintStrings> = {
+export const GUIDE_HINT_STRINGS: Record<"be" | "en" | "de" | "es", GuideHintStrings> = {
   "be": {
     "dismiss": "Схаваць",
     "heading": "Побач ёсць гід…",
@@ -28,5 +28,11 @@ export const GUIDE_HINT_STRINGS: Record<"be" | "en" | "de", GuideHintStrings> = 
     "heading": "In der Nähe gibt es einen Guide…",
     "openHint": "Guide-Beschreibung öffnen",
     "paid": "kostenpflichtig",
+  },
+  "es": {
+    "dismiss": "Ocultar",
+    "heading": "Cerca hay una guía…",
+    "openHint": "Abrir la descripción de la guía",
+    "paid": "de pago",
   },
 };

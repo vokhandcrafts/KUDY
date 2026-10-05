@@ -65,13 +65,15 @@ describe("uiStrings (G06.05 AC1)", () => {
     // G14.04.d: uk has its own catalog now — the unknown-locale fallback is
     // asserted on a locale no catalog answers. G21.10 (issue #544): de has
     // its own German catalogue too, so the probe moved to the still-planned
-    // «es» — and de now asserts its own honest German words. The
-    // discriminator is a word the languages do not share («Назад» is the
-    // same word in be and uk).
-    expect(uiStrings("es").loading).toBe(uiStrings("be").loading);
+    // «es» — and de now asserts its own honest German words. G21.11 (issue
+    // #545): es owns a Spanish catalogue now, so the probe moves again to
+    // the still-planned «fr». The discriminator is a word the languages do
+    // not share («Назад» is the same word in be and uk).
+    expect(uiStrings("fr").loading).toBe(uiStrings("be").loading);
     expect(uiStrings("en").loading).not.toBe(uiStrings("be").loading);
     expect(uiStrings("uk").loading).not.toBe(uiStrings("be").loading);
     expect(uiStrings("de").loading).toBe("Wird geladen…");
+    expect(uiStrings("es").loading).toBe("Cargando…");
   });
 
   // G06.10 (issue #433): the My history reason line obeys the same outward

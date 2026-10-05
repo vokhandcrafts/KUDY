@@ -43,15 +43,15 @@ test('the registry defines the eight requested UI codes and native names once (c
   assert.throws(() => uiLocaleNativeName('ru'), /ui-locale-unregistered/);
 });
 
-test('the complete set is be/en/uk/de; planned codes stay registered but incomplete (criterion 4)', () => {
-  assert.deepEqual([...COMPLETE_UI_LOCALES], ['be', 'en', 'uk', 'de']);
+test('the complete set is be/en/uk/de/es; planned codes stay registered but incomplete (criterion 4)', () => {
+  assert.deepEqual([...COMPLETE_UI_LOCALES], ['be', 'en', 'uk', 'de', 'es']);
   for (const { code } of EIGHT) {
     assert.equal(isUiLocaleCode(code), true, `${code} is registered`);
   }
   for (const code of COMPLETE_UI_LOCALES) {
     assert.equal(isCompleteUiLocale(code), true, `${code} is complete`);
   }
-  for (const code of ['es', 'fr', 'cs', 'sv']) {
+  for (const code of ['fr', 'cs', 'sv']) {
     assert.equal(isCompleteUiLocale(code), false, `${code} has no catalogue yet`);
   }
   assert.equal(isCompleteUiLocale('ru'), false);
@@ -85,7 +85,7 @@ test('the store derives its vocabulary from the registry and keeps unknown-input
   // The planned languages are registered but incomplete — the store refuses
   // them exactly like an unregistered code (the named UiLocaleError, no
   // silent state), and a refused switch keeps the current locale.
-  for (const planned of ['es', 'fr', 'cs', 'sv', 'ru']) {
+  for (const planned of ['fr', 'cs', 'sv', 'ru']) {
     assert.throws(() => store.set(planned), UiLocaleError);
     assert.equal(store.current(), 'en');
   }
