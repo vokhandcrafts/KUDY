@@ -77,6 +77,26 @@ test('the locale expectation follows the URL prefix in flat and nested export la
   assert.equal(expectedDocumentLocale('guides/demo-route-a1/stops/stop-1.html'), 'be');
 });
 
+test('backslash rel paths (a Windows export walk) resolve the same URL locale as slash paths', () => {
+  // Every exported page shape, in both separators: a backslash path must read
+  // as the same URL, not fall through to the site default (the G21.35 defect).
+  const cases: [path: string, expected: string][] = [
+    ['en.html', 'en'],
+    ['en/app.html', 'en'],
+    ['en/index.html', 'en'],
+    ['en/guides/demo-route-a1.html', 'en'],
+    ['en/guides/demo-route-a1/stops/stop-1.html', 'en'],
+    ['index.html', 'be'],
+    ['app.html', 'be'],
+    ['guides/demo-route-a1/stops/stop-1.html', 'be'],
+    ['404.html', 'be'],
+  ];
+  for (const [p, expected] of cases) {
+    assert.equal(expectedDocumentLocale(p), expected, p);
+    assert.equal(expectedDocumentLocale(p.replaceAll('/', '\\')), expected, p);
+  }
+});
+
 test('non-html assets are not read as pages', () => {
   const out = writeTree({ 'en/data.json': '{"lang":"be"}', 'media/story.m4a': Buffer.from([0x00, 0x01, 0x02]) });
   assert.equal(checkExportedDocumentLanguage({ outDir: out }).ok, true);
