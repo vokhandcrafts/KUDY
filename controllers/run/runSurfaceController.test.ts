@@ -644,7 +644,10 @@ async function momentWorld(): Promise<{
   // The physical fact of the sounding guide launch (the fake's scripted
   // snapshot — the port's documented test contract).
   world.audioPort.snapshotValue = { state: 'playing', positionMs: 0, durationMs: 60_000 };
-  const facts = await readMomentFacts(memoryBundles(world.files), { locales: ['be', 'en'] });
+  const facts = await readMomentFacts(memoryBundles(world.files), {
+    locales: ['be', 'en'],
+    audioProbe: async (rel: string) => (world.files[rel] ?? '').length > 0,
+  });
   if (!facts.ok || facts.moments.length !== 1) throw new Error('the fixture offered no teaser');
   const teaser = facts.moments[0];
   if (teaser.audioPath === null) throw new Error('the fixture teaser has no audio path');

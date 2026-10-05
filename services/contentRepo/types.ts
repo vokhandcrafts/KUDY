@@ -137,6 +137,17 @@ export interface BundlesStore {
 // are absent, unreadable or at the wrong size; null where the count is
 // unknowable — not_downloaded, or a lock.json that is missing or unparseable
 // (criterion 4: diagnosed, never thrown).
+// G22.02 (issue #607) — the teaser-audio availability probe handed to
+// readMomentFacts through the required options.audioProbe. true answers one
+// question only: is `rel` a readable, nonempty regular file? A false answer
+// (absent, directory, empty, unreadable, metadata fault) is a normal
+// negative — the reader falls to the next preferred locale and the card
+// renders without Play. The probe grants no access and never reads the
+// media body: a file that disappears after the probe still follows the
+// existing playback error path (the FileFacts note above: a zero-length
+// media file counts as unreadable — a silent placeholder cannot play).
+export type TeaserAudioProbe = (rel: string) => Promise<boolean>;
+
 export interface InventoryEntry {
   routeId: string;
   version: string;
