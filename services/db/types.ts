@@ -94,10 +94,12 @@ export interface EventInput {
   payload: string;
 }
 
-// A stored event_queue row (G09.01): EventInput plus the sent flag. sent is
-// flush bookkeeping — 0 until a sender resolves for the batch, 1 after the
-// mark; the flag itself never leaves the device.
+// A stored event_queue row (G09.01): EventInput plus the sent flag and the
+// durable enqueue_seq insertion key (G22.03). sent is flush bookkeeping — 0
+// until a sender resolves for the batch, 1 after the mark; neither the flag
+// nor the key ever leaves the device (the key orders bounded pages, spec E3).
 export interface EventQueueRow extends EventInput {
+  enqueueSeq: number;
   sent: boolean;
 }
 
