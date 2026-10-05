@@ -7,7 +7,7 @@
 // schematic — markers at their relative positions, the ODbL attribution
 // visible (11 §6), and no mandatory next/deviated line (the route line is
 // optional and the bundle carries no line geometry).
-import { stopStatus, type RunState, type StopStatus } from '../../core/engine/state.ts';
+import { stopStatus, stopStatusTable, type RunState, type StopStatus } from '../../core/engine/state.ts';
 import type { RunPlaceFact, RunStopFact } from '../../services/contentRepo/runMapFacts.ts';
 import type { RunStop } from './runOrchestrator.ts';
 import { RUN_MAP_STRINGS_DATA } from './runMap-strings.generated.ts';
@@ -84,6 +84,13 @@ function project(points: ReadonlyArray<Point>): ReadonlyArray<{ nx: number; ny: 
 // the POI points beside them. A session stop the pinned facts miss (a state
 // restored against a changed package) renders at the map's center with its
 // computed status — honest absence, no invented geometry.
+//
+// E7 (G22.07): the geometry index and the status table are built once per
+// projection — work proportional to the shown points, no per-marker scan of
+// the geometry array or of the engine state. Both are read-only and
+// ephemeral: nothing survives the call, and the engine stays the source of
+// the status (the derived table is an optimization whose answers must agree
+// with the canonical single-stop rule — the fallback asks it directly).
 export function runMapView(
   run: RunState,
   stops: ReadonlyArray<RunStop>,
@@ -92,7 +99,6 @@ export function runMapView(
   localePreference: readonly string[],
 ): RunMapView {
   if (run.phase === 'Idle') return { markers: [], pois: [] };
-  const geometryByStop = new Map(stops.map((stop) => [stop.stopId, stop]));
   const nameByStop = new Map(facts.map((fact) => [fact.stopId, fact.name]));
   const stopPlaces = new Set(facts.map((fact) => fact.placeId));
   const poiPlaces = places.filter((place) => !stopPlaces.has(place.placeId));
@@ -100,13 +106,14 @@ export function runMapView(
     ...stops.map((stop) => ({ lat: stop.lat, lng: stop.lng })),
     ...poiPlaces.map((place) => ({ lat: place.lat, lng: place.lng })),
   ]);
+  const fitByStop = new Map(stops.map((stop, index) => [stop.stopId, fitted[index]]));
+  const statusByStop = stopStatusTable(run);
   const markers = run.stops.map((sessionStop) => {
-    const geometry = geometryByStop.get(sessionStop.stopId);
-    const fit = geometry ? fitted[stops.indexOf(geometry)] : undefined;
+    const fit = fitByStop.get(sessionStop.stopId);
     return {
       stopId: sessionStop.stopId,
       name: stopLabel(nameByStop.get(sessionStop.stopId) ?? {}, localePreference, sessionStop.stopId),
-      status: stopStatus(run, sessionStop.stopId),
+      status: statusByStop.get(sessionStop.stopId) ?? stopStatus(run, sessionStop.stopId),
       nx: fit?.nx ?? 0.5,
       ny: fit?.ny ?? 0.5,
     };
