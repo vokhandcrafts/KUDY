@@ -472,3 +472,73 @@ test('G22.05 reopen_observes_new_package_and_locale: the text cache lives inside
   // rewrites a returned result.
   assert.equal(first.moments[0]?.teaserText, 'Стары тэкст');
 });
+
+test('G22.05 reopen: two versions of one route stay distinct — each version resolves its own text and its own stops read', async () => {
+  // A re-download keeps the story ids but replaces the content: version 1
+  // and version 2 both carry a place-1 teaser for s-1 with different words.
+  const dirs = new Map<string, string[]>([
+    ['bundles', ['route-a']],
+    ['bundles/route-a', ['1', '2']],
+  ]);
+  const files = new Map<string, FileFacts>([
+    ['bundles/route-a/1/moments.json', bytes(moment())],
+    ['bundles/route-a/1/be/base/stops.json', bytes(JSON.stringify([{ story_id: 's-1', text: 'Тэкст v1' }]))],
+    ['bundles/route-a/1/be/base/audio/s-1.m4a', bytes('audio')],
+    ['bundles/route-a/2/moments.json', bytes(moment())],
+    ['bundles/route-a/2/be/base/stops.json', bytes(JSON.stringify([{ story_id: 's-1', text: 'Тэкст v2' }]))],
+    ['bundles/route-a/2/be/base/audio/s-1.m4a', bytes('audio')],
+  ]);
+  const store = new MeterStore(new FakeStore(dirs, files));
+  const result = await readMomentFacts(store, {
+    locales: ['be'],
+    audioProbe: probeFor(files),
+    placeId: 'place-1',
+  });
+  assert.ok(result.ok);
+  if (!result.ok) return;
+  assert.deepEqual(result.moments.map((moment) => [moment.version, moment.teaserText]), [
+    ['1', 'Тэкст v1'],
+    ['2', 'Тэкст v2'],
+  ]);
+  // The cache key carries the package root: the identical story id in the
+  // sibling version costs its own read, never reuses the other version's
+  // document.
+  assert.deepEqual(store.reads, [
+    'bundles/route-a/1/moments.json',
+    'bundles/route-a/1/be/base/stops.json',
+    'bundles/route-a/2/moments.json',
+    'bundles/route-a/2/be/base/stops.json',
+  ]);
+});
+
+test('G22.05 reopen: a changed locales array is honored at the next call — the text cache never spans calls', async () => {
+  const dirs = new Map<string, string[]>([
+    ['bundles', ['route-a']],
+    ['bundles/route-a', ['1']],
+  ]);
+  const files = new Map<string, FileFacts>([
+    ['bundles/route-a/1/moments.json', bytes(moment())],
+    ['bundles/route-a/1/be/base/stops.json', bytes(JSON.stringify([{ story_id: 's-1', text: 'Тэкст be' }]))],
+    ['bundles/route-a/1/en/base/stops.json', bytes(JSON.stringify([{ story_id: 's-1', text: 'Тэкст en' }]))],
+  ]);
+  // The same store answers both opens; only the preferred-locale list
+  // differs — the UI language switch the place detail observes.
+  const first = await readMomentFacts(new MeterStore(new FakeStore(dirs, files)), {
+    locales: ['be'],
+    audioProbe: probeFor(files),
+    placeId: 'place-1',
+  });
+  assert.ok(first.ok);
+  if (!first.ok) return;
+  assert.equal(first.moments[0]?.teaserText, 'Тэкст be');
+
+  const second = await readMomentFacts(new MeterStore(new FakeStore(dirs, files)), {
+    locales: ['en', 'be'],
+    audioProbe: probeFor(files),
+    placeId: 'place-1',
+  });
+  assert.ok(second.ok);
+  if (!second.ok) return;
+  assert.equal(second.moments[0]?.teaserText, 'Тэкст en');
+  assert.equal(first.moments[0]?.teaserText, 'Тэкст be');
+});

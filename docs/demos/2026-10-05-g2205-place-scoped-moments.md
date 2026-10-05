@@ -21,7 +21,7 @@ assert run.returncode == 0, run.stdout[-2000:] + run.stderr[-2000:]
 plan = None
 interesting = ('selected_place_reads_only_matching_media', 'stops_text_read_once_per_package_locale',
                'reopen_observes_new_package_and_locale', 'placeId is refused', 'no manifest matches',
-               'own place; a later open')
+               'own place; a later open', 'versions of one route stay distinct', 'locales array is honored')
 for line in run.stdout.splitlines():
     if line.startswith('1..'):
         plan = line
@@ -37,5 +37,7 @@ ok 18 - G22.05 (AC1): a valid scope with no manifest matches returns no facts an
 ok 19 - G22.05 selected_place_reads_only_matching_media: five packages with twenty stories each — media and text resolve for the one match per package only
 ok 20 - G22.05 stops_text_read_once_per_package_locale: two teasers of one package share a single stops read; the preference order is unchanged
 ok 21 - G22.05 reopen_observes_new_package_and_locale: the text cache lives inside one call — the next open re-reads a changed package
-1..21
+ok 22 - G22.05 reopen: two versions of one route stay distinct — each version resolves its own text and its own stops read
+ok 23 - G22.05 reopen: a changed locales array is honored at the next call — the text cache never spans calls
+1..23
 ```
