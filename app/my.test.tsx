@@ -183,12 +183,15 @@ describe("KUDY language row (G14.04.d)", () => {
     expect(screen.getByTestId("btn-ui-locale-uk").props.accessibilityState).toEqual({ selected: true });
   });
 
-  test("the row offers the three self-named locales and marks the current one", async () => {
+  test("the row offers the four self-named locales and marks the current one", async () => {
     renderRouter({ _layout: layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
     expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
     expect(screen.getByText("Беларуская")).toBeTruthy();
     expect(screen.getByText("English")).toBeTruthy();
     expect(screen.getByText("Українська")).toBeTruthy();
+    // G21.10 (issue #544): the de catalogue landed, the picker derives the
+    // fourth chip from the registry's complete set.
+    expect(screen.getByText("Deutsch")).toBeTruthy();
     expect(screen.getByTestId("btn-ui-locale-be").props.accessibilityState).toEqual({ selected: true });
     expect(screen.getByTestId("btn-ui-locale-en").props.accessibilityState).toEqual({ selected: false });
     // Switching to en re-renders the chrome in English (AC3: no restart) —
@@ -198,6 +201,21 @@ describe("KUDY language row (G14.04.d)", () => {
     fireEvent.press(screen.getByTestId("btn-ui-locale-en"));
     expect(await screen.findByText("History unavailable.")).toBeTruthy();
     expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
+  });
+
+  test("G21.10 (issue #544): picking de re-renders the honest-unavailable line in German", async () => {
+    // No history port behind the surface: the always-present chrome word
+    // carries the language probe (the three-locale test's idiom), German
+    // here. The no-restart property is proven by the uk sibling above —
+    // the same switch mechanism, one proof is enough.
+    const services = createServices({});
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("btn-ui-locale-de"));
+    expect(await screen.findByText("Verlauf nicht verfügbar.")).toBeTruthy();
+    expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
+    expect(services.uiLocale.current()).toBe("de");
+    expect(screen.getByTestId("btn-ui-locale-de").props.accessibilityState).toEqual({ selected: true });
   });
 });
 

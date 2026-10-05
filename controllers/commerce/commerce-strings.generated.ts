@@ -43,4 +43,15 @@ export const OFFER_STRINGS_DATA = {
     "purchasedPending": "Куплено · треба завантажити",
     "tryAgain": "Спробувати ще раз",
   },
+  "de": {
+    "buy": "Kaufen",
+    "continueFree": "Kostenlos weitermachen",
+    "dismiss": "Nicht jetzt",
+    "errorBody": "Du kannst es erneut versuchen oder kostenlos weitermachen.",
+    "errorTitle": "Der Kauf wurde nicht abgeschlossen",
+    "offerBody": "Ein Kauf schaltet die Geschichten dieses Guides frei.",
+    "offerTitle": "Alle Geschichten des Guides",
+    "purchasedPending": "Gekauft · muss geladen werden",
+    "tryAgain": "Erneut versuchen",
+  },
 };

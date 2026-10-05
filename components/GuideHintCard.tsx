@@ -26,8 +26,9 @@ import type { NearbyHintBinding, NearbyHintState } from "../controllers/useNearb
 export function guideHintStrings(locale: string): GuideHintStrings {
   // The words are the generated projection of the canonical records plus the
   // reviewed translations (G21.25, issue #558); uk keeps the documented be
-  // fallback (uk-release-scope §6.4) until its words are authored (G21.19).
-  return locale === "en" ? GUIDE_HINT_STRINGS.en : GUIDE_HINT_STRINGS.be;
+  // fallback (uk-release-scope §6.4) until its words are authored (G21.19),
+  // de renders its own catalogue (G21.10, issue #544).
+  return locale === "en" ? GUIDE_HINT_STRINGS.en : locale === "de" ? GUIDE_HINT_STRINGS.de : GUIDE_HINT_STRINGS.be;
 }
 
 const styles = StyleSheet.create({

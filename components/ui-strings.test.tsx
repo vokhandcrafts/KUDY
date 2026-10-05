@@ -63,12 +63,15 @@ describe("uiStrings (G06.05 AC1)", () => {
 
   test("an unknown locale falls back to Belarusian, the first preference", () => {
     // G14.04.d: uk has its own catalog now — the unknown-locale fallback is
-    // asserted on a locale no catalog answers («de»). The discriminator is
-    // a word the two languages do not share («Назад» is the same word in
-    // be and uk).
-    expect(uiStrings("de").loading).toBe(uiStrings("be").loading);
+    // asserted on a locale no catalog answers. G21.10 (issue #544): de has
+    // its own German catalogue too, so the probe moved to the still-planned
+    // «es» — and de now asserts its own honest German words. The
+    // discriminator is a word the languages do not share («Назад» is the
+    // same word in be and uk).
+    expect(uiStrings("es").loading).toBe(uiStrings("be").loading);
     expect(uiStrings("en").loading).not.toBe(uiStrings("be").loading);
-    expect(uiStrings("uk").loading).not.toBe(uiStrings("de").loading);
+    expect(uiStrings("uk").loading).not.toBe(uiStrings("be").loading);
+    expect(uiStrings("de").loading).toBe("Wird geladen…");
   });
 
   // G06.10 (issue #433): the My history reason line obeys the same outward

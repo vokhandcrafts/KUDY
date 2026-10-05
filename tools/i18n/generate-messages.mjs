@@ -63,7 +63,7 @@ export const DOMAINS = [
       {
         file: 'components/ui-strings.generated.ts',
         exportName: 'UI_STRINGS',
-        locales: ['be', 'en', 'uk'],
+        locales: ['be', 'en', 'uk', 'de'],
         annotation: 'Record<CompleteUiLocaleCode, UiStrings>',
         imports: [
           'import { completeUiLocaleSelfNames, type CompleteUiLocaleCode } from "../contracts/ui-locales.ts";',
@@ -78,13 +78,13 @@ export const DOMAINS = [
   },
   {
     domain: 'native.guideHint',
-    note: 'the nearby guide-hint card\'s words (G07.05 #284); uk keeps the documented be fallback (uk-release-scope §6.4) until its words are authored',
+    note: 'the nearby guide-hint card\'s words (G07.05 #284); uk keeps the documented be fallback (uk-release-scope §6.4) until its words are authored, de renders its own catalogue (G21.10 #544)',
     outputs: [
       {
         file: 'components/guide-hint-strings.generated.ts',
         exportName: 'GUIDE_HINT_STRINGS',
-        locales: ['be', 'en'],
-        annotation: 'Record<"be" | "en", GuideHintStrings>',
+        locales: ['be', 'en', 'de'],
+        annotation: 'Record<"be" | "en" | "de", GuideHintStrings>',
         imports: ['import type { GuideHintStrings } from "../contracts/ui-message-types.ts";'],
       },
     ],
@@ -96,7 +96,7 @@ export const DOMAINS = [
       {
         file: 'controllers/catalog/preview-strings.generated.ts',
         exportName: 'PREVIEW_STRINGS_DATA',
-        locales: ['be', 'en', 'uk'],
+        locales: ['be', 'en', 'uk', 'de'],
         signature: {
           // The detail function receives the controller's PreviewDetail state
           // object (kind + the missing-files count), not the raw parameters;
@@ -117,7 +117,7 @@ export const DOMAINS = [
       {
         file: 'controllers/run/runMap-strings.generated.ts',
         exportName: 'RUN_MAP_STRINGS_DATA',
-        locales: ['be', 'en', 'uk'],
+        locales: ['be', 'en', 'uk', 'de'],
       },
     ],
   },
@@ -128,7 +128,7 @@ export const DOMAINS = [
       {
         file: 'controllers/place/placeDetail-strings.generated.ts',
         exportName: 'PLACE_DETAIL_STRINGS_DATA',
-        locales: ['be', 'en', 'uk'],
+        locales: ['be', 'en', 'uk', 'de'],
       },
     ],
   },
@@ -139,7 +139,7 @@ export const DOMAINS = [
       {
         file: 'controllers/nearby/nearbySurface-strings.generated.ts',
         exportName: 'NEARBY_STRINGS_DATA',
-        locales: ['be', 'en', 'uk'],
+        locales: ['be', 'en', 'uk', 'de'],
       },
     ],
   },
@@ -150,7 +150,7 @@ export const DOMAINS = [
       {
         file: 'controllers/commerce/commerce-strings.generated.ts',
         exportName: 'OFFER_STRINGS_DATA',
-        locales: ['be', 'en', 'uk'],
+        locales: ['be', 'en', 'uk', 'de'],
       },
     ],
   },
@@ -161,7 +161,7 @@ export const DOMAINS = [
       {
         file: 'controllers/feedback-strings.generated.ts',
         exportName: 'FEEDBACK_STRINGS_DATA',
-        locales: ['be', 'en', 'uk'],
+        locales: ['be', 'en', 'uk', 'de'],
       },
     ],
   },
@@ -172,6 +172,7 @@ export const DOMAINS = [
       { file: 'web/lib/i18n/be.ts', exportName: 'be', locales: ['be'] },
       { file: 'web/lib/i18n/en.ts', exportName: 'en', locales: ['en'] },
       { file: 'web/lib/i18n/uk.ts', exportName: 'uk', locales: ['uk'] },
+      { file: 'web/lib/i18n/de.ts', exportName: 'de', locales: ['de'] },
     ],
   },
 ];
