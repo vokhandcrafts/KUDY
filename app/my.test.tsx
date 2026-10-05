@@ -1,17 +1,20 @@
 // UX 01 (issue #347) — the KUDY surface render suite (the display name since
 // issue #426): a finished-run
-// history of ten sessions renders inside the surface's ScrollView — the
+// history of ten sessions renders inside the surface's FlatList — the
 // list is reachable by scroll, never cut by the fold. The rows come from a
 // fake session-history port: the screen renders what the durable zone keeps
 // and invents nothing (the G06.04 controller suite covers the states; this
 // suite covers only the scroll surface, implementation-rules 1 — removing
-// the ScrollView drops the testID and fails).
+// the FlatList drops the testID and fails). G22.06 (issue #611): the port
+// serves pages, and the list windows the loaded rows instead of mounting the
+// whole page at once.
 import { describe, expect, test } from "@jest/globals";
 import { fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
 
 import My from "./(tabs)/my";
 import FeedbackForm from "./feedback";
 import { createServices } from "../controllers/createServices";
+import type { SessionHistoryPort } from "../controllers/myKudyController";
 import {
   FEEDBACK_DISCLOSURE_VERSION,
   feedbackStrings,
@@ -29,27 +32,29 @@ import {
 } from "../tests/feedback/queue-fixture";
 import { tokens } from "../components/design-tokens";
 import { CATALOG_FIXTURES, flatStyle, layoutWith, serve, sha256 } from "../test/render-helpers";
-import type { SessionRow } from "../services/db/types";
+import type { SessionHistoryCursor, SessionHistoryPage, SessionHistorySummary } from "../services/db/types";
 
-const finishedRow = (n: number): SessionRow => ({
+const finishedSummary = (n: number): SessionHistorySummary => ({
   sessionId: `walk-render-${n}`,
   routeId: "route-map",
   version: "1",
   locale: "be",
-  tier: ["base"],
   state: "finished",
   startedAt: n * 1_000,
   finishedAt: n * 1_000 + 500,
-  autoFired: [],
-  heard: ["story-1"],
-  lastStopId: null,
-  playSeq: 0,
+  heardCount: 1,
+});
+
+// The fake history port serves one static completed page — the screen renders
+// what the durable zone keeps and invents nothing.
+const historyPort = (rows: SessionHistorySummary[]): SessionHistoryPort => ({
+  listPage: async () => ({ live: null, rows, nextCursor: null }),
 });
 
 describe("KUDY surface (UX 01)", () => {
   test("the finished history scrolls: ten sessions render inside the ScrollView", async () => {
-    const rows = Array.from({ length: 10 }, (_, i) => finishedRow(i + 1));
-    const services = createServices({ sessionHistory: { list: async () => rows } });
+    const rows = Array.from({ length: 10 }, (_, i) => finishedSummary(i + 1));
+    const services = createServices({ sessionHistory: historyPort(rows) });
     renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
     expect(await screen.findByTestId("scroll-my")).toBeTruthy();
     for (const row of rows) {
@@ -64,11 +69,11 @@ describe("KUDY surface (UX 01)", () => {
   // an unknown stored code renders as-is, never rewritten into a guess.
   test("the history rows label their content language from the registry", async () => {
     const rows = [
-      { ...finishedRow(1), locale: "uk" },
-      { ...finishedRow(2), locale: "en" },
-      { ...finishedRow(3), locale: "unknown-code" },
+      { ...finishedSummary(1), locale: "uk" },
+      { ...finishedSummary(2), locale: "en" },
+      { ...finishedSummary(3), locale: "unknown-code" },
     ];
-    const services = createServices({ sessionHistory: { list: async () => rows } });
+    const services = createServices({ sessionHistory: historyPort(rows) });
     renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
     expect((await screen.findByTestId("my-session-locale-walk-render-1")).props.children).toBe("Українська");
     expect(screen.getByTestId("my-session-locale-walk-render-2").props.children).toBe("English");
@@ -82,6 +87,60 @@ describe("KUDY surface (UX 01)", () => {
   });
 });
 
+// G22.06 (issue #611): the paged history surface — the FlatList windows the
+// loaded page (the visible rows mount, never the whole page at once) and the
+// load-more walks the store's cursor through the real screen path.
+describe("KUDY paged history (G22.06)", () => {
+  test("history_list_renders_visible_rows: a full page of 50 windows its rows", async () => {
+    const rows = Array.from({ length: 50 }, (_, i) => finishedSummary(i + 1));
+    const services = createServices({ sessionHistory: historyPort(rows) });
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("my-history-section")).toBeTruthy();
+    expect(screen.getByTestId("my-session-walk-render-1")).toBeTruthy();
+    // the window: a full page mounts some rows, never all 50 at once —
+    // mapping the whole loaded page instead turns the count assertion red
+    const mounted = screen.queryAllByTestId(/^my-session-walk-render-\d+$/);
+    expect(mounted.length).toBeGreaterThan(0);
+    expect(mounted.length).toBeLessThan(rows.length);
+  });
+
+  test("scrolling to the end reads the next page through the screen's load-more", async () => {
+    // The first page fills the initial render window exactly (12 rows): RN
+    // arms onEndReached once the last cell of the data is mounted, and the
+    // jest surface gets no layout events to widen the window afterwards.
+    const pageOne = Array.from({ length: 12 }, (_, i) => finishedSummary(i + 1));
+    const pageTwo = Array.from({ length: 30 }, (_, i) => finishedSummary(100 + i));
+    const last = pageOne[11]!;
+    const cursor: SessionHistoryCursor = { startedAt: last.startedAt, sessionId: last.sessionId };
+    let calls = 0;
+    const services = createServices({
+      sessionHistory: {
+        listPage: async (received) => {
+          calls += 1;
+          if (received === null) return { live: null, rows: pageOne, nextCursor: cursor };
+          return { live: null, rows: pageTwo, nextCursor: null };
+        },
+      },
+    });
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    await screen.findByTestId("my-history-section");
+    // A real scroll arms RN's internal metrics before it calls the list's
+    // onEndReached; the jest surface gets no layout events, so the test
+    // invokes the same handler a real scroll reaches — the screen's
+    // onEndReached → store.loadMore → port path is what is under test here,
+    // not RN's own metric arming (the controller suite covers the cursor
+    // semantics behind it).
+    fireEvent(screen.getByTestId("scroll-my"), "onEndReached", { distanceFromEnd: 0 });
+    // the appended page went through the real screen → store → FlatList path
+    await waitFor(() => {
+      const state = services.history?.controller.getState();
+      expect(state?.status === "ready" && state.rows.length).toBe(42);
+    });
+    // boot read + the focus read + the load-more page
+    expect(calls).toBe(3);
+  });
+});
+
 // UX 05 (issue #351): the rows show the catalog's guide title when the
 // catalog names the route; a route it does not name keeps the raw id — the
 // durable zone's own fact. Removing the lookup (or the fallback) fails one
@@ -90,13 +149,13 @@ describe("KUDY guide titles (UX 05)", () => {
   test("the ready catalog names the route; an unknown route falls back to its id", async () => {
     serve(CATALOG_FIXTURES);
     const rows = [
-      { ...finishedRow(1), routeId: "guide-route-a1" },
-      { ...finishedRow(2), routeId: "route-offline" },
+      { ...finishedSummary(1), routeId: "guide-route-a1" },
+      { ...finishedSummary(2), routeId: "route-offline" },
     ];
     const services = createServices({
       catalogOrigin: "https://catalog.test",
       catalogSha256: sha256,
-      sessionHistory: { list: async () => rows },
+      sessionHistory: historyPort(rows),
     });
     renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
     expect(await screen.findByText("Гісторыі сукнараў: ад мытні да порта")).toBeTruthy();
@@ -110,7 +169,7 @@ describe("KUDY guide titles (UX 05)", () => {
 // this red (implementation-rules 1).
 describe("KUDY loading indicator (UX 07)", () => {
   test("the loading state shows the ActivityIndicator next to the text", async () => {
-    const services = createServices({ sessionHistory: { list: () => new Promise(() => {}) } });
+    const services = createServices({ sessionHistory: { listPage: () => new Promise(() => {}) } });
     renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
     expect(await screen.findByTestId("loading-indicator")).toBeTruthy();
     expect(screen.getByText("Загрузка…")).toBeTruthy();
@@ -121,16 +180,16 @@ describe("KUDY loading indicator (UX 07)", () => {
 // named retry re-runs the controller's refresh, and a recovered read renders
 // the rows (implementation-rules 1: removing the retry turns this red).
 test("G06.05: the unavailable history offers the named retry and recovers", async () => {
-  const rows = [finishedRow(1)];
+  const rows = [finishedSummary(1)];
   let calls = 0;
-  const list = async (): Promise<SessionRow[]> => {
+  const listPage = async (): Promise<SessionHistoryPage> => {
     calls += 1;
     // The boot read and the focus read both fail — the retry press is the
     // third read, and it is the one that recovers.
     if (calls < 3) throw new Error("db busy");
-    return rows;
+    return { live: null, rows, nextCursor: null };
   };
-  const services = createServices({ sessionHistory: { list } });
+  const services = createServices({ sessionHistory: { listPage } });
   renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
   expect(await screen.findByTestId("my-unavailable")).toBeTruthy();
   fireEvent.press(screen.getByTestId("btn-my-retry"));
@@ -166,7 +225,7 @@ describe("KUDY language row (G14.04.d)", () => {
   test("picking uk re-renders the words in place, no restart", async () => {
     let reads = 0;
     const services = createServices({
-      sessionHistory: { list: async () => { reads += 1; return []; } },
+      sessionHistory: { listPage: async () => { reads += 1; return { live: null, rows: [], nextCursor: null }; } },
     });
     renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
     expect(await screen.findByText("Бягучая прагулка")).toBeTruthy();
@@ -244,7 +303,7 @@ describe("KUDY own ratings (G16.03)", () => {
     sendNow(driver, GUIDE_TARGET, { now: NOW, mutationId: M1 });
     await sync.flush();
     const services = createServices({
-      sessionHistory: { list: async () => [] },
+      sessionHistory: historyPort([]),
       feedback: { driver, sync },
     });
     renderRouter({ _layout: layoutWith(services), "(tabs)/my": My, feedback: FeedbackForm }, { initialUrl: "/my" });
@@ -272,7 +331,7 @@ describe("KUDY own ratings (G16.03)", () => {
       now: () => NOW,
     });
     const services = createServices({
-      sessionHistory: { list: async () => [] },
+      sessionHistory: historyPort([]),
       feedback: { driver, sync },
     });
     renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });

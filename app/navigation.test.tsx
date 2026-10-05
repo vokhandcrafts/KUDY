@@ -71,23 +71,11 @@ describe("route placeholders (19 §2.5)", () => {
   // where 1970-01-01T00:00:05Z is already 1969-12-31 — a revert to the UTC
   // day fails this (implementation-rules 1).
   test("KUDY shows the live walk and the previous runs (11 §16.2, 03)", async () => {
+    // G22.06: the port serves pages — the live walk as the full durable row
+    // beside the completed summaries; the heard counts are the derived facts.
     const sessionHistory = {
-      list: async () => [
-        {
-          sessionId: "walk-old",
-          routeId: "route-map",
-          version: "1",
-          locale: "be",
-          tier: ["base"],
-          state: "finished" as const,
-          startedAt: 1_000,
-          finishedAt: 2_000,
-          autoFired: [],
-          heard: ["story-1"],
-          lastStopId: null,
-          playSeq: 1,
-        },
-        {
+      listPage: async () => ({
+        live: {
           sessionId: "walk-live",
           routeId: "route-other",
           version: "1",
@@ -101,7 +89,20 @@ describe("route placeholders (19 §2.5)", () => {
           lastStopId: null,
           playSeq: 2,
         },
-      ],
+        rows: [
+          {
+            sessionId: "walk-old",
+            routeId: "route-map",
+            version: "1",
+            locale: "be",
+            state: "finished" as const,
+            startedAt: 1_000,
+            finishedAt: 2_000,
+            heardCount: 1,
+          },
+        ],
+        nextCursor: null,
+      }),
     };
     renderRouter(
       { "_layout": layoutWith(createServices({ sessionHistory })), "(tabs)/my": My },
