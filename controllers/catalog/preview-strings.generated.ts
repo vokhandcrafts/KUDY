@@ -82,6 +82,24 @@ export const PREVIEW_STRINGS_DATA = {
     "storageExit": "Speicher in KUDY freigeben",
     "storageFullDetail": (mb: number) => `nicht genug Speicher: ${mb} MB mehr erforderlich`,
   },
+  "es": {
+    "detail": (detail: { readonly kind: string; readonly count?: number }) => detail.kind === "damaged" ? `Paquete dañado: hace falta descargar de nuevo` : detail.kind === "missing-files" ? `Faltan archivos: ${detail.count}` : detail.kind === "stale" ? `Hay una actualización disponible` : `Paquete incompleto`,
+    "downloadFailed": "Error al descargar.",
+    "label": {
+      "download": "Descargar",
+      "start": "Empezar",
+    },
+    "reason": {
+      "preview#download-unavailable": "La descarga no está disponible en esta compilación.",
+      "preview#not-published": "La guía no está publicada.",
+      "preview#purchase-required": "Se requiere compra.",
+      "preview#storage-unknown": "El almacenamiento no está disponible.",
+      "preview#verify-unavailable": "La verificación no está disponible.",
+    },
+    "retry": "Reintentar",
+    "storageExit": "Liberar espacio en KUDY",
+    "storageFullDetail": (mb: number) => `falta espacio: hacen falta ${mb} MB más`,
+  },
   "fr": {
     "detail": (detail: { readonly kind: string; readonly count?: number }) => detail.kind === "damaged" ? `paquet endommagé : nouveau téléchargement nécessaire` : detail.kind === "missing-files" ? `fichiers manquants : ${detail.count}` : detail.kind === "stale" ? `une mise à jour est disponible` : `paquet incomplet`,
     "downloadFailed": "Échec du téléchargement.",

@@ -4,7 +4,7 @@
   "provenance": {
     "kind": "glossary",
     "reviewer": "owner",
-    "evidence": "тэрміны выцягнутыя з зацверджаных перакладных набораў en/uk (міграцыя G06.05 #280 + рэв'ю G21.25 #558), анкераваныя на кананічныя запісы source.json; паходжанне кожнага тэрміна — у яго provenance па форме G21.27; дапоўнена de-тэрмінамі ў задачы G21.10 (#544): выбары занкерваныя на лакатары de-набору, сэмантычны рэвью — у results/G21.10.md; дапоўнена fr-тэрмінамі ў задачы G21.12 (#546): выбары занкерваныя на лакатары fr-набору, сэмантычны рэвью — у results/G21.12.md"
+    "evidence": "тэрміны выцягнутыя з зацверджаных перакладных набораў en/uk (міграцыя G06.05 #280 + рэв'ю G21.25 #558), анкераваныя на кананічныя запісы source.json; паходжанне кожнага тэрміна — у яго provenance па форме G21.27; дапоўнена de-тэрмінамі ў задачы G21.10 (#544): выбары занкерваныя на лакатары de-набору, сэмантычны рэвью — у results/G21.10.md; дапоўнена es-тэрмінамі ў задачы G21.11 (#545): выбары занкерваныя на лакатары es-набору, сэмантычны рэвью — у results/G21.11.md; дапоўнена fr-тэрмінамі ў задачы G21.12 (#546): выбары занкерваныя на лакатары fr-набору, сэмантычны рэвью — у results/G21.12.md"
   },
   "entries": [
     {
@@ -46,6 +46,17 @@
             "term": "Guide",
             "locator": "translations/de.json#native.nearby.guideLabel",
             "reason": "de трымае запазычаны Guide (Guides →, Guide, Guide-Beschreibung) — як en, кароткі і нэўтральны для каталога і карткі падказкі",
+            "date": "2026-10-05"
+          }
+        },
+        "es": {
+          "term": "Guía",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Guía",
+            "locator": "translations/es.json#native.nearby.guideLabel",
+            "reason": "es трымае запазычаны род Guía (Guías →, Guía) з жаночым родам кнігі-гіда — кароткае і звыклае слова каталога і карткі падказкі",
             "date": "2026-10-05"
           }
         },
@@ -105,6 +116,17 @@
             "date": "2026-10-05"
           }
         },
+        "es": {
+          "term": "Parada",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Parada",
+            "locator": "translations/es.json#native.chrome.stopsCount",
+            "reason": "імянік — Parada (Paradas: N, Parada N, Siguiente parada) — звыклы іспанскі тэрмін кропак маршруту; дзеянне спыніць тэйзер — асобнае «Detener» (native.place.stopLabel), uk/de-прэцэдэнт немешвання сэнсаў",
+            "date": "2026-10-05"
+          }
+        },
         "fr": {
           "term": "étape",
           "provenance": {
@@ -157,6 +179,17 @@
             "term": "Rundgang",
             "locator": "translations/de.json#native.chrome.currentWalk",
             "reason": "Rundgang як адзіны тэрмін праходу (Aktueller Rundgang, Frühere Rundgänge, Rundgang beenden) — прыродны нямецкі актыўны праход па горадзе",
+            "date": "2026-10-05"
+          }
+        },
+        "es": {
+          "term": "Recorrido",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Recorrido",
+            "locator": "translations/es.json#native.chrome.currentWalk",
+            "reason": "Recorrido як адзіны тэрмін праходу (Recorrido actual, Recorridos anteriores, Terminar el recorrido) — прыродны іспанскі актыўны праход па горадзе",
             "date": "2026-10-05"
           }
         },
@@ -215,6 +248,17 @@
             "date": "2026-10-05"
           }
         },
+        "es": {
+          "term": "Descargar",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Descargar",
+            "locator": "translations/es.json#native.preview.label.download",
+            "reason": "адзін корань для абодвух сэнсаў (Descargar, Error al descargar, no descargada) — en/uk-прэцэдэнт аднакарэннага тэрміна",
+            "date": "2026-10-05"
+          }
+        },
         "fr": {
           "term": "télécharger",
           "provenance": {
@@ -266,6 +310,17 @@
             "term": "nicht verfügbar",
             "locator": "translations/de.json#native.chrome.catalogUnavailable",
             "reason": "nicht verfügbar у радках стану і прычынах прэв'ю (Katalog nicht verfügbar, …) — стандартны нямецкі UI-зварот недаступнасці",
+            "date": "2026-10-05"
+          }
+        },
+        "es": {
+          "term": "no disponible",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "no disponible",
+            "locator": "translations/es.json#native.chrome.catalogUnavailable",
+            "reason": "no disponible ў радках стану і прычынах прэв'ю (Catálogo no disponible, …) — стандартны іспанскі UI-зварот недаступнасці",
             "date": "2026-10-05"
           }
         },
@@ -324,6 +379,17 @@
             "date": "2026-10-05"
           }
         },
+        "es": {
+          "term": "compra",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "compra",
+            "locator": "translations/es.json#native.preview.reason.preview#purchase-required",
+            "reason": "Se requiere compra / Comprada / compras por las tiendas — толькі факт падзеі, без плацёжных даных",
+            "date": "2026-10-05"
+          }
+        },
         "fr": {
           "term": "achat",
           "provenance": {
@@ -374,6 +440,17 @@
             "term": "fortgesetzt",
             "locator": "translations/de.json#native.run.restoredTitle",
             "reason": "канон restore без рэстаўрацыйнай метафары: Rundgang aus der gespeicherten Sitzung fortgesetzt — тая самая пабудова, што be/en/uk",
+            "date": "2026-10-05"
+          }
+        },
+        "es": {
+          "term": "continuado",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "continuado",
+            "locator": "translations/es.json#native.run.restoredTitle",
+            "reason": "канон restore без рэстаўрацыйнай метафары: Recorrido continuado desde la sesión guardada — тая самая пабудова, што be/en/uk/de",
             "date": "2026-10-05"
           }
         },

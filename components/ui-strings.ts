@@ -23,5 +23,5 @@ import { UI_STRINGS } from "./ui-strings.generated.ts";
 export type { AccessKind, UiStrings } from "../contracts/ui-message-types.ts";
 
 export function uiStrings(locale: string): UiStrings {
-  return locale === "fr" ? UI_STRINGS.fr : locale === "de" ? UI_STRINGS.de : locale === "en" ? UI_STRINGS.en : locale === "uk" ? UI_STRINGS.uk : UI_STRINGS.be;
+  return locale === "es" ? UI_STRINGS.es : locale === "fr" ? UI_STRINGS.fr : locale === "de" ? UI_STRINGS.de : locale === "en" ? UI_STRINGS.en : locale === "uk" ? UI_STRINGS.uk : UI_STRINGS.be;
 }
