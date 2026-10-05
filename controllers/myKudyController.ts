@@ -66,6 +66,10 @@ export function createMyKudyController(port: SessionHistoryPort): ControllerStor
     status: 'loading',
     refresh: async () => {
       const run = ++seq;
+      // The epoch bump already discards any in-flight page read (its run
+      // check rejects it), so the load-more flag is released here — waiting
+      // for the superseded attempt would deadlock every further load-more.
+      loadingMore = false;
       refreshing = true;
       try {
         let page: SessionHistoryPage;

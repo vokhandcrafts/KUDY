@@ -165,12 +165,19 @@ test('late_page_does_not_overwrite_refresh: a page landing after a refresh is di
   const first = row('walk-1', 'finished', 4_000);
   const second = row('walk-2', 'finished', 3_000);
   let releaseLate: ((value: SessionHistoryPage) => void) | undefined;
+  let cursorReads = 0;
   const store = createMyKudyController({
     listPage: async (cursor) => {
       if (cursor === null) return page(live, [first], CURSOR_ONE);
-      return new Promise<SessionHistoryPage>((resolve) => {
-        releaseLate = () => resolve(page(null, [second], null));
-      });
+      cursorReads += 1;
+      // only the first page-two read hangs; later ones resolve — the paging
+      // must survive the superseded attempt
+      if (cursorReads === 1) {
+        return new Promise<SessionHistoryPage>((resolve) => {
+          releaseLate = () => resolve(page(null, [second], null));
+        });
+      }
+      return page(null, [second], null);
     },
   });
   const ready = (await until(store, (current) => current.status === 'ready')) as Extract<
@@ -190,6 +197,13 @@ test('late_page_does_not_overwrite_refresh: a page landing after a refresh is di
   assert.deepEqual(final.rows.map((entry) => entry.sessionId), ['walk-1'], 'no duplicate, no stale row');
   assert.equal(final.loadingMore, false, 'the superseded page unlocks the load-more state');
   assert.equal(final.moreError, null);
+  // the negative guard: paging keeps working after the superseded attempt —
+  // the in-flight flag must not stay stuck for the rest of the store's life
+  const cursorReadsBefore = cursorReads;
+  await store.getState().loadMore();
+  assert.equal(cursorReads, cursorReadsBefore + 1, 'loadMore reaches the port again after a superseded attempt');
+  const grown = store.getState() as Extract<MyKudyState, { status: 'ready' }>;
+  assert.deepEqual(grown.rows.map((entry) => entry.sessionId), ['walk-1', 'walk-2'], 'the retried page appends');
 });
 
 test('live_session_is_visible_on_every_page: paging never hides the live walk', async () => {
