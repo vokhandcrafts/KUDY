@@ -72,8 +72,9 @@ async function webhookEventCount(db: Database): Promise<number> {
   return (result.rows as Array<{ count: number }>)[0]!.count;
 }
 
-test('a signed refund (CANCELLATION) persists the event and drops the cached rights of app_user_id and uuid aliases', async () => {
+test('a signed refund (CANCELLATION) persists the event and drops the cached rights of app_user_id and uuid aliases', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const deviceA = randomUUID();
   const deviceC = randomUUID();
   await seedDeviceWithCache(db, deviceA);
@@ -102,8 +103,9 @@ test('a signed refund (CANCELLATION) persists the event and drops the cached rig
   assert.ok(row['event_at'] !== null, 'the event timestamp is persisted');
 });
 
-test('a tampered signature is 401 and changes no rights (issue proof: падроблены подпіс → правы не змяніліся)', async () => {
+test('a tampered signature is 401 and changes no rights (issue proof: падроблены подпіс → правы не змяніліся)', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const device = randomUUID();
   await seedDeviceWithCache(db, device);
   const event = { id: randomUUID(), type: 'CANCELLATION', app_user_id: device };
@@ -116,8 +118,9 @@ test('a tampered signature is 401 and changes no rights (issue proof: падро
   assert.equal(await webhookEventCount(db), 0, 'nothing is persisted either');
 });
 
-test('a signature from a foreign secret, a missing or malformed header, and a stale timestamp are all 401', async () => {
+test('a signature from a foreign secret, a missing or malformed header, and a stale timestamp are all 401', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const base = { id: randomUUID(), type: 'CANCELLATION', app_user_id: randomUUID() };
   const rejections = [
     requestOf(base, { secret: 'another-secret' }),
@@ -134,8 +137,9 @@ test('a signature from a foreign secret, a missing or malformed header, and a st
   assert.equal(await webhookEventCount(db), 0);
 });
 
-test('the HMAC covers the raw bytes: one flipped body byte with the original signature is 401', async () => {
+test('the HMAC covers the raw bytes: one flipped body byte with the original signature is 401', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const event = { id: randomUUID(), type: 'CANCELLATION', app_user_id: randomUUID(), product_id: 'kudy.route.ext' };
   const body = JSON.stringify({ event });
   const request = requestOf(event);
@@ -147,8 +151,9 @@ test('the HMAC covers the raw bytes: one flipped body byte with the original sig
   assert.equal(await webhookEventCount(db), 0);
 });
 
-test('an oversized body is 400 before the signature gate: nothing is persisted or executed', async () => {
+test('an oversized body is 400 before the signature gate: nothing is persisted or executed', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const oversized = new Uint8Array(64 * 1024 + 1);
   const answer = await handleWebhook(
     { signatureHeader: 'garbage', rawBody: oversized, secret: SECRET, nowMs: NOW_MS },
@@ -159,8 +164,9 @@ test('an oversized body is 400 before the signature gate: nothing is persisted o
   assert.equal(await webhookEventCount(db), 0);
 });
 
-test('corrupt payloads answer 400 without a crash, a persist or a rights change', async () => {
+test('corrupt payloads answer 400 without a crash, a persist or a rights change', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const device = randomUUID();
   await seedDeviceWithCache(db, device);
   const bodies = [
@@ -186,8 +192,9 @@ test('corrupt payloads answer 400 without a crash, a persist or a rights change'
   assert.equal(await webhookEventCount(db), 0, 'nothing persisted');
 });
 
-test('a duplicate delivery answers 200, keeps one event row and applies the effects once (issue proof: дубль → адна змена)', async () => {
+test('a duplicate delivery answers 200, keeps one event row and applies the effects once (issue proof: дубль → адна змена)', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const device = randomUUID();
   await seedDeviceWithCache(db, device);
   const event = { id: randomUUID(), type: 'EXPIRATION', app_user_id: device, expiration_at_ms: 1_699_999_500_000 };
@@ -206,8 +213,9 @@ test('a duplicate delivery answers 200, keeps one event row and applies the effe
   assert.equal((rows.rows as Array<{ count: number }>)[0]!.count, 1);
 });
 
-test('a duplicate after a crash between persist and effects re-applies the idempotent effect (at-least-once, 09 §5.1)', async () => {
+test('a duplicate after a crash between persist and effects re-applies the idempotent effect (at-least-once, 09 §5.1)', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const device = randomUUID();
   await seedDeviceWithCache(db, device);
   const event = { id: randomUUID(), type: 'REFUND_REVERSED', app_user_id: device };
@@ -224,8 +232,9 @@ test('a duplicate after a crash between persist and effects re-applies the idemp
   assert.equal((flag.rows as Array<Record<string, unknown>>)[0]!['effects_applied'], true);
 });
 
-test('TRANSFER drops the cached rights of transferred_from devices only; transferred_to stays', async () => {
+test('TRANSFER drops the cached rights of transferred_from devices only; transferred_to stays', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const fromDevice = randomUUID();
   const toDevice = randomUUID();
   await seedDeviceWithCache(db, fromDevice);
@@ -246,8 +255,9 @@ test('TRANSFER drops the cached rights of transferred_from devices only; transfe
   assert.equal(await cacheRowCount(db, toDevice), 1, 'the receiving device needs no action');
 });
 
-test('bookkeeping events (TEST, INITIAL_PURCHASE, BILLING_ISSUE, …) persist but touch no rights', async () => {
+test('bookkeeping events (TEST, INITIAL_PURCHASE, BILLING_ISSUE, …) persist but touch no rights', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const device = randomUUID();
   await seedDeviceWithCache(db, device);
   for (const type of ['TEST', 'INITIAL_PURCHASE', 'BILLING_ISSUE', 'PRODUCT_CHANGE', 'RENEWAL']) {
@@ -259,8 +269,9 @@ test('bookkeeping events (TEST, INITIAL_PURCHASE, BILLING_ISSUE, …) persist bu
   assert.equal(await webhookEventCount(db), 5, 'every event is durably stored');
 });
 
-test('a store fault never yields 200: the handler propagates it and nothing is half-applied', async () => {
+test('a store fault never yields 200: the handler propagates it and nothing is half-applied', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const device = randomUUID();
   await seedDeviceWithCache(db, device);
   const real = pgliteWebhookRunner(db);
@@ -300,8 +311,9 @@ test('parseWebhookEvent keeps a non-integer event_timestamp_ms out of the persis
   assert.equal(event['event_timestamp_ms'], 'soon', 'the value survives into the stored payload');
 });
 
-test('webhook_payload_minimized: the durable payload keeps only the accounting fields — device identity and subscriber personal data never reach the row (G20.12, spec N6)', async () => {
+test('webhook_payload_minimized: the durable payload keeps only the accounting fields — device identity and subscriber personal data never reach the row (G20.12, spec N6)', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const device = randomUUID();
   await seedDeviceWithCache(db, device);
 
@@ -338,8 +350,9 @@ test('webhook_payload_minimized: the durable payload keeps only the accounting f
   });
 });
 
-test('replay_does_not_resurrect: after the retention sweep purges the event row, the replayed delivery re-persists it but can only drop cache rows — rights and the device account never come back (G20.12)', async () => {
+test('replay_does_not_resurrect: after the retention sweep purges the event row, the replayed delivery re-persists it but can only drop cache rows — rights and the device account never come back (G20.12)', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const device = randomUUID();
   await seedDeviceWithCache(db, device);
   const event = { id: randomUUID(), type: 'CANCELLATION', app_user_id: device, product_id: 'kudy.route.ext' };

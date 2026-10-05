@@ -9,7 +9,7 @@
 // behaviors (implementation-rules 1).
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import test from 'node:test';
+import test, { type TestContext } from 'node:test';
 
 import { hashIp } from '../../functions/_shared/device-core.ts';
 import { handleFeedbackEdgeRequest } from '../../functions/feedback/feedback-wire.ts';
@@ -130,8 +130,9 @@ test('guard: the contract limits are the spec numbers', () => {
 
 // --- RLS behavior ---
 
-test('anon and authenticated cannot touch the feedback tables, even with a grant re-added', async () => {
+test('anon and authenticated cannot touch the feedback tables, even with a grant re-added', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   await db.query('set role anon');
   for (const table of FEEDBACK_TABLES) {
     await assert.rejects(db.query(`select * from ${table}`), /permission denied/i, `${table}: no grants, no access`);
@@ -156,21 +157,8 @@ test('anon and authenticated cannot touch the feedback tables, even with a grant
   }
 });
 
-test('the registry and rows survive device deletion; the device-owned rows do not', async () => {
-  const db = await freshFeedbackDatabase();
-  const client = pgliteFeedbackClient(db);
-  const config = testFeedbackConfig();
-  const device = await registerFeedbackDevice(db);
-  await publishFixtureTargets(db, [
-    { kind: 'guide', route_id: 'guide-route-a1', version: '1', locale: 'be' },
-  ]);
-
-  const call = (method: string, urlPath: string, body: unknown, secret = device.secret) =>
-    handleFeedbackEdgeRequest(
-      feedbackRequest({ method, url: `https://feedback.test${urlPath}`, body, secret }),
-      client,
-      config,
-    );
+test('the registry and rows survive device deletion; the device-owned rows do not', async (t) => {
+  const { db, call } = await feedbackScenario(t);
   await call('PUT', '/v1/feedback', {
     mutation_id: '00000000-0000-4000-8000-000000000001',
     target: { kind: 'guide', route_id: 'guide-route-a1', version: '1', locale: 'be' },
@@ -190,8 +178,9 @@ test('the registry and rows survive device deletion; the device-owned rows do no
   assert.equal(registry.rows[0]?.count, 1, 'published registry targets survive device deletion (21 §5.2)');
 });
 
-test('deleted device credentials cannot recreate rows', async () => {
+test('deleted device credentials cannot recreate rows', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   const device = await registerFeedbackDevice(db);
   await db.query('delete from devices');
   // The service role itself cannot attach a rating to a dead device: the FK
@@ -213,8 +202,9 @@ const EXPORT_TARGETS = [
 ];
 const exportDoc = () => ({ schema_version: 1, status: 'prepared', targets: EXPORT_TARGETS.map((t) => ({ ...t, status: 'prepared' })) });
 
-test('prepared targets fail closed with 503; publication reconciles an interrupted import', async () => {
+test('prepared targets fail closed with 503; publication reconciles an interrupted import', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   const client = pgliteFeedbackClient(db);
   const config = testFeedbackConfig();
   const device = await registerFeedbackDevice(db);
@@ -264,8 +254,9 @@ test('prepared targets fail closed with 503; publication reconciles an interrupt
   assert.equal(still.status, 200, 'the second published target keeps accepting ratings');
 });
 
-test('a malformed export is rejected before any write', async () => {
+test('a malformed export is rejected before any write', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   const runner = { query: (sql: string, params?: unknown[]) => db.query(sql, params) };
   const broken = [
     { schema_version: 2, status: 'prepared', targets: EXPORT_TARGETS },
@@ -285,8 +276,27 @@ test('a malformed export is rejected before any write', async () => {
 // --- CAS and concurrency semantics ---
 
 /** The shared single-device scenario: fresh DB, one device, the guide/be target published, the wire caller. */
-async function ratingScenario(): Promise<{ db: Awaited<ReturnType<typeof freshFeedbackDatabase>>; call: (method: string, urlPath: string, body: unknown) => Promise<Response>; target: Record<string, unknown> }> {
+/** Owned-database prologue shared by the edge-wire cases: real PGlite, the production
+ *  client, one registered device and the canonical guide target published (G22.01). */
+async function feedbackScenario(t: TestContext) {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
+  const client = pgliteFeedbackClient(db);
+  const config = testFeedbackConfig();
+  const device = await registerFeedbackDevice(db);
+  await publishFixtureTargets(db, [{ kind: 'guide', route_id: 'guide-route-a1', version: '1', locale: 'be' }]);
+  const call = (method: string, urlPath: string, body: unknown, secret = device.secret) =>
+  handleFeedbackEdgeRequest(
+  feedbackRequest({ method, url: `https://feedback.test${urlPath}`, body, secret }),
+  client,
+  config,
+  );
+  return { db, client, config, device, call };
+}
+
+async function ratingScenario(t: TestContext): Promise<{ db: Awaited<ReturnType<typeof freshFeedbackDatabase>>; call: (method: string, urlPath: string, body: unknown) => Promise<Response>; target: Record<string, unknown> }> {
+  const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   const client = pgliteFeedbackClient(db);
   const config = testFeedbackConfig();
   const device = await registerFeedbackDevice(db);
@@ -301,8 +311,8 @@ async function ratingScenario(): Promise<{ db: Awaited<ReturnType<typeof freshFe
   return { db, call, target };
 }
 
-test('same-revision writes yield one success and one conflict; stale deletes cannot overwrite', async () => {
-  const { db, call, target } = await ratingScenario();
+test('same-revision writes yield one success and one conflict; stale deletes cannot overwrite', async (t) => {
+  const { db, call, target } = await ratingScenario(t);
   const put = (mutationId: string, expectedRevision: number, score: number) =>
     call('PUT', '/v1/feedback', {
       mutation_id: mutationId,
@@ -336,8 +346,8 @@ test('same-revision writes yield one success and one conflict; stale deletes can
   assert.deepEqual(await (await put('00000000-0000-4000-8000-000000000008', 3, 5)).json(), { revision: 4, saved: true });
 });
 
-test('a different payload under the same mutation_id conflicts with 409', async () => {
-  const { db, call, target } = await ratingScenario();
+test('a different payload under the same mutation_id conflicts with 409', async (t) => {
+  const { db, call, target } = await ratingScenario(t);
   const base = {
     mutation_id: '00000000-0000-4000-8000-000000000001',
     target,
@@ -354,8 +364,8 @@ test('a different payload under the same mutation_id conflicts with 409', async 
   assert.equal(rows.rows[0]?.score, 4, 'the conflicting payload overwrote nothing');
 });
 
-test('a duplicate that raced past the original replays after the lock, never 503s', async () => {
-  const { call, target } = await ratingScenario();
+test('a duplicate that raced past the original replays after the lock, never 503s', async (t) => {
+  const { call, target } = await ratingScenario(t);
   const put = (mutationId: string, expectedRevision: number, score: number, reasonCodes: string[]) =>
     call('PUT', '/v1/feedback', {
       mutation_id: mutationId,
@@ -384,8 +394,9 @@ test('a duplicate that raced past the original replays after the lock, never 503
   assert.deepEqual(await conflict.json(), { error: 'mutation_conflict' });
 });
 
-test('forged-bearer failures count toward the shared IP bucket', async () => {
+test('forged-bearer failures count toward the shared IP bucket', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   const client = pgliteFeedbackClient(db);
   const config = { ...testFeedbackConfig(), deviceRateLimit: 100, ipRateLimit: 1 };
   const device = await registerFeedbackDevice(db);
@@ -412,8 +423,9 @@ test('forged-bearer failures count toward the shared IP bucket', async () => {
 
 // --- limits and envelope failures ---
 
-test('the device and IP limits answer 429 with Retry-After; reads count too', async () => {
+test('the device and IP limits answer 429 with Retry-After; reads count too', async (t) => {
   const db = await freshFeedbackDatabase();
+  t.after(() => db.close());
   const client = pgliteFeedbackClient(db);
   const config = { ...testFeedbackConfig(), deviceRateLimit: 2, ipRateLimit: 10 };
   const device = await registerFeedbackDevice(db);
@@ -450,12 +462,8 @@ test('the device and IP limits answer 429 with Retry-After; reads count too', as
   assert.deepEqual(stored.rows.map((row) => row.ip_hash), [hashIp('192.0.2.1')]);
 });
 
-test('envelope failures: unknown path, oversized body, invalid JSON', async () => {
-  const db = await freshFeedbackDatabase();
-  const client = pgliteFeedbackClient(db);
-  const config = testFeedbackConfig();
-  const device = await registerFeedbackDevice(db);
-  await publishFixtureTargets(db, [{ kind: 'guide', route_id: 'guide-route-a1', version: '1', locale: 'be' }]);
+test('envelope failures: unknown path, oversized body, invalid JSON', async (t) => {
+  const { db, client, config, device } = await feedbackScenario(t);
 
   const notFound = await handleFeedbackEdgeRequest(
     feedbackRequest({ method: 'POST', url: 'https://feedback.test/v1/feedback/rate', body: {}, secret: device.secret }),

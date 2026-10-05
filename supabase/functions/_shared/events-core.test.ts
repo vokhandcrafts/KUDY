@@ -371,8 +371,9 @@ test('eventInsertSql: placeholders only, bounded by the batch contract', () => {
 
 // --- the production statements against real Postgres (PGlite) ---
 
-test('PGlite: the real port inserts the batch, dedupes the resend, and bumps the rate window', async () => {
+test('PGlite: the real port inserts the batch, dedupes the resend, and bumps the rate window', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const deviceId = '66666666-6666-4666-8666-000000000001';
   await db.query('insert into devices (device_id, secret_hash) values ($1, md5(random()::text))', [deviceId]);
   const port = createSqlEventsPort(db);
@@ -398,8 +399,9 @@ test('PGlite: the real port inserts the batch, dedupes the resend, and bumps the
   assert.equal(await port.incrementEventRate(deviceId, windowStart), 2, 'the same window accumulates');
 });
 
-test('PGlite: the rate counter dies with the device row (cascade)', async () => {
+test('PGlite: the rate counter dies with the device row (cascade)', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const deviceId = '66666666-6666-4666-8666-000000000002';
   await db.query('insert into devices (device_id, secret_hash) values ($1, md5(random()::text))', [deviceId]);
   const port = createSqlEventsPort(db);
@@ -413,8 +415,9 @@ test('PGlite: the rate counter dies with the device row (cascade)', async () => 
 // its old secret authenticates nothing and its old events store nothing.
 // Fails if the delete stops removing the devices row or the intake stops
 // consulting it (implementation-rules 1).
-test('G09.03: after device-delete the same batch answers 403 and stores nothing', async () => {
+test('G09.03: after device-delete the same batch answers 403 and stores nothing', async (t) => {
   const db = await freshMigratedDatabase();
+  t.after(() => db.close());
   const registration = registerDevice();
   await db.query(DEVICE_INSERT_SQL, [registration.deviceId, registration.secretHash]);
   const port = createSqlEventsPort(db);
