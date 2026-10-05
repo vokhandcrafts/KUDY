@@ -24,6 +24,9 @@ import type {
   SessionRow,
   SessionStartInput,
   SessionState,
+  SessionHistoryCursor,
+  SessionHistoryPage,
+  SessionHistorySummary,
   SqlDriver,
   SqlValue,
 } from './types.ts';
@@ -165,6 +168,78 @@ export function listSessionHistory(driver: SqlDriver): SessionRow[] {
     .prepare(`SELECT ${SESSION_COLUMNS} FROM session ORDER BY started_at DESC, session_id DESC`)
     .all()
     .map(toSessionRow);
+}
+
+// G22.06 (spec E6): My KUDY reads the completed history in bounded pages —
+// the keyset cursor (started_at, session_id) walks `started_at DESC,
+// session_id DESC`, the page never carries more than SESSION_HISTORY_PAGE_SIZE
+// completed summaries and never touches an offset. The live walk is read in
+// the same snapshot, separately from the completed rows (spec: «бягучая
+// прагулка даступная асобна ад старонак завершанай гісторыі»). Full-history
+// reads stay in listSessionHistory for the actual-progress uses.
+// G22.06 names a malformed cursor 'history-page-invalid' — a bad key is a
+// named diagnostic, never a wrong page or a crash (implementation-rules 14).
+export const SESSION_HISTORY_PAGE_SIZE = 50;
+
+const SESSION_SUMMARY_COLUMNS =
+  'session_id, route_id, version, locale, state, started_at, finished_at, heard';
+
+function toSessionHistorySummary(row: SessionDbRow): SessionHistorySummary {
+  return {
+    sessionId: String(row.session_id),
+    routeId: String(row.route_id),
+    version: String(row.version),
+    locale: String(row.locale),
+    state: String(row.state) as SessionState,
+    startedAt: Number(row.started_at),
+    finishedAt: row.finished_at === null || row.finished_at === undefined ? null : Number(row.finished_at),
+    // Derived in the mapper, not in SQL: the summary needs only the count, and
+    // JSON functions must not be assumed of the real target driver (spec E6
+    // criterion 6). The array itself never leaves the store here.
+    heardCount: (JSON.parse(String(row.heard)) as string[]).length,
+  };
+}
+
+export function listSessionHistoryPage(
+  driver: SqlDriver,
+  cursor: SessionHistoryCursor | null,
+): SessionHistoryPage {
+  let cursorSql = '';
+  const params: SqlValue[] = [];
+  if (cursor !== null) {
+    if (typeof cursor.sessionId !== 'string' || cursor.sessionId === '' || !Number.isSafeInteger(cursor.startedAt)) {
+      throw new DbError(
+        'history-page-invalid',
+        `history page cursor must be a (startedAt safe integer, sessionId non-empty string) pair, got (${String(cursor.startedAt)}, ${String(cursor.sessionId)})`,
+      );
+    }
+    cursorSql = ' AND (started_at < ? OR (started_at = ? AND session_id < ?))';
+    params.push(cursor.startedAt, cursor.startedAt, cursor.sessionId);
+  }
+  // One snapshot for the live row and the page: a walk finishing between the
+  // two reads must not surface twice (as the live walk and as a history row).
+  return inTransaction(driver, () => {
+    const live = getLiveSession(driver);
+    const rows = driver
+      .prepare(
+        `SELECT ${SESSION_SUMMARY_COLUMNS} FROM session WHERE state = 'finished'${cursorSql}
+         ORDER BY started_at DESC, session_id DESC LIMIT ?`,
+      )
+      .all(...params, SESSION_HISTORY_PAGE_SIZE)
+      .map(toSessionHistorySummary);
+    const last = rows[rows.length - 1];
+    return {
+      live,
+      rows,
+      // A full page carries the key of its last row even when the next page
+      // comes back empty — the final empty page is how the walk ends (the
+      // controller clears its load-more state on it, spec E6 criterion 4).
+      nextCursor:
+        rows.length === SESSION_HISTORY_PAGE_SIZE && last
+          ? { startedAt: last.startedAt, sessionId: last.sessionId }
+          : null,
+    };
+  });
 }
 
 // The deletion-guard read (G04.04.b, ADR G01.03 §3.4): every non-finished

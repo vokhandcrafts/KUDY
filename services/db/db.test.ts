@@ -31,6 +31,7 @@ import {
   listPendingEvents,
   listSessionGuideHints,
   listSessionHistory,
+  listSessionHistoryPage,
   markEventsSent,
   openDatabase,
   pauseSession,
@@ -46,7 +47,7 @@ import {
 } from './db.ts';
 import { INITIAL_SCHEMA_DDL, migrationSteps, ZONE_A_DDL, ZONE_A_TABLES, ZONE_B_DDL, ZONE_B_TABLES } from './schema.ts';
 import { nodeSqliteDriver, nodeSqliteFileDriver } from './test-fixture.ts';
-import type { SqlDriver } from './types.ts';
+import type { SessionHistoryCursor, SqlDriver } from './types.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -451,7 +452,7 @@ test('an old file-backed store upgrades in place: rows keep payloads, keys backf
 
     const upgraded = nodeSqliteFileDriver(file);
     openDatabase(upgraded.driver);
-    assert.equal(Number(upgraded.driver.prepare('PRAGMA user_version').get()!.user_version), 3);
+    assert.equal(Number(upgraded.driver.prepare('PRAGMA user_version').get()!.user_version), migrationSteps[migrationSteps.length - 1]!.version);
     const rows = upgraded.driver
       .prepare('SELECT event_id, enqueue_seq FROM event_queue ORDER BY enqueue_seq')
       .all();
@@ -550,6 +551,244 @@ test('openDatabase: reopening a store already at the latest version is a no-op',
   startSession(driver, START);
   openDatabase(driver);
   assert.ok(getSession(driver, START.sessionId));
+});
+
+// G22.06 (issue #611, spec E6) — the bounded completed-history page read: the
+// keyset cursor, the live walk beside the pages, and the in-place index
+// migration. Measurements on synthetic sessions are labeled as measurements,
+// not user-frequency claims.
+// The page size is pinned as the literal 50 the spec fixes, never read from
+// the code's constant — a bound that measures itself cannot fail on a revert.
+const PAGE_SIZE = 50;
+
+// Arrange-only seeding through straight SQL (implementation-rules 15): the
+// reads under test stay the production path, the fixtures never pre-process
+// their inputs.
+function seedFinishedSessions(driver: SqlDriver, count: number, baseStartedAt: number): void {
+  const insert = driver.prepare(
+    "INSERT INTO session (session_id, route_id, version, locale, state, started_at, finished_at, heard) VALUES (?, ?, ?, ?, 'finished', ?, ?, ?)",
+  );
+  for (let i = 0; i < count; i += 1) {
+    const startedAt = baseStartedAt + i;
+    insert.run(
+      `walk-${String(i).padStart(4, '0')}`,
+      'route-page',
+      '1',
+      'be',
+      startedAt,
+      startedAt + 500,
+      JSON.stringify(['story-1', 'story-2']),
+    );
+  }
+}
+
+// The measurement instrument for spec E6 criterion 1: counts the rows the
+// history page reads actually return through the driver surface.
+function countingHistoryDriver(driver: SqlDriver): { driver: SqlDriver; historyRowsRead: () => number } {
+  let rowsRead = 0;
+  const wrapped: SqlDriver = {
+    execSql: (sql) => driver.execSql(sql),
+    prepare: (sql) => {
+      const statement = driver.prepare(sql);
+      if (!sql.includes('FROM session')) return statement;
+      return {
+        run: (...params) => statement.run(...params),
+        get: (...params) => statement.get(...params),
+        all: (...params) => {
+          const rows = statement.all(...params);
+          rowsRead += rows.length;
+          return rows;
+        },
+      };
+    },
+  };
+  return { driver: wrapped, historyRowsRead: () => rowsRead };
+}
+
+test('history_page_is_bounded: one page reads at most 50 completed summaries at 20/100/500 sessions', () => {
+  for (const total of [20, 100, 500]) {
+    const driver = openFresh();
+    seedFinishedSessions(driver, total, 1_000_000);
+    const counting = countingHistoryDriver(driver);
+    const page = listSessionHistoryPage(counting.driver, null);
+    // the measurement: whatever the history's size, one page read returns at
+    // most the page size — 20 rows for 20 sessions, 50 for 100 and 500
+    assert.equal(page.rows.length, Math.min(total, PAGE_SIZE), `first page at ${total} sessions`);
+    assert.ok(
+      counting.historyRowsRead() <= PAGE_SIZE,
+      `one page read ${counting.historyRowsRead()} rows at ${total} sessions`,
+    );
+    // walking the cursor to the end reads every row exactly once — no offset
+    // traversal, no duplicate, no loss
+    const ids: string[] = [];
+    let cursor: SessionHistoryCursor | null = null;
+    let pages = 0;
+    do {
+      const walk = listSessionHistoryPage(counting.driver, cursor);
+      pages += 1;
+      ids.push(...walk.rows.map((row) => row.sessionId));
+      cursor = walk.nextCursor;
+    } while (cursor !== null);
+    assert.equal(ids.length, total, `all rows across pages at ${total} sessions`);
+    assert.equal(new Set(ids).size, total, `no duplicates across pages at ${total} sessions`);
+    // an exact multiple of the page size ends the walk with one empty final
+    // page — the cursor stays open after a full page and the next read closes it
+    const exactMultiple = total % PAGE_SIZE === 0 ? 1 : 0;
+    assert.equal(
+      pages,
+      Math.ceil(total / PAGE_SIZE) + exactMultiple,
+      `page count at ${total} sessions`,
+    );
+    assert.deepEqual(ids, [...ids].sort((a, b) => b.localeCompare(a)), `page order kept at ${total} sessions`);
+  }
+});
+
+test('live_session_is_visible_on_every_page: the live walk rides each page read, the completed pages stay clean', () => {
+  const driver = openFresh();
+  seedFinishedSessions(driver, 120, 1_000_000);
+  startSession(driver, { ...START, sessionId: 'walk-live' });
+  pauseSession(driver, 'walk-live');
+
+  const first = listSessionHistoryPage(driver, null);
+  assert.equal(first.live?.sessionId, 'walk-live');
+  assert.equal(first.rows.length, PAGE_SIZE);
+  const second = listSessionHistoryPage(driver, first.nextCursor);
+  // the live walk is available separately on every page read, never inside
+  // the completed rows
+  assert.equal(second.live?.sessionId, 'walk-live');
+  assert.ok(second.rows.every((row) => row.sessionId !== 'walk-live'));
+  assert.ok(first.rows.every((row) => row.sessionId !== 'walk-live'));
+  assert.equal(second.rows[0]!.heardCount, 2, 'the derived heard count matches the session data');
+});
+
+test('tied started_at rows keep the keyset stable, and the final empty page closes the walk', () => {
+  const driver = openFresh();
+  seedFinishedSessions(driver, 48, 1_000);
+  // a tie at the page boundary: same started_at, distinct session_id — the
+  // cursor carries both facts, so paging neither loses nor repeats the pair
+  const tie = driver.prepare(
+    "INSERT INTO session (session_id, route_id, version, locale, state, started_at, finished_at, heard) VALUES (?, ?, ?, ?, 'finished', ?, ?, ?)",
+  );
+  tie.run('tie-a', 'route-page', '1', 'be', 999, 1_499, '[]');
+  tie.run('tie-b', 'route-page', '1', 'be', 999, 1_499, '[]');
+  tie.run('zz-late', 'route-page', '1', 'be', 998, 1_498, '[]');
+
+  const first = listSessionHistoryPage(driver, null);
+  assert.equal(first.rows.length, PAGE_SIZE);
+  assert.equal(first.rows[0]!.sessionId, 'walk-0047');
+  assert.deepEqual(first.rows.slice(-2).map((row) => row.sessionId), ['tie-b', 'tie-a'], 'the tie orders by session_id DESC');
+  assert.deepEqual(first.nextCursor, { startedAt: 999, sessionId: 'tie-a' });
+
+  const second = listSessionHistoryPage(driver, first.nextCursor);
+  assert.deepEqual(second.rows.map((row) => row.sessionId), ['zz-late'], 'the row below the tie lands on the next page once');
+  assert.equal(second.nextCursor, null, 'the walk ends with an empty final page, not a lost row');
+});
+
+test('the history page read plans over the partial index — no full history read or sort', () => {
+  const driver = openFresh();
+  seedFinishedSessions(driver, 600, 1_000_000);
+  // capture the SQL the real page read issues, then plan it verbatim
+  const captured: string[] = [];
+  const wrapper: SqlDriver = {
+    execSql: (sql) => driver.execSql(sql),
+    prepare: (sql) => {
+      if (sql.includes('FROM session') && sql.includes('LIMIT ?')) captured.push(sql);
+      return driver.prepare(sql);
+    },
+  };
+  const page = listSessionHistoryPage(wrapper, null);
+  assert.equal(page.rows.length, PAGE_SIZE);
+  assert.equal(captured.length, 1, 'exactly one prepared history query');
+  const plan = driver
+    .prepare(`EXPLAIN QUERY PLAN ${captured[0]}`)
+    .all(PAGE_SIZE)
+    .map((row) => String(row.detail));
+  assert.ok(
+    plan.join('\n').includes('session_history_order'),
+    `the plan must use the partial index, got: ${plan.join(' | ')}`,
+  );
+  assert.ok(plan.every((detail) => !detail.includes('TEMP B-TREE')), 'no temporary b-tree sort');
+  assert.ok(
+    plan.every((detail) => !detail.includes('SCAN session') || detail.includes('USING INDEX session_history_order')),
+    'every history access goes through the partial index, never a bare table read',
+  );
+  // the cursor page keeps the row bound whatever plan the OR predicate picks
+  const second = listSessionHistoryPage(wrapper, { startedAt: 1_000_049, sessionId: 'walk-0049' });
+  assert.ok(second.rows.length <= PAGE_SIZE);
+});
+
+test('the history page cursor is validated with a named diagnostic, never a wrong page', () => {
+  const driver = openFresh();
+  seedFinishedSessions(driver, 3, 1_000);
+  const bad: Array<SessionHistoryCursor> = [
+    { startedAt: Number.NaN, sessionId: 'walk-0001' },
+    { startedAt: 1.5, sessionId: 'walk-0001' },
+    { startedAt: Number.POSITIVE_INFINITY, sessionId: 'walk-0001' },
+    { startedAt: 1_000, sessionId: '' },
+  ];
+  for (const cursor of bad) {
+    assert.throws(
+      () => listSessionHistoryPage(driver, cursor),
+      (error: unknown) => error instanceof DbError && error.rule === 'history-page-invalid',
+      `cursor ${JSON.stringify(cursor)} must answer with history-page-invalid`,
+    );
+  }
+  const nonString = { startedAt: 1_000, sessionId: 5 } as unknown as SessionHistoryCursor;
+  assert.throws(
+    () => listSessionHistoryPage(driver, nonString),
+    (error: unknown) => error instanceof DbError && error.rule === 'history-page-invalid',
+  );
+  assert.equal(listSessionHistoryPage(driver, null).rows.length, 3, 'a null cursor opens the first page');
+});
+
+test('an old file-backed store gains the history order in place: rows and counts stay untouched', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'g2206-'));
+  const file = path.join(dir, 'history.db');
+  try {
+    let snapshot: ReturnType<typeof listSessionHistory>;
+    {
+      const legacy = nodeSqliteFileDriver(file);
+      openDatabase(legacy.driver, migrationSteps.slice(0, 3));
+      assert.equal(Number(legacy.driver.prepare('PRAGMA user_version').get()!.user_version), 3);
+      for (let i = 0; i < 3; i += 1) {
+        startSession(legacy.driver, { ...START, sessionId: `walk-done-${i}`, startedAt: 1_000 + i });
+        checkpointProgress(legacy.driver, `walk-done-${i}`, { heard: ['story-1', 'story-2', 'story-3'] });
+        finishSession(legacy.driver, `walk-done-${i}`, { finishedAt: 2_000 + i });
+      }
+      // the live walk starts last — the one_live_session rule allows exactly
+      // one active/paused row, and the snapshot keeps it beside the finished
+      startSession(legacy.driver, { ...START, sessionId: 'walk-live-1', startedAt: 5_000 });
+      pauseSession(legacy.driver, 'walk-live-1');
+      snapshot = listSessionHistory(legacy.driver);
+      legacy.close();
+    }
+    {
+      const upgraded = nodeSqliteFileDriver(file);
+      openDatabase(upgraded.driver);
+      assert.equal(Number(upgraded.driver.prepare('PRAGMA user_version').get()!.user_version), 4);
+      const index = upgraded.driver
+        .prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'session_history_order'")
+        .get();
+      assert.ok(index, 'the history order index exists after the in-place migration');
+      // the stored progress survives the index migration unchanged
+      assert.deepEqual(listSessionHistory(upgraded.driver), snapshot);
+      // the summary projection matches the actual session data
+      const page = listSessionHistoryPage(upgraded.driver, null);
+      assert.deepEqual(
+        page.rows.map((row) => [row.sessionId, row.startedAt, row.heardCount]),
+        snapshot
+          .filter((row) => row.state === 'finished')
+          .map((row) => [row.sessionId, row.startedAt, row.heard.length]),
+      );
+      assert.equal(page.live?.sessionId, 'walk-live-1');
+      // reopening a store already at the latest version changes nothing
+      openDatabase(upgraded.driver);
+      assert.deepEqual(listSessionHistory(upgraded.driver), snapshot);
+      upgraded.close();
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('zone guards: the two zone lists cannot drift, and rebuildDerived names no zone B table', () => {

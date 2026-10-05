@@ -55,6 +55,37 @@ export interface SessionRow {
   playSeq: number;
 }
 
+// G22.06 (spec E6): the completed-history page read. The cursor is the keyset
+// key of the last row of the previous page — (started_at, session_id), the
+// same pair the page order sorts by — never an offset. The summary carries the
+// row's identity/state/timing facts plus the derived heardCount; the progress
+// arrays themselves stay in the store and are read separately when a surface
+// needs the full walk. Projections only: nothing here is new stored progress.
+export interface SessionHistoryCursor {
+  startedAt: number;
+  sessionId: string;
+}
+
+export interface SessionHistorySummary {
+  sessionId: string;
+  routeId: string;
+  version: string;
+  locale: string;
+  state: SessionState;
+  startedAt: number;
+  finishedAt: number | null;
+  heardCount: number;
+}
+
+export interface SessionHistoryPage {
+  /** The app's one live walk (active/paused), read separately from the pages. */
+  live: SessionRow | null;
+  /** Completed summaries of this page, `started_at DESC, session_id DESC`. */
+  rows: SessionHistorySummary[];
+  /** Key of the next page; null when the read reached the end of the history. */
+  nextCursor: SessionHistoryCursor | null;
+}
+
 // ADR G01.03 §3.3 checkpoint (PersistProgress): the controller writes the
 // sets and last_stop_id after every accepted mutating event, in event order;
 // play_seq is written through on PlayStory. Fields are optional — a
