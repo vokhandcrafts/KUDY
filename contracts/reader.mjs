@@ -28,8 +28,23 @@ function resolveRef(root, rootFile, schemaFile, ref) {
     }
     return { schema: node, file: schemaFile };
   }
-  const target = path.resolve(path.dirname(schemaFile), ref);
-  return { schema: loadSchema(target), file: target, root: loadSchema(target) };
+  // Cross-file ref, optionally with an in-target fragment
+  // ("other.schema.json", "other.schema.json#/$defs/x") — the fragment walks
+  // the TARGET document and nested "#/..." refs inside it resolve against
+  // that target root, per draft-07 resolution.
+  const hashIndex = ref.indexOf('#');
+  const filePart = hashIndex === -1 ? ref : ref.slice(0, hashIndex);
+  const fragment = hashIndex === -1 ? null : ref.slice(hashIndex + 1);
+  const target = path.resolve(path.dirname(schemaFile), filePart);
+  const targetRoot = loadSchema(target);
+  if (fragment === null || fragment === '') {
+    return { schema: targetRoot, file: target, root: targetRoot };
+  }
+  let node = targetRoot;
+  for (const part of fragment.replace(/^\//, '').split('/')) {
+    node = node?.[part.replace(/~1/g, '/').replace(/~0/g, '~')];
+  }
+  return { schema: node, file: target, root: targetRoot };
 }
 
 function typeOf(value) {
