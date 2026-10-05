@@ -68,6 +68,12 @@ export function createSchema(db) {
       collected_at TEXT
     );
     CREATE UNIQUE INDEX IF NOT EXISTS media_record_file ON media (raw_record_id, file);
+    -- G22.04: the /records page counts each record's links with a per-row
+    -- COUNT over links.raw_record_id; the index turns that lookup from a full
+    -- table scan into an indexed seek. Idempotent on every open, so a store
+    -- opened before G22.04 gains it on the next write-mode open — the
+    -- read-only dispatcher cannot create schema objects.
+    CREATE INDEX IF NOT EXISTS links_record ON links (raw_record_id);
     -- Cleaning versions (G17.06): one row per written cleaned document. The
     -- raw record is never rewritten — each cleaning run whose package version
     -- differs from the latest writes the next version file (v1, v2, …) and

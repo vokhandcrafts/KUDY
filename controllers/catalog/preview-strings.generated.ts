@@ -64,4 +64,22 @@ export const PREVIEW_STRINGS_DATA = {
     "storageExit": "Звільнити місце в KUDY",
     "storageFullDetail": (mb: number) => `бракує місця: потрібно ще ${mb} МБ`,
   },
+  "de": {
+    "detail": (detail: { readonly kind: string; readonly count?: number }) => detail.kind === "damaged" ? `Paket beschädigt: erneutes Laden nötig` : detail.kind === "missing-files" ? `Fehlende Dateien: ${detail.count}` : detail.kind === "stale" ? `Ein Update ist verfügbar` : `Paket unvollständig`,
+    "downloadFailed": "Laden fehlgeschlagen.",
+    "label": {
+      "download": "Laden",
+      "start": "Starten",
+    },
+    "reason": {
+      "preview#download-unavailable": "Laden ist in diesem Build nicht verfügbar.",
+      "preview#not-published": "Guide ist nicht veröffentlicht.",
+      "preview#purchase-required": "Kauf erforderlich.",
+      "preview#storage-unknown": "Speicher nicht verfügbar.",
+      "preview#verify-unavailable": "Prüfung nicht verfügbar.",
+    },
+    "retry": "Erneut versuchen",
+    "storageExit": "Speicher in KUDY freigeben",
+    "storageFullDetail": (mb: number) => `nicht genug Speicher: ${mb} MB mehr erforderlich`,
+  },
 };

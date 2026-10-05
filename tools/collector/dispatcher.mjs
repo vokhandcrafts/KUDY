@@ -3,7 +3,9 @@
 // campaigns with record counts by status, photos, failed steps, and the latest
 // run_log steps with their diagnostics —, since G17.13, the «Запісы» page:
 // every record of every campaign with its status, rights, photo/link counts
-// and URL-carried filters, and, since G17.20, the per-campaign «Як парсіць»
+// and URL-carried filters — since G22.04 bounded to one page (validated
+// limit, keyset cursor, next-page link) —, and, since G17.20, the
+// per-campaign «Як парсіць»
 // block: the transport stored with the campaign, with the manual steps a human
 // performs themselves under tor. Zero dependencies (node:http + node:sqlite).
 // The store is opened with readOnly: true, so no request can write to the
@@ -54,7 +56,9 @@ const RIGHTS_BE = {
   research_only: 'толькі даследаванне',
   author_own: 'уласны матэрыял',
 };
-const RECORD_PARAMS = ['status', 'city'];
+const RECORD_PARAMS = ['status', 'city', 'limit', 'cursor'];
+const DEFAULT_RECORDS_LIMIT = 50;
+const MAX_RECORDS_LIMIT = 100;
 // Display words for the campaign transport (docs/24 «Кампанія», G17.20): the
 // raw key stays visible in a .key span, so the canonical value is never hidden
 // behind a translation.
@@ -299,10 +303,12 @@ function notFound(response, why) {
   response.end(`dispatcher: 404 — ${why}`);
 }
 
-// URL filters of the records list: `status` must be a known record status, and
-// only the two known parameter names are accepted. Anything else — an unknown
+// URL filters of the records list: `status` must be a known record status,
+// and only the known parameter names are accepted. Anything else — an unknown
 // parameter, an unknown status value — is answered with a readable note and
-// the unfiltered list, never a 500. An empty value is no filter.
+// the unfiltered list, never a 500. An empty value is no filter. The `limit`
+// and `cursor` parameters (G22.04) are stricter: parseRecordsPage rejects an
+// invalid value with a 400 before any SQL runs.
 function parseRecordFilters(query) {
   const notes = [];
   const unknown = [...new Set(query.keys())].filter((key) => !RECORD_PARAMS.includes(key));
@@ -319,16 +325,82 @@ function parseRecordFilters(query) {
   return { status, city: query.get('city') || undefined, notes };
 }
 
-// The «Запісы» data: every record of every campaign. A record's city is its
-// campaign's city, so the city filter is the axis that separates campaigns
+// The page cursor (G22.04): base64url JSON of the last ordering key — c:
+// collected_at (a null is kept: null dates sort last in the page order), u:
+// url, i: id — plus the normalized city/s filters it was built under. The
+// cursor is plain data, not an access right: the fields are typed here,
+// always bound as SQL parameters, and parseRecordsPage rejects a cursor whose
+// filters disagree with the request.
+function encodeRecordsCursor({ collectedAt, url, id, city, status }) {
+  return Buffer.from(
+    JSON.stringify({ c: collectedAt ?? null, u: url, i: id, city: city ?? null, s: status ?? null }),
+    'utf8'
+  ).toString('base64url');
+}
+
+function decodeRecordsCursor(value) {
+  let payload = null;
+  try {
+    payload = JSON.parse(Buffer.from(value, 'base64url').toString('utf8'));
+  } catch {
+    return null;
+  }
+  const ok =
+    payload !== null &&
+    typeof payload === 'object' &&
+    !Array.isArray(payload) &&
+    (payload.c === null || typeof payload.c === 'string') &&
+    typeof payload.u === 'string' &&
+    payload.u !== '' &&
+    typeof payload.i === 'string' &&
+    payload.i !== '' &&
+    (payload.city === null || typeof payload.city === 'string') &&
+    (payload.s === null || RECORD_STATUSES.includes(payload.s));
+  return ok ? payload : null;
+}
+
+// Page bounds of the records list (G22.04): the limit and the keyset cursor
+// are validated before any SQL runs — an invalid value answers { ok: false }
+// with the reason, and the route turns it into a 400. An empty value means
+// "no parameter", like the filters above.
+function parseRecordsPage(query, filters) {
+  const rawLimit = query.get('limit');
+  if (rawLimit !== null && rawLimit !== '') {
+    if (!/^\d+$/.test(rawLimit) || Number(rawLimit) < 1 || Number(rawLimit) > MAX_RECORDS_LIMIT) {
+      return { ok: false, reason: `Ліміт «${rawLimit}» — патрэбны цэлы лік ад 1 да ${MAX_RECORDS_LIMIT}.` };
+    }
+  }
+  const limit = rawLimit === null || rawLimit === '' ? DEFAULT_RECORDS_LIMIT : Number(rawLimit);
+  const rawCursor = query.get('cursor');
+  if (rawCursor === null || rawCursor === '') {
+    return { ok: true, limit, cursor: null };
+  }
+  const cursor = decodeRecordsCursor(rawCursor);
+  if (cursor === null) {
+    return { ok: false, reason: 'Курсор не чытаецца — пачніце перабор спісу нанова без яго.' };
+  }
+  if (cursor.s !== (filters.status ?? null) || cursor.city !== (filters.city ?? null)) {
+    return {
+      ok: false,
+      reason: `Курсор несупадае з фільтрамі запыта (курсор: status=${cursor.s ?? '—'}, city=${cursor.city ?? '—'}) — змена фільтра пачынае новы перабор.`,
+    };
+  }
+  return { ok: true, limit, cursor };
+}
+
+// The «Запісы» data: one bounded page of records (G22.04). A record's city is
+// its campaign's city, so the city filter is the axis that separates campaigns
 // here — the same one the CLI's search offers. Photo and link counts ride in
-// the same query as scalar subqueries; the title comes from the search index's
-// row for the latest cleaned document — the index cannot be re-synced from
-// this connection (read-only), so a record without one falls back to its URL,
-// like the CLI's search output does.
+// the same query as scalar subqueries (the links one seeks through the
+// links_record index); the title comes from the search index's row for the
+// latest cleaned document — the index cannot be re-synced from this
+// connection (read-only), so a record without one falls back to its URL, like
+// the CLI's search output does.
 function recordsData(db, query) {
   const filters = parseRecordFilters(query);
-  if (!db) return { ...filters, records: [], cities: [] };
+  const page = parseRecordsPage(query, filters);
+  if (!page.ok) return { ...filters, kind: 'invalid-page', reason: page.reason };
+  if (!db) return { ...filters, records: [], cities: [], limit: page.limit, nextCursor: null };
   const where = [];
   const params = [];
   if (filters.status) {
@@ -339,6 +411,22 @@ function recordsData(db, query) {
     where.push('r.city = ?');
     params.push(filters.city);
   }
+  if (page.cursor) {
+    // The keyset predicate: rows strictly after the cursor in the page order
+    // collected_at DESC (nulls last in SQLite), then url, then id. Four
+    // segments — older non-null dates; any row when the cursor has a date and
+    // this row's is null; the tied date resolved by (url, id); tied null
+    // dates resolved by (url, id). The cursor values are bound parameters,
+    // never spliced into the SQL text.
+    where.push(`(
+      (r.collected_at IS NOT NULL AND r.collected_at < ?)
+      OR (r.collected_at IS NULL AND ? IS NOT NULL)
+      OR (r.collected_at = ? AND (r.url > ? OR (r.url = ? AND r.id > ?)))
+      OR (r.collected_at IS NULL AND ? IS NULL AND (r.url > ? OR (r.url = ? AND r.id > ?)))
+    )`);
+    const { c, u, i } = page.cursor;
+    params.push(c, c, c, u, u, i, c, u, u, i);
+  }
   const records = db
     .prepare(
       `SELECT r.id, r.source_type, r.url, r.collected_at, r.city, r.status, r.rights, f.title,
@@ -347,20 +435,35 @@ function recordsData(db, query) {
        FROM raw_records r
        LEFT JOIN cleaned_fts f ON f.raw_record_id = r.id
        ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
-       ORDER BY r.collected_at DESC, r.url, r.id`
+       ORDER BY r.collected_at DESC, r.url, r.id
+       LIMIT ?`
     )
-    .all(...params)
+    .all(...params, page.limit)
     .map((row) => ({
       ...row,
       statusBe: RECORD_STATUS_BE[row.status] ?? row.status,
       sourceBe: SOURCE_TYPE_BE[row.source_type] ?? row.source_type,
       rightsBe: RIGHTS_BE[row.rights] ?? row.rights,
     }));
+  const last = records[records.length - 1] ?? null;
+  // A full page may have a successor; the cursor pins the last rendered key,
+  // so rows inserted between requests never shift the traversal (no repeats,
+  // no skips of older rows). A short page is the end of the list.
+  const nextCursor =
+    last !== null && records.length === page.limit
+      ? encodeRecordsCursor({
+          collectedAt: last.collected_at ?? null,
+          url: last.url,
+          id: last.id,
+          city: filters.city ?? null,
+          status: filters.status ?? null,
+        })
+      : null;
   const cities = db
     .prepare('SELECT DISTINCT city FROM raw_records ORDER BY city')
     .all()
     .map((row) => row.city);
-  return { ...filters, records, cities };
+  return { ...filters, records, cities, limit: page.limit, nextCursor };
 }
 
 // Every choice in the filter bar is a plain GET link carrying the full filter
@@ -413,12 +516,32 @@ function notesHtml(notes) {
   return notes.map((note) => `<p class="note">${escapeHtml(note)}</p>`).join('\n');
 }
 
-export function renderRecords({ records, cities, status, city, notes }) {
+// The next-page link carries the full traversal state — filters, the chosen
+// limit when it is not the default, the cursor — so, like the filter bar, the
+// address bar always holds the shareable view of that page.
+function recordsNextHref({ status, city, limit, cursor }) {
+  const params = new URLSearchParams();
+  if (status) params.set('status', status);
+  if (city) params.set('city', city);
+  if (limit !== DEFAULT_RECORDS_LIMIT) params.set('limit', String(limit));
+  params.set('cursor', cursor);
+  return `/records?${params.toString()}`;
+}
+
+export function renderRecords({ records, cities, status, city, notes, limit, nextCursor }) {
   const noteHtml = notesHtml(notes);
   const rows =
     records.length > 0
       ? records.map(recordRowHtml).join('\n')
       : `<tr><td colspan="8" class="empty">${status || city ? 'Па гэтым фільтры запісаў няма.' : EMPTY_LIBRARY_MESSAGE}</td></tr>`;
+  // A full page may continue; a short page is the end of the list and renders
+  // no link.
+  const nextPage =
+    nextCursor !== null
+      ? `\n<p class="filters"><a href="${escapeHtml(
+          recordsNextHref({ status, city, limit, cursor: nextCursor })
+        )}">Наступная старонка →</a></p>`
+      : '';
   return pageShell(
     'records',
     `${noteHtml}
@@ -427,7 +550,7 @@ ${recordsFilterBar({ status, city, cities })}
 <table>
 <tr><th>Назва</th><th>Крыніца</th><th>Статус</th><th>Правы</th><th>Горад</th><th>Дата збору</th><th>Фота</th><th>Спасылкі</th></tr>
 ${rows}
-</table>`
+</table>${nextPage}`
   );
 }
 
@@ -731,6 +854,16 @@ async function serveDataFile(snapshotsRoot, pathname, response) {
   response.end(await readFile(file));
 }
 
+// The 400 page of the records list (G22.04): the readable reason from
+// parseRecordsPage, the notes that still apply, and the way out — a fresh
+// traversal without the cursor.
+function renderRecordsBadRequest({ notes, reason }) {
+  return pageShell(
+    'records',
+    `${notesHtml(notes)}\n<p class="note">${escapeHtml(reason)}</p>\n<p class="filters"><a href="/records">Пачаць перабор нанова</a></p>`
+  );
+}
+
 async function handleRequest(db, snapshotsRoot, request, response) {
   const url = new URL(request.url, 'http://127.0.0.1');
   if (request.method !== 'GET') {
@@ -748,8 +881,16 @@ async function handleRequest(db, snapshotsRoot, request, response) {
     return;
   }
   if (url.pathname === '/records') {
-    // Same body-before-head order as the overview.
-    const body = renderRecords(recordsData(db, url.searchParams));
+    // Same body-before-head order as the overview; a request whose limit or
+    // cursor fails validation answers 400 with the reason before any SQL
+    // runs (G22.04).
+    const data = recordsData(db, url.searchParams);
+    if (data.kind === 'invalid-page') {
+      response.writeHead(400, { 'content-type': 'text/html; charset=utf-8' });
+      response.end(renderRecordsBadRequest(data));
+      return;
+    }
+    const body = renderRecords(data);
     response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     response.end(body);
     return;

@@ -87,5 +87,5 @@ export function placeRefusalText(refusal: string, strings: PlaceDetailStrings): 
 const STRINGS = PLACE_DETAIL_STRINGS_DATA;
 
 export function placeDetailStrings(locale: string): PlaceDetailStrings {
-  return locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
+  return locale === 'de' ? STRINGS.de : locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
 }

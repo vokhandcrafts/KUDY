@@ -50,6 +50,86 @@ async function get(dispatcher, requestPath) {
   return { status: response.status, body: await response.text(), type: response.headers.get('content-type') };
 }
 
+// --- G22.04 pagination helpers ---
+
+// Every record row links its card exactly once, so the card-link cells count
+// the rendered rows of a page.
+function renderedRows(body) {
+  return (body.match(/<td><a href="\/record\?id=/g) ?? []).length;
+}
+
+function rowIds(body) {
+  return (body.match(/\/record\?id=([0-9a-f-]{36})/g) ?? []).map((match) => match.slice('/record?id='.length));
+}
+
+// Follows next-page links from firstPath until the link runs out; the
+// traversal guard keeps a fixture bug from spinning the suite forever.
+async function traversePages(dispatcher, firstPath) {
+  const ids = [];
+  let path = firstPath;
+  for (let page = 0; path; page += 1) {
+    assert.ok(page < 1000, 'traversal terminates');
+    const response = await get(dispatcher, path);
+    assert.equal(response.status, 200, path);
+    ids.push(...rowIds(response.body));
+    const nextHref = response.body.match(/href="(\/records\?[^"]*cursor=[^"]*)"/)?.[1];
+    path = nextHref ? nextHref.replaceAll('&amp;', '&') : null;
+  }
+  return ids;
+}
+
+// The JS mirror of the page order (collected_at DESC with nulls last, then
+// url, then id) — the independent oracle the walked pages are diffed against.
+function expectedOrder(records) {
+  return [...records].sort((a, b) => {
+    const aNull = a.collected_at === null;
+    const bNull = b.collected_at === null;
+    if (aNull !== bNull) return aNull ? 1 : -1;
+    if (!aNull && a.collected_at !== b.collected_at) return a.collected_at < b.collected_at ? 1 : -1;
+    if (a.url !== b.url) return a.url < b.url ? -1 : 1;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+}
+
+// Bulk fixture (G22.04): n cycling records across the two campaigns — null
+// dates every 10th, tied dates through the 20-day cycle, alternating
+// cities/statuses — plus two crafted records sharing one url across campaigns
+// with the same collected_at, so the (url, id) tiebreak is decisive.
+function seedBulkRecords(dir, n) {
+  const dbPath = path.join(dir, 'db.sqlite');
+  const db = openStore(dbPath);
+  seedCampaign(db, 'c1');
+  db.prepare(
+    `INSERT INTO campaigns (id, city, source_path, content_hash, seeds, topics, fence, youtube, created_at)
+     VALUES ('c2', 'krakow', 'other.yaml', 'hash', '[]', '[]', '{}', '[]', '2026-09-23T00:00:00.000Z')`
+  ).run();
+  const records = [];
+  for (let k = 0; k < n; k += 1) {
+    const record = rawRecord({
+      campaignId: k % 2 === 0 ? 'c1' : 'c2',
+      city: k % 2 === 0 ? 'gdansk' : 'krakow',
+      url: `https://news.example/r${String(k).padStart(4, '0')}`,
+      collected_at: k % 10 === 0 ? null : `2026-09-${String(20 - (k % 20)).padStart(2, '0')}T00:00:00.000Z`,
+      status: k % 3 === 0 ? 'cleaned' : 'raw',
+    });
+    upsertRawRecord(db, record);
+    records.push(record);
+  }
+  for (const campaignId of ['c1', 'c2']) {
+    const record = rawRecord({
+      campaignId,
+      city: campaignId === 'c1' ? 'gdansk' : 'krakow',
+      url: 'https://news.example/repeated',
+      collected_at: '2026-09-15T12:00:00.000Z',
+      status: 'raw',
+    });
+    upsertRawRecord(db, record);
+    records.push(record);
+  }
+  db.close();
+  return { dbPath, records };
+}
+
 // Two campaigns with records in every status, a photo, links, a failed crawl
 // step and a failed youtube step — everything the overview and the records
 // pages claim to show. The records fixture (G17.13): c1's two records are
@@ -354,7 +434,8 @@ test('unknown record filter parameters answer readably, not 500', async (t) => {
 
   const unknownParam = await get(dispatcher, '/records?banana=1');
   assert.equal(unknownParam.status, 200);
-  assert.match(unknownParam.body, /Невядомы параметр «banana» — ігнаруецца; вядомыя: status, city\./);
+  // G22.04: limit and cursor are known parameters now; the note lists them.
+  assert.match(unknownParam.body, /Невядомы параметр «banana» — ігнаруецца; вядомыя: status, city, limit, cursor\./);
   assert.ok(unknownParam.body.includes(recordA.url), 'the list still renders, unfiltered');
 
   const unknownStatus = await get(dispatcher, '/records?status=banana');
@@ -380,6 +461,177 @@ test('unknown record filter parameters answer readably, not 500', async (t) => {
   const unknownCity = await get(dispatcher, '/records?city=nowhere');
   assert.equal(unknownCity.status, 200);
   assert.match(unknownCity.body, /Па гэтым фільтры запісаў няма\./);
+});
+
+// AC2 (G22.04): over 1,000 records a real request renders only the requested
+// page — the default 50 — plus the next-page link; the rendered count and the
+// SQL row count are checked against each other.
+test('records_response_is_one_page: 1000+ records render one bounded page with a next link', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath } = seedBulkRecords(dir, 1005);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const store = new DatabaseSync(dbPath, { readOnly: true });
+  const total = Number(store.prepare('SELECT COUNT(*) AS n FROM raw_records').get().n);
+  store.close();
+  assert.ok(total > 1000, `the fixture holds ${total} records`);
+
+  const first = await get(dispatcher, '/records');
+  assert.equal(first.status, 200);
+  assert.equal(renderedRows(first.body), 50, 'the default page renders exactly the default limit');
+  assert.match(first.body, /Наступная старонка/);
+  assert.ok(first.body.match(/href="(\/records\?[^"]*cursor=[^"]*)"/), 'the next-page link carries the cursor');
+
+  const explicit = await get(dispatcher, '/records?limit=100');
+  assert.equal(explicit.status, 200);
+  assert.equal(renderedRows(explicit.body), 100, 'an explicit limit bounds the page the same way');
+  assert.match(explicit.body, /Наступная старонка/);
+
+  const tail = await get(dispatcher, '/records?limit=1000');
+  assert.equal(tail.status, 400, 'the limit above the accepted range is rejected, not widened');
+});
+
+// AC3 (G22.04): cursor pages preserve collected_at DESC, url, id — with null
+// dates, tied dates and a url repeated across campaigns — under the city and
+// status filters, walk every row exactly once, and an insertion between
+// requests neither repeats nor skips older traversal rows.
+test('cursor_preserves_filtered_order_with_nulls: keyset pages walk nulls, ties and repeated urls exactly once', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath, records } = seedBulkRecords(dir, 57);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const expectedAll = expectedOrder(records).map((record) => record.id);
+  assert.deepEqual(await traversePages(dispatcher, '/records?limit=7'), expectedAll);
+
+  const filtered = records.filter((record) => record.status === 'raw' && record.city === 'gdansk');
+  const expectedFiltered = expectedOrder(filtered).map((record) => record.id);
+  assert.ok(expectedFiltered.length > 7, 'the filtered traversal has pages to walk');
+  assert.deepEqual(
+    await traversePages(dispatcher, '/records?status=raw&city=gdansk&limit=5'),
+    expectedFiltered,
+    'the cursor keeps the normalized filters page after page'
+  );
+
+  // An insertion between requests: one row older than the cursor and one
+  // newer. The older row must still appear later (no skip), the newer one
+  // legitimately stays behind the cursor (no repeat of what was shown), and
+  // nothing already walked appears twice.
+  const first = await get(dispatcher, '/records?limit=7');
+  const walked = rowIds(first.body);
+  assert.deepEqual(walked, expectedAll.slice(0, 7), 'page one is the head of the order');
+  const older = rawRecord({
+    campaignId: 'c1',
+    url: 'https://news.example/zzz-inserted-older',
+    collected_at: '2026-08-01T00:00:00.000Z',
+  });
+  const newer = rawRecord({
+    campaignId: 'c1',
+    url: 'https://news.example/aaa-inserted-newer',
+    collected_at: '2026-10-05T00:00:00.000Z',
+  });
+  const writer = new DatabaseSync(dbPath);
+  upsertRawRecord(writer, older);
+  upsertRawRecord(writer, newer);
+  writer.close();
+
+  const nextHref = first.body.match(/href="(\/records\?[^"]*cursor=[^"]*)"/)?.[1];
+  assert.ok(nextHref, 'a full page offers the next link');
+  const rest = await traversePages(dispatcher, nextHref.replaceAll('&amp;', '&'));
+  const combined = [...walked, ...rest];
+  assert.equal(new Set(combined).size, combined.length, 'no row renders twice across the insertion');
+  assert.ok(combined.includes(older.id), 'the row inserted below the cursor is not skipped');
+  assert.ok(!combined.includes(newer.id), 'the row inserted above the cursor does not repeat the page');
+  assert.deepEqual(combined, expectedOrder([...records, older]).map((record) => record.id));
+});
+
+// AC4 (G22.04): invalid limits and cursors answer 400 with a readable reason
+// before any SQL runs; an empty value stays "no parameter".
+test('invalid_page_input_is_400: bad limits and cursors are rejected before SQL', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath } = seedBulkRecords(dir, 60);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  for (const bad of ['0', '-1', '2.5', '101', 'abc', '+5', '1e2', ' 5', '5.0']) {
+    const response = await get(dispatcher, `/records?limit=${encodeURIComponent(bad)}`);
+    assert.equal(response.status, 400, `limit ${JSON.stringify(bad)}`);
+    assert.match(response.body, /патрэбны цэлы лік ад 1 да 100/, `reason for limit ${JSON.stringify(bad)}`);
+  }
+  assert.equal((await get(dispatcher, '/records?limit=')).status, 200, 'an empty limit is no parameter');
+
+  // Malformed cursors: garbage bytes, non-JSON, wrong JSON shapes, an empty
+  // ordering key, an unknown status vocabulary.
+  const b64 = (value) =>
+    Buffer.from(typeof value === 'string' ? value : JSON.stringify(value), 'utf8').toString('base64url');
+  for (const bad of [
+    '!!!',
+    b64('not json'),
+    b64([1, 2]),
+    b64({}),
+    b64({ c: null, u: '', i: 'x', city: null, s: null }),
+    b64({ c: null, u: 'https://x', i: 'x', city: null, s: 'banana' }),
+  ]) {
+    const response = await get(dispatcher, `/records?cursor=${bad}`);
+    assert.equal(response.status, 400, `cursor ${bad}`);
+    assert.match(response.body, /Курсор не чытаецца/, `reason for cursor ${bad}`);
+  }
+
+  // A cursor built under other filters is rejected: changing a filter starts
+  // a new traversal, so the same request without the cursor stays 200.
+  const first = await get(dispatcher, '/records?status=raw&limit=10');
+  const cursorValue = first.body.match(/cursor=([A-Za-z0-9_-]+)/)?.[1];
+  assert.ok(cursorValue, 'page one carries the cursor value');
+  for (const wrong of ['status=raw&city=gdansk', 'status=cleaned', '']) {
+    const response = await get(dispatcher, `/records?${wrong}${wrong ? '&' : ''}limit=10&cursor=${cursorValue}`);
+    assert.equal(response.status, 400, `mismatched filters: ${wrong || '(none)'}`);
+    assert.match(response.body, /несупадае з фільтрамі запыта/, `reason for ${wrong || '(none)'}`);
+  }
+  assert.equal(
+    (await get(dispatcher, '/records?status=raw&city=gdansk&limit=10')).status,
+    200,
+    'the changed filter without a cursor starts a fresh traversal'
+  );
+
+  // The reason renders as escaped text, never as markup.
+  const hostile = await get(dispatcher, '/records?limit=%3Cscript%3E');
+  assert.equal(hostile.status, 400);
+  assert.doesNotMatch(hostile.body, /<script>/);
+  assert.match(hostile.body, /&lt;script&gt;/);
+});
+
+// AC1+AC6 (G22.04): the rendered link counts stay correct and the link-count
+// lookup goes through the dedicated index — the query plan shows an indexed
+// seek over links, not a scan; the record card keeps every link row.
+test('link_count_uses_record_index: the link count seeks through links_record', async (t) => {
+  const dir = makeTempDir();
+  const { dbPath, recordA } = buildStoreFixture(dir);
+  const dispatcher = await startDispatcher({ dbPath, snapshotsRoot: path.join(dir, 'snapshots'), port: 0 });
+  t.after(() => dispatcher.close());
+
+  const records = await get(dispatcher, '/records');
+  assert.match(records.body, /<td>1<\/td><td>2<\/td>/, 'record A still shows its photo/link counts');
+
+  // The plan of the production count shape (the correlated per-row subquery
+  // of recordsData): an indexed seek on raw_record_id, never a table scan.
+  const db = new DatabaseSync(dbPath, { readOnly: true });
+  const plan = db
+    .prepare(
+      'EXPLAIN QUERY PLAN SELECT (SELECT COUNT(*) FROM links l WHERE l.raw_record_id = r.id) AS links FROM raw_records r'
+    )
+    .all()
+    .map((row) => row.detail)
+    .join('\n');
+  db.close();
+  // COVERING INDEX: the count reads raw_record_id straight from the index.
+  assert.match(plan, /SEARCH l USING .*INDEX links_record/);
+  assert.doesNotMatch(plan, /SCAN links/);
+
+  const card = await get(dispatcher, `/record?id=${recordA.id}`);
+  assert.equal(card.status, 200);
+  assert.match(card.body, /history/);
+  assert.match(card.body, /cranes/, 'the card keeps rendering every link row');
 });
 
 test('record card shows snapshot text with the image at its position, links and metadata', async (t) => {

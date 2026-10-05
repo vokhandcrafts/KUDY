@@ -23,8 +23,9 @@ const TIME_CAP_WORDS = {
   be: { 60: 'Да гадзіны', 120: 'Да дзвюх гадзін', 240: 'На паўдня' },
   en: { 60: 'Up to an hour', 120: 'Up to two hours', 240: 'Half a day' },
   uk: { 60: 'До години', 120: 'До двох годин', 240: 'На пів дня' },
+  de: { 60: 'Bis zu einer Stunde', 120: 'Bis zu zwei Stunden', 240: 'Ein halber Tag' },
 };
-const TIME_CAP_BASE = { be: (v) => `Да ${v} хв`, en: (v) => `Up to ${v} min`, uk: (v) => `До ${v} хв` };
+const TIME_CAP_BASE = { be: (v) => `Да ${v} хв`, en: (v) => `Up to ${v} min`, uk: (v) => `До ${v} хв`, de: (v) => `Bis zu ${v} Min.` };
 
 const SINGLE_NUMBER_IDS = ['stopsCount', 'freeStopsCount', 'heardCount', 'stopNumber', 'sizeMb', 'durationMinutes'];
 
