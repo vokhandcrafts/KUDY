@@ -25,8 +25,9 @@ const TIME_CAP_WORDS = {
   uk: { 60: 'До години', 120: 'До двох годин', 240: 'На пів дня' },
   de: { 60: 'Bis zu einer Stunde', 120: 'Bis zu zwei Stunden', 240: 'Ein halber Tag' },
   es: { 60: 'Hasta una hora', 120: 'Hasta dos horas', 240: 'Medio día' },
+  fr: { 60: "Jusqu'à une heure", 120: "Jusqu'à deux heures", 240: 'Une demi-journée' },
 };
-const TIME_CAP_BASE = { be: (v) => `Да ${v} хв`, en: (v) => `Up to ${v} min`, uk: (v) => `До ${v} хв`, de: (v) => `Bis zu ${v} Min.`, es: (v) => `Hasta ${v} min` };
+const TIME_CAP_BASE = { be: (v) => `Да ${v} хв`, en: (v) => `Up to ${v} min`, uk: (v) => `До ${v} хв`, de: (v) => `Bis zu ${v} Min.`, es: (v) => `Hasta ${v} min`, fr: (v) => `Jusqu'à ${v} min` };
 
 const SINGLE_NUMBER_IDS = ['stopsCount', 'freeStopsCount', 'heardCount', 'stopNumber', 'sizeMb', 'durationMinutes'];
 

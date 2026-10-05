@@ -153,9 +153,9 @@ describe("G16.03: the rating form route (issue #74)", () => {
       // construction, and the form must answer with the be fallback words,
       // never a raw unknown state (issue #598). G21.10 (issue #544): de owns
       // a complete catalogue now, so the stale probe moved to the
-      // still-planned es. G21.11 (issue #545): es owns a complete catalogue
-      // now, so the stale probe moves to the still-planned fr.
-      uiLocalePersistence: { read: () => "fr" as UiLocaleSwitchCode, write: () => {} },
+      // still-planned es. G21.11 (issue #545) and G21.12 (issue #546) landed
+      // es and fr, so the stale probe moves to the still-planned cs.
+      uiLocalePersistence: { read: () => "cs" as UiLocaleSwitchCode, write: () => {} },
     });
     renderRouter(withRoutes(services), {
       initialUrl: "/feedback?kind=guide&id=guide-route-a1&version=1&locale=be",

@@ -102,10 +102,10 @@ describe('nearbyStrings (criterion 5)', () => {
     // G14.04.d (issue #305): uk answers from its own catalog now — the
     // unknown-locale fallback is probed on a locale no catalog answers.
     // G21.10 (issue #544): de answers from its own catalogue, so the probe
-    // moved to the still-planned es. G21.11 (issue #545): es answers from
-    // its own catalogue now, so the probe moves to the still-planned fr.
+    // moved to the still-planned es. G21.11 (issue #545) and G21.12 (issue
+    // #546) landed es and fr, so the probe moves to the still-planned cs.
     assert.equal(nearbyStrings('uk').title, 'Поруч');
-    assert.equal(nearbyStrings('fr').title, 'Побач');
+    assert.equal(nearbyStrings('cs').title, 'Побач');
     assert.equal(nearbyStrings('es').title, 'Cerca');
   });
 });

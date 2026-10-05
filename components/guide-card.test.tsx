@@ -56,13 +56,16 @@ describe("selected_text_locale_filter", () => {
 });
 
 describe("empty_locale_catalogue", () => {
+  // The be-fallback probe rides a registered code with no catalogue yet:
+  // cs (the probe rotated de→fr→es→cs as G21.10 #544, G21.12 #546 and
+  // G21.11 #545 landed their catalogues — each landing retires its code).
   test("guides exist in other languages — the filtered-empty state explains the language", () => {
-    render(<CatalogStateView state={ready([card("g1", ["be", "en"])])} variant="rubric" locale="fr" />);
+    render(<CatalogStateView state={ready([card("g1", ["be", "en"])])} variant="rubric" locale="cs" />);
     expect(screen.getByTestId("city-message").props.children).toBe(uiStrings("be").textLocaleEmpty);
   });
 
   test("nothing is published at all — NAV3's honest empty stays", () => {
-    render(<CatalogStateView state={ready([])} variant="rubric" locale="fr" />);
+    render(<CatalogStateView state={ready([])} variant="rubric" locale="cs" />);
     expect(screen.getByTestId("city-message").props.children).toBe(uiStrings("be").notPublished);
   });
 });

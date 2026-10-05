@@ -66,10 +66,10 @@ describe("uiStrings (G06.05 AC1)", () => {
     // asserted on a locale no catalog answers. G21.10 (issue #544): de has
     // its own German catalogue too, so the probe moved to the still-planned
     // «es» — and de now asserts its own honest German words. G21.11 (issue
-    // #545): es owns a Spanish catalogue now, so the probe moves again to
-    // the still-planned «fr». The discriminator is a word the languages do
-    // not share («Назад» is the same word in be and uk).
-    expect(uiStrings("fr").loading).toBe(uiStrings("be").loading);
+    // #545) and G21.12 (issue #546) landed es and fr, so the probe moves on
+    // to the still-planned «cs». The discriminator is a word the languages
+    // do not share («Назад» is the same word in be and uk).
+    expect(uiStrings("cs").loading).toBe(uiStrings("be").loading);
     expect(uiStrings("en").loading).not.toBe(uiStrings("be").loading);
     expect(uiStrings("uk").loading).not.toBe(uiStrings("be").loading);
     expect(uiStrings("de").loading).toBe("Wird geladen…");
