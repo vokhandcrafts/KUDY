@@ -87,4 +87,15 @@ export const OFFER_STRINGS_DATA = {
     "purchasedPending": "Zakoupeno · čeká stažení",
     "tryAgain": "Zkusit znovu",
   },
+  "sv": {
+    "buy": "Köp",
+    "continueFree": "Fortsätt gratis",
+    "dismiss": "Inte nu",
+    "errorBody": "Du kan försöka igen eller fortsätta gratis.",
+    "errorTitle": "Köpet slutfördes inte",
+    "offerBody": "Ett köp låser upp guidens berättelser.",
+    "offerTitle": "Alla guidens berättelser",
+    "purchasedPending": "Köpt · väntar på nedladdning",
+    "tryAgain": "Prova igen",
+  },
 };

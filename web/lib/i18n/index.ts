@@ -3,7 +3,7 @@
 // (issue #305) adds the third file, uk, beside them (uk-release-scope §3.1 —
 // the same system, a new set); G21.10 (issue #544) adds de the same way;
 // G21.11 (issue #545) adds es; G21.12 (issue #546) adds fr; G21.13 (issue
-// #547) adds cs. The typed UiStrings
+// #547) adds cs; G21.14 (issue #548) adds sv. The typed UiStrings
 // interface plus the parity
 // test keep the files at the same key set at all times.
 import { be } from './be.ts';
@@ -13,6 +13,7 @@ import { de } from './de.ts';
 import { es } from './es.ts';
 import { fr } from './fr.ts';
 import { cs } from './cs.ts';
+import { sv } from './sv.ts';
 import type { CompleteUiLocaleCode } from '../../../contracts/ui-locales.ts';
 
 // The live web UI locales (plan §4): be is the default at the root, en is the
@@ -26,8 +27,8 @@ export type UiLocale = 'be' | 'en';
 // (uk-release-scope §6.3). de owns its strings file (G21.10, issue #544) and
 // joins the routes with G21.22, the same release-unit rule; es the same
 // (G21.11, issue #545); fr the same (G21.12, issue #546); cs the same
-// (G21.13, issue #547).
-export type UiStringsLocale = UiLocale | 'uk' | 'de' | 'es' | 'fr' | 'cs';
+// (G21.13, issue #547); sv the same (G21.14, issue #548).
+export type UiStringsLocale = UiLocale | 'uk' | 'de' | 'es' | 'fr' | 'cs' | 'sv';
 
 // The UI locales of the web channel with live routes (plan §4) — uk joins
 // here with the release unit, never before it.
@@ -96,7 +97,7 @@ export interface UiStrings {
   privacyContact: string;
 }
 
-const STRINGS: Record<UiStringsLocale, UiStrings> = { be, en, uk, de, es, fr, cs };
+const STRINGS: Record<UiStringsLocale, UiStrings> = { be, en, uk, de, es, fr, cs, sv };
 
 export function getUiStrings(locale: UiStringsLocale): UiStrings {
   return STRINGS[locale];

@@ -66,16 +66,18 @@ describe("uiStrings (G06.05 AC1)", () => {
     // asserted on a locale no catalog answers. G21.10 (issue #544): de has
     // its own German catalogue too, so the probe moved to the still-planned
     // «es» — and de now asserts its own honest German words. G21.11 (issue
-    // #545) and G21.12 (issue #546) landed es and fr, so the probe moved on to
-    // the still-planned «cs» — and G21.13 (issue #547) landed cs, so the
-    // probe moves on to the still-planned «sv». The discriminator is a word
-    // the languages do not share («Назад» is the same word in be and uk).
-    expect(uiStrings("sv").loading).toBe(uiStrings("be").loading);
+    // #545), G21.12 (issue #546), G21.13 (issue #547) and G21.14 (issue
+    // #548) landed es, fr, cs and sv in turn, so the probe finally runs out
+    // of planned codes: all eight requested languages are complete, and the
+    // fallback probe rides an unregistered code («pl»). The discriminator is
+    // a word the languages do not share («Назад» is the same word in be and uk).
+    expect(uiStrings("pl").loading).toBe(uiStrings("be").loading);
     expect(uiStrings("en").loading).not.toBe(uiStrings("be").loading);
     expect(uiStrings("uk").loading).not.toBe(uiStrings("be").loading);
     expect(uiStrings("de").loading).toBe("Wird geladen…");
     expect(uiStrings("es").loading).toBe("Cargando…");
     expect(uiStrings("cs").loading).toBe("Načítání…");
+    expect(uiStrings("sv").loading).toBe("Laddar…");
   });
 
   // G06.10 (issue #433): the My history reason line obeys the same outward

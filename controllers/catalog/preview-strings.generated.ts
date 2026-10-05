@@ -136,4 +136,22 @@ export const PREVIEW_STRINGS_DATA = {
     "storageExit": "Uvolnit místo v KUDY",
     "storageFullDetail": (mb: number) => `není dost místa: chybí ještě ${mb} MB`,
   },
+  "sv": {
+    "detail": (detail: { readonly kind: string; readonly count?: number }) => detail.kind === "damaged" ? `Paketet är skadat: ladda ner igen` : detail.kind === "missing-files" ? `Filer saknas: ${detail.count}` : detail.kind === "stale" ? `En uppdatering är tillgänglig` : `Paketet är ofullständigt`,
+    "downloadFailed": "Nedladdningen misslyckades.",
+    "label": {
+      "download": "Ladda ner",
+      "start": "Börja",
+    },
+    "reason": {
+      "preview#download-unavailable": "Nedladdning är inte tillgänglig i det här bygget.",
+      "preview#not-published": "Guiden är inte publicerad.",
+      "preview#purchase-required": "Köp krävs.",
+      "preview#storage-unknown": "Lagringen är inte tillgänglig.",
+      "preview#verify-unavailable": "Verifieringen är inte tillgänglig.",
+    },
+    "retry": "Försök igen",
+    "storageExit": "Frigör utrymme i KUDY",
+    "storageFullDetail": (mb: number) => `det saknas utrymme: ytterligare ${mb} MB krävs`,
+  },
 };
