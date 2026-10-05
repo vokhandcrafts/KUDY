@@ -485,11 +485,14 @@ export function createServices(ports: ServicePorts): Services {
   // G22.02 (issue #607): the teaser audio resolves through the dedicated
   // probe — never a full media read; the reader exists only where the probe
   // port is supplied beside the store.
+  // G22.05 (issue #610): the place-detail open passes its place through the
+  // binding — media and text resolve only for the selected place.
   const momentsReader = bundlesStore && teaserAudioProbe
-    ? () =>
+    ? (placeId: string) =>
         readMomentFacts(bundlesStore, {
           locales: [uiLocale.current(), ...localePreference],
           audioProbe: teaserAudioProbe,
+          placeId,
         })
     : undefined;
   // The preview button's inventory port: the asked layer's disk facts read

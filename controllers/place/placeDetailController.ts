@@ -24,8 +24,11 @@ export type { MomentFact };
 export interface PlaceDetailDeps {
   readonly service: Pick<CatalogService, 'loadNearby'>;
   // The moment facts reader over the downloaded packages; absent without a
-  // bundles store — the detail renders its facts without teasers.
-  readonly moments?: () => Promise<MomentFacts>;
+  // bundles store — the detail renders its facts without teasers. G22.05
+  // (issue #610): the open passes its place to the reader, so media and
+  // text resolve only for this place — the reader scopes before media
+  // resolution, never after.
+  readonly moments?: (placeId: string) => Promise<MomentFacts>;
   readonly placeId: string;
 }
 
@@ -56,7 +59,7 @@ async function load(store: ControllerStore<PlaceDetailState>, deps: PlaceDetailD
   try {
     const [nearby, moments] = await Promise.all([
       deps.service.loadNearby(null),
-      deps.moments ? deps.moments() : Promise.resolve(NO_MOMENTS),
+      deps.moments ? deps.moments(deps.placeId) : Promise.resolve(NO_MOMENTS),
     ]);
     // The catalog state decides the facts line; the teasers are library
     // truth and render regardless of the catalog's fate.

@@ -129,3 +129,43 @@ test('a thrown load is the named error state', async () => {
   });
   assert.deepEqual(state, { kind: 'error', reason: 'place#load-failed' });
 });
+
+// G22.05 (issue #610) — the reader spy records the place every open asks
+// with; the TEASER fixture stays the two-place payload of this suite.
+const askingMoments =
+  (asked: string[]) =>
+  async (placeId: string): Promise<MomentFacts> => {
+    asked.push(placeId);
+    return TEASER;
+  };
+
+test('G22.05: each open asks the reader with its own place; a later open never updates the closed binding', async () => {
+  const asked: string[] = [];
+  const first = createPlaceDetailController({
+    service: serviceWith(Promise.resolve({ kind: 'ready', offers: [PLACE_OFFER], degraded: null })),
+    moments: askingMoments(asked),
+    placeId: 'place-a1',
+  });
+  await Promise.resolve();
+  await Promise.resolve();
+  const firstState = first.store.getState();
+
+  const second = createPlaceDetailController({
+    service: serviceWith(Promise.resolve({ kind: 'ready', offers: [], degraded: null })),
+    moments: askingMoments(asked),
+    placeId: 'place-b2',
+  });
+  await Promise.resolve();
+  await Promise.resolve();
+
+  assert.deepEqual(asked, ['place-a1', 'place-b2']);
+  // The closed binding keeps its settled state — a later open cannot
+  // replace a newer place's answer or rewrite the old one.
+  assert.equal(first.store.getState(), firstState);
+  const secondState = second.store.getState();
+  assert.ok(secondState.kind === 'ready');
+  if (secondState.kind !== 'ready') return;
+  // The display contract stays: TEASER carries a place-other row — the
+  // detail still renders only its own place's teasers.
+  assert.deepEqual(secondState.moments, []);
+});
