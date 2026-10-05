@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-05 — CI: праверыць білінг GitHub Actions (checks не запускаюцца)
+Што зрабіць: джобы Actions на PR не стартуюць — «The job was not started because recent account payments have failed or your spending limit needs to be increased». Правер білінг/ліміт акаўнта ў GitHub Settings → Billing, пасля чаго перазапусці checks апошніх PR (у т.л. ужо змержанага #632 на main). Вердыкты рэвью і суддзі #632 зялёныя, лакальныя гейты прайдзены.
+PR: https://github.com/vokhandcrafts/KUDY/pull/632 (run: https://github.com/vokhandcrafts/KUDY/actions/runs/37343901371)
+
 ### 2026-10-05 — G21.19: змержыць глоссарый і працэс змены мов (задача #543)
 Што зрабіць: праглядзі і змержы PR #628 у main, каб глоссарый тэрмінаў, працэс змены радкоў ва ўсіх выпушчаных мовах і крытэрыйны рэндэр лічэбнікаў сталі даступныя выканаўцам. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам; мерж закрывае #543 і разблакіруе каталогі G21.10–G21.14.
 PR: https://github.com/vokhandcrafts/KUDY/pull/628 (issue: https://github.com/vokhandcrafts/KUDY/issues/543; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
