@@ -14,7 +14,7 @@
 // event table's snake_case (event_id, type, at, schema_version, payload —
 // implementation-rules 2); the mapper in this file is the single conversion
 // point from the store's camelCase rows.
-import { appendEvent, DbError, listPendingEvents, markEventsSent } from './db/db.ts';
+import { appendEvent, DbError, getDeviceId, latestEnqueueSeq, listPendingEvents, markEventsSent } from './db/db.ts';
 import type { EventInput, SqlDriver } from './db/types.ts';
 
 // The wire shape of one queued event, verbatim event-table field names. The
@@ -51,31 +51,44 @@ export function emitEvent(driver: SqlDriver, event: EventInput): void {
 // the retry resends only what stayed.
 const FLUSH_CHUNK = 256;
 
-// Flushes the pending tail through the injected sender and marks each
-// acknowledged chunk sent in one transaction. A sender that resolved but a
-// process that died before the mark leave the rows pending, and the next
-// flush resends the same event_ids — the stable-id contract the server
-// dedupes against. Returns the number of marked events; an empty queue
-// wakes no transport.
+// Flushes the pending tail through the injected sender one bounded page at
+// a time: one send call and one sent mark per page, so no driver's
+// bind-parameter limit can wedge the queue and a failing page leaves the
+// earlier ones marked, the rest pending — the retry resends only what
+// stayed. Returns the number of marked events; an empty queue wakes no
+// transport.
 //
-// The optional beforeBatch gate is read before every chunk is sent; a false
-// return stops the flush there — chunks already acknowledged stay marked,
+// G22.03: the page read is bounded twice — by the page size and by the
+// enqueue_seq bound frozen before the first read, so rows appended while
+// the flush runs (backdated or not) wait for the next flush instead of
+// joining a batch that is already in flight.
+//
+// The optional beforeBatch gate is read before every page is sent; a false
+// return stops the flush there — pages already acknowledged stay marked,
 // the rest stay pending and unmarked. The gate is a loop decision, not a
 // sender wrapper: a resolving wrapper would still be followed by the mark,
 // retiring a batch that never left (the G20.05 consent recheck relies on
 // the gate, not on a silent no-op send).
+//
+// The device identity captured at flush start is rechecked before every
+// send and again after the awaited send, before the mark: an account
+// cleared or replaced mid-flush stops the flush, so old work never
+// acknowledges rows of the replacement account (G09.03).
 export interface FlushEventsOptions {
   beforeBatch?: () => boolean;
 }
 
 export async function flushEvents(driver: SqlDriver, send: EventSender, options?: FlushEventsOptions): Promise<number> {
-  const pending = listPendingEvents(driver);
+  const upToSeq = latestEnqueueSeq(driver);
+  const ownerId = getDeviceId(driver);
   let marked = 0;
-  for (let start = 0; start < pending.length; start += FLUSH_CHUNK) {
+  for (;;) {
     if (options?.beforeBatch && !options.beforeBatch()) break;
-    const chunk = pending.slice(start, start + FLUSH_CHUNK);
+    if (getDeviceId(driver) !== ownerId) break;
+    const page = listPendingEvents(driver, { limit: FLUSH_CHUNK, upToSeq });
+    if (page.length === 0) break;
     await send(
-      chunk.map((row) => ({
+      page.map((row) => ({
         event_id: row.eventId,
         type: row.type,
         at: row.at,
@@ -83,9 +96,10 @@ export async function flushEvents(driver: SqlDriver, send: EventSender, options?
         payload: parsePayload(row.payload, `event ${row.eventId}`),
       })),
     );
+    if (getDeviceId(driver) !== ownerId) break;
     marked += markEventsSent(
       driver,
-      chunk.map((row) => row.eventId),
+      page.map((row) => row.eventId),
     );
   }
   return marked;

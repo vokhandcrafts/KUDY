@@ -15,7 +15,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { DbError, listPendingEvents, openDatabase } from './db/db.ts';
+import { clearDeviceAccountState, DbError, listPendingEvents, openDatabase, setDeviceId } from './db/db.ts';
 import { nodeSqliteFileDriver } from './db/test-fixture.ts';
 import type { SqlDriver } from './db/types.ts';
 import { eventFactory, openFreshEventStore } from './eventLog-test-fixture.ts';
@@ -247,4 +247,176 @@ test('flush surfaces a corrupt stored row as a named diagnostic and sends nothin
   assert.equal(senderCalled, false);
   // the row stays pending for diagnostics, not silently dropped
   assert.equal(queuedRows(driver, 'app_open'), 1);
+});
+
+// G22.03 (issue #608, spec E3) — the flush reads the queue in bounded pages
+// against a frozen enqueue_seq snapshot instead of one unbounded tail read.
+
+// G22.03 — a driver wrapper that counts how many rows the pending queue
+// query hands over. The flush must select one bounded page per attempt; this
+// counts the real SELECTs against the store, not the wire batches.
+function pendingRowCountingDriver(driver: SqlDriver, counter: { pendingRows: number }): SqlDriver {
+  return {
+    execSql: (sql) => driver.execSql(sql),
+    prepare: (sql) => {
+      const statement = driver.prepare(sql);
+      if (!sql.includes('FROM event_queue') || !sql.includes('ORDER BY at, event_id')) return statement;
+      return {
+        run: (...params) => statement.run(...params),
+        get: (...params) => statement.get(...params),
+        all: (...params) => {
+          const rows = statement.all(...params);
+          counter.pendingRows += rows.length;
+          return rows;
+        },
+      };
+    },
+  };
+}
+
+test('flush_reads_one_bounded_page_before_send', async () => {
+  const driver = openFreshEventStore();
+  const total = 20_000;
+  for (let i = 0; i < total; i += 1) {
+    emitEvent(driver, event({ at: 1_700_000_000_000 + i }));
+  }
+  const reads = { pendingRows: 0 };
+  const readsAtSend: number[] = [];
+  const marked = await flushEvents(pendingRowCountingDriver(driver, reads), (batch) => {
+    readsAtSend.push(reads.pendingRows);
+    assert.ok(batch.length <= 256, 'the wire batch stays bounded too');
+    return Promise.resolve();
+  });
+  assert.ok(
+    (readsAtSend[0] ?? Number.POSITIVE_INFINITY) <= 256,
+    `the first send attempt must be preceded by at most 256 selected rows, got ${String(readsAtSend[0])}`,
+  );
+  let previous = 0;
+  for (const at of readsAtSend) {
+    assert.ok(at - previous <= 256, 'every later query selects at most 256 rows');
+    previous = at;
+  }
+  assert.equal(marked, total);
+  assert.equal(listPendingEvents(driver).length, 0);
+});
+
+test('backdated_insert_waits_for_next_flush', async () => {
+  const driver = openFreshEventStore();
+  for (let i = 0; i < 600; i += 1) {
+    emitEvent(driver, event({ at: 1_700_000_000_000 + i }));
+  }
+  const backdated = event({ at: 1_700_000_000_000 - 5_000 });
+  const batches: string[][] = [];
+  let firstLeft = true;
+  await flushEvents(driver, (batch) => {
+    if (firstLeft) {
+      firstLeft = false;
+      emitEvent(driver, backdated); // lands mid-flush, with an earlier `at`
+    }
+    batches.push(batch.map((e) => e.event_id));
+    return Promise.resolve();
+  });
+  assert.ok(
+    batches.flat().every((id) => id !== backdated.eventId),
+    'an event appended during the flush stays pending until the next flush',
+  );
+  // the next flush picks it up first — its earlier `at` sorts ahead
+  const next = await capture(driver);
+  assert.deepEqual(next.map((e) => e.event_id), [backdated.eventId]);
+});
+
+test('batch_failure_preserves_pending_tail', async () => {
+  const driver = openFreshEventStore();
+  const ids: string[] = [];
+  for (let i = 0; i < 600; i += 1) {
+    const one = event({ at: 1_700_000_000_000 + i });
+    ids.push(one.eventId);
+    emitEvent(driver, one);
+  }
+  let attempt = 0;
+  await assert.rejects(
+    flushEvents(driver, (batch) => {
+      attempt += 1;
+      if (attempt === 2) return Promise.reject(new Error('connection lost'));
+      return Promise.resolve();
+    }),
+    /connection lost/,
+  );
+  // the acknowledged first page stays marked; everything else stays pending
+  assert.equal(Number(driver.prepare('SELECT COUNT(*) AS n FROM event_queue WHERE sent = 1').get()!.n), 256);
+  assert.deepEqual(
+    listPendingEvents(driver).map((row) => row.eventId),
+    ids.slice(256),
+    'the unacknowledged tail keeps its order and identity',
+  );
+  // the retry resends exactly the tail, same ids, then drains the queue
+  const retry: string[][] = [];
+  const marked = await flushEvents(driver, (batch) => {
+    retry.push(batch.map((e) => e.event_id));
+    return Promise.resolve();
+  });
+  assert.deepEqual(retry.flat(), ids.slice(256));
+  assert.equal(marked, 344);
+});
+
+test('owner_change_stops_old_flush', async () => {
+  // a replacement that keeps the rows: the identity switches mid-send while
+  // the old account's events are still queued — the in-flight flush must
+  // stop and must not acknowledge those rows for the new owner
+  const driver = openFreshEventStore();
+  setDeviceId(driver, 'device-old');
+  for (let i = 0; i < 600; i += 1) {
+    emitEvent(driver, event({ at: 1_700_000_000_000 + i }));
+  }
+  const replacement = event({ at: 1_700_000_000_000 + 10_000 });
+  let sends = 0;
+  const marked = await flushEvents(driver, (batch) => {
+    sends += 1;
+    if (sends === 1) {
+      setDeviceId(driver, 'device-new');
+      emitEvent(driver, replacement);
+    }
+    return Promise.resolve();
+  });
+  assert.equal(sends, 1, 'no further batch goes out after the ownership change');
+  assert.equal(marked, 0, 'the in-flight batch is never acknowledged for the new owner');
+  assert.equal(
+    listPendingEvents(driver).length,
+    601,
+    'nothing marked, nothing lost: the old rows and the replacement event all stay pending',
+  );
+  assert.ok(
+    listPendingEvents(driver).some((row) => row.eventId === replacement.eventId),
+    'the replacement event stays pending for the next flush',
+  );
+});
+
+test('account_clearing_mid_flush_keeps_the_replacement_event_pending', async () => {
+  const driver = openFreshEventStore();
+  setDeviceId(driver, 'device-old');
+  for (let i = 0; i < 600; i += 1) {
+    emitEvent(driver, event({ at: 1_700_000_000_000 + i }));
+  }
+  const replacement = event({ at: 1_700_000_000_000 + 10_000 });
+  let sends = 0;
+  const marked = await flushEvents(driver, (batch) => {
+    sends += 1;
+    if (sends === 1) {
+      // the account is cleared and replaced mid-send: queue rows go away,
+      // the replacement account writes its own event and takes the device
+      clearDeviceAccountState(driver);
+      emitEvent(driver, replacement);
+      setDeviceId(driver, 'device-new');
+    }
+    return Promise.resolve();
+  });
+  assert.equal(sends, 1, 'no further batch goes out after the clearing');
+  assert.equal(marked, 0, 'the in-flight batch is not acknowledged by the old flush');
+  assert.deepEqual(
+    listPendingEvents(driver).map((row) => row.eventId),
+    [replacement.eventId],
+    'the replacement account keeps its own pending event; no old work touches it',
+  );
+  const refilled = await flushEvents(driver, async () => {});
+  assert.equal(refilled, 1, 'the new owner flushes its own event under its own identity');
 });

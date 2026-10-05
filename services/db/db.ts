@@ -373,16 +373,55 @@ export function checkpointProgress(driver: SqlDriver, sessionId: string, progres
 // `09` §10: client-generated event_id carries idempotency — a repeated send
 // of the same event lands as one row (upsert targeted at event_id only, so
 // malformed payloads still fail loudly instead of being silently ignored).
+// G22.03: the row also gets its durable enqueue_seq key, allocated in this
+// same transaction through the counter in `settings`; a duplicate event_id
+// leaves a gap in the sequence — monotonic without reuse is the contract,
+// gaps are free.
 export function appendEvent(driver: SqlDriver, event: EventInput): void {
   inTransaction(driver, () => {
     driver
       .prepare(
-        `INSERT INTO event_queue (event_id, type, at, schema_version, payload, sent)
-         VALUES (?, ?, ?, ?, ?, 0)
+        `INSERT INTO event_queue (event_id, type, at, schema_version, payload, sent, enqueue_seq)
+         VALUES (?, ?, ?, ?, ?, 0, ?)
          ON CONFLICT(event_id) DO NOTHING`,
       )
-      .run(event.eventId, event.type, event.at, event.schemaVersion, event.payload);
+      .run(event.eventId, event.type, event.at, event.schemaVersion, event.payload, allocateEnqueueSeq(driver));
   });
+}
+
+// G22.03 — the durable insertion key. `settings` holds the counter (its SQL
+// lives here) because the device wipe deletes only the consent row: queue
+// rows go away with clearDeviceAccountState, the counter does not — deletion
+// never reuses an enqueue_seq, so a flush snapshot stays meaningful after an
+// account clearing. Both readers answer with a named diagnostic when the
+// counter row is missing or malformed, never with a guess.
+function readEnqueueSeqCounter(driver: SqlDriver): number {
+  const row = driver.prepare('SELECT next FROM event_queue_seq WHERE singleton = 1').get();
+  const next = row === undefined ? null : Number(row.next);
+  if (next === null || !Number.isSafeInteger(next) || next < 1) {
+    throw new DbError(
+      'event-seq-state-invalid',
+      'event_queue_seq.next is missing or not a safe integer; the enqueue_seq counter is broken',
+    );
+  }
+  return next;
+}
+
+// Allocates the next key; must run inside the caller's transaction (the
+// appendEvent one) so the read and the bump cannot interleave.
+function allocateEnqueueSeq(driver: SqlDriver): number {
+  const next = readEnqueueSeqCounter(driver);
+  driver
+    .prepare('UPDATE event_queue_seq SET next = ? WHERE singleton = 1')
+    .run(String(next + 1));
+  return next;
+}
+
+// The last allocated enqueue_seq — the bound a flush freezes before its
+// first page read (spec E3): events appended later carry keys above the
+// bound and wait for the next flush, so an in-flight batch never grows.
+export function latestEnqueueSeq(driver: SqlDriver): number {
+  return readEnqueueSeqCounter(driver) - 1;
 }
 
 // G09.01: the pending tail of the queue in stable dispatch order — the
@@ -390,6 +429,11 @@ export function appendEvent(driver: SqlDriver, event: EventInput): void {
 // the batch. Sent rows are never re-sent (09 §10: one event = one credit; a
 // batch whose ack was lost resends with the same event_id and the server
 // dedupes it).
+// G22.03: the read is page-bounded — `page.limit` caps the rows per query
+// and `page.upToSeq` freezes the enqueue_seq bound, so a flush never selects
+// the whole unsent tail and rows appended mid-flush stay out of it. Bounds
+// are validated numbers, never interpolated SQL; a malformed bound is a
+// named diagnostic ('event-page-invalid'), not a crash or a wrong page.
 function toEventQueueRow(row: Record<string, SqlValue>): EventQueueRow {
   return {
     eventId: String(row.event_id),
@@ -397,19 +441,50 @@ function toEventQueueRow(row: Record<string, SqlValue>): EventQueueRow {
     at: Number(row.at),
     schemaVersion: Number(row.schema_version),
     payload: String(row.payload),
+    enqueueSeq: Number(row.enqueue_seq),
     sent: Number(row.sent) === 1,
   };
 }
 
-export function listPendingEvents(driver: SqlDriver): EventQueueRow[] {
+export interface PendingEventsPage {
+  /** Row cap per query (the flush page size). */
+  limit?: number;
+  /** Frozen enqueue_seq bound; rows keyed above it stay pending. */
+  upToSeq?: number;
+}
+
+export function listPendingEvents(driver: SqlDriver, page?: PendingEventsPage): EventQueueRow[] {
+  const conditions: string[] = ['sent = 0'];
+  const params: SqlValue[] = [];
+  if (page?.upToSeq !== undefined) {
+    if (!Number.isSafeInteger(page.upToSeq) || page.upToSeq < 0) {
+      throw new DbError(
+        'event-page-invalid',
+        `pending page upToSeq must be a non-negative safe integer, got ${String(page.upToSeq)}`,
+      );
+    }
+    conditions.push('enqueue_seq <= ?');
+    params.push(page.upToSeq);
+  }
+  let limitSql = '';
+  if (page?.limit !== undefined) {
+    if (!Number.isSafeInteger(page.limit) || page.limit < 1) {
+      throw new DbError(
+        'event-page-invalid',
+        `pending page limit must be a positive safe integer, got ${String(page.limit)}`,
+      );
+    }
+    limitSql = ' LIMIT ?';
+    params.push(page.limit);
+  }
+  const where = conditions.length > 0 ? ` WHERE ${conditions.join(' AND ')}` : '';
   return driver
     .prepare(
-      `SELECT event_id, type, at, schema_version, payload, sent
-       FROM event_queue
-       WHERE sent = 0
-       ORDER BY at, event_id`,
+      `SELECT event_id, type, at, schema_version, payload, sent, enqueue_seq
+       FROM event_queue${where}
+       ORDER BY at, event_id${limitSql}`,
     )
-    .all()
+    .all(...params)
     .map(toEventQueueRow);
 }
 
@@ -437,7 +512,7 @@ export function listEvents(driver: SqlDriver, window: EventWindow = {}): EventQu
   const where = conditions.length > 0 ? ` WHERE ${conditions.join(' AND ')}` : '';
   return driver
     .prepare(
-      `SELECT event_id, type, at, schema_version, payload, sent
+      `SELECT event_id, type, at, schema_version, payload, sent, enqueue_seq
        FROM event_queue${where}
        ORDER BY at, event_id`,
     )

@@ -10,6 +10,7 @@
 // names no zone B table, and the DDL/zone lists cannot drift apart.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
@@ -17,12 +18,15 @@ import test from 'node:test';
 import {
   appendEvent,
   checkpointProgress,
+  clearDeviceAccountState,
   DbError,
   finishSession,
   getBundleAssets,
+  getDeviceId,
   getSession,
   getLiveSession,
   getSetting,
+  latestEnqueueSeq,
   listGuidesInHintCooldown,
   listPendingEvents,
   listSessionGuideHints,
@@ -41,7 +45,7 @@ import {
   upsertBundleAsset,
 } from './db.ts';
 import { INITIAL_SCHEMA_DDL, migrationSteps, ZONE_A_DDL, ZONE_A_TABLES, ZONE_B_DDL, ZONE_B_TABLES } from './schema.ts';
-import { nodeSqliteDriver } from './test-fixture.ts';
+import { nodeSqliteDriver, nodeSqliteFileDriver } from './test-fixture.ts';
 import type { SqlDriver } from './types.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -389,6 +393,155 @@ test('markEventsSent: one honest changes count, re-marking is a no-op, empty bat
   assert.equal(markEventsSent(driver, []), 0);
   const stored = driver.prepare('SELECT sent FROM event_queue WHERE event_id = ?').get('evt-x1');
   assert.equal(Number(stored!.sent), 1);
+});
+
+
+// G22.03 (issue #608, spec E3) — the durable enqueue_seq key, the bounded
+// pending read, and the in-place upgrade of an old file-backed store.
+
+test('enqueue_seq survives account clearing and reopen, and keeps rising', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'g2203-'));
+  const file = path.join(dir, 'events.db');
+  try {
+    let firstSeq: number;
+    {
+      const store = nodeSqliteFileDriver(file);
+      openDatabase(store.driver);
+      appendEvent(store.driver, { eventId: 'evt-g1', type: 'app_open', at: 10, schemaVersion: 1, payload: '{}' });
+      firstSeq = listPendingEvents(store.driver)[0]!.enqueueSeq;
+      clearDeviceAccountState(store.driver);
+      assert.equal(listPendingEvents(store.driver).length, 0);
+      appendEvent(store.driver, { eventId: 'evt-g2', type: 'app_open', at: 11, schemaVersion: 1, payload: '{}' });
+      const afterClear = listPendingEvents(store.driver)[0]!.enqueueSeq;
+      assert.ok(afterClear > firstSeq, 'the counter is not reset by clearDeviceAccountState');
+      store.close();
+    }
+    {
+      const store = nodeSqliteFileDriver(file);
+      openDatabase(store.driver);
+      appendEvent(store.driver, { eventId: 'evt-g3', type: 'app_open', at: 12, schemaVersion: 1, payload: '{}' });
+      const rows = listPendingEvents(store.driver);
+      assert.deepEqual(rows.map((row) => row.eventId), ['evt-g2', 'evt-g3']);
+      assert.ok(rows[1]!.enqueueSeq > rows[0]!.enqueueSeq, 'keys stay monotonic across a reopen');
+      assert.ok(rows[0]!.enqueueSeq > firstSeq, 'the counter survives the reopen');
+      store.close();
+    }
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('an old file-backed store upgrades in place: rows keep payloads, keys backfill in dispatch order', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'g2203-'));
+  const file = path.join(dir, 'legacy.db');
+  try {
+    const legacy = nodeSqliteFileDriver(file);
+    openDatabase(legacy.driver, migrationSteps.slice(0, 2));
+    assert.equal(Number(legacy.driver.prepare('PRAGMA user_version').get()!.user_version), 2);
+    // the v2 shape: no enqueue_seq column; straight SQL with an `at` tie and
+    // rows inserted out of dispatch order, one of them already sent
+    const seed = legacy.driver.prepare(
+      'INSERT INTO event_queue (event_id, type, at, schema_version, payload, sent) VALUES (?, ?, ?, ?, ?, ?)',
+    );
+    seed.run('evt-o3', 'app_open', 3000, 1, '{}', 0);
+    seed.run('evt-o1', 'app_open', 1000, 1, '{}', 0);
+    seed.run('evt-o2', 'app_open', 2000, 1, '{}', 0);
+    seed.run('evt-o2b', 'app_open', 2000, 1, '{}', 1);
+    legacy.close();
+
+    const upgraded = nodeSqliteFileDriver(file);
+    openDatabase(upgraded.driver);
+    assert.equal(Number(upgraded.driver.prepare('PRAGMA user_version').get()!.user_version), 3);
+    const rows = upgraded.driver
+      .prepare('SELECT event_id, enqueue_seq FROM event_queue ORDER BY enqueue_seq')
+      .all();
+    assert.deepEqual(
+      rows.map((row) => String(row.event_id)),
+      ['evt-o1', 'evt-o2', 'evt-o2b', 'evt-o3'],
+      'the backfill follows the dispatch order (at, event_id), sent rows included',
+    );
+    assert.deepEqual(rows.map((row) => Number(row.enqueue_seq)), [1, 2, 3, 4]);
+    appendEvent(upgraded.driver, { eventId: 'evt-new', type: 'app_open', at: 9000, schemaVersion: 1, payload: '{}' });
+    const pending = listPendingEvents(upgraded.driver).map((row) => row.enqueueSeq);
+    assert.deepEqual(pending, [1, 2, 4, 5], 'the seeded counter resumes past the backfill, the sent row stays out');
+    upgraded.close();
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('the bounded pending read rejects malformed bounds with a named diagnostic', () => {
+  const driver = openFresh();
+  const bad: Array<{ limit?: number; upToSeq?: number }> = [
+    { limit: 0 },
+    { limit: -1 },
+    { limit: 1.5 },
+    { limit: Number.NaN },
+    { upToSeq: -1 },
+    { upToSeq: 1.5 },
+    { upToSeq: Number.NaN },
+  ];
+  for (const page of bad) {
+    assert.throws(
+      () => listPendingEvents(driver, page),
+      (error: unknown) => error instanceof DbError && error.rule === 'event-page-invalid',
+      `bounds ${JSON.stringify(page)} must answer with event-page-invalid`,
+    );
+  }
+  assert.equal(listPendingEvents(driver, { limit: 10, upToSeq: 5 }).length, 0);
+});
+
+test('a broken enqueue_seq counter answers with a named diagnostic, never a guess', () => {
+  const driver = openFresh();
+  appendEvent(driver, { eventId: 'evt-c1', type: 'app_open', at: 1, schemaVersion: 1, payload: '{}' });
+  driver.prepare('UPDATE event_queue_seq SET next = 0').run();
+  assert.throws(
+    () => latestEnqueueSeq(driver),
+    (error: unknown) => error instanceof DbError && error.rule === 'event-seq-state-invalid',
+  );
+  driver.prepare('DELETE FROM event_queue_seq').run();
+  assert.throws(
+    () => appendEvent(driver, { eventId: 'evt-c2', type: 'app_open', at: 2, schemaVersion: 1, payload: '{}' }),
+    (error: unknown) => error instanceof DbError && error.rule === 'event-seq-state-invalid',
+  );
+});
+
+test('the bounded pending read plans over the partial index — no full tail read or sort', () => {
+  const driver = openFresh();
+  for (let i = 0; i < 600; i += 1) {
+    appendEvent(driver, { eventId: `evt-p${i}`, type: 'app_open', at: 1000 + i, schemaVersion: 1, payload: '{}' });
+  }
+  // capture the SQL the real pending read issues, then plan it verbatim
+  const captured: string[] = [];
+  const wrapper: SqlDriver = {
+    execSql: (sql) => driver.execSql(sql),
+    prepare: (sql) => {
+      if (sql.includes('FROM event_queue') && sql.includes('LIMIT ?')) captured.push(sql);
+      return driver.prepare(sql);
+    },
+  };
+  const page = listPendingEvents(wrapper, { limit: 256, upToSeq: 10_000 });
+  assert.equal(page.length, 256);
+  assert.equal(captured.length, 1, 'exactly one prepared pending query');
+  const plan = driver
+    .prepare(`EXPLAIN QUERY PLAN ${captured[0]}`)
+    .all(10_000, 256)
+    .map((row) => String(row.detail));
+  assert.ok(
+    plan.join('\n').includes('event_queue_pending_order'),
+    `the plan must use the partial index, got: ${plan.join(' | ')}`,
+  );
+  assert.ok(plan.every((detail) => !detail.includes('TEMP B-TREE')), 'no temporary b-tree sort');
+  // SQLite words a bounded index iteration "SCAN ... USING INDEX" — the early
+  // stop at the page limit is what keeps the read bounded (the row counter in
+  // eventLog.test.ts proves the ≤256-rows-per-query property), a bare table
+  // read or a temp-b-tree sort are what this test must refuse.
+  assert.ok(
+    plan.every(
+      (detail) => !detail.includes('SCAN event_queue') || detail.includes('USING INDEX event_queue_pending_order'),
+    ),
+    'every queue access goes through the partial index, never a bare table read',
+  );
 });
 
 test('openDatabase: reopening a store already at the latest version is a no-op', () => {

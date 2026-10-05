@@ -192,4 +192,35 @@ export const migrationSteps: MigrationStep[] = [
       );
     },
   },
+  // G22.03 (spec E3) — the durable enqueue_seq insertion key: one NOT NULL
+  // column, existing rows backfilled in the stable dispatch order (at,
+  // event_id) so the key order matches the dispatch order at migration time,
+  // the counter row seeded past the backfill, and the partial index the
+  // bounded pending read plans over (no full unsent-tail read or sort).
+  {
+    version: 3,
+    up: (driver) => {
+      driver.execSql('ALTER TABLE event_queue ADD COLUMN enqueue_seq INTEGER NOT NULL DEFAULT 0');
+      const rows = driver.prepare('SELECT event_id, at FROM event_queue ORDER BY at, event_id').all();
+      const stamp = driver.prepare('UPDATE event_queue SET enqueue_seq = ? WHERE event_id = ?');
+      rows.forEach((row, index) => {
+        stamp.run(index + 1, String(row.event_id));
+      });
+      // the durable counter: one row, monotonic, its own zone B table so
+      // `settings` stays app settings and the device wipe (which deletes only
+      // the consent row there) can never touch the counter — deletion never
+      // reuses an enqueue_seq, a flush snapshot stays meaningful across an
+      // account clearing
+      driver.execSql(`CREATE TABLE event_queue_seq (
+  singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+  next INTEGER NOT NULL
+)`);
+      driver
+        .prepare('INSERT INTO event_queue_seq (singleton, next) VALUES (1, ?)')
+        .run(String(rows.length + 1));
+      driver.execSql(
+        'CREATE INDEX event_queue_pending_order ON event_queue (at, event_id, enqueue_seq) WHERE sent = 0',
+      );
+    },
+  },
 ];
