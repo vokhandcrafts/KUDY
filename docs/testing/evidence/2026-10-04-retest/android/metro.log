@@ -1,0 +1,39 @@
+Starting project at C:\Users\kamyl\WebstormProjects\KUDY
+Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8083
+Logs for your project will appear below.
+Android node_modules\expo-router\entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+| (node:51608) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+Android node_modules\expo-router\entry.js ▓░░░░░░░░░░░░░░░  9.0% (3/5)
+Android node_modules\expo-router\entry.js ▓▓░░░░░░░░░░░░░░ 16.0% ( 46/222)
+| (node:37712) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:51940) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:18652) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:35088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:41572) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+Android node_modules\expo-router\entry.js ▓▓░░░░░░░░░░░░░░ 16.0% (127/321)
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓░░░░░░░░░░ 40.6% (365/573)
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓░░░░░ 69.6% (643/780)
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 77.2% (868/988)
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 87.1% (1103/1194)
+| 
+| <--- Last few GCs --->
+| 
+| [51608:0000021704816000]   364764 ms: Scavenge 104.7 (237.0) -> 65.9 (237.0) MB, pooled: 28 MB, 15.88 / 0.06 ms  (average mu = 0.999, current mu = 0.996) task; 
+| 
+| FATAL ERROR: Zone Allocation failed - process out of memory
+| ----- Native stack trace -----
+| 
+Android node_modules\expo-router\entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 90.2% (1306/1411)
+Android Bundling failed 31387ms node_modules\expo-router\entry.js (1644 modules)
+ ERROR  Error: A jest worker process (pid=51608) was terminated by another process: signal=SIGTERM, exitCode=null. Operating system logs may contain more information on why this occurred.
+    at ChildProcessWorker._onExit (C:\Users\kamyl\WebstormProjects\KUDY\node_modules\jest-worker\build\workers\ChildProcessWorker.js:370:23)
+    at ChildProcess.emit (node:events:508:28)

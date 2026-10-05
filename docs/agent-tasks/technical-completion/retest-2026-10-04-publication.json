@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-04",
+  "testedHead": "46cddb1974d0a96b0fdcefdb4fe92a9a834bfe41",
+  "parent": 532,
+  "created": 3,
+  "issues": [
+    {
+      "id": "G21.34",
+      "number": 590,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/590",
+      "state": "OPEN",
+      "labels": [],
+      "dependencies": [
+        "#533",
+        "#556"
+      ],
+      "readBack": true,
+      "visibleInOpenIssues": true
+    },
+    {
+      "id": "G21.35",
+      "number": 591,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/591",
+      "state": "OPEN",
+      "labels": [],
+      "dependencies": [
+        "#590",
+        "#534"
+      ],
+      "readBack": true,
+      "visibleInOpenIssues": true
+    },
+    {
+      "id": "G21.36",
+      "number": 592,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/592",
+      "state": "OPEN",
+      "labels": [],
+      "dependencies": [
+        "#590"
+      ],
+      "readBack": true,
+      "visibleInOpenIssues": true
+    }
+  ],
+  "reused": [
+    {
+      "number": 537,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/537",
+      "evidenceComment": "https://github.com/vokhandcrafts/KUDY/issues/537#issuecomment-5980607201",
+      "bodyPreserved": true
+    }
+  ],
+  "acyclic": true,
+  "dependencyEdges": 5,
+  "readBackComplete": true,
+  "openIssueVisibilityVerified": true,
+  "projectBoardVerification": "error: your authentication token is missing required scopes [read:project]\r\nTo request it, run:  gh auth refresh -s read:project",
+  "newLabelsAdded": false,
+  "workersStarted": false,
+  "documentsOnMain": true,
+  "publicationPrerequisite": {
+    "number": 590,
+    "url": "https://github.com/vokhandcrafts/KUDY/issues/590"
+  },
+  "localLinksValid": true
+}

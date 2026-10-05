@@ -1,0 +1,12 @@
+[
+  {
+    "path": "en/app.html",
+    "expected": "en",
+    "actual": "en"
+  },
+  {
+    "path": "en\\app.html",
+    "expected": "en",
+    "actual": "be"
+  }
+]

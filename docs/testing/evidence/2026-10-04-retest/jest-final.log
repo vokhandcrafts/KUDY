@@ -1,0 +1,156 @@
+PASS app/preview.test.tsx (36.5 s)
+PASS app/run.test.tsx (6.613 s)
+  ● Console
+
+    console.error
+      Looks like you have configured linking in multiple places. This is likely an error since deep links should only be handled in one place to avoid conflicts. Make sure that:
+      - You don't have multiple NavigationContainers in the app each with 'linking' enabled
+      - Only a single instance of the root component is rendered
+
+      428 |     // spent trigger stays spent (check 17's durable half of this panel
+      429 |     // criterion), and the panel is where it was left — Half, the card open.
+    > 430 |     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+          |                 ^
+      431 |     await screen.findByTestId("run-map");
+      432 |     expect(starts()).toBe(1);
+      433 |     // The live in-memory walk, not a row restore: the story is still sounding
+
+      at error (node_modules/expo-router/src/fork/useLinking.native.ts:66:15)
+      at Object.react-stack-bottom-frame (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14062:20)
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at commitHookEffectListMount (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:8376:29)
+      at commitHookPassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:8463:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9782:13)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9897:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9775:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9775:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9794:11)
+      at flushPendingEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11528:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2082:11)
+      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
+      at actImplementation (node_modules/@testing-library/react-native/src/act.ts:30:25)
+      at renderWithAct (node_modules/@testing-library/react-native/src/render-act.ts:13:11)
+      at renderInternal (node_modules/@testing-library/react-native/src/render.tsx:69:33)
+      at Object.renderInternal (node_modules/@testing-library/react-native/src/render.tsx:44:10)
+      at render (node_modules/expo-router/src/testing-library/index.tsx:83:35)
+      at Object.<anonymous> (app/run.test.tsx:430:17)
+      at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+      at _next (node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+
+    console.error
+      Looks like you have configured linking in multiple places. This is likely an error since deep links should only be handled in one place to avoid conflicts. Make sure that:
+      - You don't have multiple NavigationContainers in the app each with 'linking' enabled
+      - Only a single instance of the root component is rendered
+
+      448 |     // navigating out of Run does not touch the audio).
+      449 |     const stopsBefore = audioPort.commands.filter((command) => command === "stop").length;
+    > 450 |     renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+          |                 ^
+      451 |     await screen.findByTestId("run-map");
+      452 |     expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+      453 |     expect(audioPort.commands.filter((command) => command === "stop")).toHaveLength(stopsBefore);
+
+      at error (node_modules/expo-router/src/fork/useLinking.native.ts:66:15)
+      at Object.react-stack-bottom-frame (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14062:20)
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at commitHookEffectListMount (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:8376:29)
+      at commitHookPassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:8463:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9782:13)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9897:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9775:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9775:11)
+      at recursivelyTraversePassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9756:11)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:9794:11)
+      at flushPendingEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11528:11)
+      at performWorkOnRootViaSchedulerTask (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2082:11)
+      at flushActQueue (node_modules/react/cjs/react.development.js:566:34)
+      at Object.<anonymous>.process.env.NODE_ENV.exports.act (node_modules/react/cjs/react.development.js:859:10)
+      at actImplementation (node_modules/@testing-library/react-native/src/act.ts:30:25)
+      at renderWithAct (node_modules/@testing-library/react-native/src/render-act.ts:13:11)
+      at renderInternal (node_modules/@testing-library/react-native/src/render.tsx:69:33)
+      at Object.renderInternal (node_modules/@testing-library/react-native/src/render.tsx:44:10)
+      at render (node_modules/expo-router/src/testing-library/index.tsx:83:35)
+      at Object.<anonymous> (app/run.test.tsx:450:17)
+      at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+      at _next (node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+
+PASS app/map.test.tsx (6.705 s)
+PASS app/back-navigation.test.tsx
+PASS app/navigation.test.tsx (5.045 s)
+PASS app/my.test.tsx
+PASS app/safe-area.test.tsx
+PASS app/discovery.test.tsx
+PASS app/place/place.test.tsx
+PASS app/hint-card.test.tsx
+PASS app/explore.test.tsx
+PASS app/status-bar.test.tsx
+  ● Console
+
+    console.error
+      An update to RootLayout(./_layout.js) inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11801:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11800:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10326:9)
+      at dispatchSetStateInternal (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4148:13)
+      at dispatchSetState (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4107:7)
+      at setLoaded (node_modules/expo-font/src/FontHooks.ts:28:11)
+
+PASS components/back-button.test.tsx
+PASS components/guide-card.test.tsx
+PASS components/walk-progress.test.tsx
+PASS components/canon-icon.test.tsx
+PASS components/modal-dialog.test.tsx
+PASS app/layout-header.test.tsx
+  ● Console
+
+    console.error
+      An update to RootLayout inside a test was not wrapped in act(...).
+      
+      When testing, code that causes React state updates should be wrapped into act(...):
+      
+      act(() => {
+        /* fire events that update state */
+      });
+      /* assert on the output */
+      
+      This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11801:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:1574:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:11800:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:10326:9)
+      at dispatchSetStateInternal (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4148:13)
+      at dispatchSetState (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4107:7)
+      at setLoaded (node_modules/expo-font/src/FontHooks.ts:28:11)
+
+PASS components/pressable-surface.test.tsx
+PASS components/scaled-text.test.tsx
+PASS components/loading-indicator.test.tsx
+PASS components/paper-surface.test.tsx
+PASS components/ui-strings.test.tsx
+PASS components/no-hardcoded-words.test.tsx
+
+Test Suites: 24 passed, 24 total
+Tests:       183 passed, 183 total
+Snapshots:   0 total
+Time:        95.043 s
+Ran all test suites.
