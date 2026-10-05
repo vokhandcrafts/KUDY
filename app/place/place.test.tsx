@@ -38,7 +38,7 @@ const MOMENT_PATH = "bundles/route-a1/1/be/base/audio/s-a1.m4a";
 // keeps the original text the other tests assert.
 class MomentStore implements BundlesStore {
   private readonly dirs: Map<string, string[]>;
-  private readonly files: Map<string, FileFacts>;
+  readonly files: Map<string, FileFacts>;
 
   constructor(momentCount = 1) {
     const moments = Array.from({ length: momentCount }, (_, i) => ({
@@ -107,11 +107,16 @@ function placeServices(
   audio: AudioService;
 } {
   const audio = new AudioService({ createPort: () => audioPort });
+  const momentStore = new MomentStore(momentCount);
   return {
     services: createServices({
       catalogOrigin: "https://catalog.test",
       catalogSha256: sha256,
-      bundlesStore: new MomentStore(momentCount),
+      bundlesStore: momentStore,
+      teaserAudioProbe: async (rel: string) => {
+        const file = momentStore.files.get(rel);
+        return file?.kind === "present" && file.bytes.length > 0;
+      },
       audio,
       ...(feedback ? { feedback } : {}),
     }),
@@ -203,10 +208,15 @@ describe("Place detail surface (G07.02)", () => {
     // The real Journey-3 chain: Побач → месца — the back stack exists only
     // when the place detail opens from the Nearby surface.
     const audioPort = new FakeAudioPlayerPort();
+    const momentStore = new MomentStore();
     const services = createServices({
       catalogOrigin: "https://catalog.test",
       catalogSha256: sha256,
-      bundlesStore: new MomentStore(),
+      bundlesStore: momentStore,
+      teaserAudioProbe: async (rel: string) => {
+        const file = momentStore.files.get(rel);
+        return file?.kind === "present" && file.bytes.length > 0;
+      },
       audio: new AudioService({ createPort: () => audioPort }),
     });
     serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });

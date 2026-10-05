@@ -10,6 +10,7 @@ import type {
   PackageStore,
   Readiness,
   Sha256,
+  TeaserAudioProbe,
   Tier,
 } from '../services/contentRepo/types.ts';
 import type { ActivationResult, LayerKey } from '../services/download/types.ts';
@@ -86,6 +87,10 @@ export interface ServicePorts {
   // device adapter lands (TR-10 filesystem, G08 entitlement) — the
   // derivation fails closed on an absent port, it never invents a state.
   readonly bundlesStore?: BundlesStore;
+  // G22.02 (issue #607) — the teaser-audio probe from the same composition
+  // root as the bundles store: wherever a teaser reader is supplied, its
+  // probe is supplied too (the reader itself refuses a probe-less contract).
+  readonly teaserAudioProbe?: TeaserAudioProbe;
   readonly evaluateLayer?: (input: {
     routeId: string;
     version: string;
@@ -301,6 +306,7 @@ export function createServices(ports: ServicePorts): Services {
     catalogOrigin,
     catalogSha256,
     bundlesStore,
+    teaserAudioProbe,
     evaluateLayer,
     downloadLayer,
     runSession,
@@ -476,8 +482,15 @@ export function createServices(ports: ServicePorts): Services {
   // G21.17 (issue #551): the teasers' display order reads the switched UI
   // language first, the composition fallback after — the reader runs per
   // place-detail open, so the pick is per-open fresh.
-  const momentsReader = bundlesStore
-    ? () => readMomentFacts(bundlesStore, { locales: [uiLocale.current(), ...localePreference] })
+  // G22.02 (issue #607): the teaser audio resolves through the dedicated
+  // probe — never a full media read; the reader exists only where the probe
+  // port is supplied beside the store.
+  const momentsReader = bundlesStore && teaserAudioProbe
+    ? () =>
+        readMomentFacts(bundlesStore, {
+          locales: [uiLocale.current(), ...localePreference],
+          audioProbe: teaserAudioProbe,
+        })
     : undefined;
   // The preview button's inventory port: the asked layer's disk facts read
   // through the shared readLayerFacts reader (G04.04.a) — the version
