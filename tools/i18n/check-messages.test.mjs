@@ -31,7 +31,9 @@ const PROBE_ID = 'native.chrome.back';
 function fixtureRoot() {
   const fake = mkdtempSync(join(tmpdir(), 'kudy-g2126-'));
   mkdirSync(join(fake, 'contracts/ui-messages/translations'), { recursive: true });
+  mkdirSync(join(fake, 'docs/reports/localization-sources'), { recursive: true });
   cpSync(join(root, 'contracts/ui-messages/source.json'), join(fake, 'contracts/ui-messages/source.json'));
+  cpSync(join(root, 'docs/reports/localization-sources/decisions.json'), join(fake, 'docs/reports/localization-sources/decisions.json'));
   for (const locale of SHIPPED) {
     cpSync(
       join(root, `contracts/ui-messages/translations/${locale}.json`),
@@ -212,6 +214,103 @@ test('valid_same_commit_update: a fully reviewed same-commit update passes end t
     const verdict = checkShippedMessages({ root: fake });
     assert.deepEqual(verdict.problems, []);
     assert.equal(verdict.ok, true);
+  } finally {
+    rmSync(fake, { recursive: true, force: true });
+  }
+});
+
+test('terminology_provenance_resolved: a fully traced approved lookup passes the gate', () => {
+  const fake = fixtureRoot();
+  try {
+    const set = readTranslation(fake, 'en');
+    const record = set.records.find((candidate) => candidate.id === PROBE_ID);
+    record.terminology = {
+      status: 'resolved',
+      kind: 'looked-up',
+      source: 'wiktionary',
+      locator: 'en edition: back, verb, sense "to return toward"',
+      term: 'Back',
+      reason: 'chrome back button — the whole message navigates to the previous screen, not the body part',
+      date: '2026-10-04',
+    };
+    writeTranslation(fake, 'en', set);
+    // The same commit regenerates the outputs into the fixture root, so the
+    // freshness leg runs clean too.
+    for (const domain of DOMAINS) {
+      for (const output of domain.outputs) {
+        mkdirSync(join(fake, dirname(output.file)), { recursive: true });
+      }
+    }
+    assert.equal(regenerateOutputs([], { root: fake, log: () => {}, error: () => {} }).status, 'written');
+    const verdict = checkShippedMessages({ root: fake });
+    assert.deepEqual(verdict.problems, []);
+    assert.equal(verdict.ok, true);
+  } finally {
+    rmSync(fake, { recursive: true, force: true });
+  }
+});
+
+test('terminology_unresolved_blocks_publication: an unresolved uncertainty stops the message', () => {
+  const fake = fixtureRoot();
+  try {
+    const set = readTranslation(fake, 'en');
+    const record = set.records.find((candidate) => candidate.id === PROBE_ID);
+    record.terminology = { status: 'unresolved', kind: 'looked-up', reason: 'ніводная зацверджаная крыніца не вырашае сэнс — выдумваць пераклад нельга' };
+    writeTranslation(fake, 'en', set);
+    const verdict = checkShippedMessages({ root: fake });
+    assert.equal(verdict.ok, false);
+    const named = verdict.problems.filter((problem) => problem.rule === 'terminology_unresolved');
+    assert.deepEqual(named, [{ rule: 'terminology_unresolved', locale: 'en', key: PROBE_ID, reason: named[0]?.reason }]);
+    assert.match(named[0]?.reason ?? '', /stays unpublished/);
+    assert.equal(verdict.problems.length, named.length, 'no unrelated problems fire');
+  } finally {
+    rmSync(fake, { recursive: true, force: true });
+  }
+});
+
+test('terminology_unsupported_reference: a looked-up trace citing a non-approved source fails', () => {
+  const fake = fixtureRoot();
+  try {
+    const set = readTranslation(fake, 'en');
+    const record = set.records.find((candidate) => candidate.id === PROBE_ID);
+    // Variant 1 — microsoft is parked at owner-decision-required in the
+    // decision file: citing it as a lookup source is unsupported today.
+    record.terminology = {
+      status: 'resolved',
+      kind: 'looked-up',
+      source: 'microsoft',
+      locator: 'TBX: back',
+      term: 'Back',
+      reason: 'кантэкстны пошук тэрміна',
+      date: '2026-10-04',
+    };
+    writeTranslation(fake, 'en', set);
+    let verdict = checkShippedMessages({ root: fake });
+    let named = verdict.problems.filter((problem) => problem.rule === 'terminology_source_unsupported');
+    assert.equal(named.length, 1);
+    assert.match(named[0]?.reason ?? '', /"microsoft"/);
+    assert.match(named[0]?.reason ?? '', /use decision/);
+    // Variant 2 — a source id the decision file does not know at all.
+    record.terminology.source = 'chatgpt';
+    writeTranslation(fake, 'en', set);
+    verdict = checkShippedMessages({ root: fake });
+    named = verdict.problems.filter((problem) => problem.rule === 'terminology_source_unsupported');
+    assert.equal(named.length, 1);
+    assert.match(named[0]?.reason ?? '', /"chatgpt"/);
+  } finally {
+    rmSync(fake, { recursive: true, force: true });
+  }
+});
+
+test('terminology_decisions_unavailable: an unreadable decisions file fails closed', () => {
+  const fake = fixtureRoot();
+  try {
+    rmSync(join(fake, 'docs/reports/localization-sources/decisions.json'));
+    const verdict = checkShippedMessages({ root: fake });
+    assert.equal(verdict.ok, false);
+    const named = verdict.problems.filter((problem) => problem.rule === 'terminology_decisions_unavailable');
+    assert.equal(named.length, 1);
+    assert.match(named[0]?.reason ?? '', /fail-closed/);
   } finally {
     rmSync(fake, { recursive: true, force: true });
   }

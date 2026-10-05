@@ -1,0 +1,38 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
+import { registerHooks, stripTypeScriptTypes } from 'node:module';
+
+const ref = '0c383593269eb54ea5d3ce9f9ecfab86bd335830';
+const root = process.cwd();
+const git = (args, options = {}) => execFileSync('git', ['-c', `safe.directory=${root.replaceAll('\\', '/')}`, ...args], { maxBuffer: 64 * 1024 * 1024, ...options });
+const files = git(['ls-tree', '-r', '--name-only', ref], { encoding: 'utf8' }).trim().split('\n').filter((p) => /\.(mjs|ts|tsx)$/.test(p) && !p.startsWith('android/'));
+const blobs = git(['cat-file', '--batch'], { input: `${files.map((p) => `${ref}:${p}`).join('\n')}\n` });
+const sources = new Map();
+let cursor = 0;
+for (const file of files) {
+  const end = blobs.indexOf(10, cursor);
+  const size = Number(blobs.subarray(cursor, end).toString().split(' ')[2]);
+  cursor = end + 1;
+  sources.set(file, blobs.subarray(cursor, cursor + size).toString('utf8'));
+  cursor += size + 1;
+}
+const key = (url) => url.startsWith('file:') ? path.relative(root, fileURLToPath(url)).replaceAll('\\', '/') : null;
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    if (specifier.startsWith('.') && context.parentURL?.startsWith('file:')) {
+      const url = new URL(specifier, context.parentURL).href;
+      if (sources.has(key(url))) return { url, shortCircuit: true };
+    }
+    return nextResolve(specifier, context);
+  },
+  load(url, context, nextLoad) {
+    const file = key(url);
+    if (!sources.has(file)) return nextLoad(url, context);
+    const text = sources.get(file);
+    return { format: 'module', source: file.endsWith('.ts') ? stripTypeScriptTypes(text) : text, shortCircuit: true };
+  },
+});
+const proof = fs.readFileSync('docs/audits/2026-10-04-efficiency-proof.mjs.txt', 'utf8').replace(/from '(\.\/[^']+)'/g, (_, rel) => `from '${pathToFileURL(path.resolve(root, rel)).href}'`);
+await import(`data:text/javascript,${encodeURIComponent(proof)}`);

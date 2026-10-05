@@ -1,10 +1,26 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Перакладны набор UI-паведамленняў, адна мова (G21.25)",
-  "description": "Адзін запіс на кожны пераклад кананічнага арыгіналу са source.json (спека 2026-10-03-single-source-translations): значэнне з шабланавымі пазіцыямі ${name}, forms — толькі для запісаў з discreteForms, з тымі жа ключамі; reviewedSourceHash — адбітак праверанай версіі арыгіналу (роўны current sourceHash, інакш набор састарэлы); review — вынік праверкі. Паходжанне тэрмінаў (запісы пошуку пры няпэўнасці) — G21.27, паўната і стандартны гейт — G21.26. Крыніцавая мова be перакладных набораў не мае — be-каталог праецыруецца са source.json. Правілы па-за схемай (невядомыя/дублыя ідэнтыфікатары, неспадзяванне хэша, неспадзяванне форм і параметраў, выканальны код у радках) — у translations.mjs, кожная са сваім іменаваным правілам.",
+  "description": "Адзін запіс на кожны пераклад кананічнага арыгіналу са source.json (спека 2026-10-03-single-source-translations): значэнне з шабланавымі пазіцыямі ${name}, forms — толькі для запісаў з discreteForms, з тымі жа ключамі; reviewedSourceHash — адбітак праверанай версіі арыгіналу (роўны current sourceHash, інакш набор састарэлы); review — вынік праверкі; terminology — паходжанне тэрмінаў пры няпэўнасці (G21.27, issue #566): вырашаны пошук з поўным следам ці сумленны unresolved, які блакуе публікацыю запісу на гейце. Крыніцавая мова be перакладных набораў не мае — be-каталог праецыруецца са source.json. Правілы па-за схемай (невядомыя/дублыя ідэнтыфікатары, неспадзяванне хэша, неспадзяванне форм і параметраў, паўната следу terminology па відзе, выканальны код у радках) — у translations.mjs, кожная са сваім іменаваным правілам.",
   "type": "object",
   "additionalProperties": false,
   "required": ["translation_schema_version", "locale", "provenance", "records"],
+  "$defs": {
+    "terminology": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "kind", "reason"],
+      "properties": {
+        "status": { "enum": ["resolved", "unresolved"] },
+        "kind": { "enum": ["looked-up", "reviewed-terminology", "reviewer-judgment"] },
+        "source": { "type": "string", "minLength": 1 },
+        "locator": { "type": "string", "minLength": 1 },
+        "term": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+      }
+    }
+  },
   "properties": {
     "translation_schema_version": { "const": 1 },
     "locale": { "type": "string", "pattern": "^[a-z]{2}$" },
@@ -52,7 +68,8 @@
               "outcome": { "enum": ["approved", "unreviewed"] },
               "note": { "type": "string", "minLength": 1 }
             }
-          }
+          },
+          "terminology": { "$ref": "#/$defs/terminology" }
         }
       }
     }

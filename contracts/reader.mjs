@@ -28,8 +28,23 @@ function resolveRef(root, rootFile, schemaFile, ref) {
     }
     return { schema: node, file: schemaFile };
   }
-  const target = path.resolve(path.dirname(schemaFile), ref);
-  return { schema: loadSchema(target), file: target, root: loadSchema(target) };
+  // Cross-file ref, optionally with an in-target fragment
+  // ("other.schema.json", "other.schema.json#/$defs/x") — the fragment walks
+  // the TARGET document and nested "#/..." refs inside it resolve against
+  // that target root, per draft-07 resolution.
+  const hashIndex = ref.indexOf('#');
+  const filePart = hashIndex === -1 ? ref : ref.slice(0, hashIndex);
+  const fragment = hashIndex === -1 ? null : ref.slice(hashIndex + 1);
+  const target = path.resolve(path.dirname(schemaFile), filePart);
+  const targetRoot = loadSchema(target);
+  if (fragment === null || fragment === '') {
+    return { schema: targetRoot, file: target, root: targetRoot };
+  }
+  let node = targetRoot;
+  for (const part of fragment.replace(/^\//, '').split('/')) {
+    node = node?.[part.replace(/~1/g, '/').replace(/~0/g, '~')];
+  }
+  return { schema: node, file: target, root: targetRoot };
 }
 
 function typeOf(value) {
@@ -86,8 +101,9 @@ function checkSimple(schema, value, errors, rule) {
 function validateNode(schema, value, errors, rule, ctx) {
   if (!schema || typeof schema !== 'object') return true;
   if (schema.$ref) {
-    const { schema: target, file, root } = resolveRef(ctx.root, ctx.rootFile, ctx.file, schema.$ref);
-    return validateNode(target, value, errors, rule, { root: root ?? ctx.root, rootFile: ctx.rootFile, file });
+    const resolved = resolveRefNode(ctx.root, ctx.rootFile, ctx.file, schema.$ref, errors, rule);
+    if (resolved === null) return false;
+    return validateNode(resolved.schema, value, errors, rule, { root: resolved.root ?? ctx.root, rootFile: ctx.rootFile, file: resolved.file });
   }
   let ok = checkSimple(schema, value, errors, rule);
   // Object keywords apply whenever the value IS an object, not only when the
@@ -138,6 +154,18 @@ function validateNode(schema, value, errors, rule, ctx) {
     if (matched && schema.then) validateNode(schema.then, value, errors, rule, ctx);
   }
   return ok && errors.length === 0;
+}
+
+// A $ref that walks to nothing (a typo in a fragment, a renamed def) is a
+// named diagnostic, never a tacit pass — validateNode treats a missing
+// schema as unknown and would otherwise accept anything.
+function resolveRefNode(root, rootFile, schemaFile, ref, errors, rule) {
+  const resolved = resolveRef(root, rootFile, schemaFile, ref);
+  if (resolved.schema === undefined) {
+    errors.push(fails('ref-unresolved', rule));
+    return null;
+  }
+  return resolved;
 }
 
 export function validateSchemaFile(schemaFile, doc) {
@@ -286,8 +314,4 @@ export function readCatalogDoc(doc) {
     ok: errors.length === 0,
     errors,
   };
-}
-
-export function readCatalogText(text) {
-  return readCatalogDoc(JSON.parse(text));
 }

@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "task": "G21.33",
+  "issue": 565,
+  "decision_date": "2026-10-05",
+  "input_commit": "f5ef3e645245a46bcc8c714ccf6f02f0f8be6d34",
+  "pin_semantics": "SHA-256 and blob IDs describe Git object bytes, not checkout EOL. Vendor pins remain in original evidence files.",
+  "decision_authority": "Executor assessment under #565; reference-only use, no data import. Owner decisions and rights verification remain prerequisites to copied-source adoption.",
+  "sources": [
+    {
+      "source": "android",
+      "decisions": [
+        {
+          "status": "use",
+          "scope": "Contextual reference for general UI actions; pin repo/path/blob/key/locale."
+        },
+        {
+          "status": "defer",
+          "scope": "Copy/import XML strings until per-file notice and a measured need are resolved."
+        },
+        {
+          "status": "reject",
+          "scope": "TV guide, backup restore or other domain mismatches as tourism/payment evidence."
+        }
+      ],
+      "evidence_sections": [
+        "coverage",
+        "revision",
+        "sources",
+        "license",
+        "limitations"
+      ],
+      "version": "25 Gitiles blobs from development main, not a release snapshot",
+      "coverage": "8 locales in core/Settings/DownloadProvider; TV has no be; four repositories inspected",
+      "size": "25 XML files; aggregate byte size unmeasured",
+      "offline": "Locally readable XML; no KUDY corpus adoption",
+      "followups": [
+        566,
+        543
+      ],
+      "permission_gate": {
+        "task": "G21.37",
+        "issue": 616,
+        "applies_to": "future copying/import, not contextual consultation",
+        "requires": "confirmed source permissions and an approved concrete reuse decision; closure with defer/reject never authorizes import"
+      },
+      "inputs": [
+        {
+          "path": "docs/reports/localization-sources/android.md",
+          "blob": "2b62a02c8346ad2fc6a807b8e61f0a357d6437a2",
+          "sha256": "37c4d6654c6aa285eb110c359d204a57f563da0ea03133d30e7e9af0e5791ad2",
+          "bytes": 20631
+        },
+        {
+          "path": "docs/reports/localization-sources/android.evidence.json",
+          "blob": "8f8358b99d74e18d318c9129e3e3fd2369cc095e",
+          "sha256": "da70133c6cbd0f814c03e2726ce547e126033ca1e7e2895ddb745985dab3d59a",
+          "bytes": 13053
+        }
+      ]
+    },
+    {
+      "source": "microsoft",
+      "decisions": [
+        {
+          "status": "owner-decision-required",
+          "scope": "TBX adoption/excerpts: measured need and verified terms before copying."
+        },
+        {
+          "status": "reject",
+          "scope": "Automatic Power BI UI-string import: no pinnable bulk channel established."
+        }
+      ],
+      "evidence_sections": [
+        "subject",
+        "coverage",
+        "channels",
+        "license",
+        "limitations"
+      ],
+      "version": "ZIP SHA-256 fed7d16955fd4063731712704cbd6584869a9009acf8a9c3c3de31e0d4ebdfe6; Last-Modified 2025-02-06; no release version",
+      "coverage": "111 language files listed; only Belarusian benchmarked; style-guide availability for all 8, not their contents",
+      "size": "ZIP 176156561 bytes; BELARUSIAN.tbx 8828278 bytes",
+      "offline": "TBX technically readable offline; no licensed subset accepted; Power BI offline unverified",
+      "followups": [],
+      "permission_gate": {
+        "task": "G21.37",
+        "issue": 616,
+        "applies_to": "future copying/import, not contextual consultation",
+        "requires": "confirmed source permissions and an approved concrete reuse decision; closure with defer/reject never authorizes import"
+      },
+      "inputs": [
+        {
+          "path": "docs/reports/localization-sources/microsoft.md",
+          "blob": "02170fc5b6172f594f39c1d681811a609fd84d0b",
+          "sha256": "1faf2a8e45cb2313dbf967818b4914ae86cb7515653ab773dabde79ae8f2a834",
+          "bytes": 22906
+        },
+        {
+          "path": "docs/reports/localization-sources/microsoft-evidence.json",
+          "blob": "ea0e09231180468677b46236439da09c45b9aa32",
+          "sha256": "68683027a5e0f2be1219e14063529d0c36cbb62d8470aed27e4879ea10a288f5",
+          "bytes": 46820
+        }
+      ]
+    },
+    {
+      "source": "cldr",
+      "decisions": [
+        {
+          "status": "use",
+          "scope": "Reference for locale rules/names and rendered-message review."
+        },
+        {
+          "status": "defer",
+          "scope": "Production subset/generator: no plural format in current 283 canonical messages; define numeric representation and formatter owner if a concrete consumer is proposed."
+        },
+        {
+          "status": "reject",
+          "scope": "Application button phrase dictionary."
+        }
+      ],
+      "evidence_sections": [
+        "subject",
+        "acquisition",
+        "verification",
+        "coverage",
+        "license",
+        "limitations"
+      ],
+      "version": "CLDR 48.2; cldr-json 48.2.3; per-file SHA-256",
+      "coverage": "45 files; 8x8 language names and cardinal/ordinal data for 8; 449 research examples, not production tests",
+      "size": "1047683 bytes in 45 files",
+      "offline": "JSON technically readable offline; no subset imported",
+      "followups": [
+        543
+      ],
+      "permission_gate": {
+        "task": "G21.37",
+        "issue": 616,
+        "applies_to": "future copying/import, not contextual consultation",
+        "requires": "confirmed source permissions and an approved concrete reuse decision; closure with defer/reject never authorizes import"
+      },
+      "inputs": [
+        {
+          "path": "docs/reports/localization-sources/cldr.md",
+          "blob": "993b4dd1bf1d72151d61c960004583a8bc625937",
+          "sha256": "31a7b72c0e0b22ff5ebfc50aaa9e844641f945230defa0d01679758badc75133",
+          "bytes": 21644
+        },
+        {
+          "path": "docs/reports/localization-sources/cldr-evidence.json",
+          "blob": "c55d543890e09a1d7534f89620ab4b66a65d122d",
+          "sha256": "b2fc158daa2b04604d396d06ea273948d294053d0263d80b83c9290d8e6c40ab",
+          "bytes": 28504
+        }
+      ]
+    },
+    {
+      "source": "wiktionary",
+      "decisions": [
+        {
+          "status": "use",
+          "scope": "Sense-specific consultation of en edition with independently reviewed wording and provenance."
+        },
+        {
+          "status": "defer",
+          "scope": "Corpus extraction, copied definitions, automatic substitution and unallowlisted live editions."
+        }
+      ],
+      "evidence_sections": [
+        "provenance",
+        "editions_and_dumps",
+        "benchmark",
+        "license",
+        "limitations"
+      ],
+      "version": "Live fetch 2026-10-04; dump metadata 20261001; individual live-page revisions not pinned in report",
+      "coverage": "8 dump editions present; only en live examined, 75 sense blocks; gaps and mixed-script findings retained",
+      "size": "en dump metadata approximately 1.8 GB + 74.3 MB index; no dump downloaded",
+      "offline": "Dump read-only use technically possible but not exercised/adopted",
+      "followups": [
+        566,
+        543
+      ],
+      "permission_gate": {
+        "task": "G21.37",
+        "issue": 616,
+        "applies_to": "future copying/import, not contextual consultation",
+        "requires": "confirmed source permissions and an approved concrete reuse decision; closure with defer/reject never authorizes import"
+      },
+      "inputs": [
+        {
+          "path": "docs/reports/localization-sources/wiktionary.md",
+          "blob": "f905fd33088f4ef19968f97f46ec0dbe9ad12fca",
+          "sha256": "e6d860e3897ac9927998704f898251a57fcd3ea8784f940b115fe2d3cbfebe80",
+          "bytes": 19529
+        },
+        {
+          "path": "docs/reports/localization-sources/wiktionary-evidence.json",
+          "blob": "9710769f054113a59e65bdccc7455f2ec1011e45",
+          "sha256": "9757ec22daa2a1fc39c9567c3410d097698cb153084da7c9fe4742d9a52cac99",
+          "bytes": 46860
+        }
+      ]
+    },
+    {
+      "source": "iate",
+      "decisions": [
+        {
+          "status": "use",
+          "scope": "Additional tourism-sense consultation for en/de/es/fr/cs/sv with entry URL, not copied API results."
+        },
+        {
+          "status": "owner-decision-required",
+          "scope": "Filtered Download export only after measured need, confirmed channel-specific terms and human access."
+        },
+        {
+          "status": "reject",
+          "scope": "Universal UI phrase dictionary or asserted Belarusian/Ukrainian term coverage."
+        }
+      ],
+      "evidence_sections": [
+        "live_system",
+        "artifacts",
+        "be_blocker",
+        "uk_state",
+        "license",
+        "limitations"
+      ],
+      "version": "Live access 2026-10-04; anonymous TBX 2019-02-26, SHA-256 ac50c2a701484f3108eec6aea80ee23b5da0c0a2062fd5cc72790ac57ccf5c6f",
+      "coverage": "6 KUDY EU languages in sample; be HTTP403 cause unknown; uk inventory only without sampled content",
+      "size": "ZIP 112828998 bytes; TBX 1859969923 bytes",
+      "offline": "Old anonymous TBX technically readable; not approved as current glossary",
+      "followups": [
+        566,
+        543
+      ],
+      "permission_gate": {
+        "task": "G21.37",
+        "issue": 616,
+        "applies_to": "future copying/import, not contextual consultation",
+        "requires": "confirmed source permissions and an approved concrete reuse decision; closure with defer/reject never authorizes import"
+      },
+      "inputs": [
+        {
+          "path": "docs/reports/localization-sources/iate.md",
+          "blob": "5d043923a3680e66e7692c20ea88dd982162f4ac",
+          "sha256": "aaaa1d350159890c2ae04c57e29d69bb4dcc0e0eb35d3d337086f6bdd587b366",
+          "bytes": 22683
+        },
+        {
+          "path": "docs/reports/localization-sources/iate.evidence.json",
+          "blob": "ea9f5dd85255ced35ba9a30f849bc2fc8aab32d9",
+          "sha256": "c5df04abbaf9f0ccff1082b766fa9aad3c9845921c2c9fe871f5554cb9b67e0f",
+          "bytes": 13811
+        }
+      ]
+    }
+  ],
+  "followups": [
+    {
+      "task": "G21.27",
+      "issue": 566,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/566",
+      "kind": "reuse",
+      "blocked_by": [
+        556,
+        565
+      ]
+    },
+    {
+      "task": "G21.19",
+      "issue": 543,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/543",
+      "kind": "reuse",
+      "blocked_by": [
+        533,
+        542,
+        556,
+        558,
+        559,
+        566
+      ]
+    },
+    {
+      "task": "G21.37",
+      "issue": 616,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/616",
+      "kind": "new-backlog",
+      "blocked_by": [
+        565
+      ],
+      "brief": "docs/agent-tasks/technical-completion/G21.37.md"
+    },
+    {
+      "task": "G21.38",
+      "issue": 617,
+      "url": "https://github.com/vokhandcrafts/KUDY/issues/617",
+      "kind": "new-backlog",
+      "blocked_by": [
+        565
+      ],
+      "brief": "docs/agent-tasks/technical-completion/G21.38.md"
+    }
+  ],
+  "registry": {
+    "status": "proposal-pending",
+    "proposal": "docs/reports/localization-sources/registry-proposal.md",
+    "external_path": "toolsLib/memory/registry/tools-registry.md",
+    "external_modified": false,
+    "reason": "Sibling project is outside writable roots; G21.38 tracks permitted application.",
+    "issue": 617
+  },
+  "checks": {
+    "report_inputs_available_on_main": true,
+    "new_documents_publication_prerequisite": 565,
+    "project_board": "unavailable: authentication token missing read:project; no scope refresh attempted",
+    "issues_readback": "616/617 OPEN, no labels/assignees, bodies matched local drafts, Blocked-by #565; both present in open Issues list",
+    "dependency_graph": "543 -> 566 -> 565 -> closed source/publication issues; 616/617 -> 565; no new cycles"
+  }
+}

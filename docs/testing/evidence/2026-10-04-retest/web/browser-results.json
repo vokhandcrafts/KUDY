@@ -1,0 +1,2650 @@
+{
+  "origin": "http://127.0.0.1:63049",
+  "browser": "153.0.8010.12",
+  "checks": [
+    {
+      "name": "1440px /app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Поўная версія — у дадатку KUDY"
+      }
+    },
+    {
+      "name": "/app: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City guides"
+      }
+    },
+    {
+      "name": "/en: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Гіды па горадзе"
+      }
+    },
+    {
+      "name": "/: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Карта горада"
+      }
+    },
+    {
+      "name": "/map: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Прыватнасць"
+      }
+    },
+    {
+      "name": "/privacy: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en/app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The full version — in the KUDY app"
+      }
+    },
+    {
+      "name": "/en/app: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en/map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City map"
+      }
+    },
+    {
+      "name": "/en/map: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en/privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Privacy"
+      }
+    },
+    {
+      "name": "/en/privacy: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Дэма-гід: сукнаны двор"
+      }
+    },
+    {
+      "name": "/guides/demo-route-a1: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en/guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Demo guide: the cloth courtyard"
+      }
+    },
+    {
+      "name": "/en/guides/demo-route-a1: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Двор сукнараў (дэма)"
+      }
+    },
+    {
+      "name": "/guides/demo-route-a1/stops/stop-1: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Млынавая калона (дэма)"
+      }
+    },
+    {
+      "name": "/guides/demo-route-a1/stops/stop-2: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en/guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Cloth Merchants' Courtyard (demo)"
+      }
+    },
+    {
+      "name": "/en/guides/demo-route-a1/stops/stop-1: document language",
+      "status": "passed"
+    },
+    {
+      "name": "1440px /en/guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The Mill Column (demo)"
+      }
+    },
+    {
+      "name": "/en/guides/demo-route-a1/stops/stop-2: document language",
+      "status": "passed"
+    },
+    {
+      "name": "390px /app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Поўная версія — у дадатку KUDY"
+      }
+    },
+    {
+      "name": "390px /en: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City guides"
+      }
+    },
+    {
+      "name": "390px /: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Гіды па горадзе"
+      }
+    },
+    {
+      "name": "390px /map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Карта горада"
+      }
+    },
+    {
+      "name": "390px /privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Прыватнасць"
+      }
+    },
+    {
+      "name": "390px /en/app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The full version — in the KUDY app"
+      }
+    },
+    {
+      "name": "390px /en/map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City map"
+      }
+    },
+    {
+      "name": "390px /en/privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Privacy"
+      }
+    },
+    {
+      "name": "390px /guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Дэма-гід: сукнаны двор"
+      }
+    },
+    {
+      "name": "390px /en/guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Demo guide: the cloth courtyard"
+      }
+    },
+    {
+      "name": "390px /guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Двор сукнараў (дэма)"
+      }
+    },
+    {
+      "name": "390px /guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Млынавая калона (дэма)"
+      }
+    },
+    {
+      "name": "390px /en/guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Cloth Merchants' Courtyard (demo)"
+      }
+    },
+    {
+      "name": "390px /en/guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The Mill Column (demo)"
+      }
+    },
+    {
+      "name": "320px /app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Поўная версія — у дадатку KUDY"
+      }
+    },
+    {
+      "name": "320px /en: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City guides"
+      }
+    },
+    {
+      "name": "320px /: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Гіды па горадзе"
+      }
+    },
+    {
+      "name": "320px /map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Карта горада"
+      }
+    },
+    {
+      "name": "320px /privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Прыватнасць"
+      }
+    },
+    {
+      "name": "320px /en/app: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The full version — in the KUDY app"
+      }
+    },
+    {
+      "name": "320px /en/map: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "City map"
+      }
+    },
+    {
+      "name": "320px /en/privacy: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Privacy"
+      }
+    },
+    {
+      "name": "320px /guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Дэма-гід: сукнаны двор"
+      }
+    },
+    {
+      "name": "320px /en/guides/demo-route-a1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Demo guide: the cloth courtyard"
+      }
+    },
+    {
+      "name": "320px /guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Двор сукнараў (дэма)"
+      }
+    },
+    {
+      "name": "320px /guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Млынавая калона (дэма)"
+      }
+    },
+    {
+      "name": "320px /en/guides/demo-route-a1/stops/stop-1: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "Cloth Merchants' Courtyard (demo)"
+      }
+    },
+    {
+      "name": "320px /en/guides/demo-route-a1/stops/stop-2: page and responsive layout",
+      "status": "passed",
+      "detail": {
+        "heading": "The Mill Column (demo)"
+      }
+    },
+    {
+      "name": "Internal link /",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/app",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/guides/demo-route-a1",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/map",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /app",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /guides/demo-route-a1",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /map",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/privacy",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /privacy",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /guides/demo-route-a1/stops/stop-1",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /guides/demo-route-a1/stops/stop-2",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/guides/demo-route-a1/stops/stop-1",
+      "status": "passed"
+    },
+    {
+      "name": "Internal link /en/guides/demo-route-a1/stops/stop-2",
+      "status": "passed"
+    },
+    {
+      "name": "Keyboard navigation to English catalog",
+      "status": "passed",
+      "detail": "City guides"
+    },
+    {
+      "name": "Catalog → guide → free stop → locked stop → guide",
+      "status": "passed"
+    },
+    {
+      "name": "Language switch preserves stop URL",
+      "status": "passed"
+    },
+    {
+      "name": "App fallback communicates unavailable stores",
+      "status": "passed",
+      "detail": "Поўная версія — у дадатку KUDY\nGPS-аўтазапуск гісторый на месцы\nОфлайн: маршруты пад рукой без інтэрнэту\nПоўныя маршруты: усе кропкі і ўсё аўдыё\n\nЗнайсці дадатак:\n\n· App Store — Хутка · Google Play — Хутка"
+    },
+    {
+      "name": "Unknown route returns 404 with route home",
+      "status": "passed"
+    },
+    {
+      "name": "Real map provider loads and fits route",
+      "status": "passed"
+    },
+    {
+      "name": "Map provider failure has a visible explanation",
+      "status": "passed"
+    },
+    {
+      "name": "Published fixture audio can play",
+      "status": "blocked",
+      "error": "{\"ok\":false,\"error\":\"Failed to load because no supported source was found.\",\"code\":4,\"networkState\":3}",
+      "reason": "The committed fixture contains a marker rather than a playable audio file; production player not proven."
+    }
+  ],
+  "pageAudits": [
+    {
+      "path": "/app",
+      "status": 200,
+      "h1": [
+        "Поўная версія — у дадатку KUDY"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en",
+      "status": 200,
+      "h1": [
+        "City guides"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/"
+        },
+        {
+          "text": "Demo guide: the cloth courtyard",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "City map",
+          "href": "/en/map"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "h1": [
+        "Гіды па горадзе"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/"
+        },
+        {
+          "text": "Дэма-гід: сукнаны двор",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "Карта горада",
+          "href": "/map"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/map",
+      "status": 200,
+      "h1": [
+        "Карта горада"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/map"
+        },
+        {
+          "text": "MapLibre",
+          "href": "https://maplibre.org/"
+        },
+        {
+          "text": "OpenFreeMap",
+          "href": "https://openfreemap.org"
+        },
+        {
+          "text": "© OpenMapTiles",
+          "href": "https://www.openmaptiles.org/"
+        },
+        {
+          "text": "OpenStreetMap",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Даныя карты © удзельнікі OpenStreetMap (ліцэнзія ODbL)",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Дэма-гід: сукнаны двор",
+          "href": "/guides/demo-route-a1"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "h1": [
+        "Прыватнасць"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/privacy"
+        },
+        {
+          "text": "https://github.com/vokhandcrafts/KUDY/issues",
+          "href": "https://github.com/vokhandcrafts/KUDY/issues"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/app",
+      "status": 200,
+      "h1": [
+        "The full version — in the KUDY app"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/map",
+      "status": 200,
+      "h1": [
+        "City map"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/map"
+        },
+        {
+          "text": "MapLibre",
+          "href": "https://maplibre.org/"
+        },
+        {
+          "text": "OpenFreeMap",
+          "href": "https://openfreemap.org"
+        },
+        {
+          "text": "© OpenMapTiles",
+          "href": "https://www.openmaptiles.org/"
+        },
+        {
+          "text": "OpenStreetMap",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Map data © OpenStreetMap contributors (ODbL licence)",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Demo guide: the cloth courtyard",
+          "href": "/en/guides/demo-route-a1"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/privacy",
+      "status": 200,
+      "h1": [
+        "Privacy"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/privacy"
+        },
+        {
+          "text": "https://github.com/vokhandcrafts/KUDY/issues",
+          "href": "https://github.com/vokhandcrafts/KUDY/issues"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/guides/demo-route-a1",
+      "status": 200,
+      "h1": [
+        "Дэма-гід: сукнаны двор"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "Двор сукнараў (дэма)",
+          "href": "/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "🔒 Млынавая калона (дэма)",
+          "href": "/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/guides/demo-route-a1",
+      "status": 200,
+      "h1": [
+        "Demo guide: the cloth courtyard"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "Cloth Merchants' Courtyard (demo)",
+          "href": "/en/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "🔒 The Mill Column (demo)",
+          "href": "/en/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/guides/demo-route-a1/stops/stop-1",
+      "status": 200,
+      "h1": [
+        "Двор сукнараў (дэма)"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Да старонкі гіда",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "Наступная кропка: Млынавая калона (дэма) →",
+          "href": "/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [
+        {
+          "src": "/content/bundle/demo-route-a1/1/be/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        },
+        {
+          "src": "/content/bundle/demo-route-a1/1/en/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        }
+      ],
+      "map": null
+    },
+    {
+      "path": "/guides/demo-route-a1/stops/stop-2",
+      "status": 200,
+      "h1": [
+        "Млынавая калона (дэма)"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Да старонкі гіда",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "← Папярэдняя кропка: Двор сукнараў (дэма)",
+          "href": "/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/guides/demo-route-a1/stops/stop-1",
+      "status": 200,
+      "h1": [
+        "Cloth Merchants' Courtyard (demo)"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Back to the guide page",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "Next stop: The Mill Column (demo) →",
+          "href": "/en/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [
+        {
+          "src": "/content/bundle/demo-route-a1/1/be/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        },
+        {
+          "src": "/content/bundle/demo-route-a1/1/en/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        }
+      ],
+      "map": null
+    },
+    {
+      "path": "/en/guides/demo-route-a1/stops/stop-2",
+      "status": 200,
+      "h1": [
+        "The Mill Column (demo)"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 1440,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Back to the guide page",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "← Previous stop: Cloth Merchants' Courtyard (demo)",
+          "href": "/en/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/app",
+      "status": 200,
+      "h1": [
+        "Поўная версія — у дадатку KUDY"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en",
+      "status": 200,
+      "h1": [
+        "City guides"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/"
+        },
+        {
+          "text": "Demo guide: the cloth courtyard",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "City map",
+          "href": "/en/map"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "h1": [
+        "Гіды па горадзе"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/"
+        },
+        {
+          "text": "Дэма-гід: сукнаны двор",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "Карта горада",
+          "href": "/map"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/map",
+      "status": 200,
+      "h1": [
+        "Карта горада"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/map"
+        },
+        {
+          "text": "MapLibre",
+          "href": "https://maplibre.org/"
+        },
+        {
+          "text": "OpenFreeMap",
+          "href": "https://openfreemap.org"
+        },
+        {
+          "text": "© OpenMapTiles",
+          "href": "https://www.openmaptiles.org/"
+        },
+        {
+          "text": "OpenStreetMap",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Даныя карты © удзельнікі OpenStreetMap (ліцэнзія ODbL)",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Дэма-гід: сукнаны двор",
+          "href": "/guides/demo-route-a1"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "h1": [
+        "Прыватнасць"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/privacy"
+        },
+        {
+          "text": "https://github.com/vokhandcrafts/KUDY/issues",
+          "href": "https://github.com/vokhandcrafts/KUDY/issues"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/app",
+      "status": 200,
+      "h1": [
+        "The full version — in the KUDY app"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/map",
+      "status": 200,
+      "h1": [
+        "City map"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/map"
+        },
+        {
+          "text": "MapLibre",
+          "href": "https://maplibre.org/"
+        },
+        {
+          "text": "OpenFreeMap",
+          "href": "https://openfreemap.org"
+        },
+        {
+          "text": "© OpenMapTiles",
+          "href": "https://www.openmaptiles.org/"
+        },
+        {
+          "text": "OpenStreetMap",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Map data © OpenStreetMap contributors (ODbL licence)",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Demo guide: the cloth courtyard",
+          "href": "/en/guides/demo-route-a1"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/privacy",
+      "status": 200,
+      "h1": [
+        "Privacy"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/privacy"
+        },
+        {
+          "text": "https://github.com/vokhandcrafts/KUDY/issues",
+          "href": "https://github.com/vokhandcrafts/KUDY/issues"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/guides/demo-route-a1",
+      "status": 200,
+      "h1": [
+        "Дэма-гід: сукнаны двор"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "Двор сукнараў (дэма)",
+          "href": "/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "🔒 Млынавая калона (дэма)",
+          "href": "/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/guides/demo-route-a1",
+      "status": 200,
+      "h1": [
+        "Demo guide: the cloth courtyard"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "Cloth Merchants' Courtyard (demo)",
+          "href": "/en/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "🔒 The Mill Column (demo)",
+          "href": "/en/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/guides/demo-route-a1/stops/stop-1",
+      "status": 200,
+      "h1": [
+        "Двор сукнараў (дэма)"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Да старонкі гіда",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "Наступная кропка: Млынавая калона (дэма) →",
+          "href": "/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [
+        {
+          "src": "/content/bundle/demo-route-a1/1/be/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        },
+        {
+          "src": "/content/bundle/demo-route-a1/1/en/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        }
+      ],
+      "map": null
+    },
+    {
+      "path": "/guides/demo-route-a1/stops/stop-2",
+      "status": 200,
+      "h1": [
+        "Млынавая калона (дэма)"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Да старонкі гіда",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "← Папярэдняя кропка: Двор сукнараў (дэма)",
+          "href": "/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/guides/demo-route-a1/stops/stop-1",
+      "status": 200,
+      "h1": [
+        "Cloth Merchants' Courtyard (demo)"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Back to the guide page",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "Next stop: The Mill Column (demo) →",
+          "href": "/en/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [
+        {
+          "src": "/content/bundle/demo-route-a1/1/be/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        },
+        {
+          "src": "/content/bundle/demo-route-a1/1/en/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        }
+      ],
+      "map": null
+    },
+    {
+      "path": "/en/guides/demo-route-a1/stops/stop-2",
+      "status": 200,
+      "h1": [
+        "The Mill Column (demo)"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 390,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Back to the guide page",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "← Previous stop: Cloth Merchants' Courtyard (demo)",
+          "href": "/en/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/app",
+      "status": 200,
+      "h1": [
+        "Поўная версія — у дадатку KUDY"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en",
+      "status": 200,
+      "h1": [
+        "City guides"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/"
+        },
+        {
+          "text": "Demo guide: the cloth courtyard",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "City map",
+          "href": "/en/map"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "h1": [
+        "Гіды па горадзе"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/"
+        },
+        {
+          "text": "Дэма-гід: сукнаны двор",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "Карта горада",
+          "href": "/map"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/map",
+      "status": 200,
+      "h1": [
+        "Карта горада"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/map"
+        },
+        {
+          "text": "MapLibre",
+          "href": "https://maplibre.org/"
+        },
+        {
+          "text": "OpenFreeMap",
+          "href": "https://openfreemap.org"
+        },
+        {
+          "text": "© OpenMapTiles",
+          "href": "https://www.openmaptiles.org/"
+        },
+        {
+          "text": "OpenStreetMap",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Даныя карты © удзельнікі OpenStreetMap (ліцэнзія ODbL)",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Дэма-гід: сукнаны двор",
+          "href": "/guides/demo-route-a1"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "h1": [
+        "Прыватнасць"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/privacy"
+        },
+        {
+          "text": "https://github.com/vokhandcrafts/KUDY/issues",
+          "href": "https://github.com/vokhandcrafts/KUDY/issues"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/app",
+      "status": 200,
+      "h1": [
+        "The full version — in the KUDY app"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/map",
+      "status": 200,
+      "h1": [
+        "City map"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/map"
+        },
+        {
+          "text": "MapLibre",
+          "href": "https://maplibre.org/"
+        },
+        {
+          "text": "OpenFreeMap",
+          "href": "https://openfreemap.org"
+        },
+        {
+          "text": "© OpenMapTiles",
+          "href": "https://www.openmaptiles.org/"
+        },
+        {
+          "text": "OpenStreetMap",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Map data © OpenStreetMap contributors (ODbL licence)",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Demo guide: the cloth courtyard",
+          "href": "/en/guides/demo-route-a1"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/privacy",
+      "status": 200,
+      "h1": [
+        "Privacy"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/privacy"
+        },
+        {
+          "text": "https://github.com/vokhandcrafts/KUDY/issues",
+          "href": "https://github.com/vokhandcrafts/KUDY/issues"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/guides/demo-route-a1",
+      "status": 200,
+      "h1": [
+        "Дэма-гід: сукнаны двор"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "Двор сукнараў (дэма)",
+          "href": "/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "🔒 Млынавая калона (дэма)",
+          "href": "/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/guides/demo-route-a1",
+      "status": 200,
+      "h1": [
+        "Demo guide: the cloth courtyard"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "Cloth Merchants' Courtyard (demo)",
+          "href": "/en/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "🔒 The Mill Column (demo)",
+          "href": "/en/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/guides/demo-route-a1/stops/stop-1",
+      "status": 200,
+      "h1": [
+        "Двор сукнараў (дэма)"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Да старонкі гіда",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "Наступная кропка: Млынавая калона (дэма) →",
+          "href": "/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [
+        {
+          "src": "/content/bundle/demo-route-a1/1/be/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        },
+        {
+          "src": "/content/bundle/demo-route-a1/1/en/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        }
+      ],
+      "map": null
+    },
+    {
+      "path": "/guides/demo-route-a1/stops/stop-2",
+      "status": 200,
+      "h1": [
+        "Млынавая калона (дэма)"
+      ],
+      "lang": "be",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/"
+        },
+        {
+          "text": "English",
+          "href": "/en/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Да старонкі гіда",
+          "href": "/guides/demo-route-a1"
+        },
+        {
+          "text": "← Папярэдняя кропка: Двор сукнараў (дэма)",
+          "href": "/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Адкрыць дадатак",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    },
+    {
+      "path": "/en/guides/demo-route-a1/stops/stop-1",
+      "status": 200,
+      "h1": [
+        "Cloth Merchants' Courtyard (demo)"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Back to the guide page",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "Next stop: The Mill Column (demo) →",
+          "href": "/en/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [
+        {
+          "src": "/content/bundle/demo-route-a1/1/be/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        },
+        {
+          "src": "/content/bundle/demo-route-a1/1/en/base/audio/story-1-base.m4a",
+          "paused": true,
+          "autoplay": false,
+          "preload": "none",
+          "controls": true
+        }
+      ],
+      "map": null
+    },
+    {
+      "path": "/en/guides/demo-route-a1/stops/stop-2",
+      "status": 200,
+      "h1": [
+        "The Mill Column (demo)"
+      ],
+      "lang": "en",
+      "overflow": false,
+      "width": 320,
+      "links": [
+        {
+          "text": "KUDY",
+          "href": "/en/"
+        },
+        {
+          "text": "Беларуская",
+          "href": "/guides/demo-route-a1/stops/stop-2"
+        },
+        {
+          "text": "Back to the guide page",
+          "href": "/en/guides/demo-route-a1"
+        },
+        {
+          "text": "← Previous stop: Cloth Merchants' Courtyard (demo)",
+          "href": "/en/guides/demo-route-a1/stops/stop-1"
+        },
+        {
+          "text": "Open the app",
+          "href": "/app"
+        }
+      ],
+      "unnamedButtons": 0,
+      "audio": [],
+      "map": null
+    }
+  ],
+  "consoleErrors": [
+    {
+      "type": "console",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "page": "http://127.0.0.1:63049/guides/missing-route/stops/missing-stop"
+    },
+    {
+      "type": "console",
+      "message": "Failed to load resource: net::ERR_INTERNET_DISCONNECTED",
+      "page": "http://127.0.0.1:63049/map"
+    },
+    {
+      "type": "console",
+      "message": "city map init failed eJ",
+      "page": "http://127.0.0.1:63049/map"
+    }
+  ],
+  "failedRequests": [
+    {
+      "url": "https://tiles.openfreemap.org/styles/liberty",
+      "reason": "net::ERR_INTERNET_DISCONNECTED",
+      "page": "http://127.0.0.1:63049/map"
+    }
+  ],
+  "externalRequests": [
+    {
+      "url": "https://tiles.openfreemap.org/styles/liberty",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.json",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1024-1279.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1536-1791.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/2304-2559.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4608-4863.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4864-5119.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9040/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9041/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/styles/liberty",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.json",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1024-1279.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1536-1791.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/2304-2559.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4608-4863.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4864-5119.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9040/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9041/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/styles/liberty",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.json",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1024-1279.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1536-1791.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/2304-2559.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4608-4863.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4864-5119.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9040/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9041/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/styles/liberty",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.json",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1024-1279.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1536-1791.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/2304-2559.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4608-4863.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4864-5119.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9040/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9041/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/styles/liberty",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.json",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1024-1279.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1536-1791.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/2304-2559.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4608-4863.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4864-5119.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9040/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9041/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/styles/liberty",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.json",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1024-1279.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1536-1791.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/2304-2559.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4608-4863.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4864-5119.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9040/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9041/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Regular/256-511.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/styles/liberty",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.json",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/1.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/1/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/natural_earth/ne2sr/1/0/0.png",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/0/0/0.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Italic/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/0-255.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1024-1279.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/1536-1791.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/2304-2559.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4608-4863.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/fonts/Noto%20Sans%20Bold/4864-5119.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9040/5233.pbf",
+      "method": "GET"
+    },
+    {
+      "url": "https://tiles.openfreemap.org/planet/20260927_080001_pt/14/9041/5233.pbf",
+      "method": "GET"
+    }
+  ],
+  "summary": {
+    "passed": 77,
+    "failed": 0,
+    "blocked": 1,
+    "pages": 42
+  }
+}

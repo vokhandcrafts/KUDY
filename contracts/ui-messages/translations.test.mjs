@@ -145,6 +145,70 @@ test('value_blank_denied: whitespace-only values are rejected', () => {
   assert.deepEqual(rulesOf(setWith([record])), ['value_blank_denied']);
 });
 
+// G21.27 (issue #566) — terminology provenance: the schema holds the shape,
+// the contract holds the per-kind completeness of a resolved trace.
+const LOOKED_UP = {
+  status: 'resolved',
+  kind: 'looked-up',
+  source: 'wiktionary',
+  locator: 'en edition: back, verb, sense "to return toward"',
+  term: 'Назад',
+  reason: 'кнопка вяртання на папярэдні экран — кантэкст навігацыі',
+  date: '2026-10-04',
+};
+
+test('terminology_trace_required: a resolved lookup carries source, locator, term and date', () => {
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: LOOKED_UP })])), [], 'the full trace is contract-clean');
+  for (const field of ['source', 'locator', 'term', 'date']) {
+    const broken = { ...LOOKED_UP };
+    delete broken[field];
+    assert.deepEqual(rulesOf(setWith([validRecord({ terminology: broken })])), ['terminology_trace_required'], field);
+  }
+  const blank = { ...LOOKED_UP, term: '   ' };
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: blank })])), ['terminology_trace_required'], 'whitespace-only trace fields are empty');
+});
+
+test('terminology_trace_required: cited reviewed terminology needs locator and term', () => {
+  const cited = { status: 'resolved', kind: 'reviewed-terminology', locator: 'гласарый G21.19: guide — імянік', term: 'Гід', reason: 'запіс ужо ў зацверджанай тэрміналогіі' };
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: cited })])), []);
+  for (const field of ['locator', 'term']) {
+    const broken = { ...cited };
+    delete broken[field];
+    assert.deepEqual(rulesOf(setWith([validRecord({ terminology: broken })])), ['terminology_trace_required'], field);
+  }
+});
+
+test('terminology_trace_required: a reviewer judgment still names the chosen term', () => {
+  const judgment = { status: 'resolved', kind: 'reviewer-judgment', term: 'Назад', reason: 'сэнс адназначны ў кантэксце экрана' };
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: judgment })])), []);
+  const noTerm = { ...judgment };
+  delete noTerm.term;
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: noTerm })])), ['terminology_trace_required']);
+});
+
+test('an unresolved uncertainty is contract-legal — the gate, not the contract, blocks publication', () => {
+  const unresolved = { status: 'unresolved', kind: 'looked-up', source: 'wiktionary', reason: 'ніводная крыніца не вырашае сэнс' };
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: unresolved })])), []);
+  const minimal = { status: 'unresolved', kind: 'reviewer-judgment', reason: 'няпэўнасць зафіксаваная да пошуку' };
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: minimal })])), []);
+});
+
+test('terminology shape violations answer with named schema diagnostics', () => {
+  for (const bad of ['так', 42, [], null]) {
+    const verdict = checkUiMessageTranslations(setWith([validRecord({ terminology: bad })]), sourceDoc, ['en']);
+    assert.equal(verdict.ok, false);
+    assert.deepEqual(verdict.errors.map((error) => error.rule), ['field_type'], JSON.stringify(bad));
+  }
+  const unknownKind = { ...LOOKED_UP, kind: 'chatgpt' };
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: unknownKind })])), ['enum_denied']);
+  const unknownStatus = { ...LOOKED_UP, status: 'maybe' };
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: unknownStatus })])), ['enum_denied']);
+  const badDate = { ...LOOKED_UP, date: '10/04/2026' };
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: badDate })])), ['field_pattern']);
+  const extraField = { ...LOOKED_UP, confidence: 0.9 };
+  assert.deepEqual(rulesOf(setWith([validRecord({ terminology: extraField })])), ['unknown_field_denied']);
+});
+
 test('unknown_field_denied: the record shape stays closed', () => {
   const record = validRecord({ provenance: 'не тут' });
   assert.deepEqual(rulesOf(setWith([record])), ['unknown_field_denied']);

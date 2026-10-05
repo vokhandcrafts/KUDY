@@ -1,0 +1,258 @@
+FAIL app/preview.test.tsx (19.503 s)
+  guide preview surface (G06.01.b)
+    √ the paid preview shows the canon facts, free_stop_count and the disabled paid start (AC1, AC2, NAV6) (532 ms)
+    √ open and locked stops are distinguishable; the locked row shows name, place, announce and lock only (NAV5) (135 ms)
+    × the stop rows show the place's human title from the catalog, never the raw place id (UX 05, AC1) (60 ms)
+    √ without the disk-truth port the button fails closed with its named reason (11 §7) (91 ms)
+    √ Download triggers the download flow and the same button becomes Start (AC3, the Proof) (136 ms)
+    √ Start of another guide with a live session opens the §4.1 dialog; «Скасаваць» returns unchanged (NAV8) (188 ms)
+    √ UX 06 AC1: the §4.1 dialog is a native Modal; the system Back closes it in place (70 ms)
+    √ UX 06 AC2: «Скасаваць» carries its own outline style, not the disabled look (66 ms)
+    √ Back from the preview returns to the city card it was opened from (NAV9) (115 ms)
+    √ the back label sits in a Text host, not bare in the Pressable (issue #343) (44 ms)
+    √ a route the catalog does not name renders the honest unavailable state (26 ms)
+    √ the preview scrolls: twelve stops and the main button render inside the ScrollView (UX 01) (66 ms)
+  guide preview loading indicator (UX 07)
+    √ the loading state shows the ActivityIndicator next to the text (41 ms)
+  G06.05 preview a11y and failure exits (issue #280)
+    √ AC1: the main button is a button with its label and the disabled state (32 ms)
+    √ AC4: insufficient space is a named failure with the retry and the storage exit (88 ms)
+    √ AC4: the failed catalog load gets its named retry — one press re-runs the refresh (52 ms)
+    √ AC1: the live walk's button is a named button (Прагулка) (53 ms)
+  G08.05 quiet commerce offer (issue #292)
+    √ the paid preview shows the quiet offer; the impression is the render fact (AC1, AC3) (85 ms)
+    √ the decline is respected: the card is gone and buys nothing (AC4) (68 ms)
+    √ repeated errors keep both exits; Continue free returns to the working offer (AC2, C28) (157 ms)
+    √ the finished purchase shows the §8 words and the offer never returns (96 ms)
+    √ without the commerce port the paid preview renders no offer (fail closed) (34 ms)
+  guide preview font layer (G06.10.b)
+    √ the title renders the display family and the metadata/body the UI family, through the token mirror (AC1, AC4) (63 ms)
+    √ the dragon-voice token resolves to the Caveat family (AC3) (1 ms)
+  guide preview clay buttons (G06.10.d)
+    √ the primary action renders the accent shelf from the token mirror; the text pair is unchanged (58 ms)
+    √ the disabled primary renders the ghost pair, no shelf, never dips, and the reason stays next to the button (66 ms)
+    √ the secondary actions render the line shade from the token mirror (73 ms)
+    √ the live walk's primary carries the accent shelf (40 ms)
+
+  ● guide preview surface (G06.01.b) › the stop rows show the place's human title from the catalog, never the raw place id (UX 05, AC1)
+
+    Unable to find an element with text: Портаўская брама
+
+    <RNCSafeAreaProvider>
+      <View>
+        <RNSScreenStack>
+          <RNSScreen
+            aria-hidden={false}
+          >
+            <RNSScreenContentWrapper>
+              <View
+                testID="screen-Route preview"
+              >
+                <View
+                  accessibilityLabel="Назад"
+                  accessibilityRole="button"
+                  accessible={true}
+                  testID="btn-preview-back"
+                >
+                  <View>
+                    <View
+                      accessibilityLabel="Назад"
+                      accessible={true}
+                      pointerEvents="none"
+                    >
+                      <RNSVGSvgView
+                        aria-hidden="true"
+                      >
+                        <RNSVGGroup>
+                          <RNSVGPath />
+                          <RNSVGPath />
+                        </RNSVGGroup>
+                      </RNSVGSvgView>
+                    </View>
+                    <Text>
+                      Назад
+                    </Text>
+                  </View>
+                </View>
+                <RCTScrollView
+                  testID="scroll-preview"
+                >
+                  <View>
+                    <View>
+                      <Text>
+                        guide-route-b1
+                      </Text>
+                      <View
+                        accessibilityLabel="Бясплатна"
+                        accessible={true}
+                        testID="badge-access-free"
+                      >
+                        <Text>
+                          Бясплатна
+                        </Text>
+                      </View>
+                      <Text
+                        testID="preview-locales"
+                      >
+                        Мовы: be
+                      </Text>
+                      <View
+                        accessibilityLabel="Час: 35 хв"
+                        accessible={true}
+                        testID="preview-duration"
+                      >
+                        <View
+                          accessibilityLabel="Працягласць"
+                          accessible={true}
+                          pointerEvents="none"
+                        >
+                          <RNSVGSvgView
+                            aria-hidden="true"
+                          >
+                            <RNSVGGroup>
+                              <RNSVGCircle />
+                              <RNSVGPath />
+                            </RNSVGGroup>
+                          </RNSVGSvgView>
+                        </View>
+                        <Text
+                          testID="preview-duration-text"
+                        >
+                          Час: 35 хв
+                        </Text>
+                      </View>
+                      <View
+                        accessibilityLabel="Кропкі: 2"
+                        accessible={true}
+                        testID="preview-counts"
+                      >
+                        <View
+                          accessibilityLabel="Кропкі"
+                          accessible={true}
+                          pointerEvents="none"
+                        >
+                          <RNSVGSvgView
+                            aria-hidden="true"
+                          >
+                            <RNSVGGroup>
+                              <RNSVGPath />
+                              <RNSVGCircle />
+                            </RNSVGGroup>
+                          </RNSVGSvgView>
+                        </View>
+                        <Text
+                          testID="preview-counts-text"
+                        >
+                          Кропкі: 2
+                        </Text>
+                      </View>
+                      <Text
+                        testID="preview-size"
+                      >
+                        Памер: 40 МБ
+                      </Text>
+                      <View
+                        testID="preview-banner"
+                      >
+                        <Text>
+                          Частка звестак часова недаступная
+                        </Text>
+                        <Text>
+                          index-unavailable
+                        </Text>
+                      </View>
+                      <View
+                        testID="preview-stops"
+                      >
+                        <View
+                          testID="stop-stop-b1-1"
+                        >
+                          <Text>
+                            Стары порт
+                          </Text>
+                          <Text>
+                            Адкуль пачыналася кожнае марское падарожжа горада.
+                          </Text>
+                        </View>
+                        <View
+                          testID="stop-stop-b1-2"
+                        >
+                          <Text>
+                            Млынавая вуліца
+                          </Text>
+                          <Text>
+                            Кароткі анонс пашыранай гісторыі пра млын.
+                          </Text>
+                          <View
+                            accessibilityLabel="Зачынена"
+                            accessible={true}
+                            testID="stop-locked-stop-b1-2"
+                          >
+                            <View
+                              accessibilityLabel="Зачынена"
+                              accessible={true}
+                              pointerEvents="none"
+                            >
+                              <RNSVGSvgView
+                                aria-hidden="true"
+                              >
+                                <RNSVGGroup>
+                                  <RNSVGRect />
+                                  <RNSVGPath />
+                                </RNSVGGroup>
+                              </RNSVGSvgView>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                      <View
+                        accessibilityLabel="Пачаць"
+                        accessibilityRole="button"
+                        accessibilityState={
+                          {
+                            "disabled": true,
+                          }
+                        }
+                        accessible={true}
+                        testID="btn-start"
+                      >
+                        <Text>
+                          Пачаць
+                        </Text>
+                      </View>
+                      <Text
+                        testID="button-reason"
+                      >
+                        Сховішча недаступнае.
+                      </Text>
+                    </View>
+                  </View>
+                </RCTScrollView>
+              </View>
+            </RNSScreenContentWrapper>
+            <RNSScreenStackHeaderConfig
+              pointerEvents="box-none"
+              title="route/[id]"
+            />
+          </RNSScreen>
+        </RNSScreenStack>
+      </View>
+    </RNCSafeAreaProvider>
+
+      190 |     );
+      191 |     expect(await screen.findByTestId("stop-stop-b1-1")).toBeTruthy();
+    > 192 |     expect(screen.getByText("Портаўская брама")).toBeTruthy();
+          |                   ^
+      193 |     expect(screen.getByTestId("stop-locked-stop-b1-2")).toBeTruthy();
+      194 |     expect(screen.getByText("Стары млын")).toBeTruthy();
+      195 |     expect(screen.queryByText(/place-b1/)).toBeNull();
+
+      at Object.getByText (app/preview.test.tsx:192:19)
+      at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+      at _next (node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 27 passed, 28 total
+Snapshots:   0 total
+Time:        20.351 s, estimated 142 s
+Ran all test suites matching /app\\preview.test.tsx/i.
