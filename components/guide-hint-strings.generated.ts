@@ -6,11 +6,11 @@
 // G21.25 (issue #558): the catalogues are generated projections — edit the
 // source/translation data, never this file; the generator's --check mode
 // fails on any hand edit.
-// the nearby guide-hint card's words (G07.05 #284); uk keeps the documented be fallback (uk-release-scope §6.4) until its words are authored, de renders its own catalogue (G21.10 #544), es too (G21.11 #545), fr too (G21.12 #546)
+// the nearby guide-hint card's words (G07.05 #284); uk keeps the documented be fallback (uk-release-scope §6.4) until its words are authored, de renders its own catalogue (G21.10 #544), es too (G21.11 #545), fr too (G21.12 #546), cs too (G21.13 #547)
 
 import type { GuideHintStrings } from "../contracts/ui-message-types.ts";
 
-export const GUIDE_HINT_STRINGS: Record<"be" | "en" | "de" | "es" | "fr", GuideHintStrings> = {
+export const GUIDE_HINT_STRINGS: Record<"be" | "en" | "de" | "es" | "fr" | "cs", GuideHintStrings> = {
   "be": {
     "dismiss": "Схаваць",
     "heading": "Побач ёсць гід…",
@@ -40,5 +40,11 @@ export const GUIDE_HINT_STRINGS: Record<"be" | "en" | "de" | "es" | "fr", GuideH
     "heading": "Il y a un guide à proximité…",
     "openHint": "Ouvrir la description du guide",
     "paid": "payant",
+  },
+  "cs": {
+    "dismiss": "Skrýt",
+    "heading": "Poblíž je průvodce…",
+    "openHint": "Otevřít popis průvodce",
+    "paid": "placený",
   },
 };

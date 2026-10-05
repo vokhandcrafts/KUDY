@@ -118,4 +118,22 @@ export const PREVIEW_STRINGS_DATA = {
     "storageExit": "Libérer de l'espace dans KUDY",
     "storageFullDetail": (mb: number) => `espace insuffisant : ${mb} Mo supplémentaires requis`,
   },
+  "cs": {
+    "detail": (detail: { readonly kind: string; readonly count?: number }) => detail.kind === "damaged" ? `Balík je poškozený: stáhni znovu` : detail.kind === "missing-files" ? `Chybí soubory: ${detail.count}` : detail.kind === "stale" ? `Je k dispozici aktualizace` : `Balík není úplný`,
+    "downloadFailed": "Stažení se nezdařilo.",
+    "label": {
+      "download": "Stáhnout",
+      "start": "Začít",
+    },
+    "reason": {
+      "preview#download-unavailable": "Stažení není v tomto buildu dostupné.",
+      "preview#not-published": "Průvodce není zveřejněný.",
+      "preview#purchase-required": "Vyžaduje se nákup.",
+      "preview#storage-unknown": "Úložiště není dostupné.",
+      "preview#verify-unavailable": "Ověření není dostupné.",
+    },
+    "retry": "Zkusit znovu",
+    "storageExit": "Uvolnit místo v KUDY",
+    "storageFullDetail": (mb: number) => `není dost místa: chybí ještě ${mb} MB`,
+  },
 };

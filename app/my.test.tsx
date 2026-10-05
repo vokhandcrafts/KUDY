@@ -242,7 +242,7 @@ describe("KUDY language row (G14.04.d)", () => {
     expect(screen.getByTestId("btn-ui-locale-uk").props.accessibilityState).toEqual({ selected: true });
   });
 
-  test("the row offers the six self-named locales and marks the current one", async () => {
+  test("the row offers the seven self-named locales and marks the current one", async () => {
     renderRouter({ _layout: layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
     expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
     expect(screen.getByText("Беларуская")).toBeTruthy();
@@ -252,9 +252,11 @@ describe("KUDY language row (G14.04.d)", () => {
     // fourth chip from the registry's complete set.
     expect(screen.getByText("Deutsch")).toBeTruthy();
     // G21.11 (issue #545): the es catalogue lands, the picker derives the
-    // fifth chip the same way; G21.12 (issue #546) adds the sixth, Français.
+    // fifth chip the same way; G21.12 (issue #546) adds the sixth, Français;
+    // G21.13 (issue #547) adds the seventh, Čeština.
     expect(screen.getByText("Español")).toBeTruthy();
     expect(screen.getByText("Français")).toBeTruthy();
+    expect(screen.getByText("Čeština")).toBeTruthy();
     expect(screen.getByTestId("btn-ui-locale-be").props.accessibilityState).toEqual({ selected: true });
     expect(screen.getByTestId("btn-ui-locale-en").props.accessibilityState).toEqual({ selected: false });
     // Switching to en re-renders the chrome in English (AC3: no restart) —
@@ -303,6 +305,17 @@ describe("KUDY language row (G14.04.d)", () => {
     fireEvent.press(screen.getByTestId("btn-ui-locale-fr"));
     expect(services.uiLocale.current()).toBe("fr");
     expect(screen.getByTestId("btn-ui-locale-fr").props.accessibilityState).toEqual({ selected: true });
+  });
+
+  test("G21.13 (issue #547): picking cs re-renders the honest-unavailable line in Czech", async () => {
+    const services = createServices({});
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("btn-ui-locale-cs"));
+    expect(services.uiLocale.current()).toBe("cs");
+    expect(await screen.findByText("Historie není dostupná.")).toBeTruthy();
+    expect(screen.getByTestId("btn-ui-locale-cs").props.accessibilityState).toEqual({ selected: true });
+    expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
   });
 });
 

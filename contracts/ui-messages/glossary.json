@@ -4,7 +4,7 @@
   "provenance": {
     "kind": "glossary",
     "reviewer": "owner",
-    "evidence": "тэрміны выцягнутыя з зацверджаных перакладных набораў en/uk (міграцыя G06.05 #280 + рэв'ю G21.25 #558), анкераваныя на кананічныя запісы source.json; паходжанне кожнага тэрміна — у яго provenance па форме G21.27; дапоўнена de-тэрмінамі ў задачы G21.10 (#544): выбары занкерваныя на лакатары de-набору, сэмантычны рэвью — у results/G21.10.md; дапоўнена es-тэрмінамі ў задачы G21.11 (#545): выбары занкерваныя на лакатары es-набору, сэмантычны рэвью — у results/G21.11.md; дапоўнена fr-тэрмінамі ў задачы G21.12 (#546): выбары занкерваныя на лакатары fr-набору, сэмантычны рэвью — у results/G21.12.md"
+    "evidence": "тэрміны выцягнутыя з зацверджаных перакладных набораў en/uk (міграцыя G06.05 #280 + рэв'ю G21.25 #558), анкераваныя на кананічныя запісы source.json; паходжанне кожнага тэрміна — у яго provenance па форме G21.27; дапоўнена de-тэрмінамі ў задачы G21.10 (#544): выбары занкерваныя на лакатары de-набору, сэмантычны рэвью — у results/G21.10.md; дапоўнена es-тэрмінамі ў задачы G21.11 (#545): выбары занкерваныя на лакатары es-набору, сэмантычны рэвью — у results/G21.11.md; дапоўнена fr-тэрмінамі ў задачы G21.12 (#546): выбары занкерваныя на лакатары fr-набору, сэмантычны рэвью — у results/G21.12.md; дапоўнена cs-тэрмінамі ў задачы G21.13 (#547): выбары занкерваныя на лакатары cs-набору, сэмантычны рэвью — у results/G21.13.md"
   },
   "entries": [
     {
@@ -68,6 +68,17 @@
             "term": "guide",
             "locator": "translations/fr.json#native.nearby.guideLabel",
             "reason": "fr трымае тую ж словаформу guide (Guides →, Guide, Description du guide) — супадзенне з en-канонам; род і апострафы ідуць з кантэксту радкоў",
+            "date": "2026-10-05"
+          }
+        },
+        "cs": {
+          "term": "Průvodce",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Průvodce",
+            "locator": "translations/cs.json#native.nearby.guideLabel",
+            "reason": "cs трымае ўласнае Průvodce (Průvodci →, Průvodce, Popis průvodce) — прыродны чэшскі тэрмін аўдыёгіда; чалавечы род трымаецца ва ўсіх радках",
             "date": "2026-10-05"
           }
         }
@@ -137,6 +148,17 @@
             "reason": "імянік — étape (Étapes : N, Étape N, Prochaine étape) — звыклы французскі тэрмін кропкі экскурсійнага маршруту; дзеянне спыніць тэйзер — асобнае «Arrêter» (native.place.stopLabel), uk/de-прэцэдэнт немешвання сэнсаў",
             "date": "2026-10-05"
           }
+        },
+        "cs": {
+          "term": "Zastavení",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Zastavení",
+            "locator": "translations/cs.json#native.chrome.stopsCount",
+            "reason": "імянік — Zastavení (Zastavení: N, Zastavení N, Další zastavení) — звыклы чэшскі тэрмін кропкі маршруту; словаформа нязменная ў лічбах; дзеянне спыніць тэйзер — асобнае «Zastavit» (native.place.stopLabel), uk/de/es-прэцэдэнт немешвання сэнсаў",
+            "date": "2026-10-05"
+          }
         }
       }
     },
@@ -201,6 +223,17 @@
             "term": "visite",
             "locator": "translations/fr.json#native.chrome.currentWalk",
             "reason": "visite як адзіны тэрмін праходу (Visite en cours, Visites précédentes, Terminer la visite ?) — сям'я «visite guidée», прыродны французскі актыўны праход па горадзе",
+            "date": "2026-10-05"
+          }
+        },
+        "cs": {
+          "term": "Procházka",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Procházka",
+            "locator": "translations/cs.json#native.chrome.currentWalk",
+            "reason": "Procházka як адзіны тэрмін праходу (Aktuální procházka, Předchozí procházky, Ukončit procházku) — прыродны чэшскі актыўны праход па горадзе; ж. род трымае статус-радкі гісторыі",
             "date": "2026-10-05"
           }
         }
@@ -269,6 +302,17 @@
             "reason": "адзін корань для абодвух сэнсаў (Télécharger, Échec du téléchargement, n'est pas téléchargé) — en/uk-прэцэдэнт аднакарэннага тэрміна",
             "date": "2026-10-05"
           }
+        },
+        "cs": {
+          "term": "stáhnout",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "stáhnout",
+            "locator": "translations/cs.json#native.preview.label.download",
+            "reason": "адзін корань для абодвух сэнсаў (Stáhnout, Stažení se nezdařilo, není stažený) — en/uk-прэцэдэнт аднакарэннага тэрміна",
+            "date": "2026-10-05"
+          }
         }
       }
     },
@@ -332,6 +376,17 @@
             "term": "indisponible",
             "locator": "translations/fr.json#native.chrome.catalogUnavailable",
             "reason": "indisponible ў радках стану і прычынах прэв'ю (Catalogue indisponible, …) — стандартны французскі UI-зварот недаступнасці",
+            "date": "2026-10-05"
+          }
+        },
+        "cs": {
+          "term": "nedostupný",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "nedostupný",
+            "locator": "translations/cs.json#native.chrome.catalogUnavailable",
+            "reason": "nedostupný у радках стану і прычынах прэв'ю (Katalog není dostupný, …) — стандартны чэшскі UI-зварот недаступнасці",
             "date": "2026-10-05"
           }
         }
@@ -400,6 +455,17 @@
             "reason": "Achat requis / Acheté / achats via les boutiques d'applications — толькі факт падзеі, без плацёжных даных",
             "date": "2026-10-05"
           }
+        },
+        "cs": {
+          "term": "nákup",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "nákup",
+            "locator": "translations/cs.json#native.preview.reason.preview#purchase-required",
+            "reason": "Vyžaduje se nákup / Zakoupeno / nákupy přes obchody aplikací — толькі факт падзеі, без плацёжных даных",
+            "date": "2026-10-05"
+          }
         }
       }
     },
@@ -462,6 +528,17 @@
             "term": "reprise depuis la session enregistrée",
             "locator": "translations/fr.json#native.run.restoredTitle",
             "reason": "канон restore без рэстаўрацыйнай метафары: Visite reprise depuis la session enregistrée — тая самая пабудова, што be/en/uk/de",
+            "date": "2026-10-05"
+          }
+        },
+        "cs": {
+          "term": "pokračuje z uložené relace",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "pokračuje z uložené relace",
+            "locator": "translations/cs.json#native.run.restoredTitle",
+            "reason": "канон restore без рэстаўрацыйнай метафары: Procházka pokračuje z uložené relace — тая самая пабудова, што be/en/uk/de/es/fr",
             "date": "2026-10-05"
           }
         }

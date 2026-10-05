@@ -76,4 +76,15 @@ export const OFFER_STRINGS_DATA = {
     "purchasedPending": "Acheté · à télécharger",
     "tryAgain": "Réessayer",
   },
+  "cs": {
+    "buy": "Koupit",
+    "continueFree": "Pokračovat zdarma",
+    "dismiss": "Teď ne",
+    "errorBody": "Můžeš to zkusit znovu nebo pokračovat zdarma.",
+    "errorTitle": "Nákup nebyl dokončen",
+    "offerBody": "Jeden nákup odemkne příběhy tohoto průvodce.",
+    "offerTitle": "Všechny příběhy průvodce",
+    "purchasedPending": "Zakoupeno · čeká stažení",
+    "tryAgain": "Zkusit znovu",
+  },
 };
