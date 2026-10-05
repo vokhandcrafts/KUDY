@@ -336,5 +336,5 @@ export type { OfferStrings } from '../../contracts/ui-message-types.ts';
 const OFFER_STRINGS = OFFER_STRINGS_DATA;
 
 export function offerStrings(locale: string): OfferStrings {
-  return locale === 'es' ? OFFER_STRINGS.es : locale === 'fr' ? OFFER_STRINGS.fr : locale === 'de' ? OFFER_STRINGS.de : locale === 'en' ? OFFER_STRINGS.en : locale === 'uk' ? OFFER_STRINGS.uk : OFFER_STRINGS.be;
+  return locale === 'cs' ? OFFER_STRINGS.cs : locale === 'es' ? OFFER_STRINGS.es : locale === 'fr' ? OFFER_STRINGS.fr : locale === 'de' ? OFFER_STRINGS.de : locale === 'en' ? OFFER_STRINGS.en : locale === 'uk' ? OFFER_STRINGS.uk : OFFER_STRINGS.be;
 }

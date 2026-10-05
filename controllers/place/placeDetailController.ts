@@ -90,5 +90,5 @@ export function placeRefusalText(refusal: string, strings: PlaceDetailStrings): 
 const STRINGS = PLACE_DETAIL_STRINGS_DATA;
 
 export function placeDetailStrings(locale: string): PlaceDetailStrings {
-  return locale === 'es' ? STRINGS.es : locale === 'fr' ? STRINGS.fr : locale === 'de' ? STRINGS.de : locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
+  return locale === 'cs' ? STRINGS.cs : locale === 'es' ? STRINGS.es : locale === 'fr' ? STRINGS.fr : locale === 'de' ? STRINGS.de : locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
 }

@@ -494,9 +494,11 @@ test('BE/EN: the surface locale is the walk pin, the words follow it', async () 
   assert.equal(runMapStrings('be').status.played, 'праслухана');
   assert.equal(runMapStrings('en').status.played, 'played');
   // The allowlist-fallback probe rides a registered code with no catalogue
-  // yet: cs (the probe moved de→es→fr→cs as G21.10 #544, G21.11 #545 and
-  // G21.12 #546 landed their catalogues — each landing retires its code).
-  assert.equal(runMapStrings('cs').status.played, 'праслухана');
+  // yet: sv (the probe moved de→es→fr→cs→sv as G21.10 #544, G21.11 #545,
+  // G21.12 #546 and G21.13 #547 landed their catalogues — each landing
+  // retires its code).
+  assert.equal(runMapStrings('sv').status.played, 'праслухана');
+  assert.equal(runMapStrings('cs').status.played, 'vyslechnuté');
   assert.equal(runMapStrings('en').reasonText['package-incomplete'], 'Guide incomplete.');
   assert.equal(runMapStrings('be').reasonText['package-incomplete'], 'Гід не поўны.');
 });

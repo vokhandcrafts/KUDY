@@ -9,16 +9,16 @@
 //
 // «Complete» (criterion 4) means every message domain of
 // contracts/ui-messages/source.json has a full typed catalogue for the code
-// today: be, en, uk, de (G21.10, issue #544), es (G21.11, issue #545) and
-// fr (G21.12, issue #546). cs/sv are registered for the future languages
-// (G21.13–G21.14) but have no catalogues yet — the selector and picker adapters advertise only the
-// complete subset, never a planned code.
+// today: be, en, uk, de (G21.10, issue #544), es (G21.11, issue #545),
+// fr (G21.12, issue #546) and cs (G21.13, issue #547). sv is registered for
+// the future language (G21.14) but has no catalogue yet — the selector and
+// picker adapters advertise only the complete subset, never a planned code.
 
 export type UiLocaleCode = "be" | "en" | "uk" | "de" | "es" | "fr" | "cs" | "sv";
 
 // The codes whose catalogues are complete today (criterion 4): the subset of
 // UiLocaleCode the adapters may advertise.
-export type CompleteUiLocaleCode = Extract<UiLocaleCode, "be" | "en" | "uk" | "de" | "es" | "fr">;
+export type CompleteUiLocaleCode = Extract<UiLocaleCode, "be" | "en" | "uk" | "de" | "es" | "fr" | "cs">;
 
 export interface UiLocaleEntry {
   readonly code: UiLocaleCode;
@@ -42,8 +42,9 @@ export const UI_LOCALES: readonly UiLocaleEntry[] = [
 // picker may expose. G21.12–G21.14 extend this list as each language's
 // catalogue lands — the registry entry and the catalogue arrive together
 // (de joined with the G21.10 catalogue, issue #544; es joins with the
-// G21.11 catalogue, issue #545; fr with the G21.12 catalogue, issue #546).
-export const COMPLETE_UI_LOCALES: readonly CompleteUiLocaleCode[] = ["be", "en", "uk", "de", "es", "fr"];
+// G21.11 catalogue, issue #545; fr with the G21.12 catalogue, issue #546;
+// cs with the G21.13 catalogue, issue #547).
+export const COMPLETE_UI_LOCALES: readonly CompleteUiLocaleCode[] = ["be", "en", "uk", "de", "es", "fr", "cs"];
 
 export function isUiLocaleCode(value: string): value is UiLocaleCode {
   return UI_LOCALES.some((entry) => entry.code === value);

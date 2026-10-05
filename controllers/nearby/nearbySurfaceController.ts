@@ -193,5 +193,5 @@ export type { NearbyStrings } from '../../contracts/ui-message-types.ts';
 const STRINGS = NEARBY_STRINGS_DATA;
 
 export function nearbyStrings(locale: string): NearbyStrings {
-  return locale === 'es' ? STRINGS.es : locale === 'fr' ? STRINGS.fr : locale === 'de' ? STRINGS.de : locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
+  return locale === 'cs' ? STRINGS.cs : locale === 'es' ? STRINGS.es : locale === 'fr' ? STRINGS.fr : locale === 'de' ? STRINGS.de : locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
 }
