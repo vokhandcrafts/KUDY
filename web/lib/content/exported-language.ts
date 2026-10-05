@@ -30,8 +30,11 @@ const HTML_LANG_PATTERN = /<html[^>]*\slang="([^"]*)"/;
 // Export files are flat or nested page files (`en.html` or `en/index.html`
 // layouts both map to the /en URL): strip the .html suffix, drop a trailing
 // index segment, then read the first URL segment as the locale prefix.
+// rel comes from path.relative (listFiles), so on Windows the separators are
+// backslashes — normalize to the URL form before reading the prefix (same
+// idiom as unsafeSegments in leak-guard.ts).
 export function expectedDocumentLocale(relPath: string): string {
-  const segments = relPath.replace(/\.html$/, '').split('/').filter((s) => s !== 'index');
+  const segments = relPath.replaceAll('\\', '/').replace(/\.html$/, '').split('/').filter((s) => s !== 'index');
   const prefix = segments[0];
   const prefixed = uiLocales.filter((locale) => locale !== defaultUiLocale);
   return prefixed.includes(prefix as (typeof uiLocales)[number]) ? prefix! : defaultUiLocale;
