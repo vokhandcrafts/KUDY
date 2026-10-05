@@ -57,7 +57,7 @@ defer/reject never authorizes import».
 | CLDR | падмноства JSON | **defer** | Unicode License v3 на тэгу 48.2.3 ([LICENSE](https://github.com/unicode-org/cldr-json/blob/48.2.3/LICENSE)) | капірайт і permission notice суправаджаюць копіі; notice пераносіцца пры прыняцці падмноства | вымераная патрэба (зараз няма) |
 | Вікіслоўнік | тэкст артыкулаў | **defer** | CC BY-SA 4.0 + GFDL ([Copyrights](https://en.wiktionary.org/wiki/Wiktionary:Copyrights)); share-alike для карпуснога выцягвання; поўныя тэксты ліцэнзій не правераныя | пазнака аўтарства (гісторыя правак) + зваротная спасылка; межы асобнай выразкі вызначаць да распаўсюджвання | праверка поўных тэкстаў ліцэнзій + рашэнне ўладара пра share-alike |
 | IATE | Download-файл | **defer** | свабоднае ўзнаўленне — толькі ў download-файла з абавязковай атрыбуцыяй; ананімны экспарт — здымак 2019-02-26 ([iate.md](iate.md), §3, §6) | «Download IATE, European Union, [год]» | уліковы запіс EU Login + рашэнне пра патрэбу актуальнага экспарту |
-| IATE | website/widget/API | **reject** | капіраванне з сайта, віджэта і вынікаў API забароненае ([legal notice](https://iate.europa.eu/legal-notice)) | не датычыцца: капіравання няма | токен для масавых аб'ёмаў — толькі праз зварот да iate@cdt.europa.eu, калі калі-небудзь спатрэбіцца |
+| IATE | website/widget/API | **reject** | капіраванне з сайта, віджэта і вынікаў API забароненае ([legal notice](https://iate.europa.eu/legal-notice)) | не датычыцца: капіравання няма | токен для масавых аб'ёмаў — толькі праз зварот да iate@cdt.europa.eu, калі ўзнікне рэальная патрэба |
 
 Дазвол Download не пераносіцца на сайт/віджэт/API — гэта розныя каналы з рознымі ўмовамі.
 Наяўнасць мовы ў пераліку крыніцы не робіцца правераным пакрыццём тэрмінаў — гэта мяжа
