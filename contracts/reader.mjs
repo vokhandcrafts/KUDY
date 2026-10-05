@@ -315,7 +315,3 @@ export function readCatalogDoc(doc) {
     errors,
   };
 }
-
-export function readCatalogText(text) {
-  return readCatalogDoc(JSON.parse(text));
-}

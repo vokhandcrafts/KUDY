@@ -1,0 +1,75 @@
+
+> kudy-web@0.1.0 prebuild
+> node --experimental-strip-types scripts/build-content.ts && node --experimental-strip-types scripts/build-qr.ts
+
+content root ready: 1 route(s), discovery discovery/demo-city/r-demo-1/index.json
+QR assets: none written — the site origin is unpublished (1 route(s) known); no fabricated origin is encoded
+
+> kudy-web@0.1.0 build
+> next build && node --experimental-strip-types scripts/scan-rendered.ts
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\kamyl\package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * C:\Users\kamyl\WebstormProjects\KUDY\web\package-lock.json
+   * C:\Users\kamyl\WebstormProjects\KUDY\package-lock.json
+
+   ▲ Next.js 15.5.25
+   - Experiments (use with caution):
+     ✓ globalNotFound
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 52s
+   Linting and checking validity of types ...
+
+ ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
+   Collecting page data ...
+   Generating static pages (0/17) ...
+   Generating static pages (4/17) 
+   Generating static pages (8/17) 
+   Generating static pages (12/17) 
+ ✓ Generating static pages (17/17)
+   Finalizing page optimization ...
+   Collecting build traces ...
+   Exporting (0/2) ...
+ ✓ Exporting (2/2)
+
+Route (app)                                     Size  First Load JS
+┌ ○ /                                          156 B         103 kB
+├ ○ /_not-found                                156 B         103 kB
+├ ○ /app                                       156 B         103 kB
+├ ○ /en                                        156 B         103 kB
+├ ○ /en/app                                    156 B         103 kB
+├ ● /en/guides/[route_id]                      156 B         103 kB
+├   └ /en/guides/demo-route-a1
+├ ● /en/guides/[route_id]/stops/[stop_id]      156 B         103 kB
+├   ├ /en/guides/demo-route-a1/stops/stop-1
+├   └ /en/guides/demo-route-a1/stops/stop-2
+├ ○ /en/map                                     1 kB         104 kB
+├ ○ /en/privacy                                156 B         103 kB
+├ ● /guides/[route_id]                         156 B         103 kB
+├   └ /guides/demo-route-a1
+├ ● /guides/[route_id]/stops/[stop_id]         156 B         103 kB
+├   ├ /guides/demo-route-a1/stops/stop-1
+├   └ /guides/demo-route-a1/stops/stop-2
+├ ○ /map                                        1 kB         104 kB
+└ ○ /privacy                                   156 B         103 kB
++ First Load JS shared by all                 103 kB
+  ├ chunks/255-f7c4c205ddd80098.js           46.5 kB
+  ├ chunks/4bd1b696-c023c6e3521b1417.js      54.2 kB
+  └ other shared chunks (total)              2.01 kB
+
+
+○  (Static)  prerendered as static content
+●  (SSG)     prerendered as static HTML (uses generateStaticParams)
+
+rendered-output scan: clean
+document-language scan: 6 violation(s)
+  wrong-document-language: en\app.html (expected be, got en)
+  wrong-document-language: en\guides\demo-route-a1.html (expected be, got en)
+  wrong-document-language: en\guides\demo-route-a1\stops\stop-1.html (expected be, got en)
+  wrong-document-language: en\guides\demo-route-a1\stops\stop-2.html (expected be, got en)
+  wrong-document-language: en\map.html (expected be, got en)
+  wrong-document-language: en\privacy.html (expected be, got en)
