@@ -28,7 +28,7 @@ export function guideHintStrings(locale: string): GuideHintStrings {
   // reviewed translations (G21.25, issue #558); uk keeps the documented be
   // fallback (uk-release-scope §6.4) until its words are authored (G21.19),
   // de renders its own catalogue (G21.10, issue #544).
-  return locale === "en" ? GUIDE_HINT_STRINGS.en : locale === "de" ? GUIDE_HINT_STRINGS.de : GUIDE_HINT_STRINGS.be;
+  return locale === "fr" ? GUIDE_HINT_STRINGS.fr : locale === "en" ? GUIDE_HINT_STRINGS.en : locale === "de" ? GUIDE_HINT_STRINGS.de : GUIDE_HINT_STRINGS.be;
 }
 
 const styles = StyleSheet.create({
