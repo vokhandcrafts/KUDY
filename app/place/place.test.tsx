@@ -25,7 +25,7 @@ import { fixtureText, flatStyle, layoutWith, serve, sha256 } from "../../test/re
 import { tokens } from "../../components/design-tokens";
 import { AudioService } from "../../services/audio/service";
 import { FakeAudioPlayerPort } from "../../services/audio/fake-port";
-import type { BundlesStore, FileFacts } from "../../services/contentRepo/types";
+import type { BundlesStore, FileFacts, TeaserAudioProbe } from "../../services/contentRepo/types";
 
 const CATALOG_TEXT = fixtureText("catalog-with-discovery.json");
 const INDEX_TEXT = fixtureText("index-valid.json");
@@ -38,7 +38,7 @@ const MOMENT_PATH = "bundles/route-a1/1/be/base/audio/s-a1.m4a";
 // keeps the original text the other tests assert.
 class MomentStore implements BundlesStore {
   private readonly dirs: Map<string, string[]>;
-  private readonly files: Map<string, FileFacts>;
+  readonly files: Map<string, FileFacts>;
 
   constructor(momentCount = 1) {
     const moments = Array.from({ length: momentCount }, (_, i) => ({
@@ -86,6 +86,14 @@ class MomentStore implements BundlesStore {
   }
 }
 
+// The teaser-audio probe beside the store (G22.02): the composition passes
+// both or neither — true is exactly a present, nonempty audio file of the
+// fake's files map.
+const probeFromStore = (store: MomentStore): TeaserAudioProbe => async (rel: string) => {
+  const file = store.files.get(rel);
+  return file?.kind === "present" && file.bytes.length > 0;
+};
+
 const withPlaceRoutes = (services: ReturnType<typeof createServices>) => ({
   _layout: layoutWith(services),
   map: MapScreen,
@@ -107,11 +115,13 @@ function placeServices(
   audio: AudioService;
 } {
   const audio = new AudioService({ createPort: () => audioPort });
+  const momentStore = new MomentStore(momentCount);
   return {
     services: createServices({
       catalogOrigin: "https://catalog.test",
       catalogSha256: sha256,
-      bundlesStore: new MomentStore(momentCount),
+      bundlesStore: momentStore,
+      teaserAudioProbe: probeFromStore(momentStore),
       audio,
       ...(feedback ? { feedback } : {}),
     }),
@@ -203,10 +213,12 @@ describe("Place detail surface (G07.02)", () => {
     // The real Journey-3 chain: Побач → месца — the back stack exists only
     // when the place detail opens from the Nearby surface.
     const audioPort = new FakeAudioPlayerPort();
+    const momentStore = new MomentStore();
     const services = createServices({
       catalogOrigin: "https://catalog.test",
       catalogSha256: sha256,
-      bundlesStore: new MomentStore(),
+      bundlesStore: momentStore,
+      teaserAudioProbe: probeFromStore(momentStore),
       audio: new AudioService({ createPort: () => audioPort }),
     });
     serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });

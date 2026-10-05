@@ -9,13 +9,19 @@
 // because the idle launch is cross-route (the single player may serve any
 // downloaded package).
 //
+// G22.02 (issue #607): the teaser audio resolves through the dedicated
+// TeaserAudioProbe (the required options.audioProbe) — a readable, nonempty
+// regular file — never by reading the .m4a body through the store. A false
+// probe answer falls to the next preferred locale; a missing probe is the
+// named configuration error below, never a permission to full-read.
+//
 // A damaged manifest or a damaged stops.json never blocks the other packages
 // — the reader collects named diagnostics and keeps reading (rule 14:
 // corrupt input answers with diagnostics, never a throw). Identifiers that
 // reach the filesystem are checked as safe segments on input (09 §7); a
 // story_id from the manifest is untrusted content, an unsafe one yields a
 // null audio path with a diagnostic, never a path.
-import type { BundlesStore } from './types.ts';
+import type { BundlesStore, TeaserAudioProbe } from './types.ts';
 import { isSafeSegment } from '../safe-path.ts';
 
 export interface MomentFact {
@@ -39,7 +45,7 @@ export interface MomentFact {
 
 export type MomentFacts =
   | { ok: true; moments: ReadonlyArray<MomentFact>; diagnostics: ReadonlyArray<string> }
-  | { ok: false; diagnostic: 'moment-facts#list-failed' };
+  | { ok: false; diagnostic: 'moment-facts#list-failed' | 'moment-facts#probe-missing' };
 
 interface RawMoment {
   momentId: string;
@@ -51,8 +57,19 @@ interface RawMoment {
 
 export async function readMomentFacts(
   store: BundlesStore,
-  options: { readonly locales: readonly string[] },
+  options: {
+    readonly locales: readonly string[];
+    // Required (G22.02): teaser audio resolves only through the dedicated
+    // probe — a composition without one is a configuration error, never a
+    // permission to read the full media body.
+    readonly audioProbe: TeaserAudioProbe;
+  },
 ): Promise<MomentFacts> {
+  if (typeof options.audioProbe !== 'function') {
+    // The named refusal answers before the first store call: a probe-less
+    // composition never reaches the library, let alone a full media read.
+    return { ok: false, diagnostic: 'moment-facts#probe-missing' };
+  }
   let routeIds: string[] | null;
   try {
     routeIds = await store.listDir('bundles');
@@ -79,7 +96,7 @@ export async function readMomentFacts(
       const packageRoot = `bundles/${routeId}/${version}`;
       const raw = await readManifest(store, packageRoot, diagnostics);
       for (const moment of raw) {
-        const audioPath = await resolveAudioPath(store, packageRoot, moment.storyId, options.locales, diagnostics);
+        const audioPath = await resolveAudioPath(options.audioProbe, packageRoot, moment.storyId, options.locales, diagnostics);
         const teaserText = await readTeaserText(store, packageRoot, moment.storyId, options.locales);
         moments.push({ ...moment, routeId, version, audioPath, teaserText });
       }
@@ -138,10 +155,14 @@ async function readManifest(
 }
 
 // The teaser audio path in the first preferred locale whose base-layer file
-// exists. The story id comes from the manifest (untrusted content): an
-// unsafe segment yields null with a diagnostic, never a path.
+// the probe answers playable: a readable, nonempty regular file (G22.02) —
+// never a full media read. A false answer (absent, directory, empty,
+// unreadable, metadata fault) falls to the next locale without a diagnostic:
+// an absent teaser audio is the honest card-without-Play, not a library
+// fault. The story id comes from the manifest (untrusted content): an unsafe
+// one yields null with a diagnostic, never a path.
 async function resolveAudioPath(
-  store: BundlesStore,
+  audioProbe: TeaserAudioProbe,
   packageRoot: string,
   storyId: string,
   locales: readonly string[],
@@ -154,8 +175,7 @@ async function resolveAudioPath(
   for (const locale of locales) {
     if (!isSafeSegment(locale)) continue;
     const path = `${packageRoot}/${locale}/base/audio/${storyId}.m4a`;
-    const file = await store.readFile(path);
-    if (file.kind !== 'absent' && file.kind !== 'unreadable') return path;
+    if (await audioProbe(path)) return path;
   }
   return null;
 }
