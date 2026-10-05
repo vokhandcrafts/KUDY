@@ -3,8 +3,8 @@
 // there. Zone B (durable — `09` §7, ADR G01.03 §3.8/§3.9, `21` §5.4) is
 // migrations-only: never an automatic delete, a failed migration never wipes
 // it. Migrations follow ADR G01.03 §3.8: PRAGMA user_version is the schema
-// number, one step = one migration = one transaction, steps only add tables
-// or columns.
+// number, one step = one migration = one transaction, steps only add tables,
+// columns or indexes.
 import type { SqlDriver } from './types.ts';
 
 export const ZONE_A_TABLES = ['bundle_asset', 'catalog_cache', 'discovery_cache'] as const;
@@ -232,6 +232,18 @@ export const migrationSteps: MigrationStep[] = [
         .run(String(rows.length + 1));
       driver.execSql(
         'CREATE INDEX event_queue_pending_order ON event_queue (at, event_id, enqueue_seq) WHERE sent = 0',
+      );
+    },
+  },
+  // G22.06 (spec E6) — the completed-history page order: the keyset read of
+  // My KUDY plans over this partial index, so a page of 50 summaries never
+  // scans or sorts the whole history. Additive only (ADR G01.03 §3.8): an
+  // index, no table rebuild — existing session rows reopen unchanged.
+  {
+    version: 4,
+    up: (driver) => {
+      driver.execSql(
+        "CREATE INDEX session_history_order ON session (started_at DESC, session_id DESC) WHERE state = 'finished'",
       );
     },
   },

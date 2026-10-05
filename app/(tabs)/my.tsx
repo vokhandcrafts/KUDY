@@ -12,12 +12,14 @@
 // when the surface returns.
 import { useCallback } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
-import { ScrollView, StyleSheet, View } from "react-native";
+// G22.06 (issue #611): the history is a FlatList — only the visible window of
+// the completed rows mounts, never the whole loaded history at once.
+import { FlatList, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { CatalogSurfaceState } from "../../controllers/catalog/catalogController";
 import { useMyKudy } from "../../controllers/myKudyController";
-import type { MyKudyState } from "../../controllers/myKudyController";
+import type { SessionHistorySummary, SessionRow } from "../../services/db/types";
 import {
   deliveryOfView,
   feedbackDeliveryWord,
@@ -125,6 +127,11 @@ const styles = StyleSheet.create({
     color: tokens.colorAccent,
     fontWeight: tokens.fontWeightStrong,
   },
+  // G22.06 (issue #611): the FlatList owns the scroll — it fills the surface
+  // under the fixed back button.
+  list: {
+    flex: 1,
+  },
 });
 
 // The local calendar day of a durable timestamp (UX 05, issue #351): the
@@ -172,6 +179,14 @@ export default function My() {
   // G06.05 (issue #280, AC1): the surface's words come from the shared
   // catalog in the display locale.
   const strings = uiStrings(locale);
+  // G22.06 (issue #611): the ready state drives the paged list — the data is
+  // the loaded completed summaries, the load-more walks the store's cursor.
+  const ready = controller !== null && controller.status === "ready" ? controller : null;
+  const guideTitle = (routeId: string): string => catalogGuideTitle(catalog, routeId);
+  const loadMore =
+    ready !== null && ready.nextCursor !== null && historyStore !== undefined
+      ? () => void historyStore.getState().loadMore()
+      : undefined;
   return (
     // G06.10.e (issue #405): the calm surface's paper — the shared wrapper
     // layers the canon grain over the unchanged paper token.
@@ -179,63 +194,115 @@ export default function My() {
       {/* UX 02 (issue #348): the surface's one back element (AC2), fixed
           above the scrolling history so it stays reachable. */}
       <BackButton label={strings.back} testID="btn-my-back" />
-      {/* UX 01 (issue #347): the history list scrolls — long finished-run
-          lists stay reachable beyond the fold. */}
-      <ScrollView testID="scroll-my">
-        <ScaledText style={styles.title}>{strings.myKudy}</ScaledText>
-        {/* G14.04.d (issue #305): the language row (uk-release-scope §4 —
-            «Мова прапануецца ў My KUDY») — the one UI-locale switch of the
-            app. The options carry their own native names from the catalog;
-            the chosen one is announced by the selected state, no invented
-            word rides the screen. Writing the switch re-renders this and the
-            other surfaces' words in place (the run's pinned locale stays the
-            walk's own — ADR G01.03 §3.4). */}
-        <UiLocaleRow locale={locale} onPick={(code) => services.uiLocale.set(code)} strings={strings} />
-        {feedbackController !== null && feedbackState !== null ? (
-          // G16.03 (issue #74): the own ratings (20 §7 «пазней у My KUDY») —
-          // without the feedback member the section stays out, the honest
-          // absence the surfaces render everywhere.
-          <OwnRatings
-            state={feedbackState}
-            catalog={catalog}
-            strings={feedbackWords}
-            onEdit={(target) =>
-              router.push({
-                pathname: "/feedback",
-                params: { kind: target.kind, id: target.id, version: target.version, locale: target.locale },
-              })
-            }
-          />
-        ) : null}
-        {controller === null || controller.status === "unavailable" ? (
-          // No member (the db adapter has not landed) and a failed read are
-          // the same honest surface: no history is invented either way.
-          // G06.05 (AC4): with a store behind the surface the failed read
-          // gets its named retry; without a store there is no exit yet —
-          // the honest state stays.
-          <View testID="my-unavailable" accessibilityLiveRegion="polite">
-            <ScaledText style={styles.unavailable}>{strings.historyUnavailable}</ScaledText>
-            {controller !== null ? <ScaledText style={styles.rowLine}>{controller.reason}</ScaledText> : null}
-            {historyStore ? (
-              <PressableSurface
-                accessibilityRole="button"
-                accessibilityLabel={strings.retry}
-                onPress={() => void historyStore.getState().refresh()}
-                style={styles.retryButton}
-                testID="btn-my-retry"
-              >
-                <ScaledText style={styles.retryLabel}>{strings.retry}</ScaledText>
-              </PressableSurface>
+      {/* UX 01 (issue #347) + G22.06 (issue #611): the history list scrolls
+          and windows — the FlatList mounts the visible rows of the loaded
+          pages, the header carries the title, the language row, the ratings
+          and the live walk. */}
+      <FlatList
+        testID="scroll-my"
+        style={styles.list}
+        data={ready?.rows ?? NO_ROWS}
+        keyExtractor={(row) => row.sessionId}
+        renderItem={({ item }) => <HistoryRow summary={item} guideTitle={guideTitle} strings={strings} />}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.25}
+        initialNumToRender={12}
+        ListHeaderComponent={
+          <>
+            <ScaledText style={styles.title}>{strings.myKudy}</ScaledText>
+            {/* G14.04.d (issue #305): the language row (uk-release-scope §4 —
+                «Мова прапануецца ў My KUDY») — the one UI-locale switch of the
+                app. The options carry their own native names from the catalog;
+                the chosen one is announced by the selected state, no invented
+                word rides the screen. Writing the switch re-renders this and the
+                other surfaces' words in place (the run's pinned locale stays the
+                walk's own — ADR G01.03 §3.4). */}
+            <UiLocaleRow locale={locale} onPick={(code) => services.uiLocale.set(code)} strings={strings} />
+            {feedbackController !== null && feedbackState !== null ? (
+              // G16.03 (issue #74): the own ratings (20 §7 «пазней у My KUDY») —
+              // without the feedback member the section stays out, the honest
+              // absence the surfaces render everywhere.
+              <OwnRatings
+                state={feedbackState}
+                catalog={catalog}
+                strings={feedbackWords}
+                onEdit={(target) =>
+                  router.push({
+                    pathname: "/feedback",
+                    params: { kind: target.kind, id: target.id, version: target.version, locale: target.locale },
+                  })
+                }
+              />
             ) : null}
-          </View>
-        ) : null}
-        {controller !== null && controller.status === "loading" ? (
-          <LoadingIndicator text={strings.loading} />
-        ) : null}
-        {controller !== null && controller.status === "ready" ? (
-          <MyKudyRows state={controller} catalog={catalog} strings={strings} />
-        ) : null}
-      </ScrollView>
+            {controller === null || controller.status === "unavailable" ? (
+              // No member (the db adapter has not landed) and a failed read are
+              // the same honest surface: no history is invented either way.
+              // G06.05 (AC4): with a store behind the surface the failed read
+              // gets its named retry; without a store there is no exit yet —
+              // the honest state stays.
+              <View testID="my-unavailable" accessibilityLiveRegion="polite">
+                <ScaledText style={styles.unavailable}>{strings.historyUnavailable}</ScaledText>
+                {controller !== null ? <ScaledText style={styles.rowLine}>{controller.reason}</ScaledText> : null}
+                {historyStore ? (
+                  <PressableSurface
+                    accessibilityRole="button"
+                    accessibilityLabel={strings.retry}
+                    onPress={() => void historyStore.getState().refresh()}
+                    style={styles.retryButton}
+                    testID="btn-my-retry"
+                  >
+                    <ScaledText style={styles.retryLabel}>{strings.retry}</ScaledText>
+                  </PressableSurface>
+                ) : null}
+              </View>
+            ) : null}
+            {controller !== null && controller.status === "loading" ? (
+              <LoadingIndicator text={strings.loading} />
+            ) : null}
+            {ready !== null ? (
+              <>
+                <ScaledText style={styles.section} testID="my-live-section">
+                  {strings.currentWalk}
+                </ScaledText>
+                {ready.live !== null ? (
+                  <LiveRow row={ready.live} guideTitle={guideTitle} strings={strings} />
+                ) : (
+                  <ScaledText style={styles.rowLine}>{strings.noCurrentWalk}</ScaledText>
+                )}
+                <ScaledText style={styles.section} testID="my-history-section">
+                  {strings.pastWalks}
+                </ScaledText>
+              </>
+            ) : null}
+          </>
+        }
+        ListFooterComponent={
+          ready !== null && (ready.loadingMore || ready.moreError !== null) ? (
+            <View>
+              {ready.loadingMore ? <LoadingIndicator text={strings.loading} /> : null}
+              {ready.moreError !== null ? (
+                // A failed load-more keeps the loaded rows and its cursor: the
+                // named retry re-reads the same page (G06.05's exit, paged).
+                <View testID="my-more-error">
+                  <ScaledText style={styles.rowLine}>{ready.moreError}</ScaledText>
+                  <PressableSurface
+                    accessibilityRole="button"
+                    accessibilityLabel={strings.retry}
+                    onPress={() => void historyStore?.getState().loadMore()}
+                    style={styles.retryButton}
+                    testID="btn-my-more-retry"
+                  >
+                    <ScaledText style={styles.retryLabel}>{strings.retry}</ScaledText>
+                  </PressableSurface>
+                </View>
+              ) : null}
+            </View>
+          ) : null
+        }
+        ListEmptyComponent={
+          ready !== null ? <ScaledText style={styles.rowLine}>{strings.noPastWalks}</ScaledText> : null
+        }
+      />
     </PaperSurface>
   );
 }
@@ -271,60 +338,59 @@ function catalogGuideTitle(catalog: CatalogSurfaceState | null, routeId: string)
   return routeId;
 }
 
-function MyKudyRows({
-  state,
-  catalog,
+// The FlatList's data when the history member is absent or not ready — one
+// stable empty array, never a fresh one per render.
+const NO_ROWS: SessionHistorySummary[] = [];
+
+// G22.06 (issue #611): the live walk's row — the durable zone's own facts
+// (state, day, heard count) plus the catalog title when it names the route.
+function LiveRow({
+  row,
+  guideTitle,
   strings,
 }: {
-  state: Extract<MyKudyState, { status: "ready" }>;
-  catalog: CatalogSurfaceState | null;
+  row: SessionRow;
+  guideTitle: (routeId: string) => string;
   strings: ReturnType<typeof uiStrings>;
 }) {
-  const guideTitle = (routeId: string): string => catalogGuideTitle(catalog, routeId);
-  const live = state.rows.filter((row) => row.state === "active" || row.state === "paused");
-  const finished = state.rows.filter((row) => row.state === "finished");
   return (
-    <View>
-      <ScaledText style={styles.section} testID="my-live-section">
-        {strings.currentWalk}
+    <View style={styles.row} testID={`my-session-${row.sessionId}`}>
+      <ScaledText style={styles.rowTitle}>{guideTitle(row.routeId)}</ScaledText>
+      <ScaledText style={styles.rowLine}>
+        {strings.liveRowLine(
+          strings.stateLabel[row.state] ?? row.state,
+          localDay(row.startedAt),
+          row.heard.length,
+        )}
       </ScaledText>
-      {live.length > 0 ? (
-        live.map((row) => (
-          <View key={row.sessionId} style={styles.row} testID={`my-session-${row.sessionId}`}>
-            <ScaledText style={styles.rowTitle}>{guideTitle(row.routeId)}</ScaledText>
-            <ScaledText style={styles.rowLine}>
-              {strings.liveRowLine(
-                strings.stateLabel[row.state] ?? row.state,
-                localDay(row.startedAt),
-                row.heard.length,
-              )}
-            </ScaledText>
-            <SessionLocaleLine row={row} />
-          </View>
-        ))
-      ) : (
-        <ScaledText style={styles.rowLine}>{strings.noCurrentWalk}</ScaledText>
-      )}
-      <ScaledText style={styles.section} testID="my-history-section">
-        {strings.pastWalks}
+      <SessionLocaleLine row={row} />
+    </View>
+  );
+}
+
+// G22.06 (issue #611): a completed history row renders the page summary —
+// the same facts the summary projection carries, the heard count derived in
+// the store, never another full-history read inside the row.
+function HistoryRow({
+  summary,
+  guideTitle,
+  strings,
+}: {
+  summary: SessionHistorySummary;
+  guideTitle: (routeId: string) => string;
+  strings: ReturnType<typeof uiStrings>;
+}) {
+  return (
+    <View style={styles.row} testID={`my-session-${summary.sessionId}`}>
+      <ScaledText style={styles.rowTitle}>{guideTitle(summary.routeId)}</ScaledText>
+      <ScaledText style={styles.rowLine}>
+        {strings.pastRowLine(
+          localDay(summary.startedAt),
+          summary.finishedAt === null ? null : localDay(summary.finishedAt),
+          summary.heardCount,
+        )}
       </ScaledText>
-      {finished.length > 0 ? (
-        finished.map((row) => (
-          <View key={row.sessionId} style={styles.row} testID={`my-session-${row.sessionId}`}>
-            <ScaledText style={styles.rowTitle}>{guideTitle(row.routeId)}</ScaledText>
-            <ScaledText style={styles.rowLine}>
-              {strings.pastRowLine(
-                localDay(row.startedAt),
-                row.finishedAt === null ? null : localDay(row.finishedAt),
-                row.heard.length,
-              )}
-            </ScaledText>
-            <SessionLocaleLine row={row} />
-          </View>
-        ))
-      ) : (
-        <ScaledText style={styles.rowLine}>{strings.noPastWalks}</ScaledText>
-      )}
+      <SessionLocaleLine row={summary} />
     </View>
   );
 }
