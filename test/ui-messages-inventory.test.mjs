@@ -47,13 +47,24 @@ function leaves(value, prefix = '') {
   return Object.entries(value).flatMap(([key, child]) => leaves(child, prefix ? `${prefix}.${key}` : key));
 }
 
+// G21.09 (issue #542): the chrome selfNames subtree is projected from the one
+// locale registry (completeUiLocaleSelfNames()), not from the canonical
+// records — the registry table owns the self-name words, so a complete code
+// the records never carried (de, G21.10 #544) appears there by design. The
+// walk skips the subtree together with its legacy migration anchors.
+function registryProjected(key) {
+  return key.startsWith('languageSelfNames.');
+}
+
 const doc = loadUiMessagesSource();
 
 test('every catalog key path has exactly one canonical record anchored to it', () => {
   for (const [domain, { value: catalog, file }] of Object.entries(CATALOGS)) {
-    const walked = leaves(catalog);
+    const walked = leaves(catalog).filter(({ key }) => !registryProjected(key));
     const owned = doc.records.filter((record) =>
-      record.migratedFrom.some((anchor) => anchor.startsWith(`${file}#`)),
+      record.migratedFrom.some(
+        (anchor) => anchor.startsWith(`${file}#`) && !registryProjected(anchor.slice(file.length + 1)),
+      ),
     );
     const anchored = new Set(
       owned.flatMap((record) =>
@@ -81,7 +92,7 @@ test('every catalog key path has exactly one canonical record anchored to it', (
 
 test('plain catalog words are verbatim in the canonical records', () => {
   for (const [domain, { value: catalog, file }] of Object.entries(CATALOGS)) {
-    for (const { key, leaf } of leaves(catalog)) {
+    for (const { key, leaf } of leaves(catalog).filter(({ key }) => !registryProjected(key))) {
       const record = doc.records.find((candidate) => candidate.migratedFrom.includes(`${file}#${key}`));
       assert.ok(record, `${file}#${key} has no record`);
       if (typeof leaf === 'string') {

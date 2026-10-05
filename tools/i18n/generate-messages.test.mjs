@@ -12,10 +12,15 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { collectOutputs, escapeTemplate, parseTemplate, renderTemplateRecord, run } from './generate-messages.mjs';
+import { collectOutputs, DOMAINS, escapeTemplate, parseTemplate, renderTemplateRecord, run } from './generate-messages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
+// The translation sets the plan renders (the source locale be projects from
+// source.json): derived from the plan, so a new output locale joins this
+// fixture the commit it joins the plan.
+const TRANSLATED_LOCALES = [...new Set(DOMAINS.flatMap((domain) => domain.outputs.flatMap((output) => output.locales)))]
+  .filter((locale) => locale !== 'be');
 
 test('generator_reproducible: repeated generation is byte-identical', () => {
   const first = collectOutputs();
@@ -50,7 +55,7 @@ test('generated_catalogue_fresh: a missing and an edited output are named, the r
   try {
     mkdirSync(join(fake, 'contracts/ui-messages/translations'), { recursive: true });
     cpSync(join(root, 'contracts/ui-messages/source.json'), join(fake, 'contracts/ui-messages/source.json'));
-    for (const locale of ['en', 'uk']) {
+    for (const locale of TRANSLATED_LOCALES) {
       cpSync(
         join(root, `contracts/ui-messages/translations/${locale}.json`),
         join(fake, `contracts/ui-messages/translations/${locale}.json`),

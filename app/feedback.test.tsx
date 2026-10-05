@@ -151,8 +151,10 @@ describe("G16.03: the rating form route (issue #74)", () => {
       // A corrupt persisted row seeds the composition root with a code the
       // closed vocabulary does not know: the store trusts read() at
       // construction, and the form must answer with the be fallback words,
-      // never a raw unknown state (issue #598).
-      uiLocalePersistence: { read: () => "de" as UiLocaleSwitchCode, write: () => {} },
+      // never a raw unknown state (issue #598). G21.10 (issue #544): de owns
+      // a complete catalogue now, so the stale probe moved to the
+      // still-planned es.
+      uiLocalePersistence: { read: () => "es" as UiLocaleSwitchCode, write: () => {} },
     });
     renderRouter(withRoutes(services), {
       initialUrl: "/feedback?kind=guide&id=guide-route-a1&version=1&locale=be",

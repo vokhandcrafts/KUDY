@@ -74,7 +74,7 @@ export function reasonsFor(kind: FeedbackTarget['kind']): readonly string[] {
 const STRINGS = FEEDBACK_STRINGS_DATA;
 
 export function feedbackStrings(locale: string): FeedbackStrings {
-  return locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
+  return locale === 'de' ? STRINGS.de : locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
 }
 
 // The delivery word of the §5.4 states, shared by the form route and the

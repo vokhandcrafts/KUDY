@@ -241,7 +241,7 @@ export interface PreviewStrings {
 const PREVIEW_STRINGS = PREVIEW_STRINGS_DATA;
 
 export function previewStrings(locale: string): PreviewStrings {
-  return locale === 'en' ? PREVIEW_STRINGS.en : locale === 'uk' ? PREVIEW_STRINGS.uk : PREVIEW_STRINGS.be;
+  return locale === 'de' ? PREVIEW_STRINGS.de : locale === 'en' ? PREVIEW_STRINGS.en : locale === 'uk' ? PREVIEW_STRINGS.uk : PREVIEW_STRINGS.be;
 }
 
 // The refusal's rendered word: the known map, else the raw reason itself

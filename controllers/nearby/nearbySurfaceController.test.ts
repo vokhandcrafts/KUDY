@@ -101,7 +101,9 @@ describe('nearbyStrings (criterion 5)', () => {
   it('carries the uk words and falls back to Belarusian for an unknown locale (G14.04.d; 09 §0)', () => {
     // G14.04.d (issue #305): uk answers from its own catalog now — the
     // unknown-locale fallback is probed on a locale no catalog answers.
+    // G21.10 (issue #544): de answers from its own catalogue, so the probe
+    // moved to the still-planned es.
     assert.equal(nearbyStrings('uk').title, 'Поруч');
-    assert.equal(nearbyStrings('de').title, 'Побач');
+    assert.equal(nearbyStrings('es').title, 'Побач');
   });
 });

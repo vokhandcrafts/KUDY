@@ -4,13 +4,17 @@
   "provenance": {
     "kind": "glossary",
     "reviewer": "owner",
-    "evidence": "тэрміны выцягнутыя з зацверджаных перакладных набораў en/uk (міграцыя G06.05 #280 + рэв'ю G21.25 #558), анкераваныя на кананічныя запісы source.json; паходжанне кожнага тэрміна — у яго provenance па форме G21.27"
+    "evidence": "тэрміны выцягнутыя з зацверджаных перакладных набораў en/uk (міграцыя G06.05 #280 + рэв'ю G21.25 #558), анкераваныя на кананічныя запісы source.json; паходжанне кожнага тэрміна — у яго provenance па форме G21.27; дапоўнена de-тэрмінамі ў задачы G21.10 (#544): выбары занкерваныя на лакатары de-набору, сэмантычны рэвью — у results/G21.10.md"
   },
   "entries": [
     {
       "term": "guide",
       "meaning": "аўтарскі тэкставы гід па горадзе або месцы (кантэнт, не чалавек-экскурсавод); радкі каталога і карткі падказкі",
-      "recordIds": ["native.chrome.guidesLink", "native.nearby.guideLabel", "native.guideHint.openHint"],
+      "recordIds": [
+        "native.chrome.guidesLink",
+        "native.nearby.guideLabel",
+        "native.guideHint.openHint"
+      ],
       "locales": {
         "en": {
           "term": "guide",
@@ -33,13 +37,29 @@
             "reason": "uk-запісы трымаюць беларускую форму «гід» даслоўна (Гіды →, Гід)",
             "date": "2026-10-05"
           }
+        },
+        "de": {
+          "term": "Guide",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Guide",
+            "locator": "translations/de.json#native.nearby.guideLabel",
+            "reason": "de трымае запазычаны Guide (Guides →, Guide, Guide-Beschreibung) — як en, кароткі і нэўтральны для каталога і карткі падказкі",
+            "date": "2026-10-05"
+          }
         }
       }
     },
     {
       "term": "stop",
       "meaning": "два сэнсы: імянік — кропка маршруту прагулкі (Кропкі: N, Кропка N, Наступная кропка), дзеянне — спыніць тэйзер месца (кнопка native.place.stopLabel); слоўнікавы тэрмін — імянік, дзеянне гл. анкеры",
-      "recordIds": ["native.chrome.stopsCount", "native.chrome.stopNumber", "web.ui.nextStop", "native.place.stopLabel"],
+      "recordIds": [
+        "native.chrome.stopsCount",
+        "native.chrome.stopNumber",
+        "web.ui.nextStop",
+        "native.place.stopLabel"
+      ],
       "locales": {
         "en": {
           "term": "stop",
@@ -62,13 +82,28 @@
             "reason": "імянік — точка (Точки: N, Точка N, Наступна точка); дзеянне — Зупинити (native.place.stopLabel): uk не змешвае сэнсы адным словам",
             "date": "2026-10-05"
           }
+        },
+        "de": {
+          "term": "Station",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Station",
+            "locator": "translations/de.json#native.chrome.stopsCount",
+            "reason": "імянік — Station (Stationen: N, Station N, Nächste Station) — звыклы нямецкі тэрмін кропак экскурсійнага маршруту; дзеянне спыніць тэйзер — асобнае «Stop» (native.place.stopLabel), uk-прэцэдэнт немешвання сэнсаў",
+            "date": "2026-10-05"
+          }
         }
       }
     },
     {
       "term": "walk",
       "meaning": "адзін актыўны праход па гідзе з жывой пазіцыяй (прагулка); сесія пачынаецца/спыняецца на экране Run, гісторыя — папярэднія праходы",
-      "recordIds": ["native.chrome.walk", "native.chrome.currentWalk", "native.chrome.pastWalks"],
+      "recordIds": [
+        "native.chrome.walk",
+        "native.chrome.currentWalk",
+        "native.chrome.pastWalks"
+      ],
       "locales": {
         "en": {
           "term": "walk",
@@ -91,13 +126,28 @@
             "reason": "Прогулянка / Поточна прогулянка ў зацверджаным uk-наборы",
             "date": "2026-10-05"
           }
+        },
+        "de": {
+          "term": "Rundgang",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Rundgang",
+            "locator": "translations/de.json#native.chrome.currentWalk",
+            "reason": "Rundgang як адзіны тэрмін праходу (Aktueller Rundgang, Frühere Rundgänge, Rundgang beenden) — прыродны нямецкі актыўны праход па горадзе",
+            "date": "2026-10-05"
+          }
         }
       }
     },
     {
       "term": "download",
       "meaning": "два сэнсы: загрузка тэйзера/прэв'ю (Загрузіць, Збой загрузкі) і спампоўка пакета гіда для прагулкі (Гід не спампаваны); be свядома разводзіць словы, en трымае download для абодвух",
-      "recordIds": ["native.preview.label.download", "native.preview.downloadFailed", "native.run.reasonText.run#package-not-downloaded"],
+      "recordIds": [
+        "native.preview.label.download",
+        "native.preview.downloadFailed",
+        "native.run.reasonText.run#package-not-downloaded"
+      ],
       "locales": {
         "en": {
           "term": "download",
@@ -120,13 +170,27 @@
             "reason": "Завантажити / не завантажений — uk трымае адзін корань для абодвух сэнсаў",
             "date": "2026-10-05"
           }
+        },
+        "de": {
+          "term": "laden",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "laden",
+            "locator": "translations/de.json#native.preview.label.download",
+            "reason": "адзін корань для абодвух сэнсаў (Laden, Laden fehlgeschlagen, nicht geladen) — en/uk-прэцэдэнт аднакарэннага тэрміна",
+            "date": "2026-10-05"
+          }
         }
       }
     },
     {
       "term": "unavailable",
       "meaning": "стан недаступнасці кантэнту/секцыі (каталог, падборка, гісторыя, загрузка); састаўныя прычыны прэв'ю маюць уласныя радкі reason#*",
-      "recordIds": ["native.chrome.catalogUnavailable", "native.preview.reason.preview#download-unavailable"],
+      "recordIds": [
+        "native.chrome.catalogUnavailable",
+        "native.preview.reason.preview#download-unavailable"
+      ],
       "locales": {
         "en": {
           "term": "unavailable",
@@ -149,13 +213,28 @@
             "reason": "недоступний / недоступне ў uk-наборы",
             "date": "2026-10-05"
           }
+        },
+        "de": {
+          "term": "nicht verfügbar",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "nicht verfügbar",
+            "locator": "translations/de.json#native.chrome.catalogUnavailable",
+            "reason": "nicht verfügbar у радках стану і прычынах прэв'ю (Katalog nicht verfügbar, …) — стандартны нямецкі UI-зварот недаступнасці",
+            "date": "2026-10-05"
+          }
         }
       }
     },
     {
       "term": "purchase",
       "meaning": "пакупка гіда праз краму (не аплата ў дадатку); радкі стану і прыватнасці фіксуць толькі факт падзеі, не плацёжныя даныя",
-      "recordIds": ["native.preview.reason.preview#purchase-required", "native.offer.purchasedPending", "web.ui.privacyPurchases"],
+      "recordIds": [
+        "native.preview.reason.preview#purchase-required",
+        "native.offer.purchasedPending",
+        "web.ui.privacyPurchases"
+      ],
       "locales": {
         "en": {
           "term": "purchase",
@@ -178,13 +257,26 @@
             "reason": "Потрібна покупка / Куплено ў uk-наборы",
             "date": "2026-10-05"
           }
+        },
+        "de": {
+          "term": "Kauf",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "Kauf",
+            "locator": "translations/de.json#native.preview.reason.preview#purchase-required",
+            "reason": "Kauf erforderlich / Gekauft / Käufe über die App-Stores — толькі факт падзеі, без плацёжных даных",
+            "date": "2026-10-05"
+          }
         }
       }
     },
     {
       "term": "restore",
       "meaning": "аднаўленне прагулкі са захаванай сесіі пасля перазапуску дадатку; be канон кажа «працягнута са захаванай сесіі», не «адноўлена»",
-      "recordIds": ["native.run.restoredTitle"],
+      "recordIds": [
+        "native.run.restoredTitle"
+      ],
       "locales": {
         "en": {
           "term": "restore",
@@ -205,6 +297,17 @@
             "term": "продовжено зі збереженої сесії",
             "locator": "translations/uk.json#native.run.restoredTitle",
             "reason": "uk-канон трымае той самую пабудову, што і be (працягнуць, не аднавіць)",
+            "date": "2026-10-05"
+          }
+        },
+        "de": {
+          "term": "fortgesetzt",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "fortgesetzt",
+            "locator": "translations/de.json#native.run.restoredTitle",
+            "reason": "канон restore без рэстаўрацыйнай метафары: Rundgang aus der gespeicherten Sitzung fortgesetzt — тая самая пабудова, што be/en/uk",
             "date": "2026-10-05"
           }
         }
