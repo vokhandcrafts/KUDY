@@ -162,3 +162,36 @@ test('AC5 (G17.19): a pre-G17.19 database gains the transport column on open', (
   assert.ok(columns.includes('transport'), 'the transport column exists after the migration');
   assert.equal(db.prepare('SELECT transport FROM campaigns WHERE id = ?').get('c1').transport, 'direct');
 });
+
+// G22.04: the /records page counts each record's links with a per-row COUNT
+// over links.raw_record_id (dispatcher.mjs). The index must exist on every
+// store — created on first open — while the media uniqueness index stays the
+// only index on media (AC1: the new index must not duplicate it).
+test('AC1 (G22.04): schema opening creates the links(raw_record_id) index once', () => {
+  const db = openStore(path.join(makeTempDir(), 'db.sqlite'));
+  assert.ok(
+    db.prepare('PRAGMA index_list(links)').all().some((row) => row.name === 'links_record'),
+    'links_record exists on links'
+  );
+  assert.deepEqual(
+    db.prepare('PRAGMA index_list(media)').all().map((row) => row.name),
+    ['media_record_file'],
+    'the media uniqueness index is not duplicated'
+  );
+});
+
+// A store written by pre-G22.04 builds has no links_record, and the read-only
+// dispatcher cannot create it; the next write-mode open (the collector CLI)
+// adds it in place, like the older in-place migrations above.
+test('AC1 (G22.04): an old store without the index gains it on the next open', () => {
+  const dbPath = path.join(makeTempDir(), 'db.sqlite');
+  const db = openStore(dbPath);
+  db.exec('DROP INDEX links_record');
+  db.close();
+
+  const reopened = openStore(dbPath);
+  assert.ok(
+    reopened.prepare('PRAGMA index_list(links)').all().some((row) => row.name === 'links_record'),
+    'links_record recreated on reopen'
+  );
+});
