@@ -43,15 +43,15 @@ test('the registry defines the eight requested UI codes and native names once (c
   assert.throws(() => uiLocaleNativeName('ru'), /ui-locale-unregistered/);
 });
 
-test('the complete set is be/en/uk/de/es/fr; planned codes stay registered but incomplete (criterion 4)', () => {
-  assert.deepEqual([...COMPLETE_UI_LOCALES], ['be', 'en', 'uk', 'de', 'es', 'fr']);
+test('the complete set is be/en/uk/de/es/fr/cs; planned codes stay registered but incomplete (criterion 4)', () => {
+  assert.deepEqual([...COMPLETE_UI_LOCALES], ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs']);
   for (const { code } of EIGHT) {
     assert.equal(isUiLocaleCode(code), true, `${code} is registered`);
   }
   for (const code of COMPLETE_UI_LOCALES) {
     assert.equal(isCompleteUiLocale(code), true, `${code} is complete`);
   }
-  for (const code of ['cs', 'sv']) {
+  for (const code of ['sv']) {
     assert.equal(isCompleteUiLocale(code), false, `${code} has no catalogue yet`);
   }
   assert.equal(isCompleteUiLocale('ru'), false);
@@ -86,8 +86,9 @@ test('the store derives its vocabulary from the registry and keeps unknown-input
   // them exactly like an unregistered code (the named UiLocaleError, no
   // silent state), and a refused switch keeps the current locale. A complete
   // catalogue joins the store's vocabulary the commit it lands (es, G21.11
-  // issue #545; fr, G21.12 issue #546): the positive siblings of the refusals.
-  for (const planned of ['cs', 'sv', 'ru']) {
+  // issue #545; fr, G21.12 issue #546; cs, G21.13 issue #547): the positive
+  // siblings of the refusals.
+  for (const planned of ['sv', 'ru']) {
     assert.throws(() => store.set(planned), UiLocaleError);
     assert.equal(store.current(), 'en');
   }
@@ -95,6 +96,8 @@ test('the store derives its vocabulary from the registry and keeps unknown-input
   assert.equal(store.current(), 'es');
   store.set('fr');
   assert.equal(store.current(), 'fr');
+  store.set('cs');
+  assert.equal(store.current(), 'cs');
   store.set('be');
   assert.equal(store.current(), 'be');
 });

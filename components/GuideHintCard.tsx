@@ -29,7 +29,7 @@ export function guideHintStrings(locale: string): GuideHintStrings {
   // fallback (uk-release-scope §6.4) until its words are authored (G21.19),
   // de renders its own catalogue (G21.10, issue #544); es too (G21.11, issue
   // #545); fr too (G21.12, issue #546).
-  return locale === "es" ? GUIDE_HINT_STRINGS.es : locale === "fr" ? GUIDE_HINT_STRINGS.fr : locale === "en" ? GUIDE_HINT_STRINGS.en : locale === "de" ? GUIDE_HINT_STRINGS.de : GUIDE_HINT_STRINGS.be;
+  return locale === "cs" ? GUIDE_HINT_STRINGS.cs : locale === "es" ? GUIDE_HINT_STRINGS.es : locale === "fr" ? GUIDE_HINT_STRINGS.fr : locale === "en" ? GUIDE_HINT_STRINGS.en : locale === "de" ? GUIDE_HINT_STRINGS.de : GUIDE_HINT_STRINGS.be;
 }
 
 const styles = StyleSheet.create({
