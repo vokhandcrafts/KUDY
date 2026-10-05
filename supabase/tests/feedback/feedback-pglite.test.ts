@@ -286,11 +286,11 @@ async function feedbackScenario(t: TestContext) {
   const device = await registerFeedbackDevice(db);
   await publishFixtureTargets(db, [{ kind: 'guide', route_id: 'guide-route-a1', version: '1', locale: 'be' }]);
   const call = (method: string, urlPath: string, body: unknown, secret = device.secret) =>
-  handleFeedbackEdgeRequest(
-  feedbackRequest({ method, url: `https://feedback.test${urlPath}`, body, secret }),
-  client,
-  config,
-  );
+    handleFeedbackEdgeRequest(
+      feedbackRequest({ method, url: `https://feedback.test${urlPath}`, body, secret }),
+      client,
+      config,
+    );
   return { db, client, config, device, call };
 }
 
