@@ -374,7 +374,7 @@ export function checkpointProgress(driver: SqlDriver, sessionId: string, progres
 // of the same event lands as one row (upsert targeted at event_id only, so
 // malformed payloads still fail loudly instead of being silently ignored).
 // G22.03: the row also gets its durable enqueue_seq key, allocated in this
-// same transaction through the counter in `settings`; a duplicate event_id
+// same transaction through the durable `event_queue_seq` counter; a duplicate event_id
 // leaves a gap in the sequence — monotonic without reuse is the contract,
 // gaps are free.
 export function appendEvent(driver: SqlDriver, event: EventInput): void {
@@ -389,12 +389,12 @@ export function appendEvent(driver: SqlDriver, event: EventInput): void {
   });
 }
 
-// G22.03 — the durable insertion key. `settings` holds the counter (its SQL
-// lives here) because the device wipe deletes only the consent row: queue
-// rows go away with clearDeviceAccountState, the counter does not — deletion
-// never reuses an enqueue_seq, so a flush snapshot stays meaningful after an
-// account clearing. Both readers answer with a named diagnostic when the
-// counter row is missing or malformed, never with a guess.
+// G22.03 — the durable insertion key. The counter is the zone B singleton
+// `event_queue_seq` (created by migration step 3): queue rows go away with
+// clearDeviceAccountState, the counter does not — deletion never reuses an
+// enqueue_seq, so a flush snapshot stays meaningful after an account clearing.
+// Both readers answer with a named diagnostic when the counter row is
+// missing or malformed, never with a guess.
 function readEnqueueSeqCounter(driver: SqlDriver): number {
   const row = driver.prepare('SELECT next FROM event_queue_seq WHERE singleton = 1').get();
   const next = row === undefined ? null : Number(row.next);

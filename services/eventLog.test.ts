@@ -17,7 +17,7 @@ import test from 'node:test';
 
 import { clearDeviceAccountState, DbError, listPendingEvents, openDatabase, setDeviceId } from './db/db.ts';
 import { nodeSqliteFileDriver } from './db/test-fixture.ts';
-import type { SqlDriver } from './db/types.ts';
+import type { EventInput, SqlDriver } from './db/types.ts';
 import { eventFactory, openFreshEventStore } from './eventLog-test-fixture.ts';
 import { emitEvent, flushEvents, type OutgoingEvent } from './eventLog.ts';
 
@@ -359,10 +359,14 @@ test('batch_failure_preserves_pending_tail', async () => {
   assert.equal(marked, 344);
 });
 
-test('owner_change_stops_old_flush', async () => {
-  // a replacement that keeps the rows: the identity switches mid-send while
-  // the old account's events are still queued — the in-flight flush must
-  // stop and must not acknowledge those rows for the new owner
+// G22.03 — the shared mid-send identity-switch arrangement: a captured
+// owner, a queue of 600 events, and a sender whose first call runs the
+// caller's identity action. The two scenarios below differ only in what that
+// action does (a bare replacement vs a full account clearing), so the flush
+// harness is one helper, not two pasted variants (jscpd).
+async function flushWithMidSendIdentity(
+  action: (driver: SqlDriver, replacement: EventInput) => void,
+): Promise<{ driver: SqlDriver; replacement: EventInput; sends: number; marked: number }> {
   const driver = openFreshEventStore();
   setDeviceId(driver, 'device-old');
   for (let i = 0; i < 600; i += 1) {
@@ -372,11 +376,19 @@ test('owner_change_stops_old_flush', async () => {
   let sends = 0;
   const marked = await flushEvents(driver, (batch) => {
     sends += 1;
-    if (sends === 1) {
-      setDeviceId(driver, 'device-new');
-      emitEvent(driver, replacement);
-    }
+    if (sends === 1) action(driver, replacement);
     return Promise.resolve();
+  });
+  return { driver, replacement, sends, marked };
+}
+
+test('owner_change_stops_old_flush', async () => {
+  // a replacement that keeps the rows: the identity switches mid-send while
+  // the old account's events are still queued — the in-flight flush must
+  // stop and must not acknowledge those rows for the new owner
+  const { driver, replacement, sends, marked } = await flushWithMidSendIdentity((d, rep) => {
+    setDeviceId(d, 'device-new');
+    emitEvent(d, rep);
   });
   assert.equal(sends, 1, 'no further batch goes out after the ownership change');
   assert.equal(marked, 0, 'the in-flight batch is never acknowledged for the new owner');
@@ -392,23 +404,12 @@ test('owner_change_stops_old_flush', async () => {
 });
 
 test('account_clearing_mid_flush_keeps_the_replacement_event_pending', async () => {
-  const driver = openFreshEventStore();
-  setDeviceId(driver, 'device-old');
-  for (let i = 0; i < 600; i += 1) {
-    emitEvent(driver, event({ at: 1_700_000_000_000 + i }));
-  }
-  const replacement = event({ at: 1_700_000_000_000 + 10_000 });
-  let sends = 0;
-  const marked = await flushEvents(driver, (batch) => {
-    sends += 1;
-    if (sends === 1) {
-      // the account is cleared and replaced mid-send: queue rows go away,
-      // the replacement account writes its own event and takes the device
-      clearDeviceAccountState(driver);
-      emitEvent(driver, replacement);
-      setDeviceId(driver, 'device-new');
-    }
-    return Promise.resolve();
+  const { driver, replacement, sends, marked } = await flushWithMidSendIdentity((d, rep) => {
+    // the account is cleared and replaced mid-send: queue rows go away,
+    // the replacement account writes its own event and takes the device
+    clearDeviceAccountState(d);
+    emitEvent(d, rep);
+    setDeviceId(d, 'device-new');
   });
   assert.equal(sends, 1, 'no further batch goes out after the clearing');
   assert.equal(marked, 0, 'the in-flight batch is not acknowledged by the old flush');

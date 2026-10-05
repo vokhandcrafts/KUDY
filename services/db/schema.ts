@@ -12,13 +12,14 @@ export const ZONE_A_TABLES = ['bundle_asset', 'catalog_cache', 'discovery_cache'
 // zone B inventory: session (ADR G01.03 §3.1), guide_hint_state +
 // guide_hint_last (ADR §3.9), migration_log (ADR §3.8, `09` §7),
 // event_queue + settings + device (`09` §7), feedback_local +
-// feedback_outbox (`21` §5.4).
+// feedback_outbox (`21` §5.4), event_queue_seq (G22.03, створае крок 3).
 export const ZONE_B_TABLES = [
   'session',
   'guide_hint_state',
   'guide_hint_last',
   'migration_log',
   'event_queue',
+  'event_queue_seq',
   'settings',
   'device',
   'feedback_local',
@@ -124,6 +125,15 @@ CREATE UNIQUE INDEX guide_hint_session_scope ON guide_hint_state (scope, session
   payload TEXT NOT NULL,
   sent INTEGER NOT NULL DEFAULT 0
 )`,
+  // G22.03 (spec E3): the durable enqueue_seq counter — one row, monotonic.
+  // Its own table (deliberately not a `settings` row): the device wipe deletes
+  // only the consent row of settings, and this counter must survive every row
+  // deletion so an enqueue_seq is never reused. Created by step 1 for fresh
+  // stores; migration step 3 creates it for existing ones.
+  event_queue_seq: `CREATE TABLE event_queue_seq (
+  singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+  next INTEGER NOT NULL
+)`,
   // `09` §7: language, permissions shown, analytics consent.
   settings: `CREATE TABLE settings (
   key TEXT PRIMARY KEY NOT NULL,
@@ -211,7 +221,9 @@ export const migrationSteps: MigrationStep[] = [
       // the consent row there) can never touch the counter — deletion never
       // reuses an enqueue_seq, a flush snapshot stays meaningful across an
       // account clearing
-      driver.execSql(`CREATE TABLE event_queue_seq (
+      // the DDL lives in ZONE_B_DDL too: fresh stores created the table at
+      // step 1, existing ones create it here — hence IF NOT EXISTS
+      driver.execSql(`CREATE TABLE IF NOT EXISTS event_queue_seq (
   singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
   next INTEGER NOT NULL
 )`);
