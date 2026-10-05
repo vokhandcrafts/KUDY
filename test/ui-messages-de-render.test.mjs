@@ -10,22 +10,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { uiStrings } from '../components/ui-strings.ts';
-// GuideHintCard.tsx is JSX (node cannot import it); the generated data module
-// is pure TS and carries the words the card's selector returns (the golden
-// test's idiom).
-import { GUIDE_HINT_STRINGS } from '../components/guide-hint-strings.generated.ts';
-import { previewStrings, previewReasonText } from '../controllers/catalog/previewController.ts';
-import { runMapStrings, runMapReason } from '../controllers/run/runMap.ts';
-import { placeDetailStrings } from '../controllers/place/placeDetailController.ts';
-import { nearbyStrings } from '../controllers/nearby/nearbySurfaceController.ts';
-import { offerStrings } from '../controllers/commerce/commerceController.ts';
-import { feedbackStrings } from '../controllers/useFeedbackController.ts';
+import { localeFamilies } from './ui-locale-families.mjs';
 import { de as webDe } from '../web/lib/i18n/de.ts';
 import { getUiStrings } from '../web/lib/i18n/index.ts';
 
 test('the chrome adapter routes de to the German catalogue', () => {
-  const s = uiStrings('de');
+  const s = localeFamilies('de').chrome;
   assert.equal(s.back, 'Zurück');
   assert.equal(s.currentWalk, 'Aktueller Rundgang');
   assert.equal(s.catalogUnavailable, 'Katalog nicht verfügbar');
@@ -37,7 +27,7 @@ test('the chrome adapter routes de to the German catalogue', () => {
 });
 
 test('the German discrete forms render over the selector arguments', () => {
-  const s = uiStrings('de');
+  const s = localeFamilies('de').chrome;
   assert.equal(s.timeCap(30), 'Bis zu 30 Min.');
   assert.equal(s.timeCap(60), 'Bis zu einer Stunde');
   assert.equal(s.timeCap(120), 'Bis zu zwei Stunden');
@@ -51,28 +41,29 @@ test('the German discrete forms render over the selector arguments', () => {
 });
 
 test('the German preview detail renders the named kind forms', () => {
-  const s = previewStrings('de');
-  assert.equal(s.detail({ kind: 'damaged' }), 'Paket beschädigt: erneutes Laden nötig');
-  assert.equal(s.detail({ kind: 'missing-files', count: 2 }), 'Fehlende Dateien: 2');
-  assert.equal(s.detail({ kind: 'stale' }), 'Ein Update ist verfügbar');
-  assert.equal(s.detail({ kind: 'other' }), 'Paket unvollständig');
-  assert.equal(previewReasonText('preview#purchase-required', s), 'Kauf erforderlich.');
+  const { preview, previewReasonText } = localeFamilies('de');
+  assert.equal(preview.detail({ kind: 'damaged' }), 'Paket beschädigt: erneutes Laden nötig');
+  assert.equal(preview.detail({ kind: 'missing-files', count: 2 }), 'Fehlende Dateien: 2');
+  assert.equal(preview.detail({ kind: 'stale' }), 'Ein Update ist verfügbar');
+  assert.equal(preview.detail({ kind: 'other' }), 'Paket unvollständig');
+  assert.equal(previewReasonText('preview#purchase-required', preview), 'Kauf erforderlich.');
   // An unknown diagnostic renders as-is (the honest runMapReason idiom).
-  assert.equal(previewReasonText('preview#unknown', s), 'preview#unknown');
+  assert.equal(previewReasonText('preview#unknown', preview), 'preview#unknown');
 });
 
 test('every German controller family routes and renders its words', () => {
-  assert.equal(GUIDE_HINT_STRINGS.de.heading, 'In der Nähe gibt es einen Guide…');
-  assert.equal(GUIDE_HINT_STRINGS.de.paid, 'kostenpflichtig');
-  assert.equal(runMapStrings('de').endWalk, 'Rundgang beenden');
-  assert.equal(runMapReason('run#package-not-downloaded', runMapStrings('de')), 'Der Guide ist nicht geladen.');
-  assert.equal(placeDetailStrings('de').playLabel, 'Teaser anhören');
-  assert.equal(placeDetailStrings('de').stopLabel, 'Stop');
-  assert.equal(nearbyStrings('de').title, 'In der Nähe');
-  assert.equal(offerStrings('de').buy, 'Kaufen');
-  assert.equal(offerStrings('de').dismiss, 'Nicht jetzt');
-  assert.equal(feedbackStrings('de').deleteButton, 'Bewertung löschen');
-  assert.equal(feedbackStrings('de').ratingOf(4), '4 von 5');
+  const f = localeFamilies('de');
+  assert.equal(f.guideHint.heading, 'In der Nähe gibt es einen Guide…');
+  assert.equal(f.guideHint.paid, 'kostenpflichtig');
+  assert.equal(f.run.endWalk, 'Rundgang beenden');
+  assert.equal(f.runReason('run#package-not-downloaded', f.run), 'Der Guide ist nicht geladen.');
+  assert.equal(f.place.playLabel, 'Teaser anhören');
+  assert.equal(f.place.stopLabel, 'Stop');
+  assert.equal(f.nearby.title, 'In der Nähe');
+  assert.equal(f.offer.buy, 'Kaufen');
+  assert.equal(f.offer.dismiss, 'Nicht jetzt');
+  assert.equal(f.feedback.deleteButton, 'Bewertung löschen');
+  assert.equal(f.feedback.ratingOf(4), '4 von 5');
 });
 
 test('the German web catalogue renders through getUiStrings with the same key shape', () => {

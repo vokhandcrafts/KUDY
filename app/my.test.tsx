@@ -242,7 +242,7 @@ describe("KUDY language row (G14.04.d)", () => {
     expect(screen.getByTestId("btn-ui-locale-uk").props.accessibilityState).toEqual({ selected: true });
   });
 
-  test("the row offers the four self-named locales and marks the current one", async () => {
+  test("the row offers the five self-named locales and marks the current one", async () => {
     renderRouter({ _layout: layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
     expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
     expect(screen.getByText("Беларуская")).toBeTruthy();
@@ -251,6 +251,9 @@ describe("KUDY language row (G14.04.d)", () => {
     // G21.10 (issue #544): the de catalogue landed, the picker derives the
     // fourth chip from the registry's complete set.
     expect(screen.getByText("Deutsch")).toBeTruthy();
+    // G21.12 (issue #546): the fr catalogue lands, the picker derives the
+    // fifth chip from the same registry table.
+    expect(screen.getByText("Français")).toBeTruthy();
     expect(screen.getByTestId("btn-ui-locale-be").props.accessibilityState).toEqual({ selected: true });
     expect(screen.getByTestId("btn-ui-locale-en").props.accessibilityState).toEqual({ selected: false });
     // Switching to en re-renders the chrome in English (AC3: no restart) —
@@ -260,6 +263,21 @@ describe("KUDY language row (G14.04.d)", () => {
     fireEvent.press(screen.getByTestId("btn-ui-locale-en"));
     expect(await screen.findByText("History unavailable.")).toBeTruthy();
     expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
+  });
+
+  test("G21.12 (issue #546): picking fr re-renders the honest-unavailable line in French", async () => {
+    // No history port behind the surface: the always-present chrome word
+    // carries the language probe (the three-locale test's idiom), French
+    // here. The no-restart property is proven by the uk sibling above —
+    // the same switch mechanism, one proof is enough.
+    const services = createServices({});
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("btn-ui-locale-fr"));
+    expect(await screen.findByText("Historique indisponible.")).toBeTruthy();
+    expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
+    expect(services.uiLocale.current()).toBe("fr");
+    expect(screen.getByTestId("btn-ui-locale-fr").props.accessibilityState).toEqual({ selected: true });
   });
 
   test("G21.10 (issue #544): picking de re-renders the honest-unavailable line in German", async () => {

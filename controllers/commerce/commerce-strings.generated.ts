@@ -54,4 +54,15 @@ export const OFFER_STRINGS_DATA = {
     "purchasedPending": "Gekauft · muss geladen werden",
     "tryAgain": "Erneut versuchen",
   },
+  "fr": {
+    "buy": "Acheter",
+    "continueFree": "Continuer gratuitement",
+    "dismiss": "Pas maintenant",
+    "errorBody": "Tu peux réessayer ou continuer gratuitement.",
+    "errorTitle": "L'achat n'a pas été terminé",
+    "offerBody": "Un achat déverrouille les histoires de ce guide.",
+    "offerTitle": "Toutes les histoires du guide",
+    "purchasedPending": "Acheté · à télécharger",
+    "tryAgain": "Réessayer",
+  },
 };

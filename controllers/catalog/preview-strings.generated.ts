@@ -82,4 +82,22 @@ export const PREVIEW_STRINGS_DATA = {
     "storageExit": "Speicher in KUDY freigeben",
     "storageFullDetail": (mb: number) => `nicht genug Speicher: ${mb} MB mehr erforderlich`,
   },
+  "fr": {
+    "detail": (detail: { readonly kind: string; readonly count?: number }) => detail.kind === "damaged" ? `paquet endommagé : nouveau téléchargement nécessaire` : detail.kind === "missing-files" ? `fichiers manquants : ${detail.count}` : detail.kind === "stale" ? `une mise à jour est disponible` : `paquet incomplet`,
+    "downloadFailed": "Échec du téléchargement.",
+    "label": {
+      "download": "Télécharger",
+      "start": "Commencer",
+    },
+    "reason": {
+      "preview#download-unavailable": "Le téléchargement est indisponible dans ce build.",
+      "preview#not-published": "Le guide n'est pas publié.",
+      "preview#purchase-required": "Achat requis.",
+      "preview#storage-unknown": "Stockage indisponible.",
+      "preview#verify-unavailable": "Vérification indisponible.",
+    },
+    "retry": "Réessayer",
+    "storageExit": "Libérer de l'espace dans KUDY",
+    "storageFullDetail": (mb: number) => `espace insuffisant : ${mb} Mo supplémentaires requis`,
+  },
 };

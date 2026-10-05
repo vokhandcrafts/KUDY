@@ -210,5 +210,5 @@ export function runMapReason(reason: string, strings: RunMapStrings): string {
 const STRINGS = RUN_MAP_STRINGS_DATA;
 
 export function runMapStrings(locale: string): RunMapStrings {
-  return locale === 'de' ? STRINGS.de : locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
+  return locale === 'fr' ? STRINGS.fr : locale === 'de' ? STRINGS.de : locale === 'en' ? STRINGS.en : locale === 'uk' ? STRINGS.uk : STRINGS.be;
 }
