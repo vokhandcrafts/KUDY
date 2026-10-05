@@ -29,6 +29,10 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/627 (issue: https://github.com/vo
 Што зрабіць: праглядзі і змержы PR #624 пасля паспяховых праверак, каб спецыфікацыя і брыфы кітайскіх даследаванняў былі даступныя ў галоўнай галіне. Гэта закрые перадумову #619; запуск даследаванняў патрабуе асобнага рашэння.
 PR: https://github.com/vokhandcrafts/KUDY/pull/624 (issue: https://github.com/vokhandcrafts/KUDY/issues/619)
 
+### 2026-10-04 — G20.14: змержыць гарды адкату Expo-адаптараў (задача #485)
+Што зрабіць: праглядзі і змержы PR #615 у main. Змена дробная (адзін тэставы гард + results-файл, бяз продакшн-кода), ідзе без рэвью-пайплайну па hook v3 крок 0, таму мерж за чалавекам; гейты на галінцы зялёныя (npm test, arch:check, jscpd). Пасля мержу задача #485 закрываецца аўтаматычна (Closes #485).
+PR: https://github.com/vokhandcrafts/KUDY/pull/615 (issue: https://github.com/vokhandcrafts/KUDY/issues/485; эпік: https://github.com/vokhandcrafts/KUDY/issues/470)
+
 ### 2026-10-04 — G16.03: змержыць рэндэр-тэст прэсу Back (задача #599)
 Што зрабіць: праглядзі і змержы PR #602 у main. Змена дробная (новы тэст + must-flag радок, бяз продакшн-кода), пайплайн па hook v3 крок 0 ідзе без рэвью-агентаў і без аўтамержу, таму мерж за чалавекам; пасля мержу задача #599 закрываецца аўтаматычна (Closes #599).
 PR: https://github.com/vokhandcrafts/KUDY/pull/602 (issue: https://github.com/vokhandcrafts/KUDY/issues/599)
