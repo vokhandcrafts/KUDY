@@ -258,7 +258,7 @@
       "lines": "194-195",
       "rule": "text_locales/audio_locales: maxItems 8, enum з 8 локаляў без кітайскай"
     },
-    "player": "services/audio/expo/expo-audio-port.ts — адзіны модуль, што імпартуе expo-audio; прайгравальнік m4a адчуваецца натыўна, рантайм-змен для кітайскай гэтая задача не прапануе"
+    "player": "services/audio/expo/expo-audio-port.ts:1-3 — даслоўна з крыніцы: \"the only module of services/audio/expo/ that imports expo-audio at runtime\"; playback .m4a expo-audio адчувае натыўна; рантайм-змен для кітайскай гэтая задача не прапануе"
   },
   "translation_candidates": [
     {
@@ -449,7 +449,7 @@
       "verdict": "defer — лід-кандыдат воблачнага пілота",
       "voices": "каля 160+ сістэмных галасоў (longxiaochun_v3 «Intellectual and positive female», longshu_v3 «Calm young male», дыялекты: кантонская longjiaxin_v3, хакка/мінань longanmin_v3)",
       "prosody": "speech_rate/pitch_rate 0.5–2.0, volume 0–100; SSML з <break> 50 мс–10 с у v2/v3/v3.5; timestamp падтрыманы",
-      "formats": "PCM/WAV/MP3/Opus да 48 кГц; нятокавы HTTP вяртае URL спампоўкі (валідны 24 гадзіны); NEMA audio/mp4 — патрэбная канвертацыя",
+      "formats": "PCM/WAV/MP3/Opus да 48 кГц; нятокавы HTTP вяртае URL спампоўкі (валідны 24 гадзіны); няма audio/mp4 — патрэбная канвертацыя",
       "max_text": "20 000 знакаў на выклік (CosyVoice); legacy qwen-tts 600 знакаў / 512 токенаў",
       "free_quota": "агульная для мадэлі ~1 000 000 токенаў на 90 дзён (Сінгапур); сімвальная TTS-квота CosyVoice не знойдзена — UNCERTAIN",
       "paid": "cosyvoice-v3-flash: USD 0.14335/10 000 знакаў (Beijing), 0.13 (Singapore); qwen-audio-3.0-tts-flash: 0.137521/0.15; v2/v3.5 не правераны — UNCERTAIN",
@@ -492,7 +492,7 @@
       "verdict": "defer",
       "voices": "каля 55–60 кітайскіх галасоў у трох узроўнях (\u7cbe\u54c1 101001 \u667a\u745c, \u5927\u6a21\u578b 501000 \u667a\u658c, \u8d85\u81ea\u7136 402000 \u4e91\u6653\u8299; кантонская 101019 \u667a\u5f64)",
       "prosody": "Speed [-2,6] = 0.6–2.5×, Volume [-10,10]; асобнага параметра вышыні тону НЯМА; SSML (zh/en) з <break>; EmotionCategory/Intensity",
-      "formats": "wav (змаўчанне) / mp3 / pcm, base64 у адказе Audio — складаць файл самаму; NEMA audio/mp4",
+      "formats": "wav (змаўчанне) / mp3 / pcm, base64 у адказе Audio — складаць файл самаму; няма audio/mp4",
       "max_text": "150 кітайскіх знакаў на запыт (поўнаправыя пунктуацыя лічыцца); для даўжэйшага — асобны прадукт \u957f\u6587\u672c\u8bed\u97f3\u5408\u6210",
       "free_quota": "аднаразовыя пакі па галасах: \u8d85\u81ea\u7136 20 000 знакаў; \u5927\u6a21\u578b 100 000; базавыя/\u7cbe\u54c1 8 000 000; тэрмін 3 месяцы, адзін раз на акаўнт",
       "paid": "постпаўд CNY за 10 000 знакаў: \u7cbe\u54c1 0.3; \u5927\u6a21\u578b 1.2→0.55; \u8d85\u81ea\u7136 6.5→4.9; \u957f\u6587\u672c 3.20/2.8→2.30/2.0; папярэднія пакі ад 0.15–0.21 (\u7cbe\u54c1)",
@@ -526,7 +526,7 @@
       "reason": "шапелят 8/16 кГц ніжэй за бар якасці наратыву; дадатковы апсемплінг не выратуе; кансольныя бар'еры + памясячная/пагадзінная мадэль цэн",
       "voices": "рэестр у кансолі (login wall); «100+ \u53d1\u97f3\u4eba» — vendor claim нізкай упэўненасці; бясплатныя \u5c0f\u71d5 xiaoyan і г.д.; «асаблівыя» 20 000 CNY/год",
       "prosody": "speed/volume/pitch 0–100; паўзы: CSSML <break time=\"500ms\"/> (названыя дыктары, ttp=cssml) або просты маркер [p500]",
-      "formats": "raw PCM / lame mp3 (sfl=1) / opus / speex; 8 або 16 кГц; NEMA audio/mp4 + патрэбны апсемплінг",
+      "formats": "raw PCM / lame mp3 (sfl=1) / opus / speex; 8 або 16 кГц; няма audio/mp4 + патрэбны апсемплінг",
       "max_text": "менш за 8000 байт на выклік (~2000 знакаў)",
       "free_quota": "500 выклікаў/суткі пасля стварэння праграмы + аднаразовы пак (адзін раз на акаўнт)",
       "paid": "«асаблівыя» дыктары па 20 000 CNY/год; прайсы па-за кансоллем — UNCERTAIN",
@@ -553,7 +553,7 @@
       "verdict": "defer",
       "voices": "zh-CN GA-рэестр (zh-CN-YunxiNeural са StyleList narration-relaxed/cheerful/... і RolePlayList Narrator/...; 48 кГц); агульная колькасць не злічана (старонка моў абразаецца да zh-CN радкоў) — UNCERTAIN",
       "prosody": "поўны SSML: pitch, паўзы, вымаўленне, тэмп, гучнасць, шматгалосе, лексіконы, стылі",
-      "formats": "30+ фарматоў: mp3 (16–192 кбіт), opus, ogg-opus, webm, amr-wb, g722, riff-wav 8–48 кГц, raw PCM; NEMA m4a/mp4/aac — канвертацыя",
+      "formats": "30+ фарматоў: mp3 (16–192 кбіт), opus, ogg-opus, webm, amr-wb, g722, riff-wav 8–48 кГц, raw PCM; няма m4a/mp4/aac — канвертацыя",
       "max_text": "REST-рэальны час: да 10 хвілін гуку; даўжэй — batch synthesis API",
       "free_quota": "F0: 500 000 знакаў/месяц (neural TTS)",
       "paid": "S0 — дынамічная «$-» на старонцы цэн не цягнецца — UNCERTAIN; «Each Chinese character is counted as two characters for billing» (кіт. знакі ×2)",
@@ -617,7 +617,7 @@
       "1. TTS-выхад (wav/mp3) → ffmpeg -c:a aac -f mp4 (ffmpeg n9.0.2 ёсць на хасце CachyOS)",
       "2. sha256 па байтах выніковага .m4a у LF/-text-рэжыме (.gitattributes AR-1)",
       "3. duration_s цэлымі секундамі (1..86400) са схеме",
-      "4. license/credit: пастаўшчык + голас + ліцэнзійная аснова (campo media.schema.json)",
+      "4. license/credit: пастаўшчык + голас + ліцэнзійная аснова (палі media.schema.json)",
       "5. для кітайскай: спачатку змена locale enum у media.schema.json + discovery-index.schema.json (G21.42)"
     ],
     "probe_status": "blocked — сама канвертацыя і прымальнасць гуку не праганяліся (няма наратыву без акаўнта/аплаты); дэмканідыдатаў пастаўшчыкоў адзіна пацвярджаюць іх уласныя прыклады, не сумяшчальнасць з KUDY"
@@ -734,7 +734,7 @@
     {
       "tool": "IndexTTS (лакальныя вагі)",
       "status": "reject-for-now",
-      "reason": "ня-OIS ліцэнзія bilibili з лімітамі і забаронай рэістрыроўкі; паўзаў няма ў README; CosyVoice пакрывае нішу ліпшымі ўмовамі"
+      "reason": "ня-OIS ліцэнзія bilibili з лімітамі і забаронай трэніроўкі чужых мадэляў; паўзаў няма ў README; CosyVoice пакрывае нішу ліпшымі ўмовамі"
     }
   ],
   "pilot_prerequisites_g2142": [
@@ -771,7 +771,7 @@
     "сімвальная бясплатная квота CosyVoice не знойдзена (толькі агульная токенавая 1 млн/90 дзён)",
     "Azure S0 прайс — дынамічная «$-»; поўная колькасць zh-CN галасоў не злічана (старонка абразаецца)",
     "iFlytek прайсы па-за кансоллем недаступныя (login wall)",
-    "прымяненне пін'іну для \u7ef4\u5229\u5947ка (Wieliczka) — складзенае са стандартных чытанняў, не звяранае са слоўнікамі",
+    "прымяненне пін'іну для \u7ef4\u5229\u5947\u5361 (Wieliczka) — складзенае са стандартных чытанняў, не звяранае са слоўнікамі",
     "гэта агульнае: уся ячэйка якасці (прыроднасць/правільнасць перакладу) = blocked: няма ні прагону, ні рэцэнзента"
   ],
   "access_log": [
@@ -809,6 +809,41 @@
       "url": "https://github.com/QwenAudio/CosyVoice",
       "status": "200",
       "note": "FunAudioLLM рэдырэкт на QwenAudio; FunAudioLLM/CosyVoice2 — 404"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/cosyvoice-voice-list",
+      "status": "200",
+      "note": "спіс галасоў CosyVoice (~160+, дыялекты)"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/realtime-tts-user-guide",
+      "status": "200",
+      "note": "фарматы реальнага часу PCM/WAV/MP3/Opus да 48 кГц"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/qwen-tts-api",
+      "status": "200",
+      "note": "legacy qwen-tts: 512 токенаў / 600 знакаў"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/qwen-audio-3-0-tts-flash",
+      "status": "200",
+      "note": "цана qwen-audio-3.0-tts-flash"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/new-free-quota",
+      "status": "200",
+      "note": "агульная бясплатная квота 1 млн токенаў / 90 дзён (Сінгапур)"
+    },
+    {
+      "url": "https://cloud.tencent.com/document/product/1073/92668",
+      "status": "200",
+      "note": "спіс галасоў Tencent TTS (тры ўзроўні, ідэнтыфікатары)"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech",
+      "status": "200",
+      "note": "SSML-магчымасці Azure; білінг кіт. знакаў ×2"
     },
     {
       "url": "https://github.com/index-tts/index-tts",

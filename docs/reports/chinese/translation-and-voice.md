@@ -37,7 +37,7 @@
 | шлях аўдыё | `` `${input.locale}/${tier}/audio/${story.story_id}.m4a` `` | `services/contentRepo/contentRepo.ts:201` |
 | шлях у рухавіку | `` `${s.locale}/${storyTierOf(stop, storyId)}/audio/${storyId}.m4a` `` | `core/engine/reducer.ts:495` |
 | індэкс | `text_locales`/`audio_locales`: `maxItems 8`, той жа enum | `contracts/schemas/discovery-index.schema.json:194-195` |
-| прайгравальнік | адзіны модуль, што імпартуе `expo-audio` — адаптар порт-інтэрфейсу | `services/audio/expo/expo-audio-port.ts:1-4` |
+| прайгравальнік | даслоўна з крыніцы: «the only module of `services/audio/expo/` that imports `expo-audio` at runtime» — адаптар порт-інтэрфейсу G05.03.b | `services/audio/expo/expo-audio-port.ts:1-3` |
 | sha256 | па байтах файла ў LF/-text-рэжыме (`.gitattributes`, AR-1) | description media.schema.json |
 
 Выснова для задачы: **кітайскі выпуск агучкі патрабуе папярэдняй змены кантрактаў** (locale enum, maxItems) — гэта рашэнне G21.42, не гэтай задачы. Рантайм-змен прайгравальніка задача не прапануе; playback `.m4a` expo-audio адчувае натыўна.
