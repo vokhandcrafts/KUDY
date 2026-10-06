@@ -144,7 +144,7 @@ export const PREVIEW_STRINGS_DATA = {
       "start": "Börja",
     },
     "reason": {
-      "preview#download-unavailable": "Nedladdning är inte tillgänglig i det här bygget.",
+      "preview#download-unavailable": "Det går inte att ladda ner i det här bygget.",
       "preview#not-published": "Guiden är inte publicerad.",
       "preview#purchase-required": "Köp krävs.",
       "preview#storage-unknown": "Lagringen är inte tillgänglig.",

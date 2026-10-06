@@ -1180,11 +1180,11 @@
     },
     {
       "id": "native.preview.reason.preview#download-unavailable",
-      "value": "Nedladdning är inte tillgänglig i det här bygget.",
+      "value": "Det går inte att ladda ner i det här bygget.",
       "reviewedSourceHash": "c92fa779597efd3693633519bd657c144bf3c77398a05850305192c9834424ff",
       "review": {
         "outcome": "approved",
-        "note": "адмова: загрузка недаступная на зборцы; build → bygge"
+        "note": "адмова: загрузка недаступная на зборцы; звыклая шведская канструкцыя «Det går inte att…», глоссарый-корань ladda ner трымаецца"
       }
     },
     {
