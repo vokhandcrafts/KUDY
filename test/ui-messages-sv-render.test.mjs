@@ -75,7 +75,6 @@ test('the Swedish web catalogue renders through getUiStrings with the same key s
   assert.equal(sv.catalogTitle, 'Stadsguider');
   assert.equal(sv.nextStop, 'Nästa stopp');
   assert.equal(sv.privacyTitle, 'Integritet');
-  assert.equal(sv.langSwitchName, 'English');
   // The generated projection keeps the key shape of the shipped sets.
   assert.deepEqual(Object.keys(sv).sort(), Object.keys(be).sort());
   // No Swedish word is blank (the shape guard's own rule, for sv).

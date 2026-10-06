@@ -28,7 +28,6 @@ export const de = {
   "duration": "Dauer",
   "homeLink": "Zur Startseite",
   "kilometersShort": "km",
-  "langSwitchName": "English",
   "languages": "Sprachen",
   "lockedLabel": "Station gesperrt",
   "mapAttribution": "Kartendaten © OpenStreetMap-Mitwirkende (Lizenz ODbL)",
@@ -56,4 +55,7 @@ export const de = {
   "storyTextHeading": "Text der Geschichte",
   "textOnly": "nur Text",
   "versionUnavailable": "Version nicht verfügbar",
+  "catalogEmpty": "Guides mit Text in dieser Sprache gibt es noch nicht.",
+  "textUnavailableTitle": "Guide-Text in dieser Sprache ist noch nicht verfügbar",
+  "textUnavailableBody": "Dieser Guide hat keinen Text in der gewählten Oberflächensprache. Seine Textsprachen stehen in der Sprachliste im Katalog.",
 };

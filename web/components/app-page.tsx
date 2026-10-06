@@ -3,15 +3,13 @@
 // offer names, 01) and renders the store buttons from lib/app-links.ts; with
 // every store unpublished the page is still a complete answer: what exists
 // today is the «хутка» state, not a dead end.
-import { localePath } from '../lib/content/site.ts';
 import type { UiLocale, UiStrings } from '../lib/i18n/index.ts';
 import { SiteShell } from './site-shell.tsx';
 import { StoreLinks } from './store-links.tsx';
 
 export function AppPage({ locale, strings }: { locale: UiLocale; strings: UiStrings }) {
-  const langSwitchHref = localePath(locale === 'be' ? 'en' : 'be', '/app');
   return (
-    <SiteShell homeHref={localePath(locale, '/')} langSwitchHref={langSwitchHref} strings={strings}>
+    <SiteShell locale={locale} currentPath="/app" strings={strings}>
       <h1>{strings.appPageTitle}</h1>
       <ul>
         <li>{strings.appBenefitGps}</li>

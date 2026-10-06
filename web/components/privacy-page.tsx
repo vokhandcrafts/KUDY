@@ -5,14 +5,12 @@
 // the single external-URL config; the store Privacy Policy fields take the
 // page's URL from the G11.04 (#299) checklist.
 import { appLinks } from '../lib/app-links.ts';
-import { localePath } from '../lib/content/site.ts';
 import type { UiLocale, UiStrings } from '../lib/i18n/index.ts';
 import { SiteShell } from './site-shell.tsx';
 
 export function PrivacyPage({ locale, strings }: { locale: UiLocale; strings: UiStrings }) {
-  const langSwitchHref = localePath(locale === 'be' ? 'en' : 'be', '/privacy');
   return (
-    <SiteShell homeHref={localePath(locale, '/')} langSwitchHref={langSwitchHref} strings={strings}>
+    <SiteShell locale={locale} currentPath="/privacy" strings={strings}>
       <h1>{strings.privacyTitle}</h1>
       <p>{strings.privacyIntro}</p>
       <p>{strings.privacyWeb}</p>

@@ -4,7 +4,7 @@
   "provenance": {
     "kind": "migration",
     "reviewer": "owner",
-    "evidence": "словы перанесены даслоўна з дзеючых en-каталогаў (G06.05 #280, вэб 09 §8); аўтарства і рэв'ю — уладар у тых PR"
+    "evidence": "словы перанесены даслоўна з дзеючых en-каталогаў (G06.05 #280, вэб 09 §8); аўтарства і рэв'ю — уладар у тых PR Дадатак G21.22 (#554): тры запісы web.ui.catalogEmpty/textUnavailableTitle/textUnavailableBody — люстра native-запісу і аўтарскія пераклады з адзнакай сесіі G21.22 у review.note кожнага запісу."
   },
   "records": [
     {
@@ -1682,14 +1682,6 @@
       }
     },
     {
-      "id": "web.ui.langSwitchName",
-      "value": "Беларуская",
-      "reviewedSourceHash": "08fee1e01a8191946fa7c18d58791822c1e28bfcbd50006a82592c408e10f28a",
-      "review": {
-        "outcome": "approved"
-      }
-    },
-    {
       "id": "web.ui.languages",
       "value": "Languages",
       "reviewedSourceHash": "c06833252de3a6b56c05b65b42dfa0b95e4005eedd8189e5bf9f2f64b4490716",
@@ -1903,6 +1895,33 @@
       "reviewedSourceHash": "6d0903ab3a0d160167c966e6b09cdce71900eb1271487b48f51ecb738379bd8e",
       "review": {
         "outcome": "approved"
+      }
+    },
+    {
+      "id": "web.ui.catalogEmpty",
+      "value": "No guides with text in this language yet.",
+      "reviewedSourceHash": "2696e018ae715ff1d8dfe7f26331d68f1325eff673496c9c213f3d4abeec1d5e",
+      "review": {
+        "outcome": "approved",
+        "note": "люстра зацверджанага native.chrome.textLocaleEmpty тае ж мовы (аднаўленне зацверджанай фармулёўкі, не новы аўтарскі пераклад); рэгістр і тэрмін — як у крыніцы люстэрка"
+      }
+    },
+    {
+      "id": "web.ui.textUnavailableTitle",
+      "value": "Guide text in this language is not available yet",
+      "reviewedSourceHash": "a19ea9ba76a34afce8fd2edd63ecbdc865dce15d8a5cd7d4e1828d7286e6216c",
+      "review": {
+        "outcome": "approved",
+        "note": "аўтарскі пераклад у задачы G21.22 (#554) з беларускага арыгіналу source.json; сэнс і рэгістр сям'і (du/tú/tu/ty) правераныя; тэрмін guide — па вэб-наборы гэтай мовы"
+      }
+    },
+    {
+      "id": "web.ui.textUnavailableBody",
+      "value": "This guide has no text in the selected interface language. Its text languages are listed in the language list in the catalog.",
+      "reviewedSourceHash": "07a46c3e0babecfe136297ae2458d4fd0a86e5b2425cead4f1372ac6edb59953",
+      "review": {
+        "outcome": "approved",
+        "note": "аўтарскі пераклад у задачы G21.22 (#554) з беларускага арыгіналу source.json; сэнс і рэгістр сям'і (du/tú/tu/ty) правераныя; тэрмін guide — па вэб-наборы гэтай мовы"
       }
     },
     {

@@ -1,11 +1,9 @@
-// UI strings for the web channel. The string files exist for be and en from
-// the first page (09 §8: «ніводнага зашытага радка нідзе»); G14.04.d
-// (issue #305) adds the third file, uk, beside them (uk-release-scope §3.1 —
-// the same system, a new set); G21.10 (issue #544) adds de the same way;
-// G21.11 (issue #545) adds es; G21.12 (issue #546) adds fr; G21.13 (issue
-// #547) adds cs; G21.14 (issue #548) adds sv. The typed UiStrings
-// interface plus the parity
-// test keep the files at the same key set at all times.
+// UI strings for the web channel. The string files are generated projections
+// of contracts/ui-messages/source.json (tools/i18n/generate-messages.mjs,
+// G21.25): be and en from the first page (09 §8: «ніводнага зашытага радка
+// нідзе»), uk beside them (G14.04.d, issue #305), de/es/fr/cs/sv
+// (G21.10–G21.14, issues #544–#548). The typed UiStrings interface plus the
+// parity test keep the files at the same key set at all times.
 import { be } from './be.ts';
 import { en } from './en.ts';
 import { uk } from './uk.ts';
@@ -14,33 +12,31 @@ import { es } from './es.ts';
 import { fr } from './fr.ts';
 import { cs } from './cs.ts';
 import { sv } from './sv.ts';
-import type { CompleteUiLocaleCode } from '../../../contracts/ui-locales.ts';
+import {
+  isUiLocaleCode,
+  uiLocaleNativeName,
+  type CompleteUiLocaleCode,
+} from '../../../contracts/ui-locales.ts';
 
-// The live web UI locales (plan §4): be is the default at the root, en is the
-// prefixed fallback — the one list the QR builder and the language switch
-// derive from.
-export type UiLocale = 'be' | 'en';
+// G21.22: the language switch renders every UI locale's self-name straight
+// from the one registry (G21.09: a language is never named through a
+// translation) — the web channel re-exports the registry call instead of
+// copying the words.
+export { uiLocaleNativeName };
 
-// G14.04.d — the strings-locale union: uk has its strings file and renders
-// through getUiStrings, but stays off the live routes/switch until the uk UI
-// release ships together with the first translated guide — one release unit
-// (uk-release-scope §6.3). de owns its strings file (G21.10, issue #544) and
-// joins the routes with G21.22, the same release-unit rule; es the same
-// (G21.11, issue #545); fr the same (G21.12, issue #546); cs the same
-// (G21.13, issue #547); sv the same (G21.14, issue #548).
-export type UiStringsLocale = UiLocale | 'uk' | 'de' | 'es' | 'fr' | 'cs' | 'sv';
+// The web UI locales with live routes (G21.22, issue #554): all eight
+// registered codes — the release no longer waits for narration or translated
+// guides. The former uk-first-guide release coupling (uk-release-scope §6.3)
+// is overridden by the approved G21.00 decision (specification
+// 2026-10-03-completion-and-locales: «Выпуск інтэрфейсу цяпер не чакае
+// запісу голасу»); a locale without published guide
+// text renders the localized empty/unavailable states instead of content
+// fallback. be is the default at the root, every other locale is a URL
+// prefix — the one list the QR builder, the language switch and the route
+// tree derive from.
+export type UiLocale = 'be' | 'en' | 'uk' | 'de' | 'es' | 'fr' | 'cs' | 'sv';
 
-// The UI locales of the web channel with live routes (plan §4) — uk joins
-// here with the release unit, never before it.
-export const uiLocales: UiLocale[] = ['be', 'en'];
-// G21.09 (issue #542, criterion 4): the advertised picker codes are a subset
-// of the registered complete UI catalogues (contracts/ui-locales.ts) — the
-// assignment below fails the build if uiLocales ever advertises a code
-// without a complete catalogue. uk owns a complete strings file but stays
-// off the live routes until its release unit (uk-release-scope §6.3) — a
-// subset, not equality.
-const advertisedComplete: readonly CompleteUiLocaleCode[] = uiLocales;
-void advertisedComplete;
+export const uiLocales: UiLocale[] = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'];
 
 // The locale the URLs without a prefix serve (plan §4): the single default
 // mapping point behind localePath and the exported document language
@@ -48,10 +44,38 @@ void advertisedComplete;
 // carries this default.
 export const defaultUiLocale: UiLocale = 'be';
 
+// The URL prefixes of the non-default locales, in registry order — the
+// exported document language scan and the route tree read the same fact.
+export const prefixedUiLocales: readonly UiLocale[] = uiLocales.filter((locale) => locale !== defaultUiLocale);
+
+// The [locale] tree's gate (G21.22): only the non-default registered codes
+// are prerendered under a URL prefix; be lives at the root, unregistered
+// codes never render. The layout answers the boolean, the pages share the
+// typed assertion.
+export function isPrefixedUiLocale(value: string): value is UiLocale {
+  return (prefixedUiLocales as readonly string[]).includes(value);
+}
+
+export function toUiLocale(value: string): UiLocale {
+  if (!isUiLocaleCode(value)) {
+    throw new Error(`ui-locale-unregistered: ${value}`);
+  }
+  return value;
+}
+
+// G21.09 (issue #542, criterion 4): the advertised picker codes must be a
+// subset of the registered complete UI catalogues (contracts/ui-locales.ts) —
+// the assignment below fails the build if uiLocales ever advertises a code
+// without a complete catalogue. Since G21.22 the web route set equals the
+// complete set; the guard stays so a future registry change cannot ship a
+// half-translated route silently.
+const advertisedComplete: readonly CompleteUiLocaleCode[] = uiLocales;
+void advertisedComplete;
+
 export interface UiStrings {
   brand: string;
-  langSwitchName: string;
   catalogTitle: string;
+  catalogEmpty: string;
   languages: string;
   duration: string;
   distance: string;
@@ -95,10 +119,12 @@ export interface UiStrings {
   privacyDeletion: string;
   privacyPurchases: string;
   privacyContact: string;
+  textUnavailableTitle: string;
+  textUnavailableBody: string;
 }
 
-const STRINGS: Record<UiStringsLocale, UiStrings> = { be, en, uk, de, es, fr, cs, sv };
+const STRINGS: Record<UiLocale, UiStrings> = { be, en, uk, de, es, fr, cs, sv };
 
-export function getUiStrings(locale: UiStringsLocale): UiStrings {
+export function getUiStrings(locale: UiLocale): UiStrings {
   return STRINGS[locale];
 }
