@@ -818,7 +818,7 @@
     {
       "url": "https://www.alibabacloud.com/help/en/model-studio/realtime-tts-user-guide",
       "status": "200",
-      "note": "фарматы реальнага часу PCM/WAV/MP3/Opus да 48 кГц"
+      "note": "фарматы рэальнага часу PCM/WAV/MP3/Opus да 48 кГц"
     },
     {
       "url": "https://www.alibabacloud.com/help/en/model-studio/qwen-tts-api",
