@@ -242,7 +242,7 @@ describe("KUDY language row (G14.04.d)", () => {
     expect(screen.getByTestId("btn-ui-locale-uk").props.accessibilityState).toEqual({ selected: true });
   });
 
-  test("the row offers the seven self-named locales and marks the current one", async () => {
+  test("the row offers the eight self-named locales and marks the current one", async () => {
     renderRouter({ _layout: layoutWith(createServices({})), "(tabs)/my": My }, { initialUrl: "/my" });
     expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
     expect(screen.getByText("Беларуская")).toBeTruthy();
@@ -253,10 +253,12 @@ describe("KUDY language row (G14.04.d)", () => {
     expect(screen.getByText("Deutsch")).toBeTruthy();
     // G21.11 (issue #545): the es catalogue lands, the picker derives the
     // fifth chip the same way; G21.12 (issue #546) adds the sixth, Français;
-    // G21.13 (issue #547) adds the seventh, Čeština.
+    // G21.13 (issue #547) adds the seventh, Čeština; G21.14 (issue #548)
+    // completes the set with the eighth, Svenska.
     expect(screen.getByText("Español")).toBeTruthy();
     expect(screen.getByText("Français")).toBeTruthy();
     expect(screen.getByText("Čeština")).toBeTruthy();
+    expect(screen.getByText("Svenska")).toBeTruthy();
     expect(screen.getByTestId("btn-ui-locale-be").props.accessibilityState).toEqual({ selected: true });
     expect(screen.getByTestId("btn-ui-locale-en").props.accessibilityState).toEqual({ selected: false });
     // Switching to en re-renders the chrome in English (AC3: no restart) —
@@ -315,6 +317,17 @@ describe("KUDY language row (G14.04.d)", () => {
     expect(services.uiLocale.current()).toBe("cs");
     expect(await screen.findByText("Historie není dostupná.")).toBeTruthy();
     expect(screen.getByTestId("btn-ui-locale-cs").props.accessibilityState).toEqual({ selected: true });
+    expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
+  });
+
+  test("G21.14 (issue #548): picking sv completes the row — the honest-unavailable line renders in Swedish", async () => {
+    const services = createServices({});
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
+    fireEvent.press(screen.getByTestId("btn-ui-locale-sv"));
+    expect(services.uiLocale.current()).toBe("sv");
+    expect(await screen.findByText("Historiken är inte tillgänglig.")).toBeTruthy();
+    expect(screen.getByTestId("btn-ui-locale-sv").props.accessibilityState).toEqual({ selected: true });
     expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
   });
 });

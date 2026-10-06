@@ -1,0 +1,18 @@
+{
+ "measurement": "pyftsubset of NotoSansCJK-Regular.ttc members with the 108-unique-char minimal charset",
+ "note": "the probe build (scripts/build-subsets.py) uses the full 298-char fixture charset and produces ~104 KB/weight",
+ "subsets": [
+  {
+   "label": "Noto Sans CJK SC",
+   "chars": 108,
+   "size_bytes": 38752,
+   "size_kb": 37.8
+  },
+  {
+   "label": "Noto Sans CJK TC",
+   "chars": 108,
+   "size_bytes": 38716,
+   "size_kb": 37.8
+  }
+ ]
+}

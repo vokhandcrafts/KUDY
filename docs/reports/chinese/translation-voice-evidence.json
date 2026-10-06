@@ -1,0 +1,854 @@
+{
+  "task": "G21.41",
+  "issue": 622,
+  "epic": 532,
+  "generated_at": "2026-10-06T10:55:00Z",
+  "agent": "zcode (GLM-5.3-Flash)",
+  "input_main": "dabf334",
+  "report": "docs/reports/chinese/translation-and-voice.md",
+  "result_file": "docs/agent-tasks/results/G21.41.md",
+  "cell_labels": {
+    "direct-run": "прамы прагон выканаўцы — у гэтай сесіі не было (забаронена брыфам: акаўнт/ключ/аплата)",
+    "official-demo": "афіцыйная дэманстрацыя пастаўшчыка — не выяўлена даступнай без акаўнта",
+    "documentation": "афіцыйная дакументацыя з датай доступу і URL",
+    "blocked": "праверка недаступная: патрэбны акаўнт, ключ, аплата або кансоль недаступная з гэтага хаста"
+  },
+  "spoken_variant": {
+    "language": "cmn (мандарын, макрамова)",
+    "variant": "стандартная путунхуа (Standard Mandarin)",
+    "script": "Hans (спрошчанае) — асноўнае; Hant — альтэрнатыўнае ў выбарцы",
+    "register": "нейтральны сучасны размоўны, не кніжны",
+    "region": "КНР (zh-CN) асноўнае; TW/HK варыянты — па-за першым выпускам",
+    "cantonese_note": "yue — асобная мова, не «іншы кітайскі» (паводле спецыфікацыі 2026-10-05)"
+  },
+  "battery": {
+    "shared_note": "агульная выбарка кітайскага трэку (спецыфікацыя 2026-10-05, §Пераклад і агучка); тая ж, што ў G21.39/#620 і G21.40/#621; майстар-копія слоўнікавых доказаў — G21.39",
+    "senses": [
+      {
+        "id": "back",
+        "sense": "кнопка вяртання да папярэдняга экрана"
+      },
+      {
+        "id": "cancel",
+        "sense": "адмяніць пачатае дзеянне"
+      },
+      {
+        "id": "settings",
+        "sense": "экран/пункт налад"
+      },
+      {
+        "id": "guide",
+        "sense": "турыстычны аўдыягід як прадукт"
+      },
+      {
+        "id": "stop",
+        "sense": "спыніць прайграванне/гід"
+      },
+      {
+        "id": "walk",
+        "sense": "прагулка як актыўнасць карыстальніка"
+      },
+      {
+        "id": "download",
+        "sense": "спампаваць кантэнт/гук"
+      },
+      {
+        "id": "purchase",
+        "sense": "купіць гід/узровень"
+      },
+      {
+        "id": "restore",
+        "sense": "аднавіць куплю/загрузку"
+      },
+      {
+        "id": "unavailable",
+        "sense": "недаступнасць кантэнту/сэрвісу"
+      }
+    ],
+    "passages": [
+      {
+        "id": "P1",
+        "script": "Hans",
+        "origin": "сінтэтычны тэкст кітайскага трэку (упершыню вызначаны ў G21.39); у гэтым файле — \\u-эскейпы",
+        "text_hans": "\u6b22\u8fce\u6765\u5230\u514b\u62c9\u79d1\u592b！\u60a8\u7684\u8bed\u97f3\u5bfc\u89c8\u4ece 10:00 \u5f00\u59cb，\u5168\u7a0b\u7ea6 90 \u5206\u949f\u3002\u8bf7\u6234\u4e0a\u8033\u673a，\u5728\u8001\u57ce\u5e7f\u573a\u7684\u96c6\u5408\u70b9\u7b49\u5f85\u5bfc\u6e38\u3002",
+        "text_hant": "\u6b61\u8fce\u4f86\u5230\u514b\u62c9\u79d1\u592b！\u60a8\u7684\u8a9e\u97f3\u5c0e\u89bd\u5f9e 10:00 \u958b\u59cb，\u5168\u7a0b\u7d04 90 \u5206\u9418\u3002\u8acb\u6234\u4e0a\u8033\u6a5f，\u5728\u8001\u57ce\u5ee3\u5834\u7684\u96c6\u5408\u9ede\u7b49\u5f85\u5c0e\u904a\u3002",
+        "be_gloss": "Прывітанне-запрашэнне ў Кракаў: аўдыягід пачынаецца а 10:00, доўжыцца каля 90 хвілін, надзеньце навушнікі і чакайце гіда на пункце збору на плошчы Старога горада."
+      },
+      {
+        "id": "P2",
+        "script": "Hans",
+        "origin": "сінтэтычны тэкст кітайскага трэку (упершыню вызначаны ў G21.39); у гэтым файле — \\u-эскейпы",
+        "text_hans": "\u4e0b\u8f7d\u5df2\u6682\u505c：\u7f51\u7edc\u4e0d\u53ef\u7528\u3002\u6062\u590d\u4e0b\u8f7d\u9700\u8981 Wi-Fi；\u8bf7\u5148\u6563\u6b65 15 \u5206\u949f，\u6d4f\u89c8\u7ef4\u5229\u5947\u5361\u7684\u76d0\u77ff\u7167\u7247\u3002\u8d2d\u4e70\u5bfc\u89c8\u7684\u95e8\u7968\u4eca\u65e5\u5f00\u653e\u81f3 18:00\u3002",
+        "be_gloss": "Спампоўванне прыпынена: сетка недаступная. Каб аднавіць, патрэбны Wi-Fi; пагуляйце 15 хвілін і паглядзіце фота саляных шахт Велічкі. Білеты на гід прадаюцца сёння да 18:00."
+      }
+    ],
+    "toponyms": [
+      {
+        "pl": "Warszawa",
+        "zh_hans": "\u534e\u6c99",
+        "zh_hant": "\u83ef\u6c99",
+        "pinyin": "Huáshā",
+        "source": "агульная выбарка G21.39 (CC-CEDICT/Вікіслоўнік)"
+      },
+      {
+        "pl": "Kraków",
+        "zh_hans": "\u514b\u62c9\u79d1\u592b",
+        "zh_hant": "\u514b\u62c9\u79d1\u592b",
+        "pinyin": "Kèlākēfū",
+        "source": "агульная выбарка G21.39 (CC-CEDICT/Вікіслоўнік)"
+      },
+      {
+        "pl": "Gdańsk",
+        "zh_hans": "\u683c\u4f46\u65af\u514b",
+        "zh_hant": "\u683c\u4f46\u65af\u514b",
+        "pinyin": "Gédànsīkè",
+        "source": "агульная выбарка G21.39 (CC-CEDICT/Вікіслоўнік)"
+      },
+      {
+        "pl": "Wieliczka",
+        "zh_hans": "\u7ef4\u5229\u5947\u5361",
+        "zh_hant": "\u7dad\u5229\u5947\u5361",
+        "pinyin": "Wéilìqíkǎ",
+        "source": "у тэксце P2; пін'ін са стандартных чытанняў сімвалаў, у гэтай сесіі не звяраўся са слоўнікамі"
+      }
+    ],
+    "numeric_and_time_cases": [
+      {
+        "case": "час пачатку",
+        "in": "10:00",
+        "note": "чытанне гадзін у TTS; у P1"
+      },
+      {
+        "case": "працягласць",
+        "in": "90 \u5206\u949f / jiǔshí fēnzhōng",
+        "note": "90 хвілін; у P1"
+      },
+      {
+        "case": "працягласць",
+        "in": "15 \u5206\u949f / shíwǔ fēnzhōng",
+        "note": "15 хвілін; у P2"
+      },
+      {
+        "case": "час заканчэння",
+        "in": "18:00",
+        "note": "у P2"
+      },
+      {
+        "case": "дата",
+        "in": "2026\u5e7410\u670815\u65e5 (15 кастрычніка 2026)",
+        "note": "дадатковы выпадак гэтай сесіі; поўны фармат YYYY\u5e74M\u6708D\u65e5"
+      },
+      {
+        "case": "колькасць-адлегласць",
+        "in": "250 \u7c73 (250 метраў)",
+        "note": "дадатковы выпадак гэтай сесіі"
+      },
+      {
+        "case": "колькасць-лічэнне",
+        "in": "3 \u5f20\u7968 (3 квіткі)",
+        "note": "дадатковы выпадак гэтай сесіі; класіфікатар \u5f20"
+      }
+    ],
+    "pause_cases": [
+      {
+        "case": "канец сказа",
+        "marker": "SSML <break time=\"500ms\"/> пасля кропкі",
+        "note": "сінтаксіс правяраецца на пілоте; натыўных мэтагаў няма"
+      },
+      {
+        "case": "пасля двукосся",
+        "marker": "<break time=\"300ms\"/>",
+        "note": "прыклад: P2 першая сказа «\u4e0b\u8f7d\u5df2\u6682\u505c：…»"
+      },
+      {
+        "case": "спіс",
+        "marker": "<break time=\"200ms\"/> паміж пунктамі",
+        "note": "пералік у аўдыягідах"
+      }
+    ],
+    "translation_checks": [
+      {
+        "check": "сэнс дзеянняў UI",
+        "battery": "senses ×10",
+        "status": "blocked — няма прагону"
+      },
+      {
+        "check": "адмаўленне",
+        "battery": "P2 \u7f51\u7edc\u4e0d\u53ef\u7528 (сетка недаступная)",
+        "status": "blocked"
+      },
+      {
+        "check": "абяцанне плацяжу",
+        "battery": "P2 \u8d2d\u4e70\u5bfc\u89c8\u7684\u95e8\u7968 (купля білетаў)",
+        "status": "blocked"
+      },
+      {
+        "check": "турыстычная лексіка",
+        "battery": "guide/walk + P1/P2",
+        "status": "blocked"
+      }
+    ],
+    "speech_checks": [
+      {
+        "check": "вымаўленне назваў (польскія топонімы ў кіт. чытанні)",
+        "battery": "toponyms ×4",
+        "status": "blocked"
+      },
+      {
+        "check": "лічбы/даты/час",
+        "battery": "numeric_and_time_cases ×7",
+        "status": "blocked"
+      },
+      {
+        "check": "тэмп",
+        "battery": "speech_rate/pitch 0.5–2.0 (DashScope), Speed [-2,6] (Tencent), rate 0.5–2 (SSML, Azure/Alibaba)",
+        "status": "documentation"
+      },
+      {
+        "check": "паўзы",
+        "battery": "pause_cases ×3; SSML <break>: Alibaba 50 мс–10 с, Tencent zh/en, Azure поўны SSML",
+        "status": "documentation"
+      },
+      {
+        "check": "прыроднасць",
+        "battery": "—",
+        "status": "blocked — незалежнага рэцэнзента і прагону няма; меркаванні пастаўшчыкоў не прымаюцца як доказ"
+      }
+    ]
+  },
+  "audio_contract_kudy": {
+    "note": "прачытана з рэальнага кода main (dabf334), не паводле пашырэння .m4a",
+    "media_schema": {
+      "file": "contracts/schemas/media.schema.json",
+      "mime_enum": [
+        "audio/mp4",
+        "image/webp"
+      ],
+      "required": [
+        "media_id",
+        "sha256",
+        "bytes",
+        "mime",
+        "locale",
+        "license",
+        "credit"
+      ],
+      "duration_s": "integer, 1..86400",
+      "locale_enum": [
+        "be",
+        "en",
+        "uk",
+        "de",
+        "es",
+        "fr",
+        "cs",
+        "sv"
+      ],
+      "note": "sha256 лічыцца па байтах файла ў LF/-text-рэжыме (.gitattributes, AR-1); кітайскай лакаля ў enum няма"
+    },
+    "audio_path": {
+      "anchors": [
+        "services/contentRepo/contentRepo.ts:201",
+        "core/engine/reducer.ts:495"
+      ],
+      "pattern": "${locale}/${tier}/audio/${story_id}.m4a"
+    },
+    "discovery_index": {
+      "file": "contracts/schemas/discovery-index.schema.json",
+      "lines": "194-195",
+      "rule": "text_locales/audio_locales: maxItems 8, enum з 8 локаляў без кітайскай"
+    },
+    "player": "services/audio/expo/expo-audio-port.ts:1-3 — даслоўна з крыніцы: \"the only module of services/audio/expo/ that imports expo-audio at runtime\"; playback .m4a expo-audio адчувае натыўна; рантайм-змен для кітайскай гэтая задача не прапануе"
+  },
+  "translation_candidates": [
+    {
+      "id": "alibaba-classic-mt",
+      "vendor": "Alibaba Cloud",
+      "product": "Machine Translation (universal/professional edition)",
+      "role": "пераклад",
+      "verdict": "defer",
+      "pl_support": "пл: код 33 Polish pl у афіцыйным спісе; поўныя крыж-пары — вывад з тэксту выключэнняў, не цытата",
+      "zh_variants": "zh, zh-tw (zh-tw толькі з кітайскай), yue",
+      "limits": "на запыт/QPS: не знойдзена на даступных старонках (UNCERTAIN); павышэнне QPS — платнае",
+      "free_quota": "1 000 000 знакаў/месяц (галоўны акаўнт,\u901a\u7528\u7248)",
+      "paid": "CNY 50/1 млн (\u901a\u7528\u7248), CNY 60/1 млн (прафесійная); пак 10 млн = CNY 480/570; інтэрн-партал: ад USD 15/1 млн",
+      "account": "інтэрн-партал alibabacloud.com — рэгістрацыя; патрабаванні (тэлефон/верыфікацыя) не правераны",
+      "data_policy": "не знойдзена на даступных старонках (UNCERTAIN)",
+      "channels": "REST API + SDK (HTTP API); офлайн-варыянту не знойдзена",
+      "evidence": [
+        {
+          "url": "https://www.alibabacloud.com/help/en/machine-translation/developer-reference/machine-translation-language-code-list",
+          "quote": "\"33 Polish pl\"; \"Text translation supports 212 languages, excluding Traditional Chinese, Mongolian, and Cantonese, with full cross-language translation.\"",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://help.aliyun.com/zh/machine-translation/product-overview/pricing-of-machine-translation-general-purpose-edition",
+          "quote_cn": "\u4e3b\u8d26\u53f7\u6bcf\u6708\u514d\u8d39\u989d\u5ea6\u4e00\u767e\u4e07\u5b57\u7b26; \u630950\u5143/\u767e\u4e07\u5b57\u7b26\u8ba1\u8d39; \u4e00\u5343\u4e07\u5b57\u7b26：480",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://www.alibabacloud.com/product/machine-translation",
+          "quote": "\"Register now to get a free monthly quota of 1 million characters.\"; \"Traffic resource package from USD15/million characters.\"",
+          "accessed": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "alibaba-qwen-mt",
+      "vendor": "Alibaba Cloud Model Studio (DashScope)",
+      "product": "Qwen-MT (qwen-mt-plus / qwen-mt-flash / qwen-mt-turbo / qwen-mt-lite)",
+      "role": "пераклад",
+      "verdict": "defer",
+      "pl_support": "пл (pl) у спісе 92 моў plus/flash/turbo",
+      "zh_variants": "zh (спрошчанае), zh_tw (традыцыйнае), yue",
+      "limits": "да 8 192 токенаў на ўвод; RPM/TPM па мадэлях (плюс 60/25 000 Beijing)",
+      "free_quota": "у дакументацыі не задакументавана (кансоль) — UNCERTAIN",
+      "paid": "цаны толькі ў кансолі, у дакументацыі «Check pricing in the console» — UNCERTAIN",
+      "account": " DashScope кансоль (інтэрн — сінгапур/бэйджын); патрабаванні не правераны",
+      "data_policy": "не задакументавана",
+      "channels": "OpenAI-сумяшчальны REST; streaming толькі flash/lite; глосар (terms) і TM (tm_list)",
+      "evidence": [
+        {
+          "url": "https://www.alibabacloud.com/help/en/model-studio/machine-translation",
+          "quote": "мадэлі qwen-mt-plus/flash/turbo/lite; \"Domain prompts currently support only English.\"; глосар terms + tm_list",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://help.aliyun.com/zh/model-studio/rate-limit",
+          "quote": "qwen-mt-plus 60 RPM / 25 000 TPM (Beijing)",
+          "accessed": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "baidu-translate",
+      "vendor": "Baidu",
+      "product": "\u767e\u5ea6\u7ffb\u8bd1\u5f00\u653e\u5e73\u53f0 / General Text Translation API (+ LLM Text Translation API)",
+      "role": "пераклад",
+      "verdict": "defer",
+      "pl_support": "\u6ce2\u5170\u8bed pl у спісе моў са змаўчання «выяўленне мовы: так»; pl у 28 агульных мовах стандартнай/пашыранай версіі (прамы пар pl↔zh — вывад)",
+      "zh_variants": "асобныя коды: zh (спрошч.), cht (традыц.), wyw (класічн. вэньянь), yue (кантонская)",
+      "limits": "стандарт: 1000 знакаў/запыт, QPS 1; пашыраная: 6000, QPS 10; LLM API: рэкамендацыя ≤2000 знакаў",
+      "free_quota": "стандарт 50 000 знакаў/месяц; пашыраная (персанальная сертыфікацыя) 1 млн/месяц; карпаратыўная 2 млн/месяц",
+      "paid": "назоўнік CNY 49/1 млн звыш бясплатнай квоты (лічыцца крынічны тэкст з прабеламі і HTML)",
+      "account": "акаўнт Baidu + распрацоўніцкія сертыфікацыі (персанальная/карпаратыўная — патрабаванні на даступных старонках не расктытыя); партал толькі кітайскамоўны",
+      "data_policy": "не знойдзена (UNCERTAIN)",
+      "channels": "REST з MD5-падпісам; аўтавыяўленне мовы; глосары з пашыранай версіі",
+      "evidence": [
+        {
+          "url": "https://fanyi-api.baidu.com/product/112",
+          "quote_cn": "\u6807\u51c6\u7248 5\u4e07\u5b57\u7b26/\u6708; \u9ad8\u7ea7\u7248 100\u4e07\u5b57\u7b26/\u6708; \u5c0a\u4eab\u7248 200\u4e07\u5b57\u7b26/\u6708; \u6536\u8d39\u6807\u51c6: \u8d85\u51fa\u514d\u8d39\u5b57\u7b26\u90e8\u5206，\u630949\u5143/\u767e\u4e07\u5b57\u7b26\u8ba1\u8d39",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://fanyi-api.baidu.com/product/113",
+          "quote_cn": "\u652f\u6301200+\u79cd\u8bed\u8a00\u4e92\u8bd1\u53ca100+\u8bed\u79cd\u81ea\u52a8\u68c0\u6d4b (vendor claim)",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://api.fanyi.baidu.com/doc/21",
+          "quote": "LLM API: model_type llm (змаўчанне) / nmt",
+          "accessed": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "tencent-tmt-legacy",
+      "vendor": "Tencent Cloud",
+      "product": "Machine Translation (TMT) — legacy TextTranslate/BatchTranslate",
+      "role": "пераклад",
+      "verdict": "reject-for-now",
+      "reason": "афіцыйнае спавяданне: новым карыстальнікам зачынена, з 2026-10-01 QPS рэжуцца штомесяц; наступнік — Hy-MT2 на TokenHub",
+      "pl_support": "UNCERTAIN (поўны спіс моў не даступны)",
+      "zh_variants": "UNCERTAIN",
+      "limits": "да 2000 знакаў на запыт (знак = кіт. іерогліф = лац. літара = пунктуацыя)",
+      "free_quota": "5 000 000 знакаў/месяц (бясплатны рэсурспак)",
+      "paid": "CNY 58/1 млн (0–100 млн), CNY 50/1 млн (100+ млн)",
+      "account": "не задакументавана на даступных старонках; міжнародны док URL 404",
+      "data_policy": "не знойдзена",
+      "channels": "Tencent Cloud signed REST + SDK; BatchTranslate у спісе спавядання",
+      "evidence": [
+        {
+          "url": "https://cloud.tencent.com/document/product/551/7372",
+          "quote_cn": "\u6587\u672c\u7ffb\u8bd1\u3001\u6279\u91cf\u6587\u672c\u7ffb\u8bd1\u5c06\u4e0b\u7ebf，\u4e0d\u518d\u652f\u6301\u65b0\u7528\u6237; \u81ea2026\u5e7410\u67081\u65e5\u8d77，\u4e0a\u8ff0\u63a5\u53e3\u7684 QPS \u9650\u5236\u5c06\u5206\u522b\u9010\u6708\u6309\u6bd4\u4f8b\u7f29\u51cf; \u6307\u5f15 TokenHub hy-mt2-plus/pro/lite",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://cloud.tencent.com/document/product/551/35017",
+          "quote_cn": "\u6bcf\u6708500\u4e07\u5b57\u7b26 (бясплатны рэсурспак); 58\u5143/\u767e\u4e07\u5b57\u7b26 → 50\u5143/\u767e\u4e07\u5b57\u7b26",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://cloud.tencent.com/document/product/551/32572",
+          "quote_cn": "\u5355\u6b21\u8bf7\u6c42\u7684\u5b57\u7b26\u6570\u4e0d\u8d85\u8fc72000",
+          "accessed": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "tencent-hymt2",
+      "vendor": "Tencent Cloud TokenHub",
+      "product": "Hy-MT2 (hy-mt2-plus / hy-mt2-pro / hy-mt2-lite)",
+      "role": "пераклад",
+      "verdict": "defer",
+      "pl_support": "UNCERTAIN — «\u652f\u6301\u8bed\u79cd\u66f4\u591a» без спісу; 33 мовы (спрошч. + традыц.) — толькі староннія пераказы",
+      "zh_variants": "спрошч./традыц. — староннія пераказы, не праверана",
+      "limits": "токенавыя цэны ўводу/вываду: Pro 0.5/2, Plus 0.5/2, Lite 0.3/1.2 CNY за 1 млн токенаў (Гуанчжоу); Сінгапур — толькі Plus",
+      "free_quota": "на старонцы цэн бясплатнай квоты няма",
+      "paid": "гл. limits (CNY/млн токенаў)",
+      "account": "TokenHub кансоль; патрабаванні не правераны",
+      "data_policy": "не знойдзена",
+      "channels": "REST/SDK Tencent Cloud",
+      "evidence": [
+        {
+          "url": "https://cloud.tencent.com/document/product/1823/130055",
+          "quote_cn": "Hy-MT2-Pro 0.5/2; Hy-MT2-Plus 0.5/2; Hy-MT2-Lite 0.3/1.2 \u5143/\u767e\u4e07tokens",
+          "accessed": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "deepl-api",
+      "vendor": "DeepL",
+      "product": "DeepL API (Developer / Growth / Enterprise)",
+      "role": "пераклад — базавы варыянт (non-Chinese baseline)",
+      "verdict": "defer",
+      "pl_support": "PL: translation=true, glossaries=true; абодва кірункі (вывад — PL не ў спісе target-only)",
+      "zh_variants": "ZH-HANS / ZH-HANT як target (і ZH без рэгіёна); рэгіёны — «Target Only»",
+      "limits": "урэзаў запыту/квоты дакумент недаступны (bot-check + 404) — UNCERTAIN",
+      "free_quota": "план Developer: 1 000 000 знакаў АДНАРАЗОВА без абнаўлення; стары Free 500 000/месяц больш не прадаецца",
+      "paid": "Growth: 50 млн знакаў/месяц; цана за дакументаванай старонкай не выцяргаецца (JS) — UNCERTAIN",
+      "account": "акаўнт + ключ; сцяжкі ўваходу не правераны (забаронена брыфам)",
+      "data_policy": "афіцыйна: тэксты выдаляюцца адразу пасля перакладу; не выкарыстоўваюцца для трэніроўкі мадэляў DeepL",
+      "channels": "REST + афіцыйныя SDK (Python/.NET/Node.js/PHP/Ruby/Java) + OpenAPI spec; пераклад дакументаў",
+      "evidence": [
+        {
+          "url": "https://support.deepl.com/hc/en-us/articles/360021200939-DeepL-API-plans",
+          "quote": "\"The DeepL API Developer plan allows developers to try out DeepL's API for free, with a total translation limit of 1,000,000 characters. Once this limit has been reached, it will not reset\"; \"Maximum data security (your texts are deleted immediately after the translation...)\"",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://developers.deepl.com/docs/resources/supported-languages",
+          "quote": "ZH-HANS \"Chinese (simplified)\"; ZH-HANT \"Chinese (traditional)\"; PL Polish translation:true",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://www.deepl.com/en/pro-api",
+          "quote": "\"deletion of your text immediately after translation\"",
+          "accessed": "2026-10-06"
+        }
+      ]
+    }
+  ],
+  "tts_candidates": [
+    {
+      "id": "dashscope-cosyvoice",
+      "vendor": "Alibaba Cloud Model Studio (DashScope)",
+      "product": "CosyVoice (cosyvoice-v2/v3-flash/v3-plus/v3.5-flash/v3.5-plus) + Qwen-Audio-TTS/legacy qwen-tts",
+      "role": "сінтэз маўлення",
+      "verdict": "defer — лід-кандыдат воблачнага пілота",
+      "voices": "каля 160+ сістэмных галасоў (longxiaochun_v3 «Intellectual and positive female», longshu_v3 «Calm young male», дыялекты: кантонская longjiaxin_v3, хакка/мінань longanmin_v3)",
+      "prosody": "speech_rate/pitch_rate 0.5–2.0, volume 0–100; SSML з <break> 50 мс–10 с у v2/v3/v3.5; timestamp падтрыманы",
+      "formats": "PCM/WAV/MP3/Opus да 48 кГц; нятокавы HTTP вяртае URL спампоўкі (валідны 24 гадзіны); няма audio/mp4 — патрэбная канвертацыя",
+      "max_text": "20 000 знакаў на выклік (CosyVoice); legacy qwen-tts 600 знакаў / 512 токенаў",
+      "free_quota": "агульная для мадэлі ~1 000 000 токенаў на 90 дзён (Сінгапур); сімвальная TTS-квота CosyVoice не знойдзена — UNCERTAIN",
+      "paid": "cosyvoice-v3-flash: USD 0.14335/10 000 знакаў (Beijing), 0.13 (Singapore); qwen-audio-3.0-tts-flash: 0.137521/0.15; v2/v3.5 не правераны — UNCERTAIN",
+      "account": "інтэрн-кансоль modelstudio.console.alibabacloud.com (email + карта); кіт. рэгіён — верыфікацыя асобы (не праверана; help.aliyun.com не рэндэрыцца з гэтага хаста)",
+      "rights": "правы на гатовы запіс/камерцыйнае выкарыстанне/рэтэнцыю не знойдзены — UNCERTAIN; задакументавана толькі «URL valid for 24 hours»",
+      "local_fallback": "CosyVoice2-0.5B вагі Apache-2.0 (HuggingFace FunAudioLLM/CosyVoice2-0.5B); код GitHub Apache-2.0",
+      "evidence": [
+        {
+          "url": "https://www.alibabacloud.com/help/en/model-studio/cosyvoice-python-sdk",
+          "quote": "speech_rate [0.5, 2.0]; pitch_rate [0.5, 2.0]; volume [0, 100]; \"Maximum per call: 20,000 characters\"",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://www.alibabacloud.com/help/en/model-studio/ssml-latex-user-guide",
+          "quote": "SSML падтрыманы v2/v3/v3.5; <break> 1 с па змаўчанні, time 1–10 с або 50–10 000 мс; root rate/pitch 0.5–2, volume 0–100",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://www.alibabacloud.com/help/en/model-studio/non-realtime-tts-user-guide",
+          "quote": "\"output.audio.url contains the download URL for the synthesized audio.\"; \"The URL is valid for 24 hours\"",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://www.alibabacloud.com/help/en/model-studio/cosyvoice-v3-flash",
+          "quote": "TTS 0.14335 per 10,000 characters (Beijing)",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://huggingface.co/FunAudioLLM/CosyVoice2-0.5B",
+          "quote": "License: apache-2.0",
+          "accessed": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "tencent-cloud-tts",
+      "vendor": "Tencent Cloud",
+      "product": "Speech Synthesis (TextToVoice, tts.tencentcloudapi.com, Version 2019-08-23)",
+      "role": "сінтэз маўлення",
+      "verdict": "defer",
+      "voices": "каля 55–60 кітайскіх галасоў у трох узроўнях (\u7cbe\u54c1 101001 \u667a\u745c, \u5927\u6a21\u578b 501000 \u667a\u658c, \u8d85\u81ea\u7136 402000 \u4e91\u6653\u8299; кантонская 101019 \u667a\u5f64)",
+      "prosody": "Speed [-2,6] = 0.6–2.5×, Volume [-10,10]; асобнага параметра вышыні тону НЯМА; SSML (zh/en) з <break>; EmotionCategory/Intensity",
+      "formats": "wav (змаўчанне) / mp3 / pcm, base64 у адказе Audio — складаць файл самаму; няма audio/mp4",
+      "max_text": "150 кітайскіх знакаў на запыт (поўнаправыя пунктуацыя лічыцца); для даўжэйшага — асобны прадукт \u957f\u6587\u672c\u8bed\u97f3\u5408\u6210",
+      "free_quota": "аднаразовыя пакі па галасах: \u8d85\u81ea\u7136 20 000 знакаў; \u5927\u6a21\u578b 100 000; базавыя/\u7cbe\u54c1 8 000 000; тэрмін 3 месяцы, адзін раз на акаўнт",
+      "paid": "постпаўд CNY за 10 000 знакаў: \u7cbe\u54c1 0.3; \u5927\u6a21\u578b 1.2→0.55; \u8d85\u81ea\u7136 6.5→4.9; \u957f\u6587\u672c 3.20/2.8→2.30/2.0; папярэднія пакі ад 0.15–0.21 (\u7cbe\u54c1)",
+      "account": "кіт. кансоль (верыфікацыя, не праверана); міжнародны партал ёсць — USD-цэны не цягнуты",
+      "rights": "не знойдзены на даступных старонках — UNCERTAIN",
+      "local_fallback": "афіцыйных адкрытых ваг няма",
+      "evidence": [
+        {
+          "url": "https://cloud.tencent.com/document/product/1073/37995",
+          "quote_cn": "Codec \u53ef\u53d6\u503c：wav（\u9ed8\u8ba4），mp3，pcm; \u4e2d\u6587\u6700\u5927\u652f\u6301150\u4e2a\u6c49\u5b57; Speed \u8bed\u901f，\u8303\u56f4：[-2，6]; Volume \u97f3\u91cf\u5927\u5c0f，\u8303\u56f4[-10，10]",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://cloud.tencent.com/document/product/1073/34112",
+          "quote_cn": "\u514d\u8d39\u8d44\u6e90\u5305\u81ea\u60a8\u9886\u53d6\u6210\u529f\u540e\u8d77\u4e09\u4e2a\u6708\u5185\u6709\u6548，\u4e00\u4e2a\u8d26\u53f7\u53ea\u80fd\u9886\u53d6\u4e00\u6b21; \u7cbe\u54c1\u97f3\u8272 0.3\u5143/\u4e07\u5b57\u7b26",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://cloud.tencent.com/document/product/1073/49575",
+          "quote_cn": "\u76ee\u524d\u53ea\u6709\u4e2d\u6587\u3001\u82f1\u6587\u5408\u6210\u652f\u6301 SSML \u529f\u80fd",
+          "accessed": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "iflytek-online-tts",
+      "vendor": "iFlytek (\u79d1\u5927\u8baf\u98de, xfyun.cn)",
+      "product": "Online TTS WebAPI",
+      "role": "сінтэз маўлення",
+      "verdict": "reject-for-now",
+      "reason": "шапелят 8/16 кГц ніжэй за бар якасці наратыву; дадатковы апсемплінг не выратуе; кансольныя бар'еры + памясячная/пагадзінная мадэль цэн",
+      "voices": "рэестр у кансолі (login wall); «100+ \u53d1\u97f3\u4eba» — vendor claim нізкай упэўненасці; бясплатныя \u5c0f\u71d5 xiaoyan і г.д.; «асаблівыя» 20 000 CNY/год",
+      "prosody": "speed/volume/pitch 0–100; паўзы: CSSML <break time=\"500ms\"/> (названыя дыктары, ttp=cssml) або просты маркер [p500]",
+      "formats": "raw PCM / lame mp3 (sfl=1) / opus / speex; 8 або 16 кГц; няма audio/mp4 + патрэбны апсемплінг",
+      "max_text": "менш за 8000 байт на выклік (~2000 знакаў)",
+      "free_quota": "500 выклікаў/суткі пасля стварэння праграмы + аднаразовы пак (адзін раз на акаўнт)",
+      "paid": "«асаблівыя» дыктары па 20 000 CNY/год; прайсы па-за кансоллем — UNCERTAIN",
+      "account": "акаўнт xfyun.cn + стварэнне праграмы + аўтарызацыя дыктараў; кансоль кітайскамоўная",
+      "rights": "не знойдзены — UNCERTAIN; камерцыйнае выкарыстанне мае куплены пакет (з дакументацыі выцякае)",
+      "evidence": [
+        {
+          "url": "https://www.xfyun.cn/doc/tts/online_tts/API.html",
+          "quote_cn": "aue: raw/lame/opus/speex; auf: audio/L16;rate=8000|16000; \u5355\u6b21\u8c03\u7528\u957f\u5ea6\u9700\u5c0f\u4e8e8000\u5b57\u8282; \u8bed\u97f3\u5408\u6210\u521b\u5efa\u5e94\u7528\u540e\u9ed8\u8ba4\u6709\u6bcf\u65e5500\u6b21\u8c03\u7528",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://www.xfyun.cn/doc/tts/online_tts/tts_description.html",
+          "quote_cn": "\u7279\u8272\u53d1\u97f3\u4eba\u90fd\u662f2\u4e07/\u5e74; \u53ef\u8bd5\u7528\u53d1\u97f3\u4eba\u8bd5\u7528\u671f\u9650\u4e3a\u6dfb\u52a0\u540e\u768415\u5929\u5185",
+          "accessed": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "azure-speech-baseline",
+      "vendor": "Microsoft",
+      "product": "Azure AI Speech — Text to speech (neural, zh-CN)",
+      "role": "сінтэз маўлення — базавы варыянт (non-Chinese baseline)",
+      "verdict": "defer",
+      "voices": "zh-CN GA-рэестр (zh-CN-YunxiNeural са StyleList narration-relaxed/cheerful/... і RolePlayList Narrator/...; 48 кГц); агульная колькасць не злічана (старонка моў абразаецца да zh-CN радкоў) — UNCERTAIN",
+      "prosody": "поўны SSML: pitch, паўзы, вымаўленне, тэмп, гучнасць, шматгалосе, лексіконы, стылі",
+      "formats": "30+ фарматоў: mp3 (16–192 кбіт), opus, ogg-opus, webm, amr-wb, g722, riff-wav 8–48 кГц, raw PCM; няма m4a/mp4/aac — канвертацыя",
+      "max_text": "REST-рэальны час: да 10 хвілін гуку; даўжэй — batch synthesis API",
+      "free_quota": "F0: 500 000 знакаў/месяц (neural TTS)",
+      "paid": "S0 — дынамічная «$-» на старонцы цэн не цягнецца — UNCERTAIN; «Each Chinese character is counted as two characters for billing» (кіт. знакі ×2)",
+      "account": "акаўнт Azure; картка; F0 без аплаты",
+      "rights": "камерцыйнае выкарыстанне нейральных галасоў на платным тарыфе — Microsoft Q&A (ліст. 2024, пошукавы ўрыўак, старонка не цягнутая) — сярэдняя ўпэўненасць; F0 для камерцыі не падыходзіць (UNCERTAIN)",
+      "local_fallback": "няма (галасы не спампоўваюцца)",
+      "evidence": [
+        {
+          "url": "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech",
+          "quote": "\"ShortName\": \"zh-CN-YunxiNeural\"; X-Microsoft-OutputFormat спіс; \"audio length can't exceed 10 minutes\"; \"Each Chinese character is counted as two characters for billing\"",
+          "accessed": "2026-10-06"
+        },
+        {
+          "url": "https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/",
+          "quote": "F0 \"0.5 million characters free per month\" (Neural TTS)",
+          "accessed": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "cosyvoice-local",
+      "vendor": "Alibaba (FunAudioLLM/QwenAudio)",
+      "product": "CosyVoice / CosyVoice2 (open weights)",
+      "role": "сінтэз маўлення — лакальны офлайн",
+      "verdict": "defer — адзіная рэальная офлайн-опцыя",
+      "voices": "Fun-CosyVoice 3.0: 9 моў + 18+ кіт. дыялектаў/акцэнтаў; інструкцыі (мова/эмоцыі/тэмп/гучнасць), zero-shot cloning, пін'ін/CMU «Pronunciation Inpainting»",
+      "prosody": "інструкцыйны кантроль; яўнага маркера паўзы ў README не задакументавана — UNCERTAIN",
+      "formats": "у README фармат не задакументаваны (прыклады пішуць wav); патрабаванні VRAM не задакументаваны (docker-прыклады nvidia/TensorRT-LLM) — UNCERTAIN",
+      "license": "код: Apache-2.0 (LICENSE); вагі CosyVoice2-0.5B: apache-2.0 на HuggingFace",
+      "prerequisites": "усталёўка цяжкая (CUDA/сборка), GPU на хасце цяпер адключаны (dGPU) — праверка на пілоты",
+      "evidence": [
+        {
+          "url": "https://github.com/QwenAudio/CosyVoice",
+          "quote": "LICENSE = Apache License 2.0; Fun-CosyVoice 3.0 \"Covers 9 common languages\" + \"18+ Chinese dialects/accents\"",
+          "accessed": "2026-10-06"
+        }
+      ]
+    },
+    {
+      "id": "indextts-local",
+      "vendor": "bilibili (IndexTeam / index-tts)",
+      "product": "IndexTTS / IndexTTS-2.5 (open weights)",
+      "role": "сінтэз маўлення — лакальны офлайн",
+      "verdict": "reject-for-now",
+      "reason": "спецыфічная ня-OIS ліцэнзія bilibili (ліміт MAU/выручкі + забарона трэніроўкі чужых мадэляў) і няма задакументаваных маркераў паўз — менш прыдатны для аўдыягіда, чым CosyVoice з Apache-2.0",
+      "voices": "IndexTTS-2.5: zh/en/ja/es/ar; дробназярністы кантроль эмоцый (8-меры вектары), тэмп duration_factor 0.5–2.0×, пін'ін-кантроль",
+      "formats": "прыклады пішуць wav; VRAM не задакументавана",
+      "license": "LICENSE файл = «bilibili Model Use License Agreement»; GitHub license field NOASSERTION; §2.2: >100 млн MAU або >1 млрд CNY выручкі — асобная ліцэнзія; §3.4c: не выкарыстоўваць для трэніроўкі іншых мадэляў (акрамя ўласных/некамерцыйных)",
+      "evidence": [
+        {
+          "url": "https://github.com/index-tts/index-tts",
+          "quote": "LICENSE \"bilibili Model Use License Agreement\"; \"more than 100 million monthly active users\" або \"annual revenue ... exceeded RMB 1 billion\" — асобная ліцэнзія",
+          "accessed": "2026-10-06"
+        }
+      ]
+    }
+  ],
+  "export_validation": {
+    "verdict": "ніводзін кандыдат (воблака і лакальны) не выдае натыўна audio/mp4 (.m4a): Alibaba PCM/WAV/MP3/Opus; Tencent wav/mp3/pcm (base64); iFlytek PCM/MP3/opus 8–16 кГц; Azure mp3/opus/ogg/webm/riff-wav; лакальныя CosyVoice/IndexTTS — wav. УСЕМ патрэбная канвертацыя ў AAC/MP4",
+    "pipeline_proposed_not_executed": [
+      "1. TTS-выхад (wav/mp3) → ffmpeg -c:a aac -f mp4 (ffmpeg n9.0.2 ёсць на хасце CachyOS)",
+      "2. sha256 па байтах выніковага .m4a у LF/-text-рэжыме (.gitattributes AR-1)",
+      "3. duration_s цэлымі секундамі (1..86400) са схеме",
+      "4. license/credit: пастаўшчык + голас + ліцэнзійная аснова (палі media.schema.json)",
+      "5. для кітайскай: спачатку змена locale enum у media.schema.json + discovery-index.schema.json (G21.42)"
+    ],
+    "probe_status": "blocked — сама канвертацыя і прымальнасць гуку не праганяліся (няма наратыву без акаўнта/аплаты); дэмканідыдатаў пастаўшчыкоў адзіна пацвярджаюць іх уласныя прыклады, не сумяшчальнасць з KUDY"
+  },
+  "rights_matrix": {
+    "note": "агульны вынік: у кітайскіх пастаўшчыкоў правы/палітыкі на даступных старонках не знойдзены (UNCERTAIN) — да любога прагону патрэбна праверка умоў у кансолі",
+    "rows": [
+      {
+        "candidate": "dashscope-cosyvoice",
+        "commercial_stock_voice": "UNCERTAIN",
+        "storage_redistribution": "UNCERTAIN (толькі URL 24 гадзіны)",
+        "retention_training": "не знойдзена",
+        "account_region": "інтэрн: email+карта; КНР: верыфікацыя асобы (не праверана)",
+        "offline": "лак. вагі Apache-2.0 — так"
+      },
+      {
+        "candidate": "tencent-cloud-tts",
+        "commercial_stock_voice": "UNCERTAIN",
+        "storage_redistribution": "UNCERTAIN",
+        "retention_training": "не знойдзена",
+        "account_region": "кіт. кансоль; міжнародны партал ёсць",
+        "offline": "няма"
+      },
+      {
+        "candidate": "iflytek-online-tts",
+        "commercial_stock_voice": "куплены пакет мае быць (з дакументацыі)",
+        "storage_redistribution": "UNCERTAIN",
+        "retention_training": "не знойдзена",
+        "account_region": "кіт. кансоль + праграма + аўтарызацыя дыктараў",
+        "offline": "асобны платны прадукт (цэны UNCERTAIN)"
+      },
+      {
+        "candidate": "azure-speech-baseline",
+        "commercial_stock_voice": "платны тарыф — так (MS Q&A, сярэдняя ўпэўненасць); F0 — не",
+        "storage_redistribution": "выхадныя файлы — ўладальнік акаўнта (стандартна па ўмовах Azure; поўны тэкст не цягнуты)",
+        "retention_training": "прамоўленыя тэксты — палітыка MS; старонкі не цягнутыя цалкам — UNCERTAIN",
+        "account_region": "акаўнт Azure + картка",
+        "offline": "няма"
+      },
+      {
+        "candidate": "deepl-api",
+        "commercial_stock_voice": "n/a (пераклад)",
+        "storage_redistribution": "пераклады — права выкарыстання; тэксты выдаляюцца адразу (афіцыйна)",
+        "retention_training": "без трэніроўкі на тэкстах карыстальніка (афіцыйна)",
+        "account_region": "акаўнт + ключ",
+        "offline": "няма"
+      },
+      {
+        "candidate": "baidu-translate",
+        "commercial_stock_voice": "n/a",
+        "storage_redistribution": "не знойдзена",
+        "retention_training": "не знойдзена",
+        "account_region": "акаўнт Baidu + сертыфікацыі (кіт. партал)",
+        "offline": "няма"
+      }
+    ]
+  },
+  "registry_recommendations": [
+    {
+      "tool": "Alibaba Cloud MT (classic)",
+      "status": "defer",
+      "reason": "pl у афіц. спісе, 1 млн бяспл./месяц, інтэрн-партал; але патрэба перакладчыка для KUDY не вымераная (пераклады аўтарскія), палітыка даных невядомая — рашэнне G21.42"
+    },
+    {
+      "tool": "Alibaba Qwen-MT (DashScope)",
+      "status": "defer",
+      "reason": "наступнік тэхналогіі, глосар+TM, pl у 92 мовах; цэны/квоты толькі ў кансолі — не параўнальна без акаўнта"
+    },
+    {
+      "tool": "Baidu Translate Open Platform",
+      "status": "defer",
+      "reason": "pl у 28 мовах, танней за ўсіх па назоўніку (CNY 49/1 млн), багатая бясплатная лесвіца; сертыфікацыйныя бар'еры і невядомая палітыка даных"
+    },
+    {
+      "tool": "Tencent TMT (legacy)",
+      "status": "reject-for-now",
+      "reason": "афіцыйнае спавяданне API (новым карыстальнікам зачынена, QPS-рэзы з 2026-10-01); выбар гэтага шляху проці інтэрнац"
+    },
+    {
+      "tool": "Tencent Hy-MT2 (TokenHub)",
+      "status": "defer",
+      "reason": "жывы наступнік, токенавыя цэны публічныя; спіс моў (pl, zh-варыянты) не пацверджаны афіцыйна"
+    },
+    {
+      "tool": "DeepL API (baseline)",
+      "status": "defer",
+      "reason": "найлепшая задакументаваная палітыка даных; ZH-HANS/ZH-HANT + PL; але патрэба акаўнта і аднаразовая квота Developer 1 млн без абнаўлення"
+    },
+    {
+      "tool": "DashScope CosyVoice / Qwen-TTS",
+      "status": "defer — лід-кандыдат TTS-пілота",
+      "reason": "найпоўнейшы задакументаваны кантроль (rate/pitch 0.5–2, SSML break да 10 с), 20 тыс. знакаў/выклік,URL-спампоўка, інтэрн-партал з нізкім бар'ерам; правы — UNCERTAIN да кансольнай праверкі"
+    },
+    {
+      "tool": "Tencent Cloud TTS",
+      "status": "defer",
+      "reason": "SSML+<break> для кітайскай, 8 млн сімвальных бясплатных пак-гадзін для базавых галасоў; ліміт 150 знакаў/запыт і без параметра вышыні тону"
+    },
+    {
+      "tool": "iFlytek Online TTS",
+      "status": "reject-for-now",
+      "reason": "16 кГц шапелят ніжэй бару наратыву; 20 тыс. CNY/год за «асаблівых» дыктараў; кансольныя бар'еры"
+    },
+    {
+      "tool": "Azure AI Speech (baseline)",
+      "status": "defer",
+      "reason": "эталонная дакументацыя SSML і фарматоў, F0 0.5 млн/месяц; кіт. знакі лічацца ×2; камерцыйныя правы — платны тарыф"
+    },
+    {
+      "tool": "CosyVoice (лакальныя вагі)",
+      "status": "defer",
+      "reason": "Apache-2.0 код+вагі — адзіны сапраўдны офлайн-шлях без rights-невызначанасці; перадумовы: GPU/VRAM невядомы, усталёўка цяжкая"
+    },
+    {
+      "tool": "IndexTTS (лакальныя вагі)",
+      "status": "reject-for-now",
+      "reason": "ня-OIS ліцэнзія bilibili з лімітамі і забаронай трэніроўкі чужых мадэляў; паўзаў няма ў README; CosyVoice пакрывае нішу ліпшымі ўмовамі"
+    }
+  ],
+  "pilot_prerequisites_g2142": [
+    {
+      "prerequisite": "рашэнне ўладара: ці патрэбны кітайскі выпуск наогул (G21.42)",
+      "cost_cap": "—"
+    },
+    {
+      "prerequisite": "акаўнт Model Studio (alibabacloud.com, сінгапур) + API-ключ захоўваць па правілах сакрэтаў (не ў рэпа)",
+      "cost_cap": "пілот TTS ≤ USD 2 (≈140 тыс. знакаў па 0.14335/10 тыс.)"
+    },
+    {
+      "prerequisite": "бясплатная квота перакладу (Alibaba 1 млн/мес або Baidu 50 тыс.–1 млн) — нулявая цана проб перакладу",
+      "cost_cap": "CNY 0 у межах бясплатнай квоты"
+    },
+    {
+      "prerequisite": "крок канвертацыі ў AAC/MP4 (ffmpeg) + праверка прайгравання ў expo-audio на Android",
+      "cost_cap": "—"
+    },
+    {
+      "prerequisite": "праверка правоў/палітык у кансолі пастаўшчыка (камерцыя/рэтэнцыя/трэніроўка) ДА прагону",
+      "cost_cap": "—"
+    },
+    {
+      "prerequisite": "незалежны рэцэнзент-кітайкамоўны ці прызнаны крытэр якасці для ацэнак прыроднасці",
+      "cost_cap": "—"
+    }
+  ],
+  "uncertainties": [
+    "цэны/квоты Qwen-MT — толькі кансоль (JS-gated)",
+    "глыбіны лімітаў запытаў/QPS Alibaba classic MT не знойдзены на даступных старонках",
+    "поўны спіс моў legacy Tencent TMT і Hy-MT2 (pl?) не цягнуты; 33 мовы Hy-MT2 — староннія пераказы",
+    "палітыкі даных/правы на запіс ва ўсіх кіт. пастаўшчыкоў (Alibaba/Tencent/iFlytek/Baidu) не знойдзены на даступных старонках",
+    "сімвальная бясплатная квота CosyVoice не знойдзена (толькі агульная токенавая 1 млн/90 дзён)",
+    "Azure S0 прайс — дынамічная «$-»; поўная колькасць zh-CN галасоў не злічана (старонка абразаецца)",
+    "iFlytek прайсы па-за кансоллем недаступныя (login wall)",
+    "прымяненне пін'іну для \u7ef4\u5229\u5947\u5361 (Wieliczka) — складзенае са стандартных чытанняў, не звяранае са слоўнікамі",
+    "гэта агульнае: уся ячэйка якасці (прыроднасць/правільнасць перакладу) = blocked: няма ні прагону, ні рэцэнзента"
+  ],
+  "access_log": [
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/tts-model",
+      "status": "200",
+      "note": "мадэлі TTS DashScope"
+    },
+    {
+      "url": "https://help.aliyun.com/zh/model-studio/text-generation-model",
+      "status": "200",
+      "note": "кіт. люстра часткова SPA; кантэксты 16k мадэляў Qwen-MT"
+    },
+    {
+      "url": "https://www.tencentcloud.com/document/product/551/...",
+      "status": "404",
+      "note": "міжнародны док TMT адсутнічае — акцэс-эвідэнцыя"
+    },
+    {
+      "url": "https://support.deepl.com/hc/en-us/articles/360021200939",
+      "status": "200",
+      "note": "планы DeepL; артыкул usage — bot-check (акцэс-эвідэнцыя)"
+    },
+    {
+      "url": "https://www.xfyun.cn/services/online_tts",
+      "status": "JS-shell",
+      "note": "маркетынговае акно не рэндэрыцца; выкарыстаныя серверныя док-старонкі"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech",
+      "status": "200",
+      "note": "фарматы/SSML/білінг ×2"
+    },
+    {
+      "url": "https://github.com/QwenAudio/CosyVoice",
+      "status": "200",
+      "note": "FunAudioLLM рэдырэкт на QwenAudio; FunAudioLLM/CosyVoice2 — 404"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/cosyvoice-voice-list",
+      "status": "200",
+      "note": "спіс галасоў CosyVoice (~160+, дыялекты)"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/realtime-tts-user-guide",
+      "status": "200",
+      "note": "фарматы рэальнага часу PCM/WAV/MP3/Opus да 48 кГц"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/qwen-tts-api",
+      "status": "200",
+      "note": "legacy qwen-tts: 512 токенаў / 600 знакаў"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/qwen-audio-3-0-tts-flash",
+      "status": "200",
+      "note": "цана qwen-audio-3.0-tts-flash"
+    },
+    {
+      "url": "https://www.alibabacloud.com/help/en/model-studio/new-free-quota",
+      "status": "200",
+      "note": "агульная бясплатная квота 1 млн токенаў / 90 дзён (Сінгапур)"
+    },
+    {
+      "url": "https://cloud.tencent.com/document/product/1073/92668",
+      "status": "200",
+      "note": "спіс галасоў Tencent TTS (тры ўзроўні, ідэнтыфікатары)"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech",
+      "status": "200",
+      "note": "SSML-магчымасці Azure; білінг кіт. знакаў ×2"
+    },
+    {
+      "url": "https://github.com/index-tts/index-tts",
+      "status": "200",
+      "note": "ліцэнзія bilibili Model Use License Agreement"
+    }
+  ]
+}

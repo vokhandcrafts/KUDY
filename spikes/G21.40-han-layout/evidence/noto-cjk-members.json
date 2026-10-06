@@ -1,0 +1,66 @@
+{
+ "file": "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+ "probe_set_size": 67,
+ "members": [
+  {
+   "index": 0,
+   "name": "Noto Sans CJK JP",
+   "covered_of_67": 55,
+   "missing": "\u0141\u0142\u017b\u017c\u0179\u017a\u0104\u0105\u0118\u0119\u015b\u0107"
+  },
+  {
+   "index": 1,
+   "name": "Noto Sans CJK KR",
+   "covered_of_67": 55,
+   "missing": "\u0141\u0142\u017b\u017c\u0179\u017a\u0104\u0105\u0118\u0119\u015b\u0107"
+  },
+  {
+   "index": 2,
+   "name": "Noto Sans CJK SC",
+   "covered_of_67": 55,
+   "missing": "\u0141\u0142\u017b\u017c\u0179\u017a\u0104\u0105\u0118\u0119\u015b\u0107"
+  },
+  {
+   "index": 3,
+   "name": "Noto Sans CJK TC",
+   "covered_of_67": 55,
+   "missing": "\u0141\u0142\u017b\u017c\u0179\u017a\u0104\u0105\u0118\u0119\u015b\u0107"
+  },
+  {
+   "index": 4,
+   "name": "Noto Sans CJK HK",
+   "covered_of_67": 55,
+   "missing": "\u0141\u0142\u017b\u017c\u0179\u017a\u0104\u0105\u0118\u0119\u015b\u0107"
+  },
+  {
+   "index": 5,
+   "name": "Noto Sans Mono CJK JP",
+   "covered_of_67": 55,
+   "missing": "\u0141\u0142\u017b\u017c\u0179\u017a\u0104\u0105\u0118\u0119\u015b\u0107"
+  },
+  {
+   "index": 6,
+   "name": "Noto Sans Mono CJK KR",
+   "covered_of_67": 55,
+   "missing": "\u0141\u0142\u017b\u017c\u0179\u017a\u0104\u0105\u0118\u0119\u015b\u0107"
+  },
+  {
+   "index": 7,
+   "name": "Noto Sans Mono CJK SC",
+   "covered_of_67": 55,
+   "missing": "\u0141\u0142\u017b\u017c\u0179\u017a\u0104\u0105\u0118\u0119\u015b\u0107"
+  },
+  {
+   "index": 8,
+   "name": "Noto Sans Mono CJK TC",
+   "covered_of_67": 55,
+   "missing": "\u0141\u0142\u017b\u017c\u0179\u017a\u0104\u0105\u0118\u0119\u015b\u0107"
+  },
+  {
+   "index": 9,
+   "name": "Noto Sans Mono CJK HK",
+   "covered_of_67": 55,
+   "missing": "\u0141\u0142\u017b\u017c\u0179\u017a\u0104\u0105\u0118\u0119\u015b\u0107"
+  }
+ ]
+}

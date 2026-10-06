@@ -81,6 +81,17 @@
             "reason": "cs трымае ўласнае Průvodce (Průvodci →, Průvodce, Popis průvodce) — прыродны чэшскі тэрмін аўдыёгіда; чалавечы род трымаецца ва ўсіх радках",
             "date": "2026-10-05"
           }
+        },
+        "sv": {
+          "term": "guide",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "guide",
+            "locator": "translations/sv.json#native.nearby.guideLabel",
+            "reason": "sv трымае запазычаны guide (Guider →, Guide, Öppna guidebeskrivningen) — як en, кароткі і нэўтральны для каталога і карткі падказкі",
+            "date": "2026-10-05"
+          }
         }
       }
     },
@@ -157,6 +168,17 @@
             "term": "Zastavení",
             "locator": "translations/cs.json#native.chrome.stopsCount",
             "reason": "імянік — Zastavení (Zastavení: N, Zastavení N, Další zastavení) — звыклы чэшскі тэрмін кропкі маршруту; словаформа нязменная ў лічбах; дзеянне спыніць тэйзер — асобнае «Zastavit» (native.place.stopLabel), uk/de/es-прэцэдэнт немешвання сэнсаў",
+            "date": "2026-10-05"
+          }
+        },
+        "sv": {
+          "term": "stopp",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "stopp",
+            "locator": "translations/sv.json#native.chrome.stopsCount",
+            "reason": "sv трымае стоп (ett) — словаформа інварыянтная ў лічбах (Stopp: 5, Stopp 3, Nästa stopp), правільна без ICU; дзеянне спыніць тэйзер — асобнае Stoppa",
             "date": "2026-10-05"
           }
         }
@@ -236,6 +258,17 @@
             "reason": "Procházka як адзіны тэрмін праходу (Aktuální procházka, Předchozí procházky, Ukončit procházku) — прыродны чэшскі актыўны праход па горадзе; ж. род трымае статус-радкі гісторыі",
             "date": "2026-10-05"
           }
+        },
+        "sv": {
+          "term": "promenad",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "promenad",
+            "locator": "translations/sv.json#native.chrome.currentWalk",
+            "reason": "walk → promenad паўсюль у зацверджаным sv-наборы (Promenad, Aktuell promenad, Tidigare promenader, Avsluta promenaden)",
+            "date": "2026-10-05"
+          }
         }
       }
     },
@@ -313,6 +346,17 @@
             "reason": "адзін корань для абодвух сэнсаў (Stáhnout, Stažení se nezdařilo, není stažený) — en/uk-прэцэдэнт аднакарэннага тэрміна",
             "date": "2026-10-05"
           }
+        },
+        "sv": {
+          "term": "ladda ner",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "ladda ner",
+            "locator": "translations/sv.json#native.preview.label.download",
+            "reason": "адзін корань ladda ner для абодвух сэнсаў (Ladda ner, Nedladdningen misslyckades, inte nedladdad) — en/uk-прэцэдэнт",
+            "date": "2026-10-05"
+          }
         }
       }
     },
@@ -387,6 +431,17 @@
             "term": "nedostupný",
             "locator": "translations/cs.json#native.chrome.catalogUnavailable",
             "reason": "nedostupný у радках стану і прычынах прэв'ю (Katalog není dostupný, …) — стандартны чэшскі UI-зварот недаступнасці",
+            "date": "2026-10-05"
+          }
+        },
+        "sv": {
+          "term": "otillgänglig",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "otillgänglig",
+            "locator": "translations/sv.json#native.chrome.catalogUnavailable",
+            "reason": "тэрмін недаступнасці; радкі стану трымаюць шведскую канструкцыю «är inte tillgänglig» (Katalogen är inte tillgänglig), ад'ектыўнае otillgänglig у дэградацыйных/часовых радках",
             "date": "2026-10-05"
           }
         }
@@ -466,6 +521,17 @@
             "reason": "Vyžaduje se nákup / Zakoupeno / nákupy přes obchody aplikací — толькі факт падзеі, без плацёжных даных",
             "date": "2026-10-05"
           }
+        },
+        "sv": {
+          "term": "köp",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "köp",
+            "locator": "translations/sv.json#native.preview.reason.preview#purchase-required",
+            "reason": "purchase → köp (Köp, Köp krävs, Köpt · väntar på nedladdning, Tillgängligt efter köp) — адзін корань ва ўсіх радках",
+            "date": "2026-10-05"
+          }
         }
       }
     },
@@ -539,6 +605,17 @@
             "term": "pokračuje z uložené relace",
             "locator": "translations/cs.json#native.run.restoredTitle",
             "reason": "канон restore без рэстаўрацыйнай метафары: Procházka pokračuje z uložené relace — тая самая пабудова, што be/en/uk/de/es/fr",
+            "date": "2026-10-05"
+          }
+        },
+        "sv": {
+          "term": "fortsätter från en sparad session",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "fortsätter från en sparad session",
+            "locator": "translations/sv.json#native.run.restoredTitle",
+            "reason": "канон без рэстаўрацыйнай метафары (Promenaden fortsätter från en sparad session), тая самая пабудова be/en/uk/de/es/fr/cs; «аднаўленне пакета» → reparera, як es reparación",
             "date": "2026-10-05"
           }
         }
