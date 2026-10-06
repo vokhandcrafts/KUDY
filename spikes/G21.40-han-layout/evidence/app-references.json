@@ -1,0 +1,152 @@
+{
+ "generated": "2026-10-06",
+ "study": "Interface typography of Chinese mobile apps (zh-Hans / zh-Hant), read-only research from official public pages. No app was installed; no interactive session happened. App-UI observations come from official Apple App Store (CN) screenshots downloaded at full resolution and visually inspected, plus official web pages.",
+ "method_note": "Factual fields (version, dates, developer, languages) were taken from Apple's official public iTunes Lookup/Search API (itunes.apple.com/lookup, itunes.apple.com/search) and cross-checked against the apps.apple.com/cn listing pages read the same day. Typography observations are visual readings of official screenshots; exact font file names cannot be proven from pixels and are marked as such.",
+ "apps": [
+  {
+   "name_zh": "\u9ad8\u5fb7\u5730\u56fe",
+   "name_latin": "Amap (AutoNavi)",
+   "class": "map",
+   "developer": "AutoNavi Information Technology Co. Ltd. (store seller string: AUTONAVI INFO TECHNOLOGY CO LTD; Alibaba group entity)",
+   "platform": "Android / iOS (iOS App Store CN listing inspected)",
+   "version": "17.0.2",
+   "version_date": "2026-09-23",
+   "source_urls": [
+    "https://apps.apple.com/cn/app/id461703208",
+    "https://itunes.apple.com/lookup?id=461703208&country=cn&lang=zh_cn",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/85/06/c5/8506c5cc-f9f7-0020-a2e8-3ad6d8a7ac64/1_U5bfc_U822alive_1242-2688.png/1242x2688bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/11/a8/e1/11a8e1fa-f06f-0e60-d652-8731eb341828/8._U626b_U8857_U699c_1242-2688.png/1242x2688bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6d/d3/69/6dd369be-f000-6411-79da-7b3c1aa87a86/_U6253_U8f66.png/1242x2688bb.jpg"
+   ],
+   "accessed": "2026-10-06",
+   "inspection": "official-materials-only",
+   "observations": {
+    "font_family": "All rendered text is heiti (CJK sans). Headlines ('\u5bfc\u822aLive \u4e0b\u4e00\u4ee3\u51fa\u884c', '\u9ad8\u5fb7\u626b\u8857\u699c2026', '\u9ad8\u5fb7\u987a\u98ce\u8f66') use an extra-heavy, slightly-rounded black heiti that is clearly a brand/marketing cut; body/UI text is a standard-weight heiti consistent with iOS PingFang SC. Exact family name NOT verifiable from pixels; no font name is stated anywhere on the listing. Digits inside heavy headlines match the CJK weight (custom or weight-matched digits).",
+    "hierarchy": "Clear 5-level ladder visible: (1) very large heavy marketing headline; (2) medium subtitle line; (3) in-app screen title / tab bar (\u63a8\u8350 \u70ed\u95e8 \u7f8e\u98df \u73a9\u4e50 \u4f11\u95f2 \u8d2d\u7269 \u9152\u5e97\u2026) with blue selected state + short underline; (4) list body: POI name dark semibold, meta line grey ('4.9 \u5206 \u5168\u5e74\u70ed\u5ea6\u503c98.2 \u597d\u53cb\u8bc4\u52064.7 \u7d2f\u8ba1\u5bfc\u822a860\u4e07\u516c\u91cc'); (5) fine print disclaimer in light grey small size at top of every marketing screenshot: '\u672c\u56fe\u7247\u4ec5\u4e3a\u793a\u4f8b\uff0c\u5b9e\u9645\u5546\u54c1\u6216\u6d3b\u52a8\u4ee5\u5b9e\u9645\u516c\u793a\u4e3a\u51c6'. Selected tab/chip = brand blue text + blue outline chip; unselected = dark grey text.",
+    "line_breaking": "No spaces anywhere between Han characters; body paragraphs wrap character-by-character. Long strings clamp with single ellipsis '\u2026' ('\u5173\u4e8e\u96f7\u5cf0\u5854\u7684\u5174\u5efa\uff0c\u6709\u4e24\u79cd\u8bf4\u2026'). Horizontally scrollable tab/chip rows are simply clipped at the screen edge with no ellipsis (\u65c5\u6e38\u2192'\u65c5', '\u62fc\u5ea7' chip half-visible). No hyphenation, no justification artifacts.",
+    "mixed_scripts": "Digits and Latin set tight against CJK with no spaces: '2.0\u516c\u91cc', '1.1\u516c\u91cc', '\u5168\u5e74\u70ed\u5ea6\u503c98.2', '\u00a5152/\u4eba', '\u8ba2\u5355\u91cc\u7a0b11.6km', '\u6b66\u660c\u533a \u8ddd\u60a8 500m', '\u4eca\u5929 14:45-15:00', '24h(\u7c0b\u8857\u603b\u5e97)'. Rating value '4.9' and '4.9 \u5206' render the digits in a rounded numeric style and brand blue, visually distinct from the following CJK unit. Time ranges use half-width hyphen '14:45-15:00'; half-width colon in clock times. District + distance separated by spaces: '\u6b66\u660c\u533a \u8ddd\u60a8 500m'.",
+    "punctuation": "Full-width CJK punctuation in sentences: \uff0c\u3001\u3002\uff1f and full-width quotes \u201c\u5341\u666f\u4e4b\u4e00\u201d. Full-width tilde not seen; marketing uses full-width comma between clauses. INCONSISTENCY observed: POI name '\u80e1\u5927\u996d\u998624h(\u7c0b\u8857\u603b\u5e97)' uses HALF-width parentheses in UI while marketing text uses full-width \uff08\uff09. App Store description uses \u4e36 (U+4E36 dot character) instead of \u3001 between travel modes ('\u9a7e\u8f66\u4e36\u6253\u8f66\u4e36\u516c\u4ea4\u4e36\u9a91\u884c') \u2014 a listing-text quirk worth flagging. Filter '\u533a/\u53bf' uses half-width slash.",
+    "unavailable_states": "Privacy placeholders in official screenshots: street addresses blurred out; prices shown as literal placeholder 'X \u5143' / '\u62fc\u5ea7 X \u5143'; promo banner shows '\u6700\u9ad8\u65e5\u8d5a XXX \u5143' (XXX placeholder). State tags as colored chips: '\u5df2\u652f\u4ed8' green chip, '\u5728\u7ebf' green-dot chip, muted chip '\u9690\u85cf\u4e58\u5ba2\u4e0d\u627f\u62c5\u9ad8\u901f\u8d39' grey. Grey placeholder text in the empty destination input: '\u4f60\u8981\u53bb\u54ea\u513f'. Regulatory disclaimer line rendered on every marketing screenshot (see hierarchy).",
+    "script_variants": "CN App Store listing declares languages: \u7b80\u4f53\u4e2d\u6587\u3001\u7e41\u4f53\u4e2d\u6587\u3001\u82f1\u8bed (Simplified + Traditional Chinese + English) \u2014 confirmed both by the listing page '\u8bed\u8a00' row and the iTunes Lookup API (two ZH codes + EN). v17.0.2 release notes claim '\u4e00\u4e2a\u9ad8\u5fb7\u7545\u6e38\u4e16\u754c 200+\u56fd\u5bb6\u300178\u79cd\u8bed\u8a00'. Interface text seen in screenshots is simplified zh-Hans only; no zh-Hant screen was available in official material.",
+    "audio_labels": "n/a for this class; closest equivalents: voice assistant wake word quoted as '\u4f60\u597d\u5c0f\u5fb7'; \u5bfc\u822aLive AI narration shows a place card '\u96f7\u5cf0\u5854 / 4.9 \u5206 \u6587\u7269\u53e4\u8ff9 / \u897f\u6e56\u201c\u5341\u666f\u4e4b\u4e00\u201d' plus a narration text bubble clamped with '\u2026', and a voice-input pill '\u6309\u4f4f\u8bf4\u8bdd' (hold to talk). Audio is represented by icon-only speaker buttons."
+   },
+   "notes": "Full store title: '\u9ad8\u5fb7\u5730\u56fe-\u9ad8\u5fb7\u6253\u8f66,\u5bfc\u822a\u516c\u4ea4\u5730\u94c1\u51fa\u884c'. Size 326.4 MB, category \u5bfc\u822a, min iOS 13.0, rating 4.86 (27.5M ratings). Store page URL with readable \u4fe1\u606f section (\u8bed\u8a00 row quoted verbatim) read 2026-10-06. Screenshots embedded in the CN listing were fetched from the mzstatic CDN at full 1242x2688 resolution and visually read."
+  },
+  {
+   "name_zh": "\u4e09\u6bdb\u6e38",
+   "name_latin": "Sanmaoyou",
+   "class": "tourism",
+   "developer": "App Store seller shows the individual name \u4e1c\u7ea2 \u674e; official site states the company: \u5e7f\u5dde\u4e09\u6bdb\u4fe1\u606f\u79d1\u6280\u6709\u9650\u516c\u53f8 (Guangzhou Sanmao Information Technology Co., Ltd.), '\u7248\u6743\u6240\u6709', \u7ca4ICP\u590716047144\u53f7. Store description claims Tencent Sogou & New Oriental investment.",
+   "platform": "Android / iOS (iOS App Store CN listing inspected; official site offers iOS\u7248/Android\u7248 download buttons)",
+   "version": "5.2.0",
+   "version_date": "2026-09-17",
+   "source_urls": [
+    "https://apps.apple.com/cn/app/id1658976259",
+    "https://itunes.apple.com/lookup?id=1658976259&country=cn&lang=zh_cn",
+    "https://www.sanmaoyou.com",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/5a/5c/e0/5a5ce097-a8c4-b49c-f596-4cf55e19f696/c94766ff-b578-4115-a399-0d744ae326ab__U666f_U535a1242_2688.jpg/1242x2688bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/41/a8/8b/41a88be9-c017-9a0a-cc60-4d38036472e6/AI_U5bfc_U6e38_U5e94_U75281242_268ios.jpg/1242x2688bb.jpg",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/e6/8c/f8/e68cf854-fb0b-28e2-25b4-261298303f1c/_U91d1_U724c_U8bf41242_2688ios.jpg/1242x2688bb.jpg"
+   ],
+   "accessed": "2026-10-06",
+   "inspection": "official-materials-only",
+   "observations": {
+    "font_family": "Heiti sans throughout the UI. Feature headlines ('\u666f\u535a\u81ea\u52a9\u5bfc\u89c8', 'AI\u5bfc\u6e38', '\u91d1\u724c\u8bf4') in a very heavy black heiti; body/narration text regular-weight heiti consistent with iOS system face. One decorative exception: the \u91d1\u724c\u8bf4 marketing banner headline '\u4f86,\u8b93\u91d1\u724c\u5bfc\u6e38\u4e3a\u60a8\u73b0\u573a\u89e3\u8bfb' is set in a brush/calligraphy script \u2014 and it MIXES traditional forms \u4f86/\u8b93 with simplified \u5bfc\u6e38/\u73b0\u573a. Exact font files unverifiable from pixels.",
+    "hierarchy": "(1) brand lockup (green logo + \u4e09\u6bdb\u6e38); (2) heavy feature headline; (3) grey-black subtitle; (4) in-screen title bar '\u6545\u5bab\u535a\u7269\u9662\u00b7\u4e09\u6bdb\u6e38\u5b98\u65b9\u8bb2\u89e3' as a floating white pill with \u7ea0\u9519 and \u5206\u4eab buttons; (5) audio entry title in teal; (6) grey meta (duration, counts); (7) search placeholder '\u8bf7\u8f93\u5165\u8bb2\u89e3\u70b9\u540d\u79f0' grey. Chip groups: selected chip filled/colored (\u5168\u90e8 340 selected with leading dot; \u56fd\u5185 filled green; \u5e7f\u5dde green with pin icon), unselected plain outline.",
+    "line_breaking": "Narration entry labels are whole narrative phrases, not place names, and are aggressively truncated: map pins show '\u4e00\u573a\u7279\u6b8a\u7684\u5e1d\u2026', '\u5e7f\u573a\u4e0a\u7684\u5730\u7816\u6700\u540e\u4e00...' (NOTE: this screenshot mixes the single-glyph ellipsis '\u2026' with three half-width dots '...'), '\u592a\u548c\u6bbf\u5e7f\u573a\uff08\u2026', '\u7d2b\u7981\u57ce\u6700\u5927\u7684\u2026', '\u660e\u671d\u6700\u5e78\u8fd0\u7684\u2026', '\u5bab\u4e2d\u6709\u654c\u60c5\u600e\u2026'. AI-chat answers wrap character-by-character across 6-7 lines with no spaces and clamp with '\u2026'. Suggestion chips at the bottom are horizontally clipped on both edges ('\u2026\u95e8\u90fd\u5305\u542b\u4ec0\u4e48\u5462' / '\u5348\u95e8\u662f\u505a\u4ec0\u4e48\u7684' cut).",
+    "mixed_scripts": "'AI\u5bfc\u6e38', 'VR\u5bfc\u89c8', '\u8fd9\u91cc\u662f\u6587\u535a\u8bb2\u89e3\u7248\u7684DeepSeek\uff01' inline Latin; digits flush with CJK: '3.4\u7c734\u5428\u591a\u91cd', '13\u5757\u7409\u7483', '\u4eba\u574750'-style counts, '\u8986\u76d6\u5168\u7403100+\u56fd\u5bb6\uff0c15000+\u666f\u533a/\u535a\u7269\u9986' (half-width + and /), durations as '8:42' and '01:31' with half-width colon; counts with a space before CJK: '\u5168\u90e8 340', '\u5fc5\u542c 197'.",
+    "punctuation": "AI chat quotes user questions with full-width curly quotes: \u201c\u7d2b\u7981\u57ce\u5bab\u6bbf\u6a90\u89d2\u4e0a\u7684\u5c0f\u52a8\u7269\u6709\u4ec0\u4e48\u4f5c\u7528\uff1f\u201d, full-width \uff1f and \uff01 ('\u4e0a\u7ebf\uff01', '\u542c\u4e0d\u8fc7\u763e\uff1f'). Full-width vertical bar \uff5c as list separator: '\u7cbe\u5fc3\u6311\u9009\uff5c\u5c42\u5c42\u9009\u62d4\uff5c\u7cfb\u7edf\u57f9\u8bad'; but the resume bar uses half-width '|': '\u7ee7\u7eed\u64ad\u653e | \u592a\u548c\u95e8'. Title separator is a middle dot with no spaces: '\u6545\u5bab\u535a\u7269\u9662\u00b7\u4e09\u6bdb\u6e38\u5b98\u65b9\u8bb2\u89e3' (in one screenshot spaced '\u6545\u5bab\u535a\u7269\u9662 \u00b7 \u4e09\u6bdb\u6e38\u5b98\u65b9\u8bb2\u89e3' \u2014 inconsistent). Half-width parentheses in '\u592a\u548c\u6bbf\u5e7f\u573a\uff08\u2026' opening full-width paren \u2014 truncated before the closing one. Marketing banner: '\u4f86,\u8b93' uses a HALF-width comma inside otherwise CJK text.",
+    "unavailable_states": "Dedicated error affordance: '\u7ea0\u9519' (report error) button with a red numeric badge next to the title bar on every guide screen. '\u8fde\u7eed\u64ad\u653e' has an off-state grey toggle. Search shows empty-field placeholder. Blurred/covered areas in screenshots (privacy). In-store unavailable-purchase states not observed; IAP exists as '\u5b66\u5e01' bundles (\u5145\u503c98\u4e2a\u5b66\u5e01 \u00a598.00 etc.).",
+    "script_variants": "Interface entirely simplified zh-Hans. The CN App Store listing page shows NO \u8bed\u8a00 (languages) row and the iTunes Lookup API returns an empty language list \u2014 no evidence found of a Traditional Chinese or English interface setting (negative evidence recorded). The only traditional glyphs seen are decorative (\u4f86, \u8b93) in one marketing banner.",
+    "audio_labels": "Audio entries are labeled with headphone icons on map pins; entry card = thumbnail + title '\u592a\u548c\u95e8' + duration '8:42' + two outline pill buttons: '\u8bed\u97f3\u8bb2\u89e3' (teal, headphones icon) and 'VR\u5bfc\u89c8' (orange, VR icon). List rows: red badge '\u5fc5\u542c' (must-listen) on thumbnail, teal title, clock icon + '01:31', a green equalizer-bars icon marking the playing/loaded state, chevron. Bottom sheet tabs: '\u5168\u90e8 340' / '\u5fc5\u542c 197' with counts; '\u8fde\u7eed\u64ad\u653e' toggle; resume strip '\u25b6 \u7ee7\u7eed\u64ad\u653e | \u592a\u548c\u95e8'. AI mode adds play/copy/regenerate icon row and a '\u4e09\u6bdb\u6e38\u6b63\u5728\u542c \u00b7\u00b7\u00b7' status chip."
+   },
+   "notes": "Full store title: '\u4e09\u6bdb\u6e38-\u5168\u7403\u535a\u7269\u9986\u5bfc\u89c8\u666f\u70b9\u8bb2\u89e3AI\u5bfc\u6e38\u9884\u7ea6\u91d1\u724c\u8bf4'. Size 317.1 MB, category \u5de5\u5177 (Utilities), min iOS 13.0, rating 4.94 (4050 ratings), first released 2022-12-29. Older sibling listings exist (ids 1173736557 v4.2.0 last updated 2022; 1317208624 \u4e09\u6bdb\u6e38FM last updated 2022) \u2014 the id-1658976259 listing is the maintained one. Official site nav: \u667a\u6167\u6587\u65c5 / \u81ea\u52a9\u5bfc\u89c8 / \u91d1\u724c\u8bf4 / AI\u535a\u7269\u9986 / \u9ad8\u6e05VR / \u8bb2\u89e3\u5458\u6d3e\u5355\u7cfb\u7edf / FM/\u89c6\u9891 / \u8bfe\u7a0b; footer '\u5e7f\u5dde\u4e09\u6bdb\u4fe1\u606f\u79d1\u6280\u6709\u9650\u516c\u53f8 \u7248\u6743\u6240\u6709'. This is a verified tourism/cultural audio-guide class app."
+  },
+  {
+   "name_zh": "\u5fae\u4fe1",
+   "name_latin": "WeChat",
+   "class": "download",
+   "developer": "Tencent \u2014 store page: \u817e\u8baf\u79d1\u6280\uff08\u6df1\u5733\uff09\u6709\u9650\u516c\u53f8, \u7edf\u4e00\u793e\u4f1a\u4fe1\u7528\u4ee3\u7801 9144030071526726XG",
+   "platform": "Android / iOS / web (iOS App Store CN listing inspected; weixin.qq.com read)",
+   "version": "8.0.79",
+   "version_date": "2026-09-29",
+   "source_urls": [
+    "https://apps.apple.com/cn/app/id414478124",
+    "https://itunes.apple.com/lookup?id=414478124&country=cn&lang=zh_cn",
+    "https://weixin.qq.com",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/44/b0/0a/44b00a76-1b7c-d46d-e419-91599dc42872/b4a78ce5-b85e-4475-9761-79c3d0564cc4_1_U6d88_U606f_U5217_U8868_ios_1242_U00d72208.png/1242x2208bb.png",
+    "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/15/76/a7/1576a71e-6ec8-92af-6ec6-a715e78a0ca3/021c1617-8529-4b9e-8951-cbb57d3ef5ab_2_U7fa4_U804a_ios_1242_U00d72208.png/1242x2208bb.png"
+   ],
+   "accessed": "2026-10-06",
+   "inspection": "official-materials-only",
+   "observations": {
+    "font_family": "Pure system-font UI: all visible Chinese is a standard heiti consistent with iOS PingFang SC; nav title '\u5fae\u4fe1' medium weight, chat names semibold, previews regular grey. No brand font, no rounded/custom digits anywhere in the two screens \u2014 digits are the plain system numeric style. (Family name not stated by any official page; attribution to PingFang SC is iOS platform convention, not pixel-provable.)",
+    "hierarchy": "Nav bar centered title; search bar with grey placeholder '\u641c\u7d22'; chat rows = avatar + name (dark) + one-line preview (grey) + timestamp (small grey, right); unread = red dot on avatar; muted chats show a bell-with-slash icon in place of/next to the timestamp; bottom tab bar \u5fae\u4fe1/\u901a\u8baf\u5f55/\u53d1\u73b0/\u6211 with green active state.",
+    "line_breaking": "Group-chat bubbles wrap character-by-character with no spaces or hyphenation ('\u5468\u516d\u9732\u8425\u6d3b\u52a8\u6709\u6ca1\u6709\u8981\u4e00\u8d77\u7ec4\u56e2\u7684\u5440\uff1f\u4f4d\u7f6e\u5c31\u5728\u540c\u6c99\u5c9b\uff0c\u9732\u8425\u8bbe\u5907\u9f50\u5168\uff0c\u4eba\u574750' breaks mid-phrase at arbitrary glyphs); message previews are strictly single-line (clamp, no visible ellipsis needed in these screens). No word-wrap exceptions observed around Latin runs.",
+    "mixed_scripts": "Group title '\u66b4\u8d70\u5c0f\u5206\u961f(54)' \u2014 member count in half-width parentheses; '\u7fe1\u7fe0\u82b1\u56ed11\u680b\u4e1a\u4e3b\u7fa4' digits inside the name; preview '1703\u2013\u6731\u751f: \u8f66\u4e3b\u6765\u632a\u4e00\u4e0b\u8f66' \u2014 room number + en-dash before a nickname, half-width colon after nickname; '[\u56fe\u7247]' and '[\u673a\u667a]' square-bracket placeholders; '+1' as a bare Latin message; timestamps '16:24' and relative '\u6628\u5929 10:32' (CJK relative day + space + digits).",
+    "punctuation": "Messages use full-width \uff0c\uff1f\uff01 and full-width tilde '\uff5e' ('\u6211\u60f3\u53bb\uff0c\u52a0\u6211\u4e00\u4e2a\uff5e'); media/emoji placeholders use half-width brackets [\u56fe\u7247] [\u673a\u667a]; nickname separators in previews use half-width ':'; the store description uses full-width quotes \u201c\u96f7\u8fbe\u52a0\u670b\u53cb\u201d and bullet '\u2022'. Mixed widths within one line are the norm and no spacing corrections are applied between scripts.",
+    "unavailable_states": "Muted conversation = icon-only state (bell with slash), no text label; non-text messages previewed as '[\u56fe\u7247]' placeholder; store description advertises '\u5173\u6000\u6a21\u5f0f: \u6587\u5b57\u4e0e\u6309\u94ae\u66f4\u5927\u66f4\u6e05\u6670' (care mode enlarges text/buttons \u2014 official accessibility label). Update screen equivalent: store '\u65b0\u529f\u80fd' notes for 8.0.79 read '\u672c\u6b21\u66f4\u65b0\uff1a- \u89e3\u51b3\u4e86\u4e00\u4e9b\u5df2\u77e5\u95ee\u9898\u3002' (generic boilerplate).",
+    "script_variants": "Strong zh-Hant support: CN listing languages row reads '\u7b80\u4f53\u4e2d\u6587\u548c\u53e6\u591625\u79cd' including explicitly \u7b80\u4f53\u4e2d\u6587 AND \u7e41\u4f53\u4e2d\u6587 (26 languages total per lookup API). weixin.qq.com footer separates products: 'WeChat (\u7e41\u4f53)' and 'WeChat (EN)' links alongside the mainland \u5fae\u4fe1 \u2014 the traditional/English variants are distributed as distinct brandings. Regional vocabulary differences (e.g., Taiwan/HK string variants) were NOT verifiable from public pages.",
+    "audio_labels": "Voice message mode is icon-only (waveform-in-circle button, left of the input field) with no text label; the CN listing includes official screenshots titled \u8bed\u97f3\u8f93\u5165 and \u8bed\u97f3\u8f6c\u6587\u5b57 (voice-to-text). Mini-program/download surfaces were not present in the two available official screenshots; store page shows IAP '\u5fae\u4fe1\u8c46' (7\u4e2a \u00a51.00 \u2026) including one English-named SKU '21 WeBeans \u00a53.00' \u2014 mixed-script IAP naming."
+   },
+   "notes": "Full store title: '\u5fae\u4fe1'. Size 967.2 MB, category \u793e\u4ea4, min iOS 15.0, rating 4.15 (8.1M ratings), released 2011-01-21. Used here as the download/access-UI class representative (WeChat is the host of the mini-program store and app-update flow; its App Store \u65b0\u529f\u80fd section is the official update-screen text). Mini-program store screens themselves were NOT available in official material \u2014 recorded as a gap."
+  },
+  {
+   "name_zh": "\u7f51\u6613\u4e91\u97f3\u4e50",
+   "name_latin": "NetEase Cloud Music",
+   "class": "download",
+   "developer": "NetEase (\u676d\u5dde\u7f51\u6613\u4e91\u97f3\u4e50\u79d1\u6280\u6709\u9650\u516c\u53f8 per NetEase corporate listings; page footer not parsed for exact entity)",
+   "platform": "web (music.163.com/download) / iOS / Android / Mac / PC / WP",
+   "version": null,
+   "version_date": null,
+   "source_urls": [
+    "https://music.163.com/download"
+   ],
+   "accessed": "2026-10-06",
+   "inspection": "docs-only",
+   "observations": {
+    "font_family": "Not determinable from HTML text; the page is a standard web page, no font-family claims read.",
+    "hierarchy": "Download portal headline: '\u4e0b\u8f7d\u7f51\u6613\u4e91\u97f3\u4e50iPhone\u3001iPad\u3001Mac\u3001Android\u3001WP\u3001PC\u7248\u5ba2\u6237\u7aef' listing platforms; login module embedded in the same page.",
+    "line_breaking": "n/a (template text only).",
+    "mixed_scripts": "Platform names inline Latin in CJK sentence ('iPhone\u3001iPad\u3001Mac'); phone-code pattern '+86'; password rule '\u5bc6\u7801\u957f\u5ea6\u4e3a8-20\u4f4d'; '8-20\u4f4d' digits half-width.",
+    "punctuation": "FULL-WIDTH SPACE (U+3000) used to justify two-character button labels \u2014 a classic CJK UI convention: '\u767b\u3000\u5f55', '\u6ce8\u3000\u518c', '\u786e\u3000\u5b9a', '\u53d6\u3000\u6d88' (4-char labels unspaced). Full-width angle book-title marks \u300a\u670d\u52a1\u6761\u6b3e\u300b \u300a\u9690\u79c1\u653f\u7b56\u300b \u300a\u513f\u7ae5\u9690\u79c1\u653f\u7b56\u300b.",
+    "unavailable_states": "Explicit, labeled error/expiry states in official text: '\u4e8c\u7ef4\u7801\u5df2\u5931\u6548 \u70b9\u51fb\u5237\u65b0' (QR code expired \u2014 click to refresh), '\u626b\u63cf\u6210\u529f' / '\u8bf7\u5728\u624b\u673a\u4e0a\u786e\u8ba4\u767b\u5f55' (scan states), '\u8d26\u53f7\u6216\u5bc6\u7801\u9519\u8bef' (account or password error) with buttons \u786e\u5b9a/\u53d6\u6d88, '\u5bc6\u7801\u4e0d\u80fd\u5305\u542b\u7a7a\u683c', '\u7531\u4e8e\u4f60\u5728\u975e\u53d7\u4fe1\u4efb\u7684\u8bbe\u5907\u4e0a\u767b\u5f55\uff0c\u9700\u8981\u8fdb\u884c\u77ed\u4fe1\u9a8c\u8bc1' (untrusted-device state), deprecation notice '\u4e91\u97f3\u4e50\u5c06\u4e0d\u518d\u652f\u6301 \u817e\u8baf\u5fae\u535a \u767b\u5f55\u65b9\u5f0f'.",
+    "script_variants": "zh-Hans only; no Traditional Chinese option seen on the page.",
+    "audio_labels": "n/a on this page."
+   },
+   "notes": "Included as SUPPLEMENTARY evidence for the download/access class: this is the official (login-free readable) download + login UI text of a major Chinese app; the download buttons themselves are QR-code/graphical and their visual typography was not inspected. Version field null because the page shows no version number in HTML text. No login was performed; only the public page was read."
+  }
+ ],
+ "negative_evidence": [
+  {
+   "item": "Wrong-URL probe returned 404",
+   "detail": "https://apps.apple.com/cn/app/id461703850 (initially guessed Amap id) returned HTTP 404 Not Found on 2026-10-06; the correct CN listing is https://apps.apple.com/cn/app/id461703208 (verified via iTunes Lookup API and the listing page).",
+   "accessed": "2026-10-06"
+  },
+  {
+   "item": "Huawei AppGallery web listing unreadable without JS",
+   "detail": "https://appgallery.huawei.com/app/C10414141 returned HTTP 200 but only a ~3 KB JavaScript application shell (CSP meta, no listing content) to a plain HTTP GET on 2026-10-06 \u2014 no Android-side listing data (version, zh-Hant support) could be verified from AppGallery web.",
+   "accessed": "2026-10-06"
+  },
+  {
+   "item": "No Traditional-Chinese evidence for \u4e09\u6bdb\u6e38",
+   "detail": "The CN App Store listing page (id1658976259) displays no \u8bed\u8a00 row and the iTunes Lookup API returns languageCodesISO2A = [] for it; official site sanmaoyou.com offers no visible language switch. No evidence of zh-Hant/English interface for this app was found (contrast: Amap and WeChat both declare \u7e41\u4f53\u4e2d\u6587).",
+   "accessed": "2026-10-06"
+  },
+  {
+   "item": "Interactive inspection impossible",
+   "detail": "No mobile app could be installed or run; ALL app-UI typography observations derive from official App Store (CN) screenshots (viewed at full 1242x2688 / 1242x2208 resolution), official web pages, and official store text. No WeChat mini-program store screen, no app update screen, and no Android-side (MiSans/HarmonyOS Sans) rendering was available in official material.",
+   "accessed": "2026-10-06"
+  },
+  {
+   "item": "Web-search tooling degraded for this session",
+   "detail": "Two WebSearch calls (WeChat/Amap App Store queries) failed with 'user concurrency limit exceeded' and the third returned low-quality results; app identification was completed instead via Apple's official public iTunes Search/Lookup API (itunes.apple.com/search, itunes.apple.com/lookup), which succeeded for all three apps.",
+   "accessed": "2026-10-06"
+  },
+  {
+   "item": "Font family names not officially documented on any read page",
+   "detail": "None of the read official pages (App Store listings, weixin.qq.com, sanmaoyou.com, music.163.com/download) names the font families used in-app (e.g., PingFang SC, MiSans, HarmonyOS Sans, custom brand faces). All font_family entries are therefore visual inferences from screenshots, explicitly not pixel-provable to a specific font file.",
+   "accessed": "2026-10-06"
+  }
+ ]
+}

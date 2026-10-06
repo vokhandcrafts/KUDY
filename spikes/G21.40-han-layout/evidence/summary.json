@@ -1,0 +1,37 @@
+{
+  "task": "G21.40 (issue #621) - Chinese glyphs and layouts: machine evidence summary",
+  "generated": "2026-10-06",
+  "host": {
+    "os": "Linux (CachyOS) x64",
+    "fonttools": "4.66.1",
+    "noto_ttc_path": "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc"
+  },
+  "web_evidence": {
+    "browser": "ZCode in-app browser (Chromium), viewport 320x800",
+    "probe_url": "http://127.0.0.1:8789/probe.html (local static server, zero external requests)",
+    "results_100": "probe-results-web-100.json",
+    "results_200": "probe-results-web-200.json",
+    "screenshots": ["screenshots/web-320-s1.png", "screenshots/web-320-s2.png", "screenshots/web-320-fx.png", "screenshots/web-320-scale200.png"]
+  },
+  "android_evidence": {
+    "device": "sdk_gphone64_x86_64 (AVD kudy-test, swiftshader_indirect)",
+    "android": "16 (SDK 36)",
+    "chrome": "133.0.6943.137",
+    "device_locale": "en-US",
+    "system_cjk_fonts": ["NotoSansCJK-Regular.ttc", "NotoSerifCJK-Regular.ttc"],
+    "network": "airplane mode ON during captures (adb reverse tcp:8789 used for the local probe server)",
+    "probe_results": "visible in screenshots/android-airplane-s2.png machine JSON block: onLine=false, all app faces loaded, KudyMissingFace=false (expected), clipped_essential=[]",
+    "screenshots": ["screenshots/android-airplane-s1.png", "screenshots/android-airplane-s2.png", "screenshots/android-airplane-fontscale200.png"]
+  },
+  "font_facts": {
+    "app_fonts": "app-fonts-cmap.json - all four approved KUDY faces cover 0 of 35 Han/CJK-punctuation codepoints of the probe set (only digits, Polish Latin-Ext, yen sign and middle dot covered)",
+    "system_noto": "noto-cjk-members.json - all 5 regional members (JP/KR/SC/TC/HK) cover the full Han set; Polish Latin-Ext is NOT fully covered by Noto CJK (no \u0141 \u017b \u0179 \u0104 \u0118 \u015b), so the Latin primary font stays required in the fallback chain",
+    "license": "noto-license.json - Noto Sans CJK is SIL Open Font License 1.1 (from the font name table)",
+    "subset_sizes": "subset-sizes.json - 108-unique-char minimal subset is ~38 KB/weight; the probe's 298-char build is ~104 KB/weight"
+  },
+  "ios": {
+    "status": "not verified",
+    "remaining_check": "iPhone/AVD (iOS) with PingFang SC rendering and RN Text fallback chain must be checked by a human or an Apple-hosted runner before G21.42 implementation"
+  },
+  "rn_native_note": "Android captures exercise the real Android system font stack through Chrome/WebView (Blink). The production surface is React Native Text; its per-weight font-family workaround (components/fonts.ts) and allowFontScaling behavior with Han fallback must be re-verified inside the app before G21.42 - named as the remaining device check."
+}
