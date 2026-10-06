@@ -45,32 +45,32 @@
           "fetched_at": "2026-10-06T00:22:23Z"
         },
         "languages_zh": {
-          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh/languages.json",
-          "http": "404",
-          "bytes": "14",
-          "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
-          "fetched_at": "2026-10-06T00:22:24Z"
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh/languages.json",
+          "http": "200",
+          "bytes": "20160",
+          "sha256": "c38a6432f03549aa933674bba9880e3bae890135922231775818ae5cbe7b3ee3",
+          "fetched_at": "2026-10-06T00:22:56Z"
         },
         "languages_zh-Hans": {
-          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh-Hans/languages.json",
-          "http": "404",
-          "bytes": "14",
-          "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
-          "fetched_at": "2026-10-06T00:22:24Z"
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh-Hans/languages.json",
+          "http": "200",
+          "bytes": "20191",
+          "sha256": "b983561ee86d239e4bd13561414daa1cb5424406cc631f368e4b5cf8e1076d47",
+          "fetched_at": "2026-10-06T00:22:56Z"
         },
         "languages_zh-Hant": {
-          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh-Hant/languages.json",
-          "http": "404",
-          "bytes": "14",
-          "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
-          "fetched_at": "2026-10-06T00:22:24Z"
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh-Hant/languages.json",
+          "http": "200",
+          "bytes": "22032",
+          "sha256": "ba2d41877dfe8085246895fb79dee07d7f27dda6f8d54a2cfbfc98b3a26251f1",
+          "fetched_at": "2026-10-06T00:22:56Z"
         },
         "languages_yue": {
-          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/yue/languages.json",
-          "http": "404",
-          "bytes": "14",
-          "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
-          "fetched_at": "2026-10-06T00:22:25Z"
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/yue/languages.json",
+          "http": "200",
+          "bytes": "22059",
+          "sha256": "cbb3993e679ff084c48b2aa804e1e3006799aa152193207b3636d0bd22194737",
+          "fetched_at": "2026-10-06T00:22:57Z"
         },
         "territories_zh-Hans": {
           "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh-Hans/territories.json",
@@ -137,7 +137,8 @@
           "SG": "\u65B0\u52A0\u5761",
           "PL": "\u6CE2\u5170"
         }
-      }
+      },
+      "files_pin_note": "languages.json — пакет cldr-localenames-full (main/zh, main/zh-Hans, main/zh-Hant, main/yue); спроба праз cldr-localenames-modern дала 404-стубы і была замененая 200-спампоўкамі таго ж тэгу (гл. http_log)"
     }
   },
   "sources": {
@@ -158,9 +159,10 @@
         "charset": "UTF-8",
         "line_endings": "CRLF"
       },
-      "data_lines_counted": 125192,
+      "data_lines_counted": 125193,
       "host": "www.mdbg.net",
-      "battery_file_local": "cedict.txt (нормалізаваны LF, у scratch, не ў рэпе)"
+      "battery_file_local": "cedict.txt (нормалізаваны LF, у scratch, не ў рэпе)",
+      "data_lines_note": "лік непустых радкоў без # (grep -vc ^# першапачаткова даў 125192 — артефакт адліку, пералічана па радках у python)"
     },
     "moe_dict": {
       "role": "normative dictionary (zh-Hant, Taiwan)",
@@ -274,7 +276,7 @@
         "fetched_at": "2026-10-06T00:44:53Z"
       },
       "extracted": "Unihan_Readings.txt (291291 радкоў)",
-      "nuance": "спрошчаныя кодэпойнты маюць kXHC1983; традыцыйны \u6062 U+6BC1 = huǐ (kHanyuPinyin \u6F22\u8A9E\u5927\u8A5E\u5178), спрошчаны U+6062 = huī — чытанне трэба браць словам"
+      "nuance": "знакавыя чытанкі Unihan неадназначныя без кантэксту слова: \u8F7D U+8F7D kXHC1983 пералічвае ДЗВЕ чытанкі (1437.030:zǎi, 1437.050:zài), тады як слоўная форма \u4E0B\u8F09 мае пэўнае чытанне xiàzài (Вікіслоўнік: «standard in Mainland and Taiwan», CEDICT пазначае варыянт [xia4zai4]); спрошчаны \u6062 U+6062 — kMandarin huī, kXHC1983 huī (0499.050). Чытанне трэба браць словам, не кодэпойнтам"
     },
     "microsoft": {
       "role": "UI terminology availability (styles + TBX)",
@@ -597,7 +599,7 @@
         "reading": "m=huīfù c=fui1 fuk6 (аўдыё LL-Q9186 (yue)-Justinrleung-\u6062\u5FA9.wav)"
       },
       "aosp": [],
-      "note": "Unihan: спрошчаны \u6062 U+6062 kMandarin/kXHC1983 = huī; традыцыйны кодэпойнт U+6BC1 дае huǐ (з \u6F22\u8A9E\u5927\u8A5E\u5178) — знакавы ўзровень чытанняў трэба браць словам, не кодэпойнтам"
+      "note": "словаўзроўневае чытанне huī fù пацверджанае CEDICT/MOE/Wiktionary; на знакавым узроўні \u8F7D U+8F7D kXHC1983 дае дзве чытанкі zǎi/zài — Unihan-чытанкі спажываць толькі словам (гл. sources.unihan.nuance)"
     },
     "unavailable": {
       "ui_sense": "функцыя/сэрвіс недаступны",
@@ -830,7 +832,7 @@
     ]
   },
   "conversion_pitfall": {
-    "evidence": "CEDICT \u7121\u6CD5\u7121\u5929 \u65E0\u6CD5\u65E0\u5929 [he2 shang5 da3 san3 , wu2 fa3 wu2 tian1] /lit. like a monk holding an umbrella — no hair, no sky (idiom) (punning on \u9AEE|\u53D1[fa4] vs \u6CD5[fa3])/",
+    "evidence": "CEDICT (пінуты экспарт) запіс «\u548C\u5C1A\u6253\u5098\uFF0C\u7121\u6CD5\u7121\u5929 \u548C\u5C1A\u6253\u4F1E\uFF0C\u65E0\u6CD5\u65E0\u5929 [he2 shang5 da3 san3 , wu2 fa3 wu2 tian1] /lit. like a monk holding an umbrella — no hair, no sky (idiom) (punning on \u9AEE|\u53D1[fa4] vs \u6CD5[fa3])/fig. defying the law and the principles of heaven/lawless/»; суседні самастойны запіс «\u7121\u6CD5\u7121\u5929 \u65E0\u6CD5\u65E0\u5929 [wu2 fa3 wu2 tian1]» такога глосу не мае",
     "meaning": "спрошчанае \u53D1 адпавядае двум традыцыйным \u9AEE (валасы) і \u767C (адпраўляць) — аўтаканверсія simp→trad патрабуе словамагульнага рашэння, не знакавага"
   },
   "unresolved": [
