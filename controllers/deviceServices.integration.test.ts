@@ -11,11 +11,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
+import nodeFs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 import { createServices } from './createServices.ts';
 import { createDeviceServicePorts } from './deviceServices.ts';
-import { nodeSqliteDriver } from '../services/db/test-fixture.ts';
-import { getLiveSession } from '../services/db/db.ts';
+import { UI_LOCALE_KEY } from './sessionPorts.ts';
+import { nodeSqliteDriver, nodeSqliteFileDriver } from '../services/db/test-fixture.ts';
+import { getLiveSession, setSetting } from '../services/db/db.ts';
 import { makeFakeFs, makeFakeFsModule } from '../services/contentRepo/expo/fs-test-fixture.ts';
 import { FakeLocationOsPort } from '../services/location/fake-port.ts';
 import { FakeAudioPlayerPort } from '../services/audio/fake-port.ts';
@@ -259,4 +263,75 @@ test('G20.20: without a catalog origin the gate answers null and the root passes
   assert.equal(catalogOriginFrom({ EXPO_PUBLIC_CATALOG_ORIGIN: undefined }), null);
   assert.equal(catalogOriginFrom({ EXPO_PUBLIC_CATALOG_ORIGIN: '' }), null);
   assert.equal(catalogOriginFrom({ EXPO_PUBLIC_CATALOG_ORIGIN: 'https://catalog.example.invalid' }), 'https://catalog.example.invalid');
+});
+
+// G21.15 (issue #549) — the ui-locale choice rides the durable settings row
+// through the production composition (the #491 storage owner): the approved
+// default stands when nothing is stored, a switch survives a close/reopen of
+// the same store file (the force-stop/relaunch cycle), a corrupt stored code
+// reads as no choice, and the next switch writes a valid row again. The file
+// db is the real SQLite engine over the production db layer — the same bytes
+// pattern the device's expo-sqlite driver keeps.
+test('G21.15: the ui-locale choice survives force-stop/relaunch through the production composition', () => {
+  const dir = nodeFs.mkdtempSync(path.join(os.tmpdir(), 'g2115-'));
+  try {
+    const file = path.join(dir, 'kudy.db');
+    const firstDb = nodeSqliteFileDriver(file);
+    const firstServices = createServices(createDeviceServicePorts(facilities(firstDb.driver)).ports);
+    assert.equal(firstServices.uiLocale.current(), 'be');
+    firstServices.uiLocale.set('de');
+    firstDb.close();
+
+    const secondDb = nodeSqliteFileDriver(file);
+    const secondServices = createServices(createDeviceServicePorts(facilities(secondDb.driver)).ports);
+    assert.equal(secondServices.uiLocale.current(), 'de');
+
+    // The corrupt row reads as no choice: the default stands, the next
+    // switch writes a valid value back. The corruption goes through the
+    // exported seam key — renaming the key breaks this test at compile time.
+    setSetting(secondDb.driver, UI_LOCALE_KEY, 'xx');
+    secondDb.close();
+    const thirdDb = nodeSqliteFileDriver(file);
+    const thirdServices = createServices(createDeviceServicePorts(facilities(thirdDb.driver)).ports);
+    assert.equal(thirdServices.uiLocale.current(), 'be');
+    thirdServices.uiLocale.set('en');
+    thirdDb.close();
+
+    const fourthDb = nodeSqliteFileDriver(file);
+    const fourthServices = createServices(createDeviceServicePorts(facilities(fourthDb.driver)).ports);
+    assert.equal(fourthServices.uiLocale.current(), 'en');
+    fourthDb.close();
+  } finally {
+    nodeFs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// G21.15 (issue #549, criterion 4): the UI setting never changes the walk's
+// pinned text/audio identity — the live session row keeps its own locale
+// while the settings row carries the chrome choice (uk-release-scope §4; the
+// store holds no session reference by construction, this pins the durable
+// half). The entitlement port stays the closed unavailable outcome.
+test('G21.15: the ui-locale switch leaves the pinned session locale and entitlement untouched', async () => {
+  const sharedDriver = nodeSqliteDriver();
+  const first = createDeviceServicePorts(facilities(sharedDriver));
+  const services = createServices(first.ports);
+  const sessionStore = first.ports.run?.session.sessionStore;
+  if (!sessionStore) throw new Error('the root constructed no run session store');
+  const started = sessionStore.start({
+    sessionId: 'walk-549',
+    routeId: 'route-549',
+    version: '1',
+    locale: 'be',
+    startedAt: 1,
+  });
+  assert.deepEqual(started, { ok: true });
+
+  services.uiLocale.set('en');
+  const live = getLiveSession(sharedDriver);
+  assert.equal(live?.locale, 'be');
+  assert.equal(first.ports.uiLocalePersistence?.read(), 'en');
+  const commerce = first.ports.commerce;
+  if (!commerce) throw new Error('the root constructed no commerce member');
+  assert.equal(commerce.stateOf('route_549_extended'), 'not-owned');
+  assert.deepEqual(await commerce.purchase('route_549_extended'), { kind: 'unavailable' });
 });

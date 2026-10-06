@@ -326,7 +326,9 @@ export function createSessionHistoryPort(driver: SqlDriver): SessionHistoryPort 
 // G14.04.d — the durable ui-locale seam over the zone-B settings row: the
 // stored value is validated against the canonical locale list, a corrupt row
 // reads as no choice (the session default 'be' stands), never a throw.
-const UI_LOCALE_KEY = 'ui_locale';
+// G21.15 (issue #549, review round 1): the key is exported so the corruption
+// test pins the real seam key — renaming it breaks the test at compile time.
+export const UI_LOCALE_KEY = 'ui_locale';
 
 export function createUiLocalePersistence(driver: SqlDriver): UiLocalePersistence {
   return {

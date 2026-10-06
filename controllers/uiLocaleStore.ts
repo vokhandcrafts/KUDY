@@ -64,7 +64,16 @@ export function createUiLocaleStore(persistence?: UiLocalePersistence): UiLocale
       current = next;
       // The write happens before the listeners run: a listener that reads
       // back through current() sees the value that fired the event.
-      persistence?.write(next);
+      // G21.15 (issue #549): the durable write is best-effort — a failed
+      // write (a closed db, a full disk) leaves the session choice standing
+      // and the listeners firing; the row keeps its last successful value
+      // and the next switch catches it up. Symmetric with the seam's read
+      // (sessionPorts.ts): a corrupt row reads as no choice, never a throw.
+      try {
+        persistence?.write(next);
+      } catch {
+        // the in-memory switch stands; the durable row is not the session's truth
+      }
       for (const listener of listeners) listener();
     },
     subscribe: (listener: () => void) => {

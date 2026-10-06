@@ -475,7 +475,10 @@ function UiLocaleRow({
   return (
     <View testID="my-ui-locale">
       <ScaledText style={styles.section}>{strings.languageLabel}</ScaledText>
-      <View style={styles.localeRow}>
+      {/* G21.15 (issue #549): the row carries its own testID — the rendered
+          suite pins the wrap layout that keeps all eight chips reachable at
+          phone width and the scaled font. */}
+      <View style={styles.localeRow} testID="my-ui-locale-row">
         {codes.map((code) => (
           <PressableSurface
             key={code}
