@@ -305,11 +305,22 @@
     }
   ],
   "registry": {
-    "status": "proposal-pending",
+    "status": "applied",
     "proposal": "docs/reports/localization-sources/registry-proposal.md",
     "external_path": "toolsLib/memory/registry/tools-registry.md",
-    "external_modified": false,
-    "reason": "Sibling project is outside writable roots; G21.38 tracks permitted application.",
+    "external_modified": true,
+    "applied_date": "2026-10-06",
+    "external_commit": "a6df011823064f7ba340e11c746a6e42820526c3",
+    "external_commit_scope": "Tool-Lib local commit (not pushed by this task): five rows applied (android, microsoft, cldr, wiktionary as a new row, iate), four detail files carry dated G21.33/G21.37 outcome blocks, the claude/ copy is synchronized",
+    "resolutions": {
+      "android": "applied",
+      "microsoft": "applied",
+      "cldr": "applied",
+      "wiktionary": "applied-new-row",
+      "iate": "applied"
+    },
+    "reason": "Applied in the writable sibling checkout (Tool-Lib, a git repository). Registry statuses record the G21.33 use/defer/reject boundaries and the G21.37 no-import decision; no importer/tool is marked installed and no corpus is adopted.",
+    "rows_readback": "2026-10-06: all five rows re-read from the external registry file after the write; every row status remains deferred — consultation/reference boundaries accepted, copying deferred or owner-gated",
     "issue": 617
   },
   "checks": {
