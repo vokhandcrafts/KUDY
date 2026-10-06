@@ -17,6 +17,11 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-05 — stale-restatement: каментар інвентарызацыйнага тэсту (issue #644)
+Што зрабіць: змержыць PR #645 — дробны фікс каментара `registryProjected`
+(дапоўнены пералік fr і cs) + must-flag запіс `key: stale-restatement`.
+PR: https://github.com/vokhandcrafts/KUDY/pull/645 — issue #644
+
 ### 2026-10-05 — G21.19: змержыць глоссарый і працэс змены мов (задача #543)
 Што зрабіць: праглядзі і змержы PR #628 у main, каб глоссарый тэрмінаў, працэс змены радкоў ва ўсіх выпушчаных мовах і крытэрыйны рэндэр лічэбнікаў сталі даступныя выканаўцам. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам; мерж закрывае #543 і разблакіруе каталогі G21.10–G21.14.
 PR: https://github.com/vokhandcrafts/KUDY/pull/628 (issue: https://github.com/vokhandcrafts/KUDY/issues/543; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
