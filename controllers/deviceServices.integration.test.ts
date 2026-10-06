@@ -250,12 +250,13 @@ test('G20.20: the free synthetic package walks the whole production composition'
   assert.deepEqual(await commerce.purchase('route_491_extended'), { kind: 'unavailable' });
 });
 
-test('G20.20: without a catalog origin the root passes the empty port set', async () => {
-  const { createDeviceServicePorts: fresh } = await import('./deviceServices.ts');
-  const facilitiesWithoutOrigin = { ...facilities(), origin: '' };
-  // The app root guards the origin; the composition itself requires it —
-  // the honest-unavailable decision lives in app/_layout.tsx, asserted here
-  // through the layout contract: no origin, no composition call.
-  assert.equal(facilitiesWithoutOrigin.origin, '');
-  assert.equal(typeof fresh, 'function');
+test('G20.20: without a catalog origin the gate answers null and the root passes the empty port set', async () => {
+  const { catalogOriginFrom } = await import('./deviceServices.ts');
+  // The same pure gate app/_layout.tsx uses (the wiring guard pins the
+  // call site): no origin, no composition call — the surfaces keep their
+  // honest unavailable state.
+  assert.equal(catalogOriginFrom({}), null);
+  assert.equal(catalogOriginFrom({ EXPO_PUBLIC_CATALOG_ORIGIN: undefined }), null);
+  assert.equal(catalogOriginFrom({ EXPO_PUBLIC_CATALOG_ORIGIN: '' }), null);
+  assert.equal(catalogOriginFrom({ EXPO_PUBLIC_CATALOG_ORIGIN: 'https://catalog.example.invalid' }), 'https://catalog.example.invalid');
 });

@@ -43,6 +43,15 @@ import {
 } from './sessionPorts.ts';
 import { defaultEngineConfig } from '../core/engine/reducer.ts';
 
+// The configured public catalog origin, or null when absent — the app root's
+// fail-closed gate: no origin, no composition call, the surfaces keep their
+// honest unavailable state (V5). Pure so the node tests exercise the real
+// gate the root uses.
+export function catalogOriginFrom(env: Record<string, string | undefined>): string | null {
+  const origin = env.EXPO_PUBLIC_CATALOG_ORIGIN;
+  return origin ? origin : null;
+}
+
 export interface DeviceFileSystem {
   File: typeof File;
   Directory: typeof Directory;

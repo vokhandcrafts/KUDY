@@ -21,7 +21,7 @@ LD_LIBRARY_PATH=$HOME/.local/lib node --test --test-reporter=tap --experimental-
 
 ```output
 ok 1 - G20.20: the free synthetic package walks the whole production composition
-ok 2 - G20.20: without a catalog origin the root passes the empty port set
+ok 2 - G20.20: without a catalog origin the gate answers null and the root passes the empty port set
 1..2
 ```
 

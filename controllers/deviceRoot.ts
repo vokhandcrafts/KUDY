@@ -20,11 +20,11 @@ import { LocationService, systemLocationClock } from '../services/location/servi
 import { createExpoLocationOsPort } from '../services/location/expo/expo-location-port.ts';
 import { createDeviceSha256, newDeviceSessionId } from '../services/device-crypto.ts';
 import { createExpoSqliteDriver } from '../services/db/expo/expo-sqlite-driver.ts';
-import { createDeviceServicePorts } from './deviceServices.ts';
+import { catalogOriginFrom, createDeviceServicePorts } from './deviceServices.ts';
 
 export function createDeviceServiceSet(): ReturnType<typeof createDeviceServicePorts> | null {
-  const origin = process.env.EXPO_PUBLIC_CATALOG_ORIGIN;
-  if (!origin) return null;
+  const origin = catalogOriginFrom(process.env);
+  if (origin === null) return null;
   const db: SQLiteDatabase = openDatabaseSync('kudy.db');
   const bundlesRoot: FsDirectory = new Directory(Paths.document, 'bundles');
   const extra = (Constants.expoConfig?.extra ?? {}) as {
