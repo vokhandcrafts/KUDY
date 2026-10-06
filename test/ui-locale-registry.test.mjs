@@ -43,18 +43,17 @@ test('the registry defines the eight requested UI codes and native names once (c
   assert.throws(() => uiLocaleNativeName('ru'), /ui-locale-unregistered/);
 });
 
-test('the complete set is be/en/uk/de/es/fr/cs; planned codes stay registered but incomplete (criterion 4)', () => {
-  assert.deepEqual([...COMPLETE_UI_LOCALES], ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs']);
+test('the complete set is be/en/uk/de/es/fr/cs/sv — all eight requested codes are complete (criterion 4)', () => {
+  assert.deepEqual([...COMPLETE_UI_LOCALES], ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']);
   for (const { code } of EIGHT) {
     assert.equal(isUiLocaleCode(code), true, `${code} is registered`);
   }
   for (const code of COMPLETE_UI_LOCALES) {
     assert.equal(isCompleteUiLocale(code), true, `${code} is complete`);
   }
-  for (const code of ['sv']) {
-    assert.equal(isCompleteUiLocale(code), false, `${code} has no catalogue yet`);
+  for (const code of ['ru']) {
+    assert.equal(isCompleteUiLocale(code), false, `${code} is not even registered`);
   }
-  assert.equal(isCompleteUiLocale('ru'), false);
 });
 
 test('every complete locale renders every registered native message family (criterion 5)', () => {
@@ -82,14 +81,14 @@ test('the store derives its vocabulary from the registry and keeps unknown-input
   assert.equal(store.current(), 'be');
   store.set('en');
   assert.equal(store.current(), 'en');
-  // The planned languages are registered but incomplete — the store refuses
-  // them exactly like an unregistered code (the named UiLocaleError, no
-  // silent state), and a refused switch keeps the current locale. A complete
-  // catalogue joins the store's vocabulary the commit it lands (es, G21.11
-  // issue #545; fr, G21.12 issue #546; cs, G21.13 issue #547): the positive
-  // siblings of the refusals.
-  for (const planned of ['sv', 'ru']) {
-    assert.throws(() => store.set(planned), UiLocaleError);
+  // Unregistered codes are refused exactly like an incomplete one used to be
+  // (the named UiLocaleError, no silent state), and a refused switch keeps
+  // the current locale. A complete catalogue joins the store's vocabulary
+  // the commit it lands (es, G21.11 issue #545; fr, G21.12 issue #546; cs,
+  // G21.13 issue #547; sv, G21.14 issue #548 — the eight requested codes are
+  // all complete now): the positive siblings of the refusals.
+  for (const unregistered of ['ru']) {
+    assert.throws(() => store.set(unregistered), UiLocaleError);
     assert.equal(store.current(), 'en');
   }
   store.set('es');
@@ -98,6 +97,8 @@ test('the store derives its vocabulary from the registry and keeps unknown-input
   assert.equal(store.current(), 'fr');
   store.set('cs');
   assert.equal(store.current(), 'cs');
+  store.set('sv');
+  assert.equal(store.current(), 'sv');
   store.set('be');
   assert.equal(store.current(), 'be');
 });
