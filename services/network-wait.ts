@@ -24,6 +24,8 @@ export const NETWORK_WAIT_LIMITS = {
   feedbackMs: 15_000,
   /** One grant request round-trip (services/download/grant.ts grantOnce). */
   grantRequestMs: 15_000,
+  /** One public-origin layer-file transfer (services/download/origin-bytes.ts, G20.20). */
+  bundleBytesMs: 30_000,
   /** One signed-URL byte transfer (services/download/grant.ts fetchOnce). */
   grantBytesMs: 30_000,
 } as const;
@@ -34,7 +36,8 @@ export type WaitRule =
   | 'wait-device'
   | 'wait-feedback'
   | 'wait-grant-request'
-  | 'wait-grant-bytes';
+  | 'wait-grant-bytes'
+  | 'wait-bundle-bytes';
 
 export class WaitTimeoutError extends Error {
   readonly rule: WaitRule;

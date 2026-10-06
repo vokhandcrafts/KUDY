@@ -1,22 +1,23 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
-import { createServices, type ServicePorts, type Services } from "../controllers/createServices";
+import { createContext, useContext, useEffect, useMemo, useSyncExternalStore } from "react";
+import { createServices, type Services } from "../controllers/createServices";
 import { useAppFonts } from "../components/fonts";
 
-// Device ports: adapters arrive with their owning tasks (G05.02.c location,
-// G05.03.b audio, TR-10 filesystem); until then the app build passes the
-// empty port set and the root constructs no services — no fake stands in for
-// a device adapter. The catalog origin (G06.01.a) comes from the build
-// environment (21 §3.3: only the configured public origin); the index
-// integrity pin still needs the device digest adapter (expo-crypto), so the
-// catalog service stays unconstructed until that port lands and the surfaces
-// show their honest unavailable state.
-const devicePorts: ServicePorts = {
-  ...(process.env.EXPO_PUBLIC_CATALOG_ORIGIN
-    ? { catalogOrigin: process.env.EXPO_PUBLIC_CATALOG_ORIGIN }
-    : {}),
-};
+// The device composition binding is loaded lazily and only when a catalog
+// origin is configured: the render tests import the screens that import this
+// module, and the Expo facility modules (expo-audio and siblings) cannot
+// initialize outside a native runtime. With no origin the root passes the
+// empty port set and the surfaces keep their honest unavailable state (V5).
+function createDeviceServiceSet(): ReturnType<
+  typeof import("../controllers/deviceRoot")["createDeviceServiceSet"]
+> | null {
+  const origin = process.env.EXPO_PUBLIC_CATALOG_ORIGIN;
+  if (!origin) return null;
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const deviceRoot = require("../controllers/deviceRoot") as typeof import("../controllers/deviceRoot");
+  return deviceRoot.createDeviceServiceSet();
+}
 
 // Screens consume services only through this provider (19 §4.2: UI never
 // touches services/ directly — controllers only). Exported for the render
@@ -44,7 +45,19 @@ export function useUiLocale(): string {
 }
 
 export default function RootLayout() {
-  const services = useMemo(() => createServices(devicePorts), []);
+  // G20.20 (issue #491): the ONE production service set comes from the
+  // device composition root (controllers/deviceRoot.ts — the only file that
+  // binds the Expo facilities); with no catalog origin configured the root
+  // passes the empty port set and the surfaces keep their honest unavailable
+  // state — no fake stands in for a device adapter (spec V5).
+  const device = useMemo(createDeviceServiceSet, []);
+  const services = useMemo(
+    () => (device === null ? createServices({}) : createServices(device.ports)),
+    [device],
+  );
+  // The composition's explicit teardown rides the root's unmount (tests,
+  // hot reload): the wakelock lease is the one live OS resource it owns.
+  useEffect(() => (device === null ? undefined : device.teardown), [device]);
   // G06.10.b: the approved families load once here, ungated — surfaces render
   // their system-ui fallback while loading and never wait for the faces.
   useAppFonts();

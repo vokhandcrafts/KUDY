@@ -33,3 +33,24 @@ test('wiring: useRunController reads no clock or GPS API of its own', () => {
     assert.doesNotMatch(source, pattern, `useRunController.ts must not use ${String(pattern)}`);
   }
 });
+
+// G20.20 (issue #491): the store session must stay unwired until G20.21 —
+// the composition roots construct no RevenueCat store session, so a live
+// purchase path cannot sneak in behind the unavailable port (reverting the
+// unavailable port for a real one flips this guard red together with the
+// port's own test).
+test('wiring: the device composition roots import no store session', () => {
+  for (const rel of ['controllers/deviceRoot.ts', 'controllers/deviceServices.ts']) {
+    const source = fs.readFileSync(path.join(REPO_ROOT, rel), 'utf8');
+    assert.doesNotMatch(source, /['\"]react-native-purchases['\"]/, `${rel} must not import the store session`);
+  }
+});
+
+// G20.20 (issue #491): the app root consumes the device composition through
+// the binding helper — a revert to the empty literal port set loses the
+// whole production service graph silently.
+test('wiring: the app root composes the device service set', () => {
+  const source = fs.readFileSync(path.join(REPO_ROOT, 'app/_layout.tsx'), 'utf8');
+  assert.match(source, /createDeviceServiceSet/);
+  assert.match(source, /EXPO_PUBLIC_CATALOG_ORIGIN/);
+});

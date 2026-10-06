@@ -1,8 +1,6 @@
 import { evaluatePackage } from '../services/contentRepo/contentRepo.ts';
 import { readLayerFacts } from '../services/contentRepo/inventory.ts';
 import { isSafeSegment } from '../services/safe-path.ts';
-import { readRunMapFacts } from '../services/contentRepo/runMapFacts.ts';
-import { readRunStoryFacts } from '../services/contentRepo/runStoryFacts.ts';
 import type {
   BundlesStore,
   EvaluateInput,
@@ -52,7 +50,8 @@ import {
   type RunSessionPorts,
   type RunSurfaceState,
 } from './run/runSurfaceController.ts';
-import type { RunControllerState } from './useRunController.ts';
+import type { RunControllerState, RunReadiness } from './useRunController.ts';
+import { createPinnedPackagePort } from './sessionPorts.ts';
 import { createMyKudyController, type MyKudyState, type SessionHistoryPort } from './myKudyController.ts';
 import { createUiLocaleStore, type UiLocalePersistence, type UiLocaleSwitch } from './uiLocaleStore.ts';
 import {
@@ -105,6 +104,11 @@ export interface ServicePorts {
   // filesystem/db), the run surfaces show their honest unavailable state —
   // the same rule the catalog member follows.
   readonly run?: { readonly session: RunSessionPorts };
+  // G20.20 (issue #491) — the per-route Start gate: RunSessionPorts.readiness
+  // has no route argument, so the composition root binds the route at
+  // surface-create time. When present, run.create overrides the session's
+  // readiness with this closure's answer for the opened route.
+  readonly readinessFor?: (routeId: string) => RunReadiness;
   // G06.04 — the My KUDY history read (services/db.listSessionHistory over
   // the device driver). Absent until TR-10 lands: the screen shows its
   // honest unavailable state.
@@ -322,6 +326,7 @@ export function createServices(ports: ServicePorts): Services {
     discoveryAnalytics,
     guideHints,
     uiLocalePersistence,
+    readinessFor,
   } = ports;
   const catalogLoader = catalogOrigin ? createOriginCatalogLoader(catalogOrigin) : undefined;
   // MVP display-locale order: Belarusian first (21 §3.2 allowlist; G14.04.d's
@@ -521,86 +526,18 @@ export function createServices(ports: ServicePorts): Services {
       return { state: facts.state, missingCount: facts.missingCount };
     },
   };
-  // The run surface's pinned-package port, implemented here over the root's
-  // own disk seams (the root is the one module that value-imports services):
-  // the live row's version/locale/tier pin wins (ADR G01.03 §3.4 — a newer
-  // catalog never substitutes a live walk's files); a fresh walk takes the
-  // single version on disk and the first preferred locale present. Anything
-  // ambiguous, absent or damaged is a named refusal — never a guess.
-  const isTierValue = (value: string): value is Tier => value === 'base' || value === 'extended';
   const runPorts = ports.run?.session;
+  // G06.04 — the run surface's pinned-package port, served by the shared
+  // composition wiring (controllers/sessionPorts.ts, G20.20): the live
+  // row's pin wins (ADR G01.03 §3.4), a fresh walk takes the single version
+  // on disk and the first preferred locale present.
   const pinnedPackage: RunPinnedPackagePort | undefined =
     runPorts && bundlesStore
-      ? {
-          read: async (routeId) => {
-            if (!isSafeSegment(routeId)) return { kind: 'refused', reason: 'run#unsafe-route-id' };
-            const live = await runPorts.recovery.read(routeId);
-            let version: string;
-            let locale: string;
-            let tier: Tier[];
-            if (
-              live &&
-              live.routeId === routeId &&
-              (live.row.state === 'active' || live.row.state === 'paused')
-            ) {
-              version = live.row.version;
-              locale = live.row.locale;
-              tier = live.row.tier.filter(isTierValue);
-            } else {
-              const versions = await bundlesStore.listDir(`bundles/${routeId}`);
-              if (!versions || versions.length === 0) {
-                return { kind: 'refused', reason: 'run#package-not-downloaded' };
-              }
-              if (versions.length > 1) return { kind: 'refused', reason: 'run#package-ambiguous' };
-              version = versions[0];
-              const locales = await bundlesStore.listDir(`bundles/${routeId}/${version}`);
-              if (!locales || locales.length === 0) {
-                return { kind: 'refused', reason: 'run#locale-missing' };
-              }
-              // G21.17 (issue #551): a fresh walk rides the selected UI
-              // language when the downloaded package carries it — the person
-              // starts the guide they are reading; an absent layer falls to
-              // the composition preference, never a substitution beyond it.
-              locale =
-                [uiLocale.current(), ...localePreference].find((candidate) => locales.includes(candidate)) ??
-                locales[0];
-              tier = ['base'];
-            }
-            const facts = await readRunMapFacts(
-              bundlesStore,
-              `bundles/${routeId}/${version}/${locale}/base`,
-              { routeId, version },
-            );
-            if (!facts.ok) return { kind: 'refused', reason: facts.diagnostic };
-            // The panel card's transcript source (11 §3: the transcript is
-            // inspected's), read from the same layer directory as the map
-            // facts. A damaged stops.json never blocks the walk — the card
-            // renders its honest pending word; the engine's truth is the
-            // walk, not the card. G06.05 (issue #280, AC3): the extended
-            // layer's stories are read beside the base ones when the pin
-            // carries the tier — the card's transcript switch needs both.
-            const stories = await readRunStoryFacts(
-              bundlesStore,
-              `bundles/${routeId}/${version}/${locale}/base`,
-            );
-            const storiesExtended = tier.includes('extended')
-              ? await readRunStoryFacts(
-                  bundlesStore,
-                  `bundles/${routeId}/${version}/${locale}/extended`,
-                )
-              : { ok: true as const, stories: [] };
-            return {
-              kind: 'pinned',
-              version,
-              locale,
-              tier,
-              stops: facts.stops,
-              places: facts.places,
-              stories: stories.ok ? stories.stories : [],
-              storiesExtended: storiesExtended.ok ? storiesExtended.stories : [],
-            };
-          },
-        }
+      ? createPinnedPackagePort({
+          session: runPorts,
+          bundlesStore,
+          preferredLocales: () => [uiLocale.current(), ...localePreference],
+        })
       : undefined;
   // G06.04 — the run surface cache (NAV7) is declared above, beside the
   // moment routing it also serves; the wrapper store below is its only
@@ -722,6 +659,9 @@ export function createServices(ports: ServicePorts): Services {
             ...(runSessionWithRetirement ?? runPorts),
             nextMomentSeq: rootNextMomentSeq,
             currentMomentPlay,
+            // G20.20 — the per-route Start gate overrides the shared
+            // readiness: the route is this surface's own.
+            ...(readinessFor ? { readiness: readinessFor(routeId) } : {}),
           },
           localePreference,
           confirmedSwitch: options?.confirmedSwitch,
