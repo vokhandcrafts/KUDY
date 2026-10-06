@@ -4,11 +4,19 @@
 // binary via KUDY_CHROMIUM) over its WebSocket endpoint using the WebSocket
 // client built into Node ≥ 22. Only the domains the map proofs need are
 // used: Target, Page, Runtime, Fetch.
+//
+// Every command is bounded. A DevTools reply that never arrives, a socket
+// that closes, or a Chromium process that exits rejects the in-flight
+// command. waitForExpression only checks its deadline between replies, so
+// an unbounded send() pins the Node 22 job until the runner's six-hour
+// cancel (the G21.03 map test is the only CDP caller in npm test).
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+
+const COMMAND_TIMEOUT_MS = 20000;
 
 // Common Chromium/Chrome binary locations; CI and dev hosts differ, the
 // KUDY_CHROMIUM override wins. Returns null when the host has none — the
@@ -29,6 +37,18 @@ export function findChromiumBinary() {
   return null;
 }
 
+function killChild(child) {
+  // Chromium forks renderer and GPU processes. Killing only the parent
+  // leaves those children holding the DevTools socket or the harness
+  // connection, and the test process never exits. detached puts the
+  // browser in its own group so the negative pid reaches the children.
+  // Windows has no negative-pid groups; child.kill covers that host.
+  if (process.platform !== 'win32' && Number.isInteger(child.pid)) {
+    try { process.kill(-child.pid, 'SIGKILL'); } catch { /* group already gone */ }
+  }
+  try { child.kill('SIGKILL'); } catch { /* already dead */ }
+}
+
 export async function launchBrowser(binary) {
   const profileDir = mkdtempSync(path.join(tmpdir(), 'kudy-web-browser-'));
   const child = spawn(
@@ -45,53 +65,129 @@ export async function launchBrowser(binary) {
       `--user-data-dir=${profileDir}`,
       'about:blank',
     ],
-    { stdio: ['ignore', 'ignore', 'pipe'] },
+    { detached: true, stdio: ['ignore', 'ignore', 'pipe'] },
   );
-  const wsUrl = await new Promise((resolve, reject) => {
-    let buffer = '';
-    const timer = setTimeout(() => reject(new Error('chromium did not report a DevTools endpoint within 15s')), 15000);
-    child.stderr.on('data', (chunk) => {
-      buffer += String(chunk);
-      const match = buffer.match(/DevTools listening on (ws:\/\/\S+)/);
-      if (match) {
-        clearTimeout(timer);
-        resolve(match[1]);
-      }
-    });
-    child.on('exit', (code) => {
-      clearTimeout(timer);
-      reject(new Error(`chromium exited before the DevTools endpoint appeared (code ${code})`));
-    });
+  const pending = new Map();
+  function failPending(error) {
+    // Copy first: reject() deletes the entry, and a live Map iterator can
+    // skip the rest — those commands would stay pending.
+    for (const entry of [...pending.values()]) entry.reject(error);
+  }
+  child.on('exit', (code, signal) => {
+    failPending(new Error(`chromium exited (${signal || code})`));
   });
 
-  const ws = new WebSocket(wsUrl);
-  await new Promise((resolve, reject) => {
-    ws.addEventListener('open', resolve, { once: true });
-    ws.addEventListener('error', () => reject(new Error('DevTools WebSocket connection failed')), { once: true });
-  });
+  let ws;
+  try {
+    const wsUrl = await new Promise((resolve, reject) => {
+      let buffer = '';
+      let capture = true;
+      let settled = false;
+      const finish = (fn, value) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        fn(value);
+      };
+      const timer = setTimeout(
+        () => finish(reject, new Error('chromium did not report a DevTools endpoint within 15s')),
+        15000,
+      );
+      child.stderr.on('data', (chunk) => {
+        if (!capture) return;
+        buffer += String(chunk);
+        const match = buffer.match(/DevTools listening on (ws:\/\/\S+)/);
+        if (match) {
+          capture = false;
+          buffer = '';
+          finish(resolve, match[1]);
+        }
+      });
+      child.on('exit', (code, signal) => {
+        finish(reject, new Error(`chromium exited before the DevTools endpoint appeared (${signal || code})`));
+      });
+    });
+
+    ws = new WebSocket(wsUrl);
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('DevTools WebSocket did not open within 15s'));
+      }, 15000);
+      ws.addEventListener('open', () => {
+        clearTimeout(timer);
+        resolve();
+      }, { once: true });
+      ws.addEventListener('error', () => {
+        clearTimeout(timer);
+        reject(new Error('DevTools WebSocket connection failed'));
+      }, { once: true });
+    });
+  } catch (error) {
+    try { ws?.close(); } catch { /* socket never opened */ }
+    killChild(child);
+    rmSync(profileDir, { recursive: true, force: true });
+    throw error;
+  }
 
   let nextId = 1;
-  const pending = new Map();
   const eventHandlers = [];
+  ws.addEventListener('close', () => failPending(new Error('DevTools WebSocket closed')));
+  ws.addEventListener('error', () => failPending(new Error('DevTools WebSocket error')));
   ws.addEventListener('message', (event) => {
-    const message = JSON.parse(String(event.data));
+    // Undici has delivered a message event whose data is null when a ping
+    // frame is mis-parsed. That throw used to escape the listener and leave
+    // the matching command pending forever.
+    let message;
+    try {
+      if (typeof event.data !== 'string') return;
+      message = JSON.parse(event.data);
+    } catch {
+      return;
+    }
+    if (!message || typeof message !== 'object') return;
     if (message.id !== undefined && pending.has(message.id)) {
       const entry = pending.get(message.id);
-      pending.delete(message.id);
       if (message.error) entry.reject(new Error(`CDP ${entry.method} failed: ${message.error.message}`));
       else entry.resolve(message.result);
     } else if (message.method) {
-      for (const handler of eventHandlers) handler(message.method, message.params, message.sessionId);
+      // Reply to Fetch.requestPaused outside this callback. Sending from
+      // inside the message listener re-enters the socket parser.
+      const method = message.method;
+      const params = message.params;
+      const sessionId = message.sessionId;
+      queueMicrotask(() => {
+        for (const handler of eventHandlers) handler(method, params, sessionId);
+      });
     }
   });
 
   const browser = {
     // Sends one command; sessionId scopes it to a page (flatten mode).
-    send(method, params = {}, sessionId) {
+    // timeoutMs bounds a reply that never comes — the default matches the
+    // map proof's own wait, and tests pass a shorter one.
+    send(method, params = {}, sessionId, timeoutMs = COMMAND_TIMEOUT_MS) {
       const id = nextId++;
       return new Promise((resolve, reject) => {
-        pending.set(id, { resolve, reject, method });
-        ws.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
+        let timer;
+        const finish = (fn, value) => {
+          if (!pending.has(id)) return;
+          clearTimeout(timer);
+          pending.delete(id);
+          fn(value);
+        };
+        timer = setTimeout(() => {
+          finish(reject, new Error(`CDP ${method} timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+        pending.set(id, {
+          method,
+          resolve: (value) => finish(resolve, value),
+          reject: (error) => finish(reject, error),
+        });
+        try {
+          ws.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
+        } catch (error) {
+          finish(reject, error);
+        }
       });
     },
     onEvent(handler) {
@@ -115,12 +211,13 @@ export async function launchBrowser(binary) {
       try {
         await Promise.race([browser.send('Browser.close'), stopped]);
       } catch {
-        child.kill('SIGKILL');
+        // The reply failed or the socket is already closed. Cleanup still runs.
       } finally {
         clearTimeout(closeTimer);
         ws.removeEventListener('close', onClose);
-        ws.close();
-        child.kill('SIGKILL');
+        failPending(new Error('browser closed'));
+        try { ws.close(); } catch { /* already closed */ }
+        killChild(child);
         rmSync(profileDir, { recursive: true, force: true });
       }
     },

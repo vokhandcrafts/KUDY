@@ -292,7 +292,14 @@ export async function startMapHarnessServer() {
     port: server.address().port,
     styleBody: STYLE_BODY,
     async close() {
-      await new Promise((resolve) => server.close(resolve));
+      // close() leaves a connection that is still sending a request (a
+      // half-open browser socket, a paused Fetch) until requestTimeout,
+      // which is long enough to pin the test process. closeAllConnections
+      // drops those sockets so the callback runs now.
+      await new Promise((resolve) => {
+        server.close(resolve);
+        server.closeAllConnections();
+      });
     },
   };
 }

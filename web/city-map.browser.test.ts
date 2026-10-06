@@ -81,12 +81,14 @@ test('G21.03: aborted map requests show the localized failure message; a good lo
         );
       }
       if (method === 'Fetch.requestPaused') {
+        // Fire-and-forget: the driver rejects the command if the socket
+        // closes during cleanup. The test does not await it.
         if (providerMode === 'fail') {
           void browser.send(
             'Fetch.failRequest',
             { requestId: params.requestId, errorReason: 'InternetDisconnected' },
             sessionId,
-          );
+          ).catch(() => {});
         } else {
           void browser.send(
             'Fetch.fulfillRequest',
@@ -103,7 +105,7 @@ test('G21.03: aborted map requests show the localized failure message; a good lo
               body: Buffer.from(server.styleBody, 'utf8').toString('base64'),
             },
             sessionId,
-          );
+          ).catch(() => {});
         }
       }
     });
