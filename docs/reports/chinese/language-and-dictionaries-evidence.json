@@ -1,0 +1,1519 @@
+{
+  "task": "G21.39",
+  "issue": 620,
+  "epic": 532,
+  "generated_at": "2026-10-06T00:52:33Z",
+  "agent": "zcode (GLM-5.3-Flash)",
+  "input_main": "07fbb36",
+  "report": "docs/reports/chinese/language-and-dictionaries.md",
+  "result_file": "docs/agent-tasks/results/G21.39.md",
+  "locale_tags": {
+    "iana": {
+      "source": {
+        "url": "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
+        "http": "200",
+        "bytes": "731819",
+        "sha256": "755fad43283be7b41ebe3c89ad054b6eaf928f404f9c0edb74799e0eab74beb1",
+        "fetched_at": "2026-10-06T00:22:23Z"
+      },
+      "facts": {
+        "zh": "Chinese, Scope: macrolanguage, Added 2005-10-16, без Suppress-Script",
+        "cmn": "Mandarin Chinese, Added 2009-07-29",
+        "yue": "Yue Chinese; Cantonese, Added 2009-07-29",
+        "Hans": "Han (Simplified variant), Added 2005-10-16",
+        "Hant": "Han (Traditional variant), Added 2005-10-16",
+        "redundant": {
+          "zh-yue": "pref yue",
+          "zh-Hans-CN": "PRC Mainland Chinese in simplified script",
+          "zh-Hant-TW": "Taiwan Chinese in traditional script"
+        },
+        "absent": [
+          "zh-CN",
+          "zh-TW",
+          "zh-HK — у рэестры адсутнічаюць як асобныя запісы (звычайныя камбінацыі мова+рэгіён)"
+        ]
+      }
+    },
+    "cldr": {
+      "version": "cldr-json tag 48.2.3 (CLDR 48.2, рэліз 2026-03-17)",
+      "files": {
+        "likelySubtags": {
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-core/supplemental/likelySubtags.json",
+          "http": "200",
+          "bytes": "220093",
+          "sha256": "38345946ad457213fb39e9645ab50f36b61681bf674b2eef2979a3b58d04afc8",
+          "fetched_at": "2026-10-06T00:22:23Z"
+        },
+        "languages_zh": {
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh/languages.json",
+          "http": "404",
+          "bytes": "14",
+          "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+          "fetched_at": "2026-10-06T00:22:24Z"
+        },
+        "languages_zh-Hans": {
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh-Hans/languages.json",
+          "http": "404",
+          "bytes": "14",
+          "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+          "fetched_at": "2026-10-06T00:22:24Z"
+        },
+        "languages_zh-Hant": {
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh-Hant/languages.json",
+          "http": "404",
+          "bytes": "14",
+          "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+          "fetched_at": "2026-10-06T00:22:24Z"
+        },
+        "languages_yue": {
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/yue/languages.json",
+          "http": "404",
+          "bytes": "14",
+          "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+          "fetched_at": "2026-10-06T00:22:25Z"
+        },
+        "territories_zh-Hans": {
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh-Hans/territories.json",
+          "http": "200",
+          "bytes": "9933",
+          "sha256": "de255a878dc85dbf801353e13e7d6685eccebe238b485818f129a6ad82212d43",
+          "fetched_at": "2026-10-06T00:22:25Z"
+        },
+        "plurals": {
+          "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-core/supplemental/plurals.json",
+          "http": "200",
+          "bytes": "76105",
+          "sha256": "6c0a48e9bcfc25856f90202f703c2c7f89c105d6868f7712a943a6ed2dcbe8f4",
+          "fetched_at": "2026-10-06T00:22:25Z"
+        }
+      },
+      "facts": {
+        "likelySubtags": {
+          "zh": "zh-Hans-CN",
+          "zh-Hant": "zh-Hant-TW",
+          "yue": "yue-Hant-HK",
+          "yue-Hans": "yue-Hans-CN",
+          "cmn": "ABSENT (аліяс у zh)"
+        },
+        "native_names": {
+          "zh-Hans_view": {
+            "zh": "\u4E2D\u6587",
+            "zh-Hans": "\u7B80\u4F53\u4E2D\u6587",
+            "zh-Hant": "\u7E41\u4F53\u4E2D\u6587",
+            "yue": "\u7CA4\u8BED"
+          },
+          "zh-Hant_view": {
+            "zh-Hans": "\u7C21\u9AD4\u4E2D\u6587",
+            "zh-Hant": "\u7E41\u9AD4\u4E2D\u6587",
+            "yue": "\u7CB5\u8A9E"
+          }
+        },
+        "plurals": {
+          "zh": "толькі other (правіл множнага ліку няма)",
+          "yue": "толькі other",
+          "cmn": "ABSENT"
+        },
+        "locale_dirs_200": [
+          "zh",
+          "zh-Hans",
+          "zh-Hant",
+          "zh-Hans-SG",
+          "zh-Hans-HK",
+          "zh-Hant-HK",
+          "zh-Hans-MO",
+          "yue",
+          "yue-Hans",
+          "yue-Hant"
+        ],
+        "locale_dirs_404": [
+          "zh-Hant-TW (аліяс на zh-Hant)",
+          "cmn"
+        ],
+        "territories_zh-Hans": {
+          "CN": "\u4E2D\u56FD",
+          "TW": "\u53F0\u6E7E",
+          "HK": "\u4E2D\u56FD\u9999\u6E2F\u7279\u522B\u884C\u653F\u533A",
+          "MO": "\u4E2D\u56FD\u6FB3\u95E8\u7279\u522B\u884C\u653F\u533A",
+          "SG": "\u65B0\u52A0\u5761",
+          "PL": "\u6CE2\u5170"
+        }
+      }
+    }
+  },
+  "sources": {
+    "cc_cedict": {
+      "role": "bilingual dictionary (zh-Hans/EN)",
+      "archive": {
+        "url": "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz",
+        "http": "200",
+        "bytes": "3978669",
+        "sha256": "545476af88e2d11b8697ca53b6249f3186f0a8d1540a4572ddda898065eb3ae2",
+        "fetched_at": "2026-10-06T00:38:22Z"
+      },
+      "header": {
+        "entries": 125193,
+        "date": "2026-10-05T08:47:18Z",
+        "license": "CC BY-SA 4.0",
+        "publisher": "MDBG",
+        "charset": "UTF-8",
+        "line_endings": "CRLF"
+      },
+      "data_lines_counted": 125192,
+      "host": "www.mdbg.net",
+      "battery_file_local": "cedict.txt (нормалізаваны LF, у scratch, не ў рэпе)"
+    },
+    "moe_dict": {
+      "role": "normative dictionary (zh-Hant, Taiwan)",
+      "title": "\u6559\u80B2\u90E8\u300A\u91CD\u7DE8\u570B\u8A9E\u8FAD\u5178\u4FEE\u8A02\u672C\u300B2021, \u81FA\u7063\u5B78\u8853\u7DB2\u8DEF\u7B2C\u516D\u7248",
+      "hosts": [
+        "dict.revised.moe.edu.tw (HTTP 200, пошук GET search.jsp?md=1&word=…, карткі dictView.jsp?ID=…; тлумачэнні рэндэрацца JS)",
+        "www.moedict.tw (\u840C\u5178/g0v дзеркала MOE-даных, JSON на слова, HTTP 200)"
+      ],
+      "hits": [
+        "\u53D6\u6D88",
+        "\u5C0E\u89BD",
+        "\u56AE\u5C0E",
+        "\u505C\u6B62",
+        "\u6563\u6B65",
+        "\u8CFC\u8CB7",
+        "\u6062\u5FA9",
+        "\u8FD4\u56DE",
+        "\u8A2D\u7F6E",
+        "\u8A2D\u5B9A"
+      ],
+      "misses_404": [
+        "\u4E0B\u8F09",
+        "\u4E0D\u53EF\u7528",
+        "\u4E0A\u4E00\u6B65"
+      ]
+    },
+    "aosp": {
+      "role": "UI terminology corpus (zh-rCN/zh-rTW)",
+      "channel": "Gitiles ?format=TEXT (base64), refs/heads/main рухаецца — пінаў blob няма, дата фіксацыі 2026-10-06",
+      "files": {
+        "base_zhCN": {
+          "url": "https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/core/res/res/values-zh-rCN/strings.xml?format=TEXT",
+          "http": "200",
+          "bytes": "412560",
+          "sha256": "1965762cfffbf58ca1ec925a494f627be825880cd2381cc996bacafb0fc88f1c",
+          "fetched_at": "2026-10-06T00:41:27Z"
+        },
+        "base_zhTW": {
+          "url": "https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/core/res/res/values-zh-rTW/strings.xml?format=TEXT",
+          "http": "200",
+          "bytes": "417228",
+          "sha256": "cc2357f59610773f07ba43fedf0f085c5c8b1fa1b327c5c0566c31215056ed95",
+          "fetched_at": "2026-10-06T00:41:28Z"
+        },
+        "settings_zhCN": {
+          "url": "https://android.googlesource.com/platform/packages/apps/Settings/+/refs/heads/main/res/values-zh-rCN/strings.xml?format=TEXT",
+          "http": "200",
+          "bytes": "947772",
+          "sha256": "4d14f42d08dcdcba2e94a23688a1992f9ea6c950012c156211cb7268e1265e1b",
+          "fetched_at": "2026-10-06T00:41:29Z"
+        },
+        "settings_zhTW": {
+          "url": "https://android.googlesource.com/platform/packages/apps/Settings/+/refs/heads/main/res/values-zh-rTW/strings.xml?format=TEXT",
+          "http": "200",
+          "bytes": "949752",
+          "sha256": "1ea6211c23c5245ed8da9972f0e5f89f4b4617306b2ecaf6093313e05c9caaad",
+          "fetched_at": "2026-10-06T00:41:30Z"
+        },
+        "downloadprovider_zhCN": {
+          "url": "https://android.googlesource.com/platform/packages/providers/DownloadProvider/+/refs/heads/main/res/values-zh-rCN/strings.xml?format=TEXT",
+          "http": "200",
+          "bytes": "7892",
+          "sha256": "537cd83356c21b1dfce99eecd6e34657d5dd4b9ceacfb73e40b035bd3490f6e7",
+          "fetched_at": "2026-10-06T00:41:31Z"
+        },
+        "downloadprovider_zhTW": {
+          "url": "https://android.googlesource.com/platform/packages/providers/DownloadProvider/+/refs/heads/main/res/values-zh-rTW/strings.xml?format=TEXT",
+          "http": "200",
+          "bytes": "7912",
+          "sha256": "dc081bcdd75aace42e72d5a26e797d84df695eccf705bb0dba960e0d1d6b639f",
+          "fetched_at": "2026-10-06T00:41:31Z"
+        }
+      }
+    },
+    "wiktionary": {
+      "role": "pronunciation reference + cross-variant readings",
+      "channel": "en.wiktionary.org?action=raw (сыры вікі-тэкст)",
+      "entries_simplified": [
+        "\u8BBE\u7F6E",
+        "\u5BFC\u89C8",
+        "\u4E0B\u8F7D",
+        "\u6062\u590D",
+        "\u8D2D\u4E70",
+        "\u505C\u6B62",
+        "\u6563\u6B65",
+        "\u53D6\u6D88",
+        "\u8FD4\u56DE",
+        "\u5411\u5BFC",
+        "\u534E\u6C99",
+        "\u514B\u62C9\u79D1\u592B",
+        "\u683C\u4F46\u65AF\u514B"
+      ],
+      "entries_traditional": [
+        "\u83EF\u6C99",
+        "\u8A2D\u7F6E",
+        "\u5C0E\u89BD",
+        "\u4E0B\u8F09",
+        "\u6062\u5FA9",
+        "\u8CFC\u8CB7",
+        "\u56AE\u5C0E"
+      ],
+      "note": "спрошчаныя старонкі — zh-see рэдырэкты на традыцыйныя; кожны артыкул мае m= (мандарын), c= (jyutping/кантонскі), mn= (мін-нан)"
+    },
+    "unihan": {
+      "role": "normative character readings (kMandarin, kXHC1983 з \u300A\u73FE\u4EE3\u6F22\u8A9E\u8A5E\u5178\u300B)",
+      "archive": {
+        "url": "https://unicode.org/Public/UNIDATA/Unihan.zip",
+        "http": "200",
+        "bytes": "8340649",
+        "sha256": "4c93ea9c1f636451729a840978f1667a53886af37ba854fdcce109721c63d43e",
+        "fetched_at": "2026-10-06T00:44:53Z"
+      },
+      "extracted": "Unihan_Readings.txt (291291 радкоў)",
+      "nuance": "спрошчаныя кодэпойнты маюць kXHC1983; традыцыйны \u6062 U+6BC1 = huǐ (kHanyuPinyin \u6F22\u8A9E\u5927\u8A5E\u5178), спрошчаны U+6062 = huī — чытанне трэба браць словам"
+    },
+    "microsoft": {
+      "role": "UI terminology availability (styles + TBX)",
+      "style_guides": [
+        "Chinese (Simplified) — https://aka.ms/chinese-simplified-styleguide",
+        "Chinese (Traditional) — https://aka.ms/chinese-traditional-styleguide"
+      ],
+      "tbx_collection": "MicrosoftTermCollection.zip (download.microsoft.com) — той самы канал G21.28; поўны 176MB рэдаўнлод у гэтай задачы не рабіўся"
+    },
+    "zh_wikipedia": {
+      "role": "toponym resolution",
+      "pages": {
+        "Wieliczka": {
+          "url": "https://zh.wikipedia.org/wiki/%E7%BB%B4%E5%88%A9%E5%A5%87%E5%8D%A1",
+          "http": "200",
+          "bytes": "140462",
+          "sha256": "7401b665905579e55cbc98e3bd7876fdd777f9300ba25d2dcf75cdce2af608a1",
+          "fetched_at": "2026-10-06T00:47:50Z"
+        },
+        "Warszawa": {
+          "url": "https://zh.wikipedia.org/wiki/%E5%8D%8E%E6%B2%99",
+          "http": "200",
+          "bytes": "1120862",
+          "sha256": "1fcf11148e1e4e46ba9ed437b0e12903df933dedef8d0b6f08287175cb938374",
+          "fetched_at": "2026-10-06T00:47:51Z"
+        }
+      }
+    }
+  },
+  "battery": {
+    "back": {
+      "ui_sense": "кнопка вяртання да папярэдняга экрана",
+      "candidate": {
+        "zh": "\u8FD4\u56DE",
+        "pinyin": "fǎnhuí"
+      },
+      "cedict": {
+        "entry": "\u8FD4\u56DE \u8FD4\u56DE [fan3 hui2] /to return to/to come (or go) back/",
+        "fit": "дзеяслоўны сэнс; асобнай UI-кнопкі няма"
+      },
+      "moe": {
+        "title": "\u8FD4\u56DE",
+        "pinyin": "fǎn huí",
+        "def": "\u56DE\u5230\u539F\u4F86\u7684\u5730\u65B9\u3002"
+      },
+      "wiktionary": {
+        "reading": "m=fǎnhuí c=faan2 wui4,faan1 wui4"
+      },
+      "aosp": [
+        {
+          "repo": "frameworks/base",
+          "key": "back_button_label",
+          "zh-rCN": "\u4E0A\u4E00\u6B65",
+          "zh-rTW": "\u8FD4\u56DE"
+        },
+        {
+          "repo": "frameworks/base",
+          "key": "input_method_nav_back_button_desc",
+          "zh-rCN": "\u8FD4\u56DE",
+          "zh-rTW": "\u8FD4\u56DE"
+        }
+      ],
+      "note": "кнопка «Back» у mainland-UI рэалізаваная як \u4E0A\u4E00\u6B65 («папярэдні крок»), не прамым слоўнікавым сэнсам \u8FD4\u56DE"
+    },
+    "cancel": {
+      "ui_sense": "адмяніць дзеянне",
+      "candidate": {
+        "zh": "\u53D6\u6D88",
+        "pinyin": "qǔxiāo"
+      },
+      "cedict": {
+        "entry": "\u53D6\u6D88 \u53D6\u6D88 [qu3 xiao1] /to cancel; to call off; to revoke; to rescind/",
+        "fit": "дакладны UI-сэнс"
+      },
+      "moe": {
+        "title": "\u53D6\u6D88",
+        "pinyin": "qǔ xiāo",
+        "def": "\u6D88\u9664\u5DF2\u6210\u7ACB\u7684\u4E8B\u3002\u5982\uFF1A\u300C\u904B\u52D5\u6703\u56E0\u98B1\u98A8\u800C\u53D6\u6D88\u3002\u300D\u4E5F\u4F5C\u300C\u53D6\u92B7\u300D\u3002"
+      },
+      "wiktionary": {
+        "reading": "m=qǔxiāo c=ceoi2 siu1 (аўдыё Yue-cheui2siu1.ogg)"
+      },
+      "aosp": [
+        {
+          "repo": "frameworks/base",
+          "key": "cancel",
+          "zh-rCN": "\u53D6\u6D88",
+          "zh-rTW": "\u53D6\u6D88"
+        }
+      ]
+    },
+    "settings": {
+      "ui_sense": "экран/пункт налад",
+      "candidate": {
+        "zh": "\u8BBE\u7F6E",
+        "pinyin": "shèzhì",
+        "variant_tw": {
+          "zh": "\u8A2D\u5B9A",
+          "pinyin": "shèdìng"
+        }
+      },
+      "cedict": [
+        {
+          "entry": "\u8A2D\u7F6E \u8BBE\u7F6E [she4 zhi4] /to set up; to install/",
+          "fit": "назоўнікавы сэнс «settings» у CEDICT адсутнічае"
+        },
+        {
+          "entry": "\u8A2D\u5B9A \u8BBE\u5B9A [she4 ding4] /to set/to set up/to install/setting/preferences/",
+          "fit": "/setting/preferences/ — бліжэйшы назоўнікавы сэнс"
+        }
+      ],
+      "moe": {
+        "title": "\u8A2D\u7F6E",
+        "pinyin": "shè zhì",
+        "def": "\u8A2D\u7ACB\u3002\u88DD\u7F6E\u3002"
+      },
+      "wiktionary": {
+        "reading": "m=shèzhì",
+        "sense": "Mainland China, computing: settings"
+      },
+      "aosp": [
+        {
+          "repo": "packages/apps/Settings",
+          "key": "settings_label",
+          "zh-rCN": "\u8BBE\u7F6E",
+          "zh-rTW": "\u8A2D\u5B9A"
+        }
+      ],
+      "note": "назоўнікавы UI-сэнс дае толькі Wiktionary са знакай Mainland China; TW-варыянт \u8A2D\u5B9A — іншае слова, не графічная канверсія \u8BBE\u7F6E"
+    },
+    "guide": {
+      "ui_sense": "тур-гід (чалавек) і аўдыё-/электронная экскурсія",
+      "candidate": {
+        "person": {
+          "zh": "\u5BFC\u6E38",
+          "pinyin": "dǎoyóu"
+        },
+        "audio_electronic": {
+          "zh": "\u5BFC\u89C8",
+          "pinyin": "dǎolǎn"
+        },
+        "leader": {
+          "zh": "\u5411\u5BFC",
+          "pinyin": "xiàngdǎo"
+        }
+      },
+      "cedict": [
+        {
+          "entry": "\u5C0E\u904A \u5BFC\u6E38 [dao3 you2] /tour guide/guidebook/to conduct a tour/",
+          "fit": "тур-гід чалавек"
+        },
+        {
+          "entry": "\u5C0E\u89BD \u5BFC\u89C8 [dao3 lan3] /(visitor, tour, audio etc) guide/guided tour/(site) navigator/to guide/",
+          "fit": "аўдыё-/электронны гід — дакладны сэнс"
+        },
+        {
+          "entry": "\u56AE\u5C0E \u5411\u5BFC [xiang4 dao3] /guide/",
+          "fit": "праваднік (чалавек)"
+        }
+      ],
+      "moe": [
+        {
+          "title": "\u5C0E\u89BD",
+          "pinyin": "dǎo lǎn",
+          "def": "\u5F15\u5C0E\u904A\u89BD\u3002\u6709\u4EBA\u5DE5\u5F15\u9818\u6216\u5229\u7528\u96FB\u8166\u3001\u5F71\u7247\u7684\u96FB\u5B50\u5C0E\u89BD\u3002"
+        },
+        {
+          "title": "\u56AE\u5C0E",
+          "pinyin": "xiàng dǎo",
+          "def": "\u5E36\u8DEF\u7684\u4EBA\u3002"
+        }
+      ],
+      "wiktionary": {
+        "reading": "\u5C0E\u89BD m=dǎolǎn c=dou6 laam5; sense: (visitor, audio, video, etc.) guide; navigator; guidebook"
+      },
+      "aosp": [],
+      "note": "тэлепраграмны сэнс «guide» (папярэджанне AOSP-рэпорта G21.28) кітайскай не датычыцца: \u5C0E\u89BD/\u5C0E\u904A — тур-сэнсы"
+    },
+    "stop": {
+      "ui_sense": "спыніць (дзеянне) і прыпынак (транспарт)",
+      "candidate": {
+        "action": {
+          "zh": "\u505C\u6B62",
+          "pinyin": "tíngzhǐ"
+        },
+        "transport": {
+          "zh": "\u5DF4\u58EB\u7AD9",
+          "pinyin": "bāshìzhàn"
+        }
+      },
+      "cedict": [
+        {
+          "entry": "\u505C\u6B62 \u505C\u6B62 [ting2 zhi3] /to stop; to halt; to cease/",
+          "fit": "дзеянне"
+        },
+        {
+          "entry": "\u5DF4\u58EB\u7AD9 \u5DF4\u58EB\u7AD9 [ba1 shi4 zhan4] /bus stop/",
+          "fit": "транспартны прыпынак"
+        }
+      ],
+      "moe": {
+        "title": "\u505C\u6B62",
+        "pinyin": "tíng zhǐ",
+        "def": "\u4E0D\u7E7C\u7E8C\uFF0C\u4E0D\u9032\u884C\u3002"
+      },
+      "wiktionary": {
+        "reading": "m=tíngzhǐ c=ting4 zi2 (аўдыё Zh-tíngzhi.ogg)"
+      },
+      "aosp": []
+    },
+    "walk": {
+      "ui_sense": "прагулка/пешы маршрут",
+      "candidate": {
+        "zh": "\u6563\u6B65",
+        "pinyin": "sànbù",
+        "alt": {
+          "zh": "\u6F2B\u6B65",
+          "pinyin": "mànbù"
+        }
+      },
+      "cedict": [
+        {
+          "entry": "\u6563\u6B65 \u6563\u6B65 [san4 bu4] /to take a walk; to go for a walk/",
+          "fit": "прагулка як дзеянне"
+        },
+        {
+          "entry": "\u6F2B\u6B65 \u6F2B\u6B65 [man4 bu4] /to wander/to ramble/recreational hiking/to perambulate/",
+          "fit": "рэкрэацыйны рэгістр"
+        },
+        {
+          "entry": "\u884C\u8D70 \u884C\u8D70 [xing2 zou3] /to walk/",
+          "fit": "нейтральнае «ікці»"
+        }
+      ],
+      "moe": {
+        "title": "\u6563\u6B65",
+        "pinyin": "sàn bù",
+        "def": "\u96A8\u610F\u8D70\u8D70\u3002"
+      },
+      "wiktionary": {
+        "reading": "m=sànbù c=saan3 bou6 (аўдыё LL-Q9186-Luilui6666-\u6563\u6B65.wav)"
+      },
+      "aosp": [],
+      "note": "асобны назоўнік «прагулка» (a walk) у CEDICT не знойдзены — толькі дзеяслоўна-дзеепрыслоўныя формы"
+    },
+    "download": {
+      "ui_sense": "спампаваць (дзеянне); спампоўка (іменнік)",
+      "candidate": {
+        "zh": "\u4E0B\u8F7D",
+        "pinyin": "xiàzài"
+      },
+      "cedict": {
+        "entry": "\u4E0B\u8F09 \u4E0B\u8F7D [xia4 zai3] /to download/also pr. [xia4zai4]/",
+        "fit": "толькі дзеяслоў; 1 запіс на тэрмін"
+      },
+      "moe": null,
+      "wiktionary": {
+        "reading": "m=xiàzài (standard in Mainland and Taiwan), xiàzǎi (variant in Mainland); c=haa6 zoi3; sense: computing to download",
+        "fit": "адзнака рэгіянальнай нормы чытання"
+      },
+      "aosp": [
+        {
+          "repo": "packages/providers/DownloadProvider",
+          "key": "root_downloads",
+          "zh-rCN": "\u4E0B\u8F7D",
+          "zh-rTW": "\u4E0B\u8F09\u9805\u76EE"
+        },
+        {
+          "repo": "packages/providers/DownloadProvider",
+          "key": "storage_description",
+          "zh-rCN": "\u4E0B\u8F7D\u5185\u5BB9",
+          "zh-rTW": "\u4E0B\u8F09"
+        }
+      ],
+      "note": "назоўнікавы UI-сэнс (спампоўкі) існуе толькі ў корпусе AOSP; у нарматыўным MOE слова адсутнічае цалкам (404 moedict)"
+    },
+    "purchase": {
+      "ui_sense": "купіць/пакупка",
+      "candidate": {
+        "zh": "\u8D2D\u4E70",
+        "pinyin": "gòumǎi"
+      },
+      "cedict": {
+        "entry": "\u8CFC\u8CB7 \u8D2D\u4E70 [gou4 mai3] /to purchase; to buy/",
+        "fit": "дакладны; ускосны назоўнік у \u9810\u8CFC /advance purchase/"
+      },
+      "moe": {
+        "title": "\u8CFC\u8CB7",
+        "pinyin": "gòu mǎi",
+        "def": "\u8CB7\u3002\u5982\uFF1A\u300C\u8CFC\u8CB7\u617E\u300D\u3002"
+      },
+      "wiktionary": {
+        "reading": "m=gòumǎi c=kau3 maai5"
+      },
+      "aosp": [],
+      "note": "фраза «restore purchases» (аднаўленне пакупак) не слоўнікавая — unresolved ва ўсіх крыніцах"
+    },
+    "restore": {
+      "ui_sense": "аднавіць (стан/пакупку)",
+      "candidate": {
+        "zh": "\u6062\u590D",
+        "pinyin": "huīfù"
+      },
+      "cedict": [
+        {
+          "entry": "\u6062\u5FA9 \u6062\u590D [hui1 fu4] /to reinstate/to resume/to restore/to recover/to regain/to rehabilitate/",
+          "fit": "дакладны агульны сэнс"
+        },
+        {
+          "entry": "\u4FEE\u5FA9 \u4FEE\u590D [xiu1 fu4] /to restore; to renovate/(computing) to repair (a corrupted file etc)/",
+          "fit": "кампутарны сэнс рамонту, не пакупак"
+        }
+      ],
+      "moe": {
+        "title": "\u6062\u5FA9",
+        "pinyin": "huī fù",
+        "def": "\u56DE\u5FA9\u539F\u4F86\u7684\u6A23\u5B50\u3002"
+      },
+      "wiktionary": {
+        "reading": "m=huīfù c=fui1 fuk6 (аўдыё LL-Q9186 (yue)-Justinrleung-\u6062\u5FA9.wav)"
+      },
+      "aosp": [],
+      "note": "Unihan: спрошчаны \u6062 U+6062 kMandarin/kXHC1983 = huī; традыцыйны кодэпойнт U+6BC1 дае huǐ (з \u6F22\u8A9E\u5927\u8A5E\u5178) — знакавы ўзровень чытанняў трэба браць словам, не кодэпойнтам"
+    },
+    "unavailable": {
+      "ui_sense": "функцыя/сэрвіс недаступны",
+      "candidate": {
+        "zh": "\u4E0D\u53EF\u7528",
+        "pinyin": "bùkěyòng",
+        "variant_tw": {
+          "zh": "\u7121\u6CD5\u4F7F\u7528"
+        }
+      },
+      "cedict": {
+        "entry": null,
+        "fit": "\u4E0D\u53EF\u7528 як headword АДСКУТНЫ; таварныя \u65E0\u8D27 /product unavailable/, \u7F3A\u8D27 /unavailable goods/ — іншы сэнс"
+      },
+      "moe": null,
+      "wiktionary": {
+        "reading": "\u7121\u6CD5 [wu2 fa3] /unable to; incapable of/ (CEDICT); \u4E0D\u53EF\u7528 артыкула няма"
+      },
+      "aosp": [
+        {
+          "repo": "frameworks/base",
+          "key": "—",
+          "zh-rCN": "\u300C\u79FB\u52A8\u7F51\u7EDC\u4E0D\u53EF\u7528…\u300D; standalone\u300C\u4E0D\u53EF\u7528\u300D",
+          "zh-rTW": "\u300C\u7121\u6CD5\u4F7F\u7528…\u300D(напр. \u7121\u6CD5\u4F7F\u7528\u8A9E\u97F3\u901A\u8A71\u670D\u52D9)"
+        },
+        {
+          "repo": "frameworks/base",
+          "key": "biometric_error_hw_unavailable",
+          "zh-rCN": "\u751F\u7269\u8BC6\u522B\u786C\u4EF6\u65E0\u6CD5\u4F7F\u7528",
+          "zh-rTW": "\u7121\u6CD5\u4F7F\u7528\u751F\u7269\u8FA8\u8B58\u786C\u9AD4"
+        }
+      ],
+      "note": "UI-сэнс «недаступна» доказаны толькі корпусам AOSP; у слоўніках (CEDICT/MOE) прамы тэрмін адсутнічае"
+    }
+  },
+  "toponyms": [
+    {
+      "pl": "Warszawa",
+      "zh": "\u534E\u6C99",
+      "trad": "\u83EF\u6C99",
+      "pinyin": "Huáshā",
+      "cedict": "\u83EF\u6C99 \u534E\u6C99 [Hua2 sha1] /Warsaw, capital of Poland/",
+      "wiktionary": "m=Huáshā c=waa4 saa1",
+      "zhwiki": "\u534E\u6C99/\u7DAD\u5229\u5947\u5361-старонка: \u7EF4\u57FA\u767E\u79D1 title \u534E\u6C99",
+      "resolved": true
+    },
+    {
+      "pl": "Kraków",
+      "zh": "\u514B\u62C9\u79D1\u592B",
+      "trad": "\u514B\u62C9\u79D1\u592B",
+      "pinyin": "Kèlākēfū",
+      "cedict": "\u514B\u62C9\u79D1\u592B \u514B\u62C9\u79D1\u592B [Ke4 la1 ke1 fu1] /Krakow/",
+      "wiktionary": "m=Kèlākēfū c=hak1 laai1 fo1 fu1",
+      "zhwiki": null,
+      "resolved": true
+    },
+    {
+      "pl": "Gdańsk",
+      "zh": "\u683C\u4F46\u65AF\u514B",
+      "trad": "\u683C\u4F46\u65AF\u514B",
+      "pinyin": "Gédànsīkè",
+      "cedict": "\u683C\u4F46\u65AF\u514B \u683C\u4F46\u65AF\u514B [Ge2 dan4 si1 ke4] /Gdansk, city on Baltic in north Poland/",
+      "wiktionary": "m=Gédànsīkè c=gaak3 daan6 si1 hak1",
+      "zhwiki": null,
+      "resolved": true
+    },
+    {
+      "pl": "Wieliczka",
+      "zh": "\u7EF4\u5229\u5947\u5361",
+      "trad": "\u7DAD\u5229\u5947\u5361",
+      "pinyin": null,
+      "cedict": null,
+      "wiktionary": null,
+      "zhwiki": "zh.wikipedia title \u7DAD\u5229\u5947\u5361 (HTTP 200, 2026-10-06)",
+      "resolved": "toponym: толькі Вікіпедыя; у слоўніках адсутнічае"
+    },
+    {
+      "pl": "Zakopane / Wisła / Wawel / Toruń / Malbork",
+      "zh": null,
+      "cedict": "NOT FOUND",
+      "wiktionary": "не правяраліся",
+      "zhwiki": "не правяраліся",
+      "resolved": false
+    }
+  ],
+  "synthetic_passages": [
+    {
+      "id": "P1",
+      "script": "Hans",
+      "text": "\u6B22\u8FCE\u6765\u5230\u514B\u62C9\u79D1\u592B\uFF01\u60A8\u7684\u8BED\u97F3\u5BFC\u89C8\u4ECE 10:00 \u5F00\u59CB\uFF0C\u5168\u7A0B\u7EA6 90 \u5206\u949F\u3002\u8BF7\u6234\u4E0A\u8033\u673A\uFF0C\u5728\u8001\u57CE\u5E7F\u573A\u7684\u96C6\u5408\u70B9\u7B49\u5F85\u5BFC\u6E38\u3002",
+      "origin": "уласны сінтэтычны тэкст гэтай сесіі, не скапіраваны",
+      "word_checks": [
+        {
+          "w": "\u6B22\u8FCE",
+          "cedict": "\u6B61\u8FCE \u6B22\u8FCE [huan1 ying2] /to welcome/welcome/"
+        },
+        {
+          "w": "\u8BED\u97F3",
+          "cedict": "\u8A9E\u97F3 \u8BED\u97F3 [yu3 yin1] /speech sounds/pronunciation/colloquial (rather than literary) pronunciation (of Chinese)/"
+        },
+        {
+          "w": "\u5BFC\u89C8",
+          "cedict": "\u898B батарэя guide"
+        },
+        {
+          "w": "\u5F00\u59CB",
+          "cedict": "\u958B\u59CB \u5F00\u59CB [kai1 shi3] /to begin; to start/beginning; start/"
+        },
+        {
+          "w": "\u5168\u7A0B",
+          "cedict": "\u5168\u7A0B \u5168\u7A0B [quan2 cheng2] /the whole distance; from beginning to end/"
+        },
+        {
+          "w": "\u7EA6",
+          "cedict": "\u7D04 \u7EA6 [yao1] /to weigh…/ + чытанне yuē «approximately» у тым жа запісе"
+        },
+        {
+          "w": "\u5206\u949F",
+          "cedict": "\u5206\u9418 \u5206\u949F [fen1 zhong1] /minute/"
+        },
+        {
+          "w": "\u8BF7",
+          "cedict": "\u8ACB \u8BF7 [qing3] /to ask/to invite/please (do sth)/"
+        },
+        {
+          "w": "\u6234\u4E0A",
+          "cedict": "\u6234\u4E0A \u6234\u4E0A [dai4 shang5] /to put on (hat etc)/"
+        },
+        {
+          "w": "\u8033\u673A",
+          "cedict": "\u8033\u6A5F \u8033\u673A [er3 ji1] /headphones/earphones/"
+        },
+        {
+          "w": "\u8001\u57CE",
+          "cedict": "\u8001\u57CE \u8001\u57CE [lao3 cheng2] /old town/old district of a city/"
+        },
+        {
+          "w": "\u5E7F\u573A",
+          "cedict": "\u5EE3\u5834 \u5E7F\u573A [guang3 chang3] /public square; plaza/"
+        },
+        {
+          "w": "\u96C6\u5408\u70B9",
+          "resolved": "частковае: \u96C6\u5408 ёсць (у т.л. матэм. сэнс), цэльнае «\u96C6\u5408\u70B9» як headword адсутнічае"
+        },
+        {
+          "w": "\u7B49\u5F85",
+          "cedict": "\u7B49\u5F85 \u7B49\u5F85 [deng3 dai4] /to wait; to wait for/"
+        },
+        {
+          "w": "\u5BFC\u6E38",
+          "cedict": "\u898B батарэя guide"
+        }
+      ],
+      "trad_rendering": "\u6B61\u8FCE\u4F86\u5230\u514B\u62C9\u79D1\u592B\uFF01\u60A8\u7684\u8A9E\u97F3\u5C0E\u89BD\u5F9E 10:00 \u958B\u59CB\uFF0C\u5168\u7A0B\u7D04 90 \u5206\u9418\u3002\u8ACB\u6234\u4E0A\u8033\u6A5F\uFF0C\u5728\u8001\u57CE\u5EE3\u5834\u7684\u96C6\u5408\u9EDE\u7B49\u5F85\u5C0E\u904A\u3002",
+      "trad_note": "кітайскія лічбы і час (10:00, 90) пакінутыя арабскімі — як у рэальнай UI-практыцы AOSP"
+    },
+    {
+      "id": "P2",
+      "script": "Hans",
+      "text": "\u4E0B\u8F7D\u5DF2\u6682\u505C\uFF1A\u7F51\u7EDC\u4E0D\u53EF\u7528\u3002\u6062\u590D\u4E0B\u8F7D\u9700\u8981 Wi-Fi\uFF1B\u8BF7\u5148\u6563\u6B65 15 \u5206\u949F\uFF0C\u6D4F\u89C8\u7EF4\u5229\u5947\u5361\u7684\u76D0\u77FF\u7167\u7247\u3002\u8D2D\u4E70\u5BFC\u89C8\u7684\u95E8\u7968\u4ECA\u65E5\u5F00\u653E\u81F3 18:00\u3002",
+      "origin": "уласны сінтэтычны тэкст гэтай сесіі",
+      "word_checks": [
+        {
+          "w": "\u4E0B\u8F7D",
+          "cedict": "\u898B батарэя download"
+        },
+        {
+          "w": "\u6682\u505C",
+          "cedict": "\u66AB\u505C \u6682\u505C [zan4 ting2] /to suspend/time-out (e.g. in sports)/stoppage/pause (media playback)/"
+        },
+        {
+          "w": "\u7F51\u7EDC\u4E0D\u53EF\u7528",
+          "resolved": "\u4E0D\u53EF\u7528 — AOSP-корпус, у слоўніках няма (гл. батарэю unavailable)"
+        },
+        {
+          "w": "\u6062\u590D",
+          "cedict": "\u898B батарэя restore"
+        },
+        {
+          "w": "\u9700\u8981",
+          "cedict": "\u9700\u8981 \u9700\u8981 [xu1 yao4] /to need; to want; to demand; to require/"
+        },
+        {
+          "w": "\u6563\u6B65",
+          "cedict": "\u898B батарэя walk"
+        },
+        {
+          "w": "\u6D4F\u89C8",
+          "cedict": "\u700F\u89BD \u6D4F\u89C8 [liu2 lan3] /to skim over/to browse/"
+        },
+        {
+          "w": "\u7EF4\u5229\u5947\u5361",
+          "resolved": "toponym: толькі zh.wikipedia \u7DAD\u5229\u5947\u5361; у CEDICT НЯМА"
+        },
+        {
+          "w": "\u76D0\u77FF",
+          "resolved": "\u76D0\u77FF/\u9E7D\u7926 у CEDICT АДСКУТНЫя — unresolved"
+        },
+        {
+          "w": "\u8D2D\u4E70",
+          "cedict": "\u898B батарэя purchase"
+        },
+        {
+          "w": "\u95E8\u7968",
+          "cedict": "\u9580\u7968 \u95E8\u7968 [men2 piao4] /ticket (for theater, cinema etc)/"
+        },
+        {
+          "w": "\u4ECA\u65E5",
+          "cedict": "\u4ECA\u65E5 \u4ECA\u65E5 [jin1 ri4] /today/"
+        },
+        {
+          "w": "\u5F00\u653E",
+          "cedict": "\u958B\u653E \u5F00\u653E [kai1 fang4] /to bloom/to open/to be open (to the public)/"
+        }
+      ],
+      "tw_rendering": "\u4E0B\u8F09\u5DF2\u66AB\u505C\uFF1A\u7DB2\u8DEF\u7121\u6CD5\u4F7F\u7528\u3002\u6062\u5FA9\u4E0B\u8F09\u9700\u8981 Wi-Fi\uFF1B\u8ACB\u5148\u6563\u6B65 15 \u5206\u9418\uFF0C\u700F\u89BD\u7DAD\u5229\u5947\u5361\u7684\u9E7D\u7926\u7167\u7247\u3002\u8CFC\u8CB7\u5C0E\u89BD\u7684\u9580\u7968\u4ECA\u65E5\u958B\u653E\u81F3 18:00\u3002",
+      "tw_note": "TW-варыянт зроблены перасклДаваннем рэгіянальнай лексікі (\u7F51\u7EDC→\u7DB2\u8DEF, \u4E0D\u53EF\u7528→\u7121\u6CD5\u4F7F\u7528), не механічнай графічнай канверсіяй — гэта дэманструе AC1-выснову пра лексічны разрыў"
+    }
+  ],
+  "regional_split_evidence": {
+    "cedict_markers": [
+      "\u6ED1\u9F20 \u6ED1\u9F20 [hua2 shu3] /(computer) mouse (Tw)/",
+      "\u8A08\u7A0B\u8ECA \u8BA1\u7A0B\u8F66 [ji4 cheng2 che1] /(Tw) taxi; cab/",
+      "\u57CB\u55AE \u57CB\u5355 [mai2 dan1] /to pay the bill … (loanword from Cantonese)/"
+    ],
+    "aosp_vocabulary": [
+      "back_button_label: \u4E0A\u4E00\u6B65 (CN) vs \u8FD4\u56DE (TW)",
+      "settings_label: \u8BBE\u7F6E (CN) vs \u8A2D\u5B9A (TW)",
+      "permlab_downloadManager: \u8BBF\u95EE…\u7BA1\u7406\u5668 (CN) vs \u5B58\u53D6…\u7BA1\u7406\u54E1 (TW)"
+    ]
+  },
+  "conversion_pitfall": {
+    "evidence": "CEDICT \u7121\u6CD5\u7121\u5929 \u65E0\u6CD5\u65E0\u5929 [he2 shang5 da3 san3 , wu2 fa3 wu2 tian1] /lit. like a monk holding an umbrella — no hair, no sky (idiom) (punning on \u9AEE|\u53D1[fa4] vs \u6CD5[fa3])/",
+    "meaning": "спрошчанае \u53D1 адпавядае двум традыцыйным \u9AEE (валасы) і \u767C (адпраўляць) — аўтаканверсія simp→trad патрабуе словамагульнага рашэння, не знакавага"
+  },
+  "unresolved": [
+    "\u4E0D\u53EF\u7528/\u7121\u6CD5\u4F7F\u7528: UI-сэнс недаступнасці не пакрыты CC-CEDICT і MOE — доказ толькі з AOSP-корпуса; манеўр патрабуе семантычнага рэвью (G21.19/#543)",
+    "download як назоўнік: у CEDICT толькі дзеяслоў; назоўнікавая форма доказана AOSP (\u4E0B\u8F7D\u5185\u5BB9/\u4E0B\u8F09\u9805\u76EE)",
+    "«restore purchases» (аднаўленне пакупак крамы): фразы няма ні ў адной слоўнікавай крыніцы — крамны тэрмін (Play/App Store) за межамі дасягнення гэтай сесіі",
+    "кантрольная верыфікацыя \u76D0\u77FF/\u9E7D\u7926 (саляная шахта) і цэльнага \u96C6\u5408\u70B9: адсутнічаюць у CEDICT",
+    "Тапонімы за межамі Варшава/Кракаў/Гданьск/Велічка (Zakopane, Wisła, Wawel, Toruń, Malbork): не верыфікаваныя",
+    "жывая маўленчая норма (сучасны разгоны рэгістр): праверана толькі праз слоўнікавыя маркеры (\u53E3\u8A9E/колоквіальны), жывога карпуса маўлення не слухалі — гэта межа G21.41 (агучка)",
+    "нэтывамоўны рэцэнзент: недаступны ў гэтай сесіі (ніякіх акаўнтаў/сэрвісаў не аўтарызавана) — канкрэтная перадумова G21.42"
+  ],
+  "http_log_entries": 61,
+  "http_log": [
+    {
+      "ts": "2026-10-06T00:22:23Z",
+      "url": "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
+      "effective_url": "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry",
+      "http": "200",
+      "bytes": "731819",
+      "file": "iana-subtag-registry.txt",
+      "sha256": "755fad43283be7b41ebe3c89ad054b6eaf928f404f9c0edb74799e0eab74beb1",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:23Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-core/supplemental/likelySubtags.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-core/supplemental/likelySubtags.json",
+      "http": "200",
+      "bytes": "220093",
+      "file": "cldr-likelySubtags.json",
+      "sha256": "38345946ad457213fb39e9645ab50f36b61681bf674b2eef2979a3b58d04afc8",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:24Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh/languages.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh/languages.json",
+      "http": "404",
+      "bytes": "14",
+      "file": "cldr-zh-languages.json",
+      "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:24Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh-Hans/languages.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh-Hans/languages.json",
+      "http": "404",
+      "bytes": "14",
+      "file": "cldr-zh-Hans-languages.json",
+      "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:24Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh-Hant/languages.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/zh-Hant/languages.json",
+      "http": "404",
+      "bytes": "14",
+      "file": "cldr-zh-Hant-languages.json",
+      "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:25Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/yue/languages.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-modern/main/yue/languages.json",
+      "http": "404",
+      "bytes": "14",
+      "file": "cldr-yue-languages.json",
+      "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:25Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh-Hans/territories.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh-Hans/territories.json",
+      "http": "200",
+      "bytes": "9933",
+      "file": "cldr-zh-Hans-territories.json",
+      "sha256": "de255a878dc85dbf801353e13e7d6685eccebe238b485818f129a6ad82212d43",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:25Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-core/supplemental/plurals.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-core/supplemental/plurals.json",
+      "http": "200",
+      "bytes": "76105",
+      "file": "cldr-plurals.json",
+      "sha256": "6c0a48e9bcfc25856f90202f703c2c7f89c105d6868f7712a943a6ed2dcbe8f4",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:56Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh-Hans/languages.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh-Hans/languages.json",
+      "http": "200",
+      "bytes": "20191",
+      "file": "cldr-zh-Hans-languages.json",
+      "sha256": "b983561ee86d239e4bd13561414daa1cb5424406cc631f368e4b5cf8e1076d47",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:56Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh-Hant/languages.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh-Hant/languages.json",
+      "http": "200",
+      "bytes": "22032",
+      "file": "cldr-zh-Hant-languages.json",
+      "sha256": "ba2d41877dfe8085246895fb79dee07d7f27dda6f8d54a2cfbfc98b3a26251f1",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:56Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh/languages.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/zh/languages.json",
+      "http": "200",
+      "bytes": "20160",
+      "file": "cldr-zh-languages.json",
+      "sha256": "c38a6432f03549aa933674bba9880e3bae890135922231775818ae5cbe7b3ee3",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:57Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/yue/languages.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-localenames-full/main/yue/languages.json",
+      "http": "200",
+      "bytes": "22059",
+      "file": "cldr-yue-languages.json",
+      "sha256": "cbb3993e679ff084c48b2aa804e1e3006799aa152193207b3636d0bd22194737",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:57Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh/characters.json",
+      "http": "200",
+      "bytes": "16881",
+      "file": "probe-zh-characters.json",
+      "sha256": "f4e57d161a3565e8690f697812f8bb097f2ae21970e28eaa7953344eee14c2bd",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:58Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans/characters.json",
+      "http": "200",
+      "bytes": "16912",
+      "file": "probe-zh-Hans-characters.json",
+      "sha256": "9c14b9f8509eefa96777fef81b432ebf1dd36844f17de40d4fbd822ac99cf93f",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:58Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant/characters.json",
+      "http": "200",
+      "bytes": "13646",
+      "file": "probe-zh-Hant-characters.json",
+      "sha256": "8b2a420853ce157aed25048e63dcc59f9538f351a49fc83642b16a068c768b85",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:58Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-SG/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-SG/characters.json",
+      "http": "200",
+      "bytes": "16942",
+      "file": "probe-zh-Hans-SG-characters.json",
+      "sha256": "041f817f5f3718b41fd45c5b10cefd0dacc67a572a5f393448ffb71102cd7359",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:59Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-HK/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-HK/characters.json",
+      "http": "200",
+      "bytes": "16942",
+      "file": "probe-zh-Hans-HK-characters.json",
+      "sha256": "1ee7be5bddabd3dc8cf7346301b3e2f1df783a4ff283c47d5ead22d6a79144cc",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:59Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant-TW/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant-TW/characters.json",
+      "http": "404",
+      "bytes": "14",
+      "file": "probe-zh-Hant-TW-characters.json",
+      "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:22:59Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant-HK/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant-HK/characters.json",
+      "http": "200",
+      "bytes": "13672",
+      "file": "probe-zh-Hant-HK-characters.json",
+      "sha256": "7613dfbc538b5c784f856e9cf7bae791304fd98b05a9080ccfce2968f14eb56f",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:23:00Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-MO/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-MO/characters.json",
+      "http": "200",
+      "bytes": "16942",
+      "file": "probe-zh-Hans-MO-characters.json",
+      "sha256": "e63c3a69a659e8e10010c977eb9b280cc4ab7260270b5a5c3af0f34619a14422",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:23:00Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue/characters.json",
+      "http": "200",
+      "bytes": "12257",
+      "file": "probe-yue-characters.json",
+      "sha256": "f9a88a3701de48c83c604d2b2c8b773820e7227481c537fd4fa807f21917d91f",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:23:01Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue-Hans/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue-Hans/characters.json",
+      "http": "200",
+      "bytes": "10851",
+      "file": "probe-yue-Hans-characters.json",
+      "sha256": "15e9db30379ec4351494d21b4b052f32ee975f348a27ac3aa1c7b8f5b2f304a5",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:23:01Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue-Hant/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue-Hant/characters.json",
+      "http": "200",
+      "bytes": "12288",
+      "file": "probe-yue-Hant-characters.json",
+      "sha256": "d09ae38b49a6a534fc13eee22a53dcb6f52680b4f939044bfc46e92e6f9e7696",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:23:02Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/cmn/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/cmn/characters.json",
+      "http": "404",
+      "bytes": "14",
+      "file": "probe-cmn-characters.json",
+      "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:25Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh/characters.json",
+      "http": "200",
+      "bytes": "16881",
+      "file": "probe-zh-characters.json",
+      "sha256": "f4e57d161a3565e8690f697812f8bb097f2ae21970e28eaa7953344eee14c2bd",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:25Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans/characters.json",
+      "http": "200",
+      "bytes": "16912",
+      "file": "probe-zh-Hans-characters.json",
+      "sha256": "9c14b9f8509eefa96777fef81b432ebf1dd36844f17de40d4fbd822ac99cf93f",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:26Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant/characters.json",
+      "http": "200",
+      "bytes": "13646",
+      "file": "probe-zh-Hant-characters.json",
+      "sha256": "8b2a420853ce157aed25048e63dcc59f9538f351a49fc83642b16a068c768b85",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:26Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-SG/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-SG/characters.json",
+      "http": "200",
+      "bytes": "16942",
+      "file": "probe-zh-Hans-SG-characters.json",
+      "sha256": "041f817f5f3718b41fd45c5b10cefd0dacc67a572a5f393448ffb71102cd7359",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:26Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-HK/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-HK/characters.json",
+      "http": "200",
+      "bytes": "16942",
+      "file": "probe-zh-Hans-HK-characters.json",
+      "sha256": "1ee7be5bddabd3dc8cf7346301b3e2f1df783a4ff283c47d5ead22d6a79144cc",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:27Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant-TW/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant-TW/characters.json",
+      "http": "404",
+      "bytes": "14",
+      "file": "probe-zh-Hant-TW-characters.json",
+      "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:27Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant-HK/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hant-HK/characters.json",
+      "http": "200",
+      "bytes": "13672",
+      "file": "probe-zh-Hant-HK-characters.json",
+      "sha256": "7613dfbc538b5c784f856e9cf7bae791304fd98b05a9080ccfce2968f14eb56f",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:27Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-MO/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/zh-Hans-MO/characters.json",
+      "http": "200",
+      "bytes": "16942",
+      "file": "probe-zh-Hans-MO-characters.json",
+      "sha256": "e63c3a69a659e8e10010c977eb9b280cc4ab7260270b5a5c3af0f34619a14422",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:28Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue/characters.json",
+      "http": "200",
+      "bytes": "12257",
+      "file": "probe-yue-characters.json",
+      "sha256": "f9a88a3701de48c83c604d2b2c8b773820e7227481c537fd4fa807f21917d91f",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:28Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue-Hans/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue-Hans/characters.json",
+      "http": "200",
+      "bytes": "10851",
+      "file": "probe-yue-Hans-characters.json",
+      "sha256": "15e9db30379ec4351494d21b4b052f32ee975f348a27ac3aa1c7b8f5b2f304a5",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:28Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue-Hant/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/yue-Hant/characters.json",
+      "http": "200",
+      "bytes": "12288",
+      "file": "probe-yue-Hant-characters.json",
+      "sha256": "d09ae38b49a6a534fc13eee22a53dcb6f52680b4f939044bfc46e92e6f9e7696",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:37:29Z",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/cmn/characters.json",
+      "effective_url": "https://raw.githubusercontent.com/unicode-org/cldr-json/48.2.3/cldr-json/cldr-misc-full/main/cmn/characters.json",
+      "http": "404",
+      "bytes": "14",
+      "file": "probe-cmn-characters.json",
+      "sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:38:22Z",
+      "url": "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz",
+      "effective_url": "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz",
+      "http": "200",
+      "bytes": "3978669",
+      "file": "cedict.gz",
+      "sha256": "545476af88e2d11b8697ca53b6249f3186f0a8d1540a4572ddda898065eb3ae2",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:41:27Z",
+      "url": "https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/core/res/res/values-zh-rCN/strings.xml?format=TEXT",
+      "effective_url": "https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/core/res/res/values-zh-rCN/strings.xml?format=TEXT",
+      "http": "200",
+      "bytes": "412560",
+      "file": "aosp-base-zhCN.b64",
+      "sha256": "1965762cfffbf58ca1ec925a494f627be825880cd2381cc996bacafb0fc88f1c",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:41:28Z",
+      "url": "https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/core/res/res/values-zh-rTW/strings.xml?format=TEXT",
+      "effective_url": "https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/core/res/res/values-zh-rTW/strings.xml?format=TEXT",
+      "http": "200",
+      "bytes": "417228",
+      "file": "aosp-base-zhTW.b64",
+      "sha256": "cc2357f59610773f07ba43fedf0f085c5c8b1fa1b327c5c0566c31215056ed95",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:41:29Z",
+      "url": "https://android.googlesource.com/platform/packages/apps/Settings/+/refs/heads/main/res/values-zh-rCN/strings.xml?format=TEXT",
+      "effective_url": "https://android.googlesource.com/platform/packages/apps/Settings/+/refs/heads/main/res/values-zh-rCN/strings.xml?format=TEXT",
+      "http": "200",
+      "bytes": "947772",
+      "file": "aosp-settings-zhCN.b64",
+      "sha256": "4d14f42d08dcdcba2e94a23688a1992f9ea6c950012c156211cb7268e1265e1b",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:41:30Z",
+      "url": "https://android.googlesource.com/platform/packages/apps/Settings/+/refs/heads/main/res/values-zh-rTW/strings.xml?format=TEXT",
+      "effective_url": "https://android.googlesource.com/platform/packages/apps/Settings/+/refs/heads/main/res/values-zh-rTW/strings.xml?format=TEXT",
+      "http": "200",
+      "bytes": "949752",
+      "file": "aosp-settings-zhTW.b64",
+      "sha256": "1ea6211c23c5245ed8da9972f0e5f89f4b4617306b2ecaf6093313e05c9caaad",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:41:31Z",
+      "url": "https://android.googlesource.com/platform/packages/providers/DownloadProvider/+/refs/heads/main/res/values-zh-rCN/strings.xml?format=TEXT",
+      "effective_url": "https://android.googlesource.com/platform/packages/providers/DownloadProvider/+/refs/heads/main/res/values-zh-rCN/strings.xml?format=TEXT",
+      "http": "200",
+      "bytes": "7892",
+      "file": "aosp-dl-zhCN.b64",
+      "sha256": "537cd83356c21b1dfce99eecd6e34657d5dd4b9ceacfb73e40b035bd3490f6e7",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:41:31Z",
+      "url": "https://android.googlesource.com/platform/packages/providers/DownloadProvider/+/refs/heads/main/res/values-zh-rTW/strings.xml?format=TEXT",
+      "effective_url": "https://android.googlesource.com/platform/packages/providers/DownloadProvider/+/refs/heads/main/res/values-zh-rTW/strings.xml?format=TEXT",
+      "http": "200",
+      "bytes": "7912",
+      "file": "aosp-dl-zhTW.b64",
+      "sha256": "dc081bcdd75aace42e72d5a26e797d84df695eccf705bb0dba960e0d1d6b639f",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:42:56Z",
+      "url": "https://www.moedict.tw/%E8%A8%AD%E5%AE%9A.json",
+      "effective_url": "https://www.moedict.tw/%E8%A8%AD%E5%AE%9A.json",
+      "http": "200",
+      "bytes": "4505",
+      "file": "moedict-she4ding.json",
+      "sha256": "7e21a6785dee3a159033e6dc3a874af63973a0c84380db4a4fcdee873a6be520",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:14Z",
+      "url": "https://www.moedict.tw/%E5%8F%96%E6%B6%88.json",
+      "effective_url": "https://www.moedict.tw/%E5%8F%96%E6%B6%88.json",
+      "http": "200",
+      "bytes": "1866",
+      "file": "moedict-\u53D6\u6D88.json",
+      "sha256": "c6ef1171a3e96ac64095abe7624a2ada8b1c2359cffe8829ac6c3e8e45adbf3a",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:14Z",
+      "url": "https://www.moedict.tw/%E5%B0%8E%E8%A6%BD.json",
+      "effective_url": "https://www.moedict.tw/%E5%B0%8E%E8%A6%BD.json",
+      "http": "200",
+      "bytes": "957",
+      "file": "moedict-\u5C0E\u89BD.json",
+      "sha256": "4be1908434ae0175a16c4d672d5d27a47671ec930c9ef6e1b9628a7c152c7c7b",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:14Z",
+      "url": "https://www.moedict.tw/%E5%9A%AE%E5%B0%8E.json",
+      "effective_url": "https://www.moedict.tw/%E5%9A%AE%E5%B0%8E.json",
+      "http": "200",
+      "bytes": "2273",
+      "file": "moedict-\u56AE\u5C0E.json",
+      "sha256": "107ee5b9c2c218cc10d2938be7d5bedadffd638a41dcc0e178da55ceac0d2f7a",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:14Z",
+      "url": "https://www.moedict.tw/%E5%81%9C%E6%AD%A2.json",
+      "effective_url": "https://www.moedict.tw/%E5%81%9C%E6%AD%A2.json",
+      "http": "200",
+      "bytes": "1459",
+      "file": "moedict-\u505C\u6B62.json",
+      "sha256": "04cf6a3378540b33b0947c09fc7933dbe3eb085da32667095410de60d49ecc2c",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:15Z",
+      "url": "https://www.moedict.tw/%E6%95%A3%E6%AD%A5.json",
+      "effective_url": "https://www.moedict.tw/%E6%95%A3%E6%AD%A5.json",
+      "http": "200",
+      "bytes": "2265",
+      "file": "moedict-\u6563\u6B65.json",
+      "sha256": "d9d6e4a28a61a0e169872c732bc0dce69ff0fde0df3f7a3b3992ee914498019c",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:15Z",
+      "url": "https://www.moedict.tw/%E4%B8%8B%E8%BC%89.json",
+      "effective_url": "https://www.moedict.tw/%E4%B8%8B%E8%BC%89.json",
+      "http": "404",
+      "bytes": "41",
+      "file": "moedict-\u4E0B\u8F09.json",
+      "sha256": "194399739d7ebb20ed93c9bb99f166a145c03207b14879b857a50b8c4d5e5f00",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:15Z",
+      "url": "https://www.moedict.tw/%E8%B3%BC%E8%B2%B7.json",
+      "effective_url": "https://www.moedict.tw/%E8%B3%BC%E8%B2%B7.json",
+      "http": "200",
+      "bytes": "1763",
+      "file": "moedict-\u8CFC\u8CB7.json",
+      "sha256": "dd6e4388b1378b8c47cd84b17eca86e82b868a1178622f9a0edcd0c03ae22ae0",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:16Z",
+      "url": "https://www.moedict.tw/%E6%81%A2%E5%BE%A9.json",
+      "effective_url": "https://www.moedict.tw/%E6%81%A2%E5%BE%A9.json",
+      "http": "200",
+      "bytes": "3208",
+      "file": "moedict-\u6062\u5FA9.json",
+      "sha256": "18e3c9d86b6a5717bb6f5fedc93ff0c1c7c46d57befc764be9fd028a05055680",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:16Z",
+      "url": "https://www.moedict.tw/%E4%B8%8D%E5%8F%AF%E7%94%A8.json",
+      "effective_url": "https://www.moedict.tw/%E4%B8%8D%E5%8F%AF%E7%94%A8.json",
+      "http": "404",
+      "bytes": "52",
+      "file": "moedict-\u4E0D\u53EF\u7528.json",
+      "sha256": "e0b556e715fa39d6f1aa2ec462c1a3f808b03bad3b6c02fc2d2b8e9fa6c0d3ac",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:16Z",
+      "url": "https://www.moedict.tw/%E4%B8%8A%E4%B8%80%E6%AD%A5.json",
+      "effective_url": "https://www.moedict.tw/%E4%B8%8A%E4%B8%80%E6%AD%A5.json",
+      "http": "404",
+      "bytes": "52",
+      "file": "moedict-\u4E0A\u4E00\u6B65.json",
+      "sha256": "4a5935f64d0d02580ac7875f097a2e4056e3b4e8b793d8da54a057a86717bb90",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:16Z",
+      "url": "https://www.moedict.tw/%E8%BF%94%E5%9B%9E.json",
+      "effective_url": "https://www.moedict.tw/%E8%BF%94%E5%9B%9E.json",
+      "http": "200",
+      "bytes": "1511",
+      "file": "moedict-\u8FD4\u56DE.json",
+      "sha256": "7b3d657f7497f6aa7db3553b64a1da036e207ab5463f82b53498bc8b4e74ddf7",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:43:17Z",
+      "url": "https://www.moedict.tw/%E8%A8%AD%E7%BD%AE.json",
+      "effective_url": "https://www.moedict.tw/%E8%A8%AD%E7%BD%AE.json",
+      "http": "200",
+      "bytes": "2297",
+      "file": "moedict-\u8A2D\u7F6E.json",
+      "sha256": "a8ad1e1a429ee549aa40a51c62b4320ccf2d51e30a2d874563791354c1659db7",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:44:53Z",
+      "url": "https://unicode.org/Public/UNIDATA/Unihan.zip",
+      "effective_url": "https://unicode.org/Public/UNIDATA/Unihan.zip",
+      "http": "200",
+      "bytes": "8340649",
+      "file": "unihan.zip",
+      "sha256": "4c93ea9c1f636451729a840978f1667a53886af37ba854fdcce109721c63d43e",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:45:54Z",
+      "url": "https://learn.microsoft.com/en-us/globalization/reference/microsoft-language-resources",
+      "effective_url": "https://learn.microsoft.com/en-us/globalization/reference/microsoft-language-resources",
+      "http": "200",
+      "bytes": "38845",
+      "file": "ms-language-portal.html",
+      "sha256": "1fc3ab4d495086178854199ec850aca67ede062bf19ca1135539fef73ad307f0",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:46:21Z",
+      "url": "https://learn.microsoft.com/en-us/globalization/reference/microsoft-style-guides",
+      "effective_url": "https://learn.microsoft.com/en-us/globalization/reference/microsoft-style-guides",
+      "http": "200",
+      "bytes": "46729",
+      "file": "ms-style-guides.html",
+      "sha256": "163ef17d3faf9d50c414f3730895301539118d6fdff65ab6bc8ac622cf622d34",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:47:50Z",
+      "url": "https://zh.wikipedia.org/wiki/%E7%BB%B4%E5%88%A9%E5%A5%87%E5%8D%A1",
+      "effective_url": "https://zh.wikipedia.org/wiki/%E7%B6%AD%E5%88%A9%E5%A5%87%E5%8D%A1",
+      "http": "200",
+      "bytes": "140462",
+      "file": "zh-wiki-wieliczka.html",
+      "sha256": "7401b665905579e55cbc98e3bd7876fdd777f9300ba25d2dcf75cdce2af608a1",
+      "curl_exit": 0,
+      "stderr": null
+    },
+    {
+      "ts": "2026-10-06T00:47:51Z",
+      "url": "https://zh.wikipedia.org/wiki/%E5%8D%8E%E6%B2%99",
+      "effective_url": "https://zh.wikipedia.org/wiki/%E5%8D%8E%E6%B2%99",
+      "http": "200",
+      "bytes": "1120862",
+      "file": "zh-wiki-warsaw.html",
+      "sha256": "1fcf11148e1e4e46ba9ed437b0e12903df933dedef8d0b6f08287175cb938374",
+      "curl_exit": 0,
+      "stderr": null
+    }
+  ]
+}
