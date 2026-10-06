@@ -132,9 +132,11 @@ module.exports = {
       to: { path: '^core/' },
     },
     // Controllers consume services/ through explicit ports (issue #209 AC1):
-    // the composition root (controllers/createServices.ts) is the only module
-    // that value-imports and constructs them; every other controller takes
-    // types only. Tests are exempt — they wire fakes.
+    // the composition roots are the only modules that value-import and
+    // construct them — createServices.ts composes the Services object,
+    // sessionPorts.ts + deviceServices.ts are the device composition and
+    // deviceRoot.ts its Expo facility binding (G20.20, issue #491); every
+    // other controller takes types only. Tests are exempt — they wire fakes.
     {
       name: 'controllers-services-type-only',
       comment:
@@ -142,7 +144,13 @@ module.exports = {
       severity: 'error',
       from: {
         path: '^controllers/',
-        pathNot: ['^controllers/createServices\\.ts$', '\\.test\\.[cm]?[jt]sx?$'],
+        pathNot: [
+          '^controllers/createServices\\.ts$',
+          '^controllers/sessionPorts\\.ts$',
+          '^controllers/deviceServices\\.ts$',
+          '^controllers/deviceRoot\\.ts$',
+          '\\.test\\.[cm]?[jt]sx?$',
+        ],
       },
       to: { path: '^services/', dependencyTypesNot: ['type-only'] },
     },

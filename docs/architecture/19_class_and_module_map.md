@@ -75,6 +75,8 @@
 | `controllers/useDiscoveryController.ts` | выбар чалавека, стан індэкса/кэшу | змену Run, пакупку, чытанне GPS | крытэрыі падбору, `discovery_cache`-кантракт | G15.03 |
 | `controllers/useFeedbackController.ts` | форма, раскрыццё мэты, edit/delete, станы адпраўкі | адпраўку да яўнага Send | чарнавік і стан формы | G16.03 |
 
+> Абнаўленне 2026-10-06 (G20.20, issue #491): кампазіцыйныя карані кантролераў — `controllers/createServices.ts` (кампазітар `Services` над портамі) і далучаныя прыладовыя карані `controllers/sessionPorts.ts` (db-правядка парт сесій/гісторыі/налад над `services/db`) і `controllers/deviceServices.ts` з яго expo-прывязкай `controllers/deviceRoot.ts` (вытворчы камплект парт прылады, спэц V5). Толькі гэтыя чатыры модулі value-імпартуюць `services/`; астатнія кантролеры трымаюць services-імпарты type-only. Машыннае правіла — `controllers-services-type-only` у `.dependency-cruiser.cjs`.
+
 ### 2.3 Сэрвісы — мяжа OS, сеткі і дыска
 
 | Модуль | Тып | Адказнасць / валодае | Жыццёвы цыкл | Задача |
