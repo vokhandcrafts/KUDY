@@ -28,7 +28,6 @@ export const fr = {
   "duration": "Durée",
   "homeLink": "Vers l'accueil",
   "kilometersShort": "km",
-  "langSwitchName": "English",
   "languages": "Langues",
   "lockedLabel": "étape verrouillée",
   "mapAttribution": "Données de carte © contributeurs OpenStreetMap (licence ODbL)",
@@ -56,4 +55,7 @@ export const fr = {
   "storyTextHeading": "Texte de l'histoire",
   "textOnly": "texte seul",
   "versionUnavailable": "Version indisponible",
+  "catalogEmpty": "Il n'y a pas encore de guides avec du texte dans cette langue.",
+  "textUnavailableTitle": "Le texte du guide dans cette langue n'est pas encore disponible",
+  "textUnavailableBody": "Ce guide n'a pas de texte dans la langue d'interface choisie. Ses langues de texte figurent dans la liste des langues du catalogue.",
 };

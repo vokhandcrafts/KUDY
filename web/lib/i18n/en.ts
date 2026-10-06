@@ -28,7 +28,6 @@ export const en = {
   "duration": "Duration",
   "homeLink": "Home",
   "kilometersShort": "km",
-  "langSwitchName": "Беларуская",
   "languages": "Languages",
   "lockedLabel": "locked stop",
   "mapAttribution": "Map data © OpenStreetMap contributors (ODbL licence)",
@@ -56,4 +55,7 @@ export const en = {
   "storyTextHeading": "Story text",
   "textOnly": "text only",
   "versionUnavailable": "Version unavailable",
+  "catalogEmpty": "No guides with text in this language yet.",
+  "textUnavailableTitle": "Guide text in this language is not available yet",
+  "textUnavailableBody": "This guide has no text in the selected interface language. Its text languages are listed in the language list in the catalog.",
 };

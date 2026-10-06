@@ -74,7 +74,6 @@ test('the Czech web catalogue renders through getUiStrings with the same key sha
   assert.equal(cs.catalogTitle, 'Průvodci po městě');
   assert.equal(cs.nextStop, 'Další zastavení');
   assert.equal(cs.privacyTitle, 'Soukromí');
-  assert.equal(cs.langSwitchName, 'English');
   // The generated projection keeps the key shape of the shipped sets.
   assert.deepEqual(Object.keys(cs).sort(), Object.keys(be).sort());
   // No Czech word is blank (the shape guard's own rule, for cs).

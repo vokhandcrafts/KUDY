@@ -28,7 +28,6 @@ export const uk = {
   "duration": "Тривалість",
   "homeLink": "На головну",
   "kilometersShort": "км",
-  "langSwitchName": "English",
   "languages": "Мови",
   "lockedLabel": "точка під замком",
   "mapAttribution": "Дані карти © учасники OpenStreetMap (ліцензія ODbL)",
@@ -56,4 +55,7 @@ export const uk = {
   "storyTextHeading": "Текст історії",
   "textOnly": "лише текст",
   "versionUnavailable": "Версія недоступна",
+  "catalogEmpty": "Гідів з текстом цією мовою ще немає.",
+  "textUnavailableTitle": "Текст гіда цією мовою поки недоступний",
+  "textUnavailableBody": "Цей гід не має тексту обраною мовою інтерфейсу. Його мови тексту вказані у списку мов у каталозі.",
 };

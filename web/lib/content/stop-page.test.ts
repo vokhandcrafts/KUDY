@@ -123,7 +123,7 @@ test('the stop components stay server-rendered and manual — no client JS, no s
     'web/components/manual-audio-player.tsx',
     'web/app/global-not-found.tsx',
     'web/app/(be)/guides/[route_id]/stops/[stop_id]/page.tsx',
-    'web/app/(en)/en/guides/[route_id]/stops/[stop_id]/page.tsx',
+    'web/app/[locale]/guides/[route_id]/stops/[stop_id]/page.tsx',
   ].map((rel) => fs.readFileSync(path.join(REPO_ROOT, rel), 'utf8'));
   assert.ok(sources.every((source) => source.length > 0));
   for (const source of sources) {

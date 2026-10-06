@@ -28,7 +28,6 @@ export const es = {
   "duration": "Duración",
   "homeLink": "Al inicio",
   "kilometersShort": "km",
-  "langSwitchName": "English",
   "languages": "Idiomas",
   "lockedLabel": "parada bloqueada",
   "mapAttribution": "Datos del mapa © colaboradores de OpenStreetMap (licencia ODbL)",
@@ -56,4 +55,7 @@ export const es = {
   "storyTextHeading": "Texto de la historia",
   "textOnly": "solo texto",
   "versionUnavailable": "Versión no disponible",
+  "catalogEmpty": "Todavía no hay guías con texto en este idioma.",
+  "textUnavailableTitle": "El texto de la guía en este idioma todavía no está disponible",
+  "textUnavailableBody": "Esta guía no tiene texto en el idioma de interfaz seleccionado. Sus idiomas de texto figuran en la lista de idiomas del catálogo.",
 };

@@ -28,7 +28,6 @@ export const be = {
   "duration": "Працягласць",
   "homeLink": "На галоўную",
   "kilometersShort": "км",
-  "langSwitchName": "English",
   "languages": "Мовы",
   "lockedLabel": "кропка пад замком",
   "mapAttribution": "Даныя карты © удзельнікі OpenStreetMap (ліцэнзія ODbL)",
@@ -56,4 +55,7 @@ export const be = {
   "storyTextHeading": "Тэкст гісторыі",
   "textOnly": "толькі тэкст",
   "versionUnavailable": "Версія недаступная",
+  "catalogEmpty": "Гідаў з тэкстам на гэтай мове яшчэ няма.",
+  "textUnavailableTitle": "Тэкст гіда на гэтай мове пакуль недаступны",
+  "textUnavailableBody": "Гэты гід не мае тэксту на выбранай мове інтэрфейсу. Яго мовы тэксту паказаныя ў спісе моваў у каталоге.",
 };
