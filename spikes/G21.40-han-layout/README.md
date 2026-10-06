@@ -29,8 +29,8 @@
 # 1) збіраць runtime/ (копіі твароў KUDY з node_modules + падмноствы Noto CJK)
 python3 spikes/G21.40-han-layout/scripts/build-subsets.py
 
-# 2) падняць лакальны сервер і адкрыць проб
-cd spikes/G21.40-han-layout && python3 -m http.server 8789
+# 2) падняць лакальны сервер і адкрыць проб (залупа толькі на loopback)
+cd spikes/G21.40-han-layout && python3 -m http.server 8789 --bind 127.0.0.1
 # web: http://127.0.0.1:8789/probe.html  (viewport 320px; кнопка «text scale» = 200%)
 
 # Android (эмулятар/прылада, офлайн-прагон):

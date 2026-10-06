@@ -1,30 +1,42 @@
-[
- {
-  "label": "golos-text/400Regular",
-  "file": "@expo-google-fonts/golos-text/400Regular/GolosText_400Regular.ttf",
-  "total_glyphs": 617,
-  "covered_of_54": 19,
-  "missing": "\u95e8\u53d1\u4e66\u8bed\u5e7f\u5bfc\u5386\u542c\u56e2\u5e01\u9580\u767c\u66f8\u8a9e\u5ee3\u5c0e\u6b77\u807d\u5718\u5e63\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349\u3002\uff0c\uff1a\uff01\uff1f\u300c\u300d\uff5e\u5206\u79d2\u64ad\u653e\u6682\u505c\u4e0b\u8f7d\u7968\u89c8"
+{
+ "probe_set_size": 67,
+ "probe_set_groups": {
+  "simplified_only": 10,
+  "traditional_only": 10,
+  "shared_regional": 10,
+  "polish_latin": 15,
+  "digits_punct": 12,
+  "audio_ui": 11
  },
- {
-  "label": "golos-text/600SemiBold",
-  "file": "@expo-google-fonts/golos-text/600SemiBold/GolosText_600SemiBold.ttf",
-  "total_glyphs": 617,
-  "covered_of_54": 19,
-  "missing": "\u95e8\u53d1\u4e66\u8bed\u5e7f\u5bfc\u5386\u542c\u56e2\u5e01\u9580\u767c\u66f8\u8a9e\u5ee3\u5c0e\u6b77\u807d\u5718\u5e63\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349\u3002\uff0c\uff1a\uff01\uff1f\u300c\u300d\uff5e\u5206\u79d2\u64ad\u653e\u6682\u505c\u4e0b\u8f7d\u7968\u89c8"
- },
- {
-  "label": "alegreya/600SemiBold",
-  "file": "@expo-google-fonts/alegreya/600SemiBold/Alegreya_600SemiBold.ttf",
-  "total_glyphs": 2092,
-  "covered_of_54": 19,
-  "missing": "\u95e8\u53d1\u4e66\u8bed\u5e7f\u5bfc\u5386\u542c\u56e2\u5e01\u9580\u767c\u66f8\u8a9e\u5ee3\u5c0e\u6b77\u807d\u5718\u5e63\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349\u3002\uff0c\uff1a\uff01\uff1f\u300c\u300d\uff5e\u5206\u79d2\u64ad\u653e\u6682\u505c\u4e0b\u8f7d\u7968\u89c8"
- },
- {
-  "label": "caveat/400Regular",
-  "file": "@expo-google-fonts/caveat/400Regular/Caveat_400Regular.ttf",
-  "total_glyphs": 1011,
-  "covered_of_54": 19,
-  "missing": "\u95e8\u53d1\u4e66\u8bed\u5e7f\u5bfc\u5386\u542c\u56e2\u5e01\u9580\u767c\u66f8\u8a9e\u5ee3\u5c0e\u6b77\u807d\u5718\u5e63\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349\u3002\uff0c\uff1a\uff01\uff1f\u300c\u300d\uff5e\u5206\u79d2\u64ad\u653e\u6682\u505c\u4e0b\u8f7d\u7968\u89c8"
- }
-]
+ "note": "KUDY app faces vs the 67-codepoint probe set; missing lists the uncovered codepoints",
+ "faces": [
+  {
+   "label": "GolosText_400Regular",
+   "file": "@expo-google-fonts/golos-text/400Regular/GolosText_400Regular.ttf",
+   "total_glyphs": 617,
+   "covered_of_67": 19,
+   "missing": "\u95e8\u53d1\u4e66\u8bed\u5e7f\u5bfc\u5386\u542c\u56e2\u5e01\u9580\u767c\u66f8\u8a9e\u5ee3\u5c0e\u6b77\u807d\u5718\u5e63\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349\u3002\uff0c\uff1a\uff01\uff1f\u300c\u300d\uff5e\u5206\u79d2\u64ad\u653e\u6682\u505c\u4e0b\u8f7d\u7968\u89c8"
+  },
+  {
+   "label": "GolosText_600SemiBold",
+   "file": "@expo-google-fonts/golos-text/600SemiBold/GolosText_600SemiBold.ttf",
+   "total_glyphs": 617,
+   "covered_of_67": 19,
+   "missing": "\u95e8\u53d1\u4e66\u8bed\u5e7f\u5bfc\u5386\u542c\u56e2\u5e01\u9580\u767c\u66f8\u8a9e\u5ee3\u5c0e\u6b77\u807d\u5718\u5e63\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349\u3002\uff0c\uff1a\uff01\uff1f\u300c\u300d\uff5e\u5206\u79d2\u64ad\u653e\u6682\u505c\u4e0b\u8f7d\u7968\u89c8"
+  },
+  {
+   "label": "Alegreya_600SemiBold",
+   "file": "@expo-google-fonts/alegreya/600SemiBold/Alegreya_600SemiBold.ttf",
+   "total_glyphs": 2092,
+   "covered_of_67": 19,
+   "missing": "\u95e8\u53d1\u4e66\u8bed\u5e7f\u5bfc\u5386\u542c\u56e2\u5e01\u9580\u767c\u66f8\u8a9e\u5ee3\u5c0e\u6b77\u807d\u5718\u5e63\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349\u3002\uff0c\uff1a\uff01\uff1f\u300c\u300d\uff5e\u5206\u79d2\u64ad\u653e\u6682\u505c\u4e0b\u8f7d\u7968\u89c8"
+  },
+  {
+   "label": "Caveat_400Regular",
+   "file": "@expo-google-fonts/caveat/400Regular/Caveat_400Regular.ttf",
+   "total_glyphs": 1011,
+   "covered_of_67": 19,
+   "missing": "\u95e8\u53d1\u4e66\u8bed\u5e7f\u5bfc\u5386\u542c\u56e2\u5e01\u9580\u767c\u66f8\u8a9e\u5ee3\u5c0e\u6b77\u807d\u5718\u5e63\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349\u3002\uff0c\uff1a\uff01\uff1f\u300c\u300d\uff5e\u5206\u79d2\u64ad\u653e\u6682\u505c\u4e0b\u8f7d\u7968\u89c8"
+  }
+ ]
+}

@@ -62,15 +62,15 @@ URL і кітайскія назвы (як эскейпы):
 ## 3. Пакрыццё шрыфтоў KUDY (крытэр 2, частка 1)
 
 cmap-скан рэальных TTF з `node_modules/@expo-google-fonts/…` (версіі з
-package-lock 0.4.2) на пробным наборы з 54 знакаў:
+package-lock 0.4.2) на пробным наборы з 67 кодпойнтаў:
 `spikes/G21.40-han-layout/evidence/app-fonts-cmap.json`.
 
 | Твар | Гліфаў | Пакрыццё набору | Чаго няма |
 |---|---|---|---|
-| GolosText 400Regular | 617 | 19/54 | увесь Han, ўся CJK-пунктуацыя |
-| GolosText 600SemiBold | 617 | 19/54 | тое самае |
-| Alegreya 600SemiBold | 2092 | 19/54 | тое самае |
-| Caveat 400Regular | 1011 | 19/54 | тое самае |
+| GolosText 400Regular | 617 | 19/67 | увесь Han, ўся CJK-пунктуацыя |
+| GolosText 600SemiBold | 617 | 19/67 | тое самае |
+| Alegreya 600SemiBold | 2092 | 19/67 | тое самае |
+| Caveat 400Regular | 1011 | 19/67 | тое самае |
 
 Пакрытыя 19 — гэта лічбы, польская лацінка-пашырэнне, `¥` і `·`. **Выснова:
 сам факт загрузкі Golos/Alegreya/Caveat нічога не даказвае пра кітайскую** —

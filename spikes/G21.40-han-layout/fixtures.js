@@ -29,7 +29,7 @@ window.PROBE_FIXTURES = {
       "note": "candidate, not activated"
     },
     "screenTitle": "\u8bed\u8a00 / \u8a9e\u8a00",
-    "screenTitleRu": "\u041c\u043e\u0432\u0430"
+    "screenTitleBel": "\u041c\u043e\u0432\u0430"
   },
   "guideCard": {
     "nameHans": "\u5e03\u62c9\u683c\u57ce\u5821\u5386\u53f2\u5efa\u7b51\u7fa4\u4e0e\u9ec4\u91d1\u5df7\u5bfc\u89c8",

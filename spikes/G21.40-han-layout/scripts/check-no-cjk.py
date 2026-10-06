@@ -29,11 +29,11 @@ def main() -> int:
         if not p.is_file():
             continue
         rel = p.relative_to(SPIKE)
-        if rel.parts[0] in ("runtime", "evidence") and (
-            rel.parts[0] == "runtime" or "screenshots" in rel.parts
-        ):
+        if "__pycache__" in rel.parts or "runtime" in rel.parts:
             continue
-        if p.suffix == ".png":
+        if rel.parts[0] == "evidence" and "screenshots" in rel.parts:
+            continue
+        if p.suffix in (".png", ".pyc"):
             continue
         if has_cjk(p.read_text(encoding="utf-8", errors="ignore")):
             bad.append(str(rel))
