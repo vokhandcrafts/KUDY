@@ -72,7 +72,9 @@ test('TR-8: every internal href in the catalog page data resolves among the stat
 // G10.02.a acceptance 2 (no dead end): the app-transition fallback the config
 // points every CTA at is a real page in both locales. Before the /app page
 // existed this check would have failed — the calm offer linked a route that
-// was not there.
+// was not there. G21.22 (issue #554): the seven prefixed locales render
+// through the one [locale] app page — its file must exist, the root be tree
+// keeps the static route.
 test('the app-links fallbackPath resolves to real /app routes in both locales', () => {
   const staticRoutes = collectRoutes(WEB_APP).filter((route) => !route.includes('['));
   assert.ok(
@@ -80,7 +82,7 @@ test('the app-links fallbackPath resolves to real /app routes in both locales', 
     `fallbackPath ${appLinks.fallbackPath} has no page — every CTA would dead-end`,
   );
   assert.ok(
-    staticRoutes.includes(`/en${appLinks.fallbackPath}`),
-    `the en /app page is missing — the en CTA would dead-end`,
+    fs.existsSync(path.join(WEB_APP, '[locale]', 'app', 'page.tsx')),
+    'the [locale] /app page is missing — the prefixed CTAs would dead-end',
   );
 });

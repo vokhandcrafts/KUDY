@@ -77,6 +77,18 @@ test('the locale expectation follows the URL prefix in flat and nested export la
   assert.equal(expectedDocumentLocale('guides/demo-route-a1/stops/stop-1.html'), 'be');
 });
 
+test('every non-default UI locale prefix decides the expected language (G21.22)', () => {
+  // G21.22 (issue #554): the prefixed set grew from en to the seven
+  // non-default registered codes — the exported document language must read
+  // each of them, not fall through to the site default.
+  assert.equal(expectedDocumentLocale('uk.html'), 'uk');
+  assert.equal(expectedDocumentLocale('de/guides/demo-route-a1.html'), 'de');
+  assert.equal(expectedDocumentLocale('es/app.html'), 'es');
+  assert.equal(expectedDocumentLocale('fr/index.html'), 'fr');
+  assert.equal(expectedDocumentLocale('cs.html'), 'cs');
+  assert.equal(expectedDocumentLocale('sv/privacy.html'), 'sv');
+});
+
 test('backslash rel paths (a Windows export walk) resolve the same URL locale as slash paths', () => {
   // Every exported page shape, in both separators: a backslash path must read
   // as the same URL, not fall through to the site default (the G21.35 defect).

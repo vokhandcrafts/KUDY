@@ -2439,17 +2439,6 @@
       "sourceHash": "f0799d4b6ae84c9fafe93c5a3e8ae85bf7675912cad3a7737f48c0448aa00f50"
     },
     {
-      "id": "web.ui.langSwitchName",
-      "source": "English",
-      "context": "Назва мовы-пераключальніка (уласная назва мовы прызначэння)",
-      "format": "plain",
-      "parameters": [],
-      "migratedFrom": [
-        "web/lib/i18n/be.ts#langSwitchName"
-      ],
-      "sourceHash": "08fee1e01a8191946fa7c18d58791822c1e28bfcbd50006a82592c408e10f28a"
-    },
-    {
       "id": "web.ui.languages",
       "source": "Мовы",
       "context": "Пазнака рада моваў гіда",
@@ -2745,6 +2734,39 @@
         "web/lib/i18n/be.ts#versionUnavailable"
       ],
       "sourceHash": "6d0903ab3a0d160167c966e6b09cdce71900eb1271487b48f51ecb738379bd8e"
+    },
+    {
+      "id": "web.ui.catalogEmpty",
+      "source": "Гідаў з тэкстам на гэтай мове яшчэ няма.",
+      "context": "Пусты стан вэб-каталога выбранай мовы: тлумачэнне адсутнасці тэксту, не памылка сеткі ці службы (G21.22; люстра native.chrome.textLocaleEmpty)",
+      "format": "plain",
+      "parameters": [],
+      "sourceHash": "2696e018ae715ff1d8dfe7f26331d68f1325eff673496c9c213f3d4abeec1d5e",
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#catalogEmpty"
+      ]
+    },
+    {
+      "id": "web.ui.textUnavailableTitle",
+      "source": "Тэкст гіда на гэтай мове пакуль недаступны",
+      "context": "Загаловак старонкі гіда ці станоўкі, калі ў гіда няма тэксту выбранай мовы інтэрфейсу (G21.22)",
+      "format": "plain",
+      "parameters": [],
+      "sourceHash": "a19ea9ba76a34afce8fd2edd63ecbdc865dce15d8a5cd7d4e1828d7286e6216c",
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#textUnavailableTitle"
+      ]
+    },
+    {
+      "id": "web.ui.textUnavailableBody",
+      "source": "Гэты гід не мае тэксту на выбранай мове інтэрфейсу. Яго мовы тэксту паказаныя ў спісе моваў у каталоге.",
+      "context": "Тэкст старонкі недаступнасці: без падмены змесціва, адсылае да факт-радка моваў гіда (G21.22)",
+      "format": "plain",
+      "parameters": [],
+      "sourceHash": "07a46c3e0babecfe136297ae2458d4fd0a86e5b2425cead4f1372ac6edb59953",
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#textUnavailableBody"
+      ]
     },
     {
       "id": "native.feedback.unavailable",

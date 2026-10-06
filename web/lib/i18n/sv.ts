@@ -28,7 +28,6 @@ export const sv = {
   "duration": "Längd",
   "homeLink": "Till startsidan",
   "kilometersShort": "km",
-  "langSwitchName": "English",
   "languages": "Språk",
   "lockedLabel": "stoppet är låst",
   "mapAttribution": "Kartdata © OpenStreetMap-bidragsgivare (licens ODbL)",
@@ -56,4 +55,7 @@ export const sv = {
   "storyTextHeading": "Berättelsens text",
   "textOnly": "endast text",
   "versionUnavailable": "Versionen är inte tillgänglig",
+  "catalogEmpty": "Det finns ännu inga guider med text på det här språket.",
+  "textUnavailableTitle": "Guidetext på det här språket är inte tillgänglig ännu",
+  "textUnavailableBody": "Den här guiden har ingen text i det valda gränssnittsspråket. Dess textspråk finns i språklistan i katalogen.",
 };

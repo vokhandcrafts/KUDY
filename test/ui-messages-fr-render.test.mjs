@@ -72,7 +72,6 @@ test('the French web catalogue renders through getUiStrings with the same key sh
   assert.equal(fr.catalogTitle, 'Guides de la ville');
   assert.equal(fr.nextStop, 'Prochaine étape');
   assert.equal(fr.privacyTitle, 'Confidentialité');
-  assert.equal(fr.langSwitchName, 'English');
   // The generated projection keeps the key shape of the shipped sets.
   assert.deepEqual(Object.keys(fr).sort(), Object.keys(be).sort());
   // No French word is blank (the shape guard's own rule, for fr).

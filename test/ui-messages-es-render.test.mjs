@@ -82,7 +82,6 @@ test('the Spanish web catalogue renders through getUiStrings with the same key s
   assert.equal(es.catalogTitle, 'Guías de la ciudad');
   assert.equal(es.nextStop, 'Siguiente parada');
   assert.equal(es.privacyTitle, 'Privacidad');
-  assert.equal(es.langSwitchName, 'English');
   // The generated projection keeps the key shape of the shipped sets.
   assert.deepEqual(Object.keys(es).sort(), Object.keys(be).sort());
   // No Spanish word is blank (the shape guard's own rule, for es).

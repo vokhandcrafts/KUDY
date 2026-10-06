@@ -133,9 +133,22 @@ function orderedOffers(index: DiscoveryIndex, routes: CatalogRouteEntry[]): { en
     .map(({ entry, offer }) => ({ entry, offer }));
 }
 
+// G21.22 (issue #554): the published-text fact a locale page filters by —
+// the offer's declared text_locales. Every per-locale page filters with this
+// predicate BEFORE any exact-localized read: a locale the offer does not
+// declare yields the localized empty/unavailable states, never a content
+// fallback; a declared locale whose localized fields are missing still fails
+// the build loudly (SiteDataError from pickText) — declared-but-corrupt stays
+// a distinct failure, not an empty page.
+function textAvailable(offer: DiscoveryOffer, locale: UiLocale): boolean {
+  return offer.availability.text_locales.includes(locale);
+}
+
 export function readSiteCatalogPage(root: string, locale: UiLocale): CatalogPageData {
   const { routes, index, cityId } = readSiteCatalog(root);
-  const cards = orderedOffers(index, routes).map(({ entry, offer }): CatalogCard => {
+  const cards = orderedOffers(index, routes)
+    .filter(({ offer }) => textAvailable(offer, locale))
+    .map(({ entry, offer }): CatalogCard => {
     const route = unwrap(readBundleRoute(root, entry.route_id, entry.version), `bundle/${entry.route_id}/${entry.version}/route.json`);
     return {
       route_id: entry.route_id,
@@ -229,6 +242,13 @@ function resolvedCatalogRoute(root: string, routeId: string): {
   return { entry, route, offer };
 }
 
+// Declared text locales of one catalog route (G21.22): the fact the guide and
+// stop pages gate on before reading content and metadata — a locale outside
+// this list renders the localized unavailable state instead of content.
+export function routeTextLocales(root: string, routeId: string): Locale[] {
+  return resolvedCatalogRoute(root, routeId).offer.availability.text_locales;
+}
+
 export function readSiteGuidePage(root: string, locale: UiLocale, routeId: string): GuidePageData {
   const { entry, route, offer } = resolvedCatalogRoute(root, routeId);
   const stops = siteStopRows(root, locale, routeId, entry.version, route);
@@ -247,8 +267,10 @@ export function readSiteGuidePage(root: string, locale: UiLocale, routeId: strin
 
 // Prerender params for the guide pages: one entry per catalog route, so an
 // unknown route_id is never prerendered and a stale one fails the build here.
-export function guideStaticParams(): { route_id: string }[] {
-  const { routes } = readSiteCatalog(getContentRoot());
+// The optional root keeps the derivation testable against a synthetic tree
+// (the sitemap filter reads the same facts, G21.22).
+export function guideStaticParams(root: string = getContentRoot()): { route_id: string }[] {
+  const { routes } = readSiteCatalog(root);
   return routes.map((route) => ({ route_id: route.route_id }));
 }
 
@@ -405,7 +427,8 @@ export function readSiteMapPage(root: string, locale: UiLocale): MapPageData {
   const { routes, index, cityId } = readSiteCatalog(root);
   const mapRoutes: MapRoute[] = [];
   const features: MapMarkers['features'] = [];
-  for (const { entry, offer } of orderedOffers(index, routes)) {
+  const visible = orderedOffers(index, routes).filter(({ offer }) => textAvailable(offer, locale));
+  for (const { entry, offer } of visible) {
     const route: RouteDoc = unwrap(readBundleRoute(root, entry.route_id, entry.version), `bundle/${entry.route_id}/${entry.version}/route.json`);
     const geo = unwrap(readBundlePlacesGeo(root, entry.route_id, entry.version), `bundle/${entry.route_id}/${entry.version}/places.json`);
     const geoById = new Map(geo.map((place) => [place.id, place]));

@@ -3,8 +3,10 @@
 // fixture guide this renders that guide's card plus the map entry, no
 // placeholder cards. The map entry was hidden while /map did not exist
 // (TR-8); the founder's tile-provider decision (2026-09-21, #111) wired the
-// route, so the entry is back.
-import { localePath } from '../lib/content/site.ts';
+// route, so the entry is back. G21.22 (issue #554): the data layer filters
+// cards by actual published text before this render — a locale with no
+// matching text gets the localized empty-catalogue state, not an error and
+// not substituted content.
 import type { CatalogPageData } from '../lib/content/site.ts';
 import type { UiLocale, UiStrings } from '../lib/i18n/index.ts';
 import { CalmOffer } from './calm-offer.tsx';
@@ -16,29 +18,32 @@ export function CatalogPage({ locale, data, strings }: {
   data: CatalogPageData;
   strings: UiStrings;
 }) {
-  const langSwitchHref = localePath(locale === 'be' ? 'en' : 'be', '/');
   return (
-    <SiteShell homeHref={localePath(locale, '/')} langSwitchHref={langSwitchHref} strings={strings}>
+    <SiteShell locale={locale} currentPath="/" strings={strings}>
       <h1>{strings.catalogTitle}</h1>
-      <ul>
-        {data.cards.map((card) => (
-          <li key={card.route_id}>
-            <a href={card.href}>{card.title}</a>
-            <p>{card.summary}</p>
-            <MetaRow
-              durationMin={card.duration_min}
-              distanceM={card.distance_m}
-              stopCount={card.stop_count}
-              languages={card.languages}
-              strings={strings}
-            />
+      {data.cards.length === 0 ? (
+        <p>{strings.catalogEmpty}</p>
+      ) : (
+        <ul>
+          {data.cards.map((card) => (
+            <li key={card.route_id}>
+              <a href={card.href}>{card.title}</a>
+              <p>{card.summary}</p>
+              <MetaRow
+                durationMin={card.duration_min}
+                distanceM={card.distance_m}
+                stopCount={card.stop_count}
+                languages={card.languages}
+                strings={strings}
+              />
+            </li>
+          ))}
+          <li key="map-entry">
+            <a href={data.mapHref}>{strings.mapTitle}</a>
+            <p>{strings.mapIntro}</p>
           </li>
-        ))}
-        <li key="map-entry">
-          <a href={data.mapHref}>{strings.mapTitle}</a>
-          <p>{strings.mapIntro}</p>
-        </li>
-      </ul>
+        </ul>
+      )}
       <CalmOffer strings={strings} />
     </SiteShell>
   );

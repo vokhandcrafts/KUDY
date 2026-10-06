@@ -28,7 +28,6 @@ export const cs = {
   "duration": "Délka",
   "homeLink": "Na úvod",
   "kilometersShort": "km",
-  "langSwitchName": "English",
   "languages": "Jazyky",
   "lockedLabel": "zastavení je zamčené",
   "mapAttribution": "Data mapy © přispěvatelé OpenStreetMap (licence ODbL)",
@@ -56,4 +55,7 @@ export const cs = {
   "storyTextHeading": "Text příběhu",
   "textOnly": "jen text",
   "versionUnavailable": "Verze není dostupná",
+  "catalogEmpty": "Průvodci s textem v tomto jazyce zatím nejsou.",
+  "textUnavailableTitle": "Text průvodce v tomto jazyce zatím není k dispozici",
+  "textUnavailableBody": "Tento průvodce nemá text ve zvoleném jazyce rozhraní. Jeho jazyky textu jsou uvedeny v seznamu jazyků v katalogu.",
 };

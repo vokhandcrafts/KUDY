@@ -11423,24 +11423,6 @@
    "out": "км"
   },
   {
-   "id": "web.ui.langSwitchName",
-   "locale": "be",
-   "args": null,
-   "out": "English"
-  },
-  {
-   "id": "web.ui.langSwitchName",
-   "locale": "en",
-   "args": null,
-   "out": "Беларуская"
-  },
-  {
-   "id": "web.ui.langSwitchName",
-   "locale": "uk",
-   "args": null,
-   "out": "English"
-  },
-  {
    "id": "web.ui.languages",
    "locale": "be",
    "args": null,

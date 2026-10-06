@@ -4,7 +4,6 @@
 // renders the public preview and the calm offer block: no audio element and
 // no transcript exist for it at the data layer. One calm offer per page, at
 // the bottom (01).
-import { localePath } from '../lib/content/site.ts';
 import type { StopPageData } from '../lib/content/site.ts';
 import type { UiLocale, UiStrings } from '../lib/i18n/index.ts';
 import { CalmOffer } from './calm-offer.tsx';
@@ -16,9 +15,8 @@ export function StopPage({ locale, data, strings }: {
   data: StopPageData;
   strings: UiStrings;
 }) {
-  const langSwitchHref = localePath(locale === 'be' ? 'en' : 'be', `/guides/${data.route_id}/stops/${data.stop_id}`);
   return (
-    <SiteShell homeHref={localePath(locale, '/')} langSwitchHref={langSwitchHref} strings={strings}>
+    <SiteShell locale={locale} currentPath={`/guides/${data.route_id}/stops/${data.stop_id}`} strings={strings}>
       <h1>{data.name}</h1>
       <nav>
         <p>

@@ -3,7 +3,6 @@
 // previews only, and one calm offer at the bottom of the description (step 4).
 // A preview of the walk, not a second product (shared invariants): no
 // download, start or purchase flows exist here.
-import { localePath } from '../lib/content/site.ts';
 import type { GuidePageData } from '../lib/content/site.ts';
 import type { UiLocale, UiStrings } from '../lib/i18n/index.ts';
 import { CalmOffer } from './calm-offer.tsx';
@@ -16,9 +15,8 @@ export function GuidePage({ locale, data, strings }: {
   data: GuidePageData;
   strings: UiStrings;
 }) {
-  const langSwitchHref = localePath(locale === 'be' ? 'en' : 'be', `/guides/${data.route_id}`);
   return (
-    <SiteShell homeHref={localePath(locale, '/')} langSwitchHref={langSwitchHref} strings={strings}>
+    <SiteShell locale={locale} currentPath={`/guides/${data.route_id}`} strings={strings}>
       <h1>{data.title}</h1>
       {data.cover ? <img src={data.cover} alt={data.title} /> : null}
       <p>{data.summary}</p>

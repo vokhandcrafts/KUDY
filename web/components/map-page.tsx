@@ -4,8 +4,8 @@
 // it renders server-side here — visible and clickable without JavaScript — in
 // addition to MapLibre's own attribution control; the URL comes from the
 // single map config. The route list repeats the catalog order and links to
-// the free guide pages.
-import { localePath } from '../lib/content/site.ts';
+// the free guide pages — the same published-text filter as the catalog
+// (G21.22), so a locale with no matching text lists no routes either.
 import type { MapPageData } from '../lib/content/site.ts';
 import { mapProvider } from '../lib/map-config.ts';
 import type { UiLocale, UiStrings } from '../lib/i18n/index.ts';
@@ -17,9 +17,8 @@ export function MapPage({ locale, data, strings }: {
   data: MapPageData;
   strings: UiStrings;
 }) {
-  const langSwitchHref = localePath(locale === 'be' ? 'en' : 'be', '/map');
   return (
-    <SiteShell homeHref={localePath(locale, '/')} langSwitchHref={langSwitchHref} strings={strings}>
+    <SiteShell locale={locale} currentPath="/map" strings={strings}>
       <h1>{strings.mapTitle}</h1>
       <p>{strings.mapIntro}</p>
       <CityMap markers={data.markers} label={strings.mapTitle} errorText={strings.mapError} />
@@ -27,13 +26,17 @@ export function MapPage({ locale, data, strings }: {
         <a href={mapProvider.osmCopyrightUrl}>{strings.mapAttribution}</a>
       </p>
       <h2>{strings.mapRoutesHeading}</h2>
-      <ul>
-        {data.routes.map((route) => (
-          <li key={route.route_id}>
-            <a href={route.href}>{route.title}</a> · {strings.stops}: {route.stops.length}
-          </li>
-        ))}
-      </ul>
+      {data.routes.length === 0 ? (
+        <p>{strings.catalogEmpty}</p>
+      ) : (
+        <ul>
+          {data.routes.map((route) => (
+            <li key={route.route_id}>
+              <a href={route.href}>{route.title}</a> · {strings.stops}: {route.stops.length}
+            </li>
+          ))}
+        </ul>
+      )}
     </SiteShell>
   );
 }

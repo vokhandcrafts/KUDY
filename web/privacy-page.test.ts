@@ -2,7 +2,9 @@
 // privacy page exists on both UI locales, and the required policy statements
 // of the acceptance criteria are present in both string files. Deleting a
 // route file, dropping a key from one locale or losing a required claim
-// fails this test — the page cannot silently become a stub.
+// fails this test — the page cannot silently become a stub. G21.22 (issue
+// #554): the root be tree stays, the seven prefixed locales render through
+// the one [locale] privacy page.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -14,7 +16,7 @@ import { en } from './lib/i18n/en.ts';
 
 const WEB_ROOT = path.dirname(fileURLToPath(import.meta.url));
 
-const ROUTE_FILES = ['app/(be)/privacy/page.tsx', 'app/(en)/en/privacy/page.tsx'];
+const ROUTE_FILES = ['app/(be)/privacy/page.tsx', 'app/[locale]/privacy/page.tsx'];
 
 // Short markers of the required statements (issue #331 criterion 2); they
 // assert the claim, not the wording.
