@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-06 — адкрыць і змержыць PR: тэст карты больш не вешае Node 22
+Што зрабіць: адкрый pull request з галіны `feature/node22-map-browser-hang-2f09` у `main` і змержы яго, калі `tests (22)` заканчваецца, а не адмяняецца праз шэсць гадзін. Агент не змог стварыць PR: GitHub адказаў «must be a collaborator».
+PR: https://github.com/vokhandcrafts/KUDY/compare/main...feature/node22-map-browser-hang-2f09 (каміт `ce4cc4f`)
+
 ### 2026-10-05 — G21.19: змержыць глоссарый і працэс змены мов (задача #543)
 Што зрабіць: праглядзі і змержы PR #628 у main, каб глоссарый тэрмінаў, працэс змены радкоў ва ўсіх выпушчаных мовах і крытэрыйны рэндэр лічэбнікаў сталі даступныя выканаўцам. Пры зелёных вердыктах рэвью і суддзі пайплайн мержыць PR сам; мерж закрывае #543 і разблакіруе каталогі G21.10–G21.14.
 PR: https://github.com/vokhandcrafts/KUDY/pull/628 (issue: https://github.com/vokhandcrafts/KUDY/issues/543; эпік: https://github.com/vokhandcrafts/KUDY/issues/532)
