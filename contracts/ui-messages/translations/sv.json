@@ -1,0 +1,2541 @@
+{
+  "translation_schema_version": 1,
+  "locale": "sv",
+  "provenance": {
+    "kind": "authored",
+    "reviewer": "Zcode (GLM-5.3-Flash), сесія G21.14",
+    "evidence": "аўтарскі шведскі пераклад у задачы G21.14 (#548): зроблены з беларускага арыгіналу source.json з апорай на зацверджаныя en/uk наборы і прэцэдэнты de/es/fr/cs (G21.10–G21.13); рэгістр — du-форма (стандарт шведскага UI), адпавядае неафіцыйнаму тону арыгіналу і сям'і de du / es tú / fr tu / cs ty; кнопкі ў загадным ладзе; тэрміны guide/promenad/stopp (дзеянне — асобнае Stoppa)/ladda ner (адзін корань)/otillgänglig (стан праз «är inte tillgänglig»)/köp/fortsätter från sparad session занкерваныя на глоссарый G21.19 са слядамі G21.27; тайлы → kartplattor (прыродны картаграфічны тэрмін, fr-прэцэдэнт); прэв'ю → förhandsvisning, тэйзер → smakprov (медыя-тэрміны разведзеныя, як es/fr/cs); сэмантычны рэвью — асобны праход усіх 280 запісаў (адмаўленні, адмена пакупкі, выдаленне/аднаўленне, род і рэгістр), пратакол у docs/agent-tasks/results/G21.14.md"
+  },
+  "records": [
+    {
+      "id": "native.chrome.access.free",
+      "value": "Gratis",
+      "reviewedSourceHash": "82e16c5b12218d14ab2c468f999861493c22fd508e1f225f286674ecffbac141",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака доступу; звыклая шведская пазнака бясплатнага доступу"
+      }
+    },
+    {
+      "id": "native.chrome.access.mixed",
+      "value": "Blandat",
+      "reviewedSourceHash": "d434ea3d59a4874db509a395e9df857ee017bee8ed9cf40bdf911b4c745459c5",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака доступу; нэўтральная форма паказчыка, як cs Smíšené"
+      }
+    },
+    {
+      "id": "native.chrome.access.paid",
+      "value": "Betalt",
+      "reviewedSourceHash": "4b081dc73d3045c6977b49c2140888c6106630d14333a0bc68abd96750d2dffb",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака доступу; пара да Gratis у тым жа родзе (ett)"
+      }
+    },
+    {
+      "id": "native.chrome.back",
+      "value": "Tillbaka",
+      "reviewedSourceHash": "b1138bccd114e81d7e8305ace5a529060269c32c1dd21e669ff30f4a2f36d7a0",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка вяртання; стандартны шведскі UI-зварот"
+      }
+    },
+    {
+      "id": "native.chrome.backToCity",
+      "value": "Stad",
+      "reviewedSourceHash": "c3196e598662ddc30063829a3d53b88c16855ef719f72189dcb748a4c7e72200",
+      "review": {
+        "outcome": "approved",
+        "note": "кароткі пункт вяртання да экрана горада, як be «Горад»"
+      }
+    },
+    {
+      "id": "native.chrome.cancel",
+      "value": "Avbryt",
+      "reviewedSourceHash": "0edad8c85ababf7db09011d81672c3470f30745ce80436b8a1e3f77f8fa7150d",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка скасавання дыялога; стандартны зварот"
+      }
+    },
+    {
+      "id": "native.chrome.catalogTemporarilyUnavailable",
+      "value": "Katalogen är tillfälligt otillgänglig",
+      "reviewedSourceHash": "1db04f4cab5a569077412e68b581db2461473397a0b1f1ba55ce094f9c65f144",
+      "review": {
+        "outcome": "approved",
+        "note": "глоссарый unavailable → otillgänglig; katalog (en) без суфікса"
+      }
+    },
+    {
+      "id": "native.chrome.catalogUnavailable",
+      "value": "Katalogen är inte tillgänglig",
+      "reviewedSourceHash": "5da4e9377f0d520cf9f61c7ff0fa655d10fd902089cdd63b979ff8f8d19d0745",
+      "review": {
+        "outcome": "approved",
+        "note": "шведская канструкцыя «är inte tillgänglig» для стану; тэрмін недаступнасці па глоссарыю"
+      }
+    },
+    {
+      "id": "native.chrome.collectionUnavailable",
+      "value": "Samlingen är inte tillgänglig",
+      "reviewedSourceHash": "f835b71196437961eeaeb3074ef18024e8204716abc2801515bbdf6a8c4b51d3",
+      "review": {
+        "outcome": "approved",
+        "note": "падборка → samling (en); канструкцыя стану, як у catalogUnavailable"
+      }
+    },
+    {
+      "id": "native.chrome.collectionUnresolved",
+      "value": "Vissa delar av samlingen är ännu inte publicerade.",
+      "reviewedSourceHash": "a5e630ad534dffdc7196d67ccc73dd0266f09f81d681a7a5b811a354ab5fd20b",
+      "review": {
+        "outcome": "approved",
+        "note": "частка членаў не апублікаваная; publicerad = апублікаваны"
+      }
+    },
+    {
+      "id": "native.chrome.currentWalk",
+      "value": "Aktuell promenad",
+      "reviewedSourceHash": "f9408779fd160eda48f9d52e41c0a274afa34f1fc10c34ed16c655a630413f88",
+      "review": {
+        "outcome": "approved",
+        "note": "глоссарый walk → promenad (en), адзіны тэрмін праходу"
+      }
+    },
+    {
+      "id": "native.chrome.degradedData",
+      "value": "En del av informationen är tillfälligt otillgänglig",
+      "reviewedSourceHash": "c6a254fe804abb64bc54bbe20e172db06ed99322075f21a9f868ba5e35a923b1",
+      "review": {
+        "outcome": "approved",
+        "note": "банер дэградацыі; adjectival otillgänglig (plural information — інварыянтна)"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.duration_unknown",
+      "value": "tiden är inte bedömd",
+      "reviewedSourceHash": "aa5a112078a2bbce5d31cfb2eaf8e7ffc469607accdc26f9e44e18b8d6dbe659",
+      "review": {
+        "outcome": "approved",
+        "note": "адрозненне прапановы; безасабова, як be «час не ацэнены»"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.over_time",
+      "value": "längre än begärt",
+      "reviewedSourceHash": "95f858f684ec50f63854358e44ef3e68fb7c3c322ff5732fc957046244703404",
+      "review": {
+        "outcome": "approved",
+        "note": "даўжэй за запыт; begära = запытваць"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.season_not_recommended",
+      "value": "passar inte den här säsongen",
+      "reviewedSourceHash": "b3976a641f5d9d01ed1186b8256e629a92bff51fc5f65f14563df0f60da468d0",
+      "review": {
+        "outcome": "approved",
+        "note": "не для гэтага сезону; att passa = падыходзіць"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.season_unassessed",
+      "value": "säsongen är inte bedömd",
+      "reviewedSourceHash": "e06820b8dbcdffc5d4e083b1b251714326a070dd61d11c589dc48b1ab551da42",
+      "review": {
+        "outcome": "approved",
+        "note": "сезон не ацэнены; безасабова, пары да duration_unknown"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.theme_mismatch",
+      "value": "annat tema",
+      "reviewedSourceHash": "518dfdb5f1459fb582bff8fef2e6f5130e9b6277546581bb5c06a49da31312e4",
+      "review": {
+        "outcome": "approved",
+        "note": "іншая тэма; кароткі факт-радок"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryAlternatives",
+      "value": "Andra alternativ",
+      "reviewedSourceHash": "6b9f5202ccfa8bebff4109104041f656688d06f08ddaa652292d65f40af5ba0e",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі іншых варыянтаў"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryEmpty",
+      "value": "Inget passar exakt — lätta på urvalet eller titta på andra förslag.",
+      "reviewedSourceHash": "831cdd7dfd6d729661152d21f5c107ebf2438ec405db988ddc8d2cd62633521d",
+      "review": {
+        "outcome": "approved",
+        "note": "пусты стан падбора; «пасмякчыце выбар» → lätta på urvalet"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryTemporarilyUnavailable",
+      "value": "Förslagen är just nu inte tillgängliga",
+      "reviewedSourceHash": "9252d5d0294115694f781e58a88257ae4b90cca39cb8c14091efd477f0721935",
+      "review": {
+        "outcome": "approved",
+        "note": "падбор → förslag (рекамендацыі), plural кансістэнтны з discoveryUnavailable"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryTitle",
+      "value": "Att göra",
+      "reviewedSourceHash": "73a869d121cfe785ef9b06081df8484b6a878a6bb51140ad668c80a4357bd816",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак экрана падбора «Чым заняцца»; звыклы шведскі загаловак спіса заняткаў"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryUnavailable",
+      "value": "Förslagen är inte tillgängliga",
+      "reviewedSourceHash": "262a86e4e8647e231e8d140b8e62fdbf5d769ab8c08400d9d87afb962676211a",
+      "review": {
+        "outcome": "approved",
+        "note": "падбор недаступны; для стану «är inte tillgänglig»"
+      }
+    },
+    {
+      "id": "native.chrome.durationLabel",
+      "value": "Längd",
+      "reviewedSourceHash": "367751046f034b1e95b6562ea3eb4809debffb78ea7af63d3de645321bdeecc9",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана працягласці; адно слово, як cs Délka"
+      }
+    },
+    {
+      "id": "native.chrome.durationMinutes",
+      "value": "Tid: ${minutes} min",
+      "reviewedSourceHash": "e9a5925bfd57c9831a26edeecf7bcb583cbd7d875c8e9fabbbd4d10449028fe4",
+      "review": {
+        "outcome": "approved",
+        "note": "радок працягласці; адзінае значэнне, тып number захаваны"
+      }
+    },
+    {
+      "id": "native.chrome.durationRange",
+      "value": "Tid: från ${minMinutes} till ${maxMinutes} min",
+      "reviewedSourceHash": "78add4278ac05d6aa17374a52f30bb5c313f6da5834ace6e464ed213dcafeee9",
+      "review": {
+        "outcome": "approved",
+        "note": "дыяпазон; даслоўная будова be «ад X да Y»"
+      }
+    },
+    {
+      "id": "native.chrome.freeStopsCount",
+      "value": "Gratis stopp: ${count}",
+      "reviewedSourceHash": "780c5d18130bb93df4355222162c7d4d8cc0cc3510971a9e6376751dff00a953",
+      "review": {
+        "outcome": "approved",
+        "note": "стоп (ett) інварыянтна ў лічбах — правільна без ICU"
+      }
+    },
+    {
+      "id": "native.chrome.guidesLink",
+      "value": "Guider →",
+      "reviewedSourceHash": "ae59ec899a5964dea00463b49e7dd6348684069736ce95f6183d3c79b94c389c",
+      "review": {
+        "outcome": "approved",
+        "note": "глоссарый guide → guide; множны Guider"
+      }
+    },
+    {
+      "id": "native.chrome.heardCount",
+      "value": "lyssnat: ${count}",
+      "reviewedSourceHash": "974ee6f7afa147c26e872b3306efc390dbf3446e84d770041ded77527ab0342a",
+      "review": {
+        "outcome": "approved",
+        "note": "праслышана: N; supinum lyssnat, безасабова для любой лічбы"
+      }
+    },
+    {
+      "id": "native.chrome.historyUnavailable",
+      "value": "Historiken är inte tillgänglig.",
+      "reviewedSourceHash": "e533a4767a8b973cf00efbfea8c16a7163f08f541ae657e853eea36baa0ccdc9",
+      "review": {
+        "outcome": "approved",
+        "note": "сказ з кропкай; канструкцыя стану"
+      }
+    },
+    {
+      "id": "native.chrome.kudyLink",
+      "value": "KUDY →",
+      "reviewedSourceHash": "6215ec8b2ead10ed524e46f5c1ddd0a0567f909e21330a8e7a0229422917383b",
+      "review": {
+        "outcome": "approved",
+        "note": "ID і брэнд не перакладаецца"
+      }
+    },
+    {
+      "id": "native.chrome.languageLabel",
+      "value": "Språk",
+      "reviewedSourceHash": "85cd11e030ecf41b369de4b859dfd71a507a92c832924c27ff037d43425b9c92",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака рада выбару мовы"
+      }
+    },
+    {
+      "id": "native.chrome.languagesLine",
+      "value": "Språk: ${textLocales}",
+      "reviewedSourceHash": "39f5323a4494e7cca7ba60c1fd4f2820d3336a75365fcac547b6a37319e7f9a0",
+      "review": {
+        "outcome": "approved",
+        "note": "радок моваў гіда; list-параметр з join захаваны"
+      }
+    },
+    {
+      "id": "native.chrome.liveRowLine",
+      "value": "${state} — från ${day} — lyssnat: ${heard}",
+      "reviewedSourceHash": "22477d4a8f0fcab537019080057be843ff31fc7ea592e85d5fb8fe5700fe6081",
+      "review": {
+        "outcome": "approved",
+        "note": "цэлы радок жывой прагулкі; без цвёрдага прыназоўніка, як be"
+      }
+    },
+    {
+      "id": "native.chrome.loading",
+      "value": "Laddar…",
+      "reviewedSourceHash": "0f54c6960ddd3180b3b6aac5d89f08b7c6f51017a06bf42789acdb26fca33706",
+      "review": {
+        "outcome": "approved",
+        "note": "агульны радок загрузкі"
+      }
+    },
+    {
+      "id": "native.chrome.locked",
+      "value": "Låst",
+      "reviewedSourceHash": "ff9f67bdfdb9c424fe56f9a9bda42414eeb402ea9b2e1ceca7551e8626c019db",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака зачыненай кропкі; партыкула-прыметнік lock → låst"
+      }
+    },
+    {
+      "id": "native.chrome.myKudy",
+      "value": "KUDY",
+      "reviewedSourceHash": "f5ef5b9f4e464f378e5652777e46ce86225013cf03b06a4f66665e92c0b2dfb6",
+      "review": {
+        "outcome": "approved",
+        "note": "рашэнне ўладара: назва паверхні гісторый «KUDY»"
+      }
+    },
+    {
+      "id": "native.chrome.nearby",
+      "value": "I närheten →",
+      "reviewedSourceHash": "19bbc736b6509867eccfc55e37450d946ccf5ceede28120e16baedd862349d82",
+      "review": {
+        "outcome": "approved",
+        "note": "пункт ніжняй навігацыі; звыклы шведскі тэрмін «побач»"
+      }
+    },
+    {
+      "id": "native.chrome.noCurrentWalk",
+      "value": "Ingen aktuell promenad",
+      "reviewedSourceHash": "71cc9155745464cb983daa06f1a7dbedd11879c5af5a0954cdfafd33bd07f7bd",
+      "review": {
+        "outcome": "approved",
+        "note": "радок адсутнасці бягучай прагулкі"
+      }
+    },
+    {
+      "id": "native.chrome.noPastWalks",
+      "value": "Inga tidigare promenader",
+      "reviewedSourceHash": "0bfbeda8ef7061ce1ba34816528ba7e430b242d9b3f048e4865475cdf7ba8ebf",
+      "review": {
+        "outcome": "approved",
+        "note": "радок адсутнасці папярэдніх праходаў; promenader (plural)"
+      }
+    },
+    {
+      "id": "native.chrome.notFoundHint",
+      "value": "Katalogen väntar — gå tillbaka till den med knappen ”Tillbaka”.",
+      "reviewedSourceHash": "28b7420ef0dc476a3c2ffc4b4eeeabd2f9dc647507d9f66a081d1b4fab127d40",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка глыбокага лінку; шведскія двукоссе-гарнітуры ”…”"
+      }
+    },
+    {
+      "id": "native.chrome.notFoundTitle",
+      "value": "Skärmen finns inte",
+      "reviewedSourceHash": "f30571fd886be738567f5f0e1e368307332c1d93251f31339d7290de2cf81928",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак адсутнага экрана; просты факт"
+      }
+    },
+    {
+      "id": "native.chrome.notPublished",
+      "value": "ej publicerad",
+      "reviewedSourceHash": "41760064e818aa82c125dc79e1b2961a5cd566a4419228253f62469206893e03",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака неапублікаванага змесціва; кароткая форма ej"
+      }
+    },
+    {
+      "id": "native.chrome.pastRowLine",
+      "value": "${startedDay} — ${finishedDay} — lyssnat: ${heard}",
+      "reviewedSourceHash": "3b31a3236db946ff49cd0ec5a56bb0e89a5804eda909cd8793de141584cb70aa",
+      "review": {
+        "outcome": "approved",
+        "note": "радок завершанай прагулкі; fallback «—» захаваны ў канане"
+      }
+    },
+    {
+      "id": "native.chrome.pastWalks",
+      "value": "Tidigare promenader",
+      "reviewedSourceHash": "639c686aee401287c7c2224cfce2606da6a128852a23771f4fab41e4275081d8",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі папярэдніх праходаў"
+      }
+    },
+    {
+      "id": "native.chrome.previewUnavailable",
+      "value": "Förhandsvisningen är tillfälligt otillgänglig",
+      "reviewedSourceHash": "29f58b35ed2a5502011a9f0b5ad3a15c8eb857bc954349a865e0053875ed8808",
+      "review": {
+        "outcome": "approved",
+        "note": "прэв'ю → förhandsvisning (en); тэрмін разведзены з тэйзерам smakprov"
+      }
+    },
+    {
+      "id": "native.chrome.previewTextUnavailable",
+      "value": "Den här guiden har ingen text på det valda gränssnittsspråket.",
+      "reviewedSourceHash": "6eb593b874ec34a4594861008c051696cafb4d710a8ff5473c9cdd35ddc730f8",
+      "review": {
+        "outcome": "approved",
+        "note": "без падстаноўкі іншай мовы; мова менавіта інтэрфейсу"
+      }
+    },
+    {
+      "id": "native.chrome.textLocaleEmpty",
+      "value": "Det finns ännu inga guider med text på det här språket.",
+      "reviewedSourceHash": "886f9de4222ee5680e6beb950cddb086d31f9eb0793730fda31ceeb52a872c23",
+      "review": {
+        "outcome": "approved",
+        "note": "пусты каталог пасля адбору па мове інтэрфейсу; тлумачэнне, не збой"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.editorial",
+      "value": "redaktionellt urval",
+      "reviewedSourceHash": "be32560fb8b57fff44f9193fdeac0d3b5fa3312e6d1526ce09f5c88ec8ac9d56",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына падбора; звыклы шведскі тэрмін"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.season_recommended",
+      "value": "rekommenderas den här säsongen",
+      "reviewedSourceHash": "83c822a95860d2c4821e05dc1b6a51d346b4e5c49e015c2e796ee56b09459002",
+      "review": {
+        "outcome": "approved",
+        "note": "безасабова-пасіў, пары да differenceText"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.theme_match",
+      "value": "tema",
+      "reviewedSourceHash": "fe66528dbcc40721fc40e604ec985777b0d5425401ab8d38f58c81124c37470b",
+      "review": {
+        "outcome": "approved",
+        "note": "супадзенне тэмы; адно слова, як be «тэма»"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.within_time",
+      "value": "passar i tid",
+      "reviewedSourceHash": "41dcea7bd6cbb320a2935ace330501a46b878eef030a85cf775fed8029ad2575",
+      "review": {
+        "outcome": "approved",
+        "note": "падыходзіць па часе; att passa i tid — звыклае"
+      }
+    },
+    {
+      "id": "native.chrome.retry",
+      "value": "Försök igen",
+      "reviewedSourceHash": "cc165ee110aa25bc187cee0368038bf687085da79f7d388ea91787197328053d",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка паўтору; стандартны зварот"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.autumn",
+      "value": "Höst",
+      "reviewedSourceHash": "33f4c1943bc36c7e4550c9987ea85f4a9255b28100446d208517c1a78bd2233d",
+      "review": {
+        "outcome": "approved",
+        "note": "назва сезона"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.spring",
+      "value": "Vår",
+      "reviewedSourceHash": "94c0fb9dc8cd9aa1175988b7b4a193f53fa1f5348c4e3f1110da3fa842721aa2",
+      "review": {
+        "outcome": "approved",
+        "note": "назва сезона"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.summer",
+      "value": "Sommar",
+      "reviewedSourceHash": "e58561f7639c8f6bd4aded2de457fa86cdb8c58a31155ca61ba4a34242034346",
+      "review": {
+        "outcome": "approved",
+        "note": "назва сезона"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.winter",
+      "value": "Vinter",
+      "reviewedSourceHash": "d585e12a829acc78ad036bad2de425546dd4ca75f5be37b7049201a909ca5f74",
+      "review": {
+        "outcome": "approved",
+        "note": "назва сезона"
+      }
+    },
+    {
+      "id": "native.chrome.sizeMb",
+      "value": "Storlek: ${mb} MB",
+      "reviewedSourceHash": "0979953f9427de22d5b78144e7648e877c2056592ac17ca64512e003e83980f2",
+      "review": {
+        "outcome": "approved",
+        "note": "радок факту памеру; МБ → MB (шведская практыка)"
+      }
+    },
+    {
+      "id": "native.chrome.stateLabel.active",
+      "value": "pågående",
+      "reviewedSourceHash": "50f925a180afc7d20f1521f3a9576ad1fc36b264eb1ae21a8aa08a8d2e576a19",
+      "review": {
+        "outcome": "approved",
+        "note": "статус прагулкі; «актыўная» = pågående (тая, што ідзе)"
+      }
+    },
+    {
+      "id": "native.chrome.stateLabel.finished",
+      "value": "avslutad",
+      "reviewedSourceHash": "89521119203d65f39c6f1f334394eb73f3d477408af4a8bc9956f0ccb36cc4bc",
+      "review": {
+        "outcome": "approved",
+        "note": "статус прагулкі; en-слово без змены"
+      }
+    },
+    {
+      "id": "native.chrome.stateLabel.paused",
+      "value": "pausad",
+      "reviewedSourceHash": "d4525430de737faa9202eba337ae8fdd6979666e06ec6f5de931d5dab20d0669",
+      "review": {
+        "outcome": "approved",
+        "note": "статус прагулкі; en-слово без змены"
+      }
+    },
+    {
+      "id": "native.chrome.stopNumber",
+      "value": "Stopp ${position}",
+      "reviewedSourceHash": "732b0324729bf9f41fd27f86c569da9b0d5b75f6c1081c90b3e611c3fd6113c9",
+      "review": {
+        "outcome": "approved",
+        "note": "нумар кропкі; стоп інварыянтна"
+      }
+    },
+    {
+      "id": "native.chrome.stopsCount",
+      "value": "Stopp: ${count}",
+      "reviewedSourceHash": "e6c16b6c3a55c0e09e51b370c85d5604eae87ecfda33b559d4598b68d7a37ba7",
+      "review": {
+        "outcome": "approved",
+        "note": "радок факту колькасці кропак"
+      }
+    },
+    {
+      "id": "native.chrome.stopsLabel",
+      "value": "Stopp",
+      "reviewedSourceHash": "543419762c01ac0a64ee4638eca6b11c812136c3c39a11e196be70d391bc7eae",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана колькасці кропак"
+      }
+    },
+    {
+      "id": "native.chrome.switchAccept",
+      "value": "Avsluta och börja",
+      "reviewedSourceHash": "09f9461a08fbf1066bb37f8a0c9afc3f52b9c2cb9919ed054ed16a6ec0f4f482",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка пацвярджэння пераключэння; парадак «завяршыць і пачаць» захаваны"
+      }
+    },
+    {
+      "id": "native.chrome.switchConfirm",
+      "value": "Avsluta ”${liveTitle}” och börja ”${candidateTitle}”?",
+      "reviewedSourceHash": "7cb787411af9ba9b7fad2486e30c358743ded0e27b84f0d07be6a89e9500fb7d",
+      "review": {
+        "outcome": "approved",
+        "note": "дыялог пераключэння; шведскія двукоссе ”…” у шаблоне"
+      }
+    },
+    {
+      "id": "native.chrome.textAudioLine",
+      "value": "Text: ${textLocales}; ljud: ${audioLocales}",
+      "reviewedSourceHash": "f4933f8d3f6e148b08c0458cfd8c82eda3f2e49657df777c47f9d5dd55e1bd05",
+      "review": {
+        "outcome": "approved",
+        "note": "composed захаваны: сегмент аўдыё умоўны (толькі калі не пусты)"
+      }
+    },
+    {
+      "id": "native.chrome.timeCap",
+      "value": "Upp till ${minutes} min",
+      "reviewedSourceHash": "4d2caf84a22f5db795338af5e935fc8654189716b361c93b3dd9cdb468de6eec",
+      "review": {
+        "outcome": "approved",
+        "note": "агульная форма — астатнім; дыскрэтныя 60/120/240 ніжэй"
+      },
+      "forms": {
+        "60": "Upp till en timme",
+        "120": "Upp till två timmar",
+        "240": "Halva dagen"
+      }
+    },
+    {
+      "id": "native.chrome.timeUnlimited",
+      "value": "Utan tidsgräns",
+      "reviewedSourceHash": "8f02cfdec9242fdb41cbc1944150ea1fe80af35eaaa00df319679c664a2c3573",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака без абмежавання часу"
+      }
+    },
+    {
+      "id": "native.chrome.validCache",
+      "value": "Tidigare giltig cache",
+      "reviewedSourceHash": "d69e1aa70b6573e5e7a801e70fcc8ead0ae58ffd214d39a82227fc88b78f86d0",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану папярэдняга валіднага кэша; cache — звыклы шведскі тэрмін"
+      }
+    },
+    {
+      "id": "native.chrome.walk",
+      "value": "Promenad",
+      "reviewedSourceHash": "b8fec3bf3468c4b2444846dc70c2c43539c6323117bad9e4b42a9a6455b6de54",
+      "review": {
+        "outcome": "approved",
+        "note": "пункт ніжняй навігацыі; глоссарый walk → promenad"
+      }
+    },
+    {
+      "id": "native.chrome.whatToDo",
+      "value": "Att göra →",
+      "reviewedSourceHash": "ca14a57064eb242bdc4b06cd3228d38e64e9866fc1e79e9128614b5565e7b179",
+      "review": {
+        "outcome": "approved",
+        "note": "ссылка на паверхню падбора; тэрмін discoveryTitle"
+      }
+    },
+    {
+      "id": "native.guideHint.dismiss",
+      "value": "Dölj",
+      "reviewedSourceHash": "ef41daab2552c03555650792656b97d33407771656bc80aea288af4b0527ad24",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка схавання карткі падказкі"
+      }
+    },
+    {
+      "id": "native.guideHint.heading",
+      "value": "Det finns en guide i närheten…",
+      "reviewedSourceHash": "afa6c69cf50b58dde34a24aa9f742b7ebffee946eeb17e76d90f7ae65a8ae6b7",
+      "review": {
+        "outcome": "approved",
+        "note": "ціхая картка «побач ёсць гід»; кропка-трохкроп'е захавана"
+      }
+    },
+    {
+      "id": "native.guideHint.openHint",
+      "value": "Öppna guidebeskrivningen",
+      "reviewedSourceHash": "c6c3fe285c1f5c311a4672cef712ff39d26fe314541ef3328e3bd2bf66608d3a",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка чытача экрана: адкрыццё апісання"
+      }
+    },
+    {
+      "id": "native.guideHint.paid",
+      "value": "betald",
+      "reviewedSourceHash": "36ba7c558c7b95ed0958922ae1e2269d9c1099bcd8ed1c65e14ce9d34d29cd07",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака платнага гіда; en-форма (guide)"
+      }
+    },
+    {
+      "id": "native.nearby.audioLabel",
+      "value": "ljud",
+      "reviewedSourceHash": "cb431707d9d9fd0564a385237b4a2110724296ccb5bc97ac13f1dab07eb4364c",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана факту аўдыё; аўдыё → ljud (адзіны тэрмін)"
+      }
+    },
+    {
+      "id": "native.nearby.cardHint",
+      "value": "Erbjudandekort. Ljud spelas inte upp.",
+      "reviewedSourceHash": "cf10a7f77cfd055dd909d8128643901c5d57292f5f2c7e57586c31ed7da56c08",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка карткі прапановы; адмаўленне запуску захавана"
+      }
+    },
+    {
+      "id": "native.nearby.durationUnit",
+      "value": "min",
+      "reviewedSourceHash": "079d7b14c190534468f60ebb89dd03327a392891ea21637e93923654586f2fa9",
+      "review": {
+        "outcome": "approved",
+        "note": "адзінка хвіліны"
+      }
+    },
+    {
+      "id": "native.nearby.empty",
+      "value": "Erbjudanden är ännu inte publicerade",
+      "reviewedSourceHash": "14efad64c2bf1a387eb5bc911f0fe955d664fb8402c294606a5085094340ae3c",
+      "review": {
+        "outcome": "approved",
+        "note": "прапановы пакуль не апублікаваныя; plural"
+      }
+    },
+    {
+      "id": "native.nearby.guideLabel",
+      "value": "Guide",
+      "reviewedSourceHash": "0f078d9620a6142a92a06859ae6287ba7c43811e3bc9d69951cf9fc1f030161a",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана карткі гіда"
+      }
+    },
+    {
+      "id": "native.nearby.indexDegraded",
+      "value": "Erbjudandeindexet är tillfälligt otillgängligt",
+      "reviewedSourceHash": "c36e91739b7d13aaae6a9e2a1bb1892c27935ef285c05dfc35384667a87945bf",
+      "review": {
+        "outcome": "approved",
+        "note": "радок дэградацыі; прыметнік otillgänglig — index (ett) → -t"
+      }
+    },
+    {
+      "id": "native.nearby.loading",
+      "value": "Laddar…",
+      "reviewedSourceHash": "76864c4c66c674c255382af4c8287404979066900d2b793bd18b722acbce8be4",
+      "review": {
+        "outcome": "approved",
+        "note": "радок загрузкі побач"
+      }
+    },
+    {
+      "id": "native.nearby.mapNote",
+      "value": "Stadskartan kommer efter beslut om kartplattor",
+      "reviewedSourceHash": "0be5495b00bd2c309da665137618d7af6ff0427f66e93426eb8944a88bb1e673",
+      "review": {
+        "outcome": "approved",
+        "note": "карта горада чакае рашэння пра тайлы; tiles → kartplattor (прыродны шведскі картаграфічны тэрмін, fr-прэцэдэнт перакладу)"
+      }
+    },
+    {
+      "id": "native.nearby.noteAcquiring",
+      "value": "Söker position…",
+      "reviewedSourceHash": "f9fe47bc78d531a4f95a80b4eff4b6c272932890908241d99d23f16dcad1d467",
+      "review": {
+        "outcome": "approved",
+        "note": "шукаем пазіцыю; без займенніка, звыклы шведскі радок працэсу"
+      }
+    },
+    {
+      "id": "native.nearby.noteDenied",
+      "value": "Positionen är inte tillåten — manuell granskning",
+      "reviewedSourceHash": "51d96de0382db6c57b90bc679f3fac2001a7cffe7230898f5f8be0d0fa9d2bfe",
+      "review": {
+        "outcome": "approved",
+        "note": "пазіцыя не дазволена; ручны агляд → manuell granskning"
+      }
+    },
+    {
+      "id": "native.nearby.noteHeldByWalk",
+      "value": "Promenaden använder positionen — manuell granskning",
+      "reviewedSourceHash": "0da6932f1e990ff833d7c1eacbd3bb65469cda844e7f5e6658b41c2e4bd4db2d",
+      "review": {
+        "outcome": "approved",
+        "note": "прагулка трымае пазіцыю"
+      }
+    },
+    {
+      "id": "native.nearby.noteUnstable",
+      "value": "Positionen är instabil",
+      "reviewedSourceHash": "8a9fc12e97a5c012d92b4e4e4d80dd068ce0fcf39c225583dc9dd7ec9f22d7d6",
+      "review": {
+        "outcome": "approved",
+        "note": "пазіцыя нестабільная"
+      }
+    },
+    {
+      "id": "native.nearby.placeLabel",
+      "value": "Plats",
+      "reviewedSourceHash": "13a42dfb51ce1366b0e65f3501044e2c663561c12bceb5e1eefd1c1ba648f15a",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана карткі месца"
+      }
+    },
+    {
+      "id": "native.nearby.proximityHeader",
+      "value": "Nära dig",
+      "reviewedSourceHash": "b5941200d2dc75a64cfe58b3c12d1545651c2d2c64bd1991cbca8907bd5fdbce",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі паблізу; разведзены з загалоўкам экрана I närheten"
+      }
+    },
+    {
+      "id": "native.nearby.reviewHeader",
+      "value": "Manuell granskning",
+      "reviewedSourceHash": "b0a03f871419d1e16a7933749a3525cadf600c0fa064d06255ebb70426f00c08",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі ручнога агляду"
+      }
+    },
+    {
+      "id": "native.nearby.textLabel",
+      "value": "Text",
+      "reviewedSourceHash": "aa2bf96ea1849308fd1afb7c10aa4de03d87adc7b9c115e7b4071b777c684e3e",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака факту тэксту"
+      }
+    },
+    {
+      "id": "native.nearby.title",
+      "value": "I närheten",
+      "reviewedSourceHash": "ceb1585e913e83295e615727dc433f621f160b3acd8ed18e40faea444c847749",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак экрана «Побач»"
+      }
+    },
+    {
+      "id": "native.nearby.unavailable",
+      "value": "Katalogen är inte tillgänglig",
+      "reviewedSourceHash": "04fe5b8f33920f11dafd234f90a5d21ab4b0181eb6d3da85d1d569d755da2a65",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану; тая ж канструкцыя, што chrome"
+      }
+    },
+    {
+      "id": "native.offer.buy",
+      "value": "Köp",
+      "reviewedSourceHash": "6e1f4eb2c0e8449facc0335b8898b51fab9b11e827e31dcbecda830f9419d02a",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка пакупкі; глоссарый purchase → köp"
+      }
+    },
+    {
+      "id": "native.offer.continueFree",
+      "value": "Fortsätt gratis",
+      "reviewedSourceHash": "f2baa69bab47ea9162dea9324f9eff5abb2a07b1975929b3bedf9e26d72d3072",
+      "review": {
+        "outcome": "approved",
+        "note": "працягнуць без пакупкі"
+      }
+    },
+    {
+      "id": "native.offer.dismiss",
+      "value": "Inte nu",
+      "reviewedSourceHash": "e5a837b139f912633fb94f4a98e64036a82ed35e7b6a1bc4b71560c725427e49",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова «не цяпер»; без канфліктнага «aldrig», як cs Teď ne"
+      }
+    },
+    {
+      "id": "native.offer.errorBody",
+      "value": "Du kan försöka igen eller fortsätta gratis.",
+      "reviewedSourceHash": "87664abf9c7fce9953aa6feaec27017bb4357b50cf8e3ca6055f12ac1c693b0f",
+      "review": {
+        "outcome": "approved",
+        "note": "тэкст збою; два шляхі захаваныя"
+      }
+    },
+    {
+      "id": "native.offer.errorTitle",
+      "value": "Köpet slutfördes inte",
+      "reviewedSourceHash": "ad99eb072eccd3dd6856951ed1bf49b93585795feb10cf036caa86b53e5a10ce",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак збою пакупкі; адмаўленне завяршэннасці, не «ніколі»"
+      }
+    },
+    {
+      "id": "native.offer.offerBody",
+      "value": "Ett köp låser upp guidens berättelser.",
+      "reviewedSourceHash": "889d9131c470607574c44341056ad5a06e938fbd72b2c8d9eba39d86642421be",
+      "review": {
+        "outcome": "approved",
+        "note": "адна пакупка адкрывае гісторыі; «адкрывае» → låser upp (метафара замка трымаецца)"
+      }
+    },
+    {
+      "id": "native.offer.offerTitle",
+      "value": "Alla guidens berättelser",
+      "reviewedSourceHash": "4a049233a864eaccd079db45a0db5435b7f443eb40f4c4f77e300ee153cce067",
+      "review": {
+        "outcome": "approved",
+        "note": "усе гісторыі гіда; глоссарый гісторыя → berättelse"
+      }
+    },
+    {
+      "id": "native.offer.purchasedPending",
+      "value": "Köpt · väntar på nedladdning",
+      "reviewedSourceHash": "73351aee750908e898ef326402d359a6064c68200c51608aba858cd3512cffac",
+      "review": {
+        "outcome": "approved",
+        "note": "факт + наступны крок, як cs Zakoupeno · čeká stažení"
+      }
+    },
+    {
+      "id": "native.offer.tryAgain",
+      "value": "Prova igen",
+      "reviewedSourceHash": "a1dbc2b68cb546fc6d006f50fbaae7e8f536bd97c68b0e15aaa9102d8bb237e4",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка паўтору пакупкі"
+      }
+    },
+    {
+      "id": "native.place.audioLabel",
+      "value": "ljud",
+      "reviewedSourceHash": "9cba9aefe283b909867ca3c7b7fdfa081738a88eda904be2c8857e8b4dbaecda",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака наяўнасці аўдыё"
+      }
+    },
+    {
+      "id": "native.place.durationUnit",
+      "value": "min",
+      "reviewedSourceHash": "5fb07a573d2f240d1203235ebd8c9730bd39304c864a7b4674fb00c5a40e8cbb",
+      "review": {
+        "outcome": "approved",
+        "note": "адзінка хвіліны месца"
+      }
+    },
+    {
+      "id": "native.place.empty",
+      "value": "Inga smakprov för den här platsen",
+      "reviewedSourceHash": "c10b21985ac88ed9bb6b0ae9d95e3ce080839a622e1d3f09b92ec534ee0040ff",
+      "review": {
+        "outcome": "approved",
+        "note": "тэйзер → smakprov (ett, plural інварыянтна); медыя-тэрмін разведзены з прэв'ю förhandsvisning, як es Avance/vista previa"
+      }
+    },
+    {
+      "id": "native.place.error",
+      "value": "Platsen kunde inte öppnas",
+      "reviewedSourceHash": "78a267a1e105f648cf74264ed59e4a3ee9b334ade5135f94b24826e31fd9abda",
+      "review": {
+        "outcome": "approved",
+        "note": "не ўдалося адкрыць месца"
+      }
+    },
+    {
+      "id": "native.place.guideLink",
+      "value": "Guideförhandsvisning",
+      "reviewedSourceHash": "6689ad59dbaf7e5400f58ed1c55c89ef10dfca451dc4c1d9e4d9d257200211d5",
+      "review": {
+        "outcome": "approved",
+        "note": "ссылка на прэв'ю гіда; кампазіт кароткі, як cs Náhled průvodce"
+      }
+    },
+    {
+      "id": "native.place.guideLinkHint",
+      "value": "Öppnar guidens förhandsvisning, startar inte promenaden.",
+      "reviewedSourceHash": "2d8e625a33b415b8a144097cf43e9b9b7566c68f36fc80fdf472b01d4ca79714",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка: прэв'ю, не запуск прагулкі"
+      }
+    },
+    {
+      "id": "native.place.loading",
+      "value": "Laddar…",
+      "reviewedSourceHash": "9fdf727adcd5b226497b6726d48906a85ffbf4ea7192fb2f52f9c5569577671f",
+      "review": {
+        "outcome": "approved",
+        "note": "радок загрузкі дэталі месца"
+      }
+    },
+    {
+      "id": "native.place.noAudio",
+      "value": "Smakprovet har inget publicerat ljud",
+      "reviewedSourceHash": "f10b57d945775369b50aa834570f60cb191aad9445d68ea7c11549e2b433aaf3",
+      "review": {
+        "outcome": "approved",
+        "note": "аўдыё тэйзера не апублікавана; пара да refusal-радка — тут «няма», там «не апублікаваны»"
+      }
+    },
+    {
+      "id": "native.place.noFacts",
+      "value": "Platsen är ännu inte publicerad i katalogen",
+      "reviewedSourceHash": "6a837f315b4fc07df8e72f31ac5802801e3e69123b032eb3ddbe6990ef5ec9be",
+      "review": {
+        "outcome": "approved",
+        "note": "месца пакуль не апублікавана ў каталога"
+      }
+    },
+    {
+      "id": "native.place.nowPlaying",
+      "value": "Spelas nu",
+      "reviewedSourceHash": "31c53b2b89b3c44e240d3860a4995fab290ac654eaabbfa98283f52915cc70e4",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака «зараз грае»"
+      }
+    },
+    {
+      "id": "native.place.paused",
+      "value": "Pausad",
+      "reviewedSourceHash": "36eaaecbe287e6c605f6875703cfd53540fa068c8b32c36eb140109003df230e",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака паўзы тэйзера; стан, не кнопка"
+      }
+    },
+    {
+      "id": "native.place.playFailed",
+      "value": "Ljudet startade inte.",
+      "reviewedSourceHash": "7057a04fb254bea27c4c76ad7523f0b96822383dbe1b0b3a275667acbde5655d",
+      "review": {
+        "outcome": "approved",
+        "note": "сказ з кропкай; збой запуску гуку"
+      }
+    },
+    {
+      "id": "native.place.playFailedHint",
+      "value": "Försök starta igen.",
+      "reviewedSourceHash": "a5244be645a80ce3e76fcc8f58e81ba9ecd87663b73973ff264dbf01b068178c",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка пасля збою"
+      }
+    },
+    {
+      "id": "native.place.playHint",
+      "value": "Uttrycklig uppspelning av smakprovet via en enda spelare.",
+      "reviewedSourceHash": "0bd0d8468494d897c96315c9ad3ac8f5633afb4d4a9af15acddcaca6e981f1f6",
+      "review": {
+        "outcome": "approved",
+        "note": "яўны Play праз адзіны плэер; «плэер» → spelare"
+      }
+    },
+    {
+      "id": "native.place.playLabel",
+      "value": "Lyssna på smakprovet",
+      "reviewedSourceHash": "98676c06c005f69e0596c1aa422f373aea133813f59122713f352e99f388cba4",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка: паслухаць тэйзер"
+      }
+    },
+    {
+      "id": "native.place.refusalText.moment#audio-unpublished",
+      "value": "Smakprovets ljud är inte publicerat.",
+      "reviewedSourceHash": "75adba4e79892068236ecd0f592b01a59142ad866d4e157556c2d8f7ee690a9b",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова гуку: тэйзер не апублікаваны; сказ з кропкай"
+      }
+    },
+    {
+      "id": "native.place.refusalText.moment#session-refused",
+      "value": "Smakprovet startar inte just nu — försök igen.",
+      "reviewedSourceHash": "27f2c6c3a5f9c950a31c4bd3719c6197ccbb81c08574f11f589d9ee1c548f137",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: зараз не запускаецца; «försök igen» без «aldrig»"
+      }
+    },
+    {
+      "id": "native.place.refusalText.moment#session-unroutable",
+      "value": "Smakprovet hörs inte i promenaden — starta det här igen.",
+      "reviewedSourceHash": "b4a69a45fa3ce27bf828742abaf9056f319804794f2ee31db62bca527194b08b",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: не гучыць у прагулцы — запусціце тут"
+      }
+    },
+    {
+      "id": "native.place.resumeLabel",
+      "value": "Fortsätt",
+      "reviewedSourceHash": "b8246a13f259bdb46e8425d790c5ffbeba1bf2905c36f9b0e81c71ae30246870",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка працягу тэйзера"
+      }
+    },
+    {
+      "id": "native.place.stopLabel",
+      "value": "Stoppa",
+      "reviewedSourceHash": "7c29f6636e7181c50f70cb3990251dd5a2b40e1823d9a27135fd168bdf559a90",
+      "review": {
+        "outcome": "approved",
+        "note": "дзеянне спыніць тэйзер; асобнае дзеянне Stoppa — аднакарэннасць з назоўнікам stopp не мяшае (стандарт шведскага UI)"
+      }
+    },
+    {
+      "id": "native.place.teaserLabel",
+      "value": "Smakprov",
+      "reviewedSourceHash": "e81ae6243c1a8f05cd365f4dfe9c2b18e0ff1ad2419f103a55573d9b9e2991b8",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака тэйзера"
+      }
+    },
+    {
+      "id": "native.place.textLabel",
+      "value": "Text",
+      "reviewedSourceHash": "9d32629dfe52f43658702381d2ab2c662cca5a395dbde1e8177280f0b94c43a6",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака наяўнасці тэксту"
+      }
+    },
+    {
+      "id": "native.place.unavailable",
+      "value": "Platsdetaljen är inte tillgänglig",
+      "reviewedSourceHash": "04c287ef15935302a75cab52776883ca52481197e2e22798268a4436c64413a9",
+      "review": {
+        "outcome": "approved",
+        "note": "дэталь месца недаступная"
+      }
+    },
+    {
+      "id": "native.preview.detail",
+      "value": "Paketet är ofullständigt",
+      "reviewedSourceHash": "22fe4c2b5e44f41bb7cafc1b0262f1f737e96b86317ce4830a1a8160b57e57eb",
+      "review": {
+        "outcome": "approved",
+        "note": "агульная форма — астатнім; іменаваныя формы ніжэй"
+      },
+      "forms": {
+        "damaged": "Paketet är skadat: ladda ner igen",
+        "missing-files": "Filer saknas: ${count}",
+        "stale": "En uppdatering är tillgänglig"
+      }
+    },
+    {
+      "id": "native.preview.downloadFailed",
+      "value": "Nedladdningen misslyckades.",
+      "reviewedSourceHash": "4470dfde12ba5d2478989694d06ff50d49447bc872a0d0ef153c02fda3e77a40",
+      "review": {
+        "outcome": "approved",
+        "note": "сказ з кропкай; адзін корань ladda ner з глоссарыя"
+      }
+    },
+    {
+      "id": "native.preview.label.download",
+      "value": "Ladda ner",
+      "reviewedSourceHash": "a549fbfb60c21722178889b8deb230cc530a13f81c505c996076e24826545daf",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка прэв'ю: загрузіць"
+      }
+    },
+    {
+      "id": "native.preview.label.start",
+      "value": "Börja",
+      "reviewedSourceHash": "d86b1af3ba0b10036ebc2e53b826d50440fda0416b79bdcdcf0b6cc548277293",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка прэв'ю: пачаць"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#download-unavailable",
+      "value": "Det går inte att ladda ner i det här bygget.",
+      "reviewedSourceHash": "c92fa779597efd3693633519bd657c144bf3c77398a05850305192c9834424ff",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: загрузка недаступная на зборцы; звыклая шведская канструкцыя «Det går inte att…», глоссарый-корань ladda ner трымаецца"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#not-published",
+      "value": "Guiden är inte publicerad.",
+      "reviewedSourceHash": "f4026de96b2bf6d2f5337774d08a4a6e28073ac9a55e76292f5cf6bc6998359d",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: гід не апублікаваны"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#purchase-required",
+      "value": "Köp krävs.",
+      "reviewedSourceHash": "e786d174f1074f25fbb00fd84bf85cca15b645d1967c920ab8b61812aa8315e4",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: патрэбна пакупка; глоссарый purchase → köp"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#storage-unknown",
+      "value": "Lagringen är inte tillgänglig.",
+      "reviewedSourceHash": "662280ea45ace6b68da87b0c542fdc84235041ae588aa93b2c0e6e45c4137b7a",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: сховішча недаступнае"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#verify-unavailable",
+      "value": "Verifieringen är inte tillgänglig.",
+      "reviewedSourceHash": "03f7bad1b0dd05221dcbf5a4acf62a639853decfcbe6ca6490ddb5c2cea9b7b0",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: праверка недаступная"
+      }
+    },
+    {
+      "id": "native.preview.retry",
+      "value": "Försök igen",
+      "reviewedSourceHash": "0cc5f813736728a6851f72c2b114f9add2a61f58d47c1a5781e3d445464c9d3b",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка паўтору ў прэв'ю"
+      }
+    },
+    {
+      "id": "native.preview.storageExit",
+      "value": "Frigör utrymme i KUDY",
+      "reviewedSourceHash": "7694206992bd6471e7d0db23d132c82854618caee70263270c8f2fe3e6ef3a35",
+      "review": {
+        "outcome": "approved",
+        "note": "выхад на вызваленне месца; брэнд без перакладу"
+      }
+    },
+    {
+      "id": "native.preview.storageFullDetail",
+      "value": "det saknas utrymme: ytterligare ${mb} MB krävs",
+      "reviewedSourceHash": "246c064641fd53a3c0f04b126c2a29f5b161c9b846290e2595292279abf0ae08",
+      "review": {
+        "outcome": "approved",
+        "note": "дэталь поўнага сховішча; тып number захаваны"
+      }
+    },
+    {
+      "id": "native.run.attribution",
+      "value": "Data © OpenStreetMap-bidragsgivare, ODbL",
+      "reviewedSourceHash": "c2b14d03ca62503c507e49ef77155a31d8423716a313ab878c7b0d751bcd23d3",
+      "review": {
+        "outcome": "approved",
+        "note": "атрыбуцыя OSM; ліцэнзія ODbL без перакладу"
+      }
+    },
+    {
+      "id": "native.run.autoplaySuspendedTitle",
+      "value": "Automatiska berättelser är pausade",
+      "reviewedSourceHash": "127dc05744cfc9564cbbe4cb47cfc30c780ee2c30b55e7a16c84c19d04c134f7",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак прыпынення аўтапрайгравання"
+      }
+    },
+    {
+      "id": "native.run.close",
+      "value": "Stäng",
+      "reviewedSourceHash": "fdcf5f36d5dc627a9fe0d52a9fb62fdcad04dae25ac94910de28dcadebf566df",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка зачынення экрана"
+      }
+    },
+    {
+      "id": "native.run.deniedGps",
+      "value": "Automatiska berättelser fungerar inte — jag ser inte din position",
+      "reviewedSourceHash": "4c2d57377f5bee5ce40cccc7e2393893218a2c5c87e74e60c3065cff7b28af0b",
+      "review": {
+        "outcome": "approved",
+        "note": "банер адмовы GPS; першая асоба, як be «я не бачу»"
+      }
+    },
+    {
+      "id": "native.run.endConfirmAccept",
+      "value": "Avsluta",
+      "reviewedSourceHash": "a8437ed726559ff94e98019d7f0d093963e380d035f5f61215a0fe521d9871e2",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка пацвярджэння завяршэння"
+      }
+    },
+    {
+      "id": "native.run.endConfirmCancel",
+      "value": "Avbryt",
+      "reviewedSourceHash": "6f2c024243297acae4ebcd87bbd44dadb04f728c836f0c126e069ecb0705bbca",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка скасавання завяршэння"
+      }
+    },
+    {
+      "id": "native.run.endConfirmTitle",
+      "value": "Avsluta promenaden?",
+      "reviewedSourceHash": "914dc880a971016df429bf5b22ea8f703e1287530f6e50654589ee9a40aa3b34",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак дыялога завяршэння"
+      }
+    },
+    {
+      "id": "native.run.endWalk",
+      "value": "Avsluta promenaden",
+      "reviewedSourceHash": "1d896d738e1170ab489de6baa61a4fbf015a3482ad6f1ea26d5ace4663e9775c",
+      "review": {
+        "outcome": "approved",
+        "note": "пункт меню сесіі"
+      }
+    },
+    {
+      "id": "native.run.endedTitle",
+      "value": "Promenaden är avslutad",
+      "reviewedSourceHash": "39f780e448149f38eb59cf40d230c2ab1539f1082ad7d357a191d46bd0f20739",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак экрана завершанай прагулкі"
+      }
+    },
+    {
+      "id": "native.run.gpsStalled",
+      "value": "Positionen är inaktuell",
+      "reviewedSourceHash": "dcb4aab6a116aa3dfec4b0cc420890b7291cec06bb1d00ecc640e66632c25c0d",
+      "review": {
+        "outcome": "approved",
+        "note": "пазіцыя састарэлая; inaktuell — дакладна «састарэлая», не «зніклая»"
+      }
+    },
+    {
+      "id": "native.run.gpsStalledDetail",
+      "value": "Automatisk uppspelning och kö är blockerade",
+      "reviewedSourceHash": "c0f1d04f075143656fd943a339c28fb79f392bc8837d049a52ba499398f3f55c",
+      "review": {
+        "outcome": "approved",
+        "note": "аўтазапуск і чарга заблакаваныя"
+      }
+    },
+    {
+      "id": "native.run.loading",
+      "value": "Laddar…",
+      "reviewedSourceHash": "040940eda93e7404d57a64daf645d628ab55ebf399ce3b32883736cf9bf238fc",
+      "review": {
+        "outcome": "approved",
+        "note": "радок загрузкі карты прагулкі"
+      }
+    },
+    {
+      "id": "native.run.lockedHint",
+      "value": "Tillgängligt efter köp",
+      "reviewedSourceHash": "8a2f3f3dd06cc4f068baefe2af315554d551a6ed4b1920ff46455715bcc3d166",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка зачыненай карткі; нэўтральнае ett-станоўчае"
+      }
+    },
+    {
+      "id": "native.run.manualPlayHint",
+      "value": "Varje berättelse startas manuellt från stoppkortet",
+      "reviewedSourceHash": "001c5d5c664209b77fd781de374acc525f425af430263b370b05c3de2a980c05",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка ручнога рэжыму; «кропка» → stopp у кампазіце"
+      }
+    },
+    {
+      "id": "native.run.markerHint",
+      "value": "Visning av stoppet. Ljud spelas inte upp.",
+      "reviewedSourceHash": "c93b6f3471a36cc43c3089c07070a0a7bc55d14d900f12e49c4454c3cfdf8ee5",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка прагляду кропкі; адмаўленне аўдыё захавана"
+      }
+    },
+    {
+      "id": "native.run.nothingPlaying",
+      "value": "Inget spelas",
+      "reviewedSourceHash": "3fa2e1172cf976d39cdaf06d27f957c31e00afa29d29a2d8caddc8b2690203da",
+      "review": {
+        "outcome": "approved",
+        "note": "просты стан бару прайгравання"
+      }
+    },
+    {
+      "id": "native.run.nowPlayingLabel",
+      "value": "Spelas nu",
+      "reviewedSourceHash": "0410c32b080f07cb67c2f1263ffe9887008786f97a5f011e7e7c75237dec7759",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака «зараз грае» на радку вяртання"
+      }
+    },
+    {
+      "id": "native.run.pauseAudio",
+      "value": "Pausa",
+      "reviewedSourceHash": "fb5c796b96e75da399f5c2807919772e99309921718eb232cf8e2081d0bac312",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка паўзы аўдыё; дзеянне"
+      }
+    },
+    {
+      "id": "native.run.pauseWalk",
+      "value": "Pausa promenaden",
+      "reviewedSourceHash": "9d38a19be03985d1f816485664843efdc5472ef71c462500c868d744d6efd978",
+      "review": {
+        "outcome": "approved",
+        "note": "пункт меню: прыпыніць прагулку"
+      }
+    },
+    {
+      "id": "native.run.pausedTitle",
+      "value": "Promenaden är pausad",
+      "reviewedSourceHash": "166ec9cb061eebb2770a359e48eb2be38c3ecbb4d8f6a613a4c9ad91400a6d2c",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак прыпыненай прагулкі"
+      }
+    },
+    {
+      "id": "native.run.playAudio",
+      "value": "Spela",
+      "reviewedSourceHash": "c511387ceea931680ada61ac8be6aefde228ae5a310e471ff5d091f3c09ffb49",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка запуску аўдыё"
+      }
+    },
+    {
+      "id": "native.run.playStoryHint",
+      "value": "Startar ljudet för den här berättelsen",
+      "reviewedSourceHash": "d3c9a3ebd3822df15a6417d6aa92f55565d3572b61cfd9f2f98aba808bafe554",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка карткі гісторыі"
+      }
+    },
+    {
+      "id": "native.run.poiKind.sight",
+      "value": "Sevärdhet",
+      "reviewedSourceHash": "42e94abcf55015b5817b57f0395ce601910d38d1eb02af1c761d091f1cdbc79b",
+      "review": {
+        "outcome": "approved",
+        "note": "назва тыпу кропкі; звыклы шведскі тэрмін славутасці"
+      }
+    },
+    {
+      "id": "native.run.readMore",
+      "value": "Läs",
+      "reviewedSourceHash": "8dfb154f8883603f925a09be40080f3693a1788640a0be59cbcf0e0848dc54db",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка разгортвання транскрыпта; кароткая, як be «Чытаць»"
+      }
+    },
+    {
+      "id": "native.run.reasonText.fallback",
+      "value": "Fel.",
+      "reviewedSourceHash": "0da87870411b9e1873d84f74989b9f36d3178c3bc2f945c6c8b2a73a4bbc8710",
+      "review": {
+        "outcome": "approved",
+        "note": "апошняя адмова без прычыны; сказ з кропкай"
+      }
+    },
+    {
+      "id": "native.run.reasonText.live-session-exists",
+      "value": "En aktiv promenad finns redan.",
+      "reviewedSourceHash": "38876047ff189a5c3cc8b4aaad58364154accfcfa128fee9758d8de7b072b59a",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова старта: жывая прагулка ўжо ёсць"
+      }
+    },
+    {
+      "id": "native.run.reasonText.package-access-locked",
+      "value": "Åtkomsten till guiden är ännu inte upplåst.",
+      "reviewedSourceHash": "305486b141166aae4f39c37fd522ba73ca70cad152735f62c7b6ea8f4c62b899",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: доступ яшчэ не адкрыты; «адкрывае» трымае метафару замка"
+      }
+    },
+    {
+      "id": "native.run.reasonText.package-incomplete",
+      "value": "Guiden är ofullständig.",
+      "reviewedSourceHash": "8d26cfe8dc716a252873caead724a2a04f2feba74d796194d51c96f869b943ef",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: гід не поўны"
+      }
+    },
+    {
+      "id": "native.run.reasonText.package-needs-recovery",
+      "value": "Guiden behöver repareras.",
+      "reviewedSourceHash": "b8b4c2c7f540bb529eb784dc36f405b7b2e7c818a813a2aa5c6001e5eb12861e",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: патрабуе аднаўлення; «аднаўленне пакета» → reparera (прэцэдэнт es reparación)"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#locale-missing",
+      "value": "Guidens språk hittades inte.",
+      "reviewedSourceHash": "69fb0a7ed42523063e1634201b51bfbfe554e375e3a5a3a8fe3831bff4b4a937",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: мова гіда не знойдзена"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#package-ambiguous",
+      "value": "Det finns flera versioner av guiden på disken.",
+      "reviewedSourceHash": "fdd1faa5c76b85d38f095cfdfdc5a95f2735d003bf0cfd1d04605ca19d3faa19",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: некалькі версій на дыску"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#package-not-downloaded",
+      "value": "Guiden är inte nedladdad.",
+      "reviewedSourceHash": "5912049b75ae0d205c03dc16c4766fbb92a49f85a06dd5fbf43979b076f3a6f4",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: гід не спампаваны; адзін корань ladda ner"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#package-read-failed",
+      "value": "Guiden kan inte läsas.",
+      "reviewedSourceHash": "cb97f828950ec915bd80a937e1c569a2e255c380aa2dc70db18883b66eeeb0ea",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: гід не чытаецца"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#recovery-failed",
+      "value": "Det gick inte att läsa den aktiva sessionen.",
+      "reviewedSourceHash": "dc38ee4a64a7e63371d24d15a8811bec2db3a5cc769f78da944fe0c00d11f75b",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: збой чытання жывой сесіі; жывая сесія → aktiv session"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#unsafe-route-id",
+      "value": "Ogiltig ruttidentifierare.",
+      "reviewedSourceHash": "d340822c39b89b886e5951a52bc64b20fca3d6f84871c9e1e5a862235c7b033c",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова: няверны ідэнтыфікатар маршруту; кампазіт кароткі"
+      }
+    },
+    {
+      "id": "native.run.reasonText.switch-no-live-session",
+      "value": "Den aktiva promenaden finns inte längre — börja om.",
+      "reviewedSourceHash": "8db71669436a5adb6fe155900507136c66e4bc436e26865e0408659b50457ecd",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова пераключэння; «пачніце нанова» → börja om"
+      }
+    },
+    {
+      "id": "native.run.restoredTitle",
+      "value": "Promenaden fortsätter från en sparad session",
+      "reviewedSourceHash": "0e2062fc47a4936d773e4e014d5f1f11c31481de99dceb81a4aa9166acdc30f1",
+      "review": {
+        "outcome": "approved",
+        "note": "глоссарый restore → «fortsätter från sparad session»; канон без рэстаўрацыйнай метафары, як be/en/uk/de/es/fr/cs"
+      }
+    },
+    {
+      "id": "native.run.resume",
+      "value": "Fortsätt",
+      "reviewedSourceHash": "eebc12f1f868df6992e266f4de878022ad7ba731a55d869b203f5e44b2562286",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка працягу прыпыненай прагулкі"
+      }
+    },
+    {
+      "id": "native.run.schematicNote",
+      "value": "Schema över ruttens stopp — stadskartan kommer efter beslut om kartplattor",
+      "reviewedSourceHash": "7202049786e88c0cfb035a2fcf10a56d78f72c8911d0a3a06810d076909d7939",
+      "review": {
+        "outcome": "approved",
+        "note": "заўвага схематычнай карты; тайлы → kartplattor"
+      }
+    },
+    {
+      "id": "native.run.status.available",
+      "value": "tillgängligt",
+      "reviewedSourceHash": "9793aad53a23abdc305d5548a29cb946b00e25523d81d73dd6fc44ec65584cf2",
+      "review": {
+        "outcome": "approved",
+        "note": "статус кропкі; en-слово (stopp) без змены"
+      }
+    },
+    {
+      "id": "native.run.status.locked",
+      "value": "låst",
+      "reviewedSourceHash": "6a99f5e753bfc059766d06244cd27adca7e2aef32f319d076e3df63d742e94a7",
+      "review": {
+        "outcome": "approved",
+        "note": "статус кропкі; пары да пазнакі Låst"
+      }
+    },
+    {
+      "id": "native.run.status.pending",
+      "value": "väntar",
+      "reviewedSourceHash": "9f528a418df5a9a0b3669164831060f48a64ee91f09944317edbf68f59fccda9",
+      "review": {
+        "outcome": "approved",
+        "note": "статус кропкі; дзеяслоў-стан"
+      }
+    },
+    {
+      "id": "native.run.status.played",
+      "value": "lyssnat",
+      "reviewedSourceHash": "a502b3cc111fa9e67cfd2cf9ed81c5255f9e620b48382d72345b3dc81661fe36",
+      "review": {
+        "outcome": "approved",
+        "note": "статус кропкі; «праслухана» → lyssnad (en-форма)"
+      }
+    },
+    {
+      "id": "native.run.status.playing",
+      "value": "spelas",
+      "reviewedSourceHash": "d1eef5a55b531148b786b73a9273d9f72d6de945391799a4b8c69b6f9b5ad31b",
+      "review": {
+        "outcome": "approved",
+        "note": "статус кропкі на карце; пасіў, «гучыць»"
+      }
+    },
+    {
+      "id": "native.run.storyBase",
+      "value": "Huvudberättelse",
+      "reviewedSourceHash": "6c2b75554d07c595a721ae6fa62de6e6e5f0157b2d7bc79dd445ca7dcbd3fd08",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака асноўнай гісторыі; глоссарый гісторыя → berättelse"
+      }
+    },
+    {
+      "id": "native.run.storyExtended",
+      "value": "Utökad berättelse",
+      "reviewedSourceHash": "3570a8bfad2653d9dcd5fe9b60241a9ec8313f4a1a3ad34085dd92117b7b044b",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака дадатковай гісторыі"
+      }
+    },
+    {
+      "id": "native.run.tierUnavailable",
+      "value": "Den utökade nivån är inte tillgänglig i en fortsatt session",
+      "reviewedSourceHash": "96e6c8ab2f1326360751f35cbe3a8f97c05b372dbe078097523afeb01a06201c",
+      "review": {
+        "outcome": "approved",
+        "note": "заўвага: дадатковы ярус недаступны ў адноўленай сесіі; «адноўленая» → fortsatt (канон працягу)"
+      }
+    },
+    {
+      "id": "native.run.transcript",
+      "value": "Transkript",
+      "reviewedSourceHash": "ed28a2f5c9457fcfa1fa39bec597498948a3909f658583f316145309b493a477",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак транскрыпта; звыклы шведскі тэрмін"
+      }
+    },
+    {
+      "id": "native.run.transcriptPending",
+      "value": "Texten kommer tillsammans med paketets innehåll",
+      "reviewedSourceHash": "e4d1078ae54a91a1baba09622433a75af468a6b88cbe1d1fb319edf4126fbada",
+      "review": {
+        "outcome": "approved",
+        "note": "ганаровая заўвага: тэкст прыйдзе з кантэнтам пакета"
+      }
+    },
+    {
+      "id": "native.run.unavailableTitle",
+      "value": "Sessionen är inte tillgänglig",
+      "reviewedSourceHash": "749dd4d5710f98ecf3c7147c540c4f2f65368b228adcaf1d050f9c738fed73a6",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак недаступнай сесіі"
+      }
+    },
+    {
+      "id": "web.ui.appBenefitFullRoutes",
+      "value": "Kompletta rutter: alla stopp och allt ljud",
+      "reviewedSourceHash": "d4b091d52be3bca3e28259c32c45de553cdae2bff23890f1466f43539a648fb6",
+      "review": {
+        "outcome": "approved",
+        "note": "выгода дадатку; «поўныя маршруты» → kompletta rutter"
+      }
+    },
+    {
+      "id": "web.ui.appBenefitGps",
+      "value": "Automatisk uppspelning av berättelser på platsen via GPS",
+      "reviewedSourceHash": "dd1f0b20a9989171a0f7ee937b8a2b300e77510c6fede71cea44091ffd88075e",
+      "review": {
+        "outcome": "approved",
+        "note": "выгода дадатку; GPS-аўтазапуск разгорнуты па-шведску"
+      }
+    },
+    {
+      "id": "web.ui.appBenefitOffline",
+      "value": "Offline: rutterna till hands utan internet",
+      "reviewedSourceHash": "0938d9674742b7ca8d10e18f403e12aec968da0f2d0727b9159f6718ec177d9e",
+      "review": {
+        "outcome": "approved",
+        "note": "выгода дадатку; «пад рукой» → till hands"
+      }
+    },
+    {
+      "id": "web.ui.appPageStores",
+      "value": "Hitta appen:",
+      "reviewedSourceHash": "41e9d325b3f4b67c7a5286cc11354b0a207839e2fee05e651cc270869ed5f0ec",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака секцыі крам"
+      }
+    },
+    {
+      "id": "web.ui.appPageTitle",
+      "value": "Fullversionen — i KUDY-appen",
+      "reviewedSourceHash": "a824a45caa613d7d9d0cb29d968595e6d42c3db635115d8aa4946823e2bbbebe",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак старонкі дадатку; тэрмін fullversion звыклы"
+      }
+    },
+    {
+      "id": "web.ui.appStoreName",
+      "value": "App Store",
+      "reviewedSourceHash": "7047842a47bf44a3707f7389b795b8484c66306e2026e9dcd5ea02e387c9c54c",
+      "review": {
+        "outcome": "approved",
+        "note": "назва крамы; брэнд не перакладаецца"
+      }
+    },
+    {
+      "id": "web.ui.audioAndText",
+      "value": "ljud och text",
+      "reviewedSourceHash": "0f4aff6c5476865b0bd3977657d0f3361fd3d04dcea6e8e4734b6bfdbdba5a0a",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака набору; тэрміны ljud/text, як у натыўных"
+      }
+    },
+    {
+      "id": "web.ui.audioHeading",
+      "value": "Ljud",
+      "reviewedSourceHash": "42ce7ded17f5749b83970a0155fde0b9503d572f14685c475940bbf1dc3a4022",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі аўдыё"
+      }
+    },
+    {
+      "id": "web.ui.audioUnavailable",
+      "value": "Ljudfilen finns inte i det offentliga paketet; berättelsens text nedan läses som vanligt.",
+      "reviewedSourceHash": "97c74598be80ccfc34d8de9326cccdd19a2e3131cd88bcd8d5a36907f528157e",
+      "review": {
+        "outcome": "approved",
+        "note": "ганаровая заўвага; тэкст чытаецца звычайна"
+      }
+    },
+    {
+      "id": "web.ui.backToGuide",
+      "value": "Till guidesidan",
+      "reviewedSourceHash": "d74d46d2484a23efcb8b7fe0c7c0cad37cd687fd47b549476567a7551dcb1fde",
+      "review": {
+        "outcome": "approved",
+        "note": "ссылка вяртання да старонкі гіда; кампазіт"
+      }
+    },
+    {
+      "id": "web.ui.brand",
+      "value": "KUDY",
+      "reviewedSourceHash": "1885cd40ff3259455dab4cd3fda86af65df621059911963040af3482180755bd",
+      "review": {
+        "outcome": "approved",
+        "note": "брэнд у шапцы"
+      }
+    },
+    {
+      "id": "web.ui.calmOfferCta",
+      "value": "Öppna appen",
+      "reviewedSourceHash": "59b840b0a9ba1fb1402597545ca1e919111a9825e9ddc94d8ab8270c7ddcafef",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка ціхай прапановы"
+      }
+    },
+    {
+      "id": "web.ui.calmOfferText",
+      "value": "Hela versionen — i appen: GPS-uppspelning, offline, kompletta rutter.",
+      "reviewedSourceHash": "fca9b8721b8f42038c5bd8672d0019ca3e492ba30ac6fa7f2fb175bdf404ea2e",
+      "review": {
+        "outcome": "approved",
+        "note": "ціхая прапанова; тры выгоды даслоўна, як план §3.2"
+      }
+    },
+    {
+      "id": "web.ui.catalogTitle",
+      "value": "Stadsguider",
+      "reviewedSourceHash": "670058fc54d284f2e46f7e8e09997332a46ab937ce627c51f1f2cfaa998f82ff",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак каталога гідаў; кампазіт, як cs Průvodci po městě"
+      }
+    },
+    {
+      "id": "web.ui.distance",
+      "value": "Avstånd",
+      "reviewedSourceHash": "bee0a3a7d35a29807e46345e626e3bca28a4970e701c0b66c236c9d84c074c04",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака рада адлегласці"
+      }
+    },
+    {
+      "id": "web.ui.duration",
+      "value": "Längd",
+      "reviewedSourceHash": "9276104996f45e284d966794e70c4fc2d52b329a5a5f4666515e718f8bf12f16",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака рада працягласці; пары да натыўнай durationLabel"
+      }
+    },
+    {
+      "id": "web.ui.homeLink",
+      "value": "Till startsidan",
+      "reviewedSourceHash": "30e2d60f17153ff35aa1adda3bab5116845e1991e0e4143d79ea1b50bb13389e",
+      "review": {
+        "outcome": "approved",
+        "note": "ссылка на галоўную"
+      }
+    },
+    {
+      "id": "web.ui.kilometersShort",
+      "value": "km",
+      "reviewedSourceHash": "f0799d4b6ae84c9fafe93c5a3e8ae85bf7675912cad3a7737f48c0448aa00f50",
+      "review": {
+        "outcome": "approved",
+        "note": "адзінка кіламетра"
+      }
+    },
+    {
+      "id": "web.ui.langSwitchName",
+      "value": "English",
+      "reviewedSourceHash": "08fee1e01a8191946fa7c18d58791822c1e28bfcbd50006a82592c408e10f28a",
+      "review": {
+        "outcome": "approved",
+        "note": "уласная назва мовы-пераключальніка (uk-прэцэдэнт)"
+      }
+    },
+    {
+      "id": "web.ui.languages",
+      "value": "Språk",
+      "reviewedSourceHash": "c06833252de3a6b56c05b65b42dfa0b95e4005eedd8189e5bf9f2f64b4490716",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака рада моваў гіда"
+      }
+    },
+    {
+      "id": "web.ui.lockedLabel",
+      "value": "stoppet är låst",
+      "reviewedSourceHash": "aafde1b7e9811c639b3f9340e59d0b53d6879b56fffc2cb6bcd74a616b2870e8",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака зачыненай кропкі ў спісе; вызначаны артыкль трымае канструкцыю"
+      }
+    },
+    {
+      "id": "web.ui.mapAttribution",
+      "value": "Kartdata © OpenStreetMap-bidragsgivare (licens ODbL)",
+      "reviewedSourceHash": "1044b87f28683a787262f17f1017ec49cf859cf8ba6c9773717fc8be6f16a536",
+      "review": {
+        "outcome": "approved",
+        "note": "атрыбуцыя карт OSM"
+      }
+    },
+    {
+      "id": "web.ui.mapError",
+      "value": "Kartan är tillfälligt otillgänglig. Ruttlistan nedan fungerar som vanligt.",
+      "reviewedSourceHash": "5d6c08e18afd5e725fb09490c6227e3ea83cadb649a78c776408948b6fa9963e",
+      "review": {
+        "outcome": "approved",
+        "note": "збой карты; спіс працуе звычайна"
+      }
+    },
+    {
+      "id": "web.ui.mapIntro",
+      "value": "Översikt över offentliga rutter och stopp. Besökarens position fastställs inte och används inte.",
+      "reviewedSourceHash": "c597a6c22daf0b31484af6251a55b92c9ddf3827aaac5719073d93a17caec838",
+      "review": {
+        "outcome": "approved",
+        "note": "уводзіны карты; адмаўленне вызначэння пазіцыі даслоўнае"
+      }
+    },
+    {
+      "id": "web.ui.mapRoutesHeading",
+      "value": "Rutter på kartan",
+      "reviewedSourceHash": "35d577ece11ecfe53eb50cc7fd5ce8f60212ada6f4e892602acb5b06449a21f1",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі маршрутаў на карце"
+      }
+    },
+    {
+      "id": "web.ui.mapTitle",
+      "value": "Stadskarta",
+      "reviewedSourceHash": "9ef7a5aa47a5315ef13466f4ff1aa67b6286c442ff261c0bbaccfc208ab85887",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак старонкі карты горада"
+      }
+    },
+    {
+      "id": "web.ui.minutesShort",
+      "value": "min",
+      "reviewedSourceHash": "e8c16fd4349955ecde6b8e54ca7e348713cdfc4bea556dfba5ed9c03fd384e93",
+      "review": {
+        "outcome": "approved",
+        "note": "адзінка хвіліны"
+      }
+    },
+    {
+      "id": "web.ui.nextStop",
+      "value": "Nästa stopp",
+      "reviewedSourceHash": "371e0d77c5507a43edee3b356ad0cfb56f8b7c21a246ea346daed28f22a10799",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка наступнай кропкі"
+      }
+    },
+    {
+      "id": "web.ui.playStoreName",
+      "value": "Google Play",
+      "reviewedSourceHash": "4d2b5bdd1768b08ed60798c2baf6ea51b51a4a14c75d19063d9f16134116ce03",
+      "review": {
+        "outcome": "approved",
+        "note": "назва крамы; брэнд"
+      }
+    },
+    {
+      "id": "web.ui.prevStop",
+      "value": "Föregående stopp",
+      "reviewedSourceHash": "91521bae33c1fc37a67fc215efdc36f06c0e7fd6c7bab32e70f3e7b7443f53dd",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка папярэдняй кропкі"
+      }
+    },
+    {
+      "id": "web.ui.privacyAnalytics",
+      "value": "Analys — bara med uttryckligt samtycke. Händelser skickas till servern först efter att samtycket har getts; ett nekande betyder att loggen bara finns på enheten och att appen fungerar fullt ut. Koordinater, namn och användarinmatad text skickas aldrig.",
+      "reviewedSourceHash": "d02dc665b1db4856113cad4e30c33fb438f48dd157f66c4da39aa242b941340b",
+      "review": {
+        "outcome": "approved",
+        "note": "прыватнасць: аналітыка толькі па яўнай згодзе; тройчы адмаўленне/няколі захаваныя"
+      }
+    },
+    {
+      "id": "web.ui.privacyAppData",
+      "value": "Appen fungerar utan konto. Den för en lokal händelselogg på enheten (vilka berättelser som öppnades, vilka rutter som laddades ner) och sparar nedladdat innehåll. Loggen innehåller varken namn eller fri text och är knuten till en slumpmässig enhetsidentifierare — det är pseudonymiserade, inte anonymiserade data.",
+      "reviewedSourceHash": "440680a83706fc8e822376da9efc4e06bef21b3f33ecc4566ef35f3c68ec5470",
+      "review": {
+        "outcome": "approved",
+        "note": "прыватнасць: лакальны лог, псеўданімізаваныя даныя; размежаванне pseudonymiserade/anonymiserade"
+      }
+    },
+    {
+      "id": "web.ui.privacyContact",
+      "value": "Frågor om den här integritetspolicyn kan ställas som issues i projektets offentliga förråd:",
+      "reviewedSourceHash": "8155e69060cfd2c7c434816554419619f7c6880d668891dd3d836b609cf425c6",
+      "review": {
+        "outcome": "approved",
+        "note": "прыватнасць: пытанні праз issues рэпазіторыя; issues — тэрмін GitHub"
+      }
+    },
+    {
+      "id": "web.ui.privacyDeletion",
+      "value": "Radering av data: i appen, under avsnittet My KUDY, finns en knapp för att radera enheten — den rensar händelseloggen på servern och enhetens post; nedladdat innehåll finns kvar. Brev eller ansökan behövs inte.",
+      "reviewedSourceHash": "6620748446af7ada3e3599b198bf82640983b0568c88d3c19f97e59b25bfc897",
+      "review": {
+        "outcome": "approved",
+        "note": "прыватнасць: выдаленне прылады; «Ліст ці заяўку дасылаць не трэба» → не патрэбныя"
+      }
+    },
+    {
+      "id": "web.ui.privacyIntro",
+      "value": "KUDY är audioguider för stadspromenader. Den här sidan beskriver vilka data projektet behandlar: webbkanalens kostnadsfria skikt och mobilappen.",
+      "reviewedSourceHash": "87c3fd8b911d11bafbc0a20e65b2312422d246dd45ebb630ee9d3942b301e33a",
+      "review": {
+        "outcome": "approved",
+        "note": "уводзіны палітыкі; audioguider — кампазіт"
+      }
+    },
+    {
+      "id": "web.ui.privacyLocation",
+      "value": "Positionen används bara i appen och bara under en aktiv promenad: bakgrundspositionering fungerar medan promenaden pågår och stannar tillsammans med den. Koordinaterna lämnar aldrig enheten — de skickas inte till servern och hamnar inte i händelseloggen. På webbkanalen fastställs besökarens position inte alls.",
+      "reviewedSourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58",
+      "review": {
+        "outcome": "approved",
+        "note": "прыватнасць: лакацыя толькі ў дадатку падчас прагулкі; «не пакідаюць прыладу» → lämnar aldrig enheten"
+      }
+    },
+    {
+      "id": "web.ui.privacyPurchases",
+      "value": "Köp går via appbutikerna (App Store, Google Play): butiken hanterar betalningsuppgifterna och appen registrerar bara köphändelsen — rutten, varianten, resultatet — utan bankuppgifter.",
+      "reviewedSourceHash": "9befc36b7704fa57cf77cb50c7277a86c5dd0ebd6fcdd4ee8f69d48d6a993dce",
+      "review": {
+        "outcome": "approved",
+        "note": "прыватнасць: пакупкі праз крамы; «без банкаўскіх рэквізітаў» → utan bankuppgifter"
+      }
+    },
+    {
+      "id": "web.ui.privacyRetention",
+      "value": "Lagringstid: råa skickade händelser sparas i 14 månader och raderas sedan av ett schemalagt jobb; aggregerade siffror per rutt finns kvar utan enhetsidentifierare.",
+      "reviewedSourceHash": "e859c436d72b484bfcf48110c474213d847ef7326797107354710ba929c6fa52",
+      "review": {
+        "outcome": "approved",
+        "note": "прыватнасць: тэрмін захавання; 14 месяцаў даслоўна"
+      }
+    },
+    {
+      "id": "web.ui.privacyTitle",
+      "value": "Integritet",
+      "reviewedSourceHash": "22162a33a385d2a42f1db6a44f8673e8d8d2f0b0180dfecf547178cfeac498fb",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак старонкі прыватнасці; звыклы шведскі тэрмін"
+      }
+    },
+    {
+      "id": "web.ui.privacyWeb",
+      "value": "Den kostnadsfria webbkanalen samlar inte konton: varken registrering eller inloggning finns, och kontaktuppgifter efterfrågas inte. Sidorna för katalogen, guiderna och kartorna öppnas utan personuppgifter.",
+      "reviewedSourceHash": "4d4fe908d535fe3996570f0917999a33a649dc1b85d21a9444352b0f2ad6341c",
+      "review": {
+        "outcome": "approved",
+        "note": "прыватнасць: вэб не збірае акаўнтаў"
+      }
+    },
+    {
+      "id": "web.ui.stopListHeading",
+      "value": "Ruttens stopp",
+      "reviewedSourceHash": "379fd21b7a21e645950a361e2a27c81ffb28a9b8c5ff5d3b40ae867ed3aa4244",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак спіса кропак маршруту"
+      }
+    },
+    {
+      "id": "web.ui.stops",
+      "value": "Stopp",
+      "reviewedSourceHash": "f01a41e8069f5a10f7446d7892a4663bc206dcc63d79c0f0bcd747d09ef05a9d",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака рада колькасці кропак; інварыянтна"
+      }
+    },
+    {
+      "id": "web.ui.storeComingSoon",
+      "value": "Kommer snart",
+      "reviewedSourceHash": "a4a928d1751b51e8124728e4b4f8cc411f60787f509a56129e2e6ffcbdf6f679",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака «хутка» для крам"
+      }
+    },
+    {
+      "id": "web.ui.storyTextHeading",
+      "value": "Berättelsens text",
+      "reviewedSourceHash": "c8c99c777db7f030957de2c87bb2807e6453c815734d5c6fcfdf762c4649be5a",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак тэксту гісторыі"
+      }
+    },
+    {
+      "id": "web.ui.textOnly",
+      "value": "endast text",
+      "reviewedSourceHash": "60adcac9c17b1b2348bdc25bf9408963fe25e9d161f6b51d2a82561c7e470515",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака набору; «толькі тэкст»"
+      }
+    },
+    {
+      "id": "web.ui.versionUnavailable",
+      "value": "Versionen är inte tillgänglig",
+      "reviewedSourceHash": "6d0903ab3a0d160167c966e6b09cdce71900eb1271487b48f51ecb738379bd8e",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану; канструкцыя стану, як у іншых"
+      }
+    },
+    {
+      "id": "native.feedback.unavailable",
+      "value": "Betyg är inte tillgängliga",
+      "reviewedSourceHash": "f64d18490a73d3cc2bfe6f4fdd502f5347a84b5ae7d0234ec4a53cbb9ed5169b",
+      "review": {
+        "outcome": "approved",
+        "note": "стан: сэрвіс водгуку не сабраны; betyg (ett) інварыянтна ў plural"
+      }
+    },
+    {
+      "id": "native.feedback.invalidTarget",
+      "value": "Betygslänken är ofullständig",
+      "reviewedSourceHash": "13b2ca38180a286de285582a9e0d9af9a6ce1f8c163e55ce33187fbae8a3c081",
+      "review": {
+        "outcome": "approved",
+        "note": "форма адкрыта з неваліднымі параметрамі мэты"
+      }
+    },
+    {
+      "id": "native.feedback.formTitleGuide",
+      "value": "Hur tycker du om guiden?",
+      "reviewedSourceHash": "2faf43c1b42bc5021922c44730c5c9bec3c25f40dcca3ff3e7123112831c8dca",
+      "review": {
+        "outcome": "approved",
+        "note": "пытанне формы водгуку гіда; du-форма"
+      }
+    },
+    {
+      "id": "native.feedback.formTitlePlace",
+      "value": "Var det värt att komma hit?",
+      "reviewedSourceHash": "0154a38c9b8759273bc0d13d11d6db7ec3cbad6506a780c86a8aef5b46bdf0e7",
+      "review": {
+        "outcome": "approved",
+        "note": "пытанне формы месца; прошлы час, як be «ці варта было»"
+      }
+    },
+    {
+      "id": "native.feedback.targetLine",
+      "value": "innehållsspråk: ${locale} · version: ${version}",
+      "reviewedSourceHash": "ba6f03bbf78712a759d9a3623817dea04b241abb111d12cf07475fde952c50fb",
+      "review": {
+        "outcome": "approved",
+        "note": "радок ідэнтычнасці мэты; інтэрпункт · захаваны"
+      }
+    },
+    {
+      "id": "native.feedback.scaleHint",
+      "value": "1 — föll inte alls i smaken · 5 — föll mycket bra i smaken",
+      "reviewedSourceHash": "763a359b696b12e109cb8be62e435ed8f2b9e0b4fcf1a0a18a345ff13159b8b9",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка шкалы; безасабовае «falla i smaken» — звыклы шведскі зварот, пары да cs se líbilo"
+      }
+    },
+    {
+      "id": "native.feedback.starLabel",
+      "value": "${score} av 5",
+      "reviewedSourceHash": "0ffa854d51fbc16346c56b9bf020629ca9ac9b116243731cdd0e5611c9e401d0",
+      "review": {
+        "outcome": "approved",
+        "note": "асобная зорка; тып number захаваны"
+      }
+    },
+    {
+      "id": "native.feedback.reasonsTitle",
+      "value": "Skäl (valfritt, högst tre)",
+      "reviewedSourceHash": "1d9b758cdb750b52ef9c0194691f66b411f1446cf47d274509fe7c43bf465776",
+      "review": {
+        "outcome": "approved",
+        "note": "выбар прычын; «да трох» → högst tre"
+      }
+    },
+    {
+      "id": "native.feedback.disclosureTitle",
+      "value": "Vem ser betyget",
+      "reviewedSourceHash": "7cd4231b4890b4597dee9a5246054c686599f0528b8346290fdbf329cb81087f",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак раскрыцця мэты"
+      }
+    },
+    {
+      "id": "native.feedback.disclosureBody",
+      "value": "Betyget ses av KUDY-teamet och används för att förbättra förslagen. Det visas inte offentligt.",
+      "reviewedSourceHash": "40ac74ccd705297733e68136eb9bbad6d682c6be1a731e09562eb577f35439d8",
+      "review": {
+        "outcome": "approved",
+        "note": "тэкст раскрыцця; нэўтральная публічнасць"
+      }
+    },
+    {
+      "id": "native.feedback.disclosureAnalytics",
+      "value": "Det här är inte analys: att skicka ett betyg innebär inte samtycke till analys och beror inte på det.",
+      "reviewedSourceHash": "5c3e76cd244614b2707e554c450e8f58db3b6a2ab3330ff2e2de572e1f6419d3",
+      "review": {
+        "outcome": "approved",
+        "note": "размежаванне водгуку і аналітыкі; дзве адмовы захаваныя"
+      }
+    },
+    {
+      "id": "native.feedback.send",
+      "value": "Skicka",
+      "reviewedSourceHash": "5d1b61cf3441db7560a769aee30416dc0c9b5d5e4d0cb6c5e5af2fdc227e7bdb",
+      "review": {
+        "outcome": "approved",
+        "note": "яўная адпраўка"
+      }
+    },
+    {
+      "id": "native.feedback.deleteButton",
+      "value": "Ta bort betyget",
+      "reviewedSourceHash": "d18d68ce08b0873d2405ed8b503398644dc5a660e3c4c4c326ba456eee781cf9",
+      "review": {
+        "outcome": "approved",
+        "note": "выдаленне ўласнай ацэнкі; «выдаліць» → ta bort (звыклы шведскі UI-зварот)"
+      }
+    },
+    {
+      "id": "native.feedback.resolveConflict",
+      "value": "Kontrollera på servern",
+      "reviewedSourceHash": "1c75021c3be06110e2689aed8eaf2ec49e49f0145f7e4daef51eded800b0d138",
+      "review": {
+        "outcome": "approved",
+        "note": "разбор канфлікту: чытанне ўласнага стану"
+      }
+    },
+    {
+      "id": "native.feedback.stateDraft",
+      "value": "Utkast sparat på enheten",
+      "reviewedSourceHash": "1f9828d67e933d0c4365984ed54b521600ffe764cf76ea26fe372c564c4d70a4",
+      "review": {
+        "outcome": "approved",
+        "note": "стан дастаўкі: чарнавік"
+      }
+    },
+    {
+      "id": "native.feedback.statePending",
+      "value": "Sparat på enheten — vi skickar när det finns nätverk",
+      "reviewedSourceHash": "7195387e99f36c3ed874cba5e91a09c9bda100636d233899ecb181ac4950d043",
+      "review": {
+        "outcome": "approved",
+        "note": "стан: чакае адпраўкі; «адправім» першая асоба множнага, як cs odešleme"
+      }
+    },
+    {
+      "id": "native.feedback.stateSent",
+      "value": "Skickat",
+      "reviewedSourceHash": "ee6e31c6ff3e7f4a976a16d2cf3e05e945fd2497f20240eead476c966b9cd470",
+      "review": {
+        "outcome": "approved",
+        "note": "стан: пацверджана серверам"
+      }
+    },
+    {
+      "id": "native.feedback.stateConflict",
+      "value": "Konflikt: servern har en nyare ändring",
+      "reviewedSourceHash": "1fefa8a95ccc366bf67ebe9edffb1259c1f3264030082b01a1ab678b762205ac",
+      "review": {
+        "outcome": "approved",
+        "note": "стан 409; «наведшая змена» → nyare ändring"
+      }
+    },
+    {
+      "id": "native.feedback.stateActionRequired",
+      "value": "Sändningen har stoppats: behöver uppmärksamhet",
+      "reviewedSourceHash": "9d3a4807b3c9bbffd40f0adb70348a542c4935461df074bcb77bb0bc9fda1b2e",
+      "review": {
+        "outcome": "approved",
+        "note": "стан 401/422; «патрэбна ўвага» даслоўна"
+      }
+    },
+    {
+      "id": "native.feedback.stateDeletePending",
+      "value": "Borttagningen väntar på nätverk",
+      "reviewedSourceHash": "5e80f91330578bbbc12509891dacb61ccf3d86569cd63e2c19c8b0061b3dac4a",
+      "review": {
+        "outcome": "approved",
+        "note": "CAS-выдаленне чакае сеткі"
+      }
+    },
+    {
+      "id": "native.feedback.inviteTitle",
+      "value": "Hur tycker du om guiden? Du kan betygsätta guiden — det är frivilligt.",
+      "reviewedSourceHash": "c7bee40548b81ff38a6a66ec43b05e53fbddef58c6708cda09261e14969ac192",
+      "review": {
+        "outcome": "approved",
+        "note": "ціхае запрашэнне пасля End; неабавязковасць даслоўна"
+      }
+    },
+    {
+      "id": "native.feedback.inviteRate",
+      "value": "Betygsätt guiden",
+      "reviewedSourceHash": "bff14adc9bcb8d672c62ee6ff83e10e26542a927104e7a053ac287c5bda11c3f",
+      "review": {
+        "outcome": "approved",
+        "note": "дзеянне запрашэння"
+      }
+    },
+    {
+      "id": "native.feedback.inviteDismiss",
+      "value": "Nej, tack",
+      "reviewedSourceHash": "974b4b9cc64413a1293c3743bc76db631f6dd4c5f5639b0631869c67474cfeaf",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова ад запрашэння"
+      }
+    },
+    {
+      "id": "native.feedback.ratePlace",
+      "value": "Betygsätt platsen",
+      "reviewedSourceHash": "6e2584651cd2326b0266694baa27f4fff406f1f8b837f0d8a71ad801cc5d466b",
+      "review": {
+        "outcome": "approved",
+        "note": "яўнае дзеянне на картке месца"
+      }
+    },
+    {
+      "id": "native.feedback.placeVisitTitle",
+      "value": "Var du här?",
+      "reviewedSourceHash": "0994331436fdf28985b497ebebc27eda56b5554fe582e29ce82b2b30f853be3a",
+      "review": {
+        "outcome": "approved",
+        "note": "пацвярджэнне візіту; шведская форма прыродна безродавая (пратывага cs Byl(a) jsi)"
+      }
+    },
+    {
+      "id": "native.feedback.placeVisitBody",
+      "value": "Att betygsätta en plats är en självskattning av besöket, inte ett verifierat besök.",
+      "reviewedSourceHash": "e89b4ab7e51c7a16d7d4fabf295cfec3cda0541e67d1e43625e17ccfaa08efad",
+      "review": {
+        "outcome": "approved",
+        "note": "тэкст пацвярджэння візіту; размежаванне захаванае"
+      }
+    },
+    {
+      "id": "native.feedback.placeVisitAccept",
+      "value": "Var här — betygsätt",
+      "reviewedSourceHash": "0e1ffe61222b1128e9dbd9f7cfa8b3ee8434076f10e2de057164a605e328737a",
+      "review": {
+        "outcome": "approved",
+        "note": "пацвярджэнне адкрывае форму месца"
+      }
+    },
+    {
+      "id": "native.feedback.mySection",
+      "value": "Mina betyg",
+      "reviewedSourceHash": "18fa60ddb291c97c36851de7137bef11352764d5351e9feefa70017f9dd00f46",
+      "review": {
+        "outcome": "approved",
+        "note": "раздзел уласных ацэнак"
+      }
+    },
+    {
+      "id": "native.feedback.myEmpty",
+      "value": "Inga egna betyg ännu",
+      "reviewedSourceHash": "ee12ec4175a34a04399cba704ce02b3f82083d2997d3b3797b32c2310a8bdf8a",
+      "review": {
+        "outcome": "approved",
+        "note": "пусты спіс уласных ацэнак"
+      }
+    },
+    {
+      "id": "native.feedback.myEdit",
+      "value": "Ändra",
+      "reviewedSourceHash": "1e2c31b3f9c9402946eb392ff6897700c2c783770a794069b734a01a42a35a04",
+      "review": {
+        "outcome": "approved",
+        "note": "дзеянне радка: адкрывае форму з дасланым значэннем"
+      }
+    },
+    {
+      "id": "native.feedback.guideWord",
+      "value": "Guide",
+      "reviewedSourceHash": "70a569cfca827aef72de7c814f0c0b3760b520f5c21dc43a67fdaad90af74272",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака віду мэты: гід"
+      }
+    },
+    {
+      "id": "native.feedback.placeWord",
+      "value": "Plats",
+      "reviewedSourceHash": "e176e75a0103ac1243532bb956a4ee2dcc9af7aaad80c35938170679577839f7",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака віду мэты: месца"
+      }
+    },
+    {
+      "id": "native.feedback.ratingOf",
+      "value": "${score} av 5",
+      "reviewedSourceHash": "c71e6b03486be62dcfc58bf64e222b7d93e4f974732e5f621d966b031562bc69",
+      "review": {
+        "outcome": "approved",
+        "note": "радок уласнай ацэнкі ў спісе"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.interesting_stories",
+      "value": "intressanta berättelser",
+      "reviewedSourceHash": "9959daf3a456d2382c1efd4faca72b689f0df1ed2923ab0cd4e821446c3120d6",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына гіда; глоссарый гісторыя → berättelse"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.clear_delivery",
+      "value": "tydlig framställning",
+      "reviewedSourceHash": "d74083aa9de049473fa1b5f857260c195797d52ddcbe3c1fa64c49748c08adc1",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына гіда; «падача» → framställning"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.too_long",
+      "value": "för långt",
+      "reviewedSourceHash": "14403d1bc95f6a5d57217237ac27a05879d0191466a34aafa1cd624ee9ebe116",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына гіда; нэўтральнае ett-станоўчае (прагулка/апісанне)"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.hard_to_navigate",
+      "value": "svårt att orientera sig",
+      "reviewedSourceHash": "079108e7d5462f0bcbd157ec5da0e366f87e54d39e35364ce6debfc82a419ca8",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына гіда"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.audio_problem",
+      "value": "ljudproblem",
+      "reviewedSourceHash": "c3ef154e822117153d07ef625a31c3a886cf523099025dcf69b3941542c6e61a",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына гіда; кампазіт кароткі, застаецца прычынай гіда"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.description_mismatch",
+      "value": "stämde inte med beskrivningen",
+      "reviewedSourceHash": "75d78626465f6da0aa52eaf8b48754720f68b28c6af0c8feeea58eef98bfbce2",
+      "review": {
+        "outcome": "approved",
+        "note": "агульная прычына; прошлы час, як be «не супала»"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.worth_visiting",
+      "value": "värt ett besök",
+      "reviewedSourceHash": "2ae5e44e2805dc7511473cce8c1d43338792b3eef17802eb05c01193bbe53643",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына месца"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.hard_to_reach",
+      "value": "svårt att ta sig till",
+      "reviewedSourceHash": "f97aeea0ff8926e5bf06bddaa142ec75cc4be468a7bdb601c486504f12b5f7bd",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына месца"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.access_problem",
+      "value": "åtkomstproblem",
+      "reviewedSourceHash": "f4417031a4fef7cc54c3916e66770fcda831e75baa3bb6e70b3dd08b9cf9f54e",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына месца; кампазіт кароткі"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-input-invalid",
+      "value": "Uppgifterna accepterades inte: kontrollera valet",
+      "reviewedSourceHash": "b22dd71560cdeeb665203c01ed389749a1e6a9c1bf8f642df722e8896dd5bd94",
+      "review": {
+        "outcome": "approved",
+        "note": "названая памылка: невалідны ўвод"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-write-failed",
+      "value": "Spara misslyckades: försök igen",
+      "reviewedSourceHash": "4a76d282ed50222f4700e03541a4b46ea0fa43e4c7f715bd742c082c694b2999",
+      "review": {
+        "outcome": "approved",
+        "note": "названая памылка: збой запісу"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-transport-failed",
+      "value": "Nätverket svarade inte: försök igen",
+      "reviewedSourceHash": "ca9f043892af3e9f4cbb37a64b494f6162aef9910123df3b2221f133621b462d",
+      "review": {
+        "outcome": "approved",
+        "note": "названая памылка: збой транспарту"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-send-no-draft",
+      "value": "Inget utkast att skicka",
+      "reviewedSourceHash": "606c54918b744dbaf923e0375c7be1d96fed06d613e39668887c420ab7b3855c",
+      "review": {
+        "outcome": "approved",
+        "note": "названая памылка: адпраўка без чарнавіка"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-resolution-required",
+      "value": "Kontrollera statusen på servern först",
+      "reviewedSourceHash": "d16eb424c719e978864af4ab241f6608a78f9eead95acc2db963e3829b630555",
+      "review": {
+        "outcome": "approved",
+        "note": "названая памылка: патрэбны чытанне ўласнага стану"
+      }
+    }
+  ]
+}
