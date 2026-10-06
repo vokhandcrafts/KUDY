@@ -61,3 +61,43 @@ test('G14.04.d #305: the listener sees the new value inside the notification', (
   store.set('en');
   assert.equal(seen, 'en');
 });
+
+// G21.15 (issue #549): the durable write is best-effort — a failed write
+// (a closed db, a full disk) must not undo the session choice, strand the
+// listeners or escape the set() call into the press handler. Symmetric with
+// the seam's read: a corrupt row reads as no choice, never a throw.
+test('G21.15 #549: a failed durable write leaves the switch standing and the listeners firing', () => {
+  let writes = 0;
+  const store = createUiLocaleStore({
+    read: () => null,
+    write: () => {
+      writes += 1;
+      throw new Error('db#closed');
+    },
+  });
+  const events: string[] = [];
+  const unsubscribe = store.subscribe(() => events.push(store.current()));
+  store.set('uk');
+  assert.equal(store.current(), 'uk');
+  assert.deepEqual(events, ['uk']);
+  assert.equal(writes, 1);
+  unsubscribe();
+});
+
+test('G21.15 #549: after a failed write the next switch writes through again', () => {
+  const written: string[] = [];
+  let fail = true;
+  const store = createUiLocaleStore({
+    read: () => null,
+    write: (locale) => {
+      if (fail) throw new Error('db#closed');
+      written.push(locale);
+    },
+  });
+  store.set('uk');
+  assert.equal(store.current(), 'uk');
+  fail = false;
+  store.set('en');
+  assert.deepEqual(written, ['en']);
+  assert.equal(store.current(), 'en');
+});

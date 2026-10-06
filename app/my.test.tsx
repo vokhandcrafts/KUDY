@@ -31,6 +31,8 @@ import {
   secretBox,
 } from "../tests/feedback/queue-fixture";
 import { tokens } from "../components/design-tokens";
+import { uiStrings } from "../components/ui-strings";
+import { COMPLETE_UI_LOCALES } from "../contracts/ui-locales";
 import { CATALOG_FIXTURES, flatStyle, layoutWith, serve, sha256 } from "../test/render-helpers";
 import type { SessionHistoryCursor, SessionHistoryPage, SessionHistorySummary } from "../services/db/types";
 
@@ -329,6 +331,29 @@ describe("KUDY language row (G14.04.d)", () => {
     expect(await screen.findByText("Historiken är inte tillgänglig.")).toBeTruthy();
     expect(screen.getByTestId("btn-ui-locale-sv").props.accessibilityState).toEqual({ selected: true });
     expect(screen.queryByText("Гісторыя недаступная.")).toBeNull();
+  });
+
+  // G21.15 (issue #549): the whole row in one pass — every one of the eight
+  // complete catalogues is selectable on the same mounted surface (no
+  // restart between picks), the honest-unavailable word re-renders through
+  // the production strings getter, and each chip carries the selected state.
+  // The row's wrap layout keeps every chip reachable at phone width and the
+  // scaled font; the scaled words ride ScaledText's canon cap (its own suite).
+  test("G21.15 (issue #549): the picker walks all eight catalogues on one mounted surface", async () => {
+    const services = createServices({});
+    renderRouter({ _layout: layoutWith(services), "(tabs)/my": My }, { initialUrl: "/my" });
+    expect(await screen.findByTestId("my-ui-locale")).toBeTruthy();
+    expect(screen.getByTestId("my-ui-locale-row").props.style).toEqual(
+      expect.objectContaining({ flexWrap: "wrap" }),
+    );
+    for (const code of COMPLETE_UI_LOCALES) {
+      fireEvent.press(screen.getByTestId(`btn-ui-locale-${code}`));
+      expect(services.uiLocale.current()).toBe(code);
+      expect(await screen.findByText(uiStrings(code).historyUnavailable)).toBeTruthy();
+      expect(screen.getByTestId(`btn-ui-locale-${code}`).props.accessibilityState).toEqual({
+        selected: true,
+      });
+    }
   });
 });
 
