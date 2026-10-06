@@ -35,3 +35,6 @@ tools/collector/runtime/
 # mirror ships with its ignore entry in the same change)
 .tmp-g0505a-proof/
 kudy-demo-374-*
+
+# G21.40 (issue #621): generated probe assets (font copies + subsets)
+spikes/G21.40-han-layout/runtime/

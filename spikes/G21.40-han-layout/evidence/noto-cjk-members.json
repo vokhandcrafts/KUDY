@@ -1,0 +1,66 @@
+{
+ "file": "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+ "size_bytes": 19484784,
+ "members": [
+  {
+   "index": 0,
+   "name": "Noto Sans CJK JP",
+   "covered_of_54": 55,
+   "missing": "ŁłŻżŹźĄąĘęść"
+  },
+  {
+   "index": 1,
+   "name": "Noto Sans CJK KR",
+   "covered_of_54": 55,
+   "missing": "ŁłŻżŹźĄąĘęść"
+  },
+  {
+   "index": 2,
+   "name": "Noto Sans CJK SC",
+   "covered_of_54": 55,
+   "missing": "ŁłŻżŹźĄąĘęść"
+  },
+  {
+   "index": 3,
+   "name": "Noto Sans CJK TC",
+   "covered_of_54": 55,
+   "missing": "ŁłŻżŹźĄąĘęść"
+  },
+  {
+   "index": 4,
+   "name": "Noto Sans CJK HK",
+   "covered_of_54": 55,
+   "missing": "ŁłŻżŹźĄąĘęść"
+  },
+  {
+   "index": 5,
+   "name": "Noto Sans Mono CJK JP",
+   "covered_of_54": 55,
+   "missing": "ŁłŻżŹźĄąĘęść"
+  },
+  {
+   "index": 6,
+   "name": "Noto Sans Mono CJK KR",
+   "covered_of_54": 55,
+   "missing": "ŁłŻżŹźĄąĘęść"
+  },
+  {
+   "index": 7,
+   "name": "Noto Sans Mono CJK SC",
+   "covered_of_54": 55,
+   "missing": "ŁłŻżŹźĄąĘęść"
+  },
+  {
+   "index": 8,
+   "name": "Noto Sans Mono CJK TC",
+   "covered_of_54": 55,
+   "missing": "ŁłŻżŹźĄąĘęść"
+  },
+  {
+   "index": 9,
+   "name": "Noto Sans Mono CJK HK",
+   "covered_of_54": 55,
+   "missing": "ŁłŻżŹźĄąĘęść"
+  }
+ ]
+}

@@ -1,0 +1,214 @@
+<!doctype html>
+<!-- G21.40 (issue #621) — ізаляваны візуальны проб кітайскіх іерогліфаў і вёрсткі.
+     Ніякіх сыравых CJK-байтаў у гэтым файле: увесь кітайскі кантэнт прыходзіць
+     з fixtures.js (\uXXXX-эскейпы) і рэндэрыцца рэальнымі знакамі ў рантайме.
+     Стратэгіі:
+       S1 — сістэмны фолбэк: рэальныя TTF Golos (@font-face) + sans-serif;
+       S2 — відавочныя рэгіянальныя сям'і «Noto Sans CJK SC» / «TC» (сістэмныя);
+       S3 — уклучанае падмноства (runtime/*-subset.otf, збіраецца build-subsets.py);
+       FX — адсутны шрыфт (збойны @font-face) + гліфы па-за пакрыццём.
+     Проб не актывуе лакаль і не мяняе вытворчыя кампаненты. -->
+<html lang="be">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G21.40 han-layout probe</title>
+<style>
+  @font-face { font-family: 'GolosText_400Regular'; src: url('runtime/GolosText_400Regular.ttf') format('truetype'); font-display: block; }
+  @font-face { font-family: 'GolosText_600SemiBold'; src: url('runtime/GolosText_600SemiBold.ttf') format('truetype'); font-display: block; }
+  @font-face { font-family: 'Alegreya_600SemiBold'; src: url('runtime/Alegreya_600SemiBold.ttf') format('truetype'); font-display: block; }
+  @font-face { font-family: 'Caveat_400Regular'; src: url('runtime/Caveat_400Regular.ttf') format('truetype'); font-display: block; }
+  @font-face { font-family: 'KudySubsetSC'; src: url('runtime/kudy-subset-sc.otf') format('opentype'); font-display: block; }
+  @font-face { font-family: 'KudySubsetTC'; src: url('runtime/kudy-subset-tc.otf') format('opentype'); font-display: block; }
+  @font-face { font-family: 'KudyMissingFace'; src: url('runtime/definitely-missing-font.ttf') format('truetype'); font-display: block; }
+
+  :root { font-size: 16px; }
+  html.scale200 { font-size: 32px; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0 auto; max-width: 320px; padding: 8px;
+    background: #faf7f2; color: #22262b;
+    font-family: 'GolosText_400Regular', sans-serif; font-size: 1rem; line-height: 1.45;
+  }
+  h1 { font-family: 'GolosText_600SemiBold', sans-serif; font-size: 1.125rem; margin: 8px 0; }
+  h2 { font-family: 'GolosText_600SemiBold', sans-serif; font-size: 0.875rem; color: #6b7280; margin: 16px 0 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .card { background: #ffffff; border: 1px solid #d8d2c6; border-radius: 10px; padding: 10px 12px; margin: 6px 0; }
+  .badge-free { background: #e7f2ec; color: #154f3a; border-radius: 99px; padding: 2px 8px; font-size: 0.75rem; }
+  .muted { color: #6b7280; font-size: 0.8125rem; }
+  .btn { display: block; width: 100%; text-align: center; border-radius: 10px; padding: 10px 8px; margin: 6px 0; }
+  .btn-primary { background: #1d6b4f; color: #ffffff; font-family: 'GolosText_600SemiBold', sans-serif; }
+  .btn-secondary { background: #ffffff; border: 1px solid #c9c1b1; color: #154f3a; }
+  .btn-disabled { background: #ffffff; border: 1px solid #6b7280; color: #6b7280; }
+  .error-box { background: #fdeaea; border: 1px solid #e0a2a2; border-radius: 10px; padding: 10px 12px; margin: 6px 0; }
+  .display { font-family: 'Alegreya_600SemiBold', sans-serif; font-size: 1.25rem; }
+  .dragon { font-family: 'Caveat_400Regular', sans-serif; font-size: 1.25rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { border: 1px solid #d8d2c6; border-radius: 99px; padding: 4px 10px; font-size: 0.875rem; background: #fff; }
+  .chip.sel { border-color: #1d6b4f; color: #1d6b4f; background: #e7f2ec; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cols h3 { margin: 0 0 4px; font-size: 0.75rem; color: #6b7280; font-weight: normal; }
+  .f-sc { font-family: 'Noto Sans CJK SC', 'GolosText_400Regular', sans-serif; }
+  .f-tc { font-family: 'Noto Sans CJK TC', 'GolosText_400Regular', sans-serif; }
+  .f-sub-sc { font-family: 'KudySubsetSC', 'GolosText_400Regular', sans-serif; }
+  .f-sub-tc { font-family: 'KudySubsetTC', 'GolosText_400Regular', sans-serif; }
+  .f-missing { font-family: 'KudyMissingFace', 'GolosText_400Regular', sans-serif; }
+  .giant { font-size: 2.25rem; }
+  .ess { outline: none; }
+  #scale-toggle { position: sticky; top: 0; z-index: 2; width: 100%; padding: 6px; border: 1px dashed #6b7280; background: #fff; color: #22262b; border-radius: 8px; margin-bottom: 8px; }
+  pre#machine-json { font-size: 0.625rem; background: #fff; border: 1px solid #d8d2c6; padding: 6px; white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<button id="scale-toggle" type="button">text scale 100% → 200%</button>
+<h1 id="title">G21.40 · han layout probe</h1>
+
+<h2>S1 · сістэмны фолбэк (Golos + system CJK)</h2>
+<section id="s1">
+  <div class="card">
+    <strong class="ess" id="s1-title"></strong>
+    <div class="chips" id="s1-chips"></div>
+  </div>
+  <div class="card">
+    <div class="display ess" id="s1-card-name"></div>
+    <div class="muted ess" id="s1-card-name-pl"></div>
+    <div class="ess" id="s1-card-duration"></div>
+    <div class="muted ess" id="s1-card-price"></div>
+    <span class="badge-free ess" id="s1-card-badge"></span>
+  </div>
+  <button class="btn btn-primary ess" id="s1-primary" type="button"></button>
+  <button class="btn btn-secondary ess" id="s1-secondary" type="button"></button>
+  <button class="btn btn-disabled ess" id="s1-disabled" type="button"></button>
+  <div class="error-box ess" id="s1-error"></div>
+  <div class="muted ess" id="s1-unavailable"></div>
+  <p class="ess" id="s1-narrative"></p>
+  <div class="card">
+    <div class="giant ess" id="s1-clock"></div>
+    <div class="muted ess" id="s1-timer"></div>
+    <div class="ess" id="s1-remaining"></div>
+  </div>
+  <div class="card">
+    <div class="ess" id="s1-audio"></div>
+    <div class="muted ess" id="s1-audio-mixed"></div>
+    <div class="dragon ess" id="s1-dragon"></div>
+  </div>
+  <div class="muted ess" id="s1-distance"></div>
+  <div class="muted ess" id="s1-date"></div>
+</section>
+
+<h2>S2 · рэгіянальныя формы: SC vs TC (сістэмныя сям'і)</h2>
+<section id="s2" class="card cols">
+  <div><h3>Noto Sans CJK SC</h3><div class="f-sc ess giant" id="s2-sc-shared"></div><div class="f-sc ess" id="s2-sc-pair"></div></div>
+  <div><h3>Noto Sans CJK TC</h3><div class="f-tc ess giant" id="s2-tc-shared"></div><div class="f-tc ess" id="s2-tc-pair"></div></div>
+</section>
+
+<h2>S3 · уклучанае падмноства (runtime subset, OFL)</h2>
+<section id="s3" class="card">
+  <div class="f-sub-sc ess" id="s3-sc"></div>
+  <div class="f-sub-tc ess" id="s3-tc"></div>
+  <div class="muted" id="s3-note"></div>
+</section>
+
+<h2>FX · адсутны шрыфт і гліфы па-за пакрыццём</h2>
+<section id="fx" class="card">
+  <div class="f-missing ess" id="fx-missing"></div>
+  <div class="ess" id="fx-pua"></div>
+  <div class="ess" id="fx-rare"></div>
+  <div class="muted" id="fx-note">FX: KudyMissingFace → bogus url; PUA U+E0FF; rare U+2A6B6</div>
+</section>
+
+<h2>машынныя вынікі (эскейп-крыніца → рэальныя знакі)</h2>
+<pre id="machine-json">collecting…</pre>
+
+<script src="fixtures.js"></script>
+<script>
+(function () {
+  'use strict';
+  var F = window.PROBE_FIXTURES;
+  function set(id, text) { document.getElementById(id).textContent = text; }
+
+  // S1
+  set('s1-title', F.langPicker.screenTitle);
+  var chips = document.getElementById('s1-chips');
+  F.langPicker.existingChips.forEach(function (name) {
+    var c = document.createElement('span'); c.className = 'chip'; c.textContent = name; chips.appendChild(c);
+  });
+  var cHans = document.createElement('span'); cHans.className = 'chip sel ess'; cHans.textContent = F.langPicker.candidateHans.label; chips.appendChild(cHans);
+  var cHant = document.createElement('span'); cHans.className = 'chip ess'; cHant.textContent = F.langPicker.candidateHant.label; chips.appendChild(cHant);
+  set('s1-card-name', F.guideCard.nameHans);
+  set('s1-card-name-pl', F.guideCard.namePolish);
+  set('s1-card-duration', F.guideCard.durationHans);
+  set('s1-card-price', F.guideCard.priceHans);
+  set('s1-card-badge', 'free · demo');
+  set('s1-primary', F.actions.primaryHans);
+  set('s1-secondary', F.actions.secondaryHans);
+  set('s1-disabled', F.actions.disabledHans);
+  set('s1-error', F.errorState.hans);
+  set('s1-unavailable', F.errorState.unavailableHans);
+  set('s1-narrative', F.narrative.hans);
+  set('s1-clock', F.timer.clock);
+  set('s1-timer', F.timer.hans);
+  set('s1-remaining', F.timer.remainingHans);
+  set('s1-audio', F.audioLabel.hans);
+  set('s1-audio-mixed', F.audioLabel.mixedHans);
+  set('s1-dragon', F.narrative.hant.slice(0, 8) + '… (Caveat)');
+  set('s1-distance', F.guideCard.distanceMixed);
+  set('s1-date', F.guideCard.dateMixed);
+
+  // S2 — агульныя кодпойнты з рэгіянальнымі формамі + пара SP/TC
+  var shared = '\u9AA8\u76F4\u4EE4\u8FC7\u8FB9\u8BF7\u51C0\u6E29\u6D77\u8349';
+  set('s2-sc-shared', shared); set('s2-tc-shared', shared);
+  set('s2-sc-pair', F.guideCard.nameLongNoSpaces);
+  set('s2-tc-pair', F.guideCard.nameLongNoSpaces);
+
+  // S3
+  set('s3-sc', F.guideCard.nameHans + ' · ' + F.actions.primaryHans);
+  set('s3-tc', F.guideCard.nameHant + ' · ' + F.actions.primaryHant);
+  set('s3-note', 'subset: 141 chars, OFL 1.1, ~47 KB/weight (runtime/, gitignored)');
+
+  // FX
+  set('fx-missing', F.actions.primaryHant + ' ' + F.audioLabel.hant);
+  set('fx-pua', F.stress.puaGlyph + ' \u2190 PUA (tofu if uncovered)');
+  set('fx-rare', F.stress.rareIdeograph + ' \u2190 U+2A6B6 ext-B');
+
+  // 200% пераключальнік
+  document.getElementById('scale-toggle').addEventListener('click', function () {
+    var on = document.documentElement.classList.toggle('scale200');
+    this.textContent = on ? 'text scale 200% → 100%' : 'text scale 100% → 200%';
+    collect();
+  });
+
+  // Машынныя вынікі: якія твары рэальна дазволіліся + кліпінг абавязковых элементаў
+  function clipping() {
+    var bad = [];
+    document.querySelectorAll('.ess').forEach(function (el) {
+      if (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) {
+        bad.push({ id: el.id || el.className, text: (el.textContent || '').slice(0, 24), sw: el.scrollWidth, cw: el.clientWidth, sh: el.scrollHeight, ch: el.clientHeight });
+      }
+    });
+    return bad;
+  }
+  function collect() {
+    var r = {
+      generated: new Date().toISOString(),
+      viewport: { w: window.innerWidth, h: window.innerHeight, scale200: document.documentElement.classList.contains('scale200') },
+      onLine: navigator.onLine,
+      fonts: {},
+      clipped_essential: clipping(),
+      note: 'fonts.check via document.fonts; clipping = scroll vs client box on .ess'
+    };
+    ['GolosText_400Regular', 'GolosText_600SemiBold', 'Alegreya_600SemiBold', 'Caveat_400Regular',
+     'KudySubsetSC', 'KudySubsetTC', 'KudyMissingFace',
+     '"Noto Sans CJK SC"', '"Noto Sans CJK TC"', '"Noto Sans CJK JP"'].forEach(function (f) {
+      r.fonts[f] = document.fonts.check('16px ' + f);
+    });
+    var json = JSON.stringify(r, null, 1);
+    document.getElementById('machine-json').textContent = json;
+    window.PROBE_RESULTS = r;
+    return r;
+  }
+  document.fonts.ready.then(function () { setTimeout(collect, 250); });
+  window.PROBE_COLLECT = collect;
+})();
+</script>
+</body>
+</html>
