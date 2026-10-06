@@ -17,6 +17,7 @@ import path from 'node:path';
 
 import { createServices } from './createServices.ts';
 import { createDeviceServicePorts } from './deviceServices.ts';
+import { UI_LOCALE_KEY } from './sessionPorts.ts';
 import { nodeSqliteDriver, nodeSqliteFileDriver } from '../services/db/test-fixture.ts';
 import { getLiveSession, setSetting } from '../services/db/db.ts';
 import { makeFakeFs, makeFakeFsModule } from '../services/contentRepo/expo/fs-test-fixture.ts';
@@ -286,8 +287,9 @@ test('G21.15: the ui-locale choice survives force-stop/relaunch through the prod
     assert.equal(secondServices.uiLocale.current(), 'de');
 
     // The corrupt row reads as no choice: the default stands, the next
-    // switch writes a valid value back.
-    setSetting(secondDb.driver, 'ui_locale', 'xx');
+    // switch writes a valid value back. The corruption goes through the
+    // exported seam key — renaming the key breaks this test at compile time.
+    setSetting(secondDb.driver, UI_LOCALE_KEY, 'xx');
     secondDb.close();
     const thirdDb = nodeSqliteFileDriver(file);
     const thirdServices = createServices(createDeviceServicePorts(facilities(thirdDb.driver)).ports);
