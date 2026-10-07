@@ -42,7 +42,8 @@ ok 4 - two builds lay byte-identical files (criterion 4)
 ok 5 - parseFaultSpec answers with named diagnostics on bad input (rule 14)
 ok 6 - the fault switch answers 404/500/stall for named files (criterion 5)
 ok 7 - an unnamed missing file answers 404 and containment holds (rule 3)
-ok 8 - the summary prints the app origin, the emulator origin and the digest
-ok 9 - the e2e:origin npm script stays wired to this tool (implementation-rules 1)
-1..9
+ok 8 - fault targets match canonical spellings of a path (non-canonical requests)
+ok 9 - the summary prints the app origin, the emulator origin and the digest
+ok 10 - the e2e:origin npm script stays wired to this tool (implementation-rules 1)
+1..10
 ```

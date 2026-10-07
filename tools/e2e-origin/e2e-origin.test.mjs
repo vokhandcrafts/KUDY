@@ -179,6 +179,22 @@ test('an unnamed missing file answers 404 and containment holds (rule 3)', async
   }
 });
 
+test('fault targets match canonical spellings of a path (non-canonical requests)', async () => {
+  const build = await buildE2EOrigin({ outDir: tmpDir('kudy-e2e-canon-') });
+  const faults = parseFaultSpec(['500:catalog.json']);
+  const server = createE2EOriginServer({ root: build.target, faults, stallMs: 300 });
+  const port = await listen(server);
+  const base = `http://127.0.0.1:${port}`;
+  try {
+    assert.equal((await fetch(`${base}/catalog%2Ejson`)).status, 500, 'percent-encoded spelling must hit the fault');
+    assert.equal((await fetch(`${base}//catalog.json`)).status, 500, 'duplicate-slash spelling must hit the fault');
+    assert.equal((await fetch(`${base}/catalog%2Fjson`)).status, 404, 'a different file is not the fault target');
+  } finally {
+    server.close();
+    await fsp.rm(build.target, { recursive: true, force: true });
+  }
+});
+
 test('the summary prints the app origin, the emulator origin and the digest', () => {
   const summary = formatOriginSummary({
     port: 8791,

@@ -121,22 +121,36 @@ export async function buildE2EOrigin({ outDir = 'tools/e2e-origin/build', now = 
 export function createE2EOriginServer({ root, faults = new Map(), stallMs = 15000 }) {
   if (!Number.isInteger(stallMs) || stallMs < 0) fail('invalid-stall-ms', { stall_ms: stallMs });
   return createServer((request, response) => {
-    const target = new URL(request.url, 'http://127.0.0.1').pathname.slice(1);
-    const kind = faults.get(target);
+    // request.url is the origin-form request target; parse it directly — the
+    // URL constructor would read a leading '//' as a protocol-relative
+    // authority and lose the path.
+    const rawPath = request.url.split('?')[0];
+    // Fault targets are canonical path spellings: the fault lookup normalizes
+    // (decode escapes, collapse duplicate slashes), so /catalog%2Ejson and
+    // //catalog.json still match a catalog.json target. A malformed escape is
+    // simply not a fault target. Serving keeps the raw target —
+    // resolveStaticFile performs exactly one decode plus containment.
+    let faultTarget = rawPath;
+    try {
+      faultTarget = decodeURIComponent(rawPath).replace(/\/{2,}/g, '/').replace(/^\/+/, '');
+    } catch {
+      faultTarget = rawPath;
+    }
+    const kind = faults.get(faultTarget);
     if (kind === '404') {
       response.writeHead(404, { 'content-type': 'application/json' });
-      response.end(canonicalJson({ fault: '404', path: target }).trimEnd());
+      response.end(canonicalJson({ fault: '404', path: faultTarget }).trimEnd());
       return;
     }
     if (kind === '500') {
       response.writeHead(500, { 'content-type': 'application/json' });
-      response.end(canonicalJson({ fault: '500', path: target }).trimEnd());
+      response.end(canonicalJson({ fault: '500', path: faultTarget }).trimEnd());
       return;
     }
     const serve = () => {
       // resolveStaticFile carries the platform-safe containment idiom
       // (AR-2): anything outside root answers 404, never a disk read.
-      const file = resolveStaticFile(root, `/${target}`);
+      const file = resolveStaticFile(root, rawPath);
       fsp.readFile(file).then(
         (bytes) => {
           response.writeHead(200, {
@@ -148,7 +162,7 @@ export function createE2EOriginServer({ root, faults = new Map(), stallMs = 1500
         },
         () => {
           response.writeHead(404, { 'content-type': 'application/json' });
-          response.end(canonicalJson({ fault: 'not-found', path: target }).trimEnd());
+          response.end(canonicalJson({ fault: 'not-found', path: faultTarget }).trimEnd());
         },
       );
     };
