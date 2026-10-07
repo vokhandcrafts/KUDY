@@ -1,0 +1,9 @@
+[
+  {
+    "id": "moment-e2e-place-1",
+    "place_id": "e2e-place-1",
+    "story_id": "story-free-1",
+    "kind": "teaser",
+    "cooldown_min": 60
+  }
+]

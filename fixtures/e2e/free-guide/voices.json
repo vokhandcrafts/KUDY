@@ -1,0 +1,14 @@
+[
+  {
+    "id": "voice-be-1",
+    "locale": "be",
+    "narrator_credit": "Сінтэтычны E2E-голас",
+    "character": "Ціхі апавядальнік"
+  },
+  {
+    "id": "voice-en-1",
+    "locale": "en",
+    "narrator_credit": "Synthetic E2E voice",
+    "character": "The Quiet Narrator"
+  }
+]

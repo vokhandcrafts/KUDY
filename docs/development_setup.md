@@ -45,6 +45,34 @@ Metro bundler; прэв'ю ў Expo Go або эмулятары. **Абмежа�
 
 Абнаўленне 2026-09-27 (issue #338, першы паспяховы device-run): у гэтым стэку Expo Go недаступны — натыўныя карта, аўдыё і крамы патрабуюць development build. Працоўны спосаб: development build (`by.kudy.app`) на эмулятары/прыладзе + `npm start` (`expo start --dev-client`) — дадатак грузіць бандл з запушчанага Metro праз Dev Launcher. Зборку бандла трымаюць два файлы ў кораню рэпазітара: `metro.config.js` — blockList выключае `*.test.*` і службовыя тэчкі `.mimosa`/`.zcode`/`.scratch` (require.context expo-router цягне jest-сюты з `app/` у бандл), а `resolveRequest` перанакіроўвае `node:*` на стаб; і `metro-node-stub.js` — проксі, каторы кідае іменаваную памылку толькі пры выкліку builtin-а (сам імпарт праходзіць: прадуктовы ланцуг з `app/` node-free пасля пераносу safe-path ідыёму ў `services/safe-path.ts`). Wiring абодвух элементаў ахаваны committed тэстам `tools/metro-config/metro-config.test.mjs` — падае пры выдаленні любога з іх. Хрушкасць вотчара: на ФС не-ext4 metro-file-map FallbackWatcher падае з `ENOENT`, калі паралельная сесія выдаляе `.mimosa/hook-state/sess_*.lock` падчас яго прагулкі — дастаткова перазапусціць Metro.
 
+## E2E-каталог: сінтэтычны origin (`npm run e2e:origin`)
+
+Адна каманда збірае сінтэтычныя фікстуры `fixtures/e2e/*` вытворчым шляхам
+публікацыі (`tools/build-bundle` → `tools/publish-catalog`) і серверытуе
+вынік як каталог-поход для дадатку і скразных аўтатэстаў (G23.01, issue
+[#659](https://github.com/vokhandcrafts/KUDY/issues/659)); рэальнага кантэнту
+і знешняга хосту там няма.
+
+```sh
+npm run e2e:origin            # збора + сервер на :8791
+npm run e2e:origin -- --port 8792
+npm run e2e:origin -- --fault "404:discovery/e2e-city/r-e2e-free-1/index.json,500:catalog.json" --stall-ms 15000
+npm run e2e:origin -- --no-serve   # толькі збора + кароткі справаздача
+```
+
+Каманда друкуе значэнне `EXPO_PUBLIC_CATALOG_ORIGIN=http://localhost:<порт>`
+для хоста і `http://10.0.2.2:<порт>` для Android-эмулятара (10.0.2.2 —
+лупбек хоста з эмулятара). Зборка дэтэрміністычная: час публікацыі запінены,
+таму два прагоны кладуць байт-ідэнтычныя файлы — сюіты могуць звяраць
+дакладны кантэнт па sha256 `catalog.json` (рэгіструецца ў справаздачы
+выканання). Вывад збора жыве ў `tools/e2e-origin/build/` — gitignored.
+Fault-пераключальнік (`404:` / `500:` / `stall:` для іменаваных файлаў
+адносна кораня origin) патрэбны сцэнарыям збояў G23.05–G23.06; `stall`
+трымае адказ `--stall-ms` (дэфолт 15000) і потым адказвае звычайна, таму
+кліенцкі тэймаўт павінен быць карацейшым за stall. Захаванне цэласнасці і
+транспартныя правілы — як у вытворчай публікацыі; змены кантракту бандла —
+вон з межаў задачы.
+
 ## Натыўныя зборкі (development build)
 
 Прадумова: профіль `development` мае `developmentClient: true` — EAS патрабуе залежнасць `expo-dev-client` у `package.json` (у каркасе: `~6.0.21`).

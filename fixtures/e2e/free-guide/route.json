@@ -1,0 +1,33 @@
+{
+  "route_id": "e2e-free-guide",
+  "version": "1",
+  "city_id": "e2e-city",
+  "access": "free_base",
+  "distance_m": 900,
+  "duration_min": 45,
+  "free_stop_count": 3,
+  "published": true,
+  "stops": [
+    {
+      "id": "e2e-stop-1",
+      "position": 0,
+      "place_id": "e2e-place-1",
+      "access_tier": "base",
+      "story_base_id": "story-free-1"
+    },
+    {
+      "id": "e2e-stop-2",
+      "position": 1,
+      "place_id": "e2e-place-2",
+      "access_tier": "base",
+      "story_base_id": "story-free-2"
+    },
+    {
+      "id": "e2e-stop-3",
+      "position": 2,
+      "place_id": "e2e-place-3",
+      "access_tier": "base",
+      "story_base_id": "story-free-3"
+    }
+  ]
+}

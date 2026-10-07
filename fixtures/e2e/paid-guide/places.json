@@ -1,0 +1,18 @@
+[
+  {
+    "id": "e2e-place-4",
+    "content_version": "1",
+    "lat": 53.903,
+    "lng": 27.563,
+    "trigger_radius_m": 30,
+    "kind": "sight"
+  },
+  {
+    "id": "e2e-place-5",
+    "content_version": "1",
+    "lat": 53.904,
+    "lng": 27.564,
+    "trigger_radius_m": 25,
+    "kind": "sight"
+  }
+]

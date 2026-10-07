@@ -7,6 +7,11 @@ spikes/G00.02-offline-map/source/** eol=lf
 # values on Windows (core.autocrlf=true) and Linux.
 fixtures/content/** -text
 
+# G23.01: the e2e fixture bytes feed the same byte-hashing packager; an EOL
+# conversion would change the sha256 values recorded in lock.json/media.json
+# per checkout (implementation-rules 4).
+fixtures/e2e/** -text
+
 # G06.08: the prototype's test byte-compares the fixture copy against the
 # canonical fixture; both paths must keep identical LF bytes on any checkout,
 # otherwise the guard silently masks or falsely reports drift (rule 4).

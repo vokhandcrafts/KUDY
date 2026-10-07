@@ -1,0 +1,58 @@
+{
+  "revision": "r-e2e-paid-1",
+  "city_id": "e2e-city",
+  "themes": [
+    {
+      "id": "theme-e2e-walk",
+      "labels": {
+        "be": "E2E-прагулка",
+        "en": "E2E walk"
+      }
+    }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-guide-e2e-paid",
+      "ref": {
+        "kind": "guide",
+        "route_id": "e2e-paid-guide",
+        "version": "1"
+      },
+      "city_id": "e2e-city",
+      "editorial_order": 4,
+      "themes": [
+        "theme-e2e-walk"
+      ],
+      "localized": {
+        "title": {
+          "be": "E2E-гід: з платным пашырэннем",
+          "en": "E2E guide: with a paid extension"
+        },
+        "summary": {
+          "be": "Сінтэтычны маршрут: свабодная першая кропка і зачыненае пашырэнне за куплю.",
+          "en": "A synthetic route: a free first stop and a locked paid extension."
+        },
+        "why_recommended": {
+          "be": "Просты сінтэтычны выпадак для праверкі куплі, разблакавання і аднаўлення.",
+          "en": "A simple synthetic case for purchase, unlock and restore checks."
+        },
+        "conditions": {
+          "be": "роўны сінтэтычны грунт, без пераходаў",
+          "en": "flat synthetic ground, no crossings"
+        }
+      },
+      "estimated_duration": {
+        "min_minutes": 25,
+        "max_minutes": 40,
+        "basis": "author_estimate"
+      },
+      "distance_m": 600,
+      "suggested_start_place_id": "e2e-place-4",
+      "season_recommendations": [],
+      "detail_ref": {
+        "kind": "guide_preview"
+      }
+    }
+  ],
+  "collections": []
+}

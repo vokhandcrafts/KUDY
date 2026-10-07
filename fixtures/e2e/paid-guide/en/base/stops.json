@@ -1,0 +1,20 @@
+[
+  {
+    "story_id": "story-paid-1",
+    "place_id": "e2e-place-4",
+    "tier": "base",
+    "duration_s": 6,
+    "voice_id": "voice-en-1",
+    "tone": "standard",
+    "text": "Synthetic text of the paid guide free story for purchase autotests; no real content lives here.",
+    "transcript": "Synthetic transcript of the free story. The free layer is published in full, so this line is visible without a purchase.",
+    "sources": [
+      "Synthetic source: the KUDY E2E fixture"
+    ],
+    "review": {
+      "by": "e2e fixture author",
+      "at": "2026-10-07",
+      "decision": "approved"
+    }
+  }
+]

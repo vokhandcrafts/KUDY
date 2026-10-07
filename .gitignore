@@ -19,6 +19,9 @@ dist/
 # G02.03: build-bundle output (public/private trees, release artifacts), never tracked
 tools/build-bundle/build/
 
+# G23.01: e2e-origin build output (staging + served publish target), never tracked
+tools/e2e-origin/build/
+
 # Mimosa security scans: local scan working dir and history, never tracked
 .mimosa/
 

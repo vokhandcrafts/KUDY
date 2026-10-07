@@ -1,0 +1,12 @@
+{
+  "place_id": "e2e-place-1",
+  "content_version": "1",
+  "name": {
+    "be": "E2E-плошча (сінтэтык)",
+    "en": "E2E Square (synthetic)"
+  },
+  "summary": {
+    "be": "Сінтэтычная кропка пачатку для скразных аўтатэстаў; не рэальнае месца.",
+    "en": "A synthetic starting point for end-to-end autotests; not a real place."
+  }
+}

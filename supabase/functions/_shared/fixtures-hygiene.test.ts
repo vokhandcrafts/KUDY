@@ -68,12 +68,14 @@ test('guard: no 43-char base64url literal (32-byte secret shape) is committed', 
   // G01.06 contract's own test data — not credentials (fixed in G01.06,
   // verified by its contract suite). fixtures/content/ media.json records
   // carry sha256 hex over fixture content bytes — the media.schema.json
-  // contract's own file-hash data (G03.04), not credentials.
+  // contract's own file-hash data (G03.04), not credentials. fixtures/e2e/
+  // media.json is the same file-hash lock over the synthetic E2E fixture
+  // audio (G23.01) — contract data, not credentials.
   // supabase/functions/deno.lock carries npm `integrity` checksums — public
   // registry metadata over the published tarball (G20.13); its base64
   // contains 43-char [A-Za-z0-9_-] runs cut by `+`/`=` of the standard
   // alphabet, which is this guard's secret shape by coincidence.
-  const allowlistedPrefixes = ['fixtures/discovery-contract/', 'fixtures/content/', 'supabase/functions/deno.lock'];
+  const allowlistedPrefixes = ['fixtures/discovery-contract/', 'fixtures/content/', 'fixtures/e2e/', 'supabase/functions/deno.lock'];
   const secretShape = /[A-Za-z0-9_-]{43}(?![A-Za-z0-9_-])/g;
   for (const rel of committedFiles) {
     if (rel.endsWith('.svg')) continue;

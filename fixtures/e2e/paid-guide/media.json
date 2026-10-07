@@ -1,0 +1,42 @@
+[
+  {
+    "media_id": "media-story-paid-1-be",
+    "sha256": "8321de282749f803360100ac9b62fe347fbb73a943ca2bdfd00229880bffe1e3",
+    "bytes": 51646,
+    "mime": "audio/mp4",
+    "locale": "be",
+    "voice_id": "voice-be-1",
+    "license": "CC0 1.0, сінтэтычны тан аўтара KUDY",
+    "credit": "Сінтэтычны E2E-тан, афлайн-генерацыя ffmpeg, 2026"
+  },
+  {
+    "media_id": "media-story-paid-1-en",
+    "sha256": "eaf5a91b5dc830ea2ef9a1a2e49179919cffa09981eb4e9f1304fe289646b06f",
+    "bytes": 51681,
+    "mime": "audio/mp4",
+    "locale": "en",
+    "voice_id": "voice-en-1",
+    "license": "CC0 1.0, synthetic tone by the KUDY author",
+    "credit": "Synthetic E2E tone, offline ffmpeg generation, 2026"
+  },
+  {
+    "media_id": "media-story-paid-2-be",
+    "sha256": "efb13937e3d3123a6298bb1673abf8e9d2914ca747de61f6ecb7fd8d50d58de4",
+    "bytes": 51716,
+    "mime": "audio/mp4",
+    "locale": "be",
+    "voice_id": "voice-be-1",
+    "license": "CC0 1.0, сінтэтычны тан аўтара KUDY",
+    "credit": "Сінтэтычны E2E-тан, афлайн-генерацыя ffmpeg, 2026"
+  },
+  {
+    "media_id": "media-story-paid-2-en",
+    "sha256": "81727c0684e6409c2b6f0201978e32c4ca36e034ff52742e3c53f226c179c4e7",
+    "bytes": 51686,
+    "mime": "audio/mp4",
+    "locale": "en",
+    "voice_id": "voice-en-1",
+    "license": "CC0 1.0, synthetic tone by the KUDY author",
+    "credit": "Synthetic E2E tone, offline ffmpeg generation, 2026"
+  }
+]

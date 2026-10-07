@@ -1,0 +1,56 @@
+[
+  {
+    "story_id": "story-free-1",
+    "place_id": "e2e-place-1",
+    "tier": "base",
+    "duration_s": 6,
+    "voice_id": "voice-en-1",
+    "tone": "standard",
+    "text": "Synthetic text of the first free story for end-to-end autotests; no real content lives here.",
+    "transcript": "Synthetic transcript of the first story. The free layer is published in full, so this line is visible without a purchase.",
+    "sources": [
+      "Synthetic source: the KUDY E2E fixture"
+    ],
+    "review": {
+      "by": "e2e fixture author",
+      "at": "2026-10-07",
+      "decision": "approved"
+    }
+  },
+  {
+    "story_id": "story-free-2",
+    "place_id": "e2e-place-2",
+    "tier": "base",
+    "duration_s": 6,
+    "voice_id": "voice-en-1",
+    "tone": "standard",
+    "text": "Synthetic text of the second free story for pause and resume autotests; no real content lives here.",
+    "transcript": "Synthetic transcript of the second story. The free layer is published in full, so this line is visible without a purchase.",
+    "sources": [
+      "Synthetic source: the KUDY E2E fixture"
+    ],
+    "review": {
+      "by": "e2e fixture author",
+      "at": "2026-10-07",
+      "decision": "approved"
+    }
+  },
+  {
+    "story_id": "story-free-3",
+    "place_id": "e2e-place-3",
+    "tier": "base",
+    "duration_s": 6,
+    "voice_id": "voice-en-1",
+    "tone": "standard",
+    "text": "Synthetic text of the third free story with a moment near the first stop; no real content lives here.",
+    "transcript": "Synthetic transcript of the third story. The free layer is published in full, so this line is visible without a purchase.",
+    "sources": [
+      "Synthetic source: the KUDY E2E fixture"
+    ],
+    "review": {
+      "by": "e2e fixture author",
+      "at": "2026-10-07",
+      "decision": "approved"
+    }
+  }
+]
