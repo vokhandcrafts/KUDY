@@ -1,0 +1,62 @@
+[
+  {
+    "media_id": "media-story-free-1-be",
+    "sha256": "59b038115546e8b889e66749687560dc5b7b2d3630cee398e2282e59bacf02b2",
+    "bytes": 51638,
+    "mime": "audio/mp4",
+    "locale": "be",
+    "voice_id": "voice-be-1",
+    "license": "CC0 1.0, сінтэтычны тан аўтара KUDY",
+    "credit": "Сінтэтычны E2E-тан, афлайн-генерацыя ffmpeg, 2026"
+  },
+  {
+    "media_id": "media-story-free-1-en",
+    "sha256": "d190fdd919705d044dd555e3f12297e8efa61de6eb35c2516f75dd8879531171",
+    "bytes": 51722,
+    "mime": "audio/mp4",
+    "locale": "en",
+    "voice_id": "voice-en-1",
+    "license": "CC0 1.0, synthetic tone by the KUDY author",
+    "credit": "Synthetic E2E tone, offline ffmpeg generation, 2026"
+  },
+  {
+    "media_id": "media-story-free-2-be",
+    "sha256": "d02e83d3555abaf523904acae7c587cae0129ebea9b5c96177f6c04f97deb479",
+    "bytes": 51699,
+    "mime": "audio/mp4",
+    "locale": "be",
+    "voice_id": "voice-be-1",
+    "license": "CC0 1.0, сінтэтычны тан аўтара KUDY",
+    "credit": "Сінтэтычны E2E-тан, афлайн-генерацыя ffmpeg, 2026"
+  },
+  {
+    "media_id": "media-story-free-2-en",
+    "sha256": "b7e4ba0cbe1f5e191c05803e89dcfbb3776a10619034cfb815e6f04884e112d6",
+    "bytes": 51760,
+    "mime": "audio/mp4",
+    "locale": "en",
+    "voice_id": "voice-en-1",
+    "license": "CC0 1.0, synthetic tone by the KUDY author",
+    "credit": "Synthetic E2E tone, offline ffmpeg generation, 2026"
+  },
+  {
+    "media_id": "media-story-free-3-be",
+    "sha256": "847561e3b5216f9123ab0723fb0ecd88acef433e009975d256cec5995be9637c",
+    "bytes": 51688,
+    "mime": "audio/mp4",
+    "locale": "be",
+    "voice_id": "voice-be-1",
+    "license": "CC0 1.0, сінтэтычны тан аўтара KUDY",
+    "credit": "Сінтэтычны E2E-тан, афлайн-генерацыя ffmpeg, 2026"
+  },
+  {
+    "media_id": "media-story-free-3-en",
+    "sha256": "f289d39bcd8bf291d2df58bfdd2da8cda291d68952ae56246fd036469fced834",
+    "bytes": 51739,
+    "mime": "audio/mp4",
+    "locale": "en",
+    "voice_id": "voice-en-1",
+    "license": "CC0 1.0, synthetic tone by the KUDY author",
+    "credit": "Synthetic E2E tone, offline ffmpeg generation, 2026"
+  }
+]

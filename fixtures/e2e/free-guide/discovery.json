@@ -1,0 +1,168 @@
+{
+  "revision": "r-e2e-free-1",
+  "city_id": "e2e-city",
+  "themes": [
+    {
+      "id": "theme-e2e-walk",
+      "labels": {
+        "be": "E2E-прагулка",
+        "en": "E2E walk"
+      }
+    }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-guide-e2e-free",
+      "ref": {
+        "kind": "guide",
+        "route_id": "e2e-free-guide",
+        "version": "1"
+      },
+      "city_id": "e2e-city",
+      "editorial_order": 1,
+      "themes": [
+        "theme-e2e-walk"
+      ],
+      "localized": {
+        "title": {
+          "be": "E2E-гід: тры свабодныя кропкі",
+          "en": "E2E guide: three free stops"
+        },
+        "summary": {
+          "be": "Сінтэтычны свабодны маршрут з трох кропак; прыдуманы для аўтатэстаў.",
+          "en": "A synthetic free route of three stops; invented for autotests."
+        },
+        "why_recommended": {
+          "be": "Кароткі замкнуты круг: ўсе тры гісторыі свабодныя, аудыё сінтэтычнае.",
+          "en": "A short closed loop: all three stories are free, the audio is synthetic."
+        },
+        "conditions": {
+          "be": "роўны сінтэтычны грунт, без пераходаў",
+          "en": "flat synthetic ground, no crossings"
+        }
+      },
+      "estimated_duration": {
+        "min_minutes": 40,
+        "max_minutes": 60,
+        "basis": "author_estimate"
+      },
+      "distance_m": 900,
+      "suggested_start_place_id": "e2e-place-1",
+      "season_recommendations": [],
+      "detail_ref": {
+        "kind": "guide_preview"
+      }
+    },
+    {
+      "offer_id": "offer-place-e2e-1",
+      "ref": {
+        "kind": "place",
+        "place_id": "e2e-place-1",
+        "content_version": "1"
+      },
+      "city_id": "e2e-city",
+      "editorial_order": 2,
+      "themes": [
+        "theme-e2e-walk"
+      ],
+      "localized": {
+        "title": {
+          "be": "E2E-плошча (сінтэтык)",
+          "en": "E2E Square (synthetic)"
+        },
+        "summary": {
+          "be": "Сінтэтычная кропка пачатку з маментам-тэйзэрам; не рэальнае месца.",
+          "en": "A synthetic starting point with a teaser moment; not a real place."
+        },
+        "why_recommended": {
+          "be": "Дзесяць сінтэтычных хвілін цішыні; кароткі прыклад месца для перапынку.",
+          "en": "Ten synthetic minutes of quiet; a short pause-spot example."
+        },
+        "conditions": {
+          "be": "большасць шляху на вуліцы",
+          "en": "most of the way is outdoors"
+        }
+      },
+      "season_recommendations": [],
+      "detail_ref": {
+        "kind": "place_public",
+        "path": "places/e2e-place-1/public.json"
+      }
+    },
+    {
+      "offer_id": "offer-collection-e2e-day",
+      "ref": {
+        "kind": "collection",
+        "collection_id": "e2e-day",
+        "content_version": "1"
+      },
+      "city_id": "e2e-city",
+      "editorial_order": 3,
+      "themes": [
+        "theme-e2e-walk"
+      ],
+      "localized": {
+        "title": {
+          "be": "Адзін дзень E2E-цэнтра",
+          "en": "One Day in the E2E Centre"
+        },
+        "summary": {
+          "be": "Сінтэтычная падборка: плошча і свабодны гід ад яе пачатку.",
+          "en": "A synthetic collection: the square and the free guide starting at it."
+        },
+        "why_recommended": {
+          "be": "Парадак падабраны рукамі: спачатку плошча, потым гід ад яе ж пачатку.",
+          "en": "The order is hand-picked: the square first, then the guide from it."
+        },
+        "conditions": {
+          "be": "сумарны час з пераходамі; дарога да пачатку не ўлічана",
+          "en": "total time includes transitions; the trip to the starting point does not"
+        }
+      },
+      "estimated_duration": {
+        "min_minutes": 40,
+        "max_minutes": 60,
+        "basis": "author_estimate"
+      },
+      "suggested_start_place_id": "e2e-place-1",
+      "season_recommendations": [],
+      "detail_ref": {
+        "kind": "collection_public",
+        "path": "collections/e2e-day/public.json"
+      }
+    }
+  ],
+  "collections": [
+    {
+      "collection_id": "e2e-day",
+      "content_version": "1",
+      "city_id": "e2e-city",
+      "localized": {
+        "title": {
+          "be": "Адзін дзень E2E-цэнтра",
+          "en": "One Day in the E2E Centre"
+        },
+        "description": {
+          "be": "Дзве сінтэтычныя прапановы ў адной дузе: плошча і свабодны гід ад таго ж пачатку.",
+          "en": "Two synthetic offers in one arc: the square and the free guide from the same start."
+        }
+      },
+      "members": [
+        {
+          "kind": "place",
+          "place_id": "e2e-place-1",
+          "content_version": "1"
+        },
+        {
+          "kind": "guide",
+          "route_id": "e2e-free-guide",
+          "version": "1"
+        }
+      ],
+      "overlap_note": {
+        "be": "Плошча — першая кропка e2e-гіда; асобна наведваць яе не трэба, гэта той самы досвед.",
+        "en": "The square is the e2e guide's first stop; visiting it separately is not needed — same experience."
+      }
+    }
+  ]
+}

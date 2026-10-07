@@ -1,0 +1,38 @@
+{
+  "route_id": "e2e-paid-guide",
+  "version": "1",
+  "city_id": "e2e-city",
+  "access": "paid",
+  "product_id_route": "e2e_route_prod",
+  "product_id_extension": "e2e_ext_prod",
+  "distance_m": 600,
+  "duration_min": 30,
+  "free_stop_count": 1,
+  "published": true,
+  "stops": [
+    {
+      "id": "e2e-stop-1",
+      "position": 0,
+      "place_id": "e2e-place-4",
+      "access_tier": "base",
+      "story_base_id": "story-paid-1"
+    },
+    {
+      "id": "e2e-stop-2",
+      "position": 1,
+      "place_id": "e2e-place-5",
+      "access_tier": "extended",
+      "story_extended_id": "story-paid-2",
+      "preview": {
+        "name": {
+          "be": "E2E-вежа (зачынена)",
+          "en": "E2E Tower (locked)"
+        },
+        "announce": {
+          "be": "За вуглом — сінтэтычная вежа і гісторыя пра яе звон; поўны тэкст адкрываецца пасля куплі.",
+          "en": "Around the corner stands the synthetic tower and the story of its bell; the full text unlocks after purchase."
+        }
+      }
+    }
+  ]
+}
