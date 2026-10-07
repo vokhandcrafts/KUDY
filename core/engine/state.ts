@@ -80,6 +80,15 @@ export interface AcceptedFix {
 // Session state: everything 09 §6.1 lists under Active, kept across Paused and
 // Ended. `tier` is the informational start record of verified layers
 // (ADR G01.03 §3.1) — it never grows; runtime availability is `tierAvailable`.
+//
+// The language identity of a guide is two independent pins over one route and
+// version (ADR G21.20 §3.1, approved 2026-10-07): the text pin (`locale`,
+// unchanged) and the optional audio pin (`audioLocale`). `null` is the
+// text-only session — no audio command is ever proposed (§3.1.3); a monolingual
+// session pins the audio to its own text locale and behaves byte-for-byte like
+// the pre-G21.21 engine (§3.1.5, §4 scenario 3). The durable row keeps
+// audio_locale NULL for both a monolingual and a text-only session and the
+// restore resolves it against the pinned version's availability (§3.4).
 export interface RunSessionState {
   phase: 'Active' | 'Paused' | 'Ended';
   sessionId: SessionId;
@@ -87,12 +96,18 @@ export interface RunSessionState {
   // Pinned at Start, immutable until End (ADR G01.03 §3.4).
   version: VersionId;
   locale: Locale;
+  // The audio pin: set at Start, immutable until End (ADR G21.20 §3.1.4);
+  // null = text-only reading.
+  audioLocale: Locale | null;
   tier: Tier[];
   stops: PackageStop[];
   // Trusted input from verified availability (ADR G01.01 §4.2): grows only
   // through AccessReady of the same identity.
   accessibleStopIds: StopId[];
   tierAvailable: Tier[];
+  // The audio layer's own readiness (ADR G21.20 §3.2): lives only while the
+  // pin is set and grows only through AccessReady of the pin's locale.
+  audioTierAvailable: Tier[];
   heard: StoryId[];
   autoFired: StopId[];
   playing: Playing | null;
@@ -136,6 +151,14 @@ export const storyAccessible = (state: RunSessionState, storyId: StoryId): boole
     state.tierAvailable.includes(storyTierOf(stop, storyId))
   );
 };
+
+// The sound predicate of a guide story (ADR G21.20 §3.2): the story's text is
+// accessible in the text layer (storyAccessible — the caller's part) AND the
+// audio pin is set AND the story's tier is in the audio layer's readiness.
+// Audio without accessible text never sounds — the runtime mirror of the
+// audio-without-text ban (09 §3 invariant 1).
+export const storyAudible = (state: RunSessionState, stop: PackageStop, storyId: StoryId): boolean =>
+  state.audioLocale !== null && state.audioTierAvailable.includes(storyTierOf(stop, storyId));
 
 // «Яшчэ можна адкрыць» (ADR G01.01 §4.6): every accessible story of the route
 // stops that is not heard — locked stories excluded, the unit is story_id, an

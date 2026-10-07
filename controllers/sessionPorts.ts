@@ -133,6 +133,60 @@ function layerPath(routeId: string, version: string, locale: string, tier: Tier)
   return `bundles/${routeId}/${version}/${locale}/${tier}`;
 }
 
+// G21.21 (ADR G21.20 §3.4) — the audio availability of one pinned version:
+// the locales whose base layer ships an audio directory. The idiom is the
+// validator's own layerShipsAudio fact (tools/validate/validate-package.mjs:
+// a layer declares itself text-only by shipping no audio directory at all;
+// an emptied directory still counts as shipping audio) — listDir answers
+// null for an absent subtree, [] for an empty one.
+async function audioLocalesOf(
+  bundlesStore: BundlesStore,
+  routeId: string,
+  version: string,
+): Promise<string[]> {
+  const locales = await bundlesStore.listDir(`bundles/${routeId}/${version}`);
+  if (!locales) return [];
+  const out: string[] = [];
+  for (const locale of locales) {
+    const audio = await bundlesStore.listDir(`bundles/${routeId}/${version}/${locale}/base/audio`);
+    if (audio !== null) out.push(locale);
+  }
+  return out;
+}
+
+// One layer's recovery read (09 §9.1): the map facts joined with the places'
+// geometry. A stop without its place geometry is a damaged package — the
+// layer answers needs-recovery whole, never a partial seed. The text loop
+// consumes the stop records, the audio loop only the tier status.
+async function readRunLayer(
+  bundlesStore: BundlesStore,
+  routeId: string,
+  version: string,
+  locale: string,
+  tier: Tier,
+): Promise<{ layer: RunRecoveryLayer; stops: RunStop[] }> {
+  const facts = await readRunMapFacts(bundlesStore, layerPath(routeId, version, locale, tier), {
+    routeId,
+    version,
+  });
+  if (!facts.ok) return { layer: { tier, status: 'needs-recovery' }, stops: [] };
+  const geometry = new Map(facts.places.map((place) => [place.placeId, place]));
+  const stops: RunStop[] = [];
+  for (const stop of facts.stops) {
+    const place = geometry.get(stop.placeId);
+    if (!place) return { layer: { tier, status: 'needs-recovery' }, stops: [] };
+    stops.push({
+      stopId: stop.stopId,
+      lat: place.lat,
+      lng: place.lng,
+      radius: place.radius,
+      ...(stop.storyBaseId ? { storyBaseId: stop.storyBaseId } : {}),
+      ...(stop.storyExtendedId ? { storyExtendedId: stop.storyExtendedId } : {}),
+    });
+  }
+  return { layer: { tier, status: 'ready', stops }, stops };
+}
+
 // G06.04 — the run surface's pinned-package port, moved verbatim from
 // createServices.ts: the live row's version/locale/tier pin wins; a fresh
 // walk takes the single version on disk and the first preferred locale
@@ -182,6 +236,10 @@ export function createPinnedPackagePort(input: {
         version,
         locale,
         tier,
+        // G21.21 (ADR G21.20 §3.2, owner edit 1): the pinned version's
+        // available audio locales — the default pin's selection source and
+        // the explicit choice's validation set.
+        audioLocales: await audioLocalesOf(bundlesStore, routeId, version),
         stops: facts.stops,
         places: facts.places,
         stories: stories.ok ? stories.stories : [],
@@ -194,7 +252,11 @@ export function createPinnedPackagePort(input: {
 // 09 §9.1 — the read-only restart-recovery view: the route's live row plus
 // the recorded layers' stop records joined from the same map facts the walk
 // reads. A stop without its place geometry is a damaged package — the layer
-// answers needs-recovery whole, never a partial seed.
+// answers needs-recovery whole, never a partial seed. G21.21 (ADR G21.20
+// §3.4): the payload also carries the pinned version's audio availability
+// and the recorded audio pin's own per-tier reads — the restore resolves a
+// NULL row against the availability and seeds audioTierAvailable only from
+// the audio tiers that verify now.
 export function createRunRecoveryPort(input: {
   driver: SqlDriver;
   bundlesStore: BundlesStore;
@@ -206,36 +268,20 @@ export function createRunRecoveryPort(input: {
       if (!row || row.routeId !== routeId) return null;
       const layers: RunRecoveryLayer[] = [];
       for (const tier of row.tier.filter(isTierValue)) {
-        const facts = await readRunMapFacts(
-          bundlesStore,
-          layerPath(routeId, row.version, row.locale, tier),
-          { routeId, version: row.version },
-        );
-        if (!facts.ok) {
-          layers.push({ tier, status: 'needs-recovery' });
-          continue;
-        }
-        const geometry = new Map(facts.places.map((place) => [place.placeId, place]));
-        const stops: RunStop[] = [];
-        let damaged = false;
-        for (const stop of facts.stops) {
-          const place = geometry.get(stop.placeId);
-          if (!place) {
-            damaged = true;
-            break;
-          }
-          stops.push({
-            stopId: stop.stopId,
-            lat: place.lat,
-            lng: place.lng,
-            radius: place.radius,
-            ...(stop.storyBaseId ? { storyBaseId: stop.storyBaseId } : {}),
-            ...(stop.storyExtendedId ? { storyExtendedId: stop.storyExtendedId } : {}),
-          });
-        }
-        layers.push(damaged ? { tier, status: 'needs-recovery' } : { tier, status: 'ready', stops });
+        const { layer } = await readRunLayer(bundlesStore, routeId, row.version, row.locale, tier);
+        // the text layer's stop records ride the layer itself — the restore
+        // seed; the audio layer's are read for the pin's verification status
+        layers.push(layer);
       }
-      return { row, routeId, version: row.version, layers };
+      const audioLocales = await audioLocalesOf(bundlesStore, routeId, row.version);
+      const audioLayers: RunRecoveryLayer[] = [];
+      if (row.audioLocale !== null) {
+        for (const tier of row.tier.filter(isTierValue)) {
+          const { layer } = await readRunLayer(bundlesStore, routeId, row.version, row.audioLocale, tier);
+          audioLayers.push(layer);
+        }
+      }
+      return { row, routeId, version: row.version, layers, audioLocales, audioLayers };
     },
   };
 }

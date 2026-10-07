@@ -63,7 +63,7 @@ import {
 import { step, type EngineConfig } from '../../core/engine/reducer.ts';
 import type { RunCommand } from '../../core/engine/commands.ts';
 import type { RunEvent } from '../../core/engine/events.ts';
-import { initialRunState, type RunSessionState, type RunState, type Tier } from '../../core/engine/state.ts';
+import { initialRunState, type Locale, type RunSessionState, type RunState, type Tier } from '../../core/engine/state.ts';
 import type { LocationService } from '../../services/location/service.ts';
 import type { GeofenceStop } from '../../services/location/types.ts';
 import type { AudioService } from '../../services/audio/service.ts';
@@ -232,7 +232,17 @@ export class RunOrchestrator {
   // start (ADR G01.03 §3.1: the row's tier records what Start verified) —
   // a paid walk re-entered after both layers were activated starts with both;
   // without it the route's default selection applies.
-  start(sessionId: string, accessibleStopIds?: ReadonlyArray<string>, verifiedTiers?: Tier[]): void {
+  // `audio` (ADR G21.20 §3.2) is the resolved audio pin of this start: null =
+  // the text-only session, a locale = the pinned audio layer with its
+  // verified tiers; undefined = the monolingual default (the audio layer is
+  // the text layer). The controller always resolves one of the three before
+  // calling.
+  start(
+    sessionId: string,
+    accessibleStopIds?: ReadonlyArray<string>,
+    verifiedTiers?: Tier[],
+    audio?: { locale: Locale | null; tiers?: ReadonlyArray<Tier> },
+  ): void {
     // The acceptance takes the resources (R3, header note 8) — the store's
     // commit already happened in the caller.
     this.attachResourceSubscriptions();
@@ -272,6 +282,9 @@ export class RunOrchestrator {
       version: this.route.version,
       locale: this.route.locale,
       tier: verifiedTiers ?? this.route.tier,
+      ...(audio === undefined
+        ? {}
+        : { audioLocale: audio.locale, ...(audio.tiers ? { audioTier: [...audio.tiers] } : {}) }),
       accessibleStopIds: [...ids],
       ...(playingNow ? { playingNow } : {}),
       stops: this.stops.map(({ stopId, storyBaseId, storyExtendedId }) => ({

@@ -122,6 +122,12 @@ export interface PreviewButtonInput {
   readonly layer: PreviewLayerFacts | null;
   readonly verify: Readiness | null;
   readonly canDownload: boolean;
+  // G21.21 (ADR G21.20 §3.2, owner edit 2): the selected cross-locale audio
+  // layer's facts — Start waits for its download the same way the text layer
+  // waits. null = no cross-locale selection (the monolingual or text-only
+  // default), so the button reads the text layer alone.
+  readonly audioLayer?: PreviewLayerFacts | null;
+  readonly audioVerify?: Readiness | null;
 }
 
 // The pure Download/Start derivation (the Proof target: reverting this
@@ -149,6 +155,41 @@ export function derivePreviewButton(input: PreviewButtonInput): PreviewButton {
     };
   }
   if (input.layer.state === 'ready') {
+    // G21.21: the selected audio layer joins the gate before Start — an
+    // unready cross-locale selection keeps the button on Download (owner
+    // edit 2: the download is the wait, never a silent substitution). The
+    // verify verdicts mirror the text branch: needs-recovery is the damaged
+    // repair, incomplete is the missing-files repair — both before Start.
+    if (input.audioLayer && input.audioLayer.state !== 'ready') {
+      return {
+        action: 'download',
+        enabled: input.canDownload,
+        label: 'download',
+        reason: input.canDownload ? null : 'preview#download-unavailable',
+        detail: input.audioLayer.state === 'partial' ? { kind: 'incomplete' } : null,
+      };
+    }
+    if (input.audioLayer && input.audioVerify && input.audioVerify.status !== 'ready') {
+      // access-locked is a purchase fact, not a download one — the same
+      // reason word the text branch shows (base audio is public; only a
+      // paid route can land here, and its text gate already fires first).
+      if (input.audioVerify.status === 'access-locked') {
+        return {
+          action: 'start',
+          enabled: false,
+          label: 'start',
+          reason: 'preview#purchase-required',
+          detail: null,
+        };
+      }
+      return {
+        action: 'download',
+        enabled: input.canDownload,
+        label: 'download',
+        reason: input.canDownload ? null : 'preview#download-unavailable',
+        detail: input.audioVerify.status === 'needs-recovery' ? { kind: 'damaged' } : { kind: 'incomplete' },
+      };
+    }
     if (!input.verify) {
       return {
         action: 'start',
@@ -207,6 +248,12 @@ export interface PreviewControllerState {
     | { readonly kind: 'unavailable'; readonly reason: string };
   readonly source: SourceSurface | null;
   readonly button: PreviewButton;
+  // G21.21 (ADR G21.20 §3.2, owner edit 1): the selected audio locale of this
+  // walk — the default resolves per the owner's rule (the text locale when
+  // its audio exists, else English), the chips re-resolve it explicitly.
+  // null = the text-only default (no audio anywhere). The handover carries
+  // it to the run surface through the route params.
+  readonly audioChoice: string | null;
   // The §4.1 dialog of NAV8: the live walk's title and the candidate's.
   readonly confirm: { readonly liveTitle: string; readonly candidateTitle: string } | null;
   readonly busy: boolean;
@@ -219,6 +266,7 @@ export interface PreviewControllerState {
   readonly downloadStorageExit: boolean;
   refresh(): Promise<void>;
   recordSource(source: string | null): void;
+  selectAudio(locale: string): void;
   download(): Promise<void>;
   start(): Promise<'handover' | 'confirm' | 'blocked'>;
   confirmHandover(): void;
@@ -279,6 +327,17 @@ export function createPreviewController(
   const strings = previewStrings(preference[0] ?? 'be');
   let seq = 0;
   let previous: GuidePreview | null = null;
+  // G21.21: the audio choice persists across refreshes; the default is
+  // resolved when the choice is absent or the facts no longer name it.
+  let audioChoice: string | null = null;
+  // The owner's default rule (ADR G21.20, owner edit 1): the text locale
+  // when the guide publishes its audio, else English, else no audio.
+  const defaultAudioChoice = (preview: GuidePreview): string | null => {
+    const text = layerLocale(preview, preference);
+    if (preview.audioLocales.includes(text)) return text;
+    if (preview.audioLocales.includes('en')) return 'en';
+    return null;
+  };
   const store = createControllerStore<PreviewControllerState>((set, get) => {
     // The facts → button derivation, the only place the button is written.
     async function deriveButton(preview: GuidePreview): Promise<PreviewButton> {
@@ -290,12 +349,25 @@ export function createPreviewController(
         layer && layer.state === 'ready' && ports.evaluate
           ? await ports.evaluate.evaluate({ routeId, version: preview.version, locale, tier: 'base' })
           : null;
+      // The cross-locale audio layer joins the gate (G21.21): its facts and
+      // verify come from the same ports, keyed by the chosen locale.
+      const choice = audioChoice ?? defaultAudioChoice(preview);
+      const audioLayer =
+        choice !== null && choice !== locale && ports.inventory
+          ? await ports.inventory.layerState({ routeId, version: preview.version, locale: choice, tier: 'base' })
+          : null;
+      const audioVerify =
+        audioLayer && audioLayer.state === 'ready' && ports.evaluate
+          ? await ports.evaluate.evaluate({ routeId, version: preview.version, locale: choice!, tier: 'base' })
+          : null;
       return derivePreviewButton({
         access: preview.access,
         granted: grantedFor(preview),
         layer,
         verify,
         canDownload: ports.download !== undefined,
+        audioLayer,
+        audioVerify,
       });
     }
     // The named download failure (R6): busy releases and the thrown
@@ -311,6 +383,7 @@ export function createPreviewController(
     return {
       surface: { kind: 'loading' },
       source: null,
+      audioChoice: null,
       button: {
         action: null,
         enabled: false,
@@ -330,9 +403,18 @@ export function createPreviewController(
           if (run !== seq) return;
           if (next.kind === 'ready') {
             previous = next.preview;
+            // The audio choice re-resolves when absent or no longer offered
+            // (a newer catalog may stop publishing the chosen audio).
+            if (audioChoice === null || !next.preview.audioLocales.includes(audioChoice)) {
+              audioChoice = defaultAudioChoice(next.preview);
+            }
             const button = await deriveButton(next.preview);
             if (run !== seq) return;
-            set({ surface: { kind: 'ready', preview: next.preview, degraded: next.degraded }, button });
+            set({
+              surface: { kind: 'ready', preview: next.preview, degraded: next.degraded },
+              button,
+              audioChoice,
+            });
             return;
           }
           if (next.kind === 'not-published') {
@@ -365,6 +447,27 @@ export function createPreviewController(
         const next = asSourceSurface(source);
         if (get().source !== next) set({ source: next });
       },
+      // G21.21: an explicit chip choice — only an audio locale the offer
+      // publishes is accepted; anything else is a caller defect and leaves
+      // the state untouched (no unvalidated echo).
+      selectAudio: (locale) => {
+        const state = get();
+        if (state.surface.kind !== 'ready') return;
+        if (!state.surface.preview.audioLocales.includes(locale)) return;
+        if (audioChoice === locale) return;
+        audioChoice = locale;
+        const preview = state.surface.preview;
+        void (async () => {
+          try {
+            const button = await deriveButton(preview);
+            set({ audioChoice: locale, button });
+          } catch {
+            // The facts read failed: the choice stands, the button keeps its
+            // last facts-based meaning — the next refresh re-derives it.
+            set({ audioChoice: locale });
+          }
+        })();
+      },
       download: async () => {
         const state = get();
         if (
@@ -378,16 +481,32 @@ export function createPreviewController(
         }
         const preview = state.surface.preview;
         set({ busy: true, downloadError: null, downloadDetail: null, downloadStorageExit: false });
-        let result: ActivationResult;
+        const textLocale = layerLocale(preview, preference);
+        // G21.21: the selected cross-locale audio layer joins the same
+        // download — both layers must complete before the button flips.
+        const audioLocale = audioChoice !== null && audioChoice !== textLocale ? audioChoice : null;
+        const targets: Array<{ locale: string }> = audioLocale
+          ? [{ locale: textLocale }, { locale: audioLocale }]
+          : [{ locale: textLocale }];
+        let result: ActivationResult | null = null;
         try {
-          result = await ports.download.activate({
-            routeId,
-            version: preview.version,
-            locale: layerLocale(preview, preference),
-            tier: 'base',
-          });
+          for (const target of targets) {
+            result = await ports.download.activate({
+              routeId,
+              version: preview.version,
+              locale: target.locale,
+              tier: 'base',
+            });
+            if (result.status !== 'complete') break;
+          }
         } catch (error) {
           failDownload(error);
+          return;
+        }
+        if (result === null) {
+          // Unreachable: targets never runs empty, but the honest guard
+          // keeps the busy state from wedging on a caller defect.
+          set({ busy: false });
           return;
         }
         // G06.05 (issue #280, AC4): a non-complete activation is a named

@@ -103,6 +103,9 @@ const LAYER = 'bundles/route-map/1/be/base';
 const DEFAULT_FILES: Record<string, string> = {
   [`${LAYER}/route.json`]: ROUTE_JSON,
   [`${LAYER}/places.json`]: PLACES_JSON,
+  // G21.21: the layer ships audio — the pinned version's audioLocales fact
+  // reads ['be'], so the default pin resolves to the monolingual walk.
+  [`${LAYER}/audio/story-1.m4a`]: 'audio-bytes',
 };
 const BASE_STOP_IDS = ['stop-1', 'stop-2', 'stop-4'];
 
@@ -196,7 +199,14 @@ function recoveryPortOver(driver: SqlDriver): RunRecovery {
       const layers: RunRecoveryLayer[] = row.tier
         .filter((value): value is Tier => value === 'base' || value === 'extended')
         .map((tier) => ({ tier, status: 'ready' as const, stops: stopsOfTier(tier) }));
-      const payload: RunRecoveryPayload = { row, routeId, version: row.version, layers };
+      const payload: RunRecoveryPayload = {
+        row,
+        routeId,
+        version: row.version,
+        layers,
+        audioLocales: [row.locale],
+        audioLayers: [],
+      };
       return payload;
     },
   };
@@ -905,6 +915,7 @@ test('G07.05: the fresh Start carries the foreground-window hint ids into sessio
         version: '1',
         locale: 'be',
         tier: ['base' as Tier],
+        audioLocales: ['be'],
         stops: [
           { stopId: 'stop-1', placeId: 'place-1', storyBaseId: 'story-1', name: { be: 'Мытня' } },
           { stopId: 'stop-2', placeId: 'place-2', storyBaseId: 'story-2', name: { be: 'Порт' } },

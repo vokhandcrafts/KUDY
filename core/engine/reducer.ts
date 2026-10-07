@@ -25,13 +25,16 @@ import {
   findStop,
   primaryStoryOf,
   storyAccessible,
+  storyAudible,
   storyTierOf,
   storiesOf,
+  type Locale,
   type PlayToken,
   type RunSessionState,
   type RunState,
   type StoryId,
   type StopId,
+  type Tier,
 } from './state.ts';
 
 // Only values from services/config (19 §3.1) — no functions, no clock. The
@@ -280,8 +283,8 @@ function startSession(event: Extract<RunEvent, { type: 'Start' }>): RunSessionSt
   }
   // ADR G01.02 §3.3/§3.8: Start never stops a sounding moment and never mints
   // a guide launch for it — the controller injects the actual player state
-  // (the moment variant) into the fresh session; autoplay then waits for the
-  // player to become free (the occupancy check of the autotrigger). Only a
+  // (the moment variant) into the fresh session; autoplay then waits
+  // for the player to become free (the occupancy check of the autotrigger). Only a
   // moment can hold the player here: guide playback without a live session is
   // exactly the moment owner.
   if (event.playingNow !== undefined && !isMomentLaunch(event.playingNow)) {
@@ -289,16 +292,53 @@ function startSession(event: Extract<RunEvent, { type: 'Start' }>): RunSessionSt
       'playingNow must be a moment launch: { momentId, storyId, seq: positive integer }',
     );
   }
+  // ADR G21.20 §3.2: the audio pin. Absent = monolingual (the audio layer is
+  // the text layer — audioTierAvailable mirrors the verified text tiers);
+  // null = text-only (audioTierAvailable never lives); a locale string = the
+  // pinned audio layer, seeded from the verified audio tiers the Start
+  // transaction carries (§3.3: the layer's readiness is verified before
+  // Start). The pin carries no route/version of its own — it rides the
+  // session's (§3.1.1), so a mismatch can only arise at restore, where the
+  // controller drops it to text-only with a diagnostic (§3.4).
+  let audioLocale: Locale | null;
+  let audioTierAvailable: Tier[];
+  if (event.audioLocale === undefined) {
+    audioLocale = event.locale;
+    audioTierAvailable = [...event.tier];
+  } else if (event.audioLocale === null) {
+    audioLocale = null;
+    audioTierAvailable = [];
+  } else {
+    // The last line of defense before the path interpolation in playGuide:
+    // the pin is a locale code, never a path segment — separators and
+    // traversal are refused here (the full untrusted-path idiom lives in
+    // services/safe-path, out of the core's import reach).
+    if (
+      typeof event.audioLocale !== 'string' ||
+      event.audioLocale.length === 0 ||
+      /[/\\]|\.\./.test(event.audioLocale)
+    ) {
+      throw new RangeError('audioLocale must be a non-empty locale code or null');
+    }
+    const audioTier = event.audioTier ?? [];
+    if (!audioTier.every((t) => t === 'base' || t === 'extended')) {
+      throw new RangeError('audioTier must list verified layers: base|extended');
+    }
+    audioLocale = event.audioLocale;
+    audioTierAvailable = [...audioTier];
+  }
   return {
     phase: 'Active',
     sessionId: event.sessionId,
     routeId: event.routeId,
     version: event.version,
     locale: event.locale,
+    audioLocale,
     tier: [...event.tier],
     stops: event.stops.map((stop) => ({ ...stop })),
     accessibleStopIds: accessible,
     tierAvailable: [...event.tier],
+    audioTierAvailable,
     heard: [],
     autoFired: [],
     playing: event.playingNow
@@ -474,8 +514,17 @@ function dwell(
 // (§4.9), so the replaced story gains no heard credit. play_seq grows by one
 // per launch and is write-through before the audio command (ADR G01.03 §3.1),
 // so a late callback can never collide with the new play_id. The path is the
-// bundle-relative audio path of ADR §4.1; the controller resolves it against
-// the installed bundle root.
+// bundle-relative audio path of ADR §4.1, built from the audio pin
+// (ADR G21.20 §3.2) — the controller resolves it against the installed
+// bundle root.
+//
+// The launch happens only when the story is audible (storyAudible): a story
+// whose text is accessible but whose audio layer is not ready (or a session
+// without a pin at all) gets the text-only presentation — no PlayStory, no
+// launch, no play_seq growth, nothing counted (ADR §3.2 «Text-only запуск»).
+// The automatic attempt still burns (§4.8.4): manual access remains. A
+// sounding launch is not interrupted by a text-only presentation — the
+// paragraph forbids every audio command, StopAudio included.
 function playGuide(
   s: RunSessionState,
   stopId: StopId,
@@ -485,14 +534,15 @@ function playGuide(
 ): void {
   const stop = findStop(s, stopId);
   if (!stop) return; // unreachable: every caller resolved the stop first
-  stopAudio(s, commands);
   if (automatic) addOnce(s.autoFired, stopId);
+  if (!storyAudible(s, stop, storyId)) return;
+  stopAudio(s, commands);
   s.playSeq += 1;
   s.playing = { owner: 'guide', stopId, storyId, playId: s.playSeq, paused: false };
   commands.push({
     type: 'PlayStory',
     storyId,
-    path: `${s.locale}/${storyTierOf(stop, storyId)}/audio/${storyId}.m4a`,
+    path: `${s.audioLocale}/${storyTierOf(stop, storyId)}/audio/${storyId}.m4a`,
     sessionId: s.sessionId,
     playId: s.playSeq,
     token: tokenOf(s, s.playing),
@@ -553,16 +603,27 @@ function audioFinished(
 // pins that version later. The engine cannot see the disk: "the actually
 // downloaded layer" (check 4) and the capability channel (check 6) live in
 // services/download; the reducer re-checks the declared values and the pin.
+//
+// ADR G21.20 §3.2 widens identity check 3 to the two language layers: an
+// event whose locale is the text pin widens tier_available (and, for a
+// monolingual session whose audio pin is the text locale, the audio mirror
+// with it); an event whose locale is the audio pin widens audioTierAvailable
+// only — it never opens text access, so the geofence window does not move.
+// Every other check (route, version, tier, stop_ids, issuer channel) and the
+// whole-event rejection on mismatch are unchanged: a grant still authorizes
+// only its own layer's bytes.
 function applyAccess(
   s: RunSessionState,
   event: Extract<RunEvent, { type: 'AccessReady' }>,
   commands: RunCommand[],
 ): void {
+  const textLayerEvent = event.locale === s.locale;
+  const audioLayerEvent = s.audioLocale !== null && event.locale === s.audioLocale;
   const identityMatches =
     event.issuer === 'services/download' &&
     event.routeId === s.routeId &&
     event.version === s.version &&
-    event.locale === s.locale &&
+    (textLayerEvent || audioLayerEvent) &&
     (event.tier === 'base' || event.tier === 'extended');
   if (!identityMatches) return;
   // Unknown stop ids open no content: the payload must stay inside the
@@ -573,17 +634,23 @@ function applyAccess(
   // Acceptance: tier_available widens, accessible_stop_ids recomputes, the
   // geofence window is rebuilt — with no Play, and heard/auto_fired untouched
   // (same-version unlock keeps progress). A repeat of the same identity adds
-  // nothing, so it emits no command: the no-op stays a no-op.
+  // nothing, so it emits no command: the no-op stays a no-op. The audio
+  // layer's widening emits nothing either — no text access changed.
   let widened = false;
-  for (const stopId of event.stopIds) {
-    if (!s.accessibleStopIds.includes(stopId)) {
-      s.accessibleStopIds.push(stopId);
+  if (textLayerEvent) {
+    for (const stopId of event.stopIds) {
+      if (!s.accessibleStopIds.includes(stopId)) {
+        s.accessibleStopIds.push(stopId);
+        widened = true;
+      }
+    }
+    if (!s.tierAvailable.includes(event.tier)) {
+      s.tierAvailable.push(event.tier);
       widened = true;
     }
   }
-  if (!s.tierAvailable.includes(event.tier)) {
-    s.tierAvailable.push(event.tier);
-    widened = true;
+  if (audioLayerEvent && !s.audioTierAvailable.includes(event.tier)) {
+    s.audioTierAvailable.push(event.tier);
   }
   if (widened) commands.push({ type: 'SetGeofenceWindow', stopIds: geofenceCandidates(s) });
 }

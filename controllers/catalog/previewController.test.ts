@@ -20,7 +20,7 @@ import {
 } from './previewController.ts';
 import { createCatalogService } from '../../services/catalog/catalogService.ts';
 import type { CatalogPathLoader } from '../../services/catalog/types.ts';
-import type { Readiness } from '../../services/contentRepo/types.ts';
+import type { Readiness, Tier } from '../../services/contentRepo/types.ts';
 import type { ActivationResult, LayerKey } from '../../services/download/types.ts';
 import { deferred, loaderFromTexts, waitUntil } from './test-helpers.ts';
 
@@ -570,5 +570,207 @@ describe('G20.23 (R6): the operation ends when the facts read fails', () => {
     const { surface } = controller.getState();
     assert.ok(surface.kind === 'ready', 'the stale failure was dropped');
     assert.equal(surface.preview.durationMin, 20);
+  });
+});
+
+// G21.21 (issue #553, ADR G21.20 §3.2, owner edits 1–2): the audio choice —
+// the owner's default rule, the explicit chip selection and the cross-locale
+// layer joining the button gate and the download. The availability facts
+// ride the discovery index the catalog envelope points at (21 §4), the same
+// source the preview screen's chips read.
+describe('G21.21: derivePreviewButton — the audio layer joins the gate', () => {
+  const base = { access: 'free' as const, granted: true, canDownload: true };
+
+  it('a ready text layer with an unready selected audio layer stays on Download', () => {
+    const button = derivePreviewButton({
+      ...base,
+      layer: { state: 'ready', missingCount: null },
+      verify: READY,
+      audioLayer: { state: 'not_downloaded', missingCount: null },
+    });
+    assert.deepEqual([button.action, button.enabled, button.label], ['download', true, 'download']);
+  });
+
+  it('an incomplete selected-audio verify keeps the repair path, not a Start promise', () => {
+    const button = derivePreviewButton({
+      ...base,
+      layer: { state: 'ready', missingCount: null },
+      verify: READY,
+      audioLayer: { state: 'ready', missingCount: null },
+      audioVerify: { status: 'incomplete', missing: ['en/base/stops.json'] },
+    });
+    assert.deepEqual([button.action, button.enabled], ['download', true]);
+    assert.deepEqual(button.detail, { kind: 'incomplete' });
+  });
+
+  it('a damaged selected audio layer keeps the repair path', () => {
+    const button = derivePreviewButton({
+      ...base,
+      layer: { state: 'ready', missingCount: null },
+      verify: READY,
+      audioLayer: { state: 'ready', missingCount: null },
+      audioVerify: { status: 'needs-recovery', media: ['en/base/audio/st1.m4a'] },
+    });
+    assert.deepEqual([button.action, button.enabled], ['download', true]);
+    assert.deepEqual(button.detail, { kind: 'damaged' });
+  });
+
+  it('both layers ready and verified — Start', () => {
+    const button = derivePreviewButton({
+      ...base,
+      layer: { state: 'ready', missingCount: null },
+      verify: READY,
+      audioLayer: { state: 'ready', missingCount: null },
+      audioVerify: READY,
+    });
+    assert.deepEqual([button.action, button.enabled, button.reason], ['start', true, null]);
+  });
+
+  it('no cross-locale selection — the text layer alone decides', () => {
+    const button = derivePreviewButton({
+      ...base,
+      layer: { state: 'ready', missingCount: null },
+      verify: READY,
+    });
+    assert.deepEqual([button.action, button.enabled], ['start', true]);
+  });
+});
+
+describe('G21.21: preview controller — the audio choice', () => {
+  function audioLoader(audioLocales: string[]) {
+    const index = JSON.stringify({
+      schema_version: 1,
+      revision: 'r-g2121',
+      city_id: 'gdansk',
+      themes: [],
+      offers: [
+        {
+          offer_id: 'offer-r1-guide',
+          ref: { kind: 'guide', route_id: 'r-1', version: '1' },
+          city_id: 'gdansk',
+          editorial_order: 1,
+          themes: [],
+          access: 'free',
+          localized: { title: { be: 'Гід раз' } },
+          availability: { text_locales: ['be'], audio_locales: audioLocales },
+        },
+      ],
+      collections: [],
+    });
+    const catalog = JSON.stringify({
+      catalog_schema_version: 1,
+      routes: [{ route_id: 'r-1', version: '1', locales: ['be'], layers: ['base'], sizes: { base: 2097152 } }],
+      discovery_index: {
+        schema_version: 1,
+        revision: 'r-g2121',
+        path: 'discovery/index.json',
+        bytes: new TextEncoder().encode(index).byteLength,
+        // the test service's sha256 is the constant fake — the pin holds by it
+        sha256: 'deadbeef',
+      },
+    });
+    return loaderFromTexts({ 'catalog.json': catalog, 'discovery/index.json': index, 'bundle/r-1/1/route.json': ROUTE_DOC });
+  }
+
+  function localeInventory(states: Record<string, PreviewLayerFacts | Error>) {
+    const calls: string[] = [];
+    return {
+      calls,
+      states,
+      layerState: (input: { routeId: string; version: string; locale: string; tier: Tier }) => {
+        calls.push(`${input.locale}/${input.tier}`);
+        const next = states[input.locale];
+        if (next === undefined) return Promise.reject(new Error(`no fixture for ${input.locale}`));
+        return next instanceof Error ? Promise.reject(next) : Promise.resolve(next);
+      },
+    };
+  }
+
+  function localeEvaluate(statuses: Record<string, Readiness | Error>) {
+    const calls: string[] = [];
+    return {
+      calls,
+      evaluate: (input: { routeId: string; version: string; locale: string; tier: Tier }) => {
+        calls.push(input.locale);
+        const next = statuses[input.locale];
+        if (next === undefined) return Promise.reject(new Error(`no fixture for ${input.locale}`));
+        return next instanceof Error ? Promise.reject(next) : Promise.resolve(next);
+      },
+    };
+  }
+
+  function localeDownload() {
+    const keys: string[] = [];
+    return {
+      keys,
+      activate: (key: LayerKey) => {
+        keys.push(`${key.routeId}/${key.locale}`);
+        return Promise.resolve<ActivationResult>({
+          status: 'complete',
+          key,
+          verified: 1,
+          bytes: 1,
+          fetched: 1,
+          diagnostics: [],
+        });
+      },
+    };
+  }
+
+  it('the default choice follows the owner rule: text locale, else English, else text-only', async () => {
+    const withBe = createPreviewController(makePorts(audioLoader(['be', 'en']), {}), 'r-1');
+    await waitUntil(() => withBe.getState().surface.kind === 'ready');
+    assert.equal(withBe.getState().audioChoice, 'be', 'the text locale ships audio — it is the default');
+    const enOnly = createPreviewController(makePorts(audioLoader(['en']), {}), 'r-1');
+    await waitUntil(() => enOnly.getState().surface.kind === 'ready');
+    assert.equal(enOnly.getState().audioChoice, 'en', 'no be audio — English substitutes');
+    const noAudio = createPreviewController(makePorts(FULL_LOADER, {}), 'r-1');
+    await waitUntil(() => noAudio.getState().surface.kind === 'ready');
+    assert.equal(noAudio.getState().audioChoice, null, 'no audio published — text-only default');
+  });
+
+  it('an explicit chip choice re-derives the button; an unready en layer holds Download', async () => {
+    const inventory = localeInventory({
+      be: { state: 'ready', missingCount: null },
+      en: { state: 'not_downloaded', missingCount: null },
+    });
+    const evaluate = localeEvaluate({ be: READY });
+    const controller = createPreviewController(
+      makePorts(audioLoader(['be', 'en']), { inventory, evaluate }),
+      'r-1',
+    );
+    await waitUntil(() => controller.getState().surface.kind === 'ready');
+    assert.equal(controller.getState().button.action, 'start', 'the be-only walk starts');
+    controller.getState().selectAudio('en');
+    await waitUntil(() => controller.getState().button.action === 'download');
+    assert.equal(controller.getState().audioChoice, 'en');
+    assert.deepEqual(inventory.calls, ['be/base', 'be/base', 'en/base'], 'the en layer joined the gate');
+    // A locale the offer does not publish is no echo — the choice stands.
+    controller.getState().selectAudio('de');
+    assert.equal(controller.getState().audioChoice, 'en');
+  });
+
+  it('the download activates both layers; the flip needs both on disk', async () => {
+    const inventory = localeInventory({
+      be: { state: 'ready', missingCount: null },
+      en: { state: 'not_downloaded', missingCount: null },
+    });
+    const evaluate = localeEvaluate({ be: READY, en: READY });
+    const download = localeDownload();
+    const controller = createPreviewController(
+      makePorts(audioLoader(['be', 'en']), { inventory, evaluate, download }),
+      'r-1',
+    );
+    await waitUntil(() => controller.getState().surface.kind === 'ready');
+    controller.getState().selectAudio('en');
+    await waitUntil(() => controller.getState().button.action === 'download');
+    // The disk truth changes (the activation is about to write the en
+    // layer); the flip still comes from the facts re-read after the
+    // activation — never from the result itself (the Proof of G06.01.b).
+    inventory.states.en = { state: 'ready', missingCount: null };
+    await controller.getState().download();
+    assert.deepEqual(download.keys, ['r-1/be', 'r-1/en'], 'both layers activated in one press');
+    await waitUntil(() => controller.getState().button.action === 'start');
+    assert.ok(inventory.calls.includes('en/base'), 'the en facts re-read after the activation');
   });
 });
