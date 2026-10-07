@@ -591,6 +591,18 @@ describe('G21.21: derivePreviewButton — the audio layer joins the gate', () =>
     assert.deepEqual([button.action, button.enabled, button.label], ['download', true, 'download']);
   });
 
+  it('an incomplete selected-audio verify keeps the repair path, not a Start promise', () => {
+    const button = derivePreviewButton({
+      ...base,
+      layer: { state: 'ready', missingCount: null },
+      verify: READY,
+      audioLayer: { state: 'ready', missingCount: null },
+      audioVerify: { status: 'incomplete', missing: ['en/base/stops.json'] },
+    });
+    assert.deepEqual([button.action, button.enabled], ['download', true]);
+    assert.deepEqual(button.detail, { kind: 'incomplete' });
+  });
+
   it('a damaged selected audio layer keeps the repair path', () => {
     const button = derivePreviewButton({
       ...base,

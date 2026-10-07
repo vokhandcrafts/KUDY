@@ -222,6 +222,15 @@ test('criterion 4: Start validates the pin — an empty locale and an unknown au
     () => step(initialRunState, startEvent({ audioLocale: '' }), NOW, CONFIG),
     /audioLocale must be a non-empty locale/,
   );
+  // The pin is a locale code, never a path segment — the engine refuses
+  // separators and traversal before playGuide interpolates the path.
+  for (const malformed of ['../en', 'en/../x', 'en/base', 'a\\b']) {
+    assert.throws(
+      () => step(initialRunState, startEvent({ locale: 'fr', audioLocale: malformed }), NOW, CONFIG),
+      /audioLocale must be a non-empty locale/,
+      `malformed pin ${malformed} is a refusal`,
+    );
+  }
   assert.throws(
     () => step(initialRunState, startEvent({ locale: 'fr', audioLocale: 'en', audioTier: ['premium' as 'base'] }), NOW, CONFIG),
     /audioTier must list verified layers/,

@@ -157,7 +157,9 @@ export function derivePreviewButton(input: PreviewButtonInput): PreviewButton {
   if (input.layer.state === 'ready') {
     // G21.21: the selected audio layer joins the gate before Start — an
     // unready cross-locale selection keeps the button on Download (owner
-    // edit 2: the download is the wait, never a silent substitution).
+    // edit 2: the download is the wait, never a silent substitution). The
+    // verify verdicts mirror the text branch: needs-recovery is the damaged
+    // repair, incomplete is the missing-files repair — both before Start.
     if (input.audioLayer && input.audioLayer.state !== 'ready') {
       return {
         action: 'download',
@@ -167,13 +169,25 @@ export function derivePreviewButton(input: PreviewButtonInput): PreviewButton {
         detail: input.audioLayer.state === 'partial' ? { kind: 'incomplete' } : null,
       };
     }
-    if (input.audioLayer && input.audioVerify && input.audioVerify.status === 'needs-recovery') {
+    if (input.audioLayer && input.audioVerify && input.audioVerify.status !== 'ready') {
+      // access-locked is a purchase fact, not a download one — the same
+      // reason word the text branch shows (base audio is public; only a
+      // paid route can land here, and its text gate already fires first).
+      if (input.audioVerify.status === 'access-locked') {
+        return {
+          action: 'start',
+          enabled: false,
+          label: 'start',
+          reason: 'preview#purchase-required',
+          detail: null,
+        };
+      }
       return {
         action: 'download',
         enabled: input.canDownload,
         label: 'download',
         reason: input.canDownload ? null : 'preview#download-unavailable',
-        detail: { kind: 'damaged' },
+        detail: input.audioVerify.status === 'needs-recovery' ? { kind: 'damaged' } : { kind: 'incomplete' },
       };
     }
     if (!input.verify) {

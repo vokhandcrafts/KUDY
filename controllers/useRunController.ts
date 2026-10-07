@@ -134,9 +134,10 @@ export interface RunRecoveryPayload {
   // when the row's own locale is here, and as text-only with a named
   // diagnostic when it is not; a non-NULL pin must be here to survive.
   audioLocales: ReadonlyArray<string>;
-  // The recorded audio layer's per-tier reads (ADR §3.7 shape) for the row's
-  // audio pin — the restored audioTierAvailable grows only from the tiers
-  // that verify now; empty when the row carries no pin.
+  // The recorded audio layer's per-tier reads — the same RunRecoveryLayer
+  // shape the text layers use (ADR G01.03 §3.7's honest per-layer report) —
+  // for the row's audio pin: the restored audioTierAvailable grows only from
+  // the tiers that verify now; empty when the row carries no pin.
   audioLayers: ReadonlyArray<RunRecoveryLayer>;
 }
 

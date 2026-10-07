@@ -564,8 +564,15 @@ export default function RoutePreview() {
               // params — the run surface starts through the switch-guide
               // transaction (the live walk finishes in the same commit the
               // new row inserts), the dialog state itself carries no write.
+              // G21.21: the audio choice rides the same params — the handover
+              // never silently drops the chips' selection into the default.
               state.confirmHandover();
-              router.push(`/run/${routeId}?confirmedSwitch=1`);
+              const audio = state.audioChoice;
+              router.push(
+                audio !== null
+                  ? `/run/${routeId}?confirmedSwitch=1&audio=${audio}`
+                  : `/run/${routeId}?confirmedSwitch=1`,
+              );
             }}
             testID="btn-confirm-start"
           />

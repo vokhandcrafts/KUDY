@@ -309,7 +309,15 @@ function startSession(event: Extract<RunEvent, { type: 'Start' }>): RunSessionSt
     audioLocale = null;
     audioTierAvailable = [];
   } else {
-    if (typeof event.audioLocale !== 'string' || event.audioLocale.length === 0) {
+    // The last line of defense before the path interpolation in playGuide:
+    // the pin is a locale code, never a path segment — separators and
+    // traversal are refused here (the full untrusted-path idiom lives in
+    // services/safe-path, out of the core's import reach).
+    if (
+      typeof event.audioLocale !== 'string' ||
+      event.audioLocale.length === 0 ||
+      /[/\\]|\.\./.test(event.audioLocale)
+    ) {
       throw new RangeError('audioLocale must be a non-empty locale code or null');
     }
     const audioTier = event.audioTier ?? [];
