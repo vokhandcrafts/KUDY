@@ -859,7 +859,7 @@ test('G21.20 §4.9: unauthorized layer — an en-extended grant opens no fr-exte
   assert.deepEqual(attempt.commands, []);
 });
 
-test('G21.20 §3.2: start() validates the pin — an empty, malformed locale or an unknown audio tier is a refusal', () => {
+test('G21.20 §3.2: start() validates the pin — malformed locales and unknown audio tiers are refusals; a pin without verified audio tiers is a text-only state', () => {
   assert.throws(() => start('walk-9', stops, { audioLocale: '' }),
     /audioLocale must be a non-empty locale code or null/);
   // The pin is a locale code, never a path segment — separators and
@@ -871,6 +871,11 @@ test('G21.20 §3.2: start() validates the pin — an empty, malformed locale or 
   }
   assert.throws(() => start('walk-9', stops, { locale: 'fr', audioLocale: 'en', audioTier: ['premium'] }),
     /audioTier must list verified layers: base\|extended/);
+  // ADR G21.20 §3.3: a pinned layer with no verified audio tiers yet starts
+  // as text-only — the engine's `audioTier ?? []`, not a refusal.
+  const unready = start('walk-9', stops, { locale: 'fr', audioLocale: 'en' });
+  assert.equal(unready.audioLocale, 'en');
+  assert.deepEqual(unready.audioTierAvailable, []);
 });
 
 test('bounded exploration: invariants across all 4-event sequences (16 choices per step)', () => {

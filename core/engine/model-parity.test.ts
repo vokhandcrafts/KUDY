@@ -1410,7 +1410,7 @@ const scenarios: Scenario[] = [
     },
   },
   {
-    title: 'G21.20 §3.2: start() validates the pin — an empty, malformed locale or an unknown audio tier is a refusal',
+    title: 'G21.20 §3.2: start() validates the pin — malformed locales and unknown audio tiers are refusals; a pin without verified audio tiers is a text-only state',
     run: () => {
       assert.throws(() => begin('walk-9', STOPS, { audioLocale: '' }), RangeError);
       // The pin is a locale code, never a path segment — separators and
@@ -1426,6 +1426,11 @@ const scenarios: Scenario[] = [
         () => begin('walk-9', STOPS, { locale: 'fr', audioLocale: 'en', audioTier: ['premium'] as unknown as Tier[] }),
         RangeError,
       );
+      // ADR G21.20 §3.3: a pinned layer with no verified audio tiers yet
+      // starts as text-only — the engine's `audioTier ?? []`, not a refusal.
+      const unready = begin('walk-9', STOPS, { locale: 'fr', audioLocale: 'en' });
+      assert.equal(unready.audioLocale, 'en');
+      assert.deepEqual(unready.audioTierAvailable, []);
     },
   },
   {

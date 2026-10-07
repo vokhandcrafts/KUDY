@@ -71,10 +71,15 @@ const audioPinOf = (locale, tierAvailable, audioLocale, audioTier) => {
       || /[/\\]|\.\./.test(audioLocale)) {
     throw new RangeError('audioLocale must be a non-empty locale code or null');
   }
-  if (!Array.isArray(audioTier) || !audioTier.every(t => t === 'base' || t === 'extended')) {
+  // ADR G21.20 §3.3: a pinned layer with no verified audio tiers yet is a
+  // state, not a refusal — Start goes as text-only. The model mirrors the
+  // engine's `audioTier ?? []` (core/engine/reducer.ts): zero verified
+  // tiers is expressible without an explicit empty array.
+  const audioTiers = audioTier ?? [];
+  if (!Array.isArray(audioTiers) || !audioTiers.every(t => t === 'base' || t === 'extended')) {
     throw new RangeError('audioTier must list verified layers: base|extended');
   }
-  return { audioLocale, audioTierAvailable: [...audioTier] };
+  return { audioLocale, audioTierAvailable: [...audioTiers] };
 };
 
 export function start(sessionId, routeStops, { routeId = 'route-1', version = 'v1',
