@@ -58,4 +58,9 @@ export const en = {
   "catalogEmpty": "No guides with text in this language yet.",
   "textUnavailableTitle": "Guide text in this language is not available yet",
   "textUnavailableBody": "This guide has no text in the selected interface language. Its text languages are listed in the language list in the catalog.",
+  "attributionHeading": "Sources and authorship",
+  "authorPhoto": "Author’s photo",
+  "usageRulesTitle": "Usage rules",
+  "usageRulesIntro": "Sources for historical materials are listed on guide and stop pages.",
+  "usageRulesReuse": "Before reusing material, check its rights at the original source or contact the rights holder.",
 };

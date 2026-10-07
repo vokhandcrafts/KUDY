@@ -9,6 +9,7 @@
 import { localePath } from '../lib/content/site.ts';
 import type { UiLocale, UiStrings } from '../lib/i18n/index.ts';
 import { SiteShell } from './site-shell.tsx';
+import { ContentAttribution } from './content-attribution.tsx';
 
 export function TextUnavailablePage({ locale, currentPath, strings }: {
   locale: UiLocale;
@@ -22,6 +23,7 @@ export function TextUnavailablePage({ locale, currentPath, strings }: {
       <p>
         <a href={localePath(locale, '/')}>{strings.homeLink}</a>
       </p>
+      <ContentAttribution locale={locale} strings={strings} attribution={{ sources: [], media: [] }} />
     </SiteShell>
   );
 }

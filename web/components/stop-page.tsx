@@ -7,6 +7,7 @@
 import type { StopPageData } from '../lib/content/site.ts';
 import type { UiLocale, UiStrings } from '../lib/i18n/index.ts';
 import { CalmOffer } from './calm-offer.tsx';
+import { ContentAttribution } from './content-attribution.tsx';
 import { ManualAudioPlayer } from './manual-audio-player.tsx';
 import { SiteShell } from './site-shell.tsx';
 
@@ -65,6 +66,7 @@ export function StopPage({ locale, data, strings }: {
             ))}
         </>
       )}
+      <ContentAttribution locale={locale} strings={strings} attribution={data.attribution} />
       <CalmOffer strings={strings} />
     </SiteShell>
   );

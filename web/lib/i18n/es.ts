@@ -58,4 +58,9 @@ export const es = {
   "catalogEmpty": "Todavía no hay guías con texto en este idioma.",
   "textUnavailableTitle": "El texto de la guía en este idioma todavía no está disponible",
   "textUnavailableBody": "Esta guía no tiene texto en el idioma de interfaz seleccionado. Sus idiomas de texto figuran en la lista de idiomas del catálogo.",
+  "attributionHeading": "Fuentes y autoría",
+  "authorPhoto": "Foto del autor",
+  "usageRulesTitle": "Normas de uso",
+  "usageRulesIntro": "Las fuentes de los materiales históricos figuran en las páginas de las rutas y las paradas.",
+  "usageRulesReuse": "Antes de reutilizar material, compruebe sus derechos en la fuente original o contacte con el titular de los derechos.",
 };

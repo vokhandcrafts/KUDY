@@ -3303,6 +3303,61 @@
         "controllers/useFeedbackController.ts#errorText.feedback-resolution-required"
       ],
       "sourceHash": "d16eb424c719e978864af4ab241f6608a78f9eead95acc2db963e3829b630555"
+    },
+    {
+      "id": "web.ui.attributionHeading",
+      "source": "Крыніцы і аўтарства",
+      "context": "Загаловак блока атрыбуцыі гіда і кропкі",
+      "format": "plain",
+      "parameters": [],
+      "sourceHash": "262a71e1ab35a50b648afe2d0ff23ef8717a62f70fba6352bd968d683f484fa0",
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#attributionHeading"
+      ]
+    },
+    {
+      "id": "web.ui.authorPhoto",
+      "source": "Фота аўтара",
+      "context": "Пазнака фота з media.json license author_own",
+      "format": "plain",
+      "parameters": [],
+      "sourceHash": "255e15ab9725891d3876cf7fa0c0e80961748701bb583a51c41bdd5714bb864a",
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#authorPhoto"
+      ]
+    },
+    {
+      "id": "web.ui.usageRulesTitle",
+      "source": "Правілы выкарыстання",
+      "context": "Загаловак і спасылка на старонку правілаў выкарыстання",
+      "format": "plain",
+      "parameters": [],
+      "sourceHash": "f3e2ee1e865651348bc54a8a9e679279bd31f087ff6057d72569f85a2b043212",
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#usageRulesTitle"
+      ]
+    },
+    {
+      "id": "web.ui.usageRulesIntro",
+      "source": "Крыніцы гістарычных матэрыялаў пазначаныя на старонках гідаў і кропак.",
+      "context": "Тлумачэнне на старонцы правілаў выкарыстання",
+      "format": "plain",
+      "parameters": [],
+      "sourceHash": "d2f27dc53f8052c06eb56bac06f8619251d5b371d0f3e4c5c45e9476a0690ff9",
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#usageRulesIntro"
+      ]
+    },
+    {
+      "id": "web.ui.usageRulesReuse",
+      "source": "Перад паўторным выкарыстаннем матэрыялу праверце яго правы ў першакрыніцы або звярніцеся да праваўладальніка.",
+      "context": "Агульная засцярога на старонцы правілаў выкарыстання",
+      "format": "plain",
+      "parameters": [],
+      "sourceHash": "b9dc6996d20d14ad7a565f18f0cb0c1726e49c4ac4d7f8ae1dd3d9f8628ffb94",
+      "migratedFrom": [
+        "web/lib/i18n/be.ts#usageRulesReuse"
+      ]
     }
   ]
 }

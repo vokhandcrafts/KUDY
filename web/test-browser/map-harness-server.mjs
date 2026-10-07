@@ -179,6 +179,7 @@ const inert = new Proxy(function () {}, {
 });
 export default inert;
 export function fileURLToPath() { return ''; }
+export const createHash = inert;
 `,
 };
 

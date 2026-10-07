@@ -6,6 +6,7 @@
 import type { GuidePageData } from '../lib/content/site.ts';
 import type { UiLocale, UiStrings } from '../lib/i18n/index.ts';
 import { CalmOffer } from './calm-offer.tsx';
+import { ContentAttribution } from './content-attribution.tsx';
 import { LockedStopRow } from './locked-stop-row.tsx';
 import { MetaRow } from './meta-row.tsx';
 import { SiteShell } from './site-shell.tsx';
@@ -41,6 +42,7 @@ export function GuidePage({ locale, data, strings }: {
           ),
         )}
       </ol>
+      <ContentAttribution locale={locale} strings={strings} attribution={data.attribution} />
       <CalmOffer strings={strings} />
     </SiteShell>
   );

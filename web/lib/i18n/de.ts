@@ -58,4 +58,9 @@ export const de = {
   "catalogEmpty": "Guides mit Text in dieser Sprache gibt es noch nicht.",
   "textUnavailableTitle": "Guide-Text in dieser Sprache ist noch nicht verfügbar",
   "textUnavailableBody": "Dieser Guide hat keinen Text in der gewählten Oberflächensprache. Seine Textsprachen stehen in der Sprachliste im Katalog.",
+  "attributionHeading": "Quellen und Urheberschaft",
+  "authorPhoto": "Foto des Autors",
+  "usageRulesTitle": "Nutzungsregeln",
+  "usageRulesIntro": "Die Quellen historischer Materialien stehen auf den Seiten der Rundgänge und Stationen.",
+  "usageRulesReuse": "Prüfen Sie vor der Wiederverwendung die Rechte an der Originalquelle oder wenden Sie sich an den Rechteinhaber.",
 };

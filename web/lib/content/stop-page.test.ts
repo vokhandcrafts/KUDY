@@ -63,6 +63,7 @@ test('the locked stop page data carries the preview only — no audio, no transc
   // transcript field.
   assert.deepEqual(Object.keys(page).sort(), [
     'announce',
+    'attribution',
     'guide_href',
     'locked',
     'name',

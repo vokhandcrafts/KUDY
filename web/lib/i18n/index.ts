@@ -73,6 +73,11 @@ const advertisedComplete: readonly CompleteUiLocaleCode[] = uiLocales;
 void advertisedComplete;
 
 export interface UiStrings {
+  attributionHeading: string;
+  authorPhoto: string;
+  usageRulesTitle: string;
+  usageRulesIntro: string;
+  usageRulesReuse: string;
   brand: string;
   catalogTitle: string;
   catalogEmpty: string;

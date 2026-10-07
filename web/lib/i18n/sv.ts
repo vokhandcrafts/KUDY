@@ -58,4 +58,9 @@ export const sv = {
   "catalogEmpty": "Det finns ännu inga guider med text på det här språket.",
   "textUnavailableTitle": "Guidetext på det här språket är inte tillgänglig ännu",
   "textUnavailableBody": "Den här guiden har ingen text i det valda gränssnittsspråket. Dess textspråk finns i språklistan i katalogen.",
+  "attributionHeading": "Källor och upphov",
+  "authorPhoto": "Författarens foto",
+  "usageRulesTitle": "Användningsregler",
+  "usageRulesIntro": "Källor till historiskt material anges på guide- och stoppsidorna.",
+  "usageRulesReuse": "Kontrollera rättigheterna hos originalkällan eller kontakta rättighetsinnehavaren innan du återanvänder material.",
 };

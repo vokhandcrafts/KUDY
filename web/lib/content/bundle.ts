@@ -22,6 +22,7 @@ import type {
   CatalogView,
   DiscoveryIndex,
   LockedStopPreview,
+  MediaRecord,
   PlaceGeoDoc,
   PublicProjection,
   ReadResult,
@@ -78,6 +79,16 @@ export function readBundleCatalog(publicRoot: string): ReadResult<CatalogView> {
 
 export function readBundleRoute(publicRoot: string, routeId: string, version: string): ReadResult<RouteDoc> {
   return readBundleDoc(publicRoot, ['bundle', routeId, version], 'route.json', readRoute);
+}
+
+export function readBundleMedia(publicRoot: string, routeId: string, version: string): ReadResult<MediaRecord[]> {
+  return readBundleDoc(publicRoot, ['bundle', routeId, version], 'media.json', (doc) => {
+    if (!Array.isArray(doc)) return { ok: false, code: 'schema-invalid', errors: [{ rule: 'media-not-an-array', path: '$' }] };
+    const errors = doc.flatMap((entry, i) =>
+      schemaCheck('schemas/media.schema.json', entry).map((error) => ({ ...error, path: `media[${i}].${error.path}` })),
+    );
+    return errors.length > 0 ? { ok: false, code: 'schema-invalid', errors } : { ok: true, data: doc as MediaRecord[] };
+  });
 }
 
 export function readBundleBaseStories(

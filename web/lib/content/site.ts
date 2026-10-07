@@ -6,6 +6,7 @@
 // wherever they restate one; href/languages/stop_count are site-derived.
 import fs from 'node:fs';
 import path from 'node:path';
+import { publicAttribution, type AttributionData } from './attribution.ts';
 import {
   readBundleBaseStories,
   readBundleCatalog,
@@ -185,6 +186,7 @@ export interface GuidePageData {
   stop_count: number;
   languages: LanguageFact[];
   stops: StopRow[];
+  attribution: AttributionData;
 }
 
 // Stop rows of one route, position order: base stops read their name from the
@@ -252,6 +254,11 @@ export function routeTextLocales(root: string, routeId: string): Locale[] {
 export function readSiteGuidePage(root: string, locale: UiLocale, routeId: string): GuidePageData {
   const { entry, route, offer } = resolvedCatalogRoute(root, routeId);
   const stops = siteStopRows(root, locale, routeId, entry.version, route);
+  const stories = unwrap(
+    readBundleBaseStories(root, routeId, entry.version, locale),
+    `bundle/${routeId}/${entry.version}/${locale}/base/stops.json`,
+  );
+  const visibleIds = new Set(route.stops.map((stop) => stop.story_base_id).filter(Boolean));
   return {
     route_id: route.route_id,
     title: pickText(offer.localized.title, locale, `discovery:offers:${routeId}:${locale}`),
@@ -262,6 +269,10 @@ export function readSiteGuidePage(root: string, locale: UiLocale, routeId: strin
     stop_count: route.stops.length,
     languages: languageFacts(offer),
     stops,
+    attribution: publicAttribution(root, routeId, entry.version,
+      stories.filter((story) => visibleIds.has(story.story_id)).flatMap((story) => story.sources),
+      route.cover ? [route.cover] : [],
+    ),
   };
 }
 
@@ -308,6 +319,7 @@ interface StopPageBase {
   // playback condition); any stop stays directly openable by URL.
   prev: StopNeighbor | null;
   next: StopNeighbor | null;
+  attribution: AttributionData;
 }
 
 export interface FreeStopPageData extends StopPageBase {
@@ -350,7 +362,12 @@ export function readSiteStopPage(root: string, locale: UiLocale, routeId: string
   };
   if (row.locked) {
     if (row.announce === null) throw new SiteDataError('invalid-preview', `previews:${stopId}:announce`);
-    return { ...base, locked: true, announce: row.announce };
+    return {
+      ...base,
+      locked: true,
+      announce: row.announce,
+      attribution: publicAttribution(root, routeId, entry.version, [], []),
+    };
   }
   const rawStop = route.stops.find((stop) => stop.id === stopId)!;
   const storyId = rawStop.story_base_id;
@@ -365,7 +382,13 @@ export function readSiteStopPage(root: string, locale: UiLocale, routeId: string
     .sort()
     .filter((candidate) => bundleAudioExists(root, routeId, entry.version, candidate, storyId))
     .map((candidate) => ({ locale: candidate, src: bundleAudioSrc(routeId, entry.version, candidate, storyId) }));
-  return { ...base, locked: false, transcript: story.transcript, audio };
+  return {
+    ...base,
+    locked: false,
+    transcript: story.transcript,
+    audio,
+    attribution: publicAttribution(root, routeId, entry.version, story.sources, audio.map((track) => track.src)),
+  };
 }
 
 // Prerender params for the stop pages: one entry per route × stop of the
