@@ -16,6 +16,17 @@
 // current physical launch, a manual pause or a focus loss is a live pause
 // (same token, offset kept), the 10-minute FocusRegain threshold closes the
 // launch, and an explicit Moment play never credits guide progress.
+// The language identity of a guide follows the accepted contract
+// (docs/architecture/decisions/G21.20-language-identity.md §3, approved
+// 2026-10-07 with owner edits 1–5): two independent pins over one route and
+// version — the text pin (`locale`, unchanged) and the optional audio pin
+// (`audioLocale`). Absent = the monolingual session (the audio layer IS the
+// text layer, byte-for-byte the pre-G21.20 walk, §3.1.5); null = the
+// text-only session, no audio command is ever proposed (§3.1.3); a locale
+// string = the pinned audio layer. Readiness is per layer, the sound
+// predicate requires the story's accessible text (§3.2), the text-only
+// presentation burns the automatic attempt (§4.8.4), and every denial of a
+// foreign grant or an unverified audio tier is a full ignore (§3.3).
 
 const storiesOf = stop => [stop.storyBaseId, stop.storyExtendedId].filter(Boolean);
 const primaryOf = stop => stop && (stop.storyBaseId ?? stop.storyExtendedId);
@@ -26,6 +37,13 @@ const storyAccessible = (s, storyId) => {
   return !!stop && s.accessibleStopIds.includes(stop.id)
     && s.tierAvailable.includes(tierOf(stop, storyId));
 };
+// The sound predicate of a guide story (ADR G21.20 §3.2): the story's text
+// is accessible in the text layer (storyAccessible — the caller's part) AND
+// the audio pin is set AND the story's tier is in the audio layer's
+// readiness. Audio without accessible text never sounds — the runtime
+// mirror of the audio-without-text ban (09 §3 invariant 1).
+const storyAudible = (s, stop, storyId) =>
+  s.audioLocale !== null && s.audioTierAvailable.includes(tierOf(stop, storyId));
 // ADR G01.02 §3.2: a moment launch needs no session and no durable zone —
 // the process-wide monotonic counter lives in the controller that mints
 // moment tokens; the model only validates the shape it is handed.
@@ -33,9 +51,35 @@ const isMomentLaunch = launch => !!launch && typeof launch === 'object'
   && typeof launch.momentId === 'string' && launch.momentId.length > 0
   && typeof launch.storyId === 'string' && launch.storyId.length > 0
   && Number.isInteger(launch.seq) && launch.seq > 0;
+// ADR G21.20 §3.1–3.2: the optional audio pin over the same route and
+// version (§3.1.1 — the pin carries no route/version of its own, so a
+// mismatch can only arise at restore, where the controller drops it to
+// text-only with a diagnostic (§3.4) before the Start transaction).
+// Absent = the monolingual session: the audio layer IS the text layer and
+// audio_tier_available mirrors the verified text tiers (§3.1.5, §4 row 3).
+// null = the text-only session: audio_tier_available never lives (§3.1.3).
+// A locale string = the pinned audio layer, seeded from the verified audio
+// tiers the Start transaction carries (§3.3). The pin is a locale code,
+// never a path segment — separators and traversal are refused here, before
+// the path interpolation in PlayStory.
+const audioPinOf = (locale, tierAvailable, audioLocale, audioTier) => {
+  if (audioLocale === undefined) {
+    return { audioLocale: locale, audioTierAvailable: [...tierAvailable] };
+  }
+  if (audioLocale === null) return { audioLocale: null, audioTierAvailable: [] };
+  if (typeof audioLocale !== 'string' || audioLocale.length === 0
+      || /[/\\]|\.\./.test(audioLocale)) {
+    throw new RangeError('audioLocale must be a non-empty locale code or null');
+  }
+  if (!Array.isArray(audioTier) || !audioTier.every(t => t === 'base' || t === 'extended')) {
+    throw new RangeError('audioTier must list verified layers: base|extended');
+  }
+  return { audioLocale, audioTierAvailable: [...audioTier] };
+};
 
 export function start(sessionId, routeStops, { routeId = 'route-1', version = 'v1',
-  locale = 'be', accessibleStopIds, tierAvailable = ['base'], playingNow } = {}) {
+  locale = 'be', accessibleStopIds, tierAvailable = ['base'], audioLocale, audioTier,
+  playingNow } = {}) {
   // Fixture defaults for routeId/locale are a convenience of synthetic tests,
   // not app rules; AccessReady events must still carry the full identity.
   const stops = routeStops.map(stop => typeof stop === 'string'
@@ -62,7 +106,11 @@ export function start(sessionId, routeStops, { routeId = 'route-1', version = 'v
   if (playingNow !== undefined && !isMomentLaunch(playingNow)) {
     throw new RangeError('playingNow must be a moment launch: { momentId, storyId, seq: positive integer }');
   }
-  return { sessionId, routeId, version, locale, stops,
+  return { sessionId, routeId, version, locale,
+    // The audio pin (ADR G21.20 §3.1–3.2): absent = monolingual, null =
+    // text-only, a locale string = the pinned audio layer.
+    ...audioPinOf(locale, tierAvailable, audioLocale, audioTier),
+    stops,
     // `tier` is the informational start record of verified layers (ADR §3.1);
     // runtime availability lives in tierAvailable and only grows via AccessReady.
     tier: [...tierAvailable],
@@ -151,12 +199,26 @@ export function step(previous, event, now) {
     s.queued = null;
   };
   const playStory = (stopId, storyId, automatic) => {
-    stopAudio();
+    const stop = findStop(s, stopId);
+    // ADR G21.20 §3.2 «Text-only запуск»: a story whose text is accessible
+    // but whose audio layer is not ready (or a session without a pin at all)
+    // gets the text-only presentation — no PlayStory, no launch, no play_seq
+    // growth, nothing counted. The automatic attempt still burns (§4.8.4):
+    // manual access remains. A sounding launch is not interrupted by a
+    // text-only presentation — the paragraph forbids every audio command,
+    // StopAudio included.
     if (automatic) add(s.autoFired, stopId);
+    if (!stop || !storyAudible(s, stop, storyId)) return;
+    stopAudio();
     // playSeq is write-through before the audio command (ADR §3.1): a late
     // callback of a previous launch can never collide with this playId.
     s.playing = { owner: 'guide', stopId, storyId, playId: ++s.playSeq, paused: false };
-    emit('PlayStory', { sessionId: s.sessionId, ...s.playing, token: tokenOf(s.playing) });
+    // The bundle-relative audio path is built from the audio pin
+    // (ADR G21.20 §3.2) — the controller resolves it against the installed
+    // bundle root.
+    emit('PlayStory', { sessionId: s.sessionId,
+      path: `${s.audioLocale}/${tierOf(stop, storyId)}/audio/${storyId}.m4a`,
+      ...s.playing, token: tokenOf(s.playing) });
   };
   const playMoment = launch => {
     // ADR G01.02 §3.6: an explicit Moment play takes the single player,
@@ -188,19 +250,29 @@ export function step(previous, event, now) {
     case 'LocationAccepted':
       s.fix = structuredClone(event.fix);
       break;
-    case 'AccessReady':
+    case 'AccessReady': {
       // Trusted event ONLY from services/download after server grant, complete
       // per-file sha256 verification and atomic activation (ADR G01.03 §3.5).
       // The whole identity must match the pinned session: route, version,
       // locale and the download issuer. A mismatched or foreign-issued event
       // is ignored entirely — no field mutates, files stay under their own
       // package key for a session that pins that version later.
+      // ADR G21.20 §3.2 widens identity check 3 to the two language layers:
+      // an event whose locale is the text pin widens tier_available (and,
+      // for a monolingual session whose audio pin is the text locale, the
+      // audio mirror with it); an event whose locale is the audio pin widens
+      // audio_tier_available only — it never opens text access. Every other
+      // check and the whole-event rejection on mismatch are unchanged: a
+      // grant still authorizes only its own layer's bytes.
+      const textLayerEvent = event.locale === s.locale;
+      const audioLayerEvent = s.audioLocale !== null && event.locale === s.audioLocale;
       if (event.issuer !== 'services/download'
           || event.routeId !== s.routeId
           || event.version !== s.version
-          || event.locale !== s.locale) break;
-      if (!applyAccess(s, event)) break;
+          || (!textLayerEvent && !audioLayerEvent)) break;
+      if (!applyAccess(s, event, textLayerEvent, audioLayerEvent)) break;
       break;
+    }
     case 'Pause':
     case 'End':
       // ADR G01.02 §3.4/§3.8: session pause and End stop guide audio and
@@ -343,14 +415,24 @@ export function step(previous, event, now) {
   return s;
 }
 
-function applyAccess(s, event) {
+function applyAccess(s, event, textLayerEvent, audioLayerEvent) {
   const stopIds = event.stopIds ?? [];
   const tiers = event.tiers ?? (event.tier ? [event.tier] : []);
   if (!Array.isArray(stopIds) || !Array.isArray(tiers)
       || !stopIds.every(id => findStop(s, id))
       || !tiers.every(t => t === 'base' || t === 'extended')
       || (!stopIds.length && !tiers.length)) return false;
-  for (const id of stopIds) if (!s.accessibleStopIds.includes(id)) s.accessibleStopIds.push(id);
-  for (const t of tiers) if (!s.tierAvailable.includes(t)) s.tierAvailable.push(t);
+  // The grant widens only its own layer (ADR G21.20 §3.2): the text pin
+  // widens accessible_stop_ids and tier_available; the audio pin widens
+  // audio_tier_available only — an en grant for a fr-text session opens no
+  // fr bytes and moves no text access. A monolingual session's audio pin is
+  // the text locale, so one event widens both mirrors.
+  if (textLayerEvent) {
+    for (const id of stopIds) if (!s.accessibleStopIds.includes(id)) s.accessibleStopIds.push(id);
+    for (const t of tiers) if (!s.tierAvailable.includes(t)) s.tierAvailable.push(t);
+  }
+  if (audioLayerEvent) {
+    for (const t of tiers) if (!s.audioTierAvailable.includes(t)) s.audioTierAvailable.push(t);
+  }
   return true;
 }

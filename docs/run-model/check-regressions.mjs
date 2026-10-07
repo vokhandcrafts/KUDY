@@ -59,8 +59,21 @@ const mutations = [
     'event.version !== s.version', 'true'],
   ['accept a grant for another route',
     'event.routeId !== s.routeId', 'false'],
+  // ADR G21.20 §3.2 (issue #675): the two language layers route the grant —
+  // the layer flags are the observable identity; the redundant whole-event
+  // check alone opens nothing, the widening is the mutation's evidence.
   ['accept a grant for another locale',
-    'event.locale !== s.locale', 'false'],
+    'const textLayerEvent = event.locale === s.locale;',
+    'const textLayerEvent = true;'],
+  ['accept a grant for another audio locale',
+    'const audioLayerEvent = s.audioLocale !== null && event.locale === s.audioLocale;',
+    'const audioLayerEvent = true;'],
+  ['play audio without a ready audio layer',
+    's.audioLocale !== null && s.audioTierAvailable.includes(tierOf(stop, storyId))',
+    'true'],
+  ['burn the automatic attempt only for audible plays',
+    'if (automatic) add(s.autoFired, stopId);\n    if (!stop || !storyAudible(s, stop, storyId)) return;',
+    'if (!stop || !storyAudible(s, stop, storyId)) return;\n    if (automatic) add(s.autoFired, stopId);'],
   ['accept a grant from a foreign issuer',
     "event.issuer !== 'services/download'", 'false'],
   ['start without verified layers',
