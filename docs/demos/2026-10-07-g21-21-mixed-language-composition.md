@@ -51,3 +51,16 @@ cd /home/viktar/worktrees/zcode-553 && LD_LIBRARY_PATH=$HOME/.local/lib npm run 
 ```output
 arch:check: OK
 ```
+
+Каманда 4: гейт мутацый рухавіка — 21 базавая рэгрэсія + новая
+«accept a grant for another audio locale» (маршрутызацыя AccessReady G21.21);
+анкеры «erase heard during replay» і «accept a grant for another locale»
+перазаякараныя пад новыя формы рэдуктара.
+
+```bash
+cd /home/viktar/worktrees/zcode-553 && LD_LIBRARY_PATH=$HOME/.local/lib npm run engine:regressions --silent 2>&1 | tail -1
+```
+
+```output
+22/22 reviewed regressions rejected by the named guards. Repository engine unchanged.
+```

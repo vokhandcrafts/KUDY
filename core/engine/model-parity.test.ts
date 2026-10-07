@@ -1140,6 +1140,18 @@ const scenarios: Scenario[] = [
     },
   },
   {
+    // G21.21: the audio-routing half of identity check 3 — a grant whose
+    // locale names neither pin is a full ignore, audio mirror included.
+    title: 'G01.03.b: grant for another audio locale is ignored entirely',
+    run: () => {
+      let s = lockedFixture();
+      const before = structuredClone(s);
+      before.commands = [];
+      s = send(s, access({ locale: 'de', tier: 'extended', stopIds: ['b'] }));
+      assert.deepEqual(s, before);
+    },
+  },
+  {
     title: 'G01.03.b: grant from a non-download issuer is ignored entirely',
     run: () => {
       for (const issuer of ['purchase-flow', undefined]) {
