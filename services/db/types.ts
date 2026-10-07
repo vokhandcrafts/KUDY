@@ -40,11 +40,18 @@ export type SessionState = 'active' | 'paused' | 'finished';
 // and tier are JSON arrays in the TEXT column and string arrays here; one
 // walk = one row, a repeated walk inserts a new row and history is never
 // deleted or overwritten.
+// G21.21 (ADR G21.20 §3.4): audioLocale is the Start-pinned audio locale,
+// immutable like the rest of the pin. NULL is the stored shape of a
+// monolingual session (the audio layer is the text layer) and of a text-only
+// one — the restore resolves the two against the pinned version's audio
+// availability; a non-NULL value never equals the row's locale by contract of
+// the writer (the controller stores the pin only for a cross-locale selection).
 export interface SessionRow {
   sessionId: string;
   routeId: string;
   version: string;
   locale: string;
+  audioLocale: string | null;
   tier: string[];
   state: SessionState;
   startedAt: number;
@@ -103,11 +110,15 @@ export interface SessionProgress {
 // startedAt is the engine's injected clock, not wall time read here.
 // carryGuideHints moves the current foreground window's shown/dismissed
 // guide_ids into session scope inside the Start transaction (§3.9).
+// G21.21 (ADR G21.20 §3.4): audioLocale is the resolved audio pin of this
+// walk — undefined/null both store NULL (a monolingual or text-only session,
+// per the writer's contract on SessionRow), a locale string stores the pin.
 export interface SessionStartInput {
   sessionId: string;
   routeId: string;
   version: string;
   locale: string;
+  audioLocale?: string | null;
   tier?: string[];
   startedAt: number;
   carryGuideHints?: string[];

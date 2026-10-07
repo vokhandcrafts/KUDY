@@ -361,6 +361,9 @@ test('criterion 4: zone B carries no ready column or flag', () => {
     .map((row) => String(row.name))
     .sort();
   assert.deepEqual(sessionColumns, [
+    // G21.21 (ADR G21.20 §3.4): the nullable audio pin column joined the
+    // verbatim field set — no readiness flag, only the immutable Start pin.
+    'audio_locale',
     'auto_fired',
     'finished_at',
     'heard',

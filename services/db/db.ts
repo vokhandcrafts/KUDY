@@ -128,6 +128,8 @@ function toSessionRow(row: SessionDbRow): SessionRow {
     routeId: String(row.route_id),
     version: String(row.version),
     locale: String(row.locale),
+    audioLocale:
+      row.audio_locale === null || row.audio_locale === undefined ? null : String(row.audio_locale),
     tier: JSON.parse(String(row.tier)) as string[],
     state: String(row.state) as SessionState,
     startedAt: Number(row.started_at),
@@ -140,7 +142,7 @@ function toSessionRow(row: SessionDbRow): SessionRow {
 }
 
 const SESSION_COLUMNS =
-  'session_id, route_id, version, locale, tier, state, started_at, finished_at, auto_fired, heard, last_stop_id, play_seq';
+  'session_id, route_id, version, locale, audio_locale, tier, state, started_at, finished_at, auto_fired, heard, last_stop_id, play_seq';
 
 function getSessionRow(driver: SqlDriver, sessionId: string): SessionDbRow | undefined {
   return driver.prepare(`SELECT ${SESSION_COLUMNS} FROM session WHERE session_id = ?`).get(sessionId);
@@ -261,14 +263,18 @@ export function listUnfinishedSessions(driver: SqlDriver, routeId: string, versi
 function insertSessionRow(driver: SqlDriver, input: SessionStartInput): void {
   driver
     .prepare(
-      `INSERT INTO session (session_id, route_id, version, locale, tier, state, started_at, play_seq)
-       VALUES (?, ?, ?, ?, ?, 'active', ?, 0)`,
+      `INSERT INTO session (session_id, route_id, version, locale, audio_locale, tier, state, started_at, play_seq)
+       VALUES (?, ?, ?, ?, ?, ?, 'active', ?, 0)`,
     )
     .run(
       input.sessionId,
       input.routeId,
       input.version,
       input.locale,
+      // ADR G21.20 §3.4: the pin rides the Start transaction and never
+      // changes after it; undefined/null store NULL (a monolingual or
+      // text-only session — the restore resolves the two).
+      input.audioLocale ?? null,
       JSON.stringify(input.tier ?? ['base']),
       input.startedAt,
     );

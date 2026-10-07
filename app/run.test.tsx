@@ -140,6 +140,9 @@ const layerFiles = (locale: string): Record<string, string> => ({
   [`bundles/route-map/1/${locale}/base/route.json`]: ROUTE_JSON,
   [`bundles/route-map/1/${locale}/base/places.json`]: PLACES_JSON,
   [`bundles/route-map/1/${locale}/base/stops.json`]: STOPS_JSON,
+  // G21.21: the layer ships audio — the pinned version's audioLocales fact
+  // names the locale and the default pin resolves to the monolingual walk.
+  [`bundles/route-map/1/${locale}/base/audio/story-1.m4a`]: "audio-bytes",
   [`bundles/route-map/1/${locale}/extended/stops.json`]: EXTENDED_STOPS_JSON,
 });
 
@@ -185,6 +188,7 @@ function runSessionTracked(): ReturnType<typeof makeRunSession> & { starts: () =
     routeId: "route-map",
     version: "1",
     locale: "be",
+    audioLocale: null as string | null,
     tier: ["base" as Tier],
     state: "active" as const,
     startedAt: 0,
@@ -220,6 +224,8 @@ function runSessionTracked(): ReturnType<typeof makeRunSession> & { starts: () =
             row,
             routeId: "route-map",
             version: "1",
+            audioLocales: ["be"],
+            audioLayers: [],
             layers: [
               {
                 tier: "base" as Tier,
@@ -731,6 +737,7 @@ describe("G06.05 accessibility and honest failures (issue #280)", () => {
       routeId: "route-map",
       version: "1",
       locale: "be",
+      audioLocale: null as string | null,
       tier,
       state: "active" as const,
       startedAt: 0,
@@ -745,6 +752,8 @@ describe("G06.05 accessibility and honest failures (issue #280)", () => {
         row,
         routeId: "route-map",
         version: "1",
+        audioLocales: ["be"],
+        audioLayers: [],
         layers: [
           {
             tier: "base" as Tier,

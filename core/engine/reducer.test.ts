@@ -26,6 +26,8 @@ test('criterion 1: the session state carries the 09 §6.1 Active fields under on
   const state = started();
   assert.deepEqual(Object.keys(state).sort(), [
     'accessibleStopIds',
+    'audioLocale',
+    'audioTierAvailable',
     'autoFired',
     'autoplaySuspended',
     'focusLostAt',

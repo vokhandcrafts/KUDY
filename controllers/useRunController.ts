@@ -128,6 +128,16 @@ export interface RunRecoveryPayload {
   routeId: string;
   version: string;
   layers: ReadonlyArray<RunRecoveryLayer>;
+  // G21.21 (ADR G21.20 §3.4): the audio availability of the pinned version —
+  // the locales whose base layer ships audio (the validator's audioFacts
+  // idiom). The NULL audio_locale row reads back as a monolingual session
+  // when the row's own locale is here, and as text-only with a named
+  // diagnostic when it is not; a non-NULL pin must be here to survive.
+  audioLocales: ReadonlyArray<string>;
+  // The recorded audio layer's per-tier reads (ADR §3.7 shape) for the row's
+  // audio pin — the restored audioTierAvailable grows only from the tiers
+  // that verify now; empty when the row carries no pin.
+  audioLayers: ReadonlyArray<RunRecoveryLayer>;
 }
 
 // The composition root's read-only restart-recovery view (09 §9.1): the live
@@ -201,18 +211,30 @@ export interface RunControllerDeps {
 // active or paused is the store's one-unfinished-session rule; a confirmed
 // switch whose live row vanished between the dialog and the confirm fails
 // closed (the world changed under the confirmed decision — never a guess).
+// G21.21 (owner edit 2, ADR G21.20): an explicitly selected audio layer that
+// is not fully verified refuses Start with its own reason — the selected
+// layer's readiness is required before the walk starts, the download is the
+// caller's wait path, and no other language is ever substituted.
 export type RunStartRefusal =
   | 'package-incomplete'
   | 'package-needs-recovery'
   | 'package-access-locked'
   | 'live-session-exists'
-  | 'switch-no-live-session';
+  | 'switch-no-live-session'
+  | 'audio-layer-not-ready'
+  | 'audio-locale-invalid';
 
 export interface RunStartInput {
   // The selected tier of this walk; 'base' unless the person starts the paid
   // layer (the readiness evaluation and the verified-tier record both follow
   // it — ADR §3.1 tier, §3.6 full selected layer).
   tier?: Tier;
+  // G21.21 (ADR G21.20 §3.2): the resolved audio pin of this walk. undefined
+  // = the monolingual default (the audio layer is the text layer — the
+  // pre-G21.21 shape); null = the text-only session (no audio ever); a
+  // locale = the pinned audio layer, whose full readiness is verified before
+  // Start (owner edit 2) unless it is the text locale itself (one layer).
+  audioLocale?: string | null;
   // R07 carry-over (ADR §3.9): the foreground window's shown/dismissed
   // guide_ids moved into session scope inside the Start transaction.
   carryGuideHints?: string[];
@@ -299,7 +321,20 @@ export interface RunControllerState {
 
 export type RunRecoveryState =
   | { status: 'none' }
-  | { status: 'restored'; sessionId: string; unavailableTiers: Tier[] };
+  | {
+      status: 'restored';
+      sessionId: string;
+      unavailableTiers: Tier[];
+      // G21.21 (ADR G21.20 §3.4): the restored audio pin — null = the
+      // text-only session; a locale = the pin that survived (a NULL row
+      // restores as the monolingual pin of its own locale when the pinned
+      // version still ships that audio).
+      audioPin: string | null;
+      // The §3.4 diagnostic: a non-NULL row pin that the pinned version's
+      // availability no longer names (a rollback, a re-published version) —
+      // dropped to text-only, the session and its progress continue intact.
+      droppedAudioPin: string | null;
+    };
 
 export function createRunController(deps: RunControllerDeps): ControllerStore<RunControllerState> {
   // The durable row this controller owns; null until a Start transaction
@@ -361,6 +396,26 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
       grantedTiers: deps.grantedTiers?.(),
     });
     if (readiness.status !== 'ready') return { ok: false, reason: refusalOf(readiness) };
+    // G21.21 (ADR G21.20 §3.2, owner edits 1–2): the resolved audio pin of
+    // this walk. undefined or the text locale = the monolingual session (the
+    // audio layer IS the text layer — the text evaluation already verified
+    // it, the row stores NULL); null = the text-only session (row NULL, no
+    // audio ever); any other locale = a separate audio layer whose full
+    // readiness is verified here before Start (owner edit 2: the download is
+    // the caller's wait path, never a silent substitution).
+    let audio: { locale: string | null; tiers: ReadonlyArray<Tier> } | undefined;
+    let rowAudioLocale: string | null = null;
+    if (input.audioLocale !== undefined && input.audioLocale !== null && input.audioLocale !== deps.route.locale) {
+      if (input.audioLocale.length === 0) return { ok: false, reason: 'audio-locale-invalid' };
+      const audioReadiness = await deps.readiness.evaluate({
+        locale: input.audioLocale,
+        tier,
+        grantedTiers: deps.grantedTiers?.(),
+      });
+      if (audioReadiness.status !== 'ready') return { ok: false, reason: 'audio-layer-not-ready' };
+      audio = { locale: input.audioLocale, tiers: [...audioReadiness.tierAvailable] };
+      rowAudioLocale = input.audioLocale;
+    }
     const accessible = await startAccessibleStops(deps.packageStops, deps.route.routeId, readiness.tierAvailable);
     if (accessible === null) return { ok: false, reason: 'package-incomplete' };
     const id = deps.newSessionId();
@@ -374,6 +429,7 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
       routeId: deps.route.routeId,
       version: deps.route.version,
       locale: deps.route.locale,
+      audioLocale: rowAudioLocale,
       tier: [...readiness.tierAvailable],
       startedAt: deps.clock.now(),
       carryGuideHints: input.carryGuideHints,
@@ -385,7 +441,14 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
       return { ok: false, reason: started.reason === 'no-live-session' ? 'switch-no-live-session' : started.reason };
     }
     sessionId = id;
-    orchestrator.start(id, accessible, [...readiness.tierAvailable]);
+    // The engine's Start: the audio pin only when the caller resolved one —
+    // undefined keeps the monolingual default (the pre-G21.21 shape), null
+    // starts text-only, a locale pins its verified tiers (ADR G21.20 §3.2).
+    orchestrator.start(id, accessible, [...readiness.tierAvailable], audio
+      ? { locale: audio.locale, tiers: audio.tiers }
+      : input.audioLocale === null
+        ? { locale: null }
+        : undefined);
     // ADR §3.3 Start effects: the wakelock is taken after the commit (11 §6).
     deps.wakelock.acquire();
     return { ok: true, sessionId: id };
@@ -437,12 +500,18 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
     const row = payload.row;
     if (row.routeId !== deps.route.routeId) return;
     if (row.state !== 'active' && row.state !== 'paused') return;
-    const { state, unavailableTiers, stops } = restoredState(payload);
+    const { state, unavailableTiers, stops, audioPin, droppedAudioPin } = restoredState(payload);
     sessionId = row.sessionId;
     orchestrator.restore(state, stops);
     store?.setState({
       run: state,
-      recovery: { status: 'restored', sessionId: row.sessionId, unavailableTiers },
+      recovery: {
+        status: 'restored',
+        sessionId: row.sessionId,
+        unavailableTiers,
+        audioPin,
+        droppedAudioPin,
+      },
     });
     if (state.phase === 'Active') {
       // 09 §9.1: the return re-arms the window of the live active session —
@@ -579,10 +648,21 @@ const isTier = (value: string): value is Tier => value === 'base' || value === '
 // identity matches the row's pinned version (criterion 5, ADR §3.4): a
 // foreign payload contributes nothing, and a recorded layer that does not
 // verify now becomes the §3.7 report instead of a content swap.
+//
+// G21.21 (ADR G21.20 §3.4): the audio pin restores with the progress. A
+// non-NULL row pin survives only when the pinned version's availability
+// still names it — otherwise it drops to text-only with the named
+// diagnostic, the session and its progress continue intact. A NULL row
+// (every pre-G21.21 row, and the writer's shape for a monolingual session)
+// reads back as the monolingual pin of the row's own locale when that audio
+// exists, and as text-only when the guide ships no audio at all — both the
+// byte-for-byte legacy behavior.
 function restoredState(payload: RunRecoveryPayload): {
   state: RunSessionState;
   unavailableTiers: Tier[];
   stops: RunStop[];
+  audioPin: string | null;
+  droppedAudioPin: string | null;
 } {
   const row = payload.row;
   const tiers = row.tier.filter(isTier);
@@ -601,12 +681,37 @@ function restoredState(payload: RunRecoveryPayload): {
       if (!stops.has(stop.stopId)) stops.set(stop.stopId, stop);
     }
   }
+  // The pin resolution (ADR §3.4): a NULL row starts from the monolingual
+  // guess of its own locale; a recorded pin must be named by the pinned
+  // version's availability. The audio layer's readiness comes from its own
+  // per-tier reads — a pin whose layer verifies nothing runs text-only until
+  // the layer verifies again (§3.3 row 2), a monolingual pin rides the text
+  // layers (one layer, the same readiness).
+  let audioPin: string | null;
+  let droppedAudioPin: string | null = null;
+  if (row.audioLocale === null) {
+    audioPin = trusted && payload.audioLocales.includes(row.locale) ? row.locale : null;
+  } else if (trusted && payload.audioLocales.includes(row.audioLocale)) {
+    audioPin = row.audioLocale;
+  } else {
+    audioPin = null;
+    droppedAudioPin = row.audioLocale;
+  }
+  const audioTierAvailable: Tier[] =
+    audioPin === null
+      ? []
+      : audioPin === row.locale
+        ? [...tierAvailable]
+        : trusted
+          ? payload.audioLayers.filter((layer) => layer.status === 'ready').map((layer) => layer.tier)
+          : [];
   const state: RunSessionState = {
     phase: row.state === 'paused' ? 'Paused' : 'Active',
     sessionId: row.sessionId,
     routeId: row.routeId,
     version: row.version,
     locale: row.locale,
+    audioLocale: audioPin,
     tier: [...tiers],
     stops: [...stops.values()].map(({ stopId, storyBaseId, storyExtendedId }) => ({
       stopId,
@@ -615,6 +720,7 @@ function restoredState(payload: RunRecoveryPayload): {
     })),
     accessibleStopIds: [...stops.keys()],
     tierAvailable,
+    audioTierAvailable,
     heard: [...row.heard],
     autoFired: [...row.autoFired],
     playing: null,
@@ -624,5 +730,5 @@ function restoredState(payload: RunRecoveryPayload): {
     focusLostAt: null,
     playSeq: row.playSeq,
   };
-  return { state, unavailableTiers, stops: [...stops.values()] };
+  return { state, unavailableTiers, stops: [...stops.values()], audioPin, droppedAudioPin };
 }

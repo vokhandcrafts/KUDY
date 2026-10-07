@@ -69,6 +69,36 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
+  // G21.21: the audio choice chips — the pill row under the locales line,
+  // the selected chip reads the accent outline (the canon ghost pair for
+  // the unselected, the accent for the selected — §5).
+  audioPicker: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    columnGap: tokens.spaceS,
+    marginTop: tokens.spaceS,
+  },
+  audioChip: {
+    borderRadius: tokens.radiusPill,
+    borderWidth: 1,
+    borderColor: tokens.colorDisabledLine,
+    paddingHorizontal: tokens.spaceM,
+    paddingVertical: 4,
+  },
+  audioChipSelected: {
+    borderColor: tokens.colorAccent,
+  },
+  audioChipLabel: {
+    color: tokens.colorMuted,
+    fontFamily: tokens.fontFamilyUi,
+    fontSize: 12,
+  },
+  audioChipLabelSelected: {
+    color: tokens.colorAccent,
+    fontFamily: tokens.fontFamilyUiStrong,
+    fontSize: 12,
+    fontWeight: tokens.fontWeightStrong,
+  },
   fact: {
     color: tokens.colorInk,
     fontFamily: tokens.fontFamilyUi,
@@ -248,13 +278,18 @@ export default function RoutePreview() {
   }
   // Start hands over to the Run surface (the run controller's G06.02 home):
   // the controller gates the §4.1 dialog; the handover itself is navigation.
+  // G21.21: the resolved audio choice rides the route params — the run
+  // surface validates it against the pinned version's audio facts.
   const handleMainButton = async () => {
     if (controller.button.action === "download") {
       await controller.download();
       return;
     }
     const outcome = await controller.start();
-    if (outcome === "handover") router.push(`/run/${routeId}`);
+    if (outcome === "handover") {
+      const audio = controller.audioChoice;
+      router.push(audio !== null ? `/run/${routeId}?audio=${audio}` : `/run/${routeId}`);
+    }
   };
   const state = controller;
   // Issue #430: the disabled condition is the button's own (enabled gate +
@@ -303,6 +338,33 @@ export default function RoutePreview() {
               testID="preview-locales"
               locale={locale}
             />
+            {/* G21.21 (ADR G21.20 §3.2, owner edit 1): the explicit audio
+                choice — one chip per available audio locale, the default
+                preselected by the owner's rule; the choice rides the
+                handover and the run surface validates it against the
+                pinned version's facts. No audio published — no picker,
+                the walk reads text-only. */}
+            {state.surface.preview.audioLocales.length > 0 ? (
+              <View style={styles.audioPicker} testID="preview-audio-picker">
+                {state.surface.preview.audioLocales.map((audioLocale) => {
+                  const selected = controller.audioChoice === audioLocale;
+                  return (
+                    <PressableSurface
+                      key={audioLocale}
+                      onPress={() => controller.selectAudio(audioLocale)}
+                      style={[styles.audioChip, selected ? styles.audioChipSelected : null]}
+                      testID={`audio-chip-${audioLocale}`}
+                    >
+                      <ScaledText
+                        style={selected ? styles.audioChipLabelSelected : styles.audioChipLabel}
+                      >
+                        {audioLocale}
+                      </ScaledText>
+                    </PressableSurface>
+                  );
+                })}
+              </View>
+            ) : null}
             {formatDuration(state.surface.preview.estimatedDuration, state.surface.preview.durationMin) ? (
               // G06.10.c (issue #403): the first icon application — the
               // metadata row. The row is one accessibility element carrying

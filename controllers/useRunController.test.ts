@@ -105,6 +105,9 @@ interface WorldOptions {
   // A scenario may decorate the recovery port of the world's own controller
   // (the concurrent-recover race gates the read).
   recovery?: (base: RunRecovery) => RunRecovery;
+  // G21.21: a scenario may decorate the readiness port (the cross-locale
+  // audio layer's verdict — the fixture package ships one locale only).
+  readiness?: (base: RunReadiness) => RunReadiness;
   // A scenario may wrap the real driver (G20.03): the fault lives at the
   // driver boundary below services/db, so the refused write travels the real
   // transaction, rollback and error path.
@@ -163,6 +166,11 @@ function recoveryPortOver(
         routeId: packageStore.key.routeId,
         version: packageStore.key.version,
         layers,
+        // The fixture store carries one locale and its audio; a cross-locale
+        // pin has no package here, so its audio layers stay empty — the pin
+        // restore scenarios craft their own payloads (G21.21).
+        audioLocales: [liveRow.locale],
+        audioLayers: [],
       };
       return payload;
     },
@@ -192,9 +200,10 @@ function world(options: WorldOptions = {}): World {
     acquire: () => wakelockCalls.push('acquire'),
     release: () => wakelockCalls.push('release'),
   };
-  const readiness: RunReadiness = {
+  const readinessBase: RunReadiness = {
     evaluate: (input) => evaluatePackage(packageStore, input),
   };
+  const readiness = options.readiness ? options.readiness(readinessBase) : readinessBase;
   const packageStops: RunPackageStops = {
     stopsOfLayer: async (_routeId, tier) => {
       const file = await packageStore.readFile('route.json');
@@ -872,7 +881,7 @@ test('criterion 4: a process restart restores the live row as a state and starts
   assert.equal(restored.playing, null); // §3.2: the player mirror is transient
   assert.equal(restored.queued, null); // §3.2: the queue never survives a restart
   assert.equal(restored.autoplaySuspended, true); // §3.2: nothing sounds by itself
-  assert.deepEqual(second.getState().recovery, { status: 'restored', sessionId, unavailableTiers: [] });
+  assert.deepEqual(second.getState().recovery, { status: 'restored', sessionId, unavailableTiers: [], audioPin: 'be', droppedAudioPin: null });
   assert.equal(w.audioPort.commands.length, commandsBefore); // no audio starts
   assert.deepEqual(secondWakelock, ['acquire']); // 11 §6: the restored Active walk holds the wakelock
 
@@ -902,7 +911,7 @@ test('criterion 4: a paused row restores without arming the location, and resume
 
   assert.equal(liveFrom(second).phase, 'Paused');
   assert.equal(liveFrom(second).sessionId, sessionId);
-  assert.deepEqual(second.getState().recovery, { status: 'restored', sessionId, unavailableTiers: [] });
+  assert.deepEqual(second.getState().recovery, { status: 'restored', sessionId, unavailableTiers: [], audioPin: 'be', droppedAudioPin: null });
   // 11 §4.2: a paused row holds no subscription — the window re-arms only
   // through the explicit «Працягнуць».
   assert.equal(w.locationPort.activeSubscriptions(), 0);
@@ -964,7 +973,9 @@ test('criterion 5: a newer catalog package never enters the restored session', a
   assert.equal(restored.locale, 'be');
   assert.deepEqual(restored.tierAvailable, []); // no foreign layer entered
   assert.deepEqual(restored.accessibleStopIds, []);
-  assert.deepEqual(second.getState().recovery, { status: 'restored', sessionId, unavailableTiers: ['base'] });
+  // A foreign payload can serve no availability fact — the monolingual pin
+  // cannot verify, so the restore reads text-only instead of guessing.
+  assert.deepEqual(second.getState().recovery, { status: 'restored', sessionId, unavailableTiers: ['base'], audioPin: null, droppedAudioPin: null });
   // The restored-active row re-arms the location, but the window holds
   // nothing: a fix at the version-2 stop's point can not even rank it.
   fix(w, 9, 9);
@@ -1008,6 +1019,8 @@ test('criterion 5: the pinned package files are still required — a damaged lay
     status: 'restored',
     sessionId: 'pinned',
     unavailableTiers: ['base'],
+    audioPin: 'be',
+    droppedAudioPin: null,
   });
   assert.deepEqual(w.audioPort.commands, []);
 });
@@ -1069,6 +1082,8 @@ test('criterion 4: concurrent recover() calls deduplicate after the read', async
     status: 'restored',
     sessionId: 'yesterday',
     unavailableTiers: [],
+    audioPin: 'be',
+    droppedAudioPin: null,
   });
   assert.deepEqual(w.wakelockCalls, ['acquire']); // one restore, not two
 });
@@ -1392,4 +1407,159 @@ test('G20.03 criterion 3: rapid ordered actions around one failed transition kee
   assert.equal(written?.playSeq, 1);
   assert.equal(live(w).phase, 'Ended');
   assert.equal(fault.pauseAttempts, 2); // the refused attempt and the retry
+});
+
+// G21.21 (issue #553, ADR G21.20 §3/§4, owner edits 1–2): the audio pin's
+// controller acceptance — the Start gate on the selected layer's readiness,
+// the durable pin shapes and the §3.4 restore resolution.
+test('G21.21: a cross-locale audio start verifies the audio layer, writes the pin and plays the en path', async (t) => {
+  const w = world({
+    // The fixture package ships be only; the scenario's audio layer is a
+    // second verified layer the readiness port answers for.
+    readiness: (base) => ({
+      evaluate: async (input) =>
+        input.locale === 'en'
+          ? { status: 'ready', routeId: ROUTE.routeId, version: ROUTE.version, tier: input.tier, tierAvailable: ['base'] }
+          : base.evaluate(input),
+    }),
+  });
+  t.after(w.discardPackage);
+  const sessionId = okStart(await w.store.getState().start({ audioLocale: 'en' }));
+  // The row carries the cross-locale pin; the engine state mirrors it.
+  assert.equal(row(w, sessionId)?.audioLocale, 'en');
+  const restored = live(w);
+  assert.equal(restored.audioLocale, 'en');
+  assert.equal(restored.locale, 'be');
+  assert.deepEqual(restored.audioTierAvailable, ['base']);
+  // A manual play launches the en layer's path through the real service.
+  w.store.getState().selectStop('stop-1');
+  assert.deepEqual(w.audioPort.commands, ['play 1:en/base/audio/story-b.m4a']);
+});
+
+test('G21.21: an unready audio layer refuses Start with its named reason — never a silent substitution', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  // The fixture package has no en layer: the readiness evaluation says
+  // incomplete, and the start refuses instead of falling back to be audio.
+  const refused = await w.store.getState().start({ audioLocale: 'en' });
+  assert.deepEqual(refused, { ok: false, reason: 'audio-layer-not-ready' });
+  assert.equal(sessionCount(w), 0, 'no row for a refused start');
+  // A malformed pin is its own named refusal, not a readiness verdict.
+  assert.deepEqual(await w.store.getState().start({ audioLocale: '' }), {
+    ok: false,
+    reason: 'audio-locale-invalid',
+  });
+});
+
+test('G21.21: the text-only start stores NULL and proposes no audio command at all', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  const sessionId = okStart(await w.store.getState().start({ audioLocale: null }));
+  assert.equal(row(w, sessionId)?.audioLocale, null, 'the row shape of a text-only session');
+  const restored = live(w);
+  assert.equal(restored.audioLocale, null);
+  assert.deepEqual(restored.audioTierAvailable, []);
+  // The manual play path: no PlayStory, no StopAudio — the engine proposes
+  // nothing audible (the transcript presentation is the screens' concern).
+  w.store.getState().selectStop('stop-1');
+  assert.deepEqual(w.audioPort.commands, []);
+});
+
+test('G21.21: the text-locale pin is the monolingual session — NULL row, be path', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  const sessionId = okStart(await w.store.getState().start({ audioLocale: ROUTE.locale }));
+  assert.equal(row(w, sessionId)?.audioLocale, null, 'the monolingual row keeps the legacy NULL shape');
+  w.store.getState().selectStop('stop-1');
+  assert.deepEqual(w.audioPort.commands, ['play 1:be/base/audio/story-b.m4a']);
+});
+
+test('G21.21: the §3.4 restore — a recorded pin survives when availability names it, drops with a diagnostic when it does not', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  // Yesterday's mixed walk: the be text layer and the en audio pin.
+  startSession(w.driver, {
+    sessionId: 'yesterday',
+    routeId: ROUTE.routeId,
+    version: ROUTE.version,
+    locale: 'be',
+    audioLocale: 'en',
+    tier: ['base'],
+    startedAt: 0,
+  });
+  checkpointProgress(w.driver, 'yesterday', { heard: ['story-b'], playSeq: 1 });
+
+  // The recovery port's audio facts: the fixture world serves be only, so
+  // the scenario decorates the read with the honest en availability.
+  const second = restart(w, (base) => ({
+    read: async (routeId) => {
+      const payload = await base.read(routeId);
+      if (!payload) return null;
+      return {
+        ...payload,
+        audioLocales: ['be', 'en'],
+        audioLayers: [{ tier: 'base' as Tier, status: 'ready' as const, stops: [] }],
+      };
+    },
+  }));
+  await second.getState().recover();
+  assert.deepEqual(second.getState().recovery, {
+    status: 'restored',
+    sessionId: 'yesterday',
+    unavailableTiers: [],
+    audioPin: 'en',
+    droppedAudioPin: null,
+  });
+  const restored = second.getState().run;
+  if (restored.phase === 'Idle') throw new Error('no restored session');
+  assert.equal(restored.audioLocale, 'en');
+  assert.deepEqual(restored.audioTierAvailable, ['base']);
+  assert.deepEqual(restored.heard, ['story-b'], 'the progress restored with the pin');
+
+  // The same row against the shipped availability (be only): the pin drops
+  // to text-only with the named diagnostic, the progress continues intact.
+  const third = restart(w);
+  await third.getState().recover();
+  assert.deepEqual(third.getState().recovery, {
+    status: 'restored',
+    sessionId: 'yesterday',
+    unavailableTiers: [],
+    audioPin: null,
+    droppedAudioPin: 'en',
+  });
+  const dropped = third.getState().run;
+  if (dropped.phase === 'Idle') throw new Error('no restored session');
+  assert.equal(dropped.audioLocale, null);
+  assert.deepEqual(dropped.heard, ['story-b']);
+  third.getState().selectStop('stop-1');
+  assert.deepEqual(w.audioPort.commands, [], 'the dropped pin reads text-only');
+});
+
+test('G21.21: a NULL row restores as the monolingual pin of its own locale', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  startSession(w.driver, {
+    sessionId: 'legacy',
+    routeId: ROUTE.routeId,
+    version: ROUTE.version,
+    locale: 'be',
+    tier: ['base'],
+    startedAt: 0,
+  });
+  const second = restart(w);
+  await second.getState().recover();
+  assert.deepEqual(second.getState().recovery, {
+    status: 'restored',
+    sessionId: 'legacy',
+    unavailableTiers: [],
+    audioPin: 'be',
+    droppedAudioPin: null,
+  });
+  const restored = second.getState().run;
+  if (restored.phase === 'Idle') throw new Error('no restored session');
+  assert.equal(restored.audioLocale, 'be');
+  assert.deepEqual(restored.audioTierAvailable, ['base']);
+  // The restored monolingual walk sounds exactly like the legacy one.
+  second.getState().selectStop('stop-1');
+  assert.deepEqual(w.audioPort.commands, ['play 1:be/base/audio/story-b.m4a']);
 });

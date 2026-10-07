@@ -373,7 +373,11 @@ const styles = StyleSheet.create({
 });
 
 export default function Run() {
-  const { id, confirmedSwitch } = useLocalSearchParams<{ id: string; confirmedSwitch?: string }>();
+  const { id, confirmedSwitch, audio } = useLocalSearchParams<{
+    id: string;
+    confirmedSwitch?: string;
+    audio?: string;
+  }>();
   const router = useRouter();
   const services = useServices();
   // G14.04.d (issue #305): the words read the switchable display locale —
@@ -383,7 +387,10 @@ export default function Run() {
   // The §4.1 handover's confirmed flag (G06.04): «Завяршыць і пачаць» on the
   // preview started this route's surface through the switch-guide
   // transaction. The cached re-entry (NAV7) ignores the flag.
-  const surface = useRunSurface(services.run, routeId, confirmedSwitch === "1");
+  // G21.21: the preview's audio choice rides the same params — the surface
+  // validates it against the pinned version's audio facts.
+  const audioParam = typeof audio === "string" && audio.length > 0 ? audio : null;
+  const surface = useRunSurface(services.run, routeId, confirmedSwitch === "1", audioParam);
   const ready = surface?.status === "ready" ? surface : null;
   const run = useRunState(ready?.controller ?? null);
   // Issue #524: without a ready session the words follow the UI-locale

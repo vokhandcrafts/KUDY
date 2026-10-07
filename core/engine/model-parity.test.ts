@@ -91,13 +91,23 @@ const toStop = (spec: string | ModelStop): PackageStop =>
 
 const begin = (sessionId: string, routeStops: (string | ModelStop)[], options: BeginOptions = {}): View => {
   const stops = routeStops.map(toStop);
+  const locale = options.locale ?? 'be';
+  const tierAvailable = options.tierAvailable ?? ['base'];
   const event: RunEvent = {
     type: 'Start',
     sessionId,
     routeId: options.routeId ?? 'route-1',
     version: options.version ?? 'v1',
-    locale: options.locale ?? 'be',
-    tier: options.tierAvailable ?? ['base'],
+    locale,
+    // G21.21: the model's world is the monolingual session — its audio pin
+    // is the text locale and the audio layer IS the text layer (ADR G21.20
+    // §3.1.5, §4 scenario 3). The mixed-language and text-only semantics are
+    // beyond the frozen model's scope (19 §7.2: its own sync task) and are
+    // covered by core/engine/audio-pin.test.ts; every equivalence below runs
+    // inside the model's domain.
+    audioLocale: locale,
+    audioTier: [...tierAvailable],
+    tier: tierAvailable,
     accessibleStopIds: options.accessibleStopIds ?? stops.map((stop) => stop.stopId),
     stops,
     ...(options.playingNow ? { playingNow: options.playingNow } : {}),
