@@ -247,4 +247,19 @@ export const migrationSteps: MigrationStep[] = [
       );
     },
   },
+  // G21.21 (ADR G21.20 §3.4, approved 2026-10-07) — the optional audio pin:
+  // NULL stays the stored shape of a monolingual session and of a text-only
+  // one (the restore resolves the two against the pinned version's audio
+  // availability); a non-NULL value is the pinned audio locale, written in
+  // the Start transaction and never changed afterwards. Additive only (ADR
+  // G01.03 §3.8): one nullable column, one transaction — existing rows read
+  // back as monolingual, and a pre-G21.21 binary build ignores the column.
+  // The ADR named the step "user_version 2" at its 2026-10-04 writing; the
+  // next free version at implementation time is 5 — the same additive step.
+  {
+    version: 5,
+    up: (driver) => {
+      driver.execSql('ALTER TABLE session ADD COLUMN audio_locale TEXT NULL');
+    },
+  },
 ];

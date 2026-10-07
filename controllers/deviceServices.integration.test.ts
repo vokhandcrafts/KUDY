@@ -93,11 +93,9 @@ function servedDocument(path: string): Uint8Array | null {
   return layerFiles[rel] ?? null;
 }
 
-const originalFetch = globalThis.fetch;
-globalThis.fetch = (async (input: RequestInfo | URL) => {
-  const url = String(input instanceof Request ? input.url : input);
-  if (!url.startsWith(`${ORIGIN}/`)) throw new Error(`unexpected-host:${url.split('/')[2]}`);
-  const body = servedDocument(url.slice(ORIGIN.length + 1));
+// The served-document response shape — one spelling for every fetch stub of
+// this file (the copy-paste gate's own demand).
+const serveResponse = (body: Uint8Array | null): Response => {
   if (body === null) {
     return { ok: false, status: 404, text: async () => '', arrayBuffer: async () => new ArrayBuffer(0) } as Response;
   }
@@ -107,6 +105,13 @@ globalThis.fetch = (async (input: RequestInfo | URL) => {
     text: async () => new TextDecoder().decode(body),
     arrayBuffer: async () => body.slice().buffer,
   } as Response;
+};
+
+const originalFetch = globalThis.fetch;
+globalThis.fetch = (async (input: RequestInfo | URL) => {
+  const url = String(input instanceof Request ? input.url : input);
+  if (!url.startsWith(`${ORIGIN}/`)) throw new Error(`unexpected-host:${url.split('/')[2]}`);
+  return serveResponse(servedDocument(url.slice(ORIGIN.length + 1)));
 }) as typeof fetch;
 
 const fs = makeFakeFs();
@@ -335,3 +340,348 @@ test('G21.15: the ui-locale switch leaves the pinned session locale and entitlem
   assert.equal(commerce.stateOf('route_549_extended'), 'not-owned');
   assert.deepEqual(await commerce.purchase('route_549_extended'), { kind: 'unavailable' });
 });
+
+// G21.21 (issue #553, ADR G21.20 §3/§4, owner edits 1–2) — the mixed-language
+// walk through the production composition: the preview's audio chips resolve
+// the pin (the owner default, then the explicit en choice), the download
+// activates both layers, the Start gate verifies the selected audio layer,
+// the engine plays the en path for fr text, and the §3.4 restore carries the
+// pin and the progress across the restart. The stand-ins stay on the Expo/OS
+// boundary — the same rules the G20.20 cycle above follows.
+const ROUTE_553_JSON = JSON.stringify({
+  route_id: 'route-553',
+  version: '1',
+  city_id: 'city-491',
+  access: 'free_base',
+  stops: [
+    {
+      id: 'stop-1',
+      position: 0,
+      place_id: 'place-1',
+      access_tier: 'base',
+      story_base_id: 'story-1',
+      preview: { name: { fr: 'Porte', en: 'Gate' } },
+    },
+  ],
+});
+const STOPS_553 = (text: string, transcript: string) =>
+  JSON.stringify([
+    {
+      story_id: 'story-1',
+      place_id: 'place-1',
+      voice_id: 'voice-1',
+      tier: 'base',
+      duration_s: 60,
+      text,
+      transcript,
+      sources: ['synthetic licensed'],
+    },
+  ]);
+const AUDIO_FR = new Uint8Array([11, 12, 13]);
+const AUDIO_EN = new Uint8Array([21, 22, 23]);
+const ORIGIN_553 = 'https://catalog-553.example.invalid';
+const DISCOVERY_INDEX_553 = JSON.stringify({
+  schema_version: 1,
+  revision: 'r-553',
+  city_id: 'city-491',
+  themes: [],
+  offers: [
+    {
+      offer_id: 'offer-553',
+      ref: { kind: 'guide', route_id: 'route-553', version: '1' },
+      city_id: 'city-491',
+      editorial_order: 1,
+      themes: [],
+      access: 'free',
+      localized: { title: { fr: 'Guide' } },
+      availability: { text_locales: ['fr'], audio_locales: ['fr', 'en'] },
+    },
+  ],
+  collections: [],
+});
+const CATALOG_553_BYTES = enc(
+  JSON.stringify({
+    catalog_schema_version: 1,
+    generated_at: '2026-10-07T00:00:00Z',
+    routes: [{ route_id: 'route-553', version: '1', locales: ['fr'], layers: ['base'], sizes: { base: 1024 } }],
+    discovery_index: {
+      schema_version: 1,
+      revision: 'r-553',
+      path: 'discovery/index.json',
+      bytes: enc(DISCOVERY_INDEX_553).byteLength,
+      // the composition's sha256 port hashes the same bytes this constant pins
+      sha256: createHash('sha256').update(enc(DISCOVERY_INDEX_553)).digest('hex'),
+    },
+  }),
+);
+
+function served553(path: string): Uint8Array | null {
+  if (path === 'catalog.json') return CATALOG_553_BYTES;
+  if (path === 'discovery/index.json') return enc(DISCOVERY_INDEX_553);
+  for (const locale of ['fr', 'en']) {
+    const layer = `bundle/route-553/1/${locale}/base`;
+    if (path === `${layer}/lock.json` || path.startsWith(`${layer}/`)) {
+      const files: Record<string, Uint8Array> = {
+        'route.json': enc(ROUTE_553_JSON),
+        'places.json': enc(PLACES_JSON),
+        'stops.json': enc(STOPS_553(locale === 'fr' ? 'тэкст-fr' : 'тэкст-en', 'транскрыпт')),
+        'audio/story-1.m4a': locale === 'fr' ? AUDIO_FR : AUDIO_EN,
+      };
+      if (path === `${layer}/lock.json`) {
+        const entries = Object.entries(files)
+          .map(([p, bytes]) => ({ path: p, bytes: bytes.byteLength, sha256: createHash('sha256').update(bytes).digest('hex') }))
+          .sort((a, b) => (a.path < b.path ? -1 : 1));
+        return enc(JSON.stringify(entries));
+      }
+      const rel = path.slice(`${layer}/`.length);
+      return files[rel] ?? null;
+    }
+  }
+  return null;
+}
+
+test('G21.21 mixed_language_offline_restart: fr text and en audio through the production composition', async (t) => {
+  // The test's own origin joins the fetch surface for its duration; the
+  // G20.20 documents above stay served for their own tests.
+  const previousFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input instanceof Request ? urlOf(input) : input);
+    if (!url.startsWith(`${ORIGIN_553}/`)) return previousFetch(input);
+    return serveResponse(served553(url.slice(ORIGIN_553.length + 1)));
+  }) as typeof fetch;
+  t.after(() => {
+    globalThis.fetch = previousFetch;
+  });
+
+  const locationPort = new FakeLocationOsPort();
+  const audioPort = new FakeAudioPlayerPort();
+  const sharedDriver = nodeSqliteDriver();
+  const first = createDeviceServicePorts({
+    ...facilities(sharedDriver),
+    origin: ORIGIN_553,
+    // The reader's content preference is fr (the composition default is a
+    // placeholder) — the fresh text pin resolves to the fr layer.
+    preferredLocales: () => ['fr'],
+    location: new LocationService({
+      port: locationPort,
+      clock: { now: () => 0, schedule: () => () => {} },
+      permissions: { foreground: 'fg', background: 'bg' },
+    }),
+    audio: new AudioService({ createPort: () => audioPort }),
+  });
+  const services = createServices(first.ports);
+  // The reader set the display locale to fr — the fresh text pin follows the
+  // display preference (the pinned-package port reads the ui-locale store).
+  services.uiLocale.set('fr');
+
+  // 1. Preview: the offer's availability names fr+en audio; the owner's
+  //    default rule picks the text locale (fr) — the chips' preselection.
+  const preview = services.preview?.create('route-553');
+  if (!preview) throw new Error('the root constructed no preview member');
+  await settledPreview(preview);
+  const previewReady = preview.getState();
+  assert.equal(
+    previewReady.surface.kind,
+    'ready',
+    previewReady.surface.kind === 'unavailable' ? `preview refused: ${previewReady.surface.reason}` : previewReady.surface.kind,
+  );
+  if (previewReady.surface.kind !== 'ready') return;
+  assert.deepEqual(previewReady.surface.preview.audioLocales, ['fr', 'en']);
+  assert.equal(previewReady.audioChoice, 'fr');
+
+  // 2. The explicit en chip: the en layer is not on disk, the button holds
+  //    Download (owner edit 2 — the download is the wait, no substitution).
+  preview.getState().selectAudio('en');
+  for (let tries = 0; tries < 200; tries += 1) {
+    if (preview.getState().audioChoice === 'en') break;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  assert.equal(preview.getState().audioChoice, 'en');
+  await preview.getState().download();
+  await preview.getState().refresh();
+  assert.equal(preview.getState().button.action, 'start', preview.getState().downloadError ?? '');
+  // Both layers landed with their locks — the fr text and the en audio.
+  assert.ok(fs.files.has('/root/bundles/route-553/1/fr/base/lock.json'));
+  assert.ok(fs.files.has('/root/bundles/route-553/1/en/base/lock.json'));
+  assert.ok(fs.files.has('/root/bundles/route-553/1/en/base/audio/story-1.m4a'));
+
+  // 3. The handover carries the choice: the walk starts with the en pin.
+  const runStore = services.run?.create('route-553', { audio: 'en' });
+  if (!runStore) throw new Error('the root constructed no run member');
+  await settledRun(runStore);
+  const surface = runStore.getState();
+  assert.equal(
+    surface.status,
+    'ready',
+    surface.status === 'unavailable' ? `run surface refused: ${surface.reason}` : surface.status,
+  );
+  if (surface.status !== 'ready') return;
+  const controller = surface.controller;
+  await phaseBecomes(controller, 'Active');
+  const active = controller.getState().run;
+  if (active.phase === 'Idle') throw new Error('no live session');
+  assert.equal(active.audioLocale, 'en', 'the mixed pin');
+  assert.equal(active.locale, 'fr', 'the text pin unchanged');
+  assert.deepEqual(active.audioTierAvailable, ['base']);
+  assert.equal(getLiveSession(sharedDriver)?.audioLocale, 'en', 'the row keeps the pin');
+  assert.equal(surface.audioLocale, 'en', 'the surface exposes the effective pin');
+
+  // 4. The GPS trigger sounds the EN layer for the fr text story.
+  const started = locationPort.commands.filter((command) => command.startsWith('start '));
+  const subscription = Number(started[started.length - 1].slice('start '.length));
+  // The session clock is the composition's own wall clock — the fixes carry
+  // its timestamps so the freshness window (09 invariant 8) accepts them.
+  for (const offset of [0, 200, 400]) {
+    locationPort.emitFix(subscription, { lat: 54.352, lng: 18.648, accuracy: 5, at: Date.now() + offset });
+  }
+  for (let tries = 0; tries < 200; tries += 1) {
+    if (audioPort.commands.some((command) => command.startsWith('play '))) break;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  assert.deepEqual(
+    audioPort.commands.filter((command) => command.startsWith('play ')),
+    ['play 1:en/base/audio/story-1.m4a'],
+    'the en layer sounds, never the text locale substitute',
+  );
+  audioPort.finish(1);
+
+  // 5. Pause, then the restart over the same driver and disk: the §3.4
+  //    restore brings the pin and the progress back, nothing sounds itself.
+  controller.getState().pauseSession();
+  await phaseBecomes(controller, 'Paused');
+  const second = createDeviceServicePorts({
+    ...facilities(sharedDriver),
+    location: new LocationService({
+      port: new FakeLocationOsPort(),
+      clock: { now: () => 0, schedule: () => () => {} },
+      permissions: { foreground: 'fg', background: 'bg' },
+    }),
+    audio: new AudioService({ createPort: () => audioPort }),
+  });
+  const restarted = createServices(second.ports);
+  const reopenedStore = restarted.run?.create('route-553');
+  if (!reopenedStore) throw new Error('the restarted root constructed no run member');
+  await settledRun(reopenedStore);
+  const reopened = reopenedStore.getState();
+  assert.equal(reopened.status, 'ready');
+  if (reopened.status !== 'ready') return;
+  await phaseBecomes(reopened.controller, 'Paused');
+  const restored = reopened.controller.getState().run;
+  if (restored.phase === 'Idle') throw new Error('no restored session');
+  assert.equal(restored.audioLocale, 'en', 'the pin restored with the walk');
+  assert.deepEqual(restored.heard, ['story-1'], 'the progress restored');
+  assert.equal(restored.playSeq, 1);
+  assert.deepEqual(reopened.controller.getState().recovery, {
+    status: 'restored',
+    sessionId: restored.sessionId,
+    unavailableTiers: [],
+    audioPin: 'en',
+    droppedAudioPin: null,
+  });
+  assert.deepEqual(
+    audioPort.commands.filter((command) => command.startsWith('play ')),
+    ['play 1:en/base/audio/story-1.m4a'],
+    'nothing sounds by itself after the restore',
+  );
+
+  // 6. End: the finished row keeps the pin as history.
+  reopened.controller.getState().end();
+  await phaseBecomes(reopened.controller, 'Ended');
+  assert.equal(getLiveSession(sharedDriver), null);
+});
+
+test('G21.21 text_only_no_audio: a guide without audio walks text-only through the composition', async (t) => {
+  // A fr text-only layer: no audio directory ships, the availability names
+  // no audio — the owner default resolves to the text-only session and no
+  // audio command is ever proposed.
+  const previousFetch = globalThis.fetch;
+  const origin = 'https://catalog-553-text.example.invalid';
+  const layer = 'bundle/route-553-text/1/fr/base';
+  const files: Record<string, Uint8Array> = {
+    'route.json': enc(JSON.stringify({
+      route_id: 'route-553-text',
+      version: '1',
+      city_id: 'city-491',
+      access: 'free_base',
+      stops: [{
+        id: 'stop-1',
+        position: 0,
+        place_id: 'place-1',
+        access_tier: 'base',
+        story_base_id: 'story-1',
+        preview: { name: { fr: 'Porte' } },
+      }],
+    })),
+    'places.json': enc(PLACES_JSON),
+    'stops.json': enc(STOPS_553('тэкст-fr', 'транскрыпт')),
+  };
+  const lock = enc(JSON.stringify(Object.entries(files).map(([p, bytes]) => ({
+    path: p,
+    bytes: bytes.byteLength,
+    sha256: createHash('sha256').update(bytes).digest('hex'),
+  })).sort((a, b) => (a.path < b.path ? -1 : 1))));
+  const catalog = enc(JSON.stringify({
+    catalog_schema_version: 1,
+    routes: [{ route_id: 'route-553-text', version: '1', locales: ['fr'], layers: ['base'], sizes: { base: 1024 } }],
+  }));
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const url = String(input instanceof Request ? urlOf(input) : input);
+    if (!url.startsWith(`${origin}/`)) return previousFetch(input);
+    const rel = url.slice(origin.length + 1);
+    const body =
+      rel === 'catalog.json' ? catalog : rel === `${layer}/lock.json` ? lock : files[rel.slice(layer.length + 1)] ?? null;
+    return serveResponse(body);
+  }) as typeof fetch;
+  t.after(() => {
+    globalThis.fetch = previousFetch;
+  });
+
+  const audioPort = new FakeAudioPlayerPort();
+  const driver = nodeSqliteDriver();
+  const first = createDeviceServicePorts({
+    ...facilities(driver),
+    origin,
+    preferredLocales: () => ['fr'],
+    audio: new AudioService({ createPort: () => audioPort }),
+  });
+  const services = createServices(first.ports);
+  const preview = services.preview?.create('route-553-text');
+  if (!preview) throw new Error('the root constructed no preview member');
+  await settledPreview(preview);
+  const ready = preview.getState();
+  assert.equal(
+    ready.surface.kind,
+    'ready',
+    ready.surface.kind === 'unavailable' ? `preview refused: ${ready.surface.reason}` : ready.surface.kind,
+  );
+  if (ready.surface.kind !== 'ready') return;
+  assert.deepEqual(ready.surface.preview.audioLocales, [], 'no audio published');
+  assert.equal(ready.audioChoice, null, 'the text-only default');
+  await preview.getState().download();
+  await preview.getState().refresh();
+  assert.equal(preview.getState().button.action, 'start');
+
+  const runStore = services.run?.create('route-553-text');
+  if (!runStore) throw new Error('the root constructed no run member');
+  await settledRun(runStore);
+  const surface = runStore.getState();
+  assert.equal(surface.status, 'ready', surface.status === 'unavailable' ? surface.reason : surface.status);
+  if (surface.status !== 'ready') return;
+  const controller = surface.controller;
+  await phaseBecomes(controller, 'Active');
+  const active = controller.getState().run;
+  if (active.phase === 'Idle') throw new Error('no live session');
+  assert.equal(active.audioLocale, null, 'the text-only session');
+  assert.deepEqual(active.audioTierAvailable, []);
+  // The manual play presents text without any audio command.
+  controller.getState().selectStop('stop-1');
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.deepEqual(audioPort.commands, [], 'no audio command for a text-only walk');
+  const afterSelect = controller.getState().run;
+  if (afterSelect.phase !== 'Idle') assert.equal(afterSelect.playing, null, 'nothing plays text-only');
+  assert.equal(getLiveSession(driver)?.audioLocale, null);
+});
+
+function urlOf(input: Request): string {
+  return input.url;
+}

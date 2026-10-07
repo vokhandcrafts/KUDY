@@ -20,6 +20,7 @@ const row = (sessionId: string, state: SessionRow['state'], startedAt: number): 
   routeId: 'route-map',
   version: '1',
   locale: 'be',
+  audioLocale: null,
   tier: ['base'],
   state,
   startedAt,

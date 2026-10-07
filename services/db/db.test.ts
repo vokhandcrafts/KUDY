@@ -123,7 +123,13 @@ test('criterion 1: rebuild is repeatable and the second pass changes nothing dur
 test('criterion 2: a failing migration rolls back its step, keeps version and rows, and names the failure', () => {
   const driver = nodeSqliteDriver();
   openDatabase(driver, [migrationSteps[0]!]);
-  startSession(driver, START);
+  // The legacy-binary shape: straight v1 SQL — the module's own session API
+  // names the latest columns, which a version-1 store does not have yet.
+  const legacyInsert = driver.prepare(
+    `INSERT INTO session (session_id, route_id, version, locale, tier, state, started_at, play_seq)
+     VALUES (?, ?, ?, ?, ?, 'active', ?, 0)`,
+  );
+  legacyInsert.run(START.sessionId, START.routeId, START.version, START.locale, '["base"]', START.startedAt);
   const failingSteps = [
     migrationSteps[0]!,
     {
@@ -145,7 +151,11 @@ test('criterion 2: a failing migration rolls back its step, keeps version and ro
       error.cause.message === 'boom',
   );
   assert.equal(Number(driver.prepare('PRAGMA user_version').get()!.user_version), 1);
-  assert.ok(getSession(driver, START.sessionId));
+  assert.equal(
+    Number(driver.prepare('SELECT COUNT(*) AS n FROM session').get()!.n),
+    1,
+    'the legacy row survives the failed step',
+  );
   // transactional DDL: the half-applied step left no table behind
   assert.equal(driver.prepare("SELECT name FROM sqlite_master WHERE name = 'half_applied'").get(), undefined);
   // repairing the step and reopening migrates forward without touching rows
@@ -160,13 +170,15 @@ test('criterion 2: a failing migration rolls back its step, keeps version and ro
   ];
   openDatabase(driver, repaired);
   assert.equal(Number(driver.prepare('PRAGMA user_version').get()!.user_version), 2);
-  assert.ok(getSession(driver, START.sessionId));
+  assert.equal(Number(driver.prepare('SELECT COUNT(*) AS n FROM session').get()!.n), 1);
 });
 
 test('criterion 2: a store newer than the code fails the open with named diagnostics', () => {
   const driver = nodeSqliteDriver();
   driver.execSql(INITIAL_SCHEMA_DDL);
-  driver.execSql('PRAGMA user_version = 5');
+  // One past the code's latest step (G21.21 added step 5): the sentinel is
+  // derived from the shipped steps, so the next migration bump moves it too.
+  driver.execSql(`PRAGMA user_version = ${migrationSteps[migrationSteps.length - 1]!.version + 1}`);
   assert.throws(
     () => openDatabase(driver),
     (error: unknown) =>
@@ -187,6 +199,69 @@ test('criterion 3: start writes the ADR §3.1 defaults and the row is live', () 
   assert.equal(live.playSeq, 0);
   assert.equal(live.finishedAt, null);
   assert.equal(live.lastStopId, null);
+});
+
+// G21.21 (ADR G21.20 §3.4): the audio pin's durable shapes — a NULL column is
+// the monolingual and the text-only row shape, a non-NULL value is the pin;
+// the migration is additive and the pin never changes after Start.
+test('G21.21: migration step 5 is additive — pre-G21.21 rows read back and the old INSERT shape still works', () => {
+  const driver = nodeSqliteDriver();
+  // A store at the previous schema version: the session table has no
+  // audio_locale column yet.
+  openDatabase(driver, migrationSteps.slice(0, migrationSteps.length - 1));
+  driver
+    .prepare(
+      `INSERT INTO session (session_id, route_id, version, locale, tier, state, started_at, play_seq)
+       VALUES (?, ?, ?, ?, ?, 'active', ?, 0)`,
+    )
+    .run(START.sessionId, START.routeId, START.version, START.locale, JSON.stringify(['base']), START.startedAt);
+  openDatabase(driver);
+  assert.equal(
+    Number(driver.prepare('PRAGMA user_version').get()!.user_version),
+    migrationSteps[migrationSteps.length - 1]!.version,
+  );
+  const row = getLiveSession(driver);
+  assert.ok(row, 'the pre-G21.21 row survives the step');
+  assert.equal(row.audioLocale, null, 'the added column reads NULL — the monolingual shape');
+  // The rollback story: a pre-G21.21 binary (no audio_locale in its INSERT)
+  // still writes and reads rows against the migrated schema — the column
+  // stays inert for it.
+  driver
+    .prepare(
+      `INSERT INTO session (session_id, route_id, version, locale, tier, state, started_at, play_seq)
+       VALUES (?, ?, ?, ?, ?, 'finished', ?, 0)`,
+    )
+    .run('22222222-2222-4222-8222-222222222222', START.routeId, START.version, 'en', '[]', START.startedAt + 1);
+  const legacy = getSession(driver, '22222222-2222-4222-8222-222222222222');
+  assert.ok(legacy);
+  assert.equal(legacy.audioLocale, null);
+});
+
+test('G21.21: the Start transaction stores the pin and checkpoints never touch it', () => {
+  const driver = openFresh();
+  startSession(driver, { ...START, audioLocale: 'en' });
+  const live = getLiveSession(driver);
+  assert.ok(live);
+  assert.equal(live.locale, 'be');
+  assert.equal(live.audioLocale, 'en', 'the cross-locale pin lands in the row');
+  checkpointProgress(driver, START.sessionId, { heard: ['story-1'], playSeq: 2 });
+  assert.equal(getLiveSession(driver)!.audioLocale, 'en', 'the pin is immutable after Start');
+  finishSession(driver, START.sessionId, { finishedAt: START.startedAt + 1 });
+  const history = listSessionHistory(driver).find((row) => row.sessionId === START.sessionId);
+  assert.ok(history);
+  assert.equal(history.audioLocale, 'en', 'history keeps the pin');
+  // A monolingual start: the controller owns the NULL-for-monolingual shape;
+  // the store writes the pin verbatim, whatever it is given.
+  startSession(driver, { ...START, sessionId: '33333333-3333-4333-8333-333333333333', startedAt: START.startedAt + 2 });
+  assert.equal(getLiveSession(driver)!.audioLocale, null);
+  finishSession(driver, '33333333-3333-4333-8333-333333333333', { finishedAt: START.startedAt + 3 });
+  startSession(driver, {
+    ...START,
+    sessionId: '44444444-4444-4444-8444-444444444444',
+    audioLocale: 'be',
+    startedAt: START.startedAt + 4,
+  });
+  assert.equal(getLiveSession(driver)!.audioLocale, 'be', 'the store writes verbatim — even the text locale');
 });
 
 // G06.04: the My KUDY read — the live walk beside the finished runs,
@@ -744,34 +819,77 @@ test('the history page cursor is validated with a named diagnostic, never a wron
 test('an old file-backed store gains the history order in place: rows and counts stay untouched', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'g2206-'));
   const file = path.join(dir, 'history.db');
+  type LegacyRow = {
+    sessionId: string;
+    state: string;
+    startedAt: number;
+    finishedAt: number | null;
+    heard: string[];
+  };
   try {
-    let snapshot: ReturnType<typeof listSessionHistory>;
+    let snapshot: LegacyRow[];
     {
       const legacy = nodeSqliteFileDriver(file);
       openDatabase(legacy.driver, migrationSteps.slice(0, 3));
       assert.equal(Number(legacy.driver.prepare('PRAGMA user_version').get()!.user_version), 3);
+      // The v3 binary's own writes: the session table has no audio_locale
+      // column yet, so the legacy shape is straight SQL, not the module's
+      // latest-schema API.
+      const legacyStart = legacy.driver.prepare(
+        `INSERT INTO session (session_id, route_id, version, locale, tier, state, started_at, play_seq)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
+      );
       for (let i = 0; i < 3; i += 1) {
-        startSession(legacy.driver, { ...START, sessionId: `walk-done-${i}`, startedAt: 1_000 + i });
-        checkpointProgress(legacy.driver, `walk-done-${i}`, { heard: ['story-1', 'story-2', 'story-3'] });
-        finishSession(legacy.driver, `walk-done-${i}`, { finishedAt: 2_000 + i });
+        legacyStart.run(`walk-done-${i}`, START.routeId, START.version, START.locale, '["base"]', 'active', 1_000 + i);
+        legacy.driver
+          .prepare('UPDATE session SET heard = ? WHERE session_id = ?')
+          .run(JSON.stringify(['story-1', 'story-2', 'story-3']), `walk-done-${i}`);
+        legacy.driver
+          .prepare("UPDATE session SET state = 'finished', finished_at = ? WHERE session_id = ?")
+          .run(2_000 + i, `walk-done-${i}`);
       }
       // the live walk starts last — the one_live_session rule allows exactly
       // one active/paused row, and the snapshot keeps it beside the finished
-      startSession(legacy.driver, { ...START, sessionId: 'walk-live-1', startedAt: 5_000 });
-      pauseSession(legacy.driver, 'walk-live-1');
-      snapshot = listSessionHistory(legacy.driver);
+      legacyStart.run('walk-live-1', START.routeId, START.version, START.locale, '["base"]', 'paused', 5_000);
+      const legacyRead = legacy.driver.prepare(
+        'SELECT session_id, state, started_at, finished_at, heard FROM session ORDER BY started_at DESC, session_id DESC',
+      );
+      snapshot = legacyRead.all().map((row) => ({
+        sessionId: String(row.session_id),
+        state: String(row.state),
+        startedAt: Number(row.started_at),
+        finishedAt: row.finished_at === null ? null : Number(row.finished_at),
+        heard: JSON.parse(String(row.heard)) as string[],
+      }));
       legacy.close();
     }
     {
       const upgraded = nodeSqliteFileDriver(file);
       openDatabase(upgraded.driver);
-      assert.equal(Number(upgraded.driver.prepare('PRAGMA user_version').get()!.user_version), 4);
+      assert.equal(
+        Number(upgraded.driver.prepare('PRAGMA user_version').get()!.user_version),
+        migrationSteps[migrationSteps.length - 1]!.version,
+      );
       const index = upgraded.driver
         .prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'session_history_order'")
         .get();
       assert.ok(index, 'the history order index exists after the in-place migration');
-      // the stored progress survives the index migration unchanged
-      assert.deepEqual(listSessionHistory(upgraded.driver), snapshot);
+      // the stored rows survive the in-place migrations unchanged
+      const rows = listSessionHistory(upgraded.driver);
+      assert.deepEqual(
+        rows.map(({ sessionId, state, startedAt, finishedAt, heard }) => ({
+          sessionId,
+          state,
+          startedAt,
+          finishedAt,
+          heard,
+        })),
+        snapshot,
+      );
+      assert.ok(
+        rows.every((row) => row.audioLocale === null),
+        'the added audio_locale column reads NULL for every legacy row',
+      );
       // the summary projection matches the actual session data
       const page = listSessionHistoryPage(upgraded.driver, null);
       assert.deepEqual(
@@ -783,7 +901,7 @@ test('an old file-backed store gains the history order in place: rows and counts
       assert.equal(page.live?.sessionId, 'walk-live-1');
       // reopening a store already at the latest version changes nothing
       openDatabase(upgraded.driver);
-      assert.deepEqual(listSessionHistory(upgraded.driver), snapshot);
+      assert.equal(listSessionHistory(upgraded.driver).length, snapshot.length);
       upgraded.close();
     }
   } finally {

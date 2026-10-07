@@ -78,6 +78,10 @@ export type RunPinnedPackage =
       version: string;
       locale: string;
       tier: Tier[];
+      // G21.21 (ADR G21.20 §3.2, owner edit 1): the pinned version's
+      // available audio locales — the default pin's selection source and the
+      // explicit handover choice's validation set.
+      audioLocales: ReadonlyArray<string>;
       stops: ReadonlyArray<RunStopFact>;
       places: ReadonlyArray<RunPlaceFact>;
       // The pinned layer's story facts (11 §3: the card's transcript is
@@ -120,6 +124,10 @@ export type RunSurfaceState =
       // panel state change re-renders the screen and re-reads it).
       locationStatus: () => LocationStatus;
       locale: string;
+      // G21.21 (ADR G21.20 §3.2): the effective audio pin of the surface —
+      // null = the text-only session; the screens read it, the engine owns
+      // the truth.
+      audioLocale: string | null;
     };
 
 export interface RunSurfaceDeps {
@@ -132,11 +140,32 @@ export interface RunSurfaceDeps {
   // through the switch-guide transaction. A cached surface (the walk is
   // already live) ignores it.
   readonly confirmedSwitch?: boolean;
+  // G21.21 (ADR G21.20 §3.2, owner edit 1): the preview's explicit audio
+  // choice carried through the route params. It is validated against the
+  // pinned version's available audio locales; absent or foreign falls to the
+  // owner's default rule — the walk's text locale when its audio exists,
+  // else English, else the text-only session (no audio anywhere).
+  readonly audioParam?: string | null;
   // G07.05 — the R07 carry source (ADR G01.03 §3.9): the composition root
   // hands in the hint controller's foreground-window ids, and the fresh
   // Start's transaction moves them into session scope. Read at start time —
   // the window's facts are whatever the hint controller recorded by then.
   readonly carryGuideHints?: () => readonly string[];
+}
+
+// The resolved audio pin of a fresh handover (ADR G21.20 §3.2, owner edit 1):
+// the explicit choice when it names an available audio locale, else the walk's
+// text locale when its audio exists, else English when it exists, else null —
+// the text-only session.
+export function resolveAudioPin(
+  textLocale: string,
+  audioLocales: ReadonlyArray<string>,
+  audioParam?: string | null,
+): string | null {
+  if (audioParam != null && audioLocales.includes(audioParam)) return audioParam;
+  if (audioLocales.includes(textLocale)) return textLocale;
+  if (audioLocales.includes('en')) return 'en';
+  return null;
 }
 
 export function createRunSurfaceController(deps: RunSurfaceDeps): ControllerStore<RunSurfaceState> {
@@ -203,25 +232,32 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
   } catch {
     return unavailable('run#recovery-failed');
   }
+  // G21.21: the effective audio pin of the surface — the fresh handover's
+  // resolved one, or the restored row's surviving pin (the §3.4 restore
+  // resolution); the screens read it, the engine owns the truth.
+  let audioLocale: string | null = null;
   if (controller.getState().run.phase === 'Idle') {
     // No live row for this route: the surface opened for a fresh handover
     // (the preview gated the §4.1 dialog and handed over), so the walk
     // starts here — through the confirmed switch-guide transaction when the
     // dialog's «Завяршыць і пачаць» led here (G06.04). The R07 carry rides
-    // the same input (ADR G01.03 §3.9). A refusal is the named reason — the
-    // walk never half-starts.
+    // the same input (ADR G01.03 §3.9), the resolved audio pin rides its
+    // own input (ADR G21.20 §3.2). A refusal is the named reason — the walk
+    // never half-starts.
     const carry = deps.carryGuideHints?.();
+    const audioPin = resolveAudioPin(pinned.locale, pinned.audioLocales, deps.audioParam);
     const started = await controller
       .getState()
-      .start(
-        deps.confirmedSwitch || carry !== undefined
-          ? {
-              ...(deps.confirmedSwitch ? { confirmedSwitch: true } : {}),
-              ...(carry !== undefined && carry.length > 0 ? { carryGuideHints: [...carry] } : {}),
-            }
-          : undefined,
-      );
+      .start({
+        audioLocale: audioPin,
+        ...(deps.confirmedSwitch ? { confirmedSwitch: true } : {}),
+        ...(carry !== undefined && carry.length > 0 ? { carryGuideHints: [...carry] } : {}),
+      });
     if (!started.ok) return unavailable(started.reason);
+    audioLocale = audioPin;
+  } else {
+    const recovery = controller.getState().recovery;
+    audioLocale = recovery.status === 'restored' ? recovery.audioPin : null;
   }
   store.setState({
     status: 'ready',
@@ -234,6 +270,7 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
     playback: () => deps.session.audio.playbackState(),
     locationStatus: () => deps.session.location.status(),
     locale: pinned.locale,
+    audioLocale,
   });
 }
 
@@ -244,19 +281,28 @@ export function useRunSurface(
     | {
         create(
           routeId: string,
-          options?: { confirmedSwitch?: boolean },
+          options?: { confirmedSwitch?: boolean; audio?: string | null },
         ): ControllerStore<RunSurfaceState>;
       }
     | undefined,
   routeId: string,
   confirmedSwitch?: boolean,
+  audio?: string | null,
 ): RunSurfaceState | null {
-  // The confirmed-switch flag is a mount input (the §4.1 handover's route
-  // param): the factory decides with it whether the fresh surface starts
-  // through the switch transaction; a cached surface ignores it.
+  // The confirmed-switch flag and the audio choice are mount inputs (the
+  // §4.1 handover's route params): the factory decides with them whether the
+  // fresh surface starts through the switch transaction and which audio pin
+  // the walk carries; a cached surface ignores both.
   const store = useMemo(
-    () => factory?.create(routeId, confirmedSwitch ? { confirmedSwitch: true } : undefined),
-    [factory, routeId, confirmedSwitch],
+    () =>
+      factory?.create(
+        routeId,
+        {
+          ...(confirmedSwitch ? { confirmedSwitch: true } : {}),
+          ...(audio !== undefined ? { audio } : {}),
+        },
+      ),
+    [factory, routeId, confirmedSwitch, audio],
   );
   return useStoreState(store);
 }

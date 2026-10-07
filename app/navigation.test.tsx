@@ -80,6 +80,7 @@ describe("route placeholders (19 §2.5)", () => {
           routeId: "route-other",
           version: "1",
           locale: "be",
+          audioLocale: null,
           tier: ["base"],
           state: "paused" as const,
           startedAt: 5_000,

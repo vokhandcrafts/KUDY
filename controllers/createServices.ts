@@ -224,7 +224,11 @@ export interface Services {
     | {
         readonly create: (
           routeId: string,
-          options?: { readonly confirmedSwitch?: boolean },
+          options?: {
+            readonly confirmedSwitch?: boolean;
+            // G21.21 (ADR G21.20 §3.2): the preview's explicit audio choice.
+            readonly audio?: string | null;
+          },
         ) => ControllerStore<RunSurfaceState>;
       }
     | undefined;
@@ -665,6 +669,10 @@ export function createServices(ports: ServicePorts): Services {
           },
           localePreference,
           confirmedSwitch: options?.confirmedSwitch,
+          // G21.21 (ADR G21.20 §3.2): the preview's audio choice rides the
+          // route params; the surface validates it against the pinned
+          // version's audio facts and resolves the owner's default.
+          ...(options && options.audio !== undefined ? { audioParam: options.audio } : {}),
           // G07.05 — the R07 carry source: the hint controller's
           // foreground-window ids move into session scope in the Start
           // transaction (ADR G01.03 §3.9).

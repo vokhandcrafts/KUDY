@@ -31,6 +31,15 @@ export type RunEvent =
       routeId: RouteId;
       version: VersionId;
       locale: Locale;
+      // ADR G21.20 §3.2: the optional audio pin. Absent = the monolingual
+      // session (the audio layer is the text layer — the pre-G21.21 shape);
+      // null = the text-only session (no audio command is ever proposed);
+      // a locale string = the pinned audio layer. The verified audio layers
+      // ride along like `tier` does for the text (readiness is verified
+      // before the Start transaction, ADR G01.03 §3.3) and seed
+      // audioTierAvailable; a monolingual Start mirrors `tier` automatically.
+      audioLocale?: Locale | null;
+      audioTier?: Tier[];
       tier: Tier[];
       accessibleStopIds: StopId[];
       stops: PackageStop[];

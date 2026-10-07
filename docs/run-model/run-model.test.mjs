@@ -30,6 +30,13 @@ function craneFixture({ accessibleStopIds = ['stop-crane'], tierAvailable = ['ba
   return step(start('session-1', crane, { version: 'v3', accessibleStopIds, tierAvailable }),
     { type: 'LocationAccepted', fix: fix() }, now);
 }
+// ADR G21.20 §4 fixtures: the mixed session pins fr text and en audio over
+// the same crane walk (the identity §4 names: one route, one version).
+function mixedFixture({ audioLocale = 'en', audioTier = ['base'],
+  accessibleStopIds = ['stop-crane'], tierAvailable = ['base'] } = {}) {
+  return step(start('session-1', crane, { version: 'v3', locale: 'fr', accessibleStopIds,
+    tierAvailable, audioLocale, audioTier }), { type: 'LocationAccepted', fix: fix() }, now);
+}
 
 test('C2: accepted arrival starts audio and spends automatic attempt', () => {
   const s = send(fixture(), trigger('a'));
@@ -731,6 +738,144 @@ test('G01.03.b: start refuses a package claiming no verified layer or an unknown
 
 test('G01.03.b: start refuses accessibleStopIds naming stops outside the pinned package', () => {
   assert.throws(() => start('walk-9', stops, { accessibleStopIds: ['a', 'ghost'] }), RangeError);
+});
+
+// ADR G21.20 §4 — the audio-pin acceptance rows of the model (issue #675):
+// the mixed session sounds only through its own unlocked audio tier, every
+// foreign grant is a full ignore, and the text-only presentation emits no
+// audio command while the automatic attempt still burns.
+
+test('G21.20 §4.1: fr text / en audio — Start carries both pins and the audio tier', () => {
+  const s = mixedFixture();
+  assert.equal(s.locale, 'fr');
+  assert.equal(s.audioLocale, 'en');
+  assert.deepEqual(s.tierAvailable, ['base']);
+  assert.deepEqual(s.audioTierAvailable, ['base']);
+  // heard is credited exactly as in the monolingual walk — by the finished
+  // live launch of the mixed session.
+  const finished = finishAudio(send(s, play('stop-crane')));
+  assert.deepEqual(finished.heard, ['story-crane-base']);
+});
+
+test('G21.20 §4.1: PlayStory builds the path from the audio pin, not the text locale', () => {
+  const played = send(mixedFixture(), play('stop-crane'));
+  assert.equal(played.commands[0]?.type, 'PlayStory');
+  assert.equal(played.commands[0]?.path, 'en/base/audio/story-crane-base.m4a');
+});
+
+test('G21.20 §4.1: AccessReady(fr) widens the text layer only; AccessReady(en) the audio layer only', () => {
+  let s = mixedFixture();
+  s = send(s, access({ version: 'v3', locale: 'fr', tier: 'extended', stopIds: ['stop-gate'] }));
+  assert.deepEqual(s.tierAvailable, ['base', 'extended']);
+  assert.deepEqual(s.audioTierAvailable, ['base']);
+  s = send(s, access({ version: 'v3', locale: 'en', tier: 'extended', stopIds: ['stop-gate'] }));
+  assert.deepEqual(s.tierAvailable, ['base', 'extended']);
+  assert.deepEqual(s.audioTierAvailable, ['base', 'extended']);
+  // The pins are immutable through the session (§3.1.4): unlocks never move them.
+  assert.equal(s.locale, 'fr');
+  assert.equal(s.audioLocale, 'en');
+});
+
+test('G21.20 §4.2: text-only — a session without a pin never proposes audio and the automatic attempt burns', () => {
+  let s = mixedFixture({ audioLocale: null });
+  assert.equal(s.audioLocale, null);
+  assert.deepEqual(s.audioTierAvailable, []);
+  s = send(s, trigger('stop-crane'));
+  assert.deepEqual(s.autoFired, ['stop-crane']);
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.commands, []);
+  assert.deepEqual(s.heard, []);
+  // Manual access keeps working; the presentation is text-only.
+  const manual = send(s, play('stop-crane'));
+  assert.equal(manual.playing, null);
+  assert.deepEqual(manual.commands, []);
+  // The text layer still widens; the audio mirror never lives (§3.1.3).
+  const widened = send(manual,
+    access({ version: 'v3', locale: 'fr', tier: 'extended', stopIds: ['stop-gate'] }));
+  assert.deepEqual(widened.tierAvailable, ['base', 'extended']);
+  assert.deepEqual(widened.audioTierAvailable, []);
+});
+
+test('G21.20 §4.3: monolingual — a session without the pin option behaves byte-for-byte as the text layer', () => {
+  const implicit = craneFixture();
+  assert.equal(implicit.audioLocale, 'be');
+  assert.deepEqual(implicit.audioTierAvailable, ['base']);
+  const played = send(implicit, play('stop-crane'));
+  assert.equal(played.commands[0]?.type, 'PlayStory');
+  assert.equal(played.commands[0]?.path, 'be/base/audio/story-crane-base.m4a');
+  // One event widens both mirrors: the audio layer IS the text layer.
+  const widened = send(played,
+    access({ version: 'v3', locale: 'be', tier: 'extended', stopIds: ['stop-gate'] }));
+  assert.deepEqual(widened.tierAvailable, ['base', 'extended']);
+  assert.deepEqual(widened.audioTierAvailable, ['base', 'extended']);
+});
+
+test('G21.20 §4.6: no voice — a story without its own unlocked audio tier gets the text-only presentation', () => {
+  let s = mixedFixture();
+  // fr-extended text unlocked; en-extended audio not: accessible, not audible.
+  s = send(s, access({ version: 'v3', locale: 'fr', tier: 'extended', stopIds: ['stop-gate'] }));
+  const attempt = send(s, trigger('stop-gate'));
+  assert.deepEqual(attempt.autoFired, ['stop-gate']);
+  assert.equal(attempt.playing, null);
+  assert.deepEqual(attempt.commands, []);
+  // en-extended unlocks: the same manual play now sounds the en path.
+  const s2 = send(attempt,
+    access({ version: 'v3', locale: 'en', tier: 'extended', stopIds: ['stop-gate'] }));
+  const audible = send(s2, play('stop-gate'));
+  assert.equal(audible.commands[0]?.type, 'PlayStory');
+  assert.equal(audible.commands[0]?.path, 'en/extended/audio/story-gate-ext.m4a');
+});
+
+test('G21.20 §4.8: a wrong-version pin reaches the model only after the restore drop (§3.4) — the session is text-only', () => {
+  // The controller's restore resolves the saved pin against the pinned
+  // version's availability; an unverifiable pin never reaches start() — the
+  // session begins text-only with progress intact.
+  let s = mixedFixture({ audioLocale: null });
+  s = send(s, trigger('stop-crane'));
+  assert.deepEqual(s.autoFired, ['stop-crane']);
+  assert.equal(s.playing, null);
+  assert.deepEqual(s.heard, []);
+  // Foreign-version bytes stay unread: a v4 grant is a full ignore even for
+  // the audio pin's locale.
+  const foreign = send(s,
+    access({ version: 'v4', locale: 'en', tier: 'base', stopIds: ['stop-crane'] }));
+  assert.deepEqual(foreign.audioTierAvailable, []);
+  assert.deepEqual(foreign.tierAvailable, ['base']);
+  assert.deepEqual(foreign.accessibleStopIds, ['stop-crane']);
+});
+
+test('G21.20 §4.9: unauthorized layer — an en-extended grant opens no fr-extended bytes', () => {
+  const s = mixedFixture();
+  const before = structuredClone(s);
+  const granted = send(s,
+    access({ version: 'v3', locale: 'en', tier: 'extended', stopIds: ['stop-gate'] }));
+  assert.deepEqual(granted.audioTierAvailable, ['base', 'extended']);
+  assert.deepEqual(granted.tierAvailable, before.tierAvailable);
+  assert.deepEqual(granted.accessibleStopIds, before.accessibleStopIds);
+  assert.deepEqual(granted.commands, []);
+  assert.equal(status(granted, 'stop-gate'), 'locked');
+  const attempt = send(granted, play('stop-gate'));
+  assert.equal(attempt.playing, null);
+  assert.deepEqual(attempt.commands, []);
+});
+
+test('G21.20 §3.2: start() validates the pin — malformed locales and unknown audio tiers are refusals; a pin without verified audio tiers is a text-only state', () => {
+  assert.throws(() => start('walk-9', stops, { audioLocale: '' }),
+    /audioLocale must be a non-empty locale code or null/);
+  // The pin is a locale code, never a path segment — separators and
+  // traversal are refused before the path interpolation in PlayStory.
+  for (const malformed of ['../en', 'en/../x', 'en/base', 'a\\b']) {
+    assert.throws(() => start('walk-9', stops, { locale: 'fr', audioLocale: malformed }),
+      /audioLocale must be a non-empty locale code or null/,
+      `malformed pin ${malformed} is a refusal`);
+  }
+  assert.throws(() => start('walk-9', stops, { locale: 'fr', audioLocale: 'en', audioTier: ['premium'] }),
+    /audioTier must list verified layers: base\|extended/);
+  // ADR G21.20 §3.3: a pinned layer with no verified audio tiers yet starts
+  // as text-only — the engine's `audioTier ?? []`, not a refusal.
+  const unready = start('walk-9', stops, { locale: 'fr', audioLocale: 'en' });
+  assert.equal(unready.audioLocale, 'en');
+  assert.deepEqual(unready.audioTierAvailable, []);
 });
 
 test('bounded exploration: invariants across all 4-event sequences (16 choices per step)', () => {
