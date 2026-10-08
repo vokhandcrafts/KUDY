@@ -246,3 +246,100 @@ try { $n = WaitFor 'screen' { param($n) $true } 1; "WAIT RESULT $(@($n).Count)" 
   assert.match(result.stdout, /^WAIT THROWN UI dump .*screen\.xml failed after 3 attempts/m);
   assert.equal(adb.calls().filter((c) => c[0] === 'pull').length, 0);
 });
+
+// Paths with spaces [key: unquoted-metro-checkout-path]. Start-Process joins
+// -ArgumentList with spaces without quoting, and cmd /c has its own quote
+// rules. The launches are taken out of the real script by AST and run against
+// stubs that only record the arguments they got, under directories whose
+// names contain spaces: the checkout, the SDK and the build root.
+const argsStubSource = `using System; using System.IO;
+public static class ArgsStub { public static int Main(string[] a) {
+  string text = string.Join("\\n", a);
+  File.WriteAllText(System.Reflection.Assembly.GetEntryAssembly().Location + ".args", text);
+  Console.Out.Write(text);
+  return 0; } }`;
+
+function spacedFixture(t) {
+  const base = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), 'g2136 spaced ')));
+  t.after(() => fs.rmSync(base, { recursive: true, force: true }));
+  const checkout = path.join(base, 'kudy checkout with spaces');
+  const sdk = path.join(base, 'android sdk');
+  const buildRoot = path.join(base, 'build root');
+  const ev = path.join(buildRoot, 'evidence', 'android');
+  const cli = path.join(checkout, 'node_modules', 'expo', 'bin', 'cli');
+  for (const dir of [path.dirname(cli), path.join(sdk, 'emulator'), path.join(sdk, 'platform-tools'), path.join(buildRoot, 'logs'), ev]) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  fs.writeFileSync(cli, "console.log(JSON.stringify({ argv: process.argv.slice(1), cwd: process.cwd() }));\n");
+  const stub = path.join(base, 'args-stub.exe');
+  fs.writeFileSync(path.join(base, 'args-stub.cs'), argsStubSource);
+  const compiled = powershell(['-Command', `Add-Type -TypeDefinition (Get-Content -Raw ${psQuote(path.join(base, 'args-stub.cs'))}) -OutputAssembly ${psQuote(stub)} -OutputType ConsoleApplication`]);
+  assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr);
+  const emulator = path.join(sdk, 'emulator', 'emulator.exe');
+  const adb = path.join(sdk, 'platform-tools', 'adb.exe');
+  fs.copyFileSync(stub, emulator);
+  fs.copyFileSync(stub, adb);
+  const recorded = (exe) => fs.readFileSync(`${exe}.args`, 'utf8').split('\n');
+  return { base, checkout, sdk, buildRoot, ev, cli, emulator, adb, recorded };
+}
+
+// Runs the named statements and functions of the real script in one session.
+function runFromScript(f, { statements = [], functions = [] }, setup, body) {
+  const file = path.join(f.base, 'probe.ps1');
+  fs.writeFileSync(file, `\uFEFF$ErrorActionPreference = 'Continue'
+. ${psQuote(guards)}
+${setup}
+$ast = [Management.Automation.Language.Parser]::ParseFile(${psQuote(script)}, [ref]$null, [ref]$null)
+foreach ($fn in $ast.FindAll({ param($a) $a -is [Management.Automation.Language.FunctionDefinitionAst] -and $a.Name -in @(${functions.map(psQuote).join(', ')}) }, $true)) { Invoke-Expression $fn.Extent.Text }
+foreach ($name in @(${statements.map(psQuote).join(', ')})) {
+  $found = @($ast.FindAll({ param($a) $a -is [Management.Automation.Language.AssignmentStatementAst] -and $a.Left.Extent.Text -eq $name -and $a.Right.Extent.Text -match '^Start-Process ' }, $true))
+  if ($found.Count -ne 1) { throw "expected one Start-Process assignment to $name, found $($found.Count)" }
+  Invoke-Expression $found[0].Extent.Text
+}
+${body}
+`);
+  return spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', file], { encoding: 'utf8', timeout: 120_000 });
+}
+
+const spacedSetup = (f) => `$Checkout = ${psQuote(f.checkout)}; $BuildRoot = ${psQuote(f.buildRoot)}; $Sdk = ${psQuote(f.sdk)}
+$adb = "$Sdk\\platform-tools\\adb.exe"; $ev = ${psQuote(f.ev)}; $serial = 'emulator-5680'
+$Avd = 'kudy_api35'; $EmuPort = 5680; $MetroPort = 8083`;
+
+test('emulator-scenarios: Metro starts from a checkout path with spaces with every argument intact', { skip }, (t) => {
+  const f = spacedFixture(t);
+  const result = runFromScript(f, { statements: ['$metroProc'] }, spacedSetup(f),
+    `$null = $metroProc.Handle; if (-not $metroProc.WaitForExit(60000)) { throw 'stub cli did not exit' }; "EXIT $($metroProc.ExitCode)"`);
+  const err = fs.readFileSync(path.join(f.buildRoot, 'logs', 'metro.err.log'), 'utf8');
+  assert.match(result.stdout, /^EXIT 0$/m, result.stdout + result.stderr + err);
+  const got = JSON.parse(fs.readFileSync(path.join(f.buildRoot, 'logs', 'metro.out.log'), 'utf8'));
+  assert.deepEqual(got.argv, [f.cli, 'start', '--dev-client', '--port', '8083', '--max-workers', '2']);
+  assert.equal(got.cwd, f.checkout);
+});
+
+test('emulator-scenarios: the adb and emulator launches, Shot and Adb keep SDK and build-root paths with spaces intact', { skip }, (t) => {
+  const f = spacedFixture(t);
+  const apk = path.join(f.base, 'app build', 'app-debug.apk');
+  const result = runFromScript(f, { statements: ['$adbStart', '$emuProc'], functions: ['Shot', 'Adb'] }, spacedSetup(f),
+    `foreach ($p in $adbStart, $emuProc) { $null = $p.Handle; if (-not $p.WaitForExit(60000)) { throw 'stub did not exit' }; "EXIT $($p.ExitCode)" }
+Copy-Item "$adb.args" "$adb.start-server.args"
+Shot 'screen one'
+Copy-Item "$adb.args" "$adb.shot.args"
+Adb install -r ${psQuote(apk)} | Out-Null; "ADB OK"`);
+  assert.equal(result.stdout.match(/^EXIT 0$/gm)?.length, 2, result.stdout + result.stderr);
+  assert.match(result.stdout, /^ADB OK$/m, result.stdout + result.stderr);
+  assert.deepEqual(f.recorded(`${f.adb}.start-server`), ['start-server']);
+  assert.deepEqual(f.recorded(f.emulator), ['-avd', 'kudy_api35', '-port', '5680', '-read-only', '-no-snapshot', '-no-boot-anim',
+    '-no-audio', '-memory', '2048', '-cores', '2', '-gpu', 'swiftshader_indirect']);
+  const shot = ['-s', 'emulator-5680', 'exec-out', 'screencap', '-p'];
+  assert.deepEqual(f.recorded(`${f.adb}.shot`), shot);
+  assert.equal(fs.readFileSync(path.join(f.ev, 'screen one.png'), 'utf8'), shot.join('\n'), 'the screenshot lands in the spaced build root');
+  assert.deepEqual(f.recorded(f.adb), ['-s', 'emulator-5680', 'install', '-r', apk]);
+});
+
+test('Test-OwnBuildPaths: a build root and checkout with spaces reach own-paths-cli intact', { skip }, (t) => {
+  const f = spacedFixture(t);
+  const result = runFromScript(f, {}, spacedSetup(f),
+    `$r = Test-OwnBuildPaths $BuildRoot $Checkout @('--dir', 'tmp', '--file', 'logs/metro.out.log'); if ($r) { "REFUSED $r" } else { 'OWN' }`);
+  assert.match(result.stdout, /^OWN$/m, result.stdout + result.stderr);
+  assert.ok(fs.statSync(path.join(f.buildRoot, 'tmp')).isDirectory());
+});

@@ -139,7 +139,9 @@ try {
   $env:CI = '1'; $env:EXPO_NO_TELEMETRY = '1'
   if ((Get-BusyPorts @($MetroPort)).Count -gt 0) { throw "Metro port $MetroPort became busy; refusing to use a server this script did not start" }
   foreach ($name in $logNames[2..3]) { [IO.File]::Delete("$BuildRoot\logs\$name") }
-  $metroProc = Start-Process node -ArgumentList @("$Checkout\node_modules\expo\bin\cli", 'start', '--dev-client', '--port', $MetroPort, '--max-workers', '2') -WorkingDirectory $Checkout -PassThru -RedirectStandardOutput "$BuildRoot\logs\metro.out.log" -RedirectStandardError "$BuildRoot\logs\metro.err.log" -WindowStyle Hidden
+  # Start-Process joins -ArgumentList with spaces and quotes nothing, so a path argument carries its own quotes;
+  # without them a checkout path with a space reaches node cut at the space [key: unquoted-metro-checkout-path].
+  $metroProc = Start-Process node -ArgumentList @("`"$Checkout\node_modules\expo\bin\cli`"", 'start', '--dev-client', '--port', $MetroPort, '--max-workers', '2') -WorkingDirectory $Checkout -PassThru -RedirectStandardOutput "$BuildRoot\logs\metro.out.log" -RedirectStandardError "$BuildRoot\logs\metro.err.log" -WindowStyle Hidden
   $null = $metroProc.Handle
   "metro pid=$($metroProc.Id)"
   $deadline = (Get-Date).AddMinutes(3)

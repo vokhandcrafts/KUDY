@@ -1,10 +1,10 @@
 == ports
 == emulator
-emulator pid=6028
+emulator pid=32404
 device: {"serial":"emulator-5558","avd":"KUDY_API36","android":"16","api":"36","abi":"x86_64","screen":"1080x2400","density":"420"}
-installed: versionName=0.1.0; lastUpdateTime=2026-10-08 15:20:17
+installed: versionName=0.1.0; lastUpdateTime=2026-10-08 15:51:34
 == metro
-metro pid=34216
+metro pid=35664
 metro status: packager-status:running
 == scenarios
 PASS Cold launch reaches Explore 
@@ -36,6 +36,6 @@ PASS Large font keeps all Explore links visible links=3
 == background
 PASS Background return preserves KUDY screen and English 
 TOTALS {"checks":26,"expected":26,"passed":26,"failed":0}
-metro stopped (own pid 34216)
-emulator stopped (own pid 6028)
+metro stopped (own pid 35664)
+emulator stopped (own pid 32404)
 EXIT 0

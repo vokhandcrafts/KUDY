@@ -194,6 +194,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/android-build/emulator
 шляхам `<рэальны $BuildRoot>\<шлях>`, у `evidence\android` і сярод гэтых журналаў няма спасылак і жорсткіх спасылак.
 Інакш ён нічога не піша і не запускае, друкуе `REFUSED build output path: …` і выходзіць з кодам 73. Свае файлы
 папярэдняга прагону ён выдаляе перад новым запісам, а `results.json` і буфер крашаў стварае толькі як новыя файлы.
+Шляхі checkout, `$Sdk`, `$BuildRoot` і APK могуць мець прабелы: шлях да Expo CLI ідзе ў Metro ў двукоссі
+(`Start-Process` сам аргументы ў двукоссе не бярэ), астатнія запускі перадаюць шляхі цэлымі.
 
 ## Профілі і асяроддзі
 
