@@ -1,7 +1,7 @@
 # G21.36 — паўторная debug-зборка Android на Windows
 
-*2026-10-08T09:46:22Z by Showboat 0.6.1*
-<!-- showboat-id: e0d7bf03-8641-4159-ab4d-cad49aca48ed -->
+*2026-10-08T10:36:24Z by Showboat 0.6.1*
+<!-- showboat-id: 6b3d0d03-6156-4bdd-afdf-64e460ad4dd0 -->
 
 G21.36 (issue #592): `tools/android-build/` збірае debug-APK з апублікаванага checkout з уласнай хатняй тэчкай Gradle, без Gradle-дэмана, з Kotlin унутры працэсу зборкі і абмежаванымі воркерамі; чыстка разгортвае junction, правярае карані па рэальных шляхах і не выдаляе нічога па-за checkout і тэчкай зборкі задачы, а таксама падчас іншай зборкі гэтага checkout. Каманды ніжэй выкананыя на Windows-хасце ўладальніка ў клоне `D:\KUDY-592`.
 
@@ -18,7 +18,7 @@ openjdk version "17.0.20.1" 2026-08-18
 core.autocrlf: true
 ```
 
-Каманда 2: тэсты інструмента. На Windows яны ствараюць сапраўдныя junction: чужы і ўкладзены junction, alias тэчкі зборкі і junction у бацькоўскім шляху мэты адхіляюцца, junction у тэчку зборкі выдаляецца як спасылка, а спыняюцца толькі JVM гэтай тэчкі зборкі. CLI-тэсты запускаюць `build` і `clean --apply` адначасова, сцэнарны скрыпт правяраецца праз `powershell -File` з занятым портам, UI-дамп — з падробленым `adb`, у якога `uiautomator dump` падае. Апошні тэст запускае сапраўдны Gradle 8.14.3 з JDK 17 для тэчкі зборкі з прабелам (`build root`) і з кірыліцай. Адкат любой праверкі робіць адпаведны радок `not ok`.
+Каманда 2: тэсты інструмента. На Windows яны ствараюць сапраўдныя junction: чужы і ўкладзены junction, alias тэчкі зборкі і junction у бацькоўскім шляху мэты адхіляюцца, junction у тэчку зборкі выдаляецца як спасылка, а спыняюцца толькі JVM гэтай тэчкі зборкі. CLI-тэсты запускаюць `build` і `clean --apply` адначасова, правяраюць, што `build` з junction на месцы `gradle-home`, `tmp`, `logs` або `records` (або з жорсткай спасылкай на месцы `gradle.properties`) спыняецца з кодам 73 і не мяняе чужы файл, а блакіроўку мёртвага працэсу абодва адначасовыя выклікі толькі паказваюць (код 75) і не забіраюць; сцэнарны скрыпт правяраецца праз `powershell -File` з занятым портам, UI-дамп — з падробленым `adb`, у якога `uiautomator dump` падае. Апошні тэст запускае сапраўдны Gradle 8.14.3 з JDK 17 для тэчкі зборкі з прабелам (`build root`) і з кірыліцай. Адкат любой праверкі робіць адпаведны радок `not ok`.
 
 ```powershell
 & { Set-Location D:\KUDY-592; $env:KUDY_JDK17 = 'D:\KUDY-Android\java\jdk-17.0.20.1+1'; $env:KUDY_TEST_GRADLE_DIST = 'D:\KUDY-592-build\gradle-home\wrapper\dists\gradle-8.14.3-bin\cv11ve7ro1n3o1j4so8xd9n66\gradle-8.14.3'; node --test --test-reporter=tap tools/android-build/scoped-clean.test.mjs tools/android-build/build-config.test.mjs tools/android-build/cli.test.mjs tools/android-build/emulator-scenarios.test.mjs tools/android-build/gradle-jvmargs.test.mjs 2>$null | Select-String -Pattern "^(ok|not ok|1\.\.)" | ForEach-Object { $_.Line } } | ForEach-Object { [Console]::Out.Write([string]$_ + [char]10) }
@@ -37,29 +37,36 @@ ok 9 - classifyProcesses: Windows paths match case-insensitively and with either
 ok 10 - cli: clean --apply is refused while a build of the same checkout holds the lock, and runs after it
 ok 11 - cli: clean --apply is refused while a build JVM of this checkout runs, even without a lock
 ok 12 - cli: a build root that aliases the checkout through a junction is refused before any command runs
-ok 13 - acquireLock: a live holder blocks, a dead holder of this host is taken over once
-ok 14 - emulator-scenarios: a busy Metro port is refused before anything starts, exit code 1
-ok 15 - emulator-scenarios: a busy emulator console or adb port is refused
-ok 16 - Test-PortOwnedBy: a listener counts as ours only inside the given process tree
-ok 17 - Get-ScenarioVerdict: exit 0 only for a complete, all-passed run with an empty crash buffer
-ok 18 - Get-UiDump: a failed dump (dump-fails) is retried, never pulled, and throws instead of returning the old screen
-ok 19 - Get-UiDump: a failed dump (dump-error-exit-0) is retried, never pulled, and throws instead of returning the old screen
-ok 20 - Get-UiDump: after one failed attempt the next dump is pulled from its own device file and cleaned up
-ok 21 - emulator-scenarios: Dump and WaitFor throw on a failed dump instead of evaluating the old screen
-ok 22 - real Gradle: the generated jvmargs start the build JVM for a build root with a space
-ok 23 - isInside: whole path segments only, case-folded on Windows
-ok 24 - validateBuildRoot: rejects relative, filesystem root, checkout ancestor and checkout child
-ok 25 - findCandidates: generated dirs of Gradle projects only, never src/ or non-Gradle dirs
-ok 26 - planCleanup + applyCleanup: removes owned generated outputs
-ok 27 - planCleanup: a build dir that is a junction into a foreign build root is refused and its target survives
-ok 28 - planCleanup: a nested junction leaving the roots refuses the whole directory
-ok 29 - applyCleanup: a junction into the build root is removed as a link, its target is kept
-ok 30 - planCleanup: a dangling link is refused, not guessed
-ok 31 - planCleanup: a candidate that is not git-ignored or holds tracked files is refused
-ok 32 - planCleanup: an invalid build root fails before anything is planned
-ok 33 - resolveRoots: a build root that is a junction to the checkout, its parent, a dir inside it or a drive root is refused
-ok 34 - planCleanup: a junction in a candidate parent path is refused even when the build root aliases the foreign dir
-1..34
+ok 13 - cli: build refuses a gradle-home that is a junction out of the build root and writes nothing there
+ok 14 - cli: build refuses a tmp that is a junction out of the build root and writes nothing there
+ok 15 - cli: build refuses a logs that is a junction out of the build root and writes nothing there
+ok 16 - cli: build refuses a records that is a junction out of the build root and writes nothing there
+ok 17 - cli: build refuses a gradle.properties that is a symlink to a foreign file # SKIP creating a file symlink needs the symlink privilege on this host
+ok 18 - cli: build refuses a gradle.properties that is a hard link to a foreign file
+ok 19 - cli: two concurrent claimants after a dead owner both refuse the stale lock and leave it untouched
+ok 20 - acquireLock: a live holder blocks; a dead holder of this host is reported as stale and kept
+ok 21 - emulator-scenarios: a busy Metro port is refused before anything starts, exit code 1
+ok 22 - emulator-scenarios: a busy emulator console or adb port is refused
+ok 23 - Test-PortOwnedBy: a listener counts as ours only inside the given process tree
+ok 24 - Get-ScenarioVerdict: exit 0 only for a complete, all-passed run with an empty crash buffer
+ok 25 - Get-UiDump: a failed dump (dump-fails) is retried, never pulled, and throws instead of returning the old screen
+ok 26 - Get-UiDump: a failed dump (dump-error-exit-0) is retried, never pulled, and throws instead of returning the old screen
+ok 27 - Get-UiDump: after one failed attempt the next dump is pulled from its own device file and cleaned up
+ok 28 - emulator-scenarios: Dump and WaitFor throw on a failed dump instead of evaluating the old screen
+ok 29 - real Gradle: the generated jvmargs start the build JVM for a build root with a space
+ok 30 - isInside: whole path segments only, case-folded on Windows
+ok 31 - validateBuildRoot: rejects relative, filesystem root, checkout ancestor and checkout child
+ok 32 - findCandidates: generated dirs of Gradle projects only, never src/ or non-Gradle dirs
+ok 33 - planCleanup + applyCleanup: removes owned generated outputs
+ok 34 - planCleanup: a build dir that is a junction into a foreign build root is refused and its target survives
+ok 35 - planCleanup: a nested junction leaving the roots refuses the whole directory
+ok 36 - applyCleanup: a junction into the build root is removed as a link, its target is kept
+ok 37 - planCleanup: a dangling link is refused, not guessed
+ok 38 - planCleanup: a candidate that is not git-ignored or holds tracked files is refused
+ok 39 - planCleanup: an invalid build root fails before anything is planned
+ok 40 - resolveRoots: a build root that is a junction to the checkout, its parent, a dir inside it or a drive root is refused
+ok 41 - planCleanup: a junction in a candidate parent path is refused even when the build root aliases the foreign dir
+1..41
 ```
 
 Каманда 3: кантраляванае ўзнаўленне з запісаных журналаў. Пакуль адзін файл выніку `compileKotlin` адкрыты (D1), Gradle не можа выдаліць вынікі і зборка падае; без гэтага (A, C, D2) задача праходзіць.

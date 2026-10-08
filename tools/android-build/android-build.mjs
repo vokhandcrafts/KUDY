@@ -14,6 +14,7 @@ import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { applyCleanup, findCandidates, gitOwnership, planCleanup, resolveRoots } from './scoped-clean.mjs';
 import { acquireLock, lockPath } from './checkout-lock.mjs';
+import { OwnPathError, checkOwnFile, openNewFile, prepareOwnDirs, replaceOwnFile } from './own-paths.mjs';
 import { buildEnv, classifyProcesses, gradleArgs, gradleUserProperties, resolveOptions, taskPaths } from './build-config.mjs';
 
 const checkoutRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -104,18 +105,32 @@ function blockingProcesses(report) {
   return lines;
 }
 
+// Read-only: the output paths that already exist must be the build root's own.
+function outputPathErrors(options) {
+  try {
+    const paths = prepareOwnDirs(options.buildRoot, checkoutRoot, { create: false });
+    checkOwnFile(path.join(paths.gradleHome, 'gradle.properties'));
+    return [];
+  } catch (error) {
+    if (error instanceof OwnPathError) return [error.message];
+    throw error;
+  }
+}
+
 function preflight(options) {
   const info = versions(options);
-  const errors = prerequisiteErrors(options, info);
+  const pathErrors = outputPathErrors(options);
+  const errors = [...prerequisiteErrors(options, info), ...pathErrors];
   const report = processReport(options);
   errors.push(...blockingProcesses(report));
   console.log(JSON.stringify({ checkoutRoot, buildRoot: options.buildRoot, paths: taskPaths(options.buildRoot), versions: info }, null, 2));
   for (const error of errors) console.error(`preflight: ${error}`);
-  return { info, errors };
+  return { info, errors, pathErrors };
 }
 
 // Exit codes: 0 ok, 1 failure, 2 cleanup target refused, 3 active build
-// process, 64 usage, 75 checkout locked by another build/clean.
+// process, 64 usage, 73 a build output path is a link or not the build root's
+// own entry, 75 checkout locked by another build/clean or by a stale lock.
 function clean(options, apply) {
   if (apply) {
     // Deleting outputs under a running build loses its results or breaks it,
@@ -178,11 +193,13 @@ function git(args) {
 }
 
 async function build(options) {
-  const { info, errors } = preflight(options);
+  const { info, errors, pathErrors } = preflight(options);
+  if (pathErrors.length > 0) return 73;
   if (errors.length > 0) return 1;
-  const paths = taskPaths(options.buildRoot);
-  for (const dir of Object.values(paths)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(paths.gradleHome, 'gradle.properties'), gradleUserProperties(options));
+  // Nothing is written before every output path is proven to be the build
+  // root's own entry [key: build-output-link-escape].
+  const paths = prepareOwnDirs(options.buildRoot, checkoutRoot);
+  replaceOwnFile(path.join(paths.gradleHome, 'gradle.properties'), gradleUserProperties(options));
 
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const logFile = path.join(paths.logs, `assembleDebug-${stamp}.log`);
@@ -191,7 +208,7 @@ async function build(options) {
   const command = `${wrapper} ${args.map(quoteForCmd).join(' ')}`;
   console.log(`build: cwd=${path.join(checkoutRoot, 'android')} command=${command} log=${logFile}`);
 
-  const log = fs.createWriteStream(logFile);
+  const log = fs.createWriteStream(null, { fd: openNewFile(logFile) });
   const started = Date.now();
   const child = spawn(isWindows ? command : wrapper, isWindows ? [] : args, {
     cwd: path.join(checkoutRoot, 'android'), env: buildEnv(options, process.env), shell: isWindows,
@@ -222,7 +239,8 @@ async function build(options) {
     versions: info, apk, taskOwnedProcessesAfterBuild: leftovers,
   };
   const recordFile = path.join(paths.records, `assembleDebug-${stamp}.json`);
-  fs.writeFileSync(recordFile, `${JSON.stringify(record, null, 2)}\n`);
+  prepareOwnDirs(options.buildRoot, checkoutRoot);
+  fs.writeFileSync(recordFile, `${JSON.stringify(record, null, 2)}\n`, { flag: 'wx' });
   console.log(`build: exit=${exitCode} duration=${record.durationSeconds}s record=${recordFile}`);
   if (apk) console.log(`build: apk ${apk.bytes} bytes sha256 ${apk.sha256}`);
   for (const line of leftovers) console.error(`build: task-owned process still running: ${line}`);
@@ -233,10 +251,26 @@ async function build(options) {
   return exitCode;
 }
 
+async function refuseForeignPaths(operation) {
+  try {
+    return await operation();
+  } catch (error) {
+    if (!(error instanceof OwnPathError)) throw error;
+    console.error(`android-build: build output path refused: ${error.message}`);
+    return 73;
+  }
+}
+
 // Taken before the process checks and held until the operation ends.
 async function withCheckoutLock(commandName, operation) {
   const file = lockPath(checkoutRoot);
   const lock = acquireLock(file, commandName);
+  if (lock.holder && lock.stale) {
+    console.error(`android-build: ${commandName} refused: stale checkout lock ${file} left by process ${lock.holder.pid} `
+      + `(${lock.holder.command}, host ${lock.holder.host}, started ${lock.holder.startedAt}), which no longer runs. `
+      + 'It is not removed automatically. If no build or clean of this checkout is running, delete that file and rerun.');
+    return 75;
+  }
   if (lock.holder) {
     console.error(`android-build: ${commandName} refused: the checkout is locked by ${JSON.stringify(lock.holder)} (${file})`);
     return 75;
@@ -276,7 +310,7 @@ async function main(argv) {
     case 'preflight': return preflight(options).errors.length === 0 ? 0 : 1;
     case 'clean': return values.apply ? withCheckoutLock('clean --apply', () => clean(options, true)) : clean(options, false);
     case 'stop-owned': return stopOwned(options);
-    case 'build': return withCheckoutLock('build', () => build(options));
+    case 'build': return withCheckoutLock('build', () => refuseForeignPaths(() => build(options)));
     default:
       console.error('usage: android-build.mjs <preflight|clean|build|stop-owned> --build-root <abs dir> [--sdk <dir>] [--jdk <dir>] [--max-workers 2] [--gradle-heap 3g] [--abi x86_64] [--timeout-minutes 90] [--ro-dep-cache <dir>] [--rerun-tasks] [--apply]');
       return 64;
