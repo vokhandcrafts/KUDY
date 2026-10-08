@@ -94,6 +94,73 @@ npx expo prebuild --platform android --no-install
 
 Чакана: каркас адкрываецца на прыладзе. Каркас сам не выклікае нілакацыю, ні аўдыё — дазволы толькі аб'яўленыя ў `app.json` як кандыдаты; спайкавыя канстанты (dwell, accuracy, bundle id) не перанесеныя. Профілі адрозніваюцца толькі application IDs — набор канфігаў адзін.
 
+## Лакальная debug-зборка Android на Windows
+
+Працэдура для Windows-хоста з уласнымі Android SDK і JDK 17 (issue
+[#592](https://github.com/vokhandcrafts/KUDY/issues/592), вынік і доказы — [G21.36](agent-tasks/results/G21.36.md)).
+Яна працуе з апублікаванага checkout і не патрабуе ні скрэтч-файлаў, ні пэўнай раскладкі дыскаў: JDK, SDK,
+хатняя тэчка Gradle і часовыя файлы задаюцца толькі для працэсу зборкі, глабальныя наладкі не мяняюцца.
+
+| Параметр | Што гэта | Прыклад |
+|---|---|---|
+| `$Checkout` | чысты checkout гэтага рэпазітара на дыску з запасам месца (`node_modules` і вынікі зборкі займаюць некалькі ГБ) | `D:\KUDY-592` |
+| `$BuildRoot` | тэчка, якой валодае толькі гэтая зборка: хатняя тэчка Gradle, temp, журналы, запісы зборак; па-за checkout | `D:\KUDY-592-build` |
+| `$Sdk` | Android SDK з `platform-tools`, `platforms;android-36`, `emulator` | `D:\KUDY-Android\sdk` |
+| `$Jdk` | JDK 17; сістэмны `JAVA_HOME` (напрыклад, JDK 25) не выкарыстоўваецца | `D:\KUDY-Android\java\jdk-17.0.20.1+1` |
+
+```powershell
+cd $Checkout
+npm ci
+npx expo prebuild --platform android --no-install
+git status --short          # чакана пуста: android/ ігнаруецца; змены package.json/lock ад інструментаў — у рэвю, не адкатваць
+$common = @('--build-root', $BuildRoot, '--sdk', $Sdk, '--jdk', $Jdk)
+node tools/android-build/android-build.mjs preflight @common
+node tools/android-build/android-build.mjs clean @common            # толькі паказвае, што будзе выдалена
+node tools/android-build/android-build.mjs clean --apply @common
+node tools/android-build/android-build.mjs build @common
+node tools/android-build/android-build.mjs build --rerun-tasks @common   # паўтор: кожная задача зноў чысціць свае вынікі
+```
+
+- `preflight` друкуе версіі (Node, npm, JDK, Gradle wrapper, SDK, React Native, Expo) і спыняе працу, калі JDK не 17, у SDK няма
+  `adb`, няма `android/` або ў гэтым checkout ці `$BuildRoot` ужо працуе Java/Gradle-працэс.
+- `build` запісвае ў `$BuildRoot\gradle-home\gradle.properties` абмежаванні: без Gradle-дэмана, `--max-workers` (2),
+  памяць `--gradle-heap` (3g), кампіляцыя Kotlin унутры працэсу зборкі (без асобнага дэмана кампілятара, які перажывае
+  зборку і трымае файлы), `--abi` (`x86_64` для эмулятара; усе чатыры — `armeabi-v7a,arm64-v8a,x86,x86_64`) і
+  `--timeout-minutes` (90), пасля якога спыняецца толькі дрэва працэсаў гэтай зборкі. Журнал — у `$BuildRoot\logs`,
+  запіс з камандай, версіямі, кодам выхаду, працягласцю, памерам і SHA-256 `android\app\build\outputs\apk\debug\app-debug.apk` —
+  у `$BuildRoot\records`.
+- `--ro-dep-cache <тэчка з modules-2>` — неабавязковы агульны кэш залежнасцей толькі для чытання (Gradle `GRADLE_RO_DEP_CACHE`):
+  залежнасці не спампоўваюцца нанова, а Gradle у гэты кэш не піша.
+- `clean` разглядае толькі згенераваныя тэчкі: `android\.gradle`, `android\build`, `android\app\build`, `android\app\.cxx`
+  і `build`/`.cxx` побач з кожным Gradle-праектам у `node_modules` (`.gradle` — толькі побач з `settings.gradle`). Кожная мэта
+  разгортваецца ў рэальны шлях, уключна з junction і ўкладзенымі спасылкамі, і павінна ляжаць у checkout або `$BuildRoot`,
+  быць git-ignored і не мець адсочваных файлаў. Калі хоць адна мэта адхіленая, не выдаляецца нічога, а прычына друкуецца.
+  Калі файл трымае іншы працэс, `clean` спыняецца з кодам 1 і паказвае магчымых трымальнікаў. Глабальныя кэшы
+  (`%USERPROFILE%\.gradle`, агульная хатняя тэчка Gradle, кэш npm) не кранаюцца.
+- `stop-owned` спыняе толькі Java-працэсы (Gradle, дэман Kotlin), у камандным радку якіх ёсць `$BuildRoot`; Java-працэсы
+  іншых checkout толькі пералічваюцца, а PowerShell, Node і іншыя працэсы не разглядаюцца зусім.
+
+Прычыны, з-за якіх працэдура менавіта такая (падрабязна — у выніку G21.36): у рэтэсце 2026-10-04 скрэтч-скрыпт ініцыялізацыі
+падмяняў тэчкі `build` у агульным checkout на junction у агульны каталог на другім дыску і запускаў PowerShell на кожны
+праект; дэман кампілятара Kotlin з няўдалай зборкі заставаўся жывым да двух гадзін і трымаў вынікі `compileKotlin`, таму
+наступная зборка не магла іх выдаліць (`Failed to clean up output files`).
+
+Праверка на эмулятары (патрэбны AVD з x86_64-вобразам; `$Avd`, `$AvdHome`, `$AndroidUserHome` — свае для хоста):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/android-build/emulator-scenarios.ps1 `
+  -BuildRoot $BuildRoot -Sdk $Sdk -AvdHome $AvdHome -AndroidUserHome $AndroidUserHome -Avd $Avd `
+  -Apk android\app\build\outputs\apk\debug\app-debug.apk
+```
+
+Скрыпт запускае эмулятар без снапшота, усталёўвае APK, запускае Metro з гэтага ж checkout з абмежаваннем
+(`expo start --dev-client --port 8083 --max-workers 2`), прабрасвае порт праз `adb reverse` і адкрывае
+`kudy://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8083`. Потым праходзіць сцэнарыі рэтэсту
+2026-10-04: навігацыя Explore → Побач / Чым заняцца / KUDY і назад, пераключэнне мовы без перазапуску,
+глыбокія спасылкі на неіснуючыя экраны, буйны шрыфт (`font_scale` 1.5) і вяртанне з фону. Вынік — UI-дампы,
+здымкі экрана, буфер крашаў і `results.json` у `$BuildRoot\evidence\android`. У канцы скрыпт вяртае `font_scale` 1.0
+і спыняе толькі эмулятар і Metro, якія ён сам запусціў.
+
 ## Профілі і асяроддзі
 
 | Профіль `eas.json` | application ID (iOS `bundleIdentifier` = Android `package`) | Прызначэнне |

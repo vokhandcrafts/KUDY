@@ -1,0 +1,189 @@
+﻿{
+    "date":  "2026-10-08T02:13:34",
+    "head":  "91da11f1c9d8425b29024aba55bdf9990246ecf2",
+    "device":  {
+                   "serial":  "emulator-5558",
+                   "avd":  "KUDY_API36",
+                   "android":  "16",
+                   "api":  "36",
+                   "abi":  "x86_64",
+                   "screen":  "1080x2400",
+                   "density":  "420"
+               },
+    "apk":  {
+                "path":  "D:\\KUDY-592-build\\apk\\build2-app-debug.apk",
+                "bytes":  97922851,
+                "sha256":  "184DAACD074EC089B620CFBA4BC4751E5FAD3A2CB77E34D7BBA1FBB2CCE046FA",
+                "installed":  "versionName=0.1.0; lastUpdateTime=2026-10-08 02:10:10"
+            },
+    "metro":  {
+                  "port":  8083,
+                  "maxWorkers":  2
+              },
+    "totals":  {
+                   "checks":  26,
+                   "passed":  26,
+                   "failed":  0
+               },
+    "checks":  [
+                   {
+                       "name":  "Cold launch reaches Explore",
+                       "status":  "passed",
+                       "evidence":  "cold-start-normal.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Catalog has a visible unavailable message",
+                       "status":  "passed",
+                       "evidence":  "explore-be.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Explore tap opens Nearby",
+                       "status":  "passed",
+                       "evidence":  "nearby-be.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Nearby Back returns to Explore",
+                       "status":  "passed",
+                       "evidence":  "before-discovery.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Explore tap opens Discovery",
+                       "status":  "passed",
+                       "evidence":  "discovery-be.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Discovery Back returns to Explore",
+                       "status":  "passed",
+                       "evidence":  "before-kudy.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Explore tap opens KUDY",
+                       "status":  "passed",
+                       "evidence":  "kudy-be.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "English applies without restart and is selected",
+                       "status":  "passed",
+                       "evidence":  "kudy-en.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Explore uses English after switch",
+                       "status":  "passed",
+                       "evidence":  "explore-en.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Nearby uses English after switch",
+                       "status":  "passed",
+                       "evidence":  "nearby-after-en.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Android Back returns to Explore",
+                       "status":  "passed",
+                       "evidence":  "before-discovery-en.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Discovery uses English after switch",
+                       "status":  "passed",
+                       "evidence":  "discovery-en.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Ukrainian applies without restart and is selected",
+                       "status":  "passed",
+                       "evidence":  "kudy-uk.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Explore uses Ukrainian after switch",
+                       "status":  "passed",
+                       "evidence":  "explore-uk.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Nearby uses Ukrainian after switch",
+                       "status":  "passed",
+                       "evidence":  "nearby-after-uk.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Unknown link shows localized explanation",
+                       "status":  "passed",
+                       "evidence":  "unknown-route-uk.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Unknown link Back returns to Explore",
+                       "status":  "passed",
+                       "evidence":  "unknown-back-explore.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Unavailable guide uses Ukrainian",
+                       "status":  "passed",
+                       "evidence":  "guide-unavailable-uk.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Unavailable run uses Ukrainian",
+                       "status":  "passed",
+                       "evidence":  "run-unavailable-uk.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Place link shows an unavailable state",
+                       "status":  "passed",
+                       "evidence":  "place-unavailable.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Collection link shows an unavailable state",
+                       "status":  "passed",
+                       "evidence":  "collection-unavailable.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "City guides link shows an unavailable state",
+                       "status":  "passed",
+                       "evidence":  "city-guides-unavailable.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Large font keeps all language buttons visible",
+                       "status":  "passed",
+                       "evidence":  "kudy-font-150-clean.xml",
+                       "detail":  "chips=8/8"
+                   },
+                   {
+                       "name":  "Large font grows the language label",
+                       "status":  "passed",
+                       "evidence":  "kudy-font-150-clean.xml",
+                       "detail":  "height100=57 height150=71"
+                   },
+                   {
+                       "name":  "Large font keeps all Explore links visible",
+                       "status":  "passed",
+                       "evidence":  "explore-font-150-clean.xml",
+                       "detail":  "links=3"
+                   },
+                   {
+                       "name":  "Background return preserves KUDY screen and English",
+                       "status":  "passed",
+                       "evidence":  "after-background-en.xml",
+                       "detail":  ""
+                   }
+               ],
+    "fatal":  null,
+    "crashBufferLines":  0,
+    "restoredFontScale":  "1.0"
+}
