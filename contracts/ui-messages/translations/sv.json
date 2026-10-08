@@ -2554,6 +2554,51 @@
         "outcome": "approved",
         "note": "названая памылка: патрэбны чытанне ўласнага стану"
       }
+    },
+    {
+      "id": "web.ui.attributionHeading",
+      "value": "Källor och upphov",
+      "reviewedSourceHash": "262a71e1ab35a50b648afe2d0ff23ef8717a62f70fba6352bd968d683f484fa0",
+      "review": {
+        "outcome": "approved",
+        "note": "Codex translation check for issue #681 against the Belarusian source."
+      }
+    },
+    {
+      "id": "web.ui.authorPhoto",
+      "value": "Författarens foto",
+      "reviewedSourceHash": "255e15ab9725891d3876cf7fa0c0e80961748701bb583a51c41bdd5714bb864a",
+      "review": {
+        "outcome": "approved",
+        "note": "Codex translation check for issue #681 against the Belarusian source."
+      }
+    },
+    {
+      "id": "web.ui.usageRulesTitle",
+      "value": "Användningsregler",
+      "reviewedSourceHash": "f3e2ee1e865651348bc54a8a9e679279bd31f087ff6057d72569f85a2b043212",
+      "review": {
+        "outcome": "approved",
+        "note": "Codex translation check for issue #681 against the Belarusian source."
+      }
+    },
+    {
+      "id": "web.ui.usageRulesIntro",
+      "value": "Källor till historiskt material anges på guide- och stoppsidorna.",
+      "reviewedSourceHash": "d2f27dc53f8052c06eb56bac06f8619251d5b371d0f3e4c5c45e9476a0690ff9",
+      "review": {
+        "outcome": "approved",
+        "note": "Codex translation check for issue #681 against the Belarusian source."
+      }
+    },
+    {
+      "id": "web.ui.usageRulesReuse",
+      "value": "Kontrollera rättigheterna hos originalkällan eller kontakta rättighetsinnehavaren innan du återanvänder material.",
+      "reviewedSourceHash": "b9dc6996d20d14ad7a565f18f0cb0c1726e49c4ac4d7f8ae1dd3d9f8628ffb94",
+      "review": {
+        "outcome": "approved",
+        "note": "Codex translation check for issue #681 against the Belarusian source."
+      }
     }
   ]
 }

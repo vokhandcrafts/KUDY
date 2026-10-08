@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { be } from '../i18n/be.ts';
 import { en } from '../i18n/en.ts';
@@ -72,6 +73,33 @@ test('the en guide page shows en text for both the place name and the locked pre
   const guide = readSiteGuidePage(publicRoot, 'en', 'demo-route-a1');
   assert.equal(guide.stops[0]!.name, "Cloth Merchants' Courtyard (demo)");
   assert.equal(guide.stops[1]!.name, 'The Mill Column (demo)');
+});
+
+test('a public cover joins its media credit; author-owned photo wording follows the recorded license', () => {
+  const copy = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-web-attribution-'));
+  fs.cpSync(publicRoot, copy, { recursive: true });
+  const bundle = path.join(copy, 'bundle', 'demo-route-a1', '1');
+  const routeFile = path.join(bundle, 'route.json');
+  const route = JSON.parse(fs.readFileSync(routeFile, 'utf8'));
+  route.cover = '/content/bundle/demo-route-a1/1/cover.webp';
+  fs.writeFileSync(routeFile, JSON.stringify(route));
+  const bytes = Buffer.from('synthetic author photo');
+  fs.writeFileSync(path.join(bundle, 'cover.webp'), bytes);
+  const mediaFile = path.join(bundle, 'media.json');
+  const media = JSON.parse(fs.readFileSync(mediaFile, 'utf8'));
+  media.push({
+    media_id: 'cover-photo',
+    sha256: createHash('sha256').update(bytes).digest('hex'),
+    bytes: bytes.length,
+    mime: 'image/webp',
+    locale: 'be',
+    license: 'author_own',
+    credit: 'KUDY author',
+  });
+  fs.writeFileSync(mediaFile, JSON.stringify(media));
+  const guide = readSiteGuidePage(copy, 'be', 'demo-route-a1');
+  assert.deepEqual(guide.attribution.media, [{ credit: 'KUDY author', authorPhoto: true }]);
+  assert.deepEqual(guide.attribution.sources, ['Дэма-крыніца: сінтэтычны архіў']);
 });
 
 test('no paid text reaches the page data (acceptance 2: no paid text in what gets rendered)', () => {

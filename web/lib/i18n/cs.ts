@@ -58,4 +58,9 @@ export const cs = {
   "catalogEmpty": "Průvodci s textem v tomto jazyce zatím nejsou.",
   "textUnavailableTitle": "Text průvodce v tomto jazyce zatím není k dispozici",
   "textUnavailableBody": "Tento průvodce nemá text ve zvoleném jazyce rozhraní. Jeho jazyky textu jsou uvedeny v seznamu jazyků v katalogu.",
+  "attributionHeading": "Zdroje a autorství",
+  "authorPhoto": "Fotografie autora",
+  "usageRulesTitle": "Pravidla použití",
+  "usageRulesIntro": "Zdroje historických materiálů jsou uvedeny na stránkách tras a zastávek.",
+  "usageRulesReuse": "Před dalším použitím materiálu ověřte práva u původního zdroje nebo kontaktujte držitele práv.",
 };

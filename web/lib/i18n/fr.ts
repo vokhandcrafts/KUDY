@@ -58,4 +58,9 @@ export const fr = {
   "catalogEmpty": "Il n'y a pas encore de guides avec du texte dans cette langue.",
   "textUnavailableTitle": "Le texte du guide dans cette langue n'est pas encore disponible",
   "textUnavailableBody": "Ce guide n'a pas de texte dans la langue d'interface choisie. Ses langues de texte figurent dans la liste des langues du catalogue.",
+  "attributionHeading": "Sources et auteurs",
+  "authorPhoto": "Photo de l’auteur",
+  "usageRulesTitle": "Règles d’utilisation",
+  "usageRulesIntro": "Les sources des documents historiques figurent sur les pages des parcours et des étapes.",
+  "usageRulesReuse": "Avant de réutiliser un contenu, vérifiez ses droits à la source ou contactez le titulaire des droits.",
 };

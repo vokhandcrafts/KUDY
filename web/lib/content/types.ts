@@ -98,6 +98,18 @@ export interface Story {
   review: { by: string; at: string; decision: 'approved' | 'rejected' | 'pending' };
 }
 
+// media.schema.json entries in the public bundle's media.json. The web only
+// uses credit and license after matching a record to a public file by sha256.
+export interface MediaRecord {
+  media_id: string;
+  sha256: string;
+  bytes: number;
+  mime: 'audio/mp4' | 'image/webp';
+  locale: Locale;
+  license: string;
+  credit: string;
+}
+
 // previews.json — 09 §5: only stop_id, place_id, name, announce, ever.
 export interface LockedStopPreview {
   stop_id: string;

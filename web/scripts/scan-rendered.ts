@@ -9,6 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { scanRenderedOutput } from '../lib/content/leak-guard.ts';
 import { checkExportedDocumentLanguage } from '../lib/content/exported-language.ts';
+import { checkExportedAttribution } from '../lib/content/attribution-guard.ts';
 
 const webDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const outDir = path.join(webDir, 'out');
@@ -34,3 +35,11 @@ if (!language.ok) {
   process.exit(1);
 }
 console.log('document-language scan: clean');
+
+const attribution = checkExportedAttribution({ outDir });
+if (attribution.length > 0) {
+  console.error(`content-attribution scan: ${attribution.length} violation(s)`);
+  for (const violation of attribution) console.error(`  ${violation.code}: ${violation.path}`);
+  process.exit(1);
+}
+console.log('content-attribution scan: clean');
