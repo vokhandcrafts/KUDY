@@ -41,5 +41,5 @@ junction-амі, сцэнарыныя навігацыйныя скрыпты, �
 
 ## Рэзалюцыя (2026-10-08)
 
-Бяспечная чыстка і абмежаваная зборка Android для #592 — `tools/android-build/` (G21.36, PR PR_URL_PLACEHOLDER);
+Бяспечная чыстка і абмежаваная зборка Android для #592 — `tools/android-build/` (G21.36, PR https://github.com/vokhandcrafts/KUDY/pull/689);
 працэдура — раздзел «Лакальная debug-зборка Android на Windows» у `docs/development_setup.md`.

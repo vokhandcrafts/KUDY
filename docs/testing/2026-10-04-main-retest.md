@@ -68,5 +68,5 @@ node --experimental-strip-types docs/testing/evidence/2026-10-04-retest/reproduc
 ## Рэзалюцыя Android-зборкі (2026-10-08)
 
 Збой `Failed to clean up output files` разабраны і ўзноўлены кантралявана ў G21.36
-([#592](https://github.com/vokhandcrafts/KUDY/issues/592), PR PR_URL_PLACEHOLDER): дзве свежыя
+([#592](https://github.com/vokhandcrafts/KUDY/issues/592), PR https://github.com/vokhandcrafts/KUDY/pull/689): дзве свежыя
 debug-зборкі на Windows прайшлі, вынік і доказы — [G21.36](../agent-tasks/results/G21.36.md).

@@ -25,7 +25,7 @@ checkout `C:\Users\kamyl\WebstormProjects\KUDY` з рэтэсту засталі
 камандай
 `node tools/android-build/android-build.mjs clean --build-root D:\KUDY-Android --sdk <SDK> --jdk <JDK17>` (без `--apply`
 нічога не выдаляецца) і толькі потым вырашай пра `--apply`.
-PR: PR_URL_PLACEHOLDER (issue #592)
+PR: https://github.com/vokhandcrafts/KUDY/pull/689 (issue #592)
 
 ### 2026-10-07 — G21.45: змержуй PR #686 і вырашы калізію ідэнтыфікатара з #669
 Што зрабіць: змержуй PR — ён дадае ў цела ADR G21.20 датаваныя зносіны §3.2/§3.4
