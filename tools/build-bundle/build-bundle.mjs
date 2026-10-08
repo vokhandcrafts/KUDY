@@ -112,6 +112,45 @@ const isPathSafe = (value, forbidEmptySegments = false) =>
     segment !== '.' &&
     !(forbidEmptySegments && segment === ''));
 
+// G21.44 §6 М2 / 09 §15: the origin release-manifest lists public/ entries
+// only. The staging file keeps every artifact. `manifest-hygiene` names a
+// private or extended path that would otherwise be published with its
+// bytes and sha256.
+export const MANIFEST_HYGIENE_RULE = 'manifest-hygiene';
+
+function isPublicArtifactPath(rel) {
+  return typeof rel === 'string' && rel.startsWith('public/') && isPathSafe(rel, true);
+}
+
+export function publicReleaseManifest(manifest) {
+  const artifacts = Array.isArray(manifest?.artifacts)
+    ? manifest.artifacts.filter((artifact) => typeof artifact?.path === 'string' && artifact.path.startsWith('public/'))
+    : [];
+  return {
+    schema_version: manifest.schema_version,
+    route_id: manifest.route_id,
+    version: manifest.version,
+    city_id: manifest.city_id,
+    discovery_revision: manifest.discovery_revision,
+    artifacts,
+    feedback_target_registry: manifest.feedback_target_registry,
+  };
+}
+
+export function manifestHygieneViolations(manifest) {
+  if (manifest === null || typeof manifest !== 'object' || Array.isArray(manifest) || !Array.isArray(manifest.artifacts)) {
+    return [{ rule: MANIFEST_HYGIENE_RULE, path: '' }];
+  }
+  const violations = [];
+  for (const artifact of manifest.artifacts) {
+    const rel = artifact?.path;
+    if (!isPublicArtifactPath(rel)) {
+      violations.push({ rule: MANIFEST_HYGIENE_RULE, path: typeof rel === 'string' ? rel : '' });
+    }
+  }
+  return violations;
+}
+
 function assertLocales(value, where) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     return fail('invalid-localized', where);
@@ -685,7 +724,8 @@ export async function buildBundle({ inDir, outDir }) {
   }
 
   // Release manifest: every public/private artifact with bytes+sha256, and
-  // the registry handoff for G02.04 (21 §5.2).
+  // the registry handoff for G02.04 (21 §5.2). This file stays in staging.
+  // publish-catalog lays publicReleaseManifest() (public/ entries only).
   const releaseManifest = {
     schema_version: 1,
     route_id: route.route_id,

@@ -10,7 +10,13 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { buildBundle, canonicalJson, sha256Hex } from '../build-bundle/build-bundle.mjs';
+import {
+  buildBundle,
+  canonicalJson,
+  manifestHygieneViolations,
+  publicReleaseManifest,
+  sha256Hex,
+} from '../build-bundle/build-bundle.mjs';
 import { PublishError, publishCatalog, rollbackCatalog } from './publish-catalog.mjs';
 import { deriveInterimCatalog } from '../../contracts/interim-catalog.mjs';
 
@@ -281,7 +287,8 @@ test('AC5: pointer and stored release files agree with the manifest; routes accu
 
   const manifestB = await readJson(targetFile(stagingB, 'release/release-manifest.json'));
   const storedManifest = await readJson(targetFile(target, 'releases/route-b/1/release-manifest.json'));
-  assert.deepEqual(storedManifest, manifestB);
+  assert.deepEqual(storedManifest, publicReleaseManifest(manifestB));
+  assert.ok(manifestB.artifacts.some((artifact) => artifact.path.startsWith('private/')));
   const registryFile = targetFile(target, 'releases/route-b/1/feedback-target-registry.json');
   assert.equal(await sha256File(registryFile), manifestB.feedback_target_registry.sha256);
   const registry = await readJson(registryFile);
@@ -351,4 +358,86 @@ test('G14.04.b: the catalog lists uk only when its base stops.json is published'
   const catalog2 = await readJson(targetFile(target2, 'catalog.json'));
   const entry2 = catalog2.routes.find((r) => r.route_id === 'demo-route-a1');
   assert.deepEqual(entry2.locales, ['be', 'en']);
+});
+
+// ------------------------------------------------- G21.44.b manifest hygiene
+
+test('manifest-hygiene: the published release manifest lists only public entries', async () => {
+  const { staging } = await makeStaging();
+  const target = await tempDir('kudy-pub-hygiene-');
+  await publishCatalog({ staging, target, now: NOW });
+  const storedPath = targetFile(target, 'releases/demo-route-a1/1/release-manifest.json');
+  const stored = await readJson(storedPath);
+  const staged = await readJson(targetFile(staging, 'release/release-manifest.json'));
+  const violations = manifestHygieneViolations(stored);
+  assert.deepEqual(violations, [], `manifest-hygiene: ${violations.map((item) => item.path).join(',')}`);
+  const privateEntries = staged.artifacts.filter((artifact) => !artifact.path.startsWith('public/'));
+  assert.ok(privateEntries.length > 0, 'staging keeps the full manifest');
+  const raw = await fsp.readFile(storedPath, 'utf8');
+  for (const entry of privateEntries) {
+    assert.equal(raw.includes(entry.path), false, 'manifest-hygiene');
+    assert.equal(raw.includes(entry.sha256), false, 'manifest-hygiene');
+  }
+  assert.equal(raw.includes('/extended/'), false, 'manifest-hygiene');
+  assert.deepEqual(stored, publicReleaseManifest(staged));
+  assert.notDeepEqual(await fsp.readFile(storedPath), await fsp.readFile(targetFile(staging, 'release/release-manifest.json')));
+  await assert.rejects(fsp.access(targetFile(target, 'private')));
+});
+
+test('manifest-hygiene: one private entry is named by the rule', () => {
+  const violations = manifestHygieneViolations({
+    schema_version: 1,
+    artifacts: [
+      { path: 'public/bundle/demo/1/route.json', bytes: 2, sha256: 'ab' },
+      { path: 'private/bundle/demo/1/be/extended/stops.json', bytes: 9, sha256: 'cd' },
+    ],
+  });
+  assert.deepEqual(violations, [
+    { rule: 'manifest-hygiene', path: 'private/bundle/demo/1/be/extended/stops.json' },
+  ]);
+});
+
+test('manifest-hygiene: an extended segment under public/ refuses before the target changes', async () => {
+  const { staging } = await makeStaging();
+  const target = await tempDir('kudy-pub-hyg-ext-');
+  const manifestFile = targetFile(staging, 'release/release-manifest.json');
+  const manifest = await readJson(manifestFile);
+  const donor = manifest.artifacts.find((artifact) => artifact.path.endsWith('/be/base/stops.json'));
+  const extendedPath = donor.path.replace('/base/', '/extended/');
+  await fsp.mkdir(path.dirname(targetFile(staging, extendedPath)), { recursive: true });
+  await fsp.copyFile(targetFile(staging, donor.path), targetFile(staging, extendedPath));
+  manifest.artifacts.push({ ...donor, path: extendedPath });
+  await fsp.writeFile(manifestFile, canonicalJson(manifest));
+  await expectPublishError(() => publishCatalog({ staging, target, now: NOW }), 'manifest-hygiene');
+  assert.deepEqual(await fsp.readdir(target), []);
+});
+
+test('manifest-hygiene: corrupt manifest input is a diagnostic', () => {
+  assert.deepEqual(manifestHygieneViolations(null), [{ rule: 'manifest-hygiene', path: '' }]);
+  assert.deepEqual(manifestHygieneViolations({ artifacts: 'nope' }), [{ rule: 'manifest-hygiene', path: '' }]);
+  assert.deepEqual(manifestHygieneViolations({ artifacts: [null] }), [{ rule: 'manifest-hygiene', path: '' }]);
+  assert.deepEqual(manifestHygieneViolations({ artifacts: [{ bytes: 1 }] }), [{ rule: 'manifest-hygiene', path: '' }]);
+});
+
+test('AC2: an already-published full release manifest refuses as version-immutable', async () => {
+  const { staging } = await makeStaging();
+  const target = await tempDir('kudy-pub-immutable-full-');
+  await publishCatalog({ staging, target, now: NOW });
+  const storedPath = targetFile(target, 'releases/demo-route-a1/1/release-manifest.json');
+  const fullBytes = await fsp.readFile(targetFile(staging, 'release/release-manifest.json'));
+  await fsp.writeFile(storedPath, fullBytes);
+  const catalogBefore = await fsp.readFile(targetFile(target, 'catalog.json'));
+  await expectPublishError(() => publishCatalog({ staging, target, now: NOW }), 'version-immutable');
+  assert.deepEqual(await fsp.readFile(storedPath), fullBytes);
+  assert.deepEqual(await fsp.readFile(targetFile(target, 'catalog.json')), catalogBefore);
+
+  const { staging: staging2 } = await makeStaging({ version: '2', revision: 'r-demo-2' });
+  await publishCatalog({ staging: staging2, target, now: NOW });
+  assert.deepEqual(await fsp.readFile(storedPath), fullBytes);
+  const publishedV2 = await readJson(targetFile(target, 'releases/demo-route-a1/2/release-manifest.json'));
+  assert.deepEqual(manifestHygieneViolations(publishedV2), []);
+  assert.equal(
+    publishedV2.artifacts.some((artifact) => artifact.path.startsWith('private/')),
+    false,
+  );
 });
