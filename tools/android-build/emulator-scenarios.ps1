@@ -2,8 +2,10 @@
 # from Metro started in the same checkout, and run the published native navigation / locale /
 # large-font / background scenarios of the 2026-10-04 retest. Writes UI dumps, screenshots,
 # the crash buffer and results.json into <BuildRoot>\evidence\android.
-# Every root is a parameter; environment changes stay in this process. Only the emulator and
-# Metro processes this script started are stopped at the end.
+# Every root is a parameter; environment changes stay in this process. Busy emulator/Metro ports
+# are refused before anything starts, and the serial and the Metro port are acted on only while
+# their listener belongs to a process this script started; only those processes are stopped.
+# Exit code: 0 only when all checks ran and passed with an empty crash buffer, otherwise 1.
 param(
   [Parameter(Mandatory)][string]$BuildRoot,
   [Parameter(Mandatory)][string]$Sdk,
@@ -16,6 +18,8 @@ param(
 $ErrorActionPreference = 'Continue'
 # Windows PowerShell 5.1 leaves $PSScriptRoot empty inside param defaults, so the checkout default is set here.
 if (-not $Checkout) { $Checkout = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path }
+. (Join-Path $PSScriptRoot 'emulator-guards.ps1')
+$ExpectedChecks = 26
 $serial = "emulator-$EmuPort"
 $ev = "$BuildRoot\evidence\android"
 New-Item -ItemType Directory $ev -Force | Out-Null
@@ -24,7 +28,7 @@ $env:ANDROID_HOME = $Sdk; $env:ANDROID_SDK_ROOT = $Sdk; $env:ANDROID_AVD_HOME = 
 $env:ANDROID_USER_HOME = $AndroidUserHome; $env:ANDROID_EMULATOR_HOME = $AndroidUserHome
 $env:TEMP = "$BuildRoot\tmp"; $env:TMP = "$BuildRoot\tmp"
 $checks = [Collections.Generic.List[object]]::new()
-$emuProc = $null; $metroProc = $null
+$emuProc = $null; $metroProc = $null; $emuOwned = $false; $crashLines = $null; $verdict = $null
 
 function Adb { $out = & $adb -s $serial @args 2>&1; if ($LASTEXITCODE -ne 0) { throw "adb $($args -join ' '): $($out -join ' ')" }; $out }
 function Dump([string]$Name) {
@@ -64,15 +68,25 @@ function DismissDevMenu {
   if ($c) { Tap $c; Start-Sleep 2; Back }
 }
 $isExplore = { param($n) HasId $n 'screen-Explore' }
+# A device that is not proven ours is never read, changed or stopped.
+function Assert-OwnEmulator {
+  if (-not ($emuProc -and (Test-PortOwnedBy $EmuPort $emuProc.Id))) { throw "$serial is not served by the emulator this script started (pid $($emuProc.Id)); refusing to act on it" }
+}
 function Write-Results {
-  $crash = @(& $adb -s $serial logcat -b crash -d 2>&1)
-  $crash | Set-Content "$ev\android-crash.log" -Encoding utf8
+  if ($script:emuOwned) {
+    $crash = @(& $adb -s $serial logcat -b crash -d 2>&1)
+    $crash | Set-Content "$ev\android-crash.log" -Encoding utf8
+    $script:crashLines = $crash.Count
+  }
+  $script:verdict = Get-ScenarioVerdict $script:fatal $checks.ToArray() $ExpectedChecks $script:crashLines
+  $apkFile = if (Test-Path -LiteralPath $Apk) { Get-Item -LiteralPath $Apk } else { $null }
   $summary = [ordered]@{
     date = (Get-Date).ToString('s'); head = (git -C $Checkout rev-parse HEAD); device = $device
-    apk = [ordered]@{ path = $Apk; bytes = (Get-Item $Apk).Length; sha256 = (Get-FileHash $Apk -Algorithm SHA256).Hash; installed = ($script:pkg -join '; ') }
+    apk = [ordered]@{ path = $Apk; bytes = $apkFile.Length; sha256 = $(if ($apkFile) { (Get-FileHash -LiteralPath $Apk -Algorithm SHA256).Hash }); installed = ($script:pkg -join '; ') }
     metro = [ordered]@{ port = $MetroPort; maxWorkers = 2 }
-    totals = [ordered]@{ checks = $checks.Count; passed = @($checks | Where-Object status -eq 'passed').Count; failed = @($checks | Where-Object status -eq 'failed').Count }
-    checks = $checks.ToArray(); fatal = $script:fatal; crashBufferLines = $crash.Count; restoredFontScale = "$fontAfter"
+    totals = [ordered]@{ checks = $checks.Count; expected = $ExpectedChecks; passed = @($checks | Where-Object status -eq 'passed').Count; failed = @($checks | Where-Object status -eq 'failed').Count }
+    checks = $checks.ToArray(); fatal = $script:fatal; crashBufferLines = $script:crashLines; restoredFontScale = "$fontAfter"
+    exitCode = $script:verdict.exitCode; failureReasons = $script:verdict.reasons
   }
   $summary | ConvertTo-Json -Depth 6 | Set-Content "$ev\results.json" -Encoding utf8
   "TOTALS $($summary.totals | ConvertTo-Json -Compress)"
@@ -80,13 +94,31 @@ function Write-Results {
 $fatal = $null; $pkg = @(); $device = $null; $fontAfter = $null
 
 try {
+  "== ports"
+  $busy = Get-BusyPorts @($EmuPort, ($EmuPort + 1), $MetroPort)
+  if ($busy.Count -gt 0) { throw "port(s) already in use: $($busy -join ', '); another emulator or Metro may run there, refusing to start or touch it" }
+  # A shared adb server started from this console would inherit the redirected output and keep a caller that waits for
+  # the output to close hanging; Start-Process starts it without inherited handles (no-op if one already runs). Only the
+  # client is awaited: Start-Process -Wait would also wait for the server it forks, which never exits.
+  $adbStart = Start-Process -FilePath $adb -ArgumentList 'start-server' -PassThru -WindowStyle Hidden
+  if (-not $adbStart.WaitForExit(60000)) { throw 'adb start-server did not finish within 60 s' }
+  if (@(& $adb devices 2>$null) -match "^$serial\s") { throw "$serial is already listed by adb; refusing to act on a device this script did not start" }
+
   "== emulator"
   $emuProc = Start-Process "$Sdk\emulator\emulator.exe" -ArgumentList @('-avd', $Avd, '-port', $EmuPort, '-read-only', '-no-snapshot', '-no-boot-anim', '-no-audio', '-memory', '2048', '-cores', '2', '-gpu', 'swiftshader_indirect') -PassThru -RedirectStandardOutput "$BuildRoot\logs\emulator.out.log" -RedirectStandardError "$BuildRoot\logs\emulator.err.log"
+  $null = $emuProc.Handle  # keeps the exit code readable in Windows PowerShell 5.1
   "emulator pid=$($emuProc.Id)"
   $deadline = (Get-Date).AddMinutes(6)
-  while ((& $adb -s $serial shell getprop sys.boot_completed 2>$null) -ne '1') { if ((Get-Date) -gt $deadline) { throw 'emulator boot timeout' }; Start-Sleep 5 }
+  while ($true) {
+    if ($emuProc.HasExited) { throw "own emulator process $($emuProc.Id) exited with code $($emuProc.ExitCode) while booting; see $BuildRoot\logs\emulator.err.log" }
+    if ((Test-PortOwnedBy $EmuPort $emuProc.Id) -and ((& $adb -s $serial shell getprop sys.boot_completed 2>$null) -eq '1')) { break }
+    if ((Get-Date) -gt $deadline) { throw 'emulator boot timeout' }
+    Start-Sleep 5
+  }
+  $emuOwned = $true
   $device = [ordered]@{ serial = $serial; avd = $Avd; android = (Adb shell getprop ro.build.version.release); api = (Adb shell getprop ro.build.version.sdk); abi = (Adb shell getprop ro.product.cpu.abi); screen = ((Adb shell wm size) -replace 'Physical size: ', ''); density = ((Adb shell wm density) -replace 'Physical density: ', '') }
   "device: $($device | ConvertTo-Json -Compress)"
+  Assert-OwnEmulator
   Adb shell settings put system font_scale 1.0 | Out-Null
   Adb install -r $Apk | Out-Null
   $pkg = (Adb shell dumpsys package by.kudy.app) | Select-String -Pattern 'versionName|lastUpdateTime' | ForEach-Object { $_.Line.Trim() }
@@ -94,11 +126,20 @@ try {
 
   "== metro"
   $env:CI = '1'; $env:EXPO_NO_TELEMETRY = '1'
+  if ((Get-BusyPorts @($MetroPort)).Count -gt 0) { throw "Metro port $MetroPort became busy; refusing to use a server this script did not start" }
   $metroProc = Start-Process node -ArgumentList @("$Checkout\node_modules\expo\bin\cli", 'start', '--dev-client', '--port', $MetroPort, '--max-workers', '2') -WorkingDirectory $Checkout -PassThru -RedirectStandardOutput "$BuildRoot\logs\metro.out.log" -RedirectStandardError "$BuildRoot\logs\metro.err.log" -WindowStyle Hidden
+  $null = $metroProc.Handle
   "metro pid=$($metroProc.Id)"
   $deadline = (Get-Date).AddMinutes(3)
-  do { Start-Sleep 3; try { $c = (Invoke-WebRequest "http://localhost:$MetroPort/status" -UseBasicParsing -TimeoutSec 5).Content; $st = if ($c -is [byte[]]) { [Text.Encoding]::UTF8.GetString($c) } else { "$c" } } catch { $st = '' } } while ($st -notmatch 'running' -and (Get-Date) -lt $deadline)
+  do {
+    Start-Sleep 3
+    if ($metroProc.HasExited) { throw "own Metro process $($metroProc.Id) exited with code $($metroProc.ExitCode); see $BuildRoot\logs\metro.err.log" }
+    try { $c = (Invoke-WebRequest "http://localhost:$MetroPort/status" -UseBasicParsing -TimeoutSec 5).Content; $st = if ($c -is [byte[]]) { [Text.Encoding]::UTF8.GetString($c) } else { "$c" } } catch { $st = '' }
+  } while ($st -notmatch 'running' -and (Get-Date) -lt $deadline)
   "metro status: $st"
+  if ($st -notmatch 'running') { throw "Metro on port $MetroPort did not report running within 3 minutes" }
+  if (-not (Test-PortOwnedBy $MetroPort $metroProc.Id)) { throw "Metro port $MetroPort is not served by the Metro this script started (pid $($metroProc.Id))" }
+  Assert-OwnEmulator
   Adb reverse "tcp:$MetroPort" "tcp:$MetroPort" | Out-Null
 
   "== scenarios"
@@ -202,8 +243,20 @@ try {
   $fatal = "$_ @ line $($_.InvocationInfo.ScriptLineNumber)"; "FATAL $fatal"
   Write-Results
 } finally {
-  & $adb -s $serial shell settings put system font_scale 1.0 2>&1 | Out-Null
-  & $adb -s $serial reverse --remove "tcp:$MetroPort" 2>&1 | Out-Null
-  if ($metroProc) { & taskkill.exe /T /F /PID $metroProc.Id 2>&1 | Out-Null; "metro stopped (own pid $($metroProc.Id))" }
-  if ($emuProc) { & $adb -s $serial emu kill 2>&1 | Out-Null; Start-Sleep 5; if (-not $emuProc.HasExited) { & taskkill.exe /T /F /PID $emuProc.Id 2>&1 | Out-Null }; "emulator stopped (own pid $($emuProc.Id))" }
+  # adb commands go to the serial only while its console port is still served by our emulator.
+  $stillOurs = $emuProc -and -not $emuProc.HasExited -and (Test-PortOwnedBy $EmuPort $emuProc.Id)
+  if ($stillOurs) {
+    & $adb -s $serial shell settings put system font_scale 1.0 2>&1 | Out-Null
+    & $adb -s $serial reverse --remove "tcp:$MetroPort" 2>&1 | Out-Null
+  }
+  if ($metroProc -and -not $metroProc.HasExited) { & taskkill.exe /T /F /PID $metroProc.Id 2>&1 | Out-Null; "metro stopped (own pid $($metroProc.Id))" }
+  if ($emuProc) {
+    if ($stillOurs) { & $adb -s $serial emu kill 2>&1 | Out-Null; Start-Sleep 5 }
+    if (-not $emuProc.HasExited) { & taskkill.exe /T /F /PID $emuProc.Id 2>&1 | Out-Null }
+    "emulator stopped (own pid $($emuProc.Id))"
+  }
 }
+if (-not $verdict) { $verdict = Get-ScenarioVerdict $fatal $checks.ToArray() $ExpectedChecks $crashLines }
+foreach ($reason in $verdict.reasons) { "NOT OK $reason" }
+"EXIT $($verdict.exitCode)"
+exit $verdict.exitCode

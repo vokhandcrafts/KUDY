@@ -1,9 +1,9 @@
 # G21.36 — паўторная debug-зборка Android на Windows
 
-*2026-10-08T00:24:05Z by Showboat 0.6.1*
-<!-- showboat-id: 0f0b5a3f-5db4-4edf-8915-c3de44d3d773 -->
+*2026-10-08T01:24:26Z by Showboat 0.6.1*
+<!-- showboat-id: c547b5a4-b997-4215-ba66-4a2c7a589d7e -->
 
-G21.36 (issue #592): `tools/android-build/` збірае debug-APK з апублікаванага checkout з уласнай хатняй тэчкай Gradle, без Gradle-дэмана, з Kotlin унутры працэсу зборкі і абмежаванымі воркерамі; чыстка разгортвае junction і не выдаляе нічога па-за checkout і тэчкай зборкі задачы. Каманды ніжэй выкананыя на Windows-хасце ўладальніка ў клоне `D:\KUDY-592`.
+G21.36 (issue #592): `tools/android-build/` збірае debug-APK з апублікаванага checkout з уласнай хатняй тэчкай Gradle, без Gradle-дэмана, з Kotlin унутры працэсу зборкі і абмежаванымі воркерамі; чыстка разгортвае junction, правярае карані па рэальных шляхах і не выдаляе нічога па-за checkout і тэчкай зборкі задачы, а таксама падчас іншай зборкі гэтага checkout. Каманды ніжэй выкананыя на Windows-хасце ўладальніка ў клоне `D:\KUDY-592`.
 
 Каманда 1: стан хоста, на якім зроблены доказы (implementation-rules 9).
 
@@ -18,10 +18,10 @@ openjdk version "17.0.20.1" 2026-08-18
 core.autocrlf: true
 ```
 
-Каманда 2: тэсты інструмента. На Windows яны ствараюць сапраўдныя junction: чужы і ўкладзены junction адхіляюцца, junction у тэчку зборкі выдаляецца як спасылка, а спыняюцца толькі JVM гэтай тэчкі зборкі. Адкат любой праверкі робіць адпаведны радок `not ok`.
+Каманда 2: тэсты інструмента. На Windows яны ствараюць сапраўдныя junction: чужы і ўкладзены junction, alias тэчкі зборкі і junction у бацькоўскім шляху мэты адхіляюцца, junction у тэчку зборкі выдаляецца як спасылка, а спыняюцца толькі JVM гэтай тэчкі зборкі. CLI-тэсты запускаюць `build` і `clean --apply` адначасова, сцэнарны скрыпт правяраецца праз `powershell -File` з занятым портам. Адкат любой праверкі робіць адпаведны радок `not ok`.
 
 ```powershell
-& { Set-Location D:\KUDY-592; node --test --test-reporter=tap tools/android-build/scoped-clean.test.mjs tools/android-build/build-config.test.mjs 2>$null | Select-String -Pattern "^(ok|not ok|1\.\.)" | ForEach-Object { $_.Line } } | ForEach-Object { [Console]::Out.Write([string]$_ + [char]10) }
+& { Set-Location D:\KUDY-592; node --test --test-reporter=tap tools/android-build/scoped-clean.test.mjs tools/android-build/build-config.test.mjs tools/android-build/cli.test.mjs tools/android-build/emulator-scenarios.test.mjs 2>$null | Select-String -Pattern "^(ok|not ok|1\.\.)" | ForEach-Object { $_.Line } } | ForEach-Object { [Console]::Out.Write([string]$_ + [char]10) }
 ```
 
 ```output
@@ -33,32 +33,42 @@ ok 5 - gradleArgs: no daemon and the task-owned Gradle home on the command line
 ok 6 - buildEnv: JDK/SDK/Gradle home/temp are per-process and point at the given paths
 ok 7 - classifyProcesses: only processes naming the build root are owned; other builds in the checkout are foreign
 ok 8 - classifyProcesses: Windows paths match case-insensitively and with either separator
-ok 9 - isInside: whole path segments only, case-folded on Windows
-ok 10 - validateBuildRoot: rejects relative, filesystem root, checkout ancestor and checkout child
-ok 11 - findCandidates: generated dirs of Gradle projects only, never src/ or non-Gradle dirs
-ok 12 - planCleanup + applyCleanup: removes owned generated outputs
-ok 13 - planCleanup: a build dir that is a junction into a foreign build root is refused and its target survives
-ok 14 - planCleanup: a nested junction leaving the roots refuses the whole directory
-ok 15 - applyCleanup: a junction into the build root is removed as a link, its target is kept
-ok 16 - planCleanup: a dangling link is refused, not guessed
-ok 17 - planCleanup: a candidate that is not git-ignored or holds tracked files is refused
-ok 18 - planCleanup: an invalid build root fails before anything is planned
-1..18
+ok 9 - cli: clean --apply is refused while a build of the same checkout holds the lock, and runs after it
+ok 10 - cli: clean --apply is refused while a build JVM of this checkout runs, even without a lock
+ok 11 - cli: a build root that aliases the checkout through a junction is refused before any command runs
+ok 12 - acquireLock: a live holder blocks, a dead holder of this host is taken over once
+ok 13 - emulator-scenarios: a busy Metro port is refused before anything starts, exit code 1
+ok 14 - emulator-scenarios: a busy emulator console or adb port is refused
+ok 15 - Test-PortOwnedBy: a listener counts as ours only inside the given process tree
+ok 16 - Get-ScenarioVerdict: exit 0 only for a complete, all-passed run with an empty crash buffer
+ok 17 - isInside: whole path segments only, case-folded on Windows
+ok 18 - validateBuildRoot: rejects relative, filesystem root, checkout ancestor and checkout child
+ok 19 - findCandidates: generated dirs of Gradle projects only, never src/ or non-Gradle dirs
+ok 20 - planCleanup + applyCleanup: removes owned generated outputs
+ok 21 - planCleanup: a build dir that is a junction into a foreign build root is refused and its target survives
+ok 22 - planCleanup: a nested junction leaving the roots refuses the whole directory
+ok 23 - applyCleanup: a junction into the build root is removed as a link, its target is kept
+ok 24 - planCleanup: a dangling link is refused, not guessed
+ok 25 - planCleanup: a candidate that is not git-ignored or holds tracked files is refused
+ok 26 - planCleanup: an invalid build root fails before anything is planned
+ok 27 - resolveRoots: a build root that is a junction to the checkout, its parent, a dir inside it or a drive root is refused
+ok 28 - planCleanup: a junction in a candidate parent path is refused even when the build root aliases the foreign dir
+1..28
 ```
 
 Каманда 3: кантраляванае ўзнаўленне з запісаных журналаў. Пакуль адзін файл выніку `compileKotlin` адкрыты (D1), Gradle не можа выдаліць вынікі і зборка падае; без гэтага (A, C, D2) задача праходзіць.
 
 ```powershell
-& { Set-Location D:\KUDY-592; Select-String -Path docs\testing\evidence\2026-10-08-g2136\repro-summary.log -Pattern "^STEP" | ForEach-Object { ($_.Line -replace " sec=\d+", "") -replace "in \d+m \d+s", "in <???>" } } | ForEach-Object { [Console]::Out.Write([string]$_ + [char]10) }
+& { Set-Location D:\KUDY-592; Select-String -Path docs\testing\evidence\2026-10-08-g2136\repro-summary.log -Pattern "^STEP" | ForEach-Object { ($_.Line -replace " sec=\d+", "") -replace "in \d+m \d+s", "in <time>" } } | ForEach-Object { [Console]::Out.Write([string]$_ + [char]10) }
 ```
 
 ```output
-STEP A1-daemon exit=0 :: BUILD SUCCESSFUL in <???>
-STEP A2-daemon-rerun exit=0 :: BUILD SUCCESSFUL in <???>
-STEP C1-inprocess exit=0 :: BUILD SUCCESSFUL in <???>
-STEP C2-inprocess-rerun exit=0 :: BUILD SUCCESSFUL in <???>
-STEP D1-locked exit=1 :: FAILURE: Build failed with an exception. | > java.io.IOException: Unable to delete directory 'D:\KUDY-592\node_modules\expo-dev-launcher\expo-dev-launcher-gradle-plugin\build\classes\kotlin\main' | BUILD FAILED in <???>
-STEP D2-released exit=0 :: BUILD SUCCESSFUL in <???>
+STEP A1-daemon exit=0 :: BUILD SUCCESSFUL in <time>
+STEP A2-daemon-rerun exit=0 :: BUILD SUCCESSFUL in <time>
+STEP C1-inprocess exit=0 :: BUILD SUCCESSFUL in <time>
+STEP C2-inprocess-rerun exit=0 :: BUILD SUCCESSFUL in <time>
+STEP D1-locked exit=1 :: FAILURE: Build failed with an exception. | > java.io.IOException: Unable to delete directory 'D:\KUDY-592\node_modules\expo-dev-launcher\expo-dev-launcher-gradle-plugin\build\classes\kotlin\main' | BUILD FAILED in <time>
+STEP D2-released exit=0 :: BUILD SUCCESSFUL in <time>
 ```
 
 Каманда 4: запісы дзвюх свежых зборак `assembleDebug` (другая з `--rerun-tasks`): код выхаду, памер і SHA-256 APK.
@@ -106,4 +116,21 @@ passed Large font keeps all language buttons visible
 passed Large font grows the language label
 passed Large font keeps all Explore links visible
 passed Background return preserves KUDY screen and English
+```
+
+Каманда 6: паўторны прагон таго самага APK пасля правак па рэвью PR #689 — скрыпт з праверкай партоў і ўласнасці эмулятара і з кодам выхаду па выніку.
+
+```powershell
+& { Set-Location D:\KUDY-592; $r = Get-Content docs\testing\evidence\2026-10-08-g2136\android-review\results.json -Raw -Encoding UTF8 | ConvertFrom-Json; "checks=$($r.totals.checks)/$($r.totals.expected) passed=$($r.totals.passed) failed=$($r.totals.failed) crashBufferLines=$($r.crashBufferLines) exitCode=$($r.exitCode) failureReasons=$(@($r.failureReasons).Count)"; Select-String -Path docs\testing\evidence\2026-10-08-g2136\android-review\scenarios.log -Pattern "^(== |EXIT|NOT OK)" | ForEach-Object { $_.Line } } | ForEach-Object { [Console]::Out.Write([string]$_ + [char]10) }
+```
+
+```output
+checks=26/26 passed=26 failed=0 crashBufferLines=0 exitCode=0 failureReasons=0
+== ports
+== emulator
+== metro
+== scenarios
+== large font
+== background
+EXIT 0
 ```

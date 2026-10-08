@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { applyCleanup, findCandidates, gitOwnership, isInside, planCleanup, validateBuildRoot } from './scoped-clean.mjs';
+import { applyCleanup, findCandidates, gitOwnership, isInside, planCleanup, resolveRoots, validateBuildRoot } from './scoped-clean.mjs';
 
 function write(file, text = 'x') {
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -148,4 +148,51 @@ test('planCleanup: an invalid build root fails before anything is planned', (t) 
     () => planCleanup({ checkoutRoot: checkout, buildRoot: path.dirname(checkout), candidates: [], ownership: gitOwnership(checkout) }),
     /must not contain the checkout/,
   );
+});
+
+// Review finding [key: unresolved-build-root-boundary]: the build root and the
+// candidates are trusted only by their canonical paths.
+test('resolveRoots: a build root that is a junction to the checkout, its parent, a dir inside it or a drive root is refused', (t) => {
+  const { checkout } = fixture(t);
+  const base = path.dirname(checkout);
+  const cases = [
+    [checkout, /must not contain the checkout/],
+    [base, /must not contain the checkout/],
+    [path.join(checkout, 'node_modules'), /outside the checkout/],
+    [path.parse(base).root, /filesystem root|must not contain the checkout/],
+  ];
+  for (const [target, pattern] of cases) {
+    const alias = path.join(base, `alias-${cases.findIndex(([x]) => x === target)}`);
+    link(target, alias);
+    assert.throws(() => resolveRoots(alias, checkout), pattern, `alias to ${target}`);
+    assert.throws(
+      () => planCleanup({ checkoutRoot: checkout, buildRoot: alias, candidates: findCandidates(checkout), ownership: gitOwnership(checkout) }),
+      pattern,
+    );
+  }
+  // A not-yet-existing build root under a junction is resolved through it too.
+  const parentAlias = path.join(base, 'parent-alias');
+  link(checkout, parentAlias);
+  assert.throws(() => resolveRoots(path.join(parentAlias, 'new-build-root'), checkout), /outside the checkout/);
+});
+
+test('planCleanup: a junction in a candidate parent path is refused even when the build root aliases the foreign dir', (t) => {
+  const { checkout } = fixture(t);
+  const base = path.dirname(checkout);
+  // The reviewer's reproduction: checkout/android -> shared/foreign, and the
+  // build root is an alias of shared/, so the resolved candidate
+  // shared/foreign/app/build would look like it lives in an allowed root.
+  const shared = path.join(base, 'shared');
+  write(path.join(shared, 'foreign', 'build.gradle'));
+  write(path.join(shared, 'foreign', 'app', 'build', 'Other.class'), 'not ours');
+  fs.rmSync(path.join(checkout, 'android'), { recursive: true });
+  link(path.join(shared, 'foreign'), path.join(checkout, 'android'));
+  const buildAlias = path.join(base, 'build-alias');
+  link(shared, buildAlias);
+  const candidate = path.join(checkout, 'android', 'app', 'build');
+  const plan = planCleanup({ checkoutRoot: checkout, buildRoot: buildAlias, candidates: findCandidates(checkout), ownership: gitOwnership(checkout) });
+  assert.match(plan.refused.find((item) => item.path === candidate)?.reason ?? '', /link in the parent path/);
+  assert.equal(plan.remove.some((item) => item.path === candidate), false);
+  applyCleanup(plan);
+  assert.equal(fs.readFileSync(path.join(shared, 'foreign', 'app', 'build', 'Other.class'), 'utf8'), 'not ours');
 });

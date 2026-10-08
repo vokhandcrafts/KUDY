@@ -12,7 +12,8 @@ import crypto from 'node:crypto';
 import { spawn, spawnSync, execFileSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
-import { applyCleanup, findCandidates, gitOwnership, planCleanup } from './scoped-clean.mjs';
+import { applyCleanup, findCandidates, gitOwnership, planCleanup, resolveRoots } from './scoped-clean.mjs';
+import { acquireLock, lockPath } from './checkout-lock.mjs';
 import { buildEnv, classifyProcesses, gradleArgs, gradleUserProperties, resolveOptions, taskPaths } from './build-config.mjs';
 
 const checkoutRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -111,7 +112,19 @@ function preflight(options) {
   return { info, errors };
 }
 
+// Exit codes: 0 ok, 1 failure, 2 cleanup target refused, 3 active build
+// process, 64 usage, 75 checkout locked by another build/clean.
 function clean(options, apply) {
+  if (apply) {
+    // Deleting outputs under a running build loses its results or breaks it,
+    // and unlocked files would go silently; refuse instead of racing it.
+    const blockers = blockingProcesses(processReport(options));
+    if (blockers.length > 0) {
+      for (const line of blockers) console.error(`clean: ${line}`);
+      console.error('clean: a build process of this checkout or build root is running; nothing was deleted');
+      return 3;
+    }
+  }
   const plan = planCleanup({
     checkoutRoot, buildRoot: options.buildRoot, candidates: findCandidates(checkoutRoot), ownership: gitOwnership(checkoutRoot),
   });
@@ -218,6 +231,22 @@ async function build(options) {
   return exitCode;
 }
 
+// Taken before the process checks and held until the operation ends.
+async function withCheckoutLock(commandName, operation) {
+  const file = lockPath(checkoutRoot);
+  const lock = acquireLock(file, commandName);
+  if (lock.holder) {
+    console.error(`android-build: ${commandName} refused: the checkout is locked by ${JSON.stringify(lock.holder)} (${file})`);
+    return 75;
+  }
+  process.once('exit', lock.release);
+  try {
+    return await operation();
+  } finally {
+    lock.release();
+  }
+}
+
 async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv, allowPositionals: true,
@@ -235,11 +264,17 @@ async function main(argv) {
     return 64;
   }
   const { options } = resolved;
+  try {
+    resolveRoots(options.buildRoot, checkoutRoot);
+  } catch (error) {
+    console.error(`android-build: ${error.message}`);
+    return 64;
+  }
   switch (commandName) {
     case 'preflight': return preflight(options).errors.length === 0 ? 0 : 1;
-    case 'clean': return clean(options, Boolean(values.apply));
+    case 'clean': return values.apply ? withCheckoutLock('clean --apply', () => clean(options, true)) : clean(options, false);
     case 'stop-owned': return stopOwned(options);
-    case 'build': return build(options);
+    case 'build': return withCheckoutLock('build', () => build(options));
     default:
       console.error('usage: android-build.mjs <preflight|clean|build|stop-owned> --build-root <abs dir> [--sdk <dir>] [--jdk <dir>] [--max-workers 2] [--gradle-heap 3g] [--abi x86_64] [--timeout-minutes 90] [--ro-dep-cache <dir>] [--rerun-tasks] [--apply]');
       return 64;

@@ -6,7 +6,8 @@
 // resolved first (junctions included) and must stay inside the task-owned
 // roots: the published checkout and the explicit --build-root. Anything else
 // is refused with a reason, and the CLI deletes nothing while any target is
-// refused.
+// refused. Both roots are compared by their canonical (real) paths, so a
+// junctioned build root or a junction above a candidate cannot widen them.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -124,6 +125,37 @@ export function validateBuildRoot(buildRoot, checkoutRoot) {
   return null;
 }
 
+// Real path of `target`; a path that does not exist yet resolves through its
+// nearest existing ancestor, so a junction anywhere above it is still seen.
+export function canonicalPath(target) {
+  const rest = [];
+  let current = path.resolve(target);
+  for (;;) {
+    const real = realpathOrNull(current);
+    if (real !== null) return path.join(real, ...rest.reverse());
+    const parent = path.dirname(current);
+    if (parent === current) return path.resolve(target);
+    rest.push(path.basename(current));
+    current = parent;
+  }
+}
+
+// The lexical checks of validateBuildRoot repeated on canonical paths: a
+// build root that is a junction (or sits under one) must not alias a drive
+// root, the checkout, an ancestor of the checkout or a directory inside it.
+// Returns the canonical roots that cleanup may trust.
+export function resolveRoots(buildRoot, checkoutRoot) {
+  const lexicalError = validateBuildRoot(buildRoot, checkoutRoot);
+  if (lexicalError) throw new Error(lexicalError);
+  const checkout = fs.realpathSync.native(checkoutRoot);
+  const build = canonicalPath(buildRoot);
+  const canonicalError = validateBuildRoot(build, checkout);
+  if (canonicalError) {
+    throw new Error(`${canonicalError} (--build-root ${path.resolve(buildRoot)} resolves to ${build}, the checkout to ${checkout})`);
+  }
+  return { checkout, build };
+}
+
 function nestedLinks(dir, out) {
   for (const entry of readEntries(dir)) {
     const full = path.join(dir, entry.name);
@@ -136,9 +168,8 @@ function nestedLinks(dir, out) {
 // Pure planning step: nothing is deleted here. Every refusal carries a reason
 // so a successor sees why a directory was kept.
 export function planCleanup({ checkoutRoot, buildRoot, candidates, ownership }) {
-  const rootError = validateBuildRoot(buildRoot, checkoutRoot);
-  if (rootError) throw new Error(rootError);
-  const allowed = [fs.realpathSync.native(checkoutRoot), fs.realpathSync.native(buildRoot)];
+  const roots = resolveRoots(buildRoot, checkoutRoot);
+  const allowed = [roots.checkout, roots.build];
   const insideAllowed = (target) => allowed.some((root) => isInside(target, root));
   const remove = [];
   const refused = [];
@@ -147,6 +178,16 @@ export function planCleanup({ checkoutRoot, buildRoot, candidates, ownership }) 
     const rel = path.relative(checkoutRoot, candidate);
     if (!isInside(candidate, checkoutRoot)) {
       refused.push({ path: candidate, reason: 'candidate is outside the checkout' });
+      continue;
+    }
+    // A link anywhere between the checkout and the candidate (android/ or a
+    // package dir junctioned elsewhere) would make the delete land outside
+    // the checkout even when the candidate itself is a plain directory.
+    const parentRel = path.relative(checkoutRoot, path.dirname(candidate));
+    const realParent = realpathOrNull(path.dirname(candidate));
+    const expectedParent = path.join(roots.checkout, parentRel);
+    if (realParent === null || caseFold(realParent) !== caseFold(expectedParent)) {
+      refused.push({ path: candidate, reason: `a link in the parent path leads elsewhere: ${path.dirname(candidate)} -> ${realParent}` });
       continue;
     }
     const stat = fs.lstatSync(candidate);

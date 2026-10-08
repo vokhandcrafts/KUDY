@@ -1,0 +1,19 @@
+== ports
+== emulator
+emulator pid=30200
+device: {"serial":"emulator-5558","avd":"KUDY_API36","android":"16","api":"36","abi":"x86_64","screen":"1080x2400","density":"420"}
+installed: versionName=0.1.0; lastUpdateTime=2026-10-08 03:07:22
+== metro
+metro pid=18876
+metro status: packager-status:running
+== scenarios
+FAIL Cold launch reaches Explore
+FAIL Catalog has a visible unavailable message
+FATAL no link-nearby on explore-be @ line 60
+TOTALS {"checks":2,"expected":26,"passed":0,"failed":2}
+metro stopped (own pid 18876)
+emulator stopped (own pid 30200)
+NOT OK fatal: no link-nearby on explore-be @ line 60
+NOT OK incomplete scenario set: 2 of 26 checks ran
+NOT OK failed checks: Cold launch reaches Explore; Catalog has a visible unavailable message
+EXIT 1
