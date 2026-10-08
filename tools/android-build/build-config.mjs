@@ -65,18 +65,32 @@ export function resolveOptions(raw, { checkoutRoot, env }) {
   };
 }
 
+// Gradle splits org.gradle.jvmargs at whitespace unless an argument is in
+// double quotes, so a path-bearing argument is always quoted: unquoted, a
+// build root such as D:\build root makes the forked build JVM look for the
+// main class "root/tmp" [key: unquoted-gradle-tmp-path]. Paths cannot contain
+// a double quote (resolveOptions rejects it).
+export const jvmArg = (arg) => `"${arg}"`;
+
+// gradle.properties is read as ISO-8859-1: a non-ASCII character in a path is
+// written as a \uXXXX escape so the JVM receives the path unchanged. Paths
+// here use forward slashes, so the value has no backslash to escape.
+export const propertyValue = (value) =>
+  value.replace(/[^\x20-\x7e]/g, (ch) => `\\u${ch.charCodeAt(0).toString(16).padStart(4, '0')}`);
+
 // gradle.properties for the task-owned GRADLE_USER_HOME. Properties there
 // override the generated android/gradle.properties for every build of the
 // composite (app, native modules and the included plugin builds) without
 // touching any tracked or global file.
 export function gradleUserProperties(options) {
   const tmp = taskPaths(options.buildRoot).tmp.replaceAll('\\', '/');
+  const jvmArgs = [`-Xmx${options.gradleHeap}`, '-XX:MaxMetaspaceSize=1g', '-Dfile.encoding=UTF-8', jvmArg(`-Djava.io.tmpdir=${tmp}`)];
   return [
     '# Written by tools/android-build/android-build.mjs (G21.36). Task-owned Gradle home only.',
     // No daemon survives the build, so no idle JVM keeps output files open.
     'org.gradle.daemon=false',
     `org.gradle.workers.max=${options.maxWorkers}`,
-    `org.gradle.jvmargs=-Xmx${options.gradleHeap} -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8 -Djava.io.tmpdir=${tmp}`,
+    `org.gradle.jvmargs=${propertyValue(jvmArgs.join(' '))}`,
     // Kotlin compiles inside the build JVM instead of a separate compile
     // daemon that outlives a failed build and holds compileKotlin outputs.
     'kotlin.compiler.execution.strategy=in-process',

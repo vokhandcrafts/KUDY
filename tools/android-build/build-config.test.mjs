@@ -53,9 +53,37 @@ test('gradleUserProperties: no daemon, bounded workers and heap, in-process Kotl
   const props = gradleUserProperties(options);
   assert.match(props, /^org\.gradle\.daemon=false$/m);
   assert.match(props, /^org\.gradle\.workers\.max=3$/m);
-  assert.match(props, /^org\.gradle\.jvmargs=-Xmx2g .*-Djava\.io\.tmpdir=\S*KUDY-build\/tmp$/m);
+  assert.match(props, /^org\.gradle\.jvmargs=-Xmx2g .*"-Djava\.io\.tmpdir=\S*KUDY-build\/tmp"$/m);
   assert.match(props, /^kotlin\.compiler\.execution\.strategy=in-process$/m);
   assert.match(props, /^reactNativeArchitectures=x86_64,arm64-v8a$/m);
+});
+
+// What Gradle does with org.gradle.jvmargs: java.util.Properties decodes
+// \uXXXX escapes, then the value is split at whitespace outside quotes and
+// the quotes are dropped (Gradle's ArgumentsSplitter).
+function jvmArgsAsGradleReadsThem(props) {
+  const raw = props.match(/^org\.gradle\.jvmargs=(.*)$/m)[1]
+    .replace(/\\u([0-9a-f]{4})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+  return [...raw.matchAll(/"([^"]*)"|'([^']*)'|(\S+)/g)].map((m) => m[1] ?? m[2] ?? m[3]);
+}
+
+// [key: unquoted-gradle-tmp-path]: a build root with a space (or non-ASCII
+// letters) is accepted, so it must reach the build JVM as one argument.
+test('gradleUserProperties: a build root with a space or non-ASCII letters stays one quoted tmpdir argument', () => {
+  for (const name of ['KUDY build root', 'KUDY зборка']) {
+    const root = path.resolve('/w', name);
+    const { options, errors } = optionsFor({ ...valid, 'build-root': root });
+    assert.equal(errors, undefined, `build root ${name} is accepted`);
+    const props = gradleUserProperties(options);
+    const tmp = `${root.replaceAll('\\', '/')}/tmp`;
+    assert.deepEqual(jvmArgsAsGradleReadsThem(props),
+      ['-Xmx3g', '-XX:MaxMetaspaceSize=1g', '-Dfile.encoding=UTF-8', `-Djava.io.tmpdir=${tmp}`]);
+    assert.match(props, /^org\.gradle\.jvmargs=[\x20-\x7e]*$/m, 'the jvmargs line is plain ASCII');
+    // Every path-bearing -D argument is quoted as a whole.
+    for (const unquoted of props.match(/^org\.gradle\.jvmargs=(.*)$/m)[1].replace(/"[^"]*"/g, '').split(/\s+/)) {
+      assert.doesNotMatch(unquoted, /^-D[^=]+=.*[\\/]/, `unquoted path argument ${unquoted}`);
+    }
+  }
 });
 
 test('gradleArgs: no daemon and the task-owned Gradle home on the command line', () => {

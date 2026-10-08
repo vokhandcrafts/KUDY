@@ -1,8 +1,9 @@
-// G21.36 (#592), review findings [key: emulator-port-ownership] and
-// [key: scenario-failure-exit-zero]: the scenario driver refuses busy
-// emulator/Metro ports before it starts anything, acts on a port only while
-// its listener belongs to a process it started, and exits non-zero unless
-// every expected check ran and passed. Windows PowerShell only.
+// G21.36 (#592), review findings [key: emulator-port-ownership],
+// [key: scenario-failure-exit-zero] and [key: stale-ui-dump-on-failure]: the
+// scenario driver refuses busy emulator/Metro ports before it starts anything,
+// acts on a port only while its listener belongs to a process it started,
+// exits non-zero unless every expected check ran and passed, and never
+// evaluates a UI dump older than the current attempt. Windows PowerShell only.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -84,4 +85,97 @@ $failed = @($ok[0..24]) + [pscustomobject]@{ name = 'c26'; status = 'failed' }
 ) -join ','`;
   const result = powershell(['-Command', command]);
   assert.equal(result.stdout.trim(), '0,1,1,1,1,1,1', result.stderr);
+});
+
+// A fake adb for the UI dump: `uiautomator dump` fails (or succeeds) as the
+// mode says, while `pull` of the old fixed path /sdcard/kudy-ui.xml would
+// still hand back an earlier screen, as on a device after a failed dump.
+const fakeAdbSource = `import fs from 'node:fs';
+import path from 'node:path';
+const dir = process.env.FAKE_ADB_DIR;
+const mode = process.env.FAKE_ADB_MODE;
+const args = process.argv.slice(4);
+fs.appendFileSync(path.join(dir, 'calls.log'), JSON.stringify(args) + '\\n');
+const device = (remote) => path.join(dir, 'device', path.posix.basename(remote));
+const screen = (id) => '<?xml version="1.0"?><hierarchy rotation="0"><node resource-id="' + id + '" bounds="[0,0][1,1]"/></hierarchy>';
+if (args[0] === 'shell' && args[1] === 'uiautomator') {
+  const dumps = fs.readFileSync(path.join(dir, 'calls.log'), 'utf8').split('\\n').filter((l) => l.includes('uiautomator')).length;
+  if (mode === 'dump-fails' || (mode === 'fail-once' && dumps === 1)) { console.error('ERROR: could not get idle state.'); process.exit(1); }
+  if (mode === 'dump-error-exit-0') { console.log('ERROR: null root node returned by UiTestAutomationBridge.'); process.exit(0); }
+  fs.writeFileSync(device(args[3]), screen('fresh-screen'));
+  console.log('UI hierchary dumped to: ' + args[3]);
+  process.exit(0);
+}
+if (args[0] === 'pull') {
+  const source = fs.existsSync(device(args[1])) ? device(args[1]) : device('/sdcard/kudy-ui.xml');
+  fs.copyFileSync(source, args[2]);
+  process.exit(0);
+}
+if (args[0] === 'shell' && args[1] === 'rm') { fs.rmSync(device(args[3]), { force: true }); process.exit(0); }
+process.exit(2);
+`;
+
+function fakeAdb(t) {
+  const dir = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), 'g2136-adb-')));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(dir, 'device'));
+  fs.writeFileSync(path.join(dir, 'device', 'kudy-ui.xml'),
+    '<?xml version="1.0"?><hierarchy rotation="0"><node resource-id="stale-screen" bounds="[0,0][1,1]"/></hierarchy>');
+  fs.writeFileSync(path.join(dir, 'fake-adb.mjs'), fakeAdbSource);
+  fs.writeFileSync(path.join(dir, 'adb.cmd'), `@"${process.execPath}" "%~dp0fake-adb.mjs" %*\r\n@exit /b %errorlevel%\r\n`);
+  const destination = path.join(dir, 'screen.xml');
+  // The previous run's evidence file for the same name: it must not be read either.
+  fs.copyFileSync(path.join(dir, 'device', 'kudy-ui.xml'), destination);
+  const calls = () => fs.readFileSync(path.join(dir, 'calls.log'), 'utf8').trim().split('\n').map((line) => JSON.parse(line));
+  return { dir, adb: path.join(dir, 'adb.cmd'), destination, calls };
+}
+
+function runPs(adb, mode, body) {
+  const file = path.join(adb.dir, 'probe.ps1');
+  // Same error preference as emulator-scenarios.ps1: a native command's stderr does not throw.
+  fs.writeFileSync(file, `\uFEFF$ErrorActionPreference = 'Continue'\n. ${psQuote(guards)}\n$adb = ${psQuote(adb.adb)}\n${body}\n`);
+  return spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', file],
+    { encoding: 'utf8', timeout: 120_000, env: { ...process.env, FAKE_ADB_DIR: adb.dir, FAKE_ADB_MODE: mode } });
+}
+
+const dumpProbe = (adb) => `try { $n = Get-UiDump $adb 'emulator-5680' ${psQuote(adb.destination)} -DelaySeconds 0; "RESULT $(@($n | ForEach-Object { $_.'resource-id' }) -join ',')" } catch { "THROWN $_" }`;
+
+for (const mode of ['dump-fails', 'dump-error-exit-0']) {
+  test(`Get-UiDump: a failed dump (${mode}) is retried, never pulled, and throws instead of returning the old screen`, { skip }, (t) => {
+    const adb = fakeAdb(t);
+    const result = runPs(adb, mode, dumpProbe(adb));
+    assert.match(result.stdout, /THROWN UI dump .* failed after 3 attempts/, result.stdout + result.stderr);
+    assert.doesNotMatch(result.stdout, /stale-screen/);
+    const calls = adb.calls();
+    assert.equal(calls.filter((c) => c[1] === 'uiautomator').length, 3);
+    assert.equal(calls.filter((c) => c[0] === 'pull').length, 0, 'nothing is pulled after a failed dump');
+    assert.equal(fs.existsSync(adb.destination), false, 'the previous local dump is removed');
+  });
+}
+
+test('Get-UiDump: after one failed attempt the next dump is pulled from its own device file and cleaned up', { skip }, (t) => {
+  const adb = fakeAdb(t);
+  const result = runPs(adb, 'fail-once', dumpProbe(adb));
+  assert.match(result.stdout, /^RESULT fresh-screen$/m, result.stdout + result.stderr);
+  const calls = adb.calls();
+  const dumps = calls.filter((c) => c[1] === 'uiautomator').map((c) => c[3]);
+  assert.equal(dumps.length, 2);
+  assert.notEqual(dumps[0], dumps[1], 'every attempt dumps to a new device file');
+  assert.deepEqual(calls.filter((c) => c[0] === 'pull').map((c) => c[1]), [dumps[1]]);
+  assert.deepEqual(calls.filter((c) => c[1] === 'rm').map((c) => c[3]), dumps);
+});
+
+// The reviewer's angle: take Dump and WaitFor out of the real script by AST
+// and drive them with an adb whose dump always fails.
+test('emulator-scenarios: Dump and WaitFor throw on a failed dump instead of evaluating the old screen', { skip }, (t) => {
+  const adb = fakeAdb(t);
+  const body = `$ast = [Management.Automation.Language.Parser]::ParseFile(${psQuote(script)}, [ref]$null, [ref]$null)
+foreach ($fn in $ast.FindAll({ param($a) $a -is [Management.Automation.Language.FunctionDefinitionAst] -and $a.Name -in 'Dump', 'WaitFor' }, $true)) { Invoke-Expression $fn.Extent.Text }
+$serial = 'emulator-5680'; $ev = ${psQuote(adb.dir)}
+try { $n = Dump 'screen'; "DUMP RESULT $(@($n).Count)" } catch { "DUMP THROWN $_" }
+try { $n = WaitFor 'screen' { param($n) $true } 1; "WAIT RESULT $(@($n).Count)" } catch { "WAIT THROWN $_" }`;
+  const result = runPs(adb, 'dump-fails', body);
+  assert.match(result.stdout, /^DUMP THROWN UI dump .*screen\.xml failed after 3 attempts/m, result.stdout + result.stderr);
+  assert.match(result.stdout, /^WAIT THROWN UI dump .*screen\.xml failed after 3 attempts/m);
+  assert.equal(adb.calls().filter((c) => c[0] === 'pull').length, 0);
 });

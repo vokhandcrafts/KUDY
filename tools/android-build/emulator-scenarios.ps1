@@ -31,19 +31,19 @@ $checks = [Collections.Generic.List[object]]::new()
 $emuProc = $null; $metroProc = $null; $emuOwned = $false; $crashLines = $null; $verdict = $null
 
 function Adb { $out = & $adb -s $serial @args 2>&1; if ($LASTEXITCODE -ne 0) { throw "adb $($args -join ' '): $($out -join ' ')" }; $out }
-function Dump([string]$Name) {
-  for ($i = 0; $i -lt 3; $i++) {
-    & $adb -s $serial shell uiautomator dump /sdcard/kudy-ui.xml 2>&1 | Out-Null
-    & $adb -s $serial pull /sdcard/kudy-ui.xml "$ev\$Name.xml" 2>&1 | Out-Null
-    if ($LASTEXITCODE -eq 0) { break }; Start-Sleep 2
-  }
-  [xml]$t = Get-Content "$ev\$Name.xml" -Raw -Encoding utf8
-  @($t.SelectNodes('//node'))
-}
+# A failed dump throws (after retries) instead of leaving an older screen to evaluate.
+function Dump([string]$Name) { Get-UiDump $adb $serial "$ev\$Name.xml" }
 function Shot([string]$Name) { cmd /c "`"$adb`" -s $serial exec-out screencap -p > `"$ev\$Name.png`"" }
+# While waiting, a failed dump only means "not there yet"; if the last dump before the deadline
+# failed, the wait throws rather than return a screen it did not see.
 function WaitFor([string]$Name, [scriptblock]$Pred, [int]$Seconds = 30) {
   $deadline = (Get-Date).AddSeconds($Seconds)
-  do { $n = Dump $Name; if (& $Pred $n) { return $n }; Start-Sleep 2 } while ((Get-Date) -lt $deadline)
+  do {
+    try { $n = Dump $Name; $failure = $null } catch { $n = $null; $failure = $_ }
+    if (-not $failure -and (& $Pred $n)) { return $n }
+    Start-Sleep 2
+  } while ((Get-Date) -lt $deadline)
+  if ($failure) { throw $failure }
   return $n
 }
 function Check([string]$Name, [string]$File, [bool]$Passed, [string]$Detail = '') {
