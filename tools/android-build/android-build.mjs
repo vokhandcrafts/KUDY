@@ -26,11 +26,13 @@ function listProcesses() {
     { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
     return JSON.parse(json).map((p) => ({ pid: p.ProcessId, name: p.Name, commandLine: p.CommandLine }));
   }
-  return execFileSync('ps', ['-eo', 'pid=,comm=,args='], { encoding: 'utf8' })
+  // The executable name comes from argv[0], not `comm`: `comm` is the main
+  // thread's name, which a runtime may rename (Node 24 sets "MainThread").
+  return execFileSync('ps', ['-eo', 'pid=,args='], { encoding: 'utf8' })
     .split('\n').filter(Boolean)
-    .map((line) => line.trim().match(/^(\d+)\s+(\S+)\s+(.*)$/))
+    .map((line) => line.trim().match(/^(\d+)\s+(\S+)(.*)$/))
     .filter(Boolean)
-    .map(([, pid, name, commandLine]) => ({ pid: Number(pid), name: path.basename(name), commandLine }));
+    .map(([, pid, argv0, rest]) => ({ pid: Number(pid), name: path.basename(argv0), commandLine: argv0 + rest }));
 }
 
 const short = (proc) => `${proc.pid} ${proc.name} ${proc.commandLine.slice(0, 240)}`;
