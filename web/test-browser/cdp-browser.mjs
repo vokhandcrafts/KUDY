@@ -35,17 +35,6 @@ export function findChromiumBinary() {
 }
 
 function killChild(child) {
-  const pid = child.pid;
-  // detached: true makes Chrome its own process-group leader, so a group
-  // signal also reaches helpers that stayed in the group. Crashpad
-  // double-forks out of the group; the launch flags stop it being spawned.
-  if (typeof pid === 'number') {
-    try {
-      process.kill(-pid, 'SIGKILL');
-    } catch (error) {
-      if (error?.code !== 'ESRCH') throw error;
-    }
-  }
   try {
     child.kill('SIGKILL');
   } catch (error) {
@@ -82,16 +71,14 @@ export async function launchBrowser(binary) {
       // The map needs WebGL; on headless hosts that means software GL.
       '--enable-unsafe-swiftshader',
       '--use-angle=swiftshader',
-      // The GPU watchdog can leave Chrome alive without answering DevTools.
       // --disable-crashpad-for-testing crash-loops the network service on
-      // Chrome 154 ("FD ownership violation"), so it is not set; close()
-      // kills the process group instead.
-      '--disable-gpu-watchdog',
-      '--in-process-gpu',
+      // Chrome 154 ("FD ownership violation") and aborts navigation.
+      // --in-process-gpu / --disable-gpu-watchdog made Target.createTarget
+      // time out on the CI Chrome. Neither is set.
       `--user-data-dir=${profileDir}`,
       'about:blank',
     ],
-    { detached: true, stdio: ['ignore', 'ignore', 'pipe'] },
+    { stdio: ['ignore', 'ignore', 'pipe'] },
   );
 
   try {

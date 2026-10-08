@@ -18,10 +18,9 @@ test('CDP command: a command that never replies fails within its timeout and kil
     await browser.close();
     rmSync(state.profileDir, { recursive: true, force: true });
   });
-  assert.ok(state.spawnArgs.includes('--disable-gpu-watchdog'));
-  assert.ok(state.spawnArgs.includes('--in-process-gpu'));
   assert.equal(state.spawnArgs.includes('--disable-crashpad-for-testing'), false);
-  assert.equal(state.spawnOptions.detached, true);
+  assert.equal(state.spawnArgs.includes('--in-process-gpu'), false);
+  assert.equal(state.spawnOptions.detached, undefined);
   const started = Date.now();
   await assert.rejects(
     () => browser.send('Runtime.evaluate', {}, undefined, 200),
