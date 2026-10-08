@@ -188,6 +188,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/android-build/emulator
 Пакуль скрыпт чакае экран, няўдалы дамп лічыцца «экрана яшчэ няма»; калі і апошні дамп да тайм-аўту не ўдаўся, прагон
 спыняецца.
 
+У `$BuildRoot` скрыпт піша толькі ў `evidence\android`, `logs` (`emulator.*.log`, `metro.*.log`) і `tmp` (TEMP для
+эмулятара, adb і Metro). Да першага запісу і яшчэ раз перад `results.json` ён правярае іх тымі ж правіламі, што і
+`build` (`own-paths.mjs` праз `node tools/android-build/own-paths-cli.mjs`): кожная тэчка — звычайная, з рэальным
+шляхам `<рэальны $BuildRoot>\<шлях>`, у `evidence\android` і сярод гэтых журналаў няма спасылак і жорсткіх спасылак.
+Інакш ён нічога не піша і не запускае, друкуе `REFUSED build output path: …` і выходзіць з кодам 73. Свае файлы
+папярэдняга прагону ён выдаляе перад новым запісам, а `results.json` і буфер крашаў стварае толькі як новыя файлы.
+
 ## Профілі і асяроддзі
 
 | Профіль `eas.json` | application ID (iOS `bundleIdentifier` = Android `package`) | Прызначэнне |

@@ -1,6 +1,8 @@
 // G21.36 (#592), review finding [key: build-output-link-escape]: every
 // directory and file the build writes (Gradle home, temp, logs, records and
 // the Gradle home's gradle.properties) must be the build root's own entry.
+// emulator-scenarios.ps1 applies the same rules to its evidence, logs and
+// temp through own-paths-cli.mjs, so this file is the one source of them.
 // The build root itself is checked by resolveRoots; a junction or symlink
 // below it (say gradle-home pointing at a shared Gradle home) would make the
 // build write into someone else's directory, so such paths are refused before
@@ -51,10 +53,12 @@ function ensureOwnDir(dir, expected, create) {
   if (!samePath(real, expected)) throw new OwnPathError(`${dir} resolves to ${real}, not to its place ${expected} in the build root`);
 }
 
-// Creates the build root and its task-owned directories, or verifies the
-// existing ones; with create=false (preflight) it only checks what exists.
-// Returns taskPaths(buildRoot). Throws OwnPathError.
-export function prepareOwnDirs(buildRoot, checkoutRoot, { create = true } = {}) {
+// Creates the build root and the given directories below it (relative paths,
+// default: the build's task-owned directories), or verifies the existing
+// ones; with create=false (preflight) it only checks what exists. A nested
+// path such as evidence/android is checked segment by segment. Returns
+// taskPaths(buildRoot). Throws OwnPathError.
+export function prepareOwnDirs(buildRoot, checkoutRoot, { create = true, dirs } = {}) {
   if (create) fs.mkdirSync(buildRoot, { recursive: true });
   let build;
   try {
@@ -63,7 +67,16 @@ export function prepareOwnDirs(buildRoot, checkoutRoot, { create = true } = {}) 
     throw new OwnPathError(error.message);
   }
   const paths = taskPaths(buildRoot);
-  for (const dir of Object.values(paths)) ensureOwnDir(dir, path.join(build, path.basename(dir)), create);
+  const relative = dirs ?? Object.values(paths).map((dir) => path.basename(dir));
+  for (const rel of relative) {
+    const segments = rel.split(/[\\/]+/).filter(Boolean);
+    if (segments.length === 0 || segments.includes('..') || segments.includes('.')) throw new OwnPathError(`${rel} is not a plain path below the build root`);
+    for (let i = 1; i <= segments.length; i += 1) {
+      const dir = path.join(buildRoot, ...segments.slice(0, i));
+      if (!create && !lstatOrNull(dir)) break;
+      ensureOwnDir(dir, path.join(build, ...segments.slice(0, i)), create);
+    }
+  }
   return paths;
 }
 
@@ -74,6 +87,18 @@ export function checkOwnFile(file) {
   if (stat?.isSymbolicLink()) throw new OwnPathError(`${file} is a link to ${linkTarget(file)}; refusing to write through it`);
   if (stat && !stat.isFile()) throw new OwnPathError(`${file} exists and is not a regular file`);
   if (stat && stat.nlink > 1) throw new OwnPathError(`${file} has ${stat.nlink} hard links; writing it would change the other names too`);
+}
+
+// Every existing entry of an own directory whose files get overwritten: no
+// link (file or directory) and no file with other hard links. Plain
+// subdirectories are left alone; nothing writes into them.
+export function checkOwnEntries(dir) {
+  for (const entry of fs.readdirSync(dir)) {
+    const target = path.join(dir, entry);
+    const stat = fs.lstatSync(target);
+    if (stat.isDirectory()) continue;
+    checkOwnFile(target);
+  }
 }
 
 // Replaces a file in a directory checked by prepareOwnDirs, after checkOwnFile.

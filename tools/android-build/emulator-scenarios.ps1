@@ -5,7 +5,11 @@
 # Every root is a parameter; environment changes stay in this process. Busy emulator/Metro ports
 # are refused before anything starts, and the serial and the Metro port are acted on only while
 # their listener belongs to a process this script started; only those processes are stopped.
-# Exit code: 0 only when all checks ran and passed with an empty crash buffer, otherwise 1.
+# Every build-root path it writes (evidence\android, logs, tmp) is checked with the own-paths.mjs rules of
+# android-build before the first write and again before the results are written; a junction, symlink or hard link
+# there is refused instead of followed.
+# Exit code: 0 only when all checks ran and passed with an empty crash buffer, 73 when a build-root output path is
+# refused, otherwise 1.
 param(
   [Parameter(Mandatory)][string]$BuildRoot,
   [Parameter(Mandatory)][string]$Sdk,
@@ -22,7 +26,10 @@ if (-not $Checkout) { $Checkout = (Resolve-Path (Join-Path $PSScriptRoot '..\..'
 $ExpectedChecks = 26
 $serial = "emulator-$EmuPort"
 $ev = "$BuildRoot\evidence\android"
-New-Item -ItemType Directory $ev -Force | Out-Null
+$logNames = 'emulator.out.log', 'emulator.err.log', 'metro.out.log', 'metro.err.log'
+$ownPaths = @('--dir', 'tmp', '--entries', 'evidence/android') + @($logNames | ForEach-Object { '--file', "logs/$_" })
+$pathRefused = Test-OwnBuildPaths $BuildRoot $Checkout $ownPaths
+if ($pathRefused) { "REFUSED build output path: $pathRefused"; 'EXIT 73'; exit 73 }
 $adb = "$Sdk\platform-tools\adb.exe"
 $env:ANDROID_HOME = $Sdk; $env:ANDROID_SDK_ROOT = $Sdk; $env:ANDROID_AVD_HOME = $AvdHome
 $env:ANDROID_USER_HOME = $AndroidUserHome; $env:ANDROID_EMULATOR_HOME = $AndroidUserHome
@@ -33,7 +40,7 @@ $emuProc = $null; $metroProc = $null; $emuOwned = $false; $crashLines = $null; $
 function Adb { $out = & $adb -s $serial @args 2>&1; if ($LASTEXITCODE -ne 0) { throw "adb $($args -join ' '): $($out -join ' ')" }; $out }
 # A failed dump throws (after retries) instead of leaving an older screen to evaluate.
 function Dump([string]$Name) { Get-UiDump $adb $serial "$ev\$Name.xml" }
-function Shot([string]$Name) { cmd /c "`"$adb`" -s $serial exec-out screencap -p > `"$ev\$Name.png`"" }
+function Shot([string]$Name) { [IO.File]::Delete("$ev\$Name.png"); cmd /c "`"$adb`" -s $serial exec-out screencap -p > `"$ev\$Name.png`"" }
 # While waiting, a failed dump only means "not there yet"; if the last dump before the deadline
 # failed, the wait throws rather than return a screen it did not see.
 function WaitFor([string]$Name, [scriptblock]$Pred, [int]$Seconds = 30) {
@@ -73,9 +80,12 @@ function Assert-OwnEmulator {
   if (-not ($emuProc -and (Test-PortOwnedBy $EmuPort $emuProc.Id))) { throw "$serial is not served by the emulator this script started (pid $($emuProc.Id)); refusing to act on it" }
 }
 function Write-Results {
+  # The paths are checked again: the run takes minutes, and nothing is written through a link that appeared meanwhile.
+  $script:pathRefused = Test-OwnBuildPaths $BuildRoot $Checkout $ownPaths
+  if ($script:pathRefused) { "REFUSED build output path: $($script:pathRefused)"; return }
   if ($script:emuOwned) {
     $crash = @(& $adb -s $serial logcat -b crash -d 2>&1)
-    $crash | Set-Content "$ev\android-crash.log" -Encoding utf8
+    Write-NewFile "$ev\android-crash.log" $crash
     $script:crashLines = $crash.Count
   }
   $script:verdict = Get-ScenarioVerdict $script:fatal $checks.ToArray() $ExpectedChecks $script:crashLines
@@ -88,7 +98,7 @@ function Write-Results {
     checks = $checks.ToArray(); fatal = $script:fatal; crashBufferLines = $script:crashLines; restoredFontScale = "$fontAfter"
     exitCode = $script:verdict.exitCode; failureReasons = $script:verdict.reasons
   }
-  $summary | ConvertTo-Json -Depth 6 | Set-Content "$ev\results.json" -Encoding utf8
+  Write-NewFile "$ev\results.json" @($summary | ConvertTo-Json -Depth 6)
   "TOTALS $($summary.totals | ConvertTo-Json -Compress)"
 }
 $fatal = $null; $pkg = @(); $device = $null; $fontAfter = $null
@@ -105,6 +115,7 @@ try {
   if (@(& $adb devices 2>$null) -match "^$serial\s") { throw "$serial is already listed by adb; refusing to act on a device this script did not start" }
 
   "== emulator"
+  foreach ($name in $logNames[0..1]) { [IO.File]::Delete("$BuildRoot\logs\$name") }
   $emuProc = Start-Process "$Sdk\emulator\emulator.exe" -ArgumentList @('-avd', $Avd, '-port', $EmuPort, '-read-only', '-no-snapshot', '-no-boot-anim', '-no-audio', '-memory', '2048', '-cores', '2', '-gpu', 'swiftshader_indirect') -PassThru -RedirectStandardOutput "$BuildRoot\logs\emulator.out.log" -RedirectStandardError "$BuildRoot\logs\emulator.err.log"
   $null = $emuProc.Handle  # keeps the exit code readable in Windows PowerShell 5.1
   "emulator pid=$($emuProc.Id)"
@@ -127,6 +138,7 @@ try {
   "== metro"
   $env:CI = '1'; $env:EXPO_NO_TELEMETRY = '1'
   if ((Get-BusyPorts @($MetroPort)).Count -gt 0) { throw "Metro port $MetroPort became busy; refusing to use a server this script did not start" }
+  foreach ($name in $logNames[2..3]) { [IO.File]::Delete("$BuildRoot\logs\$name") }
   $metroProc = Start-Process node -ArgumentList @("$Checkout\node_modules\expo\bin\cli", 'start', '--dev-client', '--port', $MetroPort, '--max-workers', '2') -WorkingDirectory $Checkout -PassThru -RedirectStandardOutput "$BuildRoot\logs\metro.out.log" -RedirectStandardError "$BuildRoot\logs\metro.err.log" -WindowStyle Hidden
   $null = $metroProc.Handle
   "metro pid=$($metroProc.Id)"
@@ -258,5 +270,6 @@ try {
 }
 if (-not $verdict) { $verdict = Get-ScenarioVerdict $fatal $checks.ToArray() $ExpectedChecks $crashLines }
 foreach ($reason in $verdict.reasons) { "NOT OK $reason" }
+if ($pathRefused) { "NOT OK build output path refused: $pathRefused"; 'EXIT 73'; exit 73 }
 "EXIT $($verdict.exitCode)"
 exit $verdict.exitCode

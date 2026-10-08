@@ -3,7 +3,9 @@
 // scenario driver refuses busy emulator/Metro ports before it starts anything,
 // acts on a port only while its listener belongs to a process it started,
 // exits non-zero unless every expected check ran and passed, and never
-// evaluates a UI dump older than the current attempt. Windows PowerShell only.
+// evaluates a UI dump older than the current attempt. [key: build-output-link-escape]:
+// it writes into the build root only through its own directories and files.
+// Windows PowerShell only.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -29,14 +31,16 @@ async function listen(t) {
   return server.address().port;
 }
 
+// The SDK has no emulator or adb: a run that got past the port check would
+// fail differently, and nothing can be started.
+const scenarioRun = (base, ports) => powershell(['-File', script, '-BuildRoot', base, '-Sdk', path.join(base, 'no-sdk'),
+  '-AvdHome', path.join(base, 'avd'), '-AndroidUserHome', path.join(base, 'user'), '-Avd', 'NONE',
+  '-Apk', path.join(base, 'missing.apk'), '-EmuPort', String(ports.emu), '-MetroPort', String(ports.metro)]);
+
 function runScenarios(t, ports) {
   const base = fs.mkdtempSync(path.join(os.tmpdir(), 'g2136-emu-'));
   t.after(() => fs.rmSync(base, { recursive: true, force: true }));
-  // The SDK has no emulator or adb: a run that got past the port check would
-  // fail differently, and nothing can be started.
-  const result = powershell(['-File', script, '-BuildRoot', base, '-Sdk', path.join(base, 'no-sdk'),
-    '-AvdHome', path.join(base, 'avd'), '-AndroidUserHome', path.join(base, 'user'), '-Avd', 'NONE',
-    '-Apk', path.join(base, 'missing.apk'), '-EmuPort', String(ports.emu), '-MetroPort', String(ports.metro)]);
+  const result = scenarioRun(base, ports);
   const results = JSON.parse(fs.readFileSync(path.join(base, 'evidence', 'android', 'results.json'), 'utf8').replace(/^\uFEFF/, ''));
   return { result, results };
 }
@@ -62,6 +66,69 @@ test('emulator-scenarios: a busy emulator console or adb port is refused', { ski
   const second = runScenarios(t, { emu: adbPort - 1, metro: 8099 });
   assert.equal(second.result.status, 1);
   assert.match(second.result.stdout, new RegExp(`already in use: .*\\b${adbPort}\\b`));
+});
+
+function linkFixture(t) {
+  const base = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), 'g2136-emu-')));
+  t.after(() => fs.rmSync(base, { recursive: true, force: true }));
+  const foreign = path.join(base, 'foreign');
+  fs.mkdirSync(foreign);
+  fs.writeFileSync(path.join(foreign, 'results.json'), 'KEEP\n');
+  fs.writeFileSync(path.join(foreign, 'emulator.out.log'), 'KEEP\n');
+  const root = path.join(base, 'build-root');
+  const files = () => Object.fromEntries(fs.readdirSync(foreign).map((name) => [name, fs.readFileSync(path.join(foreign, name), 'utf8')]));
+  return { root, foreign, files };
+}
+
+function assertRefusedBeforeWriting(result, f, before, reason) {
+  assert.equal(result.status, 73, result.stdout + result.stderr);
+  assert.match(result.stdout, new RegExp(`REFUSED build output path: own-paths: refused: .*${reason}`));
+  assert.doesNotMatch(result.stdout, /== ports|emulator pid=|metro pid=/, 'refused before anything else ran');
+  assert.deepEqual(f.files(), before, 'the foreign directory is unchanged');
+}
+
+for (const rel of ['tmp', 'logs', 'evidence', 'evidence\\android']) {
+  test(`emulator-scenarios: ${rel} as a junction out of the build root is refused before the first write, exit 73`, { skip }, (t) => {
+    const f = linkFixture(t);
+    fs.mkdirSync(path.dirname(path.join(f.root, rel)), { recursive: true });
+    fs.symlinkSync(f.foreign, path.join(f.root, rel), 'junction');
+    const before = f.files();
+    assertRefusedBeforeWriting(scenarioRun(f.root, { emu: 5680, metro: 8099 }), f, before, 'is a link to');
+  });
+}
+
+for (const [kind, rel] of [['hard link', 'evidence\\android\\results.json'], ['hard link', 'logs\\emulator.out.log'], ['symlink', 'evidence\\android\\results.json']]) {
+  test(`emulator-scenarios: ${rel} as a ${kind} to a foreign file is refused before the first write`, { skip }, (t) => {
+    const f = linkFixture(t);
+    const own = path.join(f.root, rel);
+    fs.mkdirSync(path.dirname(own), { recursive: true });
+    const foreignFile = path.join(f.foreign, path.basename(rel));
+    try {
+      if (kind === 'symlink') fs.symlinkSync(foreignFile, own, 'file');
+      else fs.linkSync(foreignFile, own);
+    } catch (error) {
+      if (error.code === 'EPERM') return t.skip('creating a file symlink needs the symlink privilege on this host');
+      throw error;
+    }
+    const before = f.files();
+    assertRefusedBeforeWriting(scenarioRun(f.root, { emu: 5680, metro: 8099 }), f, before, kind === 'symlink' ? 'is a link to' : 'has 2 hard links');
+  });
+}
+
+test('Write-NewFile: replaces a hard-linked name without changing the other name, and refuses a directory', { skip }, (t) => {
+  const f = linkFixture(t);
+  fs.mkdirSync(f.root);
+  const linked = path.join(f.root, 'results.json');
+  fs.linkSync(path.join(f.foreign, 'results.json'), linked);
+  const junction = path.join(f.root, 'android-crash.log');
+  fs.symlinkSync(f.foreign, junction, 'junction');
+  const before = f.files();
+  const result = powershell(['-Command', `. ${psQuote(guards)}; Write-NewFile ${psQuote(linked)} @('new', 'lines'); try { Write-NewFile ${psQuote(junction)} @('x'); 'WROTE' } catch { 'THROWN' }`]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /THROWN/);
+  assert.equal(fs.readFileSync(linked, 'utf8'), '\uFEFFnew\r\nlines\r\n');
+  assert.equal(fs.statSync(linked).nlink, 1);
+  assert.deepEqual(f.files(), before, 'the foreign files are unchanged');
 });
 
 test('Test-PortOwnedBy: a listener counts as ours only inside the given process tree', { skip }, async (t) => {

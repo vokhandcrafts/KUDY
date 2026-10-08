@@ -73,3 +73,29 @@ function Get-UiDump([string]$Adb, [string]$Serial, [string]$Destination, [int]$A
   }
   throw "UI dump $Destination failed after $Attempts attempts: $($failures -join '; ')"
 }
+
+# Build-root output paths [key: build-output-link-escape]: the rules live in own-paths.mjs (the same ones `build` uses) and
+# run here through own-paths-cli.mjs before the caller writes: each directory is created if missing and must be a plain
+# directory whose real path is <real build root>\<name>; files and directory entries must not be links or hard links.
+# Returns $null when every path is the build root's own, otherwise the reason.
+function Test-OwnBuildPaths([string]$BuildRoot, [string]$Checkout, [string[]]$Arguments) {
+  $ErrorActionPreference = 'Continue'
+  $cli = Join-Path $PSScriptRoot 'own-paths-cli.mjs'
+  $out = @(& node $cli --build-root $BuildRoot --checkout $Checkout @Arguments 2>&1 | ForEach-Object { "$_" })
+  $code = $LASTEXITCODE
+  if ($code -eq 0) { return $null }
+  $reason = ($out -join ' ').Trim()
+  if (-not $reason) { $reason = "own-paths-cli.mjs exited $code" }
+  return $reason
+}
+
+# Writes a file the script owns: an earlier run's file of that name is deleted first (deleting a link removes only the
+# link; a directory there makes Delete throw), then the file is created with CreateNew, so an entry that appears in
+# between is an error instead of being followed. UTF-8 with BOM and CRLF lines, as Set-Content -Encoding utf8 wrote.
+function Write-NewFile([string]$Path, [object[]]$Lines) {
+  [IO.File]::Delete($Path)
+  $encoding = [Text.UTF8Encoding]::new($true)
+  [byte[]]$bytes = @($encoding.GetPreamble()) + @($encoding.GetBytes((@($Lines | ForEach-Object { "$_`r`n" }) -join '')))
+  $stream = [IO.File]::Open($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+  try { $stream.Write($bytes, 0, $bytes.Length) } finally { $stream.Dispose() }
+}
