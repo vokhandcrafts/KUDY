@@ -20,6 +20,13 @@ import { en } from './lib/i18n/en.ts';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = HERE;
 
+// Fetch.failRequest / fulfillRequest are not awaited: the page is the
+// assertion. A reply that arrives after navigation, or a command timeout
+// that has already killed Chrome, must not surface as an unhandled rejection.
+function ignoreLateFetch(error: unknown) {
+  return error;
+}
+
 // One DOM collector for both scenarios; the raw-failure regex asserts the
 // visitor never sees the provider URL or the exception text (criterion 3).
 type CdpConsoleArgs = { value?: unknown; description?: string }[];
@@ -64,16 +71,32 @@ test('G21.03: aborted map requests show the localized failure message; a good lo
     t.skip('web dependencies are not installed (cd web && npm ci)');
     return;
   }
-  const server = await startMapHarnessServer();
-  const browser = await launchBrowser(chromium);
+  let server: Awaited<ReturnType<typeof startMapHarnessServer>> | undefined;
+  let browser: Awaited<ReturnType<typeof launchBrowser>> | undefined;
+  // A thrown CDP timeout runs finally. t.after also runs for an in-test
+  // timeout option. Close is idempotent, so both paths can call this.
+  const closeAll = async () => {
+    const currentBrowser = browser;
+    const currentServer = server;
+    try {
+      if (currentBrowser) await currentBrowser.close();
+    } finally {
+      if (currentServer) await currentServer.close();
+    }
+  };
+  t.after(closeAll);
   try {
-    const page = await browser.newPage();
-    await browser.send('Page.enable', {}, page);
-    await browser.send('Runtime.enable', {}, page);
+    server = await startMapHarnessServer();
+    browser = await launchBrowser(chromium);
+    const activeServer = server;
+    const activeBrowser = browser;
+    const page = await activeBrowser.newPage();
+    await activeBrowser.send('Page.enable', {}, page);
+    await activeBrowser.send('Runtime.enable', {}, page);
 
     const consoleErrors: string[] = [];
     let providerMode = 'fail';
-    browser.onEvent((method: string, params: { type?: string; args?: CdpConsoleArgs; requestId?: string }, sessionId?: string) => {
+    activeBrowser.onEvent((method: string, params: { type?: string; args?: CdpConsoleArgs; requestId?: string }, sessionId?: string) => {
       if (sessionId !== page) return;
       if (method === 'Runtime.consoleAPICalled' && params.type === 'error') {
         consoleErrors.push(
@@ -82,13 +105,13 @@ test('G21.03: aborted map requests show the localized failure message; a good lo
       }
       if (method === 'Fetch.requestPaused') {
         if (providerMode === 'fail') {
-          void browser.send(
+          void activeBrowser.send(
             'Fetch.failRequest',
             { requestId: params.requestId, errorReason: 'InternetDisconnected' },
             sessionId,
-          );
+          ).catch(ignoreLateFetch);
         } else {
-          void browser.send(
+          void activeBrowser.send(
             'Fetch.fulfillRequest',
             {
               requestId: params.requestId,
@@ -100,32 +123,32 @@ test('G21.03: aborted map requests show the localized failure message; a good lo
                 { name: 'content-type', value: 'application/json' },
                 { name: 'access-control-allow-origin', value: '*' },
               ],
-              body: Buffer.from(server.styleBody, 'utf8').toString('base64'),
+              body: Buffer.from(activeServer.styleBody, 'utf8').toString('base64'),
             },
             sessionId,
-          );
+          ).catch(ignoreLateFetch);
         }
       }
     });
 
-    await browser.send('Page.navigate', { url: `http://127.0.0.1:${server.port}/` }, page);
-    await waitForExpression(browser, page, "document.readyState === 'complete' && !!window.__mapHarness");
+    await activeBrowser.send('Page.navigate', { url: `http://127.0.0.1:${activeServer.port}/` }, page);
+    await waitForExpression(activeBrowser, page, "document.readyState === 'complete' && !!window.__mapHarness");
     // The success/recovery scenarios need a working WebGL2 context; on hosts
     // where software GL is unavailable the live-browser suite skips with the
     // limitation named (implementation-rules 7) instead of failing on the
     // environment.
-    const webgl2 = await evaluateValue(browser, page, "!!document.createElement('canvas').getContext('webgl2')");
+    const webgl2 = await evaluateValue(activeBrowser, page, "!!document.createElement('canvas').getContext('webgl2')");
     if (!webgl2) {
       t.skip('WebGL2 is unavailable in this Chromium build (software GL required for MapLibre)');
       return;
     }
-    await browser.send('Fetch.enable', { patterns: [{ urlPattern: 'https://tiles.openfreemap.org/*' }] }, page);
+    await activeBrowser.send('Fetch.enable', { patterns: [{ urlPattern: 'https://tiles.openfreemap.org/*' }] }, page);
 
     // Criterion 1: the aborted provider request reproduces the empty map —
     // only data-map-error marks it, no tile content, no raw failure text.
-    await evaluateValue(browser, page, "window.__mapHarness.mount('be')");
-    await waitForExpression(browser, page, "!!document.querySelector('[data-map-error]')");
-    const beFailure = await evaluateValue(browser, page, COLLECTOR);
+    await evaluateValue(activeBrowser, page, "window.__mapHarness.mount('be')");
+    await waitForExpression(activeBrowser, page, "!!document.querySelector('[data-map-error]')");
+    const beFailure = await evaluateValue(activeBrowser, page, COLLECTOR);
     assert.equal(beFailure.messageFound, true);
     assert.equal(beFailure.messageHidden, false);
     assert.equal(beFailure.messageText, be.mapError);
@@ -138,10 +161,10 @@ test('G21.03: aborted map requests show the localized failure message; a good lo
     }
 
     // Criterion 2 (localized): the en page shows the en message.
-    await evaluateValue(browser, page, 'window.__mapHarness.unmount()');
-    await evaluateValue(browser, page, "window.__mapHarness.mount('en')");
-    await waitForExpression(browser, page, "!!document.querySelector('[data-map-error]')");
-    const enFailure = await evaluateValue(browser, page, COLLECTOR);
+    await evaluateValue(activeBrowser, page, 'window.__mapHarness.unmount()');
+    await evaluateValue(activeBrowser, page, "window.__mapHarness.mount('en')");
+    await waitForExpression(activeBrowser, page, "!!document.querySelector('[data-map-error]')");
+    const enFailure = await evaluateValue(activeBrowser, page, COLLECTOR);
     assert.equal(enFailure.messageText, en.mapError);
     assert.equal(enFailure.leaksRawFailure, false);
 
@@ -149,15 +172,15 @@ test('G21.03: aborted map requests show the localized failure message; a good lo
     // initialization loads, clears message and marker, and the guide links
     // stay usable.
     providerMode = 'local-style';
-    await evaluateValue(browser, page, 'window.__mapHarness.unmount()');
-    await evaluateValue(browser, page, "window.__mapHarness.mount('be')");
+    await evaluateValue(activeBrowser, page, 'window.__mapHarness.unmount()');
+    await evaluateValue(activeBrowser, page, "window.__mapHarness.mount('be')");
     await waitForExpression(
-      browser,
+      activeBrowser,
       page,
       `document.querySelector('div[role="region"]')?.dataset.mapReady === 'fitted'`,
       { timeoutMs: 30000 },
     );
-    const success = await evaluateValue(browser, page, COLLECTOR);
+    const success = await evaluateValue(activeBrowser, page, COLLECTOR);
     assert.equal(success.errorPresent, false);
     assert.equal(success.messageHidden, true);
     assert.equal(success.messageText, be.mapError);
@@ -169,12 +192,11 @@ test('G21.03: aborted map requests show the localized failure message; a good lo
 
     // Criterion 2 (cleanup): removing the live map leaves no errors behind.
     const consoleErrorsBeforeUnmount = consoleErrors.length;
-    await evaluateValue(browser, page, 'window.__mapHarness.unmount()');
+    await evaluateValue(activeBrowser, page, 'window.__mapHarness.unmount()');
     await new Promise((resolve) => setTimeout(resolve, 500));
-    assert.deepEqual(await evaluateValue(browser, page, 'window.__pageErrors'), []);
+    assert.deepEqual(await evaluateValue(activeBrowser, page, 'window.__pageErrors'), []);
     assert.deepEqual(consoleErrors.slice(consoleErrorsBeforeUnmount), []);
   } finally {
-    await browser.close();
-    await server.close();
+    await closeAll();
   }
 });

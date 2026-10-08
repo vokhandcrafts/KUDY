@@ -25,6 +25,13 @@ if (/echo\s+"no product/.test(text)) {
 if (!/npm test/.test(text)) {
   failures.push('required-checks.yml does not run `npm test`');
 }
+// PR #689 (run 37713584531): tests (22) sat silent for six hours after the
+// map browser file started. The job limit and the per-test limit are the
+// revert guard (implementation-rules 1) — deleting either turns this check red.
+const testsJob = text.slice(text.indexOf('\n  tests:'), text.indexOf('\n  windows-portable:'));
+if (!/timeout-minutes:\s*10\b/.test(testsJob)) {
+  failures.push('required-checks.yml tests job has no timeout-minutes: 10 — a stuck suite must not run to the 360-minute default');
+}
 if (!/npm ci/.test(text)) {
   failures.push('required-checks.yml does not run `npm ci`');
 }
@@ -37,6 +44,9 @@ if (!/working-directory:\s*web/.test(text)) {
 // tools/arch npm-test glob must turn this committed check red, or the gate
 // could be disabled silently.
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+if (!/--test-timeout=60000\b/.test(pkg.scripts?.test ?? '')) {
+  failures.push('npm test does not set --test-timeout=60000 — a stuck file must fail by name instead of holding the job');
+}
 if (!pkg.scripts?.['arch:check']) {
   failures.push('package.json has no arch:check script');
 }
