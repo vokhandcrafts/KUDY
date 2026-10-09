@@ -31,3 +31,38 @@ test('CDP command: a command that never replies fails within its timeout and kil
   await browser.close();
   await browser.close();
 });
+
+test('CDP command: send() without a timeout uses the 15000ms default and kills the child', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const browser = await launchBrowser('synthetic-chromium');
+  t.after(() => {
+    rmSync(state.profileDir, { recursive: true, force: true });
+  });
+  const pending = browser.send('Runtime.evaluate');
+  let settled = null;
+  pending.then(() => { settled = 'resolved'; }, (error) => { settled = error; });
+  t.mock.timers.tick(14999);
+  await Promise.resolve();
+  assert.equal(settled, null);
+  assert.equal(state.child.killed, false);
+  t.mock.timers.tick(1);
+  await Promise.resolve();
+  assert.equal(state.child.killed, true);
+  assert.ok(settled instanceof Error);
+  assert.match(settled.message, /CDP Runtime\.evaluate timed out after 15000ms/);
+  await browser.close();
+});
+
+test('CDP command: close rejects an in-flight command that never replies', async (t) => {
+  const browser = await launchBrowser('synthetic-chromium');
+  t.after(() => {
+    rmSync(state.profileDir, { recursive: true, force: true });
+  });
+  const pending = browser.send('Runtime.evaluate');
+  let settled = null;
+  pending.then(() => { settled = 'resolved'; }, (error) => { settled = error; });
+  await browser.close();
+  await Promise.resolve();
+  assert.ok(settled instanceof Error, 'close must reject the in-flight command');
+  assert.match(settled.message, /CDP closed before Runtime\.evaluate finished/);
+});

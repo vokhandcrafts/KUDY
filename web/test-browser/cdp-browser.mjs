@@ -6,7 +6,6 @@
 // used: Target, Page, Runtime, Fetch.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
-import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -14,6 +13,11 @@ const DEVTOOLS_TIMEOUT_MS = 15000;
 const COMMAND_TIMEOUT_MS = 15000;
 const CLOSE_TIMEOUT_MS = 2000;
 const PROFILE_REMOVAL_ATTEMPTS = 5;
+const PROFILE_REMOVAL_DELAY_MS = 50;
+// Windows throws EPERM while Chrome still has the profile mapped. The
+// POSIX races settle in a few dozen milliseconds; EPERM needs longer.
+const PROFILE_REMOVAL_EPERM_DELAY_MS = 250;
+const RETRIABLE_PROFILE_ERRORS = new Set(['ENOTEMPTY', 'EBUSY', 'EPERM']);
 
 // Common Chromium/Chrome binary locations; CI and dev hosts differ, the
 // KUDY_CHROMIUM override wins. Returns null when the host has none — the
@@ -45,21 +49,30 @@ function killChild(child) {
 async function removeProfile(profileDir) {
   for (let attempt = 0; attempt < PROFILE_REMOVAL_ATTEMPTS; attempt += 1) {
     try {
-      rmSync(profileDir, { recursive: true, force: true });
+      fs.rmSync(profileDir, { recursive: true, force: true });
       return;
     } catch (error) {
-      // Chrome can keep writing the profile for a moment after SIGKILL.
-      // Throwing here skips the caller's server.close() and the test
-      // process stays up for the rest of the job.
-      if (attempt === PROFILE_REMOVAL_ATTEMPTS - 1) return;
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      if (error?.code !== 'ENOTEMPTY' && error?.code !== 'EBUSY') throw error;
+      // Chrome can keep the profile mapped after SIGKILL. Throwing from
+      // close() skips the caller's server shutdown, so the retriable
+      // codes (including Windows EPERM) wait and try again. The last
+      // failure stays visible: the path is written to stderr and close()
+      // still returns.
+      const code = error?.code;
+      if (!RETRIABLE_PROFILE_ERRORS.has(code)) throw error;
+      if (attempt === PROFILE_REMOVAL_ATTEMPTS - 1) {
+        process.stderr.write(
+          `profile cleanup failed after ${PROFILE_REMOVAL_ATTEMPTS} attempts: ${profileDir}\n`,
+        );
+        return;
+      }
+      const delay = code === 'EPERM' ? PROFILE_REMOVAL_EPERM_DELAY_MS : PROFILE_REMOVAL_DELAY_MS;
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 }
 
 export async function launchBrowser(binary) {
-  const profileDir = mkdtempSync(path.join(tmpdir(), 'kudy-web-browser-'));
+  const profileDir = fs.mkdtempSync(path.join(tmpdir(), 'kudy-web-browser-'));
   const child = spawn(
     binary,
     [
@@ -142,7 +155,10 @@ export async function launchBrowser(binary) {
     });
 
     function clearPending() {
-      for (const entry of pending.values()) clearTimeout(entry.timer);
+      for (const entry of pending.values()) {
+        clearTimeout(entry.timer);
+        entry.reject(new Error(`CDP closed before ${entry.method} finished`));
+      }
       pending.clear();
     }
 
@@ -199,8 +215,14 @@ export async function launchBrowser(binary) {
             ws.addEventListener('close', onClose, { once: true });
             closeTimer = setTimeout(resolve, CLOSE_TIMEOUT_MS);
           });
+          const closeCommand = browser.send('Browser.close');
+          // Promise.race observes a failure of Browser.close. clearPending
+          // rejects the same promise once the socket close or the close
+          // timer has already won. This handler marks that later rejection
+          // as observed so it is not reported as unhandled.
+          closeCommand.catch(() => {});
           try {
-            await Promise.race([browser.send('Browser.close'), stopped]);
+            await Promise.race([closeCommand, stopped]);
           } catch {
             killChild(child);
           } finally {
