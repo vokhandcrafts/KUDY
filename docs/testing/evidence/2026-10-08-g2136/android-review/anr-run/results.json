@@ -1,0 +1,52 @@
+﻿{
+    "date":  "2026-10-08T03:13:57",
+    "head":  "fd06a4943139931f3c4c1f1553a0b6b4d08aaafa",
+    "device":  {
+                   "serial":  "emulator-5558",
+                   "avd":  "KUDY_API36",
+                   "android":  "16",
+                   "api":  "36",
+                   "abi":  "x86_64",
+                   "screen":  "1080x2400",
+                   "density":  "420"
+               },
+    "apk":  {
+                "path":  "D:\\KUDY-592-build\\apk\\build2-app-debug.apk",
+                "bytes":  97922851,
+                "sha256":  "184DAACD074EC089B620CFBA4BC4751E5FAD3A2CB77E34D7BBA1FBB2CCE046FA",
+                "installed":  "versionName=0.1.0; lastUpdateTime=2026-10-08 03:07:22"
+            },
+    "metro":  {
+                  "port":  8083,
+                  "maxWorkers":  2
+              },
+    "totals":  {
+                   "checks":  2,
+                   "expected":  26,
+                   "passed":  0,
+                   "failed":  2
+               },
+    "checks":  [
+                   {
+                       "name":  "Cold launch reaches Explore",
+                       "status":  "failed",
+                       "evidence":  "cold-start-normal.xml",
+                       "detail":  ""
+                   },
+                   {
+                       "name":  "Catalog has a visible unavailable message",
+                       "status":  "failed",
+                       "evidence":  "explore-be.xml",
+                       "detail":  ""
+                   }
+               ],
+    "fatal":  "no link-nearby on explore-be @ line 60",
+    "crashBufferLines":  0,
+    "restoredFontScale":  "",
+    "exitCode":  1,
+    "failureReasons":  [
+                           "fatal: no link-nearby on explore-be @ line 60",
+                           "incomplete scenario set: 2 of 26 checks ran",
+                           "failed checks: Cold launch reaches Explore; Catalog has a visible unavailable message"
+                       ]
+}

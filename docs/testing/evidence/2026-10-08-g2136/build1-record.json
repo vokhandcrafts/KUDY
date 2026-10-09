@@ -1,0 +1,46 @@
+{
+  "command": "gradlew.bat assembleDebug --no-daemon --console=plain --gradle-user-home D:\\KUDY-592-build\\gradle-home",
+  "cwd": "D:\\KUDY-592\\android",
+  "log": "D:\\KUDY-592-build\\logs\\assembleDebug-2026-10-07T23-01-22-999Z.log",
+  "startedAt": "2026-10-07T23:01:23.001Z",
+  "durationSeconds": 1184,
+  "exitCode": 0,
+  "timedOut": false,
+  "gitHead": "91da11f1c9d8425b29024aba55bdf9990246ecf2",
+  "gitStatus": "M package.json\n?? tools/android-build/",
+  "gradleUserProperties": "# Written by tools/android-build/android-build.mjs (G21.36). Task-owned Gradle home only.\norg.gradle.daemon=false\norg.gradle.workers.max=2\norg.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8 -Djava.io.tmpdir=D:/KUDY-592-build/tmp\nkotlin.compiler.execution.strategy=in-process\nreactNativeArchitectures=x86_64\n",
+  "roDepCache": "D:\\KUDY-Android\\gradle\\caches",
+  "versions": {
+    "host": "win32 Microsoft Windows [Version 10.0.26200.9457]",
+    "node": "v24.13.0",
+    "npm": "11.6.2",
+    "jdkRelease": "17.0.20.1",
+    "javaVersion": "openjdk version \"17.0.20.1\" 2026-08-18",
+    "gradleWrapper": "https\\://services.gradle.org/distributions/gradle-8.14.3-bin.zip",
+    "sdkPlatformTools": "37.0.1",
+    "sdkEmulator": "37.2.12",
+    "sdkPlatforms": [
+      "android-36"
+    ],
+    "sdkBuildTools": [
+      "35.0.0",
+      "36.0.0"
+    ],
+    "sdkNdk": [
+      "27.1.12297006"
+    ],
+    "sdkCmake": [
+      "3.22.1"
+    ],
+    "reactNative": "0.81.5",
+    "expo": "54.0.37",
+    "expoDevLauncher": "6.0.21",
+    "expoModulesCore": "3.0.30"
+  },
+  "apk": {
+    "path": "D:\\KUDY-592\\android\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+    "bytes": 97922851,
+    "sha256": "184DAACD074EC089B620CFBA4BC4751E5FAD3A2CB77E34D7BBA1FBB2CCE046FA"
+  },
+  "taskOwnedProcessesAfterBuild": []
+}

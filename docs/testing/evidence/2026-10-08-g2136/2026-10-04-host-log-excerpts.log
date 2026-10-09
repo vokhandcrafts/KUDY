@@ -1,0 +1,24 @@
+### D:\KUDY-Android\gradle\daemon\8.14.3\daemon-39636.out.log
+170: 2026-10-04T02:43:53.275+0200 [INFO] [org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy] Daemon is about to start building Build{id=386e7417-79d4-41d6-b594-711d3d407a0b, currentDir=C:\Users\kamyl\WebstormProjects\KUDY}. Dispatching build started information...
+179: FAILURE: Build failed with an exception.
+182: The specified initialization script 'C:\Users\kamyl\WebstormProjects\KUDY\android\.scratch\ui-2026-10-02\android-build.init.gradle' does not exist.
+190: BUILD FAILED in 1m 27s
+252: 2026-10-04T02:44:28.990+0200 [INFO] [org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy] Daemon is about to start building Build{id=55326443-534e-4a7a-b35e-e603ba806f07, currentDir=C:\Users\kamyl\WebstormProjects\KUDY}. Dispatching build started information...
+303: Caused by: java.io.FileNotFoundException: C:\Users\kamyl\WebstormProjects\KUDY\node_modules\expo-modules-core\expo-module-gradle-plugin\build\kotlin\compileKotlin\classpath-snapshot\shrunk-classpath-snapshot.bin (The system cannot find the path specified)
+375: Caused by: java.io.FileNotFoundException: C:\Users\kamyl\WebstormProjects\KUDY\node_modules\expo-modules-core\expo-module-gradle-plugin\build\kotlin\compileKotlin\classpath-snapshot\shrunk-classpath-snapshot.bin (The system cannot find the path specified)
+405: Using fallback strategy: Compile without Kotlin daemon
+445: FAILURE: Build failed with an exception.
+448: Initialization script 'C:\Users\kamyl\WebstormProjects\KUDY\.scratch\ui-2026-10-02\android-build.init.gradle' line: 17
+452: > The shell cannot be started. A failure occurred during initialization:
+453: The type initializer for 'System.Net.ServicePointManager' threw an exception.
+468: BUILD FAILED in 4m 17s
+469: 28 actionable tasks: 8 executed, 20 up-to-date
+1244: 2026-10-04T02:58:05.175+0200 [INFO] [org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy] Daemon is about to start building Build{id=7612681f-5938-4d21-ab48-0fb1fe63f467, currentDir=C:\Users\kamyl\WebstormProjects\KUDY}. Dispatching build started information...
+1253: FAILURE: Build failed with an exception.
+1257: > Failed to clean up output files for task ':expo-dev-launcher-gradle-plugin:compileKotlin'
+1265: BUILD FAILED in 24s
+1266: 26 actionable tasks: 4 executed, 22 up-to-date
+### D:\KUDY-Android\tmp\kotlin-daemon.2026-10-04.02-45-16-340.00.log
+3: 2026-10-04 02:45:16.529 [daemon] INFO: daemon args: --daemon-runFilesPath C:\Users\kamyl\AppData\Local\kotlin\daemon --daemon-autoshutdownIdleSeconds=7200 --daemon-compilerClasspath D:\KUDY-Android\gradle\caches\modules-2\files-2.1\org.jetbrains.kotlin\kotlin-compiler-embeddable\2.1.20\4ef56b3316798316bfac7a0ae443391c9e900ea1\kotlin-compiler-embeddable-2.1.20.jar;D:\KUDY-Android\gradle\caches\modu
+94: 2026-10-04 02:45:30.790 [compiler] SEVERE: Exception: java.io.FileNotFoundException: C:\Users\kamyl\WebstormProjects\KUDY\node_modules\expo-modules-core\expo-module-gradle-plugin\build\kotlin\compileKotlin\classpath-snapshot\shrunk-classpath-snapshot.bin (The system cannot find the path specified)
+126: 2026-10-04 02:45:30.790 [compiler] SEVERE: Exception

@@ -64,3 +64,9 @@ node --experimental-strip-types docs/testing/evidence/2026-10-04-retest/reproduc
 ## Задачы па выніках
 
 [Нарэзка з залежнасцямі](../agent-tasks/technical-completion/retest-2026-10-04.md): публікацыя справаздачы [#590](https://github.com/vokhandcrafts/KUDY/issues/590), Windows-шляхі [#591](https://github.com/vokhandcrafts/KUDY/issues/591), зборка Android [#592](https://github.com/vokhandcrafts/KUDY/issues/592). Аўдыё паўторна не ствараецца: вынік дададзены ў існую [#537](https://github.com/vokhandcrafts/KUDY/issues/537).
+
+## Рэзалюцыя Android-зборкі (2026-10-08)
+
+Збой `Failed to clean up output files` разабраны і ўзноўлены кантралявана ў G21.36
+([#592](https://github.com/vokhandcrafts/KUDY/issues/592), PR https://github.com/vokhandcrafts/KUDY/pull/689): дзве свежыя
+debug-зборкі на Windows прайшлі, вынік і доказы — [G21.36](../agent-tasks/results/G21.36.md).

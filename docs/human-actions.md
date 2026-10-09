@@ -25,6 +25,16 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/712 — issue #623
 Адкрый GitHub Project і правер, што #700–#708, а таксама #693 і #694 бачныя ў backlog; калі карткі не дададзеныя, дадай іх без пазнак запуску. Аўтаматычная праверка дошкі недаступная: токен не мае `read:project`; самі Issues створаныя і перачытаныя.
 Issue: https://github.com/vokhandcrafts/KUDY/issues/699
 
+### 2026-10-08 — G21.36: змержуй PR па Android-зборцы на Windows і, калі хочаш, прыбяры старыя junction
+Што зрабіць: прагледзь і змержуй PR — ён дадае `tools/android-build/` (праверка, скопавая чыстка, абмежаваная
+зборка, сцэнарыі на эмулятары) і раздзел у `docs/development_setup.md`; закрывае #592. Па жаданні: у агульным
+checkout `C:\Users\kamyl\WebstormProjects\KUDY` з рэтэсту засталіся junction-тэчкі `build` у `node_modules`, якія
+вядуць у `D:\KUDY-Android\build`. Калі той checkout будзе на `main` з гэтым PR і без незавершанай працы, паглядзі спіс
+камандай
+`node tools/android-build/android-build.mjs clean --build-root D:\KUDY-Android --sdk <SDK> --jdk <JDK17>` (без `--apply`
+нічога не выдаляецца) і толькі потым вырашай пра `--apply`.
+PR: https://github.com/vokhandcrafts/KUDY/pull/689 (issue #592)
+
 ### 2026-10-07 — G21.45: змержуй PR #686 і вырашы калізію ідэнтыфікатара з #669
 Што зрабіць: змержуй PR — ён дадае ў цела ADR G21.20 датаваныя зносіны §3.2/§3.4
 па тваёй рэзалюцыі (#552) і закрывае #678; фармулёўку зносінаў праглядзі перад
