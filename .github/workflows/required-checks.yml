@@ -33,10 +33,14 @@ jobs:
   windows-portable:
     # A26-08 (issue #488): the portable path-boundary guards run on Windows,
     # the main development host — git prints `/` while path.relative prints
-    # `\`. Both files are dependency-free (node builtins only), so no install
-    # step. The symlink-privilege security cases stay mandatory on the Linux
-    # tests job above; on an incapable host they self-skip with the
-    # limitation named, never silently.
+    # `\`. Those two files are dependency-free (node builtins only).
+    # G21.36 (#592, windows-regressions-skipped-in-ci): the android-build
+    # suite is node builtins, git and Windows PowerShell, so this job still
+    # has no install step. It does not start an SDK or an emulator. The real
+    # Gradle test skips unless KUDY_TEST_GRADLE_DIST and KUDY_JDK17 are set.
+    # The symlink-privilege security cases stay mandatory on the Linux tests
+    # job above; on an incapable host they self-skip with the limitation
+    # named, never silently.
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -45,6 +49,8 @@ jobs:
           node-version: 24
       - name: portable path-boundary checks (design-tokens + fixture hygiene)
         run: node --test --experimental-strip-types test/design-tokens.test.mjs supabase/functions/_shared/fixtures-hygiene.test.ts
+      - name: android-build suite (Windows PowerShell cases; no SDK or emulator)
+        run: node --test "tools/android-build/*.test.mjs"
   lint:
     runs-on: ubuntu-latest
     steps:

@@ -122,6 +122,21 @@ if (!/run:\s*node --test --experimental-strip-types.*fixtures-hygiene\.test\.ts/
   failures.push('required-checks.yml does not run the fixture-hygiene guard on Windows');
 }
 
+// G21.36 (#592) revert guard — the Ubuntu `tests` job skips the Windows-only
+// android-build cases (`needs Windows PowerShell and Get-NetTCPConnection`).
+// The required windows-portable job must run that suite, or a revert of the
+// emulator-script protections stays green (windows-regressions-skipped-in-ci).
+// The match is limited to that job, so the same command on Linux does not
+// count. Comment lines are already stripped above.
+const windowsStart = text.indexOf('\n  windows-portable:');
+const windowsEnd = text.indexOf('\n  lint:');
+const windowsJob = windowsStart >= 0 && windowsEnd > windowsStart ? text.slice(windowsStart, windowsEnd) : '';
+if (!/run:\s*node --test "tools\/android-build\/\*\.test\.mjs"/.test(windowsJob)) {
+  failures.push(
+    'required-checks.yml windows-portable job does not run `node --test "tools/android-build/*.test.mjs"` — Windows-only android-build regressions are skipped in CI'
+  );
+}
+
 // G20.27 revert guard — supply-chain pins (spec V6, issue #500): every action
 // reference in every workflow must be a full 40-hex upstream commit SHA, the
 // tag staying only as a version annotation. The file list is enumerated from

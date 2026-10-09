@@ -1,0 +1,41 @@
+== ports
+== emulator
+emulator pid=32404
+device: {"serial":"emulator-5558","avd":"KUDY_API36","android":"16","api":"36","abi":"x86_64","screen":"1080x2400","density":"420"}
+installed: versionName=0.1.0; lastUpdateTime=2026-10-08 15:51:34
+== metro
+metro pid=35664
+metro status: packager-status:running
+== scenarios
+PASS Cold launch reaches Explore 
+PASS Catalog has a visible unavailable message 
+PASS Explore tap opens Nearby 
+PASS Nearby Back returns to Explore 
+PASS Explore tap opens Discovery 
+PASS Discovery Back returns to Explore 
+PASS Explore tap opens KUDY 
+PASS English applies without restart and is selected 
+PASS Explore uses English after switch 
+PASS Nearby uses English after switch 
+PASS Android Back returns to Explore 
+PASS Discovery uses English after switch 
+PASS Ukrainian applies without restart and is selected 
+PASS Explore uses Ukrainian after switch 
+PASS Nearby uses Ukrainian after switch 
+PASS Unknown link shows localized explanation 
+PASS Unknown link Back returns to Explore 
+PASS Unavailable guide uses Ukrainian 
+PASS Unavailable run uses Ukrainian 
+PASS Place link shows an unavailable state 
+PASS Collection link shows an unavailable state 
+PASS City guides link shows an unavailable state 
+== large font
+PASS Large font keeps all language buttons visible chips=8/8
+PASS Large font grows the language label height100=57 height150=71
+PASS Large font keeps all Explore links visible links=3
+== background
+PASS Background return preserves KUDY screen and English 
+TOTALS {"checks":26,"expected":26,"passed":26,"failed":0}
+metro stopped (own pid 35664)
+emulator stopped (own pid 32404)
+EXIT 0
