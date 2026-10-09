@@ -1,0 +1,18 @@
+== A. Kotlin compile daemon strategy (as in the 2026-10-04 retest), two runs
+STEP A1-daemon exit=0 sec=73 :: BUILD SUCCESSFUL in 1m 12s
+kotlin-daemon pid=33560 ownedMarker=True
+kotlin-daemon pid=20408 ownedMarker=True
+  handles in build output after A1 (no Gradle process alive):
+  files=92 held=0
+STEP A2-daemon-rerun exit=0 sec=70 :: BUILD SUCCESSFUL in 1m 9s
+== B. stop task-owned leftovers
+stopping task-owned 29676 java.exe D:\KUDY-Android\java\jdk-17.0.20.1+1\bin\java -cp D:\KUDY-Android\gradle\caches\modules-2\files-2.1\org.jetbrains.kotlin\kotlin-compiler-embeddable\2.1.20\4ef56b3316798316bfac7a0ae443391c9e900ea1\kotlin-compiler-embeddable-2.1.20.jar;D:\KUD
+  files=92 held=0
+== C. in-process Kotlin (the fix), two runs
+STEP C1-inprocess exit=0 sec=94 :: BUILD SUCCESSFUL in 1m 33s
+STEP C2-inprocess-rerun exit=0 sec=94 :: BUILD SUCCESSFUL in 1m 33s
+== D. explicit lock on one output file, in-process
+  holding \node_modules\expo-dev-launcher\expo-dev-launcher-gradle-plugin\build\classes\kotlin\main\expo\modules\devlauncher\DevLauncherPlugin$apply$1.class
+STEP D1-locked exit=1 sec=78 :: FAILURE: Build failed with an exception. | > java.io.IOException: Unable to delete directory 'D:\KUDY-592\node_modules\expo-dev-launcher\expo-dev-launcher-gradle-plugin\build\classes\kotlin\main' | BUILD FAILED in 1m 17s
+STEP D2-released exit=0 sec=94 :: BUILD SUCCESSFUL in 1m 34s
+== done
