@@ -40,7 +40,7 @@ public/collections/<collection_id>/public.json # detail_ref-мэты падбо�
 public/discovery/<city_id>/<revision>/index.json
 private/bundle/<route_id>/<version>/<locale>/extended/…   # lock.json у тым жа фармаце
 release/feedback-target-registry.json  # толькі для сервера, кліенту не выдаецца
-release/release-manifest.json          # поўны спіс артэфактаў з bytes+sha256
+release/release-manifest.json          # поўны ўнутраны спіс public і private з bytes+sha256
 ```
 
 - `lock.json` — `[{path, bytes, sha256}]` з `09`, разд. 4; шляхі адносныя тэчцы
@@ -82,6 +82,10 @@ release/release-manifest.json          # поўны спіс артэфакта�
 4. **Адхіленне неваліднага індэкса** (`21`, разд. 9, радок 1): дублі refs,
    укладзеныя collections, чужы горад, небяспечныя шляхі, невядомыя локалі/сезоны,
    парушаны дыяпазон хвілін, адсутны `overlap_note`.
+5. **Публічны маніфест.** `release/release-manifest.json` застаецца поўным
+   унутраным спісам. На origin `publish-catalog` кладзе толькі запісы
+   `public/` у `releases/<route_id>/<version>/release-manifest.json`
+   (правіла `manifest-hygiene`, `09` разд. 15).
 
 ## Мяжа адказнасці
 

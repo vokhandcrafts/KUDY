@@ -31,7 +31,13 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { canonicalJson, sha256Hex } from '../build-bundle/build-bundle.mjs';
+import {
+  MANIFEST_HYGIENE_RULE,
+  canonicalJson,
+  manifestHygieneViolations,
+  publicReleaseManifest,
+  sha256Hex,
+} from '../build-bundle/build-bundle.mjs';
 import { isIdentifier } from '../../contracts/identifier.mjs';
 import { readCatalogDoc } from '../../contracts/reader.mjs';
 
@@ -238,6 +244,14 @@ export async function publishCatalog({ staging, target, now }) {
     });
   }
 
+  // Origin copy: public/ entries only. Checked before any target write so a
+  // private or extended path answers manifest-hygiene and leaves the
+  // previous catalog in place (09 §15, G21.44 §6 М2).
+  const originManifest = publicReleaseManifest(manifest);
+  const hygiene = manifestHygieneViolations(originManifest);
+  if (hygiene.length > 0) fail(MANIFEST_HYGIENE_RULE, { path: shownPath(hygiene[0].path) });
+  const originManifestBytes = Buffer.from(canonicalJson(originManifest), 'utf8');
+
   const entry = deriveCatalogEntry(manifest, readJsonFile(
     path.join(stagingAbs, ...safeSegments(`public/bundle/${manifest.route_id}/${manifest.version}/route.json`)),
     `public/bundle/${manifest.route_id}/${manifest.version}/route.json`,
@@ -286,11 +300,15 @@ export async function publishCatalog({ staging, target, now }) {
     copied += 1;
   }
 
-  // ---- store the release manifest + registry export (21 §5.2)
-  const manifestBytes = await fsp.readFile(path.join(stagingAbs, 'release', 'release-manifest.json'));
+  // ---- store the public release manifest + registry export (21 §5.2)
+  // The staging file (release/release-manifest.json) is the full manifest
+  // and is never laid. Immutability compares the public bytes that would be
+  // laid with the file already stored for this route/version: an identical
+  // republish matches; an already-published full manifest is byte drift and
+  // is not rewritten. Other versions' manifests are not read.
   const releaseDir = path.join(targetAbs, 'releases', manifest.route_id, manifest.version);
   for (const [name, bytes] of [
-    ['release-manifest.json', manifestBytes],
+    ['release-manifest.json', originManifestBytes],
     ['feedback-target-registry.json', registryBytes],
   ]) {
     const releaseRel = `releases/${manifest.route_id}/${manifest.version}/${name}`;

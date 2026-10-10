@@ -12,6 +12,8 @@ import {
   assembleIndex,
   buildBundle,
   canonicalJson,
+  manifestHygieneViolations,
+  publicReleaseManifest,
   sha256Hex,
 } from './build-bundle.mjs';
 
@@ -109,6 +111,19 @@ test('AC1: release manifest lists every artifact with bytes and sha256', async (
     assert.ok(entry.bytes > 0, entry.path);
     assert.equal(entry.sha256, tree[entry.path], entry.path);
   }
+});
+
+test('manifest-hygiene: the staging manifest stays full and the public projection drops private entries', async () => {
+  const out = await buildDemoFixture();
+  const manifest = readJson(out, 'release/release-manifest.json');
+  const privateEntry = manifest.artifacts.find((entry) => entry.path.startsWith('private/'));
+  assert.ok(privateEntry, 'the internal manifest keeps a private entry');
+  const projected = publicReleaseManifest(manifest);
+  assert.equal(projected.artifacts.some((entry) => entry.path === privateEntry.path), false);
+  assert.equal(JSON.stringify(projected).includes(privateEntry.sha256), false);
+  assert.deepEqual(manifestHygieneViolations(projected), []);
+  const onDisk = await fsp.readFile(path.join(out, 'release', 'release-manifest.json'), 'utf8');
+  assert.equal(onDisk.includes(privateEntry.path), true);
 });
 
 // -------------------------------------------------- AC1: EOL pin (rule 1/4)
