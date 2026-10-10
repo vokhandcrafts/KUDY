@@ -15,6 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import type { JourneyContext } from '../test-browser/e2e-harness.mjs';
 import { withE2ePage, assertCleanJourney, webOutRoot, servedContent, discoveryIndex } from '../test-browser/e2e-harness.mjs';
 import { evaluateValue } from '../test-browser/cdp-browser.mjs';
 import { be } from '../lib/i18n/be.ts';
@@ -25,15 +26,15 @@ const REPO_ROOT = path.resolve(HERE, '..', '..');
 
 function guideOffer() {
   const index = discoveryIndex();
-  const offer = index.offers.find((entry) => entry.ref.kind === 'guide' && entry.ref.route_id === 'e2e-paid-guide');
+  const offer = index.offers.find((entry: any) => entry.ref.kind === 'guide' && entry.ref.route_id === 'e2e-paid-guide');
   assert.ok(offer, 'the served discovery must offer the e2e-paid-guide route');
   return offer;
 }
 
 // The published preview facts of the locked stop, per locale.
-function publishedPreview(locale) {
+function publishedPreview(locale: string) {
   const previews = servedContent('bundle', 'e2e-paid-guide', '1', locale, 'base', 'previews.json');
-  const preview = previews.find((entry) => entry.stop_id === 'e2e-stop-2');
+  const preview = previews.find((entry: any) => entry.stop_id === 'e2e-stop-2');
   assert.ok(preview, `published previews must carry the locked stop e2e-stop-2 (${locale})`);
   return { name: preview.name[locale], announce: preview.announce[locale] };
 }
@@ -44,18 +45,18 @@ function publishedPreview(locale) {
 function extendedLeakCanary() {
   const file = path.join(REPO_ROOT, 'fixtures', 'e2e', 'paid-guide', 'be', 'extended', 'stops.json');
   const stories = JSON.parse(fs.readFileSync(file, 'utf8'));
-  const story = stories.find((entry) => entry.story_id === 'story-paid-2');
+  const story = stories.find((entry: any) => entry.story_id === 'story-paid-2');
   assert.ok(story, 'fixture source must carry the locked story story-paid-2');
   return story.transcript;
 }
 
 // The bundle audio URL scheme: the documented public layout (the CONTENT_ASSET_BASE
 // mapping in web/lib/content/site.ts) over the served tree's own facts.
-const audioSrc = (routeId, locale, storyId) =>
+const audioSrc = (routeId: string, locale: string, storyId: string) =>
   `/content/bundle/${routeId}/1/${locale}/base/audio/${storyId}.m4a`;
 
 test('G23.02: catalog → guide → free stop with playable audio → locked stop with calm offer only', async (t) => {
-  await withE2ePage(t, async ({ browser, page, goto, pageErrors, blockedRequests }) => {
+  await withE2ePage(t, async ({ browser, page, goto, pageErrors, blockedRequests }: JourneyContext) => {
     const offer = guideOffer();
 
     // Catalog (be): the synthetic guide is a real card — no placeholders.
@@ -73,7 +74,7 @@ test('G23.02: catalog → guide → free stop with playable audio → locked sto
     );
     assert.equal(catalog.title, be.catalogTitle);
     assert.ok(
-      catalog.guideLinks.some((link) => link.href === '/guides/e2e-paid-guide' && link.text === offer.localized.title.be),
+      catalog.guideLinks.some((link: any) => link.href === '/guides/e2e-paid-guide' && link.text === offer.localized.title.be),
       `catalog must offer the guide card, saw: ${JSON.stringify(catalog.guideLinks)}`,
     );
 
@@ -114,7 +115,7 @@ test('G23.02: catalog → guide → free stop with playable audio → locked sto
     // (duration > 0) and play like a visitor's tap would.
     await goto('/guides/e2e-paid-guide/stops/e2e-stop-1');
     const stories = servedContent('bundle', 'e2e-paid-guide', '1', 'be', 'base', 'stops.json');
-    const story = stories.find((entry) => entry.story_id === 'story-paid-1');
+    const story = stories.find((entry: any) => entry.story_id === 'story-paid-1');
     assert.ok(story, 'served stops.json must carry story-paid-1');
     const freeStop = await evaluateValue(
       browser,
@@ -193,8 +194,8 @@ test('G23.02: catalog → guide → free stop with playable audio → locked sto
       false,
       'the locked stop page must never leak the extended-layer transcript',
     );
-    const extendedDirs = [];
-    const walk = (dir) => {
+    const extendedDirs: string[] = [];
+    const walk = (dir: string) => {
       for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
         if (entry.name === 'extended') extendedDirs.push(path.join(dir, entry.name));
         else if (entry.isDirectory()) walk(path.join(dir, entry.name));

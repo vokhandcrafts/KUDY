@@ -122,6 +122,19 @@ export function startE2eSiteServer(outRoot = webOutRoot()) {
 //   readyState of the previous document must never satisfy the wait.
 // - waitForPath(path): the same wait after an in-page activation (keyboard).
 // - keys(presses): raw Tab/Enter key events through the Input domain.
+// The JSDoc types flow into web/e2e/*.test.ts through allowJs and keep their
+// destructured callback parameters off the implicit-any list (tsc -p web,
+// required check `lint`).
+/**
+ * @typedef {Object} JourneyContext
+ * @property {{ send: (method: string, params?: Record<string, unknown>, sessionId?: string) => Promise<any> }} browser
+ * @property {string} page CDP session id of the locked-down page
+ * @property {(pathname: string) => Promise<void>} goto navigate and wait for the exact path
+ * @property {(pathname: string) => Promise<void>} waitForPath wait until the page is at the path
+ * @property {(key: 'Tab' | 'Enter') => Promise<void>} press dispatch a keyboard key
+ * @property {string[]} pageErrors uncaught page exceptions recorded so far
+ * @property {string[]} blockedRequests non-localhost requests blocked so far
+ */
 export async function withE2ePage(t, run) {
   if (!webOutAvailable()) {
     t.skip('web/out static build is missing — run `npm run e2e:web` (it builds the synthetic origin and the site, then this suite)');

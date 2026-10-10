@@ -1,0 +1,44 @@
+{
+  "environment": {
+    "host": "Linux (CachyOS), Node 26.10.0",
+    "device": "AVD kudy-test, Android 16 / API 36, 1080x2400, -gpu swiftshader_indirect -no-audio",
+    "shell": "dev-client APK rebuilt from main 4e6b729 (assembleDebug, JAVA_HOME java-21)",
+    "js": "Metro 8083 from worktree zcode/555 (tree identical to main 4e6b729)",
+    "catalog": [
+      "phase A: fixtures/content/demo-route through tools/build-bundle + tools/publish-catalog (production path), served statically on the EXPO_PUBLIC_CATALOG_ORIGIN port",
+      "phase B: synthetic e2e origin (tools/e2e-origin/serve-e2e-origin.mjs, G23.01) on the same port"
+    ]
+  },
+  "findings": [
+    {
+      "id": "N1",
+      "severity": "medium",
+      "surface": "My KUDY history/settings storage on the emulator dev-client",
+      "observed": "History section answers with the localized unavailable state and a native-module error: \"Call to function 'NativeDatabase.execSync' has been rejected.\" with causes \"java.lang.NullPointerException\" (de-my.png) and \"database is locked\" (de-my-font150.png) on different runs.",
+      "consequence": "The UI-language choice does not survive a force-stop relaunch on this build (relaunch returns the be chrome after a de selection); the durable settings row cannot be exercised through the same adapter.",
+      "note": "The app handles the failure gracefully (localized state + Erneut versuchen), no crash. Same-cause suspicion for the package-download failure (N2) needs a separate task; physical-device verification is blocked-external here."
+    },
+    {
+      "id": "N2",
+      "severity": "medium",
+      "surface": "Preview package download (synthetic e2e origin, be UI)",
+      "observed": "Tap Загрузіць on the free guide ends in the download-failed state (Паўтарыць + Збой загрузкі., be-synthetic-after-download.png); the same URLs answer 200 from the host (bundle/e2e-free-guide/1/be/base/lock.json). The walk start therefore stays unexercised in this environment.",
+      "note": "Correct refusal texts were proven on the paid demo route instead: \"Патрэбна пакупка.\" (preview#purchase-required) after Пачаць with a purchased-gated route."
+    },
+    {
+      "id": "N3",
+      "severity": "low",
+      "surface": "System font scale 150% (criterion 2)",
+      "observed": "font_scale=1.5 set via adb settings, app force-stopped and relaunched: all eight self-name chips visible and tappable (font150-record.json, de-my-font150.png), font scale reset to 1.0 afterwards. The screenshot does not demonstrate visual 1.5x scaling of the app text (dev-client configuration propagation), so the scaling half of this check stays not-proven here and needs the physical-device record.",
+      "note": "The 2026-10-04 retest's 150% pass (kudy-font-150-clean.png) remains the prior evidence for the scaling half."
+    }
+  ],
+  "proven": [
+    "All eight UI locales switch live from the My KUDY picker; the chrome re-renders in the selected language (chromeSwitched=true x8, walk-records.json).",
+    "Selected-language filtering (G21.17): be/en/uk reach the guide preview; de/es/fr/cs/sv get the localized empty catalogue (Guides mit Text in dieser Sprache gibt es noch nicht. etc.).",
+    "Preview fact line localized per UI locale with content text/audio locales (Тэкст/Text/Текст: be, en, uk; аўдыё: be, en).",
+    "Audio chips (be/en codes) present on be/en/uk previews; foreign-audio pin en selected on the be UI (be-synthetic-preview-audio-en.png).",
+    "Discovery and Nearby screens render localized in all eight locales (incl. the honest unavailable states: Падбор недаступны, manual browse without GPS).",
+    "Paid-route start gate: Пачаць answers the localized refusal Патрэбна пакупка. (demo-route access=paid)."
+  ]
+}
