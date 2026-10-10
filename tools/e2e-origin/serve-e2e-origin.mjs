@@ -23,6 +23,13 @@
 //     --fault "404:discovery/e2e-city/r-e2e-free-1/index.json,500:catalog.json" \
 //     --stall-ms 15000
 //   node tools/e2e-origin/serve-e2e-origin.mjs --no-serve   # build + print only
+//   node tools/e2e-origin/serve-e2e-origin.mjs --no-serve --packages paid-guide
+//
+// Package subset (G23.02): --packages narrows the build to named fixture
+// packages in the pinned publish order. The web E2E builds the paid-guide
+// package alone: the web reader resolves every catalog route against the
+// ACTIVE discovery revision, and a one-package city keeps catalog.json and
+// the pointer coherent without touching the production path.
 //
 // From the Android emulator the origin is http://10.0.2.2:<port>
 // (10.0.2.2 is the host loopback); from a host browser or a web test it is
@@ -66,6 +73,27 @@ const FAULT_KINDS = new Set(['404', '500', 'stall']);
 // cannot smuggle whitespace or traversal into the spec.
 const FAULT_PATH = /^[A-Za-z0-9._/-]+$/;
 
+// The package subset to build and publish (G23.02): the default stays the
+// full two-package city; the web E2E publishes the paid-guide package alone,
+// because the web reader resolves every catalog route against the ACTIVE
+// discovery revision and a one-package city keeps that coherent. Names must
+// be known fixture packages; the pinned publish order is preserved.
+export function parsePackageSet(values, repoRoot = REPO_ROOT) {
+  if (values === undefined || values.length === 0) return [...FIXTURE_PACKAGES];
+  const names = new Set();
+  for (const value of values) {
+    for (const entry of String(value).split(',')) {
+      if (entry === '') fail('packages-empty-entry', {});
+      if (!FIXTURE_PACKAGES.includes(entry)) fail('packages-unknown', { entry });
+      names.add(entry);
+    }
+  }
+  for (const name of names) {
+    if (!fs.existsSync(path.join(repoRoot, 'fixtures', 'e2e', name))) fail('packages-missing-dir', { name });
+  }
+  return FIXTURE_PACKAGES.filter((pkg) => names.has(pkg));
+}
+
 // Returns Map<pathname (no leading slash), kind>. Diagnostics over prose.
 export function parseFaultSpec(values) {
   const faults = new Map();
@@ -90,12 +118,12 @@ export function parseFaultSpec(values) {
 
 // The publish target is the served root: catalog.json at the origin, bundle
 // and discovery files beneath it, exactly as the app and web readers expect.
-export async function buildE2EOrigin({ outDir = 'tools/e2e-origin/build', now = PINNED_NOW, repoRoot = REPO_ROOT } = {}) {
+export async function buildE2EOrigin({ outDir = 'tools/e2e-origin/build', now = PINNED_NOW, repoRoot = REPO_ROOT, packages } = {}) {
   if (Number.isNaN(Date.parse(now))) fail('invalid-now', { now });
   const outAbs = path.resolve(repoRoot, outDir);
   await fsp.mkdir(outAbs, { recursive: true });
   let last;
-  for (const pkg of FIXTURE_PACKAGES) {
+  for (const pkg of parsePackageSet(packages, repoRoot)) {
     const staging = path.join(outAbs, 'staging', pkg);
     fs.rmSync(staging, { recursive: true, force: true });
     await buildBundle({ inDir: path.join(repoRoot, 'fixtures', 'e2e', pkg), outDir: staging });
@@ -197,13 +225,14 @@ export function formatOriginSummary({ port, build, faults, stallMs }) {
 // --------------------------------------------------------------------- CLI
 
 function parseArgs(argv) {
-  const values = { fault: [], port: 8791, 'stall-ms': 15000, now: PINNED_NOW };
-  const valued = ['--port', '--out', '--now', '--fault', '--stall-ms'];
+  const values = { fault: [], packages: [], port: 8791, 'stall-ms': 15000, now: PINNED_NOW };
+  const valued = ['--port', '--out', '--now', '--fault', '--stall-ms', '--packages'];
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === '--no-serve') values['no-serve'] = true;
     else if (valued.includes(argv[i])) {
       if (argv[i + 1] === undefined) fail('missing-arg-value', { arg: argv[i] });
       if (argv[i] === '--fault') values.fault.push(argv[i + 1]);
+      else if (argv[i] === '--packages') values.packages.push(argv[i + 1]);
       else values[argv[i].slice(2)] = argv[i + 1];
       i += 1;
     } else fail('unknown-arg', { arg: argv[i] });
@@ -217,14 +246,14 @@ async function main() {
     args = parseArgs(process.argv.slice(2));
   } catch (error) {
     if (error instanceof E2EOriginError) {
-      console.error(`usage: node tools/e2e-origin/serve-e2e-origin.mjs [--port <n>] [--out <dir>] [--now <iso>] [--fault "KIND:PATH[,…]"] [--stall-ms <n>] [--no-serve]`);
+      console.error(`usage: node tools/e2e-origin/serve-e2e-origin.mjs [--port <n>] [--out <dir>] [--now <iso>] [--packages "paid-guide[,free-guide]"] [--fault "KIND:PATH[,…]"] [--stall-ms <n>] [--no-serve]`);
       console.error(canonicalJson({ error: { code: error.code, ...error.ids } }).trimEnd());
       process.exit(2);
     }
     throw error;
   }
   const faults = parseFaultSpec(args.fault);
-  const build = await buildE2EOrigin({ outDir: args.out ?? 'tools/e2e-origin/build', now: args.now });
+  const build = await buildE2EOrigin({ outDir: args.out ?? 'tools/e2e-origin/build', now: args.now, packages: args.packages });
   if (args['no-serve']) {
     console.log(formatOriginSummary({ port: null, build, faults, stallMs: args['stall-ms'] }));
     return;
