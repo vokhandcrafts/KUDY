@@ -289,11 +289,14 @@ export async function startMapHarnessServer() {
     })();
   });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  let closing;
   return {
     port: server.address().port,
     styleBody: STYLE_BODY,
-    async close() {
-      await new Promise((resolve) => server.close(resolve));
+    close() {
+      // --test-timeout runs t.after while finally may also close.
+      if (!closing) closing = new Promise((resolve) => server.close(resolve));
+      return closing;
     },
   };
 }

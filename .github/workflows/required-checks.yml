@@ -9,6 +9,10 @@ jobs:
   # product checks, not announcements. Node 22.x and 24.x both verify the
   # engines range; 24.13.0 is the verified dev environment (run-model README).
   tests:
+    # Healthy runs finish in a few minutes (node --test about 116s on Node 24
+    # in run 37713584531). 10 minutes fails a stuck file without waiting for
+    # the 360-minute default that cancelled PR #689.
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
