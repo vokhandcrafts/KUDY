@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { withE2ePage, assertCleanJourney } from '../test-browser/e2e-harness.mjs';
+import { withE2ePage, assertCleanJourney, discoveryIndex } from '../test-browser/e2e-harness.mjs';
 import { evaluateValue } from '../test-browser/cdp-browser.mjs';
 import { be } from '../lib/i18n/be.ts';
 
@@ -52,7 +52,9 @@ test('G23.02: keyboard-only navigation reaches and activates the main links', as
     await press('Enter');
     await waitForPath('/guides/e2e-paid-guide');
     const heading = await evaluateValue(browser, page, `document.querySelector('h1')?.textContent ?? null`);
-    assert.equal(heading, 'E2E-гід: з платным пашырэннем');
+    const offer = discoveryIndex().offers.find((entry) => entry.ref.kind === 'guide');
+    assert.ok(offer, 'the served discovery must offer a guide');
+    assert.equal(heading, offer.localized.title.be);
 
     assertCleanJourney({ pageErrors, blockedRequests });
   });

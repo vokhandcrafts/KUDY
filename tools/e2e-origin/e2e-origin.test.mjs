@@ -240,3 +240,11 @@ test('building the paid-guide subset lays a one-route catalog with its own disco
   assert.equal(catalog.discovery_index.path, 'discovery/e2e-city/r-e2e-paid-1/index.json');
   await fsp.rm(out, { recursive: true, force: true });
 });
+
+test('the e2e:web runner stays wired to this tool and its npm script (implementation-rules 1)', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8'));
+  assert.equal(pkg.scripts['e2e:web'], 'node web/e2e/run-e2e.mjs');
+  // The runner must keep invoking this tool through the production path.
+  const runner = fs.readFileSync(path.join(REPO_ROOT, 'web', 'e2e', 'run-e2e.mjs'), 'utf8');
+  assert.match(runner, /serve-e2e-origin\.mjs/, 'the web E2E runner must build the origin through serve-e2e-origin.mjs');
+});
