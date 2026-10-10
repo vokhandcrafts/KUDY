@@ -19,6 +19,7 @@ import {
   createE2EOriginServer,
   formatOriginSummary,
   parseFaultSpec,
+  parsePackageSet,
 } from './serve-e2e-origin.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -211,4 +212,31 @@ test('the summary prints the app origin, the emulator origin and the digest', ()
 test('the e2e:origin npm script stays wired to this tool (implementation-rules 1)', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8'));
   assert.equal(pkg.scripts['e2e:origin'], 'node tools/e2e-origin/serve-e2e-origin.mjs');
+});
+
+// G23.02 (issue #660): the package subset keeps the pinned publish order,
+// builds only the named packages and answers bad input with named
+// diagnostics — the web E2E publishes the paid-guide package alone.
+test('parsePackageSet narrows the build and answers bad input with named diagnostics (rule 14)', () => {
+  assert.deepEqual(parsePackageSet(undefined), ['paid-guide', 'free-guide'], 'the default stays the full city');
+  assert.deepEqual(parsePackageSet(['paid-guide']), ['paid-guide']);
+  assert.deepEqual(parsePackageSet(['free-guide,paid-guide']), ['paid-guide', 'free-guide'], 'pinned order wins');
+  assert.deepEqual(parsePackageSet(['paid-guide', 'paid-guide']), ['paid-guide'], 'duplicates collapse');
+  for (const [bad, code] of [
+    [['paid-guide,'], 'packages-empty-entry'],
+    [['no-such-package'], 'packages-unknown'],
+  ]) {
+    assert.throws(() => parsePackageSet(bad), (error) => error instanceof E2EOriginError && error.code === code);
+  }
+});
+
+test('building the paid-guide subset lays a one-route catalog with its own discovery pointer', async () => {
+  const out = tmpDir('kudy-e2e-subset-');
+  const build = await buildE2EOrigin({ outDir: out, packages: ['paid-guide'] });
+  const catalogBytes = await fsp.readFile(path.join(build.target, 'catalog.json'));
+  const catalog = readCatalogDoc(JSON.parse(catalogBytes.toString('utf8')));
+  assert.equal(catalog.status, 'v1');
+  assert.deepEqual(catalog.routes.map((route) => route.route_id), ['e2e-paid-guide']);
+  assert.equal(catalog.discovery_index.path, 'discovery/e2e-city/r-e2e-paid-1/index.json');
+  await fsp.rm(out, { recursive: true, force: true });
 });

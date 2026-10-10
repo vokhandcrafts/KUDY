@@ -1,0 +1,12 @@
+{
+  "place_id": "e2e-place-4",
+  "content_version": "1",
+  "name": {
+    "be": "E2E-плошча платнага гіда (сінтэтык)",
+    "en": "E2E paid-guide square (synthetic)"
+  },
+  "summary": {
+    "be": "Сінтэтычная свабодная кропка платнага гіда для скразных аўтатэстаў; не рэальнае месца.",
+    "en": "A synthetic free stop of the paid guide for end-to-end autotests; not a real place."
+  }
+}

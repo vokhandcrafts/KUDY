@@ -71,7 +71,10 @@ async function removeProfile(profileDir) {
   }
 }
 
-export async function launchBrowser(binary) {
+// extraArgs: per-suite Chromium flags appended after the base set (the map
+// proofs need none; the E2E journeys add the autoplay policy that lets a
+// scripted play() resolve like a visitor's tap would).
+export async function launchBrowser(binary, extraArgs = []) {
   const profileDir = fs.mkdtempSync(path.join(tmpdir(), 'kudy-web-browser-'));
   const child = spawn(
     binary,
@@ -88,6 +91,7 @@ export async function launchBrowser(binary) {
       // Chrome 154 ("FD ownership violation") and aborts navigation.
       // --in-process-gpu / --disable-gpu-watchdog made Target.createTarget
       // time out on the CI Chrome. Neither is set.
+      ...extraArgs,
       `--user-data-dir=${profileDir}`,
       'about:blank',
     ],
