@@ -84,7 +84,9 @@ test('G23.02: catalog → guide → free stop with playable audio → locked sto
       browser,
       page,
       `(() => {
-        const rows = Array.from(document.querySelectorAll('main li'));
+        // The stops live in the ordered list; the attribution section
+        // (G21.44.a) carries its own text-only list items.
+        const rows = Array.from(document.querySelectorAll('main ol > li'));
         return {
           heading: document.querySelector('h1')?.textContent ?? null,
           summary: document.querySelector('main li p, main > p')?.textContent ?? null,
