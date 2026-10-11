@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="be">
+<head>
+<meta charset="utf-8">
+<title>G25.03 — кіт персанажа дракона · кантактны ліст</title>
+<style>
+  :root {
+    --paper: #FAF7F2; --ink: #22262B; --muted: #6B7280; --line: #D8D2C6;
+    --accent: #1D6B4F; --clay: #805039; --amber: #D8A551;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: system-ui, sans-serif; font-size: 15px; line-height: 1.45;
+    padding: 32px 40px 48px;
+  }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 19px; margin: 40px 0 12px; padding-top: 16px; border-top: 2px solid var(--line); }
+  .status { color: var(--muted); font-size: 13.5px; margin: 0 0 8px; }
+  .badge {
+    display: inline-block; border: 1.5px solid var(--clay); color: var(--clay);
+    border-radius: 99px; padding: 1px 10px; font-size: 12px; margin-left: 6px;
+  }
+  .badge.amber { border-color: var(--amber); color: #8A610E; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; font-size: 13.5px; }
+  th { background: #F3EEE5; font-weight: 600; }
+  .poses { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .pose { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+  .pose img { width: 100%; display: block; }
+  .pose h3 { font-size: 15px; margin: 10px 0 4px; }
+  .pose .state { color: var(--accent); font-size: 12px; font-weight: 600; }
+  .pose p { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+  .ladder { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 16px; align-items: center; }
+  .ladder .cell { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px; text-align: center; }
+  .ladder img { vertical-align: middle; }
+  .ladder .cap { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .rules li { margin-bottom: 6px; }
+  .note { background: #FDF1D7; border: 1px solid #E6C98C; border-radius: 10px; padding: 10px 14px; font-size: 13px; margin: 12px 0; }
+  footer { margin-top: 36px; padding-top: 14px; border-top: 2px solid var(--line); color: var(--muted); font-size: 12.5px; }
+  code { background: #F3EEE5; border-radius: 4px; padding: 1px 5px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<h1>G25.03 — Кіт персанажа дракона</h1>
+<p class="status">Кантактны ліст · прапанова хвалі G25 для выбару ўладара · эпік #346 · 2026-10-11 ·
+  крыніца: <strong>брыф «Атлас знаходак» v1</strong> (08.10.2026, рэдакцыя <code>a11ea86</code>) ·
+  канон: visual-language.md §6</p>
+<p class="status"><strong>Статус: падабенства глінянай фігурцы НЕ пацверджанае</strong> — арыгінальныя фота адсутнічаюць
+  (запыт уводу: вынік G25.03 → G24.02 §2). Выбар напрамку іконкі I1/I3 (B05) чакае ўладара — PR #732.
+  Усе колеры фігуркі — гіпотэзы рэестра:<span class="badge">гліна B04.1</span><span class="badge amber">бурштын B04.2</span></p>
+
+<h2>1. Сілуэт і пропорцыі — аснова кіта</h2>
+<img src="dragon-silhouette.svg" alt="Аркуш пропорцый" style="width: 760px; max-width: 100%; display: block; margin: 8px 0;">
+<table>
+  <tr><th>Крыніца</th><th>Статус</th><th>Што ўзята ў кіт</th></tr>
+  <tr><td>A1 — эскіз брэнд-сесіі 07.10 (ImageGen, па фота ўладара)</td><td>эскіз, не фота</td><td>характар узнятай галавы, грывы-грэбень</td></tr>
+  <tr><td>B2 — рэльеф «крэм на зялёным», тая ж сесія</td><td>эскіз, не фота</td><td>круглявы корпус, размах крылаў, лопатка хвоста</td></tr>
+  <tr><td>Кандыдаты іконкі G24.02 (I1, поўны сілуэт)</td><td>матэрыял выбару</td><td>правілы чытэльнасці сілуэту на малых памерах</td></tr>
+  <tr><td><strong>Арыгінальныя фота фігуркі</strong></td><td><strong>адсутнічаюць</strong></td><td>— праверка падабенства немагчымая; усе суджэнні пра форму — прапанова</td></tr>
+</table>
+
+<h2>2. Чатыры пазы канона (вялікі памер — 300 px)</h2>
+<div class="poses">
+  <div class="pose">
+    <img src="pose-calm.svg" alt="Поза спакойны">
+    <h3>Спакойны</h3>
+    <div class="state">канон: спакойны</div>
+    <p>Базавы стан: крылы складзеныя, галава роўная з ціхім нахілам наперад. Сустрэча, чаканне, фон экранаў.</p>
+  </div>
+  <div class="pose">
+    <img src="pose-curious.svg" alt="Поза цікаўны/здзіўлены">
+    <h3>Цікаўны / здзіўлены</h3>
+    <div class="state">канон: здзіўлены</div>
+    <p>Галава ўзнятая, вока шырокае, адно крыло паўузнятае. Рэакцыя на знаходку і варрую ўвагі дэталь.</p>
+  </div>
+  <div class="pose">
+    <img src="pose-inviting.svg" alt="Поза кліча">
+    <h3>Кліча</h3>
+    <div class="state">канон: кліча</div>
+    <p>Крыло-рука выцягнута наперад, галава высока, адкрытая ўсмешка. «Хадзем, пакажу» — запрашэнне ў прагулку.</p>
+  </div>
+  <div class="pose">
+    <img src="pose-celebrating.svg" alt="Поза ціха святкуе">
+    <h3>Ціха святкуе</h3>
+    <div class="state">канон: святкуе</div>
+    <p>Абодва крылы паўузнятыя, шчаслівыя заплюшчаныя вочы, мяккая ўсмешка. Завяршэнне прагулкі, знаходка. Без гучнасці.</p>
+  </div>
+</div>
+
+<h2>3. Памерная лесвіца — малыя памеры і спрашчэнне</h2>
+<p>Правіла лесвіцы: дэталі сыходзяць па адной, пазнавальнасць трымаецца на грэбні, крылах і лопатцы хвоста.</p>
+<div class="ladder">
+  <div class="cell"><strong>Поза</strong></div>
+  <div class="cell"><strong>120 px</strong></div>
+  <div class="cell"><strong>60 px</strong></div>
+  <div class="cell"><strong>29 px</strong></div>
+
+  <div class="cell">Спакойны<div class="cap">120: усё акрамя кіпцюроў; 60: вока; 29: сілуэт</div></div>
+  <div class="cell"><img src="pose-calm.svg" width="120" alt="спакойны 120"></div>
+  <div class="cell"><img src="pose-calm.svg" width="60" alt="спакойны 60"></div>
+  <div class="cell"><img src="pose-calm.svg" width="29" alt="спакойны 29"></div>
+
+  <div class="cell">Цікаўны / здзіўлены<div class="cap">жэст крыла чытаецца да 60 px</div></div>
+  <div class="cell"><img src="pose-curious.svg" width="120" alt="цікаўны 120"></div>
+  <div class="cell"><img src="pose-curious.svg" width="60" alt="цікаўны 60"></div>
+  <div class="cell"><img src="pose-curious.svg" width="29" alt="цікаўны 29"></div>
+
+  <div class="cell">Кліча<div class="cap">выцягнутае крыла — галоўны сігнал позы</div></div>
+  <div class="cell"><img src="pose-inviting.svg" width="120" alt="кліча 120"></div>
+  <div class="cell"><img src="pose-inviting.svg" width="60" alt="кліча 60"></div>
+  <div class="cell"><img src="pose-inviting.svg" width="29" alt="кліча 29"></div>
+
+  <div class="cell">Ціха святкуе<div class="cap">іскры — толькі на 120 px і болей</div></div>
+  <div class="cell"><img src="pose-celebrating.svg" width="120" alt="святкуе 120"></div>
+  <div class="cell"><img src="pose-celebrating.svg" width="60" alt="святкуе 60"></div>
+  <div class="cell"><img src="pose-celebrating.svg" width="29" alt="святкуе 29"></div>
+</div>
+
+<h2>4. Правілы формы (прапанова для #705 і #708)</h2>
+<ul class="rules">
+  <li><strong>Твар.</strong> Адно бачнае вока (профіль): папяровая круглявая бялковая, чарнільная зрэнка; брова адной лініяй. Рот — мяккая ўсмешка; адкрыты рот толькі ў «кліча» і «ціха святкуе». Зубы і полымя не малююцца ніколі — характар ціхі.</li>
+  <li><strong>Крылы.</strong> «Спакойны» — складзенае ўздоўж боку; «здзіўлены» — адно паўузнятае з двума пальцамі; «кліча» — адно выцягнута наперад як рука; «святкуе» — абодва паўузнятыя (далёкае відаць за бліжэйшым). Крылы не перакрываюць тэкст, кнопкі і панэль Run.</li>
+  <li><strong>Шыя і галава.</strong> S-выгін захоўваецца ва ўсіх позах. Узнятая галава — характэрны жэст трох поз, не абавязковая пастава; у «спакойны» шыя роўная. Грэбень-грыва — дзве мяккія лісцяткі назад-ўніз.</li>
+  <li><strong>Матэрыял.</strong> Адна гліна #805039 (гіпотэза B04.1) на ўсіх формах; раздзяленне формаў — папяровай лініяй, як на рэльефе B2. Без новых адценняў і градыентаў; бурштын (B04.2) — толькі неістотны дэкор (іскры «святкуе», сыходзяць на 60 px).</li>
+  <li><strong>Спрашчэнне.</strong> 120 px: без кіпцюроў; 60 px: без лініі жывата і кіпцюроў, вока застаецца; 29 px: чысты сілуэт, вока сыходзіць. Іскры і адкрыты рот — толькі вялікія памеры.</li>
+</ul>
+
+<div class="note">Узнятыя крылы на фігурцы-рэферэнсе (A1/B2) — прыроджаны стан фігуркі; у кіце яны сталі выразам станаў:
+складзеныя = спакой, узнятыя = эмоцыя. Гэта прапанова правілы, не прыняты канон.</div>
+
+<footer>
+  Прэв'ю локальна: <code>chromium --headless --screenshot=contact-sheet.png --window-size=1560,2400 contact-sheet.html</code> ·
+  Поўная карта крыцэрыяў і статус праверак: <code>docs/agent-tasks/results/G25.03.md</code> ·
+  Гукавы handoff → #694 (S1/S2, сцэна брыфа) · кампаненты і станы → #705.
+</footer>
+
+</body>
+</html>
