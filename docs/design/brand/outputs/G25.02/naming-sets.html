@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="be">
+<head>
+<meta charset="utf-8">
+<title>G25.02 — наборы назваў інтэрфейсу (гіпотэзы)</title>
+<style>
+  :root {
+    /* Канон G06.07 (прынятыя токены) */
+    --paper: #FAF7F2;
+    --ink: #22262B;
+    --green: #1D6B4F;
+    --line: #E3DCD2;
+    --muted: #6B6257;
+    /* Гіпотэзы B04.1/B04.2 (не production) */
+    --clay: #805039;
+    --amber: #D8A551;
+    --scale: 1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px;
+    background: #F1EDE6;
+    color: var(--ink);
+    font-family: "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: calc(15px * var(--scale));
+    line-height: 1.45;
+  }
+  h1 { font-size: calc(20px * var(--scale)); margin: 0 0 4px; }
+  h2 { font-size: calc(16px * var(--scale)); margin: 28px 0 10px; }
+  p.note { color: var(--muted); margin: 0 0 18px; max-width: 76ch; }
+  .hypo {
+    display: inline-block; padding: 1px 8px; margin-left: 6px;
+    border: 1px solid var(--amber); border-radius: 99px;
+    color: var(--clay); background: #FBF3E3;
+    font-size: calc(11px * var(--scale));
+  }
+  .board { display: flex; gap: 28px; align-items: flex-start; flex-wrap: wrap; }
+  .set { width: 380px; }
+  .set > h3 { margin: 0 0 2px; font-size: calc(17px * var(--scale)); font-family: Alegreya, Georgia, serif; }
+  .set > .idea { color: var(--muted); margin: 0 0 10px; font-size: calc(13px * var(--scale)); }
+  .phone {
+    width: 360px; border: 1.5px solid var(--ink); border-radius: 18px;
+    background: var(--paper); padding: 16px 14px 18px;
+  }
+  .phone .city { font-family: Alegreya, Georgia, serif; font-size: calc(24px * var(--scale)); margin: 0 0 10px; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 9px 2px; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: none; }
+  .row .a { font-weight: 600; color: var(--green); }
+  .row .r { color: var(--muted); font-size: calc(12px * var(--scale)); text-align: right; }
+  .btn {
+    display: block; text-align: center; padding: 10px 8px; margin-top: 10px;
+    border-radius: 10px; background: var(--green); color: var(--paper);
+    font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .btn.ghost { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
+  .btn.locked { background: transparent; color: var(--muted); border: 1.5px dashed var(--muted); }
+  .chip {
+    display: inline-block; margin-top: 10px; padding: 6px 12px;
+    border: 1.5px solid var(--clay); border-radius: 99px; color: var(--clay);
+    font-family: Alegreya, Georgia, serif;
+  }
+  .chip .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--amber); margin-right: 6px; }
+  .tagline {
+    margin-top: 12px; font-family: Alegreya, Georgia, serif; font-style: italic;
+    font-size: calc(17px * var(--scale)); color: var(--ink);
+  }
+  .verdict { margin-top: 10px; font-size: calc(12.5px * var(--scale)); color: var(--muted); }
+  .verdict b { color: var(--ink); }
+  table { border-collapse: collapse; width: 100%; max-width: 1180px; background: var(--paper); }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; font-size: calc(13px * var(--scale)); }
+  th { background: #EFE9DF; font-weight: 600; }
+  .risk { color: #8A2D2D; font-weight: 600; }
+  .ok { color: var(--green); font-weight: 600; }
+  .webnav {
+    max-width: 1180px; background: var(--paper); border: 1.5px solid var(--ink);
+    border-radius: 12px; padding: 12px 16px; display: flex; gap: 22px; flex-wrap: wrap; align-items: baseline;
+  }
+  .webnav .a { color: var(--green); font-weight: 600; }
+  .webnav .city { font-family: Alegreya, Georgia, serif; font-size: calc(19px * var(--scale)); }
+  .legend { max-width: 1180px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; margin-bottom: 22px; font-size: calc(13px * var(--scale)); color: var(--muted); }
+</style>
+</head>
+<body>
+
+<h1>G25.02 — наборы назваў інтэрфейсу</h1>
+<p class="note">Гіпотэзы для параўнання — <strong>не production-радкі і не зацверджаныя рашэнні</strong>.
+Канонавыя словы цяперашняга інтэрфейсу — з <code>contracts/ui-messages/source.json</code> (be, dc43799);
+крыніца характару — брыф «Атлас знаходак» v1 (a11ea86, 08.10.2026). Канчатковыя назвы рэестар рашэнняў
+заносіць толькі пасля выбару ўладара (B06). Шрыфт тут — сістэмны запасны, не Golos/Alegreya:
+параўноўваюцца словы, не метрыка шрыфтоў.</p>
+
+<div class="legend">
+Канон: папера #FAF7F2 · чарніла #22262B · зялёны #1D6B4F. Гліна #805039 і бурштын #D8A551 —
+гіпотэзы B04.1/B04.2, паказаныя толькі кружком ля назвы калекцыі.
+Двухтабовая кантрактная структура «горад + KUDY» і кнопкі «Побач»/«Прагулка» захаваныя ва ўсіх наборах (R01).
+</div>
+
+<h2>Тры наборы — асноўны экран, прэв'ю гіда, KUDY, калекцыя, тагляйн</h2>
+<div class="board">
+
+  <div class="set">
+    <h3>Набор A — «Канон, упарадкаваны»</h3>
+    <p class="idea">Цяперашнія словы захоўваюцца; правіцца толькі тры ўнутраныя неўзгодненасці:
+    «праходы» → «прагулкі», «гайд» → «гід», дадаецца назва калекцыі і тагляйн.</p>
+    <div class="phone">
+      <p class="city">Гданьск</p>
+      <div class="row"><span class="a">Гіды →</span><span class="r">рубрыка R01</span></div>
+      <div class="row"><span class="a">Побач →</span><span class="r">карта і Moments</span></div>
+      <div class="row"><span class="a">Чым заняцца →</span><span class="r">падбор</span></div>
+      <div class="row"><span class="a">KUDY →</span><span class="r">гісторыя і мова</span></div>
+      <span class="btn">Пачаць</span>
+      <span class="btn ghost">Купіць · адна пакупка адкрывае ўсе гісторыі</span>
+      <div class="row" style="margin-top:8px"><span>Прагулка</span><span class="r">кнопка ўваходу ў Run (NAV7)</span></div>
+      <div class="row"><span>Бягучая прагулка</span><span class="r">актыўная</span></div>
+      <div class="row"><span>Папярэднія прагулкі</span><span class="r">завершаная</span></div>
+      <div class="row"><span>Мова</span><span class="r">пераключэнне UI</span></div>
+      <div class="row"><span>Мае ацэнкі</span><span class="r">водгукі</span></div>
+      <span class="chip"><span class="dot"></span>Знаходкі</span>
+      <div class="tagline">Горад расказвае.</div>
+    </div>
+    <p class="verdict"><b>Рызыкі:</b> мінімальныя. Не тыкае R01-цытаваных назваў,
+    патрабуе толькі трох фіксаў у каталозе. Тагляйн перакладны без дракона.</p>
+  </div>
+
+  <div class="set">
+    <h3>Набор B — «Вандроўка»</h3>
+    <p class="idea">Сям'я «прагулка» замяняецца на «вандроўку» (голас брыфа: «вандроўнік»);
+    падбор — «Што паглядзім?»; калекцыя — цэлая канцэпцыя «Атлас знаходак»; тагляйн — лінія адносін з брыфа.</p>
+    <div class="phone">
+      <p class="city">Гданьск</p>
+      <div class="row"><span class="a">Гіды →</span><span class="r">рубрыка R01</span></div>
+      <div class="row"><span class="a">Побач →</span><span class="r">карта і Moments</span></div>
+      <div class="row"><span class="a">Што паглядзім? →</span><span class="r">падбор</span></div>
+      <div class="row"><span class="a">KUDY →</span><span class="r">гісторыя і мова</span></div>
+      <span class="btn">Пачаць</span>
+      <span class="btn ghost">Купіць · адна пакупка адкрывае ўсе гісторыі</span>
+      <div class="row" style="margin-top:8px"><span>Вандроўка</span><span class="r">кнопка ўваходу ў Run (NAV7)</span></div>
+      <div class="row"><span>Бягучая вандроўка</span><span class="r">актыўная</span></div>
+      <div class="row"><span>Папярэднія вандроўкі</span><span class="r">завершаная</span></div>
+      <div class="row"><span>Мова</span><span class="r">пераключэнне UI</span></div>
+      <div class="row"><span>Мае ацэнкі</span><span class="r">водгукі</span></div>
+      <span class="chip"><span class="dot"></span>Атлас знаходак</span>
+      <div class="tagline">Куды? Хадзем, паглядзім.</div>
+    </div>
+    <p class="verdict"><b>Рызыкі:</b> перайменаванне «Прагулка» супярэчыць цытаванай у R01 кнопцы
+    і цягне міграцыю сям'і слоў ва ўсіх 8 мовах за стылістычны выйгрыш. Тагляйн — голас персанажа:
+    змешвае функцыянальны тэкст з маўленнем дракона. «Атлас знаходак» доўгі для чыпы.</p>
+  </div>
+
+  <div class="set">
+    <h3>Набор C — «Горад-першы»</h3>
+    <p class="idea">Сям'я «прагулка» захаваная; акцэнт на горадзе і памяці: гісторыя праходаў —
+    «Мае маршруты», калекцыя — «Атлас», тагляйн пра гісторыі побач.</p>
+    <div class="phone">
+      <p class="city">Гданьск</p>
+      <div class="row"><span class="a">Гіды →</span><span class="r">рубрыка R01</span></div>
+      <div class="row"><span class="a">Побач →</span><span class="r">карта і Moments</span></div>
+      <div class="row"><span class="a">Чым заняцца →</span><span class="r">падбор</span></div>
+      <div class="row"><span class="a">KUDY →</span><span class="r">гісторыя і мова</span></div>
+      <span class="btn">Пачаць</span>
+      <span class="btn ghost">Купіць · адна пакупка адкрывае ўсе гісторыі</span>
+      <div class="row" style="margin-top:8px"><span>Прагулка</span><span class="r">кнопка ўваходу ў Run (NAV7)</span></div>
+      <div class="row"><span>Бягучая прагулка</span><span class="r">актыўная</span></div>
+      <div class="row"><span>Мае прагулкі</span><span class="r">актыўная · завершаная</span></div>
+      <div class="row"><span>Мова</span><span class="r">пераключэнне UI</span></div>
+      <div class="row"><span>Мае ацэнкі</span><span class="r">водгукі</span></div>
+      <span class="chip"><span class="dot"></span>Атлас</span>
+      <div class="tagline">Гісторыі побач з табой.</div>
+    </div>
+    <p class="verdict"><b>Рызыкі:</b> «Атлас» без брэнд-кантэксту чытаецца абстрактна;
+    тагляйн «Гісторыі побач» канфліктуе са словам паверхні «Побач» (карта) — падмена
+    дзвюх розных рэчаў адным словам. «Мае прагулкі» змешвае актыўную і завершаныя ў адным радку.</p>
+  </div>
+
+</div>
+
+<h2>Вялікі тэкст (font scale 200 %) — тэст доўгіх назваў, тэлефон 360 px</h2>
+<p class="note">Той самы набор A пры падвоеным памеры тэксту. Кнопкі ў нерухомых радах з
+усечаннем (ellipsis) — гэта месцы, дзе G21.47 фіксаваў перапаўненне (#719): тут яны паказаны як
+іменаваныя рызыкі, не як зацверджаны выгляд.</p>
+<div style="transform-origin: 0 0;">
+<div class="board">
+  <div class="set">
+    <h3>200 % — кнопкі прэв'ю і рады KUDY</h3>
+    <div class="phone">
+      <p class="city">Гданьск</p>
+      <div class="row"><span class="a">Побач →</span><span class="r">карта</span></div>
+      <div class="row"><span class="a">Чым заняцца →</span><span class="r">падбор</span></div>
+      <span class="btn">Працягнуць бясплатна</span>
+      <span class="btn ghost">Купіць</span>
+      <span class="btn locked">Зачынена — даступна пасля куплі</span>
+      <div class="row" style="margin-top:8px"><span>Папярэднія прагулкі</span><span class="r">завершаная</span></div>
+      <div class="row"><span>Вызваліць месца ў KUDY</span><span class="r">сховішча</span></div>
+      <div class="tagline">Горад расказвае.</div>
+    </div>
+    <p class="verdict"><b>Даўжыні (знакаў):</b> «Працягнуць бясплатна» — 20;
+    «Вызваліць месца ў KUDY» — 22; «Зачынена — даступна пасля куплі» — 32 (стан-радок, перанос дапушчальны);
+    «Папярэднія прагулкі» — 18. Самыя доўгія кнопкі трапляюць пад усечанне ў фіксаванай шырыні —
+    працоўная знаходка для #719, тут не лічыцца.</p>
+  </div>
+
+  <div class="set">
+    <h3>100 % — той самы рад для параўнання</h3>
+    <div class="phone">
+      <div class="row"><span class="a">Побач →</span><span class="r">карта</span></div>
+      <div class="row"><span class="a">Чым заняцца →</span><span class="r">падбор</span></div>
+      <span class="btn">Працягнуць бясплатна</span>
+      <span class="btn ghost">Купіць</span>
+      <span class="btn locked">Зачынена — даступна пасля куплі</span>
+      <div class="row" style="margin-top:8px"><span>Папярэднія прагулкі</span><span class="r">завершаная</span></div>
+      <div class="row"><span>Вызваліць месца ў KUDY</span><span class="r">сховішча</span></div>
+      <div class="tagline">Горад расказвае.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<h2>Вэб-узор (≥ 821 px, дзве калонкі) — тыя самыя словы</h2>
+<div class="webnav">
+  <span class="city">Гданьск — гіды па горадзе</span>
+  <span class="a">Гіды</span>
+  <span class="a">Побач</span>
+  <span class="a">Чым заняцца</span>
+  <span class="a">KUDY</span>
+  <span style="color: var(--muted)">Горад расказвае.</span>
+</div>
+
+</body>
+</html>
