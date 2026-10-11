@@ -14,8 +14,11 @@
 // production surface, no locale activation — zh stays behind G21.50.
 //
 // Machine files carry no raw CJK bytes: the Han string below is \uXXXX
-// escape-encoded (the gitguard idiom), decoded at render time.
+// escape-encoded (the gitguard idiom), decoded at render time. Captions ride
+// the MinimalRow prop (the han-probe.tsx ProbeRow idiom) — no literal words
+// in JSX text nodes (the no-hardcoded-words guard).
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import type { ReactNode } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { tokens } from "../components/design-tokens";
@@ -48,6 +51,15 @@ const styles = StyleSheet.create({
   },
 });
 
+function MinimalRow({ caption, children }: { caption: string; children: ReactNode }) {
+  return (
+    <View>
+      {children}
+      <Text style={styles.caption}>{caption}</Text>
+    </View>
+  );
+}
+
 export default function HanProbeMinimal() {
   if (!__DEV__) return null;
   return <HanProbeMinimalSurface />;
@@ -67,22 +79,25 @@ function HanProbeMinimalSurface() {
       }}
       testID="screen-Han probe minimal"
     >
-      <View testID="han-minimal/raw-ui">
-        <Text style={styles.rawUi}>{probeString}</Text>
-      </View>
-      <Text style={styles.caption}>raw Text, ui family, uncapped — the minimal case</Text>
+      <MinimalRow caption="raw Text, ui family, uncapped — the minimal case">
+        <View testID="han-minimal/raw-ui">
+          <Text style={styles.rawUi}>{probeString}</Text>
+        </View>
+      </MinimalRow>
 
-      <View testID="han-minimal/raw-default-font">
-        <Text style={styles.rawDefault}>{probeString}</Text>
-      </View>
-      <Text style={styles.caption}>raw Text, no fontFamily, uncapped</Text>
+      <MinimalRow caption="raw Text, no fontFamily, uncapped">
+        <View testID="han-minimal/raw-default-font">
+          <Text style={styles.rawDefault}>{probeString}</Text>
+        </View>
+      </MinimalRow>
 
-      <View testID="han-minimal/size-control">
-        <Text allowFontScaling={false} style={styles.sizeControl}>
-          {probeString}
-        </Text>
-      </View>
-      <Text style={styles.caption}>allowFontScaling=false, 2x base size</Text>
+      <MinimalRow caption="allowFontScaling=false, 2x base size">
+        <View testID="han-minimal/size-control">
+          <Text allowFontScaling={false} style={styles.sizeControl}>
+            {probeString}
+          </Text>
+        </View>
+      </MinimalRow>
     </ScrollView>
   );
 }
