@@ -8,6 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
+import type { JourneyContext } from '../test-browser/e2e-harness.mjs';
 import { withE2ePage, assertCleanJourney, discoveryIndex } from '../test-browser/e2e-harness.mjs';
 import { evaluateValue } from '../test-browser/cdp-browser.mjs';
 import { defaultUiLocale, getUiStrings, uiLocaleNativeName, uiLocales } from '../lib/i18n/index.ts';
@@ -15,7 +16,7 @@ import { appLinks } from '../lib/app-links.ts';
 import { localePath } from '../lib/content/site.ts';
 
 test('G23.02: the be ↔ en switch keeps the equivalent path and every locale route opens', async (t) => {
-  await withE2ePage(t, async ({ browser, page, goto, pageErrors, blockedRequests }) => {
+  await withE2ePage(t, async ({ browser, page, goto, pageErrors, blockedRequests }: JourneyContext) => {
     // The switch row on a guide page: every UI locale's self-name, the
     // current one marked, the others pointing at the same path.
     await goto('/guides/e2e-paid-guide');
@@ -30,7 +31,7 @@ test('G23.02: the be ↔ en switch keeps the equivalent path and every locale ro
       })))()`,
     );
     for (const locale of uiLocales) {
-      const entry = switchRow.find((item) => item.text === uiLocaleNativeName(locale));
+      const entry = switchRow.find((item: any) => item.text === uiLocaleNativeName(locale));
       assert.ok(entry, `the switch must name ${locale} by its self-name`);
       if (locale === defaultUiLocale) {
         assert.equal(entry.current, true, 'the current locale must be marked, not linked');
@@ -43,9 +44,9 @@ test('G23.02: the be ↔ en switch keeps the equivalent path and every locale ro
     // be ↔ en: the en chip lands on the equivalent en path with the en
     // content, and the be chip leads straight back. The expected title comes
     // from the served discovery offer — the fact the page renders.
-    const offer = discoveryIndex().offers.find((entry) => entry.ref.kind === 'guide');
+    const offer = discoveryIndex().offers.find((entry: any) => entry.ref.kind === 'guide');
     assert.ok(offer, 'the served discovery must offer a guide');
-    const enHref = switchRow.find((item) => item.text === uiLocaleNativeName('en')).href;
+    const enHref = switchRow.find((item: any) => item.text === uiLocaleNativeName('en')).href;
     await goto(enHref);
     const enPage = await evaluateValue(
       browser,
@@ -91,7 +92,7 @@ test('G23.02: the be ↔ en switch keeps the equivalent path and every locale ro
 });
 
 test('G23.02: /app fallback, per-locale privacy and the not-found page', async (t) => {
-  await withE2ePage(t, async ({ browser, page, goto, pageErrors, blockedRequests }) => {
+  await withE2ePage(t, async ({ browser, page, goto, pageErrors, blockedRequests }: JourneyContext) => {
     // /app: the CTA fallback target — the store row exactly as the config
     // states (a live store is a link, an unpublished one the «хутка» state).
     await goto('/app');
@@ -108,7 +109,7 @@ test('G23.02: /app fallback, per-locale privacy and the not-found page', async (
     );
     assert.equal(appPage.lang, 'be');
     assert.equal(appPage.heading, appStrings.appPageTitle);
-    for (const store of ['appStore', 'playStore']) {
+    for (const store of ['appStore', 'playStore'] as const) {
       const url = appLinks[store];
       if (url.kind === 'live') {
         assert.ok(appPage.storeLinks.includes(url.href), `a live ${store} URL must be a link`);

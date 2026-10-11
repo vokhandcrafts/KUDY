@@ -1,0 +1,124 @@
+{
+ "screen": "my-font150",
+ "locale": "de",
+ "chipsVisible": [
+  "Беларуская",
+  "Беларуская",
+  "English",
+  "English",
+  "Українська",
+  "Українська",
+  "Deutsch",
+  "Deutsch",
+  "Español",
+  "Español",
+  "Français",
+  "Français",
+  "Čeština",
+  "Čeština",
+  "Svenska",
+  "Svenska"
+ ],
+ "values": [
+  {
+   "text": "",
+   "desc": "Zurück"
+  },
+  {
+   "text": "",
+   "desc": "Zurück"
+  },
+  {
+   "text": "Zurück",
+   "desc": ""
+  },
+  {
+   "text": "KUDY",
+   "desc": ""
+  },
+  {
+   "text": "Sprache",
+   "desc": ""
+  },
+  {
+   "text": "",
+   "desc": "Беларуская"
+  },
+  {
+   "text": "Беларуская",
+   "desc": ""
+  },
+  {
+   "text": "",
+   "desc": "English"
+  },
+  {
+   "text": "English",
+   "desc": ""
+  },
+  {
+   "text": "",
+   "desc": "Українська"
+  },
+  {
+   "text": "Українська",
+   "desc": ""
+  },
+  {
+   "text": "",
+   "desc": "Deutsch"
+  },
+  {
+   "text": "Deutsch",
+   "desc": ""
+  },
+  {
+   "text": "",
+   "desc": "Español"
+  },
+  {
+   "text": "Español",
+   "desc": ""
+  },
+  {
+   "text": "",
+   "desc": "Français"
+  },
+  {
+   "text": "Français",
+   "desc": ""
+  },
+  {
+   "text": "",
+   "desc": "Čeština"
+  },
+  {
+   "text": "Čeština",
+   "desc": ""
+  },
+  {
+   "text": "",
+   "desc": "Svenska"
+  },
+  {
+   "text": "Svenska",
+   "desc": ""
+  },
+  {
+   "text": "Verlauf nicht verfügbar.",
+   "desc": ""
+  },
+  {
+   "text": "Call to function 'NativeDatabase.execSync' has been rejected.&#10;→ Caused by: database is locked",
+   "desc": ""
+  },
+  {
+   "text": "",
+   "desc": "Erneut versuchen"
+  },
+  {
+   "text": "Erneut versuchen",
+   "desc": ""
+  }
+ ]
+}

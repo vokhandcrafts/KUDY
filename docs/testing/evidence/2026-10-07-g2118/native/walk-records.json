@@ -1,0 +1,2397 @@
+[
+ {
+  "screen": "my",
+  "locale": "be",
+  "values": [
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "Назад",
+    "desc": ""
+   },
+   {
+    "text": "KUDY",
+    "desc": ""
+   },
+   {
+    "text": "Мова",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Беларуская"
+   },
+   {
+    "text": "Беларуская",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "English"
+   },
+   {
+    "text": "English",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Українська"
+   },
+   {
+    "text": "Українська",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Deutsch"
+   },
+   {
+    "text": "Deutsch",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Español"
+   },
+   {
+    "text": "Español",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Français"
+   },
+   {
+    "text": "Français",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Čeština"
+   },
+   {
+    "text": "Čeština",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Svenska"
+   },
+   {
+    "text": "Svenska",
+    "desc": ""
+   },
+   {
+    "text": "Бягучая прагулка",
+    "desc": ""
+   },
+   {
+    "text": "Бягучай прагулкі няма",
+    "desc": ""
+   },
+   {
+    "text": "Папярэднія праходы",
+    "desc": ""
+   },
+   {
+    "text": "Папярэдніх праходаў няма",
+    "desc": ""
+   }
+  ],
+  "languageChip": "Беларуская",
+  "chromeSwitched": true
+ },
+ {
+  "screen": "preview",
+  "locale": "be",
+  "values": [
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "Назад",
+    "desc": ""
+   },
+   {
+    "text": "Дэма-гід: сукнаны двор",
+    "desc": ""
+   },
+   {
+    "text": "Дэма-маршрут з дзвюма гісторыямі: свабодны двор і платная млынавая колана.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Платна"
+   },
+   {
+    "text": "Платна",
+    "desc": ""
+   },
+   {
+    "text": "Тэкст: be, en, uk; аўдыё: be, en",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "be"
+   },
+   {
+    "text": "be",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "en"
+   },
+   {
+    "text": "en",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Час: ад 40 да 60 хв"
+   },
+   {
+    "text": "",
+    "desc": "Працягласць"
+   },
+   {
+    "text": "Час: ад 40 да 60 хв",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Кропкі: 2"
+   },
+   {
+    "text": "",
+    "desc": "Кропкі"
+   },
+   {
+    "text": "Кропкі: 2",
+    "desc": ""
+   },
+   {
+    "text": "Памер: 1 МБ",
+    "desc": ""
+   },
+   {
+    "text": "Кропак бясплатна: 1",
+    "desc": ""
+   },
+   {
+    "text": "Усе гісторыі гіда",
+    "desc": ""
+   },
+   {
+    "text": "Адна пакупка адкрывае гісторыі гэтага гіда.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Купіць"
+   },
+   {
+    "text": "Купіць",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Не цяпер"
+   },
+   {
+    "text": "Не цяпер",
+    "desc": ""
+   },
+   {
+    "text": "Кропка 1",
+    "desc": ""
+   },
+   {
+    "text": "Двор сукнараў (дэма)",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Зачынена"
+   },
+   {
+    "text": "",
+    "desc": "Зачынена"
+   },
+   {
+    "text": "Млынавая калона (дэма)",
+    "desc": ""
+   },
+   {
+    "text": "За паваротам — апошняя калона старога млына і гісторыя пра яе вяртуна.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Зачынена"
+   },
+   {
+    "text": "",
+    "desc": "Зачынена"
+   },
+   {
+    "text": "",
+    "desc": "Пачаць"
+   },
+   {
+    "text": "Пачаць",
+    "desc": ""
+   },
+   {
+    "text": "Патрэбна пакупка.",
+    "desc": ""
+   }
+  ],
+  "factLine": "Тэкст: be, en, uk; аўдыё: be, en",
+  "audioChips": [
+   "be",
+   "be",
+   "en",
+   "en"
+  ]
+ },
+ {
+  "screen": "discovery",
+  "locale": "be",
+  "values": [
+   {
+    "text": "",
+    "desc": "Горад"
+   },
+   {
+    "text": "",
+    "desc": "Горад"
+   },
+   {
+    "text": "Горад",
+    "desc": ""
+   },
+   {
+    "text": "Чым заняцца",
+    "desc": ""
+   },
+   {
+    "text": "Падбор недаступны",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "nearby",
+  "locale": "be",
+  "values": [
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "Назад",
+    "desc": ""
+   },
+   {
+    "text": "Побач",
+    "desc": ""
+   },
+   {
+    "text": "Карта горада зʼявіцца пасля рашэння пра тайлы",
+    "desc": ""
+   },
+   {
+    "text": "Агляд",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Дэма-гід: сукнаны двор, paid"
+   },
+   {
+    "text": "Дэма-гід: сукнаны двор",
+    "desc": ""
+   },
+   {
+    "text": "Дэма-маршрут з дзвюма гісторыямі: свабодны двор і платная млынавая колана.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Платна"
+   },
+   {
+    "text": "Платна",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Гід"
+   },
+   {
+    "text": "Тэкст: be, en, uk; аўдыё: be, en&#10;~40—60 хв",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Двор сукнараў (дэма), free"
+   },
+   {
+    "text": "Двор сукнараў (дэма)",
+    "desc": ""
+   },
+   {
+    "text": "Ціхі дворык з рэшткай гарадской сцены; сінтэтычны дэма-кантэнт.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Бясплатна"
+   },
+   {
+    "text": "Бясплатна",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Месца"
+   },
+   {
+    "text": "Тэкст: be, en, uk; аўдыё: —",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "my",
+  "locale": "en",
+  "values": [
+   {
+    "text": "",
+    "desc": "Back"
+   },
+   {
+    "text": "",
+    "desc": "Back"
+   },
+   {
+    "text": "Back",
+    "desc": ""
+   },
+   {
+    "text": "KUDY",
+    "desc": ""
+   },
+   {
+    "text": "Language",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Беларуская"
+   },
+   {
+    "text": "Беларуская",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "English"
+   },
+   {
+    "text": "English",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Українська"
+   },
+   {
+    "text": "Українська",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Deutsch"
+   },
+   {
+    "text": "Deutsch",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Español"
+   },
+   {
+    "text": "Español",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Français"
+   },
+   {
+    "text": "Français",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Čeština"
+   },
+   {
+    "text": "Čeština",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Svenska"
+   },
+   {
+    "text": "Svenska",
+    "desc": ""
+   },
+   {
+    "text": "Current walk",
+    "desc": ""
+   },
+   {
+    "text": "No current walk",
+    "desc": ""
+   },
+   {
+    "text": "Previous walks",
+    "desc": ""
+   },
+   {
+    "text": "No previous walks",
+    "desc": ""
+   }
+  ],
+  "languageChip": "English",
+  "chromeSwitched": true
+ },
+ {
+  "screen": "preview",
+  "locale": "en",
+  "values": [
+   {
+    "text": "",
+    "desc": "Back"
+   },
+   {
+    "text": "",
+    "desc": "Back"
+   },
+   {
+    "text": "Back",
+    "desc": ""
+   },
+   {
+    "text": "Demo guide: the cloth courtyard",
+    "desc": ""
+   },
+   {
+    "text": "A demo route with two stories: the free courtyard and the paid mill column.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Paid"
+   },
+   {
+    "text": "Paid",
+    "desc": ""
+   },
+   {
+    "text": "Text: be, en, uk; audio: be, en",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "be"
+   },
+   {
+    "text": "be",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "en"
+   },
+   {
+    "text": "en",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Time: 40–60 min"
+   },
+   {
+    "text": "",
+    "desc": "Duration"
+   },
+   {
+    "text": "Time: 40–60 min",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Stops: 2"
+   },
+   {
+    "text": "",
+    "desc": "Stops"
+   },
+   {
+    "text": "Stops: 2",
+    "desc": ""
+   },
+   {
+    "text": "Size: 1 MB",
+    "desc": ""
+   },
+   {
+    "text": "Free stops: 1",
+    "desc": ""
+   },
+   {
+    "text": "All of the guide's stories",
+    "desc": ""
+   },
+   {
+    "text": "One purchase unlocks this guide’s stories.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Buy"
+   },
+   {
+    "text": "Buy",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Not now"
+   },
+   {
+    "text": "Not now",
+    "desc": ""
+   },
+   {
+    "text": "Stop 1",
+    "desc": ""
+   },
+   {
+    "text": "Cloth Merchants' Courtyard (demo)",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Locked"
+   },
+   {
+    "text": "",
+    "desc": "Locked"
+   },
+   {
+    "text": "The Mill Column (demo)",
+    "desc": ""
+   },
+   {
+    "text": "Around the bend stands the last column of the old mill; a story about its weathervane.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Locked"
+   },
+   {
+    "text": "",
+    "desc": "Locked"
+   },
+   {
+    "text": "",
+    "desc": "Start"
+   },
+   {
+    "text": "Start",
+    "desc": ""
+   },
+   {
+    "text": "Purchase required.",
+    "desc": ""
+   }
+  ],
+  "factLine": "Text: be, en, uk; audio: be, en",
+  "audioChips": [
+   "be",
+   "be",
+   "en",
+   "en"
+  ]
+ },
+ {
+  "screen": "discovery",
+  "locale": "en",
+  "values": [
+   {
+    "text": "",
+    "desc": "City"
+   },
+   {
+    "text": "",
+    "desc": "City"
+   },
+   {
+    "text": "City",
+    "desc": ""
+   },
+   {
+    "text": "What to do",
+    "desc": ""
+   },
+   {
+    "text": "Discovery unavailable",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "nearby",
+  "locale": "en",
+  "values": [
+   {
+    "text": "",
+    "desc": "Back"
+   },
+   {
+    "text": "",
+    "desc": "Back"
+   },
+   {
+    "text": "Back",
+    "desc": ""
+   },
+   {
+    "text": "Nearby",
+    "desc": ""
+   },
+   {
+    "text": "The city map arrives after the tiles decision",
+    "desc": ""
+   },
+   {
+    "text": "Browse",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Demo guide: the cloth courtyard, paid"
+   },
+   {
+    "text": "Demo guide: the cloth courtyard",
+    "desc": ""
+   },
+   {
+    "text": "A demo route with two stories: the free courtyard and the paid mill column.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Paid"
+   },
+   {
+    "text": "Paid",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Guide"
+   },
+   {
+    "text": "Text: be, en, uk; audio: be, en&#10;~40—60 min",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Cloth Merchants' Courtyard (demo), free"
+   },
+   {
+    "text": "Cloth Merchants' Courtyard (demo)",
+    "desc": ""
+   },
+   {
+    "text": "A quiet courtyard with a remnant of the town wall; synthetic demo content.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Free"
+   },
+   {
+    "text": "Free",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Place"
+   },
+   {
+    "text": "Text: be, en, uk; audio: —",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "my",
+  "locale": "uk",
+  "values": [
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "Назад",
+    "desc": ""
+   },
+   {
+    "text": "KUDY",
+    "desc": ""
+   },
+   {
+    "text": "Мова",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Беларуская"
+   },
+   {
+    "text": "Беларуская",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "English"
+   },
+   {
+    "text": "English",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Українська"
+   },
+   {
+    "text": "Українська",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Deutsch"
+   },
+   {
+    "text": "Deutsch",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Español"
+   },
+   {
+    "text": "Español",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Français"
+   },
+   {
+    "text": "Français",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Čeština"
+   },
+   {
+    "text": "Čeština",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Svenska"
+   },
+   {
+    "text": "Svenska",
+    "desc": ""
+   },
+   {
+    "text": "Поточна прогулянка",
+    "desc": ""
+   },
+   {
+    "text": "Поточної прогулянки немає",
+    "desc": ""
+   },
+   {
+    "text": "Попередні прогулянки",
+    "desc": ""
+   },
+   {
+    "text": "Попередніх прогулянок немає",
+    "desc": ""
+   }
+  ],
+  "languageChip": "Українська",
+  "chromeSwitched": true
+ },
+ {
+  "screen": "preview",
+  "locale": "uk",
+  "values": [
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "Назад",
+    "desc": ""
+   },
+   {
+    "text": "Демо-гід: сукняний двір",
+    "desc": ""
+   },
+   {
+    "text": "Демо-маршрут з двома історіями: вільний двір і платна млинарська колона.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Платно"
+   },
+   {
+    "text": "Платно",
+    "desc": ""
+   },
+   {
+    "text": "Текст: be, en, uk; аудіо: be, en",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "be"
+   },
+   {
+    "text": "be",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "en"
+   },
+   {
+    "text": "en",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Час: від 40 до 60 хв"
+   },
+   {
+    "text": "",
+    "desc": "Тривалість"
+   },
+   {
+    "text": "Час: від 40 до 60 хв",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Точки: 2"
+   },
+   {
+    "text": "",
+    "desc": "Точки"
+   },
+   {
+    "text": "Точки: 2",
+    "desc": ""
+   },
+   {
+    "text": "Розмір: 1 МБ",
+    "desc": ""
+   },
+   {
+    "text": "Точок безкоштовно: 1",
+    "desc": ""
+   },
+   {
+    "text": "Усі історії гіда",
+    "desc": ""
+   },
+   {
+    "text": "Одна покупка відкриває історії цього гіда.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Купити"
+   },
+   {
+    "text": "Купити",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Не зараз"
+   },
+   {
+    "text": "Не зараз",
+    "desc": ""
+   },
+   {
+    "text": "Точка 1",
+    "desc": ""
+   },
+   {
+    "text": "Двір сукнарів (демо)",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Зачинено"
+   },
+   {
+    "text": "",
+    "desc": "Зачинено"
+   },
+   {
+    "text": "Млинарська колона (демо)",
+    "desc": ""
+   },
+   {
+    "text": "За поворотом — остання колона старого млина та історія про її флюгер.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Зачинено"
+   },
+   {
+    "text": "",
+    "desc": "Зачинено"
+   },
+   {
+    "text": "",
+    "desc": "Почати"
+   },
+   {
+    "text": "Почати",
+    "desc": ""
+   },
+   {
+    "text": "Потрібна покупка.",
+    "desc": ""
+   }
+  ],
+  "factLine": "Текст: be, en, uk; аудіо: be, en",
+  "audioChips": [
+   "be",
+   "be",
+   "en",
+   "en"
+  ]
+ },
+ {
+  "screen": "discovery",
+  "locale": "uk",
+  "values": [
+   {
+    "text": "",
+    "desc": "Місто"
+   },
+   {
+    "text": "",
+    "desc": "Місто"
+   },
+   {
+    "text": "Місто",
+    "desc": ""
+   },
+   {
+    "text": "Чим зайнятися",
+    "desc": ""
+   },
+   {
+    "text": "Підбір недоступний",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "nearby",
+  "locale": "uk",
+  "values": [
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "Назад",
+    "desc": ""
+   },
+   {
+    "text": "Поруч",
+    "desc": ""
+   },
+   {
+    "text": "Карта міста з’явиться після рішення про тайли",
+    "desc": ""
+   },
+   {
+    "text": "Огляд",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Демо-гід: сукняний двір, paid"
+   },
+   {
+    "text": "Демо-гід: сукняний двір",
+    "desc": ""
+   },
+   {
+    "text": "Демо-маршрут з двома історіями: вільний двір і платна млинарська колона.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Платно"
+   },
+   {
+    "text": "Платно",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Гід"
+   },
+   {
+    "text": "Текст: be, en, uk; аудіо: be, en&#10;~40—60 хв",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Двір сукнарів (демо), free"
+   },
+   {
+    "text": "Двір сукнарів (демо)",
+    "desc": ""
+   },
+   {
+    "text": "Тихий двірик із залишком міської стіни; синтетичний демо-контент.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Безкоштовно"
+   },
+   {
+    "text": "Безкоштовно",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Місце"
+   },
+   {
+    "text": "Текст: be, en, uk; аудіо: —",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "my",
+  "locale": "de",
+  "values": [
+   {
+    "text": "",
+    "desc": "Zurück"
+   },
+   {
+    "text": "",
+    "desc": "Zurück"
+   },
+   {
+    "text": "Zurück",
+    "desc": ""
+   },
+   {
+    "text": "KUDY",
+    "desc": ""
+   },
+   {
+    "text": "Sprache",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Беларуская"
+   },
+   {
+    "text": "Беларуская",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "English"
+   },
+   {
+    "text": "English",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Українська"
+   },
+   {
+    "text": "Українська",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Deutsch"
+   },
+   {
+    "text": "Deutsch",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Español"
+   },
+   {
+    "text": "Español",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Français"
+   },
+   {
+    "text": "Français",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Čeština"
+   },
+   {
+    "text": "Čeština",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Svenska"
+   },
+   {
+    "text": "Svenska",
+    "desc": ""
+   },
+   {
+    "text": "Aktueller Rundgang",
+    "desc": ""
+   },
+   {
+    "text": "Kein aktueller Rundgang",
+    "desc": ""
+   },
+   {
+    "text": "Frühere Rundgänge",
+    "desc": ""
+   },
+   {
+    "text": "Keine früheren Rundgänge",
+    "desc": ""
+   }
+  ],
+  "languageChip": "Deutsch",
+  "chromeSwitched": true
+ },
+ {
+  "screen": "explore",
+  "locale": "de",
+  "values": [
+   {
+    "text": "Гданьск",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "In der Nähe →"
+   },
+   {
+    "text": "In der Nähe →",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Was unternehmen →"
+   },
+   {
+    "text": "Was unternehmen →",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "KUDY →"
+   },
+   {
+    "text": "KUDY →",
+    "desc": ""
+   },
+   {
+    "text": "Guides mit Text in dieser Sprache gibt es noch nicht.",
+    "desc": ""
+   }
+  ],
+  "guideCard": null,
+  "note": "no preview reachable (filtered or no card)"
+ },
+ {
+  "screen": "discovery",
+  "locale": "de",
+  "values": [
+   {
+    "text": "",
+    "desc": "Stadt"
+   },
+   {
+    "text": "",
+    "desc": "Stadt"
+   },
+   {
+    "text": "Stadt",
+    "desc": ""
+   },
+   {
+    "text": "Was unternehmen?",
+    "desc": ""
+   },
+   {
+    "text": "Auswahl nicht verfügbar",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "nearby",
+  "locale": "de",
+  "values": [
+   {
+    "text": "",
+    "desc": "Zurück"
+   },
+   {
+    "text": "",
+    "desc": "Zurück"
+   },
+   {
+    "text": "Zurück",
+    "desc": ""
+   },
+   {
+    "text": "In der Nähe",
+    "desc": ""
+   },
+   {
+    "text": "Die Stadtkarte erscheint nach der Entscheidung über Kartenkacheln",
+    "desc": ""
+   },
+   {
+    "text": "Überblick",
+    "desc": ""
+   },
+   {
+    "text": "Guides mit Text in dieser Sprache gibt es noch nicht.",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "my",
+  "locale": "es",
+  "values": [
+   {
+    "text": "",
+    "desc": "Atrás"
+   },
+   {
+    "text": "",
+    "desc": "Atrás"
+   },
+   {
+    "text": "Atrás",
+    "desc": ""
+   },
+   {
+    "text": "KUDY",
+    "desc": ""
+   },
+   {
+    "text": "Idioma",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Беларуская"
+   },
+   {
+    "text": "Беларуская",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "English"
+   },
+   {
+    "text": "English",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Українська"
+   },
+   {
+    "text": "Українська",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Deutsch"
+   },
+   {
+    "text": "Deutsch",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Español"
+   },
+   {
+    "text": "Español",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Français"
+   },
+   {
+    "text": "Français",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Čeština"
+   },
+   {
+    "text": "Čeština",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Svenska"
+   },
+   {
+    "text": "Svenska",
+    "desc": ""
+   },
+   {
+    "text": "Recorrido actual",
+    "desc": ""
+   },
+   {
+    "text": "No hay ningún recorrido actual",
+    "desc": ""
+   },
+   {
+    "text": "Recorridos anteriores",
+    "desc": ""
+   },
+   {
+    "text": "No hay recorridos anteriores",
+    "desc": ""
+   }
+  ],
+  "languageChip": "Español",
+  "chromeSwitched": true
+ },
+ {
+  "screen": "explore",
+  "locale": "es",
+  "values": [
+   {
+    "text": "Гданьск",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Cerca →"
+   },
+   {
+    "text": "Cerca →",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Qué hacer →"
+   },
+   {
+    "text": "Qué hacer →",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "KUDY →"
+   },
+   {
+    "text": "KUDY →",
+    "desc": ""
+   },
+   {
+    "text": "Todavía no hay guías con texto en este idioma.",
+    "desc": ""
+   }
+  ],
+  "guideCard": null,
+  "note": "no preview reachable (filtered or no card)"
+ },
+ {
+  "screen": "discovery",
+  "locale": "es",
+  "values": [
+   {
+    "text": "",
+    "desc": "Ciudad"
+   },
+   {
+    "text": "",
+    "desc": "Ciudad"
+   },
+   {
+    "text": "Ciudad",
+    "desc": ""
+   },
+   {
+    "text": "Qué hacer",
+    "desc": ""
+   },
+   {
+    "text": "Las recomendaciones no están disponibles",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "nearby",
+  "locale": "es",
+  "values": [
+   {
+    "text": "",
+    "desc": "Atrás"
+   },
+   {
+    "text": "",
+    "desc": "Atrás"
+   },
+   {
+    "text": "Atrás",
+    "desc": ""
+   },
+   {
+    "text": "Cerca",
+    "desc": ""
+   },
+   {
+    "text": "El mapa de la ciudad llegará tras la decisión sobre los tiles",
+    "desc": ""
+   },
+   {
+    "text": "Exploración manual",
+    "desc": ""
+   },
+   {
+    "text": "Todavía no hay guías con texto en este idioma.",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "my",
+  "locale": "fr",
+  "values": [
+   {
+    "text": "",
+    "desc": "Retour"
+   },
+   {
+    "text": "",
+    "desc": "Retour"
+   },
+   {
+    "text": "Retour",
+    "desc": ""
+   },
+   {
+    "text": "KUDY",
+    "desc": ""
+   },
+   {
+    "text": "Langue",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Беларуская"
+   },
+   {
+    "text": "Беларуская",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "English"
+   },
+   {
+    "text": "English",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Українська"
+   },
+   {
+    "text": "Українська",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Deutsch"
+   },
+   {
+    "text": "Deutsch",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Español"
+   },
+   {
+    "text": "Español",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Français"
+   },
+   {
+    "text": "Français",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Čeština"
+   },
+   {
+    "text": "Čeština",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Svenska"
+   },
+   {
+    "text": "Svenska",
+    "desc": ""
+   },
+   {
+    "text": "Visite en cours",
+    "desc": ""
+   },
+   {
+    "text": "Aucune visite en cours",
+    "desc": ""
+   },
+   {
+    "text": "Visites précédentes",
+    "desc": ""
+   },
+   {
+    "text": "Aucune visite précédente",
+    "desc": ""
+   }
+  ],
+  "languageChip": "Français",
+  "chromeSwitched": true
+ },
+ {
+  "screen": "explore",
+  "locale": "fr",
+  "values": [
+   {
+    "text": "Гданьск",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "À proximité →"
+   },
+   {
+    "text": "À proximité →",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Que faire →"
+   },
+   {
+    "text": "Que faire →",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "KUDY →"
+   },
+   {
+    "text": "KUDY →",
+    "desc": ""
+   },
+   {
+    "text": "Il n'y a pas encore de guides avec du texte dans cette langue.",
+    "desc": ""
+   }
+  ],
+  "guideCard": null,
+  "note": "no preview reachable (filtered or no card)"
+ },
+ {
+  "screen": "discovery",
+  "locale": "fr",
+  "values": [
+   {
+    "text": "",
+    "desc": "Ville"
+   },
+   {
+    "text": "",
+    "desc": "Ville"
+   },
+   {
+    "text": "Ville",
+    "desc": ""
+   },
+   {
+    "text": "Que faire",
+    "desc": ""
+   },
+   {
+    "text": "Sélection indisponible",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "nearby",
+  "locale": "fr",
+  "values": [
+   {
+    "text": "",
+    "desc": "Retour"
+   },
+   {
+    "text": "",
+    "desc": "Retour"
+   },
+   {
+    "text": "Retour",
+    "desc": ""
+   },
+   {
+    "text": "À proximité",
+    "desc": ""
+   },
+   {
+    "text": "La carte de la ville arrivera après la décision sur les tuiles",
+    "desc": ""
+   },
+   {
+    "text": "Vue d'ensemble",
+    "desc": ""
+   },
+   {
+    "text": "Il n'y a pas encore de guides avec du texte dans cette langue.",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "my",
+  "locale": "cs",
+  "values": [
+   {
+    "text": "",
+    "desc": "Zpět"
+   },
+   {
+    "text": "",
+    "desc": "Zpět"
+   },
+   {
+    "text": "Zpět",
+    "desc": ""
+   },
+   {
+    "text": "KUDY",
+    "desc": ""
+   },
+   {
+    "text": "Jazyk",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Беларуская"
+   },
+   {
+    "text": "Беларуская",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "English"
+   },
+   {
+    "text": "English",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Українська"
+   },
+   {
+    "text": "Українська",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Deutsch"
+   },
+   {
+    "text": "Deutsch",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Español"
+   },
+   {
+    "text": "Español",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Français"
+   },
+   {
+    "text": "Français",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Čeština"
+   },
+   {
+    "text": "Čeština",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Svenska"
+   },
+   {
+    "text": "Svenska",
+    "desc": ""
+   },
+   {
+    "text": "Aktuální procházka",
+    "desc": ""
+   },
+   {
+    "text": "Žádná aktuální procházka",
+    "desc": ""
+   },
+   {
+    "text": "Předchozí procházky",
+    "desc": ""
+   },
+   {
+    "text": "Žádné předchozí procházky",
+    "desc": ""
+   }
+  ],
+  "languageChip": "Čeština",
+  "chromeSwitched": true
+ },
+ {
+  "screen": "explore",
+  "locale": "cs",
+  "values": [
+   {
+    "text": "Гданьск",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Poblíž →"
+   },
+   {
+    "text": "Poblíž →",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Co dělat →"
+   },
+   {
+    "text": "Co dělat →",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "KUDY →"
+   },
+   {
+    "text": "KUDY →",
+    "desc": ""
+   },
+   {
+    "text": "Průvodci s textem v tomto jazyce zatím nejsou.",
+    "desc": ""
+   }
+  ],
+  "guideCard": null,
+  "note": "no preview reachable (filtered or no card)"
+ },
+ {
+  "screen": "discovery",
+  "locale": "cs",
+  "values": [
+   {
+    "text": "",
+    "desc": "Město"
+   },
+   {
+    "text": "",
+    "desc": "Město"
+   },
+   {
+    "text": "Město",
+    "desc": ""
+   },
+   {
+    "text": "Co dělat",
+    "desc": ""
+   },
+   {
+    "text": "Doporučení nejsou dostupná",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "nearby",
+  "locale": "cs",
+  "values": [
+   {
+    "text": "",
+    "desc": "Zpět"
+   },
+   {
+    "text": "",
+    "desc": "Zpět"
+   },
+   {
+    "text": "Zpět",
+    "desc": ""
+   },
+   {
+    "text": "Poblíž",
+    "desc": ""
+   },
+   {
+    "text": "Mapa města přibude po rozhodnutí o dlaždicích",
+    "desc": ""
+   },
+   {
+    "text": "Ruční prohlížení",
+    "desc": ""
+   },
+   {
+    "text": "Průvodci s textem v tomto jazyce zatím nejsou.",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "my",
+  "locale": "sv",
+  "values": [
+   {
+    "text": "",
+    "desc": "Tillbaka"
+   },
+   {
+    "text": "",
+    "desc": "Tillbaka"
+   },
+   {
+    "text": "Tillbaka",
+    "desc": ""
+   },
+   {
+    "text": "KUDY",
+    "desc": ""
+   },
+   {
+    "text": "Språk",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Беларуская"
+   },
+   {
+    "text": "Беларуская",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "English"
+   },
+   {
+    "text": "English",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Українська"
+   },
+   {
+    "text": "Українська",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Deutsch"
+   },
+   {
+    "text": "Deutsch",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Español"
+   },
+   {
+    "text": "Español",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Français"
+   },
+   {
+    "text": "Français",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Čeština"
+   },
+   {
+    "text": "Čeština",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Svenska"
+   },
+   {
+    "text": "Svenska",
+    "desc": ""
+   },
+   {
+    "text": "Aktuell promenad",
+    "desc": ""
+   },
+   {
+    "text": "Ingen aktuell promenad",
+    "desc": ""
+   },
+   {
+    "text": "Tidigare promenader",
+    "desc": ""
+   },
+   {
+    "text": "Inga tidigare promenader",
+    "desc": ""
+   }
+  ],
+  "languageChip": "Svenska",
+  "chromeSwitched": true
+ },
+ {
+  "screen": "explore",
+  "locale": "sv",
+  "values": [
+   {
+    "text": "Гданьск",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "I närheten →"
+   },
+   {
+    "text": "I närheten →",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Att göra →"
+   },
+   {
+    "text": "Att göra →",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "KUDY →"
+   },
+   {
+    "text": "KUDY →",
+    "desc": ""
+   },
+   {
+    "text": "Det finns ännu inga guider med text på det här språket.",
+    "desc": ""
+   }
+  ],
+  "guideCard": null,
+  "note": "no preview reachable (filtered or no card)"
+ },
+ {
+  "screen": "discovery",
+  "locale": "sv",
+  "values": [
+   {
+    "text": "",
+    "desc": "Stad"
+   },
+   {
+    "text": "",
+    "desc": "Stad"
+   },
+   {
+    "text": "Stad",
+    "desc": ""
+   },
+   {
+    "text": "Att göra",
+    "desc": ""
+   },
+   {
+    "text": "Förslagen är inte tillgängliga",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "nearby",
+  "locale": "sv",
+  "values": [
+   {
+    "text": "",
+    "desc": "Tillbaka"
+   },
+   {
+    "text": "",
+    "desc": "Tillbaka"
+   },
+   {
+    "text": "Tillbaka",
+    "desc": ""
+   },
+   {
+    "text": "I närheten",
+    "desc": ""
+   },
+   {
+    "text": "Stadskartan kommer efter beslut om kartplattor",
+    "desc": ""
+   },
+   {
+    "text": "Manuell granskning",
+    "desc": ""
+   },
+   {
+    "text": "Det finns ännu inga guider med text på det här språket.",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "preview-audio-en",
+  "locale": "be",
+  "values": [
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "Назад",
+    "desc": ""
+   },
+   {
+    "text": "E2E-гід: тры свабодныя кропкі",
+    "desc": ""
+   },
+   {
+    "text": "Сінтэтычны свабодны маршрут з трох кропак; прыдуманы для аўтатэстаў.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Бясплатна"
+   },
+   {
+    "text": "Бясплатна",
+    "desc": ""
+   },
+   {
+    "text": "Тэкст: be, en; аўдыё: be, en",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "be"
+   },
+   {
+    "text": "be",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "en"
+   },
+   {
+    "text": "en",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Час: ад 40 да 60 хв"
+   },
+   {
+    "text": "",
+    "desc": "Працягласць"
+   },
+   {
+    "text": "Час: ад 40 да 60 хв",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Кропкі: 3"
+   },
+   {
+    "text": "",
+    "desc": "Кропкі"
+   },
+   {
+    "text": "Кропкі: 3",
+    "desc": ""
+   },
+   {
+    "text": "Памер: 1 МБ",
+    "desc": ""
+   },
+   {
+    "text": "Кропка 1",
+    "desc": ""
+   },
+   {
+    "text": "E2E-плошча (сінтэтык)",
+    "desc": ""
+   },
+   {
+    "text": "Кропка 2",
+    "desc": ""
+   },
+   {
+    "text": "Кропка 3",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Загрузіць"
+   },
+   {
+    "text": "Загрузіць",
+    "desc": ""
+   }
+  ]
+ },
+ {
+  "screen": "run-start-refused",
+  "locale": "be",
+  "values": [
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "",
+    "desc": "Назад"
+   },
+   {
+    "text": "Назад",
+    "desc": ""
+   },
+   {
+    "text": "E2E-гід: тры свабодныя кропкі",
+    "desc": ""
+   },
+   {
+    "text": "Сінтэтычны свабодны маршрут з трох кропак; прыдуманы для аўтатэстаў.",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Бясплатна"
+   },
+   {
+    "text": "Бясплатна",
+    "desc": ""
+   },
+   {
+    "text": "Тэкст: be, en; аўдыё: be, en",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "be"
+   },
+   {
+    "text": "be",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "en"
+   },
+   {
+    "text": "en",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Час: ад 40 да 60 хв"
+   },
+   {
+    "text": "",
+    "desc": "Працягласць"
+   },
+   {
+    "text": "Час: ад 40 да 60 хв",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Кропкі: 3"
+   },
+   {
+    "text": "",
+    "desc": "Кропкі"
+   },
+   {
+    "text": "Кропкі: 3",
+    "desc": ""
+   },
+   {
+    "text": "Памер: 1 МБ",
+    "desc": ""
+   },
+   {
+    "text": "Кропка 1",
+    "desc": ""
+   },
+   {
+    "text": "E2E-плошча (сінтэтык)",
+    "desc": ""
+   },
+   {
+    "text": "Кропка 2",
+    "desc": ""
+   },
+   {
+    "text": "Кропка 3",
+    "desc": ""
+   },
+   {
+    "text": "",
+    "desc": "Загрузіць"
+   },
+   {
+    "text": "Загрузіць",
+    "desc": ""
+   }
+  ]
+ }
+]

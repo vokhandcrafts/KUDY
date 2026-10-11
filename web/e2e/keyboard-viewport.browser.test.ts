@@ -6,6 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
+import type { JourneyContext } from '../test-browser/e2e-harness.mjs';
 import { withE2ePage, assertCleanJourney, discoveryIndex } from '../test-browser/e2e-harness.mjs';
 import { evaluateValue } from '../test-browser/cdp-browser.mjs';
 import { be } from '../lib/i18n/be.ts';
@@ -29,7 +30,7 @@ const FOCUS_PROBE = `(() => {
 })()`;
 
 test('G23.02: keyboard-only navigation reaches and activates the main links', async (t) => {
-  await withE2ePage(t, async ({ browser, page, goto, press, waitForPath, pageErrors, blockedRequests }) => {
+  await withE2ePage(t, async ({ browser, page, goto, press, waitForPath, pageErrors, blockedRequests }: JourneyContext) => {
     await goto('/');
     // Tab from the document start through the header and the card list; the
     // guide card link must be reachable and every focused link visibly so.
@@ -52,7 +53,7 @@ test('G23.02: keyboard-only navigation reaches and activates the main links', as
     await press('Enter');
     await waitForPath('/guides/e2e-paid-guide');
     const heading = await evaluateValue(browser, page, `document.querySelector('h1')?.textContent ?? null`);
-    const offer = discoveryIndex().offers.find((entry) => entry.ref.kind === 'guide');
+    const offer = discoveryIndex().offers.find((entry: any) => entry.ref.kind === 'guide');
     assert.ok(offer, 'the served discovery must offer a guide');
     assert.equal(heading, offer.localized.title.be);
 
@@ -61,8 +62,8 @@ test('G23.02: keyboard-only navigation reaches and activates the main links', as
 });
 
 test('G23.02: 320/390/1440 px keep pages inside the viewport with primary actions visible', async (t) => {
-  await withE2ePage(t, async ({ browser, page, goto, pageErrors, blockedRequests }) => {
-    const setViewport = (width, height) =>
+  await withE2ePage(t, async ({ browser, page, goto, pageErrors, blockedRequests }: JourneyContext) => {
+    const setViewport = (width: number, height: number) =>
       browser.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false }, page);
     const clearViewport = () => browser.send('Emulation.clearDeviceMetricsOverride', {}, page);
 
