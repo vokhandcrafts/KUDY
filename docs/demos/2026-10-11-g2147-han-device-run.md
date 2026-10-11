@@ -13,7 +13,7 @@ node -e "const a=require('node:assert/strict');const r=require('./docs/testing/e
 G21.47 evidence proof: OK
 ```
 
-Паводзіны маштабавання на 200% (піксельныя вышыні чарніла, `glyph-metrics.json`): ScaledText капіруе на 1.25 (фактар канону), `allowFontScaling=false` трымае роўна 1.0, а uncapped Text — дэфект (#718). Моцная вага CJK — сінтэзаваны bold: на прыладзе толькі Regular-твары, формы гліфаў супадаюць.
+Паводзіны маштабавання на 200% (піксельныя вышыні чарніла, `glyph-metrics.json`): ScaledText капіруе на 1.25 (фактар канону), `allowFontScaling=false` трымае роўна 1.0, а uncapped Text — дэфект (#718). Моцная вага CJK маляе ўзбагачаныя штрыхі пры аднолькавых формах гліфаў; мэханізм (зменны instance wght ці сінтэзаваны bold) гэты прагон не вызначае.
 
 ```bash
 node -e "const r=require('./docs/testing/evidence/2026-10-11-g2147/han-probe-results.json');const g=require('./docs/testing/evidence/2026-10-11-g2147/glyph-metrics.json');console.log('clipping scan 100%:',JSON.stringify(r.clippingScan.scale1));console.log('clipping scan 200%:',JSON.stringify(r.clippingScan.scale2));console.log('CJK font files:',r.deviceCjkFontFiles.join(', '));console.log('scaled-cap ratio:',g.rows['scaled-cap'].ratio,'| pinned-off:',g.rows['pinned-off'].ratio,'| raw-full:',g.rows['raw-full'].ratio,'(defect #718)')"
