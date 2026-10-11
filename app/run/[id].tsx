@@ -441,7 +441,9 @@ export default function Run() {
     return (
       <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Run">
         <BackButton label={back} testID="btn-run-back" />
-        <ScaledText style={styles.centered}>{strings.unavailableTitle}</ScaledText>
+        <ScaledText style={styles.centered} testID="run-unavailable">
+          {strings.unavailableTitle}
+        </ScaledText>
         {surface !== null ? (
           <ScaledText style={styles.reason} testID="run-unavailable-reason">
             {runMapReason(surface.reason, strings)}
