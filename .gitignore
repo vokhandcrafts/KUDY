@@ -52,3 +52,8 @@ docs/testing/evidence/2026-10-11-g219/runtime/
 # G23.03 (issue #661): Android E2E runtime artifacts (screenshots, UI dumps,
 # Metro/origin logs) — never tracked.
 tools/e2e-android/artifacts/
+
+# Issue #718 (G21.47 follow-up): device-run runtime artifacts (raw UI dumps) —
+# machine JSON committed to the evidence dir is escape-encoded, the raw pulls are not.
+docs/testing/evidence/2026-10-11-g718/runtime/
+

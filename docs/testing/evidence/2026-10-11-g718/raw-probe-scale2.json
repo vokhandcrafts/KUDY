@@ -1,0 +1,70 @@
+{
+  "run": {
+    "task": "issue #718 (G21.47 follow-up)",
+    "driver": "han-minimal-run.mjs",
+    "surface": "probe (dev-only, __DEV__-gated)",
+    "device": {
+      "serial": "emulator-5554",
+      "ro.build.version.release": "16",
+      "ro.build.version.sdk": "36",
+      "ro.product.model": "Android SDK built for x86_64",
+      "ro.hardware": "ranchu",
+      "ro.sf.lcd_density": "",
+      "fontScaleBefore": "1.0",
+      "fontScaleRun": 2,
+      "fontScaleRestored": "1.0"
+    },
+    "metro": "http://localhost:8081/status=packager-status:running",
+    "probeDeepLink": "kudy://han-probe"
+  },
+  "rows": [
+    {
+      "row": "han-node-0",
+      "textLength": 84,
+      "bounds": [
+        42,
+        242,
+        1038,
+        717
+      ],
+      "widthPx": 996,
+      "heightPx": 475
+    },
+    {
+      "row": "han-node-1",
+      "textLength": 16,
+      "bounds": [
+        42,
+        1824,
+        1038,
+        1902
+      ],
+      "widthPx": 996,
+      "heightPx": 78
+    },
+    {
+      "row": "han-node-2",
+      "textLength": 16,
+      "bounds": [
+        42,
+        2018,
+        1038,
+        2096
+      ],
+      "widthPx": 996,
+      "heightPx": 78
+    },
+    {
+      "row": "han-node-3",
+      "textLength": 16,
+      "bounds": [
+        42,
+        2213,
+        1038,
+        2275
+      ],
+      "widthPx": 996,
+      "heightPx": 62
+    }
+  ]
+}

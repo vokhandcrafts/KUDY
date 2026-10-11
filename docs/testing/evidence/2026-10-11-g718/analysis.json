@@ -1,0 +1,39 @@
+{
+  "minimal_raw_line1": {
+    "glyph_clusters": 13,
+    "median_advance_px": 74.0,
+    "note": "uncapped Text at font_scale 2.0: advance ~74px = 1.77x of the 42px base (density 3.0), not the linear 2.0x=84px"
+  },
+  "minimal_pinned_line1": {
+    "glyph_clusters": 11,
+    "median_advance_px": 84.0,
+    "note": "pinned 28dp Text: advance ~84px = exactly 2.0x of 42px (linear DIP path, correct)"
+  },
+  "probe_raw_line1": {
+    "glyph_clusters": 15,
+    "median_advance_px": 74.0,
+    "note": "the recorded surface's uncapped row: same ~74px non-linear advance"
+  },
+  "probe_raw_clip": {
+    "ink_last_y": 2095,
+    "ink_last_row_px": 253,
+    "tail_ink_px": [
+      333,
+      300,
+      310,
+      253
+    ],
+    "view_bottom_y": 2096,
+    "note": "ink ends at the view bottom with no taper (a full row of ink cut mid-stroke); the correct glyph bottoms extend ~13px further"
+  },
+  "probe_raw_line1_scale1": {
+    "glyph_clusters": 16,
+    "median_advance_px": 42,
+    "note": "font_scale 1.0: 16 glyphs in one line, advance 42px = 1.0x, no clip"
+  },
+  "density": 3.0,
+  "base_font_px": 42,
+  "font_scale": 2.0,
+  "non_linear_ratio": 1.762,
+  "linear_ratio": 2.0
+}
