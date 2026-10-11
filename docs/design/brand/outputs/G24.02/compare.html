@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="be">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G24.02 — параўнанне іконкавых кандыдатаў I1/I3</title>
+<!--
+  compare.html — G24.02 (#693), дошка параўнання для выбару ўладара.
+  Статычная старонка без скрыптоў: памерная лесвіца 29/40/60/1024 px,
+  маскі платформ, splash-напрамак S1, кантрасты і бяспечная зона adaptive icon.
+  Кандыдаты — скіцы (icon-i1, icon-i3, icon-i3-compass, icon-i2-full),
+  не production-асеты. Цёмная прэзентацыя чакае рашэння #436 — толькі
+  нейтральны цёмны шпалерны кантэкст, не цёмная тэма прадукту.
+-->
+<style>
+  :root { --paper:#FAF7F2; --ink:#22262B; --green:#1D6B4F; --line:#D8D2C6; --muted:#6B7280; }
+  body { font-family: system-ui, sans-serif; background: var(--paper); color: var(--ink); margin: 0; padding: 24px; }
+  h1 { font-size: 22px; } h2 { font-size: 18px; margin-top: 40px; }
+  .note { color: var(--muted); font-size: 13px; max-width: 900px; }
+  table { border-collapse: collapse; margin-top: 12px; }
+  td, th { border: 1px solid var(--line); padding: 10px 14px; text-align: center; vertical-align: middle; font-size: 14px; }
+  th { background: #fff; }
+  .bgdark { background: #2B2F33; } .bglight { background: #E9E4DA; }
+  .squircle { border-radius: 22%; } .circle { border-radius: 50%; }
+  .cell { display: inline-block; margin: 4px; line-height: 0; }
+  .splash { width: 560px; height: 120px; background: var(--green); display: flex; align-items: center; justify-content: center; gap: 18px; border: 1px solid var(--line); }
+  .splash img { width: 88px; height: 88px; }
+  .splash span { color: var(--paper); font-size: 30px; font-weight: 600; letter-spacing: 4px; }
+  .big { position: relative; width: 300px; height: 300px; }
+  .big img { width: 300px; height: 300px; }
+  .safe { position: absolute; left: 50%; top: 50%; width: 198px; height: 198px; margin: -99px 0 0 -99px; border: 2px dashed #fff; border-radius: 50%; }
+  .warn { color: #B3331F; }
+</style>
+</head>
+<body>
+<h1>G24.02 · Кандыдаты лаўнчар-іконкі KUDY — параўнанне для выбару ўладара</h1>
+<p class="note">Скіцы для параўнання, не production-асеты: фінальныя зыходнікі для #429 робяцца толькі пасля выбару варыянту і праверкі падабенства па фота фігуркі (у рэпе фота няма). Палітра канона: крэм #FAF7F2 на зялёным #1D6B4F — 6.01:1 (WCAG 1.4.11 ≥ 3:1 для графікі). Тэксту ў іконцы няма.</p>
+
+<h2>1. Памерная лесвіца 29 / 40 / 60 / 1024 px</h2>
+<table>
+  <tr><th>Кандыдат</th><th>29 px</th><th>40 px</th><th>60 px</th><th>1024 px</th><th>Сутнасць і рызыка</th></tr>
+  <tr>
+    <th>I1 · Узнятая галава</th>
+    <td><img src="icon-i1.svg" class="squircle" width="29" height="29" alt="I1 у 29 px"></td>
+    <td><img src="icon-i1.svg" class="squircle" width="40" height="40" alt="I1 у 40 px"></td>
+    <td><img src="icon-i1.svg" class="squircle" width="60" height="60" alt="I1 у 60 px"></td>
+    <td><img src="icon-i1.svg" width="120" height="120" alt="I1 у 1024 px"></td>
+    <td style="text-align:left">Галоўны жэст брыфа; чытаецца на 29 px. Рызыка: «адна галава і шыя» яшчэ не прынятая (брыф) — менавіта таму выбар за ўладарам.</td>
+  </tr>
+  <tr>
+    <th>I3 · Галава па-над колам</th>
+    <td><img src="icon-i3.svg" class="squircle" width="29" height="29" alt="I3 у 29 px"></td>
+    <td><img src="icon-i3.svg" class="squircle" width="40" height="40" alt="I3 у 40 px"></td>
+    <td><img src="icon-i3.svg" class="squircle" width="60" height="60" alt="I3 у 60 px"></td>
+    <td><img src="icon-i3.svg" width="120" height="120" alt="I3 у 1024 px"></td>
+    <td style="text-align:left">Дынаміка «зірнуць далей»; на 29 px кола чытаецца як тыповы круглы значок (рызыка рэпорта I3). Патрэбна зялёная раздзяляльная абводка.</td>
+  </tr>
+  <tr>
+    <th>I3-к · з кампаснымі дзелкамі</th>
+    <td><img src="icon-i3-compass.svg" class="squircle" width="29" height="29" alt="I3 з дзелкамі ў 29 px"></td>
+    <td><img src="icon-i3-compass.svg" class="squircle" width="40" height="40" alt="I3 з дзелкамі ў 40 px"></td>
+    <td><img src="icon-i3-compass.svg" class="squircle" width="60" height="60" alt="I3 з дзелкамі ў 60 px"></td>
+    <td><img src="icon-i3-compass.svg" width="120" height="120" alt="I3 з дзелкамі ў 1024 px"></td>
+    <td style="text-align:left">Кампасная опцыя. Дзелкі 10 px на 1024 ≈ 0,3 px на 29 px і ≈ 0,6 px на 60 px — на малых памерах знікаюць, кампас не працуе як сімвал іконкі.</td>
+  </tr>
+  <tr>
+    <th>Поўны сілуэт з крыламі (I2)</th>
+    <td><img src="icon-i2-full.svg" class="squircle" width="29" height="29" alt="Поўны сілуэт у 29 px"></td>
+    <td><img src="icon-i2-full.svg" class="squircle" width="40" height="40" alt="Поўны сілуэт у 40 px"></td>
+    <td><img src="icon-i2-full.svg" class="squircle" width="60" height="60" alt="Поўны сілуэт у 60 px"></td>
+    <td><img src="icon-i2-full.svg" width="120" height="120" alt="Поўны сілуэт у 1024 px"></td>
+    <td style="text-align:left">Крылы робяць фігурку пазнавальнай (брыф); морда, хвост і дэталі губляюцца да ~60 px (рызыка рэпорта I2). Трымаецца як варыянт, калі ўладар захавае крылы.</td>
+  </tr>
+</table>
+
+<h2>2. Кантэкст платформ: маскі і шпалеры</h2>
+<p class="note">Злева — светлы, справа — нейтральны цёмны шпалер. <span class="warn">Цёмная тэма прадукту — асобнае рашэнне #436, яго напрамку няма, таму цёмная прэзентацыя іконкі застаецца неправеранай (запіс у выніку).</span> Скворэл iOS і кола Android — сістэмныя маскі, сам файл залишаюцца квадратным без уласнага скруглення.</p>
+<table>
+  <tr>
+    <th><span class="cell bglight squircle"><img src="icon-i1.svg" class="squircle" width="60" height="60" alt="I1, светлы шпалер"></span> <span class="cell bgdark squircle"><img src="icon-i1.svg" class="squircle" width="60" height="60" alt="I1, цёмны шпалер"></span></th>
+    <th><span class="cell bglight squircle"><img src="icon-i3.svg" class="squircle" width="60" height="60" alt="I3, светлы шпалер"></span> <span class="cell bgdark squircle"><img src="icon-i3.svg" class="squircle" width="60" height="60" alt="I3, цёмны шпалер"></span></th>
+    <th><span class="cell bglight squircle"><img src="icon-i3-compass.svg" class="squircle" width="60" height="60" alt="I3-к, светлы шпалер"></span> <span class="cell bgdark squircle"><img src="icon-i3-compass.svg" class="squircle" width="60" height="60" alt="I3-к, цёмны шпалер"></span></th>
+    <th><span class="cell bglight squircle"><img src="icon-i2-full.svg" class="squircle" width="60" height="60" alt="Поўны сілуэт, светлы шпалер"></span> <span class="cell bgdark squircle"><img src="icon-i2-full.svg" class="squircle" width="60" height="60" alt="Поўны сілуэт, цёмны шпалер"></span></th>
+  </tr>
+  <tr>
+    <td class="circle"><img src="icon-i1.svg" class="circle" width="60" height="60" alt="I1, круглая маска"></td>
+    <td class="circle"><img src="icon-i3.svg" class="circle" width="60" height="60" alt="I3, круглая маска"></td>
+    <td class="circle"><img src="icon-i3-compass.svg" class="circle" width="60" height="60" alt="I3-к, круглая маска"></td>
+    <td class="circle"><img src="icon-i2-full.svg" class="circle" width="60" height="60" alt="Поўны сілуэт, круглая маска"></td>
+  </tr>
+</table>
+
+<h2>3. Splash-напрамак S1 (сістэмная застаўка)</h2>
+<p class="note">Напрамак рэпорта: зялёны фон, крэмавая марка з іконкі, слова KUDY асобна. Сістэмная застаўка iOS і Android 12+ — статычная: адзін фон + адна выява без анімацыі (збігаецца з reduced-motion канона); слова KUDY на Android 12+ у сістэмны пласт не ўваходзіць — яго паказвае сама праграма. Фота-варыянт S2 («фігурка ў Гданьску») чакае здымкаў з §3 выніку.</p>
+<div class="splash"><img src="icon-i1.svg" alt="марка I1 на застаўцы"><span>KUDY</span></div>
+
+<h2>4. Бяспечная зона adaptive icon (Android)</h2>
+<p class="note">Foreground для adaptive icon — асобны экспарт: толькі крэмавая марка з празрыстасцю, цэнтр у коле 66/108 (пункцір на прэв'ю). Фон задаецца праз <code>backgroundColor #1D6B4F</code>, не малюецца ў foreground-файле. Пункцір — ілюстрацыя зоны, не асет.</p>
+<div class="big"><img src="icon-i1.svg" alt="I1 з зонай бяспекі"><span class="safe"></span></div>
+
+<h2>5. Кантраст і даступнасць (разлік па каноне)</h2>
+<table>
+  <tr><th>Пара</th><th>Суадносіны</th><th>Плашка</th><th>Вердыкт</th></tr>
+  <tr><td>крэм #FAF7F2 · зялёны #1D6B4F</td><td>6.01:1</td><td>≥ 3:1 (1.4.11 графіка)</td><td>праходзіць</td></tr>
+  <tr><td>зялёны #1D6B4F · папера #FAF7F2</td><td>6.01:1</td><td>≥ 3:1</td><td>праходзіць ( splash на паперы )</td></tr>
+  <tr><td>гліна #805039 · зялёны #1D6B4F</td><td>1.05:1</td><td>—</td><td class="warn">забаронена: героя глінянага тону на зялёным не ставіць</td></tr>
+  <tr><td>бурштын #D8A551 · зялёны #1D6B4F</td><td>2.88:1</td><td>≥ 3:1</td><td class="warn">ніжэй плашкі — толькі неістотны дэкор, не сімвал іконкі</td></tr>
+</table>
+<p class="note">Іншае: сілуэт без унутраных тонкіх дэталяў (вока і ноздра — не нясуць сэнсу самі па сабе); лаўнчар заўсёды мае подпіс назвы праграмы з боку ОС; застаўка статычная — reduced-motion выканана; iOS-іконка без альфы (поўная заливка фонам).</p>
+</body>
+</html>
