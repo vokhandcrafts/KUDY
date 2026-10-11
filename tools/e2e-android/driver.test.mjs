@@ -14,13 +14,15 @@ import { DriverError, E2eDriver, describeSelector, findNode, nodeCenter, parseDu
 const here = path.dirname(fileURLToPath(import.meta.url));
 const readFixture = (name) => fs.readFileSync(path.join(here, 'fixtures', name), 'utf8');
 
+const tmpDirs = [];
+test.after(() => {
+  for (const dir of tmpDirs) fs.rmSync(dir, { recursive: true, force: true });
+});
+
 function testDriver() {
-  return new E2eDriver({
-    adbPath: 'adb',
-    serial: 'emulator-0000',
-    artifactsDir: fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-e2e-test-')),
-    pkg: 'by.kudy.app',
-  });
+  const artifactsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-e2e-test-'));
+  tmpDirs.push(artifactsDir);
+  return new E2eDriver({ adbPath: 'adb', serial: 'emulator-0000', artifactsDir, pkg: 'by.kudy.app' });
 }
 
 test('parseDump reads the recorded Explore dump: testID nodes with tappable centers', () => {

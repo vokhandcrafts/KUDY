@@ -143,7 +143,10 @@ function pollHttpOk(url, timeoutMs) {
 
 // Metro and the origin server run in their own process groups and are
 // stopped by group id — the listening PID's whole tree, per
-// implementation-rules 11 (never shell job pids).
+// implementation-rules 11 (never shell job pids). POSIX boundary: the
+// group kill is the Unix idiom; on Windows it degrades to the logged
+// warning plus the port-closed poll (verified only on Linux — rule 9;
+// a taskkill /T branch is the documented follow-up).
 function startGroupProcess(command, args, { cwd, env, logPath }) {
   const log = fs.openSync(logPath, 'a');
   fs.appendFileSync(log, `$ ${command} ${args.join(' ')}\n`);
