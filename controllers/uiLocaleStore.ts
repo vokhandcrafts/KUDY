@@ -15,9 +15,13 @@
 // port lands it writes the durable `settings` row (the consent idiom).
 
 // G21.09 (issue #542, criterion 4): the store's vocabulary derives from the
-// one locale registry — the complete catalogues (be/en/uk today); a planned
-// code is not switchable. The unknown-input semantics below are unchanged.
-import { COMPLETE_UI_LOCALES, type CompleteUiLocaleCode } from '../contracts/ui-locales.ts';
+// one locale registry — the complete catalogues (all eight since G21.14); a
+// planned code is not switchable. The unknown-input semantics below are
+// unchanged.
+// G21.50 (issue #711): switchable means OPEN, not merely complete — the
+// open set rides the release flag (the openLocales injection is the tests'
+// seam; production derives it from the registry module's OPEN_UI_LOCALES).
+import { COMPLETE_UI_LOCALES, OPEN_UI_LOCALES, type CompleteUiLocaleCode } from '../contracts/ui-locales.ts';
 
 export type UiLocaleSwitchCode = CompleteUiLocaleCode;
 
@@ -37,27 +41,39 @@ export interface UiLocalePersistence {
 }
 
 export class UiLocaleError extends Error {
-  readonly rule: 'ui-locale-unknown';
+  readonly rule: 'ui-locale-unknown' | 'ui-locale-closed';
 
-  constructor(rule: 'ui-locale-unknown', locale: string) {
-    super(`ui-locale-unknown: ${locale}`);
+  constructor(rule: 'ui-locale-unknown' | 'ui-locale-closed', locale: string) {
+    super(`${rule}: ${locale}`);
     this.name = 'UiLocaleError';
     this.rule = rule;
   }
 }
 
-const VOCABULARY: readonly UiLocaleSwitchCode[] = COMPLETE_UI_LOCALES;
-
-export function createUiLocaleStore(persistence?: UiLocalePersistence): UiLocaleSwitch {
+export function createUiLocaleStore(
+  persistence?: UiLocalePersistence,
+  openLocales?: readonly UiLocaleSwitchCode[],
+): UiLocaleSwitch {
+  const open = openLocales ?? OPEN_UI_LOCALES;
   const stored = persistence?.read() ?? null;
-  let current: UiLocaleSwitchCode = stored ?? 'be';
+  // G21.50 (issue #711, criterion 3): a stored code that is registered but
+  // closed is not the session locale — the session falls back to be, the row
+  // is not overwritten and nothing throws; a later read may restore the code
+  // once the flag opens it.
+  let current: UiLocaleSwitchCode = stored !== null && open.includes(stored) ? stored : 'be';
   const listeners = new Set<() => void>();
 
   return {
     current: () => current,
     set: (locale: string) => {
-      if (!VOCABULARY.includes(locale as UiLocaleSwitchCode)) {
-        throw new UiLocaleError('ui-locale-unknown', locale);
+      // G21.50: the switch vocabulary is the open set. A code that is
+      // registered but closed is a named refusal of its own — it is not
+      // `ui-locale-unknown` (the registry knows it) and not a silent state.
+      if (!(open as readonly string[]).includes(locale)) {
+        throw new UiLocaleError(
+          (COMPLETE_UI_LOCALES as readonly string[]).includes(locale) ? 'ui-locale-closed' : 'ui-locale-unknown',
+          locale,
+        );
       }
       const next = locale as UiLocaleSwitchCode;
       if (next === current) return;

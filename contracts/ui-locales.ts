@@ -55,6 +55,49 @@ export function isCompleteUiLocale(value: string): value is CompleteUiLocaleCode
   return (COMPLETE_UI_LOCALES as readonly string[]).includes(value);
 }
 
+// G21.50 (issue #711): the open subset the pickers advertise is a separate
+// fact from COMPLETE_UI_LOCALES — a code may be complete and still closed.
+// The frozen default is the G21.50 decision set: the eight advertised codes
+// stay open under every flag state (hiding any of them is out of scope),
+// and a code registered complete after this decision (zh first, G21.42 §11)
+// stays closed until the flag names it.
+const RELEASE_DEFAULT_OPEN: readonly CompleteUiLocaleCode[] = ["be", "en", "uk", "de", "es", "fr", "cs", "sv"];
+
+// The one build/deploy input that names additionally open codes (additive,
+// comma- or whitespace-separated; `zh` once its catalogue lands). No flag
+// vendor, no second input name.
+export const RELEASE_FLAG_ENV = 'EXPO_PUBLIC_OPEN_UI_LOCALES';
+
+// Pure resolver: the default set intersected with `complete`, plus every
+// flag-named code that `complete` registers. Absent, empty or corrupt input
+// (unknown tokens, stray separators) answers with the default set — never a
+// throw, never a removal of the default codes. The `complete` parameter is
+// the tests' seam; production always evaluates against the real registry.
+export function releaseOpenUiLocales(
+  flagValue: string | null | undefined,
+  complete: readonly CompleteUiLocaleCode[] = COMPLETE_UI_LOCALES,
+): readonly CompleteUiLocaleCode[] {
+  const open: CompleteUiLocaleCode[] = RELEASE_DEFAULT_OPEN.filter((code) => complete.includes(code));
+  if (typeof flagValue !== 'string') {
+    return open;
+  }
+  const known: readonly string[] = complete;
+  const taken: readonly string[] = open;
+  for (const token of flagValue.split(/[,\s]+/)) {
+    if (token !== '' && !taken.includes(token) && known.includes(token)) {
+      open.push(token as CompleteUiLocaleCode);
+    }
+  }
+  return open;
+}
+
+// The module-level fact the surfaces read. The value is read once here at
+// module evaluation: Metro inlines EXPO_PUBLIC_* into the app binary, the
+// Next static export evaluates it at build time, node tests see the real
+// environment. A bundle that cannot inline it (a web client chunk) reads
+// undefined — the same absent-flag case, so it falls back to the default.
+export const OPEN_UI_LOCALES: readonly CompleteUiLocaleCode[] = releaseOpenUiLocales(process.env[RELEASE_FLAG_ENV]);
+
 // The complete locales' native names as a keyed record for the chrome
 // catalogs: the catalogs embed this object so the self-name words live only
 // in the registry table above.

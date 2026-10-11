@@ -14,6 +14,8 @@ import { cs } from './cs.ts';
 import { sv } from './sv.ts';
 import {
   isUiLocaleCode,
+  RELEASE_FLAG_ENV,
+  releaseOpenUiLocales,
   uiLocaleNativeName,
   type CompleteUiLocaleCode,
 } from '../../../contracts/ui-locales.ts';
@@ -36,7 +38,12 @@ export { uiLocaleNativeName };
 // tree derive from.
 export type UiLocale = 'be' | 'en' | 'uk' | 'de' | 'es' | 'fr' | 'cs' | 'sv';
 
-export const uiLocales: UiLocale[] = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'];
+// G21.50 (issue #711): the route set is the OPEN subset — the resolver turns
+// the release flag input into the advertised list, so a registered-but-closed
+// code never becomes a URL prefix, a sitemap path, an hreflang entry or an
+// exported `html lang`. The parity guard below keeps this a subset of the
+// complete catalogues.
+export const uiLocales: UiLocale[] = [...releaseOpenUiLocales(process.env[RELEASE_FLAG_ENV])];
 
 // The locale the URLs without a prefix serve (plan §4): the single default
 // mapping point behind localePath and the exported document language

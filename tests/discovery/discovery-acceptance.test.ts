@@ -257,4 +257,27 @@ describe("G15.04 discovery integration acceptance", () => {
     assert.ok(state.surface.kind === "ready");
     assert.equal(state.surface.result.exact.length, 4, "discovery needs no analytics consent");
   });
+
+  // G21.50 (issue #711, criterion 5): the query's content locale never
+  // leaves the open set. The real registry has no gated code yet, so the
+  // unregistered `zz` rides the same open-set guard a registered-but-closed
+  // code takes; the resolver tests (test/ui-locale-registry.test.mjs) carry
+  // the closed-code semantics. selectDiscovery stays a pure text_locales
+  // include — the guard lives at this controller boundary.
+  test("the query locale never leaves the open set: a foreign initial falls back to be, a refused switch keeps the value", async () => {
+    const store = await bootedDiscovery({ loader: mutableLoader(syntheticFiles(PUBLICATION)).loader });
+    const fallbackStore = await bootedDiscovery({
+      loader: mutableLoader(syntheticFiles(PUBLICATION)).loader,
+      criteriaLocale: "zz",
+    });
+    assert.equal(
+      fallbackStore.getState().criteriaLocale,
+      "be",
+      "a value outside the open set falls back to the picker's open locale",
+    );
+    store.getState().setCriteriaLocale("en");
+    assert.equal(store.getState().criteriaLocale, "en", "an open locale still switches");
+    store.getState().setCriteriaLocale("zz");
+    assert.equal(store.getState().criteriaLocale, "en", "a refused switch keeps the previous open locale");
+  });
 });
