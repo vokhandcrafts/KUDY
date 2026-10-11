@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 790" font-family="Golos Text, system-ui, sans-serif">
+  <!-- G25.07 · карта пераходаў: тэлефон (злева) і вэб (справа).
+       Крыніцы пераходаў: docs/design/screens-and-transitions.md (G06.06),
+       11_run_interaction.md §16, ADR G01.01–G01.03, вэб-маршруты web/app/. -->
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#6b7280"/>
+    </marker>
+    <marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#1d6b4f"/>
+    </marker>
+    <marker id="arW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#b3331f"/>
+    </marker>
+  </defs>
+  <style>
+    .n{fill:#ffffff;stroke:#d8d2c6;stroke-width:1.5;rx:10}
+    .t{font-size:14px;font-weight:600;fill:#22262b}
+    .s{font-size:10.5px;fill:#6b7280}
+    .nav{font-size:10px;font-weight:600;fill:#1d6b4f}
+    .e{fill:none;stroke:#6b7280;stroke-width:1.4}
+    .ea{fill:none;stroke:#1d6b4f;stroke-width:1.6}
+    .ed{fill:none;stroke:#6b7280;stroke-width:1.2;stroke-dasharray:4 4}
+    .ew{fill:none;stroke:#b3331f;stroke-width:1.4}
+    .h{font-size:17px;font-weight:600;fill:#22262b}
+    .cap{font-size:11px;fill:#4c5359}
+  </style>
+
+  <text x="24" y="30" class="h">Тэлефон: ланцуг прагулкі</text>
+  <text x="24" y="48" class="cap">Суцэльныя стрэлкі — карыстацкія пераходы; пункцірныя — вяртанне Back; чырвоная — адзіны дыялог пацверджання.</text>
+
+  <!-- вузлы тэлефона -->
+  <g>
+    <rect x="40" y="90" width="170" height="48" class="n" rx="10"/>
+    <text x="52" y="111" class="t">Explore (горад)</text>
+    <text x="52" y="127" class="s">рады Гіды/Побач/Чым заняцца</text>
+
+    <rect x="280" y="66" width="150" height="44" class="n" rx="10"/>
+    <text x="292" y="86" class="t">Guides (рубрыка)</text>
+    <text x="292" y="100" class="s">спіс гідаў</text>
+
+    <rect x="280" y="146" width="150" height="44" class="n" rx="10"/>
+    <text x="292" y="166" class="t">Discovery result</text>
+    <text x="292" y="180" class="s">падбор па запыце</text>
+
+    <rect x="40" y="230" width="150" height="44" class="n" rx="10"/>
+    <text x="52" y="250" class="t">Побач (мапа)</text>
+    <text x="52" y="264" class="s">тэйзер з яўным Play</text>
+
+    <rect x="40" y="360" width="150" height="44" class="n" rx="10"/>
+    <text x="52" y="380" class="t">My KUDY</text>
+    <text x="52" y="394" class="s">гісторыя · мова · ацэнкі</text>
+
+    <rect x="480" y="66" width="160" height="44" class="n" rx="10"/>
+    <text x="492" y="86" class="t">Прэв&#8217;ю гіда</text>
+    <text x="492" y="100" class="s">Download &#8594; Start (09 §6.5)</text>
+
+    <rect x="480" y="160" width="160" height="44" class="n" rx="10"/>
+    <text x="492" y="180" class="t">Картка месца</text>
+    <text x="492" y="194" class="s">публічная праекцыя</text>
+
+    <rect x="280" y="236" width="150" height="44" class="n" rx="10"/>
+    <text x="292" y="256" class="t">Падборка</text>
+    <text x="292" y="270" class="s">члены без аўдыё</text>
+
+    <rect x="480" y="256" width="160" height="52" class="n" rx="10"/>
+    <text x="492" y="277" class="t">Дыялог §4.1</text>
+    <text x="492" y="292" class="s">«Завяршыць “A” і пачаць “B”?»</text>
+    <text x="492" y="304" class="s">«Скасаваць» &#8594; назад без змен</text>
+
+    <rect x="300" y="380" width="180" height="56" class="n" rx="10" style="stroke:#1d6b4f;stroke-width:2"/>
+    <text x="312" y="402" class="t">Run (адна паверхня)</text>
+    <text x="312" y="417" class="s">мапа + панэль Peek/Half/Full</text>
+    <text x="312" y="430" class="s">тап маркера &#8594; прэв&#8217;ю, не гук</text>
+
+    <rect x="540" y="420" width="140" height="44" class="n" rx="10"/>
+    <text x="552" y="440" class="t">End (завяршэнне)</text>
+    <text x="552" y="454" class="s">«Яшчэ можна адкрыць»</text>
+
+    <rect x="540" y="520" width="160" height="56" class="n" rx="10" style="stroke-dasharray:4 3"/>
+    <text x="552" y="541" class="t">Форма ацэнкі</text>
+    <text x="552" y="556" class="s">часовая паверхня: не ў стосе,</text>
+    <text x="552" y="568" class="s">Back &#8594; паверхня-крыніца</text>
+  </g>
+
+  <!-- стрэлкі тэлефона -->
+  <g>
+    <path d="M212 104 L278 92" class="ea" marker-end="url(#arA)"/>
+    <text x="222" y="90" class="nav">NAV1 «Гіды»</text>
+    <path d="M215 122 L278 162" class="e" marker-end="url(#ar)"/>
+    <text x="228" y="152" class="nav">NAV4 «Чым заняцца»</text>
+    <path d="M125 140 L115 228" class="e" marker-end="url(#ar)"/>
+    <text x="60" y="196" class="nav">NAV3 «Побач»</text>
+    <path d="M120 342 L116 408" class="e" marker-end="url(#ar)"/>
+    <text x="62" y="382" class="nav">NAV3 «KUDY»</text>
+    <path d="M432 88 L478 88" class="ea" marker-end="url(#arA)"/>
+    <text x="436" y="80" class="nav">NAV1 картка</text>
+    <path d="M430 176 L516 128" class="e" marker-end="url(#ar)"/>
+    <text x="448" y="148" class="nav">21 §3.1 картка выніку</text>
+    <path d="M355 190 L352 234" class="e" marker-end="url(#ar)"/>
+    <text x="360" y="218" class="nav">21 §3.1</text>
+    <path d="M560 112 L560 158" class="e" marker-end="url(#ar)"/>
+    <text x="566" y="140" class="nav">NAV9 месца</text>
+    <path d="M548 302 L440 378" class="ew" marker-end="url(#arW)"/>
+    <text x="430" y="330" class="nav" fill="#b3331f">NAV8 пацвярджэнне Start</text>
+    <path d="M560 110 L470 386" class="ea" marker-end="url(#arA)"/>
+    <text x="528" y="240" class="nav" fill="#1d6b4f">Start (09 §6.5)</text>
+    <path d="M192 252 L298 396" class="ea" marker-end="url(#arA)"/>
+    <text x="196" y="330" class="nav">NAV7 «Прагулка»</text>
+    <path d="M482 408 L538 432" class="e" marker-end="url(#ar)"/>
+    <text x="484" y="418" class="nav">«Завяршыць»</text>
+    <path d="M620 466 L620 518" class="e" marker-end="url(#ar)"/>
+    <text x="626" y="498" class="nav">NAV10 запрашэнне</text>
+    <path d="M612 518 L490 434" class="ed" marker-end="url(#ar)"/>
+    <text x="520" y="494" class="s">Back/«Прапусціць» &#8594; крыніца</text>
+    <path d="M370 434 L540 180" class="ed" marker-end="url(#ar)"/>
+    <text x="416" y="300" class="s">тап маркера &#8594; прэв&#8217;ю (11 §16.4)</text>
+    <path d="M298 420 L194 272" class="ed" marker-end="url(#ar)"/>
+    <text x="196" y="352" class="s">мапа Back (11, раздзел 2)</text>
+    <path d="M116 300 C 40 300, 30 420, 100 500 C 160 560, 300 500, 352 438" class="ed" marker-end="url(#ar)"/>
+    <text x="42" y="540" class="nav">NAV7: «Прагулка» з любой паверхні раздзела 16</text>
+    <text x="42" y="554" class="s">&#8594; Run у ранейшым становішчы панэлі; аўдыё не спыняецца</text>
+  </g>
+
+  <line x1="700" y1="20" x2="700" y2="770" stroke="#b9b1a5" stroke-width="1"/>
+
+  <text x="724" y="30" class="h">Вэб-канал: уваход без усталёўкі</text>
+  <text x="724" y="48" class="cap">Публічныя старонкі web/app/; працяг у дадатку — CalmOffer і /app (16 G10.02: «неўсталяваны дадатак не дае тупік»).</text>
+
+  <!-- вузлы вэба -->
+  <g>
+    <rect x="724" y="90" width="170" height="48" class="n" rx="10"/>
+    <text x="736" y="111" class="t">Каталог «/»</text>
+    <text x="736" y="127" class="s">«Гіды па горадзе»</text>
+
+    <rect x="990" y="70" width="170" height="48" class="n" rx="10"/>
+    <text x="1002" y="91" class="t">Гід /guides/id</text>
+    <text x="1002" y="107" class="s">тэкст · кропкі · замкі</text>
+
+    <rect x="990" y="170" width="170" height="48" class="n" rx="10"/>
+    <text x="1002" y="191" class="t">Карта /map</text>
+    <text x="1002" y="207" class="s">агляд + спіс маршрутаў</text>
+
+    <rect x="724" y="180" width="170" height="44" class="n" rx="10"/>
+    <text x="736" y="200" class="t">Прыватнасць /privacy</text>
+    <text x="736" y="214" class="s">шапка, з усіх старонак</text>
+
+    <rect x="990" y="270" width="170" height="48" class="n" rx="10"/>
+    <text x="1002" y="291" class="t">/app — «Поўная версія»</text>
+    <text x="1002" y="307" class="s">3 выгады + крамы</text>
+
+    <rect x="724" y="300" width="170" height="44" class="n" rx="10" style="stroke-dasharray:4 3"/>
+    <text x="736" y="320" class="t">Правілы /usage-rules</text>
+    <text x="736" y="334" class="s">крыніцы і аўтарства</text>
+
+    <rect x="990" y="380" width="170" height="48" class="n" rx="10" style="stroke:#805039;stroke-dasharray:4 3"/>
+    <text x="1002" y="401" class="t">Крамы: «Хутка»</text>
+    <text x="1002" y="417" class="s">поўны адказ, не тупік</text>
+
+    <rect x="724" y="420" width="170" height="48" class="n" rx="10" style="stroke:#805039;stroke-dasharray:4 3"/>
+    <text x="736" y="441" class="t">Дадатак KUDY</text>
+    <text x="736" y="457" class="s">працяг — глыбокая спасылка</text>
+  </g>
+
+  <!-- стрэлкі вэба -->
+  <g>
+    <path d="M896 104 L988 94" class="ea" marker-end="url(#arA)"/>
+    <text x="902" y="96" class="nav">картка гіда</text>
+    <path d="M896 126 L988 184" class="e" marker-end="url(#ar)"/>
+    <text x="916" y="152" class="nav">«Карта горада»</text>
+    <path d="M809 140 L809 178" class="e" marker-end="url(#ar)"/>
+    <text x="816" y="166" class="nav">шапка</text>
+    <path d="M1090 120 L1080 168" class="e" marker-end="url(#ar)"/>
+    <text x="1098" y="150" class="nav">шапка/мапа</text>
+    <path d="M1075 220 L1075 268" class="ea" marker-end="url(#arA)"/>
+    <text x="1082" y="250" class="nav">CalmOffer → «Адкрыць дадатак»</text>
+    <path d="M1075 320 L1075 378" class="e" marker-end="url(#ar)"/>
+    <text x="1082" y="354" class="nav">«Знайсці дадатак:»</text>
+    <path d="M1090 428 C 940 470, 860 500, 812 466" class="ed" marker-end="url(#ar)"/>
+    <text x="878" y="498" class="s">глыбокая спасылка ў дадатак (прапанова; сёння — старонка /app)</text>
+  </g>
+
+  <text x="24" y="700" class="cap" style="font-weight:600">Чытанне:</text>
+  <text x="90" y="700" class="cap">штрых — адкладзенае/прапанова (глыбокая спасылка ў дадатак, правілы ў шапцы вэба не маляваліся як асобны крок); гліна-контур — крамы «Хутка» (16 G10.02).</text>
+  <text x="90" y="716" class="cap">«Прагулка» (NAV7) і Back (11 §16.2) не з'яўляюцца камандамі: сесія, гук і прагрэс не мяняюцца. Паверхні раздзела 16: горад, рубрыка, прэв'ю, месца, падборка, вынік, Побач, My KUDY.</text>
+  <text x="24" y="756" class="cap">Крыніцы: docs/design/screens-and-transitions.md (G06.06); 11_run_interaction.md §16; ADR G01.01–G01.03; web/app/ (be, [locale]).</text>
+</svg>

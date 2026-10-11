@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="be">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G25.07 · Макеты асноўных экранаў · кантактны ліст</title>
+<style>
+.wtop .links span strong{font-weight:600}
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Alegreya;src:url(../G25.06/fonts/Alegreya_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Caveat;src:url(../G25.06/fonts/Caveat_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+/* Значэнні — даслоўна канон G06.07 (docs/design/visual-language.md, «Дадатак»);
+   кампанентныя класы — перавыкарыстаныя з кантактнага ліста G25.06. */
+:root{
+ --paper:#faf7f2;--ink:#22262b;--muted:#6b7280;--accent:#1d6b4f;--accent-ink:#fff;--card:#fff;--line:#d8d2c6;
+ --shelf-accent:#154f3a;--shelf-line:#c9c1b1;--disabled-ink:#6b7280;--disabled-line:#6b7280;
+ --map:#eef3ee;--street:#dfe7df;--person:#1f5aa8;
+ --notice-bg:#fdf1d7;--notice-border:#e6c98c;--error-bg:#fdeaea;--error-border:#e0a2a2;
+ --hint-bg:#f6faff;--hint-border:#bcd2f0;--moment-bg:#fff7ec;--moment-border:#ecd9b0;
+ --badge-paid:#fdf1d7;--badge-free:#e7f2ec;--badge-mixed:#ece7f8;--badge-lock:#eceff1;
+ --marker-played:#1d6b4f;--marker-playing:#b3331f;--marker-available:#8a610e;--marker-pending:#646c77;--marker-locked:#67707a;
+ /* прапановы G25.01 (B04.1/B04.2) — не production-токены */
+ --clay:#805039;--amber:#d8a551;
+ --r:10px;--pill:99px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#ece7df;color:var(--ink);font:400 16px/1.45 Golos,system-ui,sans-serif}
+h1,h2,h3,p,table{margin:0}
+.sp{max-width:1660px;margin:auto;padding:24px}
+.sp-head{display:flex;justify-content:space-between;align-items:end;gap:24px;padding-bottom:16px;border-bottom:1px solid #b9b1a5}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--clay)}
+h1{font:600 36px/1.1 Alegreya,serif;margin-top:4px}
+.sp-head p{max-width:680px;font-size:14px}
+.src{font-size:12px;color:#4c5359;margin-top:6px}
+section{margin-top:26px}
+h2{font:600 22px/1.2 Alegreya,serif;padding-bottom:8px;border-bottom:2px solid var(--accent);margin-bottom:4px}
+h2 small{font:400 13px/1.4 Golos,sans-serif;color:#4c5359;display:block;margin-top:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-top:12px}
+.cell{background:var(--paper);border:1px solid #c9c1b1;border-radius:var(--r);padding:14px;overflow:hidden}
+.cell>h3{font-size:13px;font-weight:600;color:#4c5359;margin-bottom:10px}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.note code,.ann code{font-family:ui-monospace,monospace;font-size:11px;background:#22262b0d;padding:1px 4px;border-radius:4px}
+.ann{font-size:12px;color:#4c5359;margin-top:8px;border-top:1px dashed #b9b1a5;padding-top:7px}
+.ann b{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--clay)}
+.ann a{color:var(--accent)}
+.tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:var(--pill);padding:2px 8px;color:#4c5359;background:#fff}
+.tag.canon{border-color:var(--accent);color:var(--accent)}
+.tag.gap{border-color:var(--clay);color:var(--clay)}
+.tag.prop{border-color:var(--amber);color:#7a5a17;background:#fdf6e6}
+.tag.hypo{border-color:#7c5cb0;color:#5b3f8f;background:#f3effa}
+.tag.proto{border-color:#b3331f;color:#b3331f;background:#fdf1f0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* — канонавыя кампаненты (значэнні з кода production, не вынаходствы) — */
+.btn{display:inline-block;border-radius:var(--r);padding:12px;font-size:16px;line-height:1.45;font-family:Golos,sans-serif;text-decoration:none}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);font-weight:600;box-shadow:0 4px 0 var(--shelf-accent)}
+.btn.ghost-primary{background:transparent;color:var(--disabled-ink);border:1px solid var(--disabled-line);box-shadow:none}
+.btn.plain{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.outline-accent{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.cancel{background:transparent;color:var(--accent);border:1px solid var(--accent);width:100%}
+.btn.quiet{background:transparent;color:var(--muted);border:0;padding:8px 12px}
+.btn.focus{outline:3px solid var(--accent);outline-offset:1px}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;font-size:16px;color:var(--muted);background:transparent}
+.chip.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.chip.rating{min-width:40px;min-height:44px;text-align:center;display:inline-flex;align-items:center;justify-content:center}
+.chip.rating.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.badge{display:inline-block;border-radius:var(--pill);padding:2px 8px;font-size:12px;color:var(--ink)}
+.badge.free{background:var(--badge-free)}.badge.paid{background:var(--badge-paid)}.badge.mixed{background:var(--badge-mixed)}.badge.lock{background:var(--badge-lock)}
+.badge .luc{display:inline-block;width:10px;height:10px;border:2px solid var(--ink);border-radius:3px;vertical-align:-1px;margin-right:4px}
+.banner{border-radius:var(--r);border-width:1px;border-style:solid;padding:12px;font-size:16px}
+.banner.notice{background:var(--notice-bg);border-color:var(--notice-border)}
+.banner.error{background:var(--error-bg);border-color:var(--error-border)}
+.banner .why{color:var(--muted);font-size:12px;margin-top:8px}
+.banner .btn{margin-top:8px}
+.cardk{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.cardk .t{font-size:16px;font-weight:600;color:var(--ink);margin-bottom:8px}
+.cardk .s{color:var(--muted);font-size:16px;margin-bottom:8px}
+.cardk .loc{color:var(--muted);font-size:16px;margin-top:8px}
+.cardk.hintpair{background:var(--hint-bg);border-color:var(--hint-border)}
+.cardk.momentpair{background:var(--moment-bg);border-color:var(--moment-border)}
+.cardk .dragon{font:400 22px/1.25 Caveat,cursive;color:var(--clay);margin-top:6px}
+.marker{width:34px;height:34px;border-radius:999px;border:2px solid var(--accent-ink);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;font-weight:600;box-shadow:0 1px 2px #22262b40}
+.m-played{background:var(--marker-played)}.m-playing{background:var(--marker-playing)}.m-available{background:var(--marker-available)}.m-pending{background:var(--marker-pending)}.m-locked{background:var(--marker-locked)}
+.person{width:18px;height:18px;border-radius:999px;border:3px solid #fff;background:var(--person);display:inline-block}
+.poi{width:14px;height:14px;border-radius:4px;background:var(--badge-mixed);border:1px solid var(--muted);display:inline-block}
+.mk{display:inline-flex;flex-direction:column;align-items:center;gap:2px;min-height:44px;justify-content:flex-start}
+.mk i{font-style:normal;font-size:12px;color:var(--ink);text-align:center;max-width:110px}
+.mapbox{background:var(--map);border:1px solid var(--line);border-radius:var(--r);position:relative;height:190px;overflow:hidden}
+.mapbox .st{position:absolute;background:var(--street)}
+.mapbox .cap{position:absolute;left:10px;top:8px;font-size:12px;color:var(--muted)}
+.track{height:6px;background:var(--line);border:1px solid var(--muted);border-radius:999px;overflow:hidden}
+.track b{display:block;height:100%;background:var(--accent)}
+.fact{display:inline-flex;gap:6px;align-items:center;font-size:16px}
+.fact .ic{width:16px;height:16px;border:2px solid var(--accent);border-radius:3px;display:inline-block}
+
+/* — кадры прылад — */
+.frames{display:grid;grid-template-columns:repeat(auto-fill,414px);gap:20px;margin-top:12px}
+.frames .cell{padding:11px}
+.surface{background:var(--paper);border:1px solid #c9c1b1;border-radius:var(--r);overflow:hidden;box-shadow:0 6px 20px #22262b14}
+.phone{width:390px;height:844px;overflow-y:auto;position:relative}
+.ptop{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px}
+.ptop .brand{font-weight:600;color:var(--accent);letter-spacing:.05em}
+.runmap{height:300px;background:var(--panel,#eef3ee)}
+.panel{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);border-radius:var(--r) var(--r) 0 0;padding:12px}
+.panel.half{height:45%}
+.bar{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px}
+.bar .row{justify-content:space-between}
+.bar .t{font-weight:600;flex:1}
+.wtop{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-bottom:1px solid var(--line);padding:12px 24px}
+.wtop .links{display:flex;gap:18px;font-size:14px}
+.wtop .links span:first-child{border-bottom:3px solid var(--accent);padding-bottom:2px}
+.wcols{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:20px 24px}
+.wfull{grid-column:1/-1}
+.bigstrip{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-top:10px}
+.bigstrip .z{font-size:32px;line-height:1.45}
+.bigstrip .cap1{font-size:25px;line-height:1.45}
+/* — табліцы — */
+table.mtx{border-collapse:collapse;width:100%;background:#fff;font-size:13px;margin-top:12px}
+table.mtx th,table.mtx td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+table.mtx th{background:var(--paper);font-weight:600}
+table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
+.foot{font-size:12px;color:#4c5359;margin-top:20px;border-top:1px solid #b9b1a5;padding-top:10px}
+
+/* — G25.07: экраны — */
+.srow{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;font-size:16px;text-decoration:none;color:var(--ink);margin-top:8px}
+.srow .ar{color:var(--accent);font-weight:600}
+.metarow{display:flex;flex-wrap:wrap;gap:8px;font-size:13px;color:var(--muted);margin-top:8px}
+.metarow span{border:1px solid var(--line);border-radius:var(--pill);padding:2px 8px}
+.stoprow{display:flex;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--line);font-size:15px}
+.stoprow:last-child{border-bottom:0}
+.stoprow .n2{color:var(--muted);font-size:13px}
+.sectiontitle{font-weight:600;margin-top:14px;font-size:15px}
+.h1screen{font:600 24px/1.2 Alegreya,serif;margin:12px 0 6px}
+.h2screen{font-weight:600;font-size:17px;margin:14px 0 6px}
+.bk{display:inline-block;font-size:13px;color:var(--muted);text-decoration:none}
+.dragonrow{display:flex;gap:10px;align-items:flex-start;margin-top:8px}
+.dragonrow img{width:64px;flex:none}
+.dragonrow .say{font:400 21px/1.3 Caveat,cursive;color:var(--clay)}
+.soundchip{display:inline-flex;gap:6px;align-items:center;font-size:12px;border:1px dashed var(--clay);color:var(--clay);border-radius:var(--pill);padding:2px 10px;margin-top:6px;background:#fbf6f1}
+.medallion{width:88px;height:88px;border-radius:999px;border:2px dashed var(--clay);background:#fbf6f1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:11px;color:var(--clay);padding:6px}
+.beat{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#5b3f8f;background:#f3effa;border:1px solid #cbb8ec;border-radius:var(--pill);padding:2px 8px;display:inline-block}
+.silence{font-size:12px;color:var(--muted);border-left:3px solid var(--line);padding-left:8px;margin-top:6px}
+.webpage{width:1280px;min-height:640px;position:relative}
+.wcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.wcard .t{font:600 20px/1.3 Alegreya,serif}
+.wcard .s{color:var(--muted);font-size:14px;margin-top:6px}
+.wcard a{color:var(--accent);text-decoration:none;font-weight:600}
+.webnote{position:absolute;right:12px;bottom:12px;font-size:11px;color:var(--muted)}
+.webgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(620px,1fr));gap:20px;margin-top:12px}
+.webwrap{max-width:1320px}
+.lockweb{display:flex;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--line);font-size:15px;color:var(--muted)}
+.fl{font-size:12px;margin-top:8px}
+.fl a{color:var(--accent);text-decoration:none;font-weight:600}
+.fl .ar{color:var(--clay)}
+</style>
+<div class="sp">
+
+<div class="sp-head">
+  <div>
+    <div class="eyebrow">G25.07 · issue #706 · эпік #346</div>
+    <h1>Макеты асноўных экранаў — тэлефон і вэб</h1>
+    <p>Тая ж дызайн-сістэма на скразным шляху прагулкі з вэб-уваходам, які працуе без усталёўкі. Кадры сувязныя (стрэлкі пераходаў — спасылкі паміж кадрамі); адкрыццё экрана, пакупкі або прадмета нідзе не запускае нарацыю.</p>
+    <div class="src">Крыніцы: брыф «Атлас знаходак» v1 (08.10.2026, рэдакцыя <code>a11ea86</code>) · канон G06.07 (<code>b6056ff</code>) · рэестр рашэнняў (<code>c984bab</code> + G25.01) · слоўнік G25.02 (змержаны ў <code>cc2b581</code>; радкі прачытаныя на HEAD, набор A — прапанова B06) · кіт дракона G25.03 (<code>b79bfda</code>) · спецімены кампанентаў G25.06 (<code>c9677f7</code>, verbatim-фіксы #735) · схемы экранаў G06.06 · 11 §16, 09 §6.5, ADR G01.01–G01.03 · вэб: <code>web/app/(be)/</code>, <code>web/components/</code>.</div>
+    <div class="src">Пазнакі: <span class="tag canon">канон</span> дзейнае значэнне з кода/канона · <span class="tag prop">прапанова</span> чакае рашэння ўладара · <span class="tag hypo">гіпотэза</span> гіпотэза/адкладзенае · <span class="tag proto">прататып</span> па-за production-абсягам · <span class="tag gap">расыходжанне</span> канон ≠ код (handoff, не фікс).</div>
+  </div>
+</div>
+
+<section id="s1">
+  <h2>§1 · Інвентарызацыя: што існуе, што адкладзенае <small>крытэрый 1 — перад малюнкам; назвы экранаў даслоўна са схем G06.06; назва паверхні гісторыі — «KUDY» (#426, ідэнтыфікатар My KUDY даслоўны)</small></h2>
+  <table class="mtx">
+    <tr><th>Экран / паверхня</th><th>Кантракт (схема G06.06)</th><th>Жывы код</th><th>Дзе ў лісце</th><th>Адкладзена / прататып</th></tr>
+    <tr><td>Explore (горад)</td><td>NAV1/NAV3/NAV4; пусты горад NAV3; зярно паперы дазволена</td><td><code>app/(tabs)/explore.tsx</code>, <code>app/city/</code></td><td><a href="#f-explore">кадар A</a></td><td>—</td></tr>
+    <tr><td>Guides (рубрыка)</td><td>NAV1/NAV2/NAV9; пустой не бывае (NAV2)</td><td>старонка рубрыкі, <code>CityCatalogBody</code></td><td><a href="#f-guides">кадар B</a></td><td>—</td></tr>
+    <tr><td>Guide preview (RouteDetail)</td><td>NAV5/NAV6/NAV8/NAV9; адна галоўная кнопка Download→Start (09 §6.5)</td><td><code>app/preview/</code>, <code>app/route/[id].tsx</code></td><td><a href="#f-preview-free">кадры C–D</a></td><td>—</td></tr>
+    <tr><td>Place card</td><td>NAV9; публічная праекцыя; форма ацэнкі месца (20 §7)</td><td><code>app/place/</code></td><td><a href="#f-denied">кадар P (кантэкст)</a></td><td>—</td></tr>
+    <tr><td>Collection card (падборка)</td><td>NAV11; без аўдыё (audio_locales пустыя)</td><td><code>app/collection/</code></td><td><a href="#s1">інвентар</a></td><td>—</td></tr>
+    <tr><td>Discovery result</td><td>NAV4; exact/alternatives; прычыны на картках</td><td><code>app/discovery.tsx</code></td><td><a href="#f-guides">кадар B (кантэкст)</a></td><td>—</td></tr>
+    <tr><td>Побач (Map, вольная прагулка)</td><td>тэйзер з яўным Play (ADR G01.02 §3.6); denied GPS → ручны агляд</td><td><code>app/map.tsx</code></td><td><a href="#f-denied">кадар P</a>, дракон <a href="#f-d240">U</a></td><td>эксперыменты кампаса — <span class="tag proto">прататып</span></td></tr>
+    <tr><td>Run</td><td>09 §6.5, 11 §3.2; панэль Peek/Half/Full; маркеры ADR G01.01 §4.5; схема кропак (<code>schematicNote</code>)</td><td><code>app/run/[id].tsx</code></td><td><a href="#f-run-peek">кадры F–G</a>, дракон <a href="#f-d0">R–U</a></td><td>—</td></tr>
+    <tr><td>End (завяршэнне)</td><td>NAV8/NAV10; «Яшчэ можна адкрыць» (ADR G01.01 §4.6); водгук адзін раз</td><td><code>app/run/[id].tsx</code> (End-тэксты)</td><td><a href="#f-end">кадар J</a></td><td>—</td></tr>
+    <tr><td>My KUDY (вонкава «KUDY»)</td><td>NAV10; гісторыя сесій; мова (L02); мае ацэнкі</td><td><code>app/(tabs)/my.tsx</code></td><td><a href="#f-my">кадар L</a>, <a href="#f-return">Q</a></td><td>асобнай паверхні налад — няма</td></tr>
+    <tr><td>Feedback form (часовая)</td><td>NAV10; не ў стосе; 20 §7, 21 §5.4</td><td><code>app/feedback.tsx</code></td><td><a href="#f-feedback">кадар K</a></td><td>—</td></tr>
+    <tr><td>Вэб: каталог / гід / мапа / /app / прыватнасць</td><td>публічныя старонкі; CalmOffer — адзін блок, без цаны; «неўсталяваны дадатак не дае тупік» (16 G10.02)</td><td><code>web/app/(be)/</code>, <code>web/components/*</code></td><td><a href="#w-catalog">кадры W–Z</a></td><td>скарбы дракона ў вэб — <span class="tag proto">прататып</span>, глыбокая спасылка — <span class="tag prop">прапанова</span></td></tr>
+    <tr><td>Калекцыя і дасягненні</td><td>канон: толькі тры віды картак; чацвёртага няма</td><td>кампанентаў няма</td><td><a href="#f-d240">кадар U (плейсхолдэр)</a></td><td><span class="tag hypo">гіпотэза B08</span> — уладальнік #704/#695/#696</td></tr>
+  </table>
+  <p class="note">Правілы навігацыі, якія трымае ўвесь ліст: Back — навігацыя, не каманда (11 §16.2); «Прагулка» з любой паверхні раздзела 16 вяртае ў Run у ранейшым становішчы панэлі (NAV7); пакупка/замок адкрываюць прэв'ю — не купляюць і не пачынаюць Run (11 §16.4); свабодны парадак кропак трымаецца маркерамі без нумарнай чаргі; Start — заўжды яўны.</p>
+</section>
+
+<section id="s2">
+  <h2>§2 · Тэлефон: сувязны ланцуг прагулкі <small>крытэрый 1; кантэнт кадраў — прыклад «Гісторыі набярэжнай» (Гданьск), не апублікаваны гід; радкі інтэрфейсу — даслоўна <code>contracts/ui-messages/source.json</code> (be)</small></h2>
+  <div class="frames">
+
+  <div class="cell" id="f-explore">
+    <h3>A · Explore (горад) — старт</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><span class="bk">Гданьск</span></div>
+      <div style="padding:12px 16px">
+        <div class="h1screen">Гданьск</div>
+        <p class="note" style="margin-top:0">Зярно паперы — дазволенае месца (канон paperGrain). <span class="tag canon">канон</span></p>
+        <div class="cardk" style="margin-top:8px">
+          <div class="t">Гісторыі набярэжнай</div>
+          <div class="s">Тры кропкі ля вады: мост, дом у вадзе, портавы кран.</div>
+          <div class="metarow"><span class="badge free">Бясплатна</span><span>Працягласць: 45 хв</span><span>Кропкі: 5</span></div>
+          <p class="fl"><a href="#f-preview-free">прэв'ю гіда</a> <span class="ar">NAV1</span></p>
+        </div>
+        <a class="srow" href="#f-denied"><span>Побач →</span><span class="ar">NAV3</span></a>
+        <a class="srow" href="#f-guides"><span>Чым заняцца →</span><span class="ar">NAV4</span></a>
+        <a class="srow" href="#f-my"><span>KUDY →</span><span class="ar">NAV3</span></a>
+      </div>
+      <div class="bar"><div class="row"><span class="t">Горад</span><a class="btn outline-accent" href="#f-run-peek">Прагулка</a></div></div>
+      <div style="height:70px"></div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> рады — <code>SurfaceLink</code> (<code>explore.tsx:77</code>); «Прагулка» — NAV7 з любой паверхні раздзела 16, вяртае ў Run без спынення аўдыё.</p>
+    <p class="fl">далей: <a href="#f-guides">B рубрыка</a> <span class="ar">→</span> <a href="#f-preview-free">C прэв'ю</a></p>
+  </div>
+
+  <div class="cell" id="f-guides">
+    <h3>B · Guides (рубрыка) і Discovery result</h3>
+    <div class="surface phone">
+      <div class="ptop"><a class="bk" href="#f-explore">← Горад</a><span class="bk">Гіды</span></div>
+      <div style="padding:12px 16px">
+        <div class="h2screen">Гіды</div>
+        <div class="cardk"><div class="t">Гісторыі набярэжнай</div><div class="metarow"><span class="badge free">Бясплатна</span><span>Працягласць: 45 хв</span></div><p class="fl"><a href="#f-preview-free">адзін гід — адна картка (NAV1, D02)</a></p></div>
+        <div class="cardk" style="margin-top:8px"><div class="t">Сакрэты Старога Горада</div><div class="metarow"><span class="badge paid">Платна</span><span>Працягласць: 60 хв</span></div><p class="fl"><a href="#f-preview-paid">прэв'ю, не купля (NAV6)</a></p></div>
+        <div class="h2screen">Discovery result — нуль exact (NAV4)</div>
+        <div class="banner notice">Нічога дакладна не падыходзіць — пасмякчыце выбар або паглядзіце іншыя варыянты.
+          <div class="why">«Іншыя варыянты» — са сваім загалоўкам і differences (<code>discoveryAlternatives</code>, <code>differenceText.*</code>).</div></div>
+        <p class="note">Прычыны на картках: «рэдакцыйны выбар», «тэма», «падыходзіць па часе» (<code>reasonText.*</code>). Пустой рубрыкі не існуе — не рэндэрыцца (NAV2).</p>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> Back → горад (NAV9); карткі аднаго гіда з розных шляхоў вядуць да таго самага прэв'ю (11 §16.1).</p>
+    <p class="fl">далей: <a href="#f-preview-free">C прэв'ю бясплатнага</a></p>
+  </div>
+
+  <div class="cell" id="f-preview-free">
+    <h3>C · Guide preview — бясплатны гід</h3>
+    <div class="surface phone">
+      <div class="ptop"><a class="bk" href="#f-guides">← Гіды</a><span class="bk">Прэв'ю</span></div>
+      <div style="padding:12px 16px">
+        <div class="h1screen">Гісторыі набярэжнай</div>
+        <p class="note" style="margin-top:0">Тры кропкі ля вады: мост, дом у вадзе, портавы кран.</p>
+        <div class="metarow"><span>Працягласць: 45 хв</span><span>Кропкі: 5</span><span>Мовы: be</span><span>Памер: 24 МБ</span></div>
+        <div class="sectiontitle">Кропкі</div>
+        <div class="stoprow"><span class="marker m-played" style="width:24px;height:24px;font-size:11px"></span><span>Кропка 1 · Мост</span></div>
+        <div class="stoprow"><span class="marker m-available" style="width:24px;height:24px;font-size:11px"></span><span>Кропка 2 · Вежа</span></div>
+        <div class="stoprow"><span class="marker m-locked" style="width:24px;height:24px;font-size:11px"></span><span>Кропка 4 · Портавы кран <span class="badge lock"><span class="luc"></span>Зачынена</span></span></div>
+        <p class="note">Кропак бясплатна: 2 (09 §3; 21 §3.2). Замкнёная кропка — назва, месца, кароткі анонс і замок; поўнага тэксту і медыя няма (NAV5).</p>
+        <div style="margin-top:12px"><a class="btn primary" href="#f-run-peek" style="display:block;text-align:center">Загрузіць</a>
+        <p class="note">Адна галоўная кнопка са зменай сэнсу: «Загрузіць» → «Пачаць» (09 §6.5). Start — яўны; адкрыццё прэв'ю не гучыць.</p></div>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> маркеры без літар — «код сёння» (канон жадае літару стану) <span class="tag gap">H3</span>; адкрыццё прэв'ю запісвае паверхню-крыніцу для Back (NAV9).</p>
+    <p class="fl">далей: <a href="#f-run-peek">F Run</a> <span class="ar">→</span> <a href="#f-preview-paid">D платная прапанова</a></p>
+  </div>
+
+  <div class="cell" id="f-preview-paid">
+    <h3>D · Guide preview — платная прапанова</h3>
+    <div class="surface phone">
+      <div class="ptop"><a class="bk" href="#f-guides">← Гіды</a><span class="bk">Прэв'ю</span></div>
+      <div style="padding:12px 16px">
+        <div class="h1screen">Сакрэты Старога Горада</div>
+        <div class="metarow"><span class="badge paid">Платна</span><span>Працягласць: 60 хв</span><span>Кропкі: 7</span></div>
+        <div class="cardk" style="margin-top:10px">
+          <div class="t">Усе гісторыі гіда</div>
+          <div class="s">Адна пакупка адкрывае гісторыі гэтага гіда.</div>
+          <div class="metarow"><span>Кропак бясплатна: 2</span></div>
+          <div class="row" style="margin-top:10px">
+            <a class="btn primary" href="#f-offline" style="flex:1;text-align:center">Купіць</a>
+          </div>
+          <a class="btn cancel" href="#f-preview-free" style="margin-top:8px">Працягнуць бясплатна</a>
+          <a class="btn quiet" href="#f-guides" style="display:block;text-align:center">Не цяпер</a>
+        </div>
+        <p class="note">«Патрэбна пакупка.» — прычына (<code>preview.reason#purchase-required</code>); «Даступна пасля куплі» — замкнёныя кропкі (<code>run.lockedHint</code>).</p>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> націск на прапанову або замок адкрывае прэв'ю — не купляе, не пачынае Run, не раскрывае private (NAV6, D06, 11 §16.4). Памер і «Вызваліць месца ў KUDY» — на сховішча (09 §6.5).</p>
+    <p class="fl">далей: <a href="#f-switch">E дыялог замены гіда</a> <span class="ar">→</span> <a href="#f-offline">M збой загрузкі</a></p>
+  </div>
+
+  <div class="cell" id="f-switch">
+    <h3>E · Дыялог §4.1 — замена актыўнага гіда (NAV8)</h3>
+    <div class="surface phone" style="background:#22262b66">
+      <div class="ptop" style="opacity:.35"><span class="brand">KUDY</span><span class="bk">Run</span></div>
+      <div style="height:430px"></div>
+      <div style="margin:0 20px;background:var(--card);border-radius:var(--r);padding:16px">
+        <div style="font-weight:600;font-size:17px">Завяршыць «Гісторыі набярэжнай» і пачаць «Сакрэты Старога Горада»?</div>
+        <p class="note">Адзіны дыялог пацверджання (11 §4.1); актыўная сесія ў гэтым дыялогу не мяняецца да «Завершыць і пачаць».</p>
+        <a class="btn primary" href="#f-run-peek" style="display:block;text-align:center;margin-top:10px">Завершыць і пачаць</a>
+        <a class="btn cancel" href="#f-preview-paid" style="margin-top:8px">Скасаваць</a>
+        <p class="note">«Скасаваць» вяртае ў прэв'ю без якой-небудзь змены сесіі (NAV8).</p>
+      </div>
+      <div style="height:60px"></div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> дыялог ≤400px; зацміценне — код сёння <code>rgba(34,38,43,.4)</code> (40% чарніла) супраць канона «35% чорнага» <span class="tag gap">H4</span>; жывой Start з замены без дыялогу няма.</p>
+    <p class="fl">далей: <a href="#f-run-peek">F Run</a></p>
+  </div>
+
+  <div class="cell" id="f-run-peek">
+    <h3>F · Run · Peek — мапа як фонавы рэжым</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><span class="bk">Гісторыі набярэжнай</span></div>
+      <div class="runmap" style="height:420px;position:relative">
+        <div class="st" style="left:0;top:120px;width:390px;height:22px;transform:rotate(-6deg)"></div>
+        <div class="st" style="left:150px;top:0;width:20px;height:200px"></div>
+        <div class="st" style="left:240px;top:180px;width:150px;height:18px;transform:rotate(8deg)"></div>
+        <div class="mk" style="position:absolute;left:60px;top:70px"><span class="marker m-played"></span><i>Кропка 1</i></div>
+        <div class="mk" style="position:absolute;left:170px;top:150px"><span class="marker m-playing"></span><i>Кропка 2</i></div>
+        <div class="mk" style="position:absolute;left:300px;top:90px"><span class="marker m-available"></span><i>Кропка 3</i></div>
+        <div class="mk" style="position:absolute;left:110px;top:260px"><span class="marker m-locked"></span><i>Кропка 4</i></div>
+        <div class="mk" style="position:absolute;left:250px;top:250px"><span class="poi" style="width:14px;height:14px"></span><i>Славутасць</i></div>
+        <span class="person" style="position:absolute;left:190px;top:210px"></span>
+        <div class="cap" style="top:auto;bottom:8px">Схема кропак маршруту — карта горада зʼявіцца пасля рашэння пра тайлы (<code>schematicNote</code>) · <span class="tag gap">H3</span> кропкі без літар, «код сёння»</div>
+      </div>
+      <div class="panel" style="position:static;border-radius:0;border-left:0;border-right:0">
+        <div style="font-weight:600">Зараз грае: Мост і вада</div>
+        <div style="color:var(--muted);font-size:13px">Кропка 2 · Асноўная гісторыя · live-паўза</div>
+        <div class="track" style="margin-top:8px"><b style="width:38%"></b></div>
+        <div class="row" style="margin-top:10px;justify-content:space-between">
+          <a class="btn plain" href="#f-run-pause">Прыпыніць прагулку</a>
+          <a class="btn outline-accent" href="#f-end">Завяршыць прагулку</a>
+        </div>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> тап маркера адкрывае прэв'ю, ніколі не гук (<code>markerHint</code> «Прагляд кропкі. Аўдыё не запускаецца.»); адна паверхня: мапа фоном + панэль Peek/Half/Full (09 §6.5); сесійнае меню — Прыпыніць/Завяршыць (11 §4.2); маркеры па ADR G01.01 §4.5; кропка пазіцыі <code>color.person</code>; POI-квадрат — «код сёння», паза канонам <span class="tag gap">H7</span>.</p>
+    <p class="fl">далей: <a href="#f-run-half">G Half</a> <span class="ar">→</span> <a href="#f-run-pause">H паўза</a></p>
+  </div>
+
+  <div class="cell" id="f-run-half">
+    <h3>G · Run · Half — картка inspected + транскрыпт</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><span class="bk">Гісторыі набярэжнай</span></div>
+      <div class="runmap" style="height:230px">
+        <div class="st" style="left:0;top:80px;width:390px;height:20px;transform:rotate(-5deg)"></div>
+        <div class="mk" style="position:absolute;left:90px;top:100px"><span class="marker m-playing"></span><i>Кропка 2</i></div>
+        <div class="mk" style="position:absolute;left:250px;top:60px"><span class="marker m-available"></span><i>Кропка 3</i></div>
+        <span class="person" style="position:absolute;left:170px;top:130px"></span>
+      </div>
+      <div class="panel half" style="position:absolute;overflow:auto">
+        <div style="color:var(--muted);font-size:13px">Зараз грае: Мост і вада — тап вяртае да now-playing (11 §3.2)</div>
+        <div style="font-weight:600;font-size:17px;margin-top:6px">Кропка 3 · Дом у вадзе</div>
+        <div style="color:var(--muted);font-size:13px">Транскрыпт inspected-кропкі, не now-playing (11 §3.2)</div>
+        <p style="font-size:14px;margin-top:8px">Дом стаіць у вадзе з семнаццатага стагоддзя. Паглядзіце, як адлюстраванне дабудоўвае яго ўніз — каменны паверх у пяраліцці.</p>
+        <div class="sectiontitle" style="margin-top:10px">Дадатковая гісторыя</div>
+        <div class="cardk" style="margin-top:6px">
+          <div class="t">Камяні портавага крана</div>
+          <div class="s">Анонс дадатковай гісторыі.</div>
+          <div class="metarow"><span class="badge lock"><span class="luc"></span>Зачынена — даступна пасля куплі</span></div>
+        </div>
+        <p class="note">Дадатковыя (extended) гісторыі — толькі праз яўны UserSelectedStory пасля unlock; замкнёная — анонс + замок (схема Run).</p>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> Half — картка inspected: транскрыпт належыць inspected, а не now-playing; радок «Зараз грае: …» з tap-back, калі inspected ≠ playing (11 §3.2).</p>
+    <p class="fl">далей: <a href="#f-end">J End</a> <span class="ar">→</span> <a href="#f-run-pause">H паўза</a></p>
+  </div>
+
+  <div class="cell" id="f-run-pause">
+    <h3>H · Run · паўза — вяртанне з перапынення</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><span class="bk">Гісторыі набярэжнай</span></div>
+      <div class="runmap" style="height:400px;opacity:.55">
+        <div class="st" style="left:0;top:120px;width:390px;height:22px;transform:rotate(-6deg)"></div>
+        <div class="mk" style="position:absolute;left:60px;top:70px"><span class="marker m-played"></span><i>Кропка 1</i></div>
+        <div class="mk" style="position:absolute;left:170px;top:150px"><span class="marker m-pending"></span><i>Кропка 2</i></div>
+        <div class="mk" style="position:absolute;left:300px;top:90px"><span class="marker m-available"></span><i>Кропка 3</i></div>
+        <span class="person" style="position:absolute;left:190px;top:210px"></span>
+      </div>
+      <div class="panel" style="position:static;border-radius:0;border-left:0;border-right:0">
+        <div style="font-weight:600;font-size:17px">Прагулка прыпынена</div>
+        <p class="note" style="margin-top:4px">Сесія <code>paused</code> (ADR G01.03 §3.1): гід-аўдыё спыненае, GPS і wakelock вызваленыя; Moment можа дагучаць (ADR G01.02 §3.4).</p>
+        <a class="btn primary" href="#f-run-peek" style="display:block;text-align:center;margin-top:10px">Працягнуць</a>
+        <p class="note">«Працягнуць» — адзіны шлях назад; нічога не гучыць сама (ADR G01.02 §3.6, C19). Стан чытаецца ў My KUDY (<a href="#f-return">кадар Q</a>).</p>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> прыпыненая прагулка трымае адзіны «Працягнуць» (11 §4.2); прыпыненая аўтаматыка — бачны радок «Працягнуць гід»; завершаная сесія не адраджаецца — паўторная прагулка — новая сесія.</p>
+    <p class="fl">далей: <a href="#f-end">J End</a> <span class="ar">→</span> <a href="#f-my">L My KUDY</a></p>
+  </div>
+
+  <div class="cell" id="f-end">
+    <h3>J · End — завяршэнне</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><span class="bk">Гісторыі набярэжнай</span></div>
+      <div style="padding:12px 16px">
+        <div class="h1screen">Прагулка завершана</div>
+        <p class="note" style="margin-top:0">Сесія <code>finished</code> (ADR G01.03 §3.1); адзін нязменны радок у гісторыі My KUDY.</p>
+        <div class="sectiontitle">Яшчэ можна адкрыць</div>
+        <div class="stoprow"><span class="marker m-available" style="width:24px;height:24px;font-size:11px"></span><span>Кропка 3 · Дом у вадзе</span></div>
+        <div class="stoprow"><span class="marker m-locked" style="width:24px;height:24px;font-size:11px"></span><span>Кропка 4 · Портавы кран — замкнёныя выключаныя (ADR G01.01 §4.6)</span></div>
+        <p class="note">Магчымасці ніколі не называюцца нядачай; адзінца — <code>story_id</code>.</p>
+        <div class="cardk" style="margin-top:12px">
+          <div class="t">Як табе гайд? Можна ацаніць — гэта неабавязкова.</div>
+          <div class="row" style="margin-top:8px">
+            <a class="btn primary" href="#f-feedback">Ацаніць гайд</a>
+            <a class="btn quiet" href="#f-my">Не, дзякуй</a>
+          </div>
+          <p class="note">Запрашэнне неабавязковае, немадальнае, максімум адно за сесію, не падчас аўдыё (11 §16.7); прапуск нічога не запісвае (F01).</p>
+        </div>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> «Як табе гайд?»/«Ацаніць гайд» — дзейныя радкі водгукаў <span class="tag gap">F1</span> (B.4: «гайд»→«гід» — be-фікс за ўладарам, G25.02); паўторны Start іншага гіда — праз прэв'ю і дыялог §4.1 (NAV8).</p>
+    <p class="fl">далей: <a href="#f-feedback">K форма ацэнкі</a> <span class="ar">→</span> <a href="#f-my">L My KUDY</a></p>
+  </div>
+
+  <div class="cell" id="f-feedback">
+    <h3>K · Форма ацэнкі — часовая паверхня</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><a class="bk" href="#f-end">× назад</a></div>
+      <div style="padding:12px 16px">
+        <div class="h1screen">Як табе гайд?</div>
+        <p class="note" style="margin-top:0">Target: «Гід» — ацэньваецца ўвесь досвед (F02, 21 §5.1); ніколі не агрэгаванае.</p>
+        <div class="row" style="margin-top:10px">
+          <span class="chip rating">1</span><span class="chip rating">2</span><span class="chip rating">3</span><span class="chip rating">4</span><span class="chip rating on">5</span>
+        </div>
+        <p class="note">1 — вельмі не спадабалася · 5 — вельмі спадабалася (<code>scaleHint</code>); без дэфолту, прапуск нічога не запісвае (20 §7).</p>
+        <div class="sectiontitle">Прычыны (неабавязкова, да трох)</div>
+        <div class="row">
+          <span class="chip on">цікавыя гісторыі</span><span class="chip on">зразумелая падача</span><span class="chip">варта наведваць</span><span class="chip">задоўга</span>
+        </div>
+        <div class="cardk" style="margin-top:12px"><div class="t">Хто бачыць ацэнку</div><div class="s">Ацэнку бачыць каманда KUDY і выкарыстоўвае яе, каб паляпшаць прапановы. Публічна яна не паказваецца.</div></div>
+        <a class="btn primary" href="#f-my" style="display:block;text-align:center;margin-top:12px">Адправіць</a>
+        <a class="btn quiet" href="#f-end" style="display:block;text-align:center">Прапусціць — вяртае на паверхню-крыніцу</a>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> форма не ўваходзіць у стос навігацыі і не стварае пункта Back (NAV10); дастаўка <code>draft → pending → sending → sent</code>, збой → <code>pending</code>, 409 → <code>conflict</code>, 401/422 → <code>action_required</code> (21 §5.4) — станы <a href="#f-return">у кадры Q</a>; прычыны — замкнёныя спісы па віду target, максімум 3 унікальныя.</p>
+    <p class="fl">далей: <a href="#f-my">L My KUDY</a></p>
+  </div>
+
+  <div class="cell" id="f-my">
+    <h3>L · My KUDY — вонкавая назва «KUDY» (#426)</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><a class="bk" href="#f-explore">Горад</a></div>
+      <div style="padding:12px 16px">
+        <div class="sectiontitle" style="margin-top:0">Бягучая прагулка</div>
+        <div class="cardk"><div class="t">Гісторыі набярэжнай</div><div class="s">актыўная — з 11.10 — праслышана: 3</div><div class="metarow"><span>Мова сесіі: be</span></div><p class="fl"><a href="#f-run-peek">Прагулка — вяртае ў Run (NAV7)</a></p></div>
+        <div class="sectiontitle">Папярэднія праходы</div>
+        <div class="cardk"><div class="s">10.10 — 10.10 — праслышана: 7</div><div class="metarow"><span>завершаная</span></div></div>
+        <div class="cardk" style="margin-top:8px"><div class="s">09.10 — 09.10 — праслышана: 2</div><div class="metarow"><span>прыпыненая</span></div><p class="fl"><a href="#f-run-pause">вяртанне з перапынення (кадар H)</a></p></div>
+        <div class="sectiontitle">Мова</div>
+        <div class="row">
+          <span class="chip on">Беларуская</span><span class="chip">English</span><span class="chip">Українська</span><span class="chip">Deutsch</span><span class="chip">Español</span><span class="chip">Français</span><span class="chip">Čeština</span><span class="chip">Svenska</span>
+        </div>
+        <p class="note">Выбар захоўваецца яўна; новая мова UI не замяняе locale актыўнага Run — радок сесіі паказвае свой locale (L02). Мовы: be, en, uk, de, es, fr, cs, sv (R11); саманазвы — <code>source.json</code> (be/en/uk) і <code>contracts/ui-locales.ts</code> (de–sv).</p>
+        <div class="sectiontitle">Мае ацэнкі</div>
+        <div class="cardk"><div class="s">Гісторыі набярэжнай — 5 з 5</div><div class="metarow"><span>Адпраўлена</span><a href="#f-feedback" style="color:var(--accent)">Змяніць</a></div></div>
+        <p class="note">«Папярэднія праходы» — дзейны радок; прапанова B.3 «Папярэднія прагулкі» чакае ўладара (G25.02). <span class="tag prop">прапанова</span></p>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> радкі сесій — <code>active/paused/finished</code> з session locale і heard count (ADR G01.03 §3.1); старыя радкі ніколі не выдаляюцца; кіраванне загрузкамі і сховішчам — тут (09 §6.5); ацэнкі — даслоўна 21 §5.4.</p>
+    <p class="fl">далей: <a href="#s3">§3 станы-дэградацыі</a></p>
+  </div>
+
+  </div>
+</section>
+
+<section id="s3">
+  <h2>§3 · Станы-дэградацыі: offline/збой, мова кантэнту, замок, denied GPS, перапыненне <small>крытэрый 2; сям'і станаў — даслоўна «Пусты / Offline / Denied / Error» (канон §7, схемы G06.06); крытычныя паведамленні ніколі не mascot-only</small></h2>
+  <div class="frames">
+
+  <div class="cell" id="f-offline">
+    <h3>M · Прэв'ю · Offline / збой праверкі пакета</h3>
+    <div class="surface phone">
+      <div class="ptop"><a class="bk" href="#f-guides">← Гіды</a><span class="bk">Прэв'ю</span></div>
+      <div style="padding:12px 16px">
+        <div class="h1screen">Сакрэты Старога Горада</div>
+        <div class="metarow"><span class="badge paid">Платна</span><span>Памер: 38 МБ</span></div>
+        <div class="banner error">Збой загрузкі.
+          <div class="why">Праверка недаступная. (<code>verify-unavailable</code>) — платны пакет патрабуе сеткі; без яе Start недаступны з прычынай.</div>
+          <a class="btn plain" href="#f-preview-paid">Паўтарыць</a>
+        </div>
+        <div style="margin-top:12px"><a class="btn ghost-primary" href="#f-preview-paid" style="display:block;text-align:center">Пачаць</a>
+        <p class="note">Выключаная пара — <code>disabled-ink/disabled-line</code> ≥ 4.5:1 (issue #430); прычына недаступнасці заўсёды пазначаная побач (11 §7).</p></div>
+        <div class="banner notice" style="margin-top:10px">Папярэдні валідны кэш <div class="why">Апошні бясплатны пакет працуе офлайн; Explore/схемы — 21 §3.3.</div></div>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> «Збой загрузкі.» (<code>downloadFailed</code>) — даслоўна; storage full — тая ж паверхня + ручны выхад «Вызваліць месца ў KUDY» (G06.05).</p>
+    <p class="fl">далей: <a href="#f-lang">N мова кантэнту</a></p>
+  </div>
+
+  <div class="cell" id="f-lang">
+    <h3>N · Прэв'ю · недаступная мова кантэнту</h3>
+    <div class="surface phone">
+      <div class="ptop"><a class="bk" href="#f-guides">← Гіды</a><span class="bk">Прэв'ю</span></div>
+      <div style="padding:12px 16px">
+        <div class="h1screen">Гісторыі набярэжнай</div>
+        <div class="banner notice">Гэтага гіда няма на выбранай мове інтэрфейсу. (<code>previewTextUnavailable</code>)
+          <div class="why">Мовы: be, en · Тэкст: be; аўдыё: — (<code>languagesLine</code>, <code>textAudioLine</code>)</div>
+        </div>
+        <p class="note">Мовы кантэнту аддзеленыя ад мовы інтэрфейсу (глосарый C, G25.02; R11). Прыклад вэба: «Гідаў з тэкстам на гэтай мове яшчэ няма.» (<code>catalogEmpty</code>).</p>
+        <div class="sectiontitle">Тэкст без аўдыё (L01)</div>
+        <div class="cardk"><div class="t">Кропка 1 · Мост</div><div class="s">Гісторыя моста — тэкст даступны, аўдыё-файла няма.</div><div class="metarow"><span class="badge mixed">толькі тэкст</span></div></div>
+        <div style="margin-top:12px"><a class="btn primary" href="#f-run-peek" style="display:block;text-align:center">Пачаць</a>
+        <p class="note">Тэкст без аўдыё не ўключае Start з абяцаннем аўдыё (L01, схема Guide preview); рэжым чытання — па кантрактах Run.</p></div>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> даступнасць па факце <code>availability</code>; пераклад інтэрфейсу не абяцае перакладзенага кантэнту або запісу (рэестр рашэнняў, R11-заўвага).</p>
+    <p class="fl">далей: <a href="#f-locked">O замок</a></p>
+  </div>
+
+  <div class="cell" id="f-locked">
+    <h3>O · Замкнёны доступ — прэв'ю кропкі і вэб</h3>
+    <div class="surface phone">
+      <div class="ptop"><a class="bk" href="#f-preview-paid">← Прэв'ю</a><span class="bk">Кропка</span></div>
+      <div style="padding:12px 16px">
+        <div class="h1screen">Портавы кран</div>
+        <div class="metarow"><span class="badge lock"><span class="luc"></span>Зачынена</span><span>Кропка 4</span></div>
+        <p class="note" style="margin-top:6px">Кароткі анонс: што бачыць кран з набярэжнай і чаму ён рухаецца.</p>
+        <p class="note">«Даступна пасля куплі» (<code>run.lockedHint</code>). Поўны тэкст, транскрыпт і медыя адсутнічаюць у бясплатным пакеце і ў сеткавых запытах (NAV5, N7).</p>
+        <div style="margin-top:12px"><a class="btn primary" href="#f-preview-paid" style="display:block;text-align:center">Купіць</a>
+        <p class="note">Замак адкрывае прэв'ю/прапанову — не куплю і не Run (11 §16.4).</p></div>
+        <div class="sectiontitle">Вэб: тая ж кропка ў публічным гідзе</div>
+        <div class="lockweb"><span class="badge lock"><span class="luc"></span>кропка пад замком</span><span>Портавы кран — публічны анонс (<code>lockedLabel</code>)</span></div>
+        <p class="note">Вэб-замок сёння — эмодзі 🔒 (<code>locked-stop-row.tsx:13</code>); прапанова — <code>outputs/G25.04/lock.svg</code> <span class="tag gap">H5</span>.</p>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> адзіная форма замка — пазнака <code>badge-lock</code> + тэкст; без вынаходства новага віду карткі (канон §5: чацвёртага віду няма).</p>
+    <p class="fl">далей: <a href="#f-denied">P denied GPS</a></p>
+  </div>
+
+  <div class="cell" id="f-denied">
+    <h3>P · Denied GPS — Побач і Run</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><span class="bk">Побач</span></div>
+      <div style="padding:12px 16px">
+        <div class="banner notice">Пазіцыя не дазволена — ручны агляд (<code>nearby.noteDenied</code>)</div>
+        <div class="sectiontitle">Агляд</div>
+        <div class="cardk"><div class="t">Гісторыі набярэжнай</div><div class="s">Гід побач — без пазіцыі</div><div class="metarow"><span class="badge free">Бясплатна</span></div></div>
+        <p class="note">Ручны агляд месцаў без пазіцыі (G07.01); радыусны ўвод ніколі не запускае аўдыё сам; эксперымент «сакрэтныя кропкі па компасе» — <span class="tag proto">прататып</span>, тут не малюецца.</p>
+        <div class="sectiontitle">Run з denied GPS</div>
+        <div class="banner notice">Аўтаматычныя гісторыі не працуюць — я не бачу вашай пазіцыі (<code>run.deniedGps</code>)</div>
+        <p class="note" style="margin-top:6px">«Кожная гісторыя запускаецца рукамі з карткі кропкі» (<code>manualPlayHint</code>): autoplay выключаны, ручны Play працуе (G06.05).</p>
+        <a class="btn plain" href="#f-run-peek">Граць — Кропка 2</a>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> Denied — іменаваны стан, не цішыня; паведамленне не mascot-only; рэплікі дракона не замяняюць крытычных паведамленняў (канон §6).</p>
+    <p class="fl">далей: <a href="#f-return">Q перапыненне</a></p>
+  </div>
+
+  <div class="cell" id="f-return">
+    <h3>Q · Вяртанне з перапынення — My KUDY і водгук</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><a class="bk" href="#f-explore">Горад</a></div>
+      <div style="padding:12px 16px">
+        <div class="sectiontitle" style="margin-top:0">Бягучая прагулка</div>
+        <div class="cardk"><div class="t">Гісторыі набярэжнай</div><div class="s">прыпыненая — з 11.10 — праслышана: 2</div><div class="metarow"><span>Мова сесіі: be</span><a href="#f-run-pause" style="color:var(--accent)">Прагулка</a></div>
+        <p class="note">NAV7: «Прагулка» вяртае ў Run у ранейшым становішчы панэлі; сесія, гук і прагрэс не мяняюцца. Back — навігацыя, не каманда (11 §16.2).</p></div>
+        <div class="sectiontitle">Мае ацэнкі — чаканне сеткі (F03)</div>
+        <div class="cardk"><div class="t">Як табе гайд? — чарнавік</div><div class="s">Захавана на прыладзе — адправім пры сетцы (<code>statePending</code>)</div>
+        <div class="metarow"><a class="btn plain" href="#f-feedback">Адправіць</a></div></div>
+        <div class="cardk" style="margin-top:8px"><div class="s">Гісторыі набярэжнай — 5 з 5</div><div class="metarow"><span>Канфлікт: на серверы наведшая змена (<code>stateConflict</code>)</span><a href="#f-feedback" style="color:var(--accent)">Праверыць на серверы</a></div></div>
+        <p class="note">Захаванне ў <code>pending</code> да сеткі — сумленнае чаканне, без маўклівай страты (F03); «сляпых паўтораў няма».</p>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> вяртанне з перапынення не аднаўляе гук сама — толькі яўнае «Працягнуць» (<a href="#f-run-pause">кадар H</a>); адкрыццё My KUDY не запускае нарацыю (кр.2).</p>
+    <p class="fl">далей: <a href="#s4">§4 дракон у сцэне</a></p>
+  </div>
+
+  </div>
+</section>
+
+<section id="s4">
+  <h2>§4 · Дракон у сцэне «Горад у адлюстраванні» <small>крытэрый 3; біты і рэплікі — даслоўна брыф v1 §Сцэна; позы — кіт G25.03 (падабенства фігуркі не пацверджанае); маўчанне сцэны: 43+17+35 = 95 с</small></h2>
+  <div class="frames">
+
+  <div class="cell" id="f-d0">
+    <h3>R · Біт 0:00–0:12 · Сустрэча</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><span class="bk">Кропка 1 · Набярэжная</span></div>
+      <div class="panel half" style="position:relative;height:470px;overflow:auto">
+        <div class="beat">Біт 0:00 · пасля яўнага старту</div>
+        <div class="dragonrow"><img src="../G25.03/pose-calm.svg" alt="Дракон, поза «спакойны» (кіт G25.03)">
+          <div><div class="say">Ну што, да вады? Я люблю пачынаць з яе. Там заўсёды нешта рухаецца — нават калі мы нікуды не спяшаемся.</div>
+          <span class="soundchip">♪ S1 — мяккі покліч свістулькі (0,5–0,8 с), перад рэплікай · плейсхолдэр: запіс чакае #694 · пры выключаных сігналах — адразу рэпліка</span></div>
+        </div>
+        <div class="silence">Далей — «Дарога без каментарыяў»: маўчанне 43 с, чутны сапраўдны горад; дадатак не падмешвае фонавы шум; гукавога напаміну і лічыльніка няма.</div>
+        <div class="row" style="margin-top:10px"><span class="tag canon">канон</span><span class="tag prop">S1/S2 — арыенціры брыфа</span></div>
+      </div>
+    </div>
+    <p class="ann"><b>умовы брыфа:</b> чалавек сам пачаў прагулку; дракон спакойны, галава крыху ўзнятая; проба прывітання ў межах абранага гіда; свабоднае аўдыё.</p>
+    <p class="fl">далей: <a href="#f-d055">S правакацыя</a></p>
+  </div>
+
+  <div class="cell" id="f-d055">
+    <h3>S · Біт 0:55–1:08 · Маленькая правакацыя</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><span class="bk">Кропка 2 · Дом у вадзе</span></div>
+      <div class="panel half" style="position:relative;height:470px;overflow:auto">
+        <div class="beat">Біт 0:55 · эпізод адкрыты яўным дзеяннем</div>
+        <div class="dragonrow"><img src="../G25.03/pose-curious.svg" alt="Дракон, поза «цікаўны» (кіт G25.03)">
+          <div class="say">Пачакай. Паглядзі на дамы ў вадзе. Які з іх хваля перамалюе першым? Я б паставіў на самы высокі.</div>
+        </div>
+        <p class="note">Без асобнага гукавога сігналу — гаворыць толькі дракон. Рэальны аб'ект і бачнасць адлюстравання патрабуюць праверкі на месцы (брыф).</p>
+        <div class="silence">Біт 1:08–1:25 «Час заўважыць»: маўчанне 17 с — нічога не трэба націскаць ці адказваць; сцэна не правярае, ці выканаў чалавек прапанову, і не прыпісвае яму назіранне. Без музыкі, адліку і гуку чакання.</div>
+      </div>
+    </div>
+    <p class="ann"><b>межы:</b> адкрыццё эпізода — яўнае дзеянне чалавека; рэпліка паверх гісторыі кропкі не гучыць — сцэна пабудавана на паўзах брыфа (B09: рэферэнс для тэсту, не таймер аўтагучання).</p>
+    <p class="fl">далей: <a href="#f-d240">U знаходка</a></p>
+  </div>
+
+  <div class="cell" id="f-d240">
+    <h3>U · Біт 2:40–2:50 · Знаходка — па жаданні</h3>
+    <div class="surface phone">
+      <div class="ptop"><span class="brand">KUDY</span><span class="bk">Кропка 2 · Дом у вадзе</span></div>
+      <div class="panel half" style="position:relative;height:470px;overflow:auto">
+        <div class="beat">Біт 2:40 · толькі пасля «Захаваць знаходку»</div>
+        <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
+          <div class="medallion">«Адлюстраванне»<br>плейсхолдэр — асет G25.05 (#704)</div>
+          <div>
+            <div class="say">Пакінем на памяць? Хвалю не забярэш, але знак для яе ў нас ёсць.</div>
+            <span class="soundchip">♪ S2 — кароткае завяршэнне матыву (да 1 с), толькі пасля рэплікі, пры адкрыцці прадмета; можна выключыць</span>
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <a class="btn primary" href="#f-d240">Захаваць знаходку</a>
+          <a class="btn quiet" href="#f-d240">Не сёння</a>
+        </div>
+        <p class="note">Прапанова асабістага сувеніра — не дасягненне за даказанае наведванне або назіранне (брыф). Пры прапуску — ні прадмета, ні сігналу. Тэкст адмовы («Не сёння») кантрактам не вызначаны — гіпотэза для G25.05. <span class="tag hypo">гіпотэза</span></p>
+        <div class="row" style="margin-top:8px"><span class="tag hypo">гіпотэза B08</span><span class="tag proto">прататып: паверхні калекцыі ў production няма (G25.05/#704, пілот #695/#696)</span></div>
+        <div class="silence">Біт 2:05–2:40 перад гэтым — «Горад застаецца галоўным»: маўчанне 35 с, ніякіх прапушчаных балаў. Біт 2:50–3:00: «Ну што, паглядзім, што за паваротам?» — вяртанне ініцыятывы, без фінальнага сігналу.</div>
+      </div>
+    </div>
+    <p class="ann"><b>межы кр.2/кр.3:</b> адкрыццё прадмета запускае толькі S2 пасля рэплікі — не нарацыю; карта медальёна — плейсхолдэр, не асет; сям'я «Знаходкі»/умовы дасягненняў — адкладзеныя да #704/#695/#696 і рашэння ўладара (B08).</p>
+    <p class="fl">далей: <a href="#s5">§5 вэб-канал</a></p>
+  </div>
+
+  </div>
+  <table class="mtx">
+    <tr><th>Правіла сцэны (брыф/канон)</th><th>Як трымаецца ў макетах</th></tr>
+    <tr><td>Нагода для рэплікі важнейшая за інтэрвал часу; няма рэплік паверх гісторыі</td><td>рэплікі толькі ў бітах R/S/U, даслоўна брыфа; іншыя кадры Run — бяз рэплік</td></tr>
+    <tr><td>Маўчанне 95 с (43+17+35) не запаўняецца</td><td>бяз адліку, музыкі, гуку чакання; сцэна не аднаўляецца сама пасля паўзы</td></tr>
+    <tr><td>Адкрыццё экрана, пакупкі або прадмета не запускае нарацыю (кр.2)</td><td>прэв'ю/замок/медальён — тых; гук толькі S1 перад прывітаннем і S2 пасля рэплікі знаходкі, абодва адключальныя</td></tr>
+    <tr><td>Ціск і віна за спыненую прагулку забароненыя</td><td>без лічыльнікаў, серый, выпадковых балаў (брыф §Калекцыя); прапуск знаходкі — нічога</td></tr>
+    <tr><td>Крытычныя паведамленні не mascot-only</td><td>denied/offline/error — тэкставыя банэры (<a href="#f-denied">P</a>, <a href="#f-offline">M</a>), дракон не рэндэрыцца ў збоі</td></tr>
+  </table>
+</section>
+
+<section id="s5">
+  <h2>§5 · Вэб-канал: уваход без усталёўкі <small>крытэрый 4; старонкі — рэальныя маршруты web/app/(be); радкі даслоўна <code>web.ui.*</code>; шырыня кадра 1280 (вэб-абалонка ў дзве калонкі ≥ 821 px)</small></h2>
+  <div class="webgrid webwrap">
+
+  <div class="cell" id="w-catalog" style="grid-column:1/-1">
+    <h3>W · Каталог «/» — спасылкавая ўводзіна</h3>
+    <div class="surface webpage">
+      <div class="wtop"><span class="brand" style="font-weight:600;color:var(--accent)">KUDY</span><div class="links" style="font-size:13px"><span><strong>Беларуская</strong></span><span>English</span><span>Українська</span><span>Deutsch</span><span>Español</span><span>Français</span><span>Čeština</span><span>Svenska</span></div></div>
+      <div style="padding:20px 24px">
+        <div class="h1screen" style="font-size:28px">Гіды па горадзе</div>
+        <div class="wcols" style="padding:12px 0">
+          <div class="wcard"><div class="t"><a href="#w-guide">Гісторыі набярэжнай</a></div><div class="s">Тры кропкі ля вады: мост, дом у вадзе, портавы кран.</div>
+            <div class="metarow"><span>Працягласць: 45 хв</span><span>Адлегласць: 2,1 км</span><span>Кропкі: 5</span><span>Мовы: be</span></div></div>
+          <div class="wcard"><div class="t">Сакрэты Старога Горада</div><div class="s">Брамы, ганцы і сляды вандроўнікаў на старых вуліцах.</div>
+            <div class="metarow"><span>Працягласць: 60 хв</span><span>Адлегласць: 3,4 км</span><span>Кропкі: 7</span><span>Мовы: be, en</span></div></div>
+          <div class="wcard"><div class="t"><a href="#w-map">Карта горада</a></div><div class="s">Агляд публічных маршрутаў і кропак. Пазіцыя наведвальніка не вызначаецца і не выкарыстоўваецца. (<code>mapIntro</code>)</div></div>
+        </div>
+        <div class="bigstrip" style="border-style:dashed">
+          <div class="cap1">Скарбы дракона — вэб-уваход у фізічныя знаходкі</div>
+          <p class="note">Адкладзеная тэма брэйншторму брыфа («фізічныя „скарбы дракона“ ў Гданьску з уваходам праз вэб»); механіка не вызначаная. <span class="tag proto">прататып</span> <span class="tag hypo">гіпотэза B10</span></p>
+        </div>
+        <div class="bigstrip">
+          <div class="cap1" style="font-size:20px">Поўная версія — у дадатку: GPS-аўтазапуск, офлайн, поўныя маршруты. <a href="#w-app">Адкрыць дадатак</a></div>
+          <p class="note">CalmOffer — адзін блок унізе, без усплывальных акон, банэраў і цаны (01 «Дзе відаць цана»; <code>calm-offer.tsx</code>).</p>
+        </div>
+      </div>
+    </div>
+    <p class="ann"><b>без усталёўкі:</b> навігацыя толькі праз спасылкі; каталёг → гід → /app — тры клікі да тлумачэння выгадаў; крамы «Хутка» — поўны адказ, не тупік (16 G10.02).</p>
+    <p class="fl">далей: <a href="#w-guide">X гід</a> <span class="ar">→</span> <a href="#w-app">Z /app</a></p>
+  </div>
+
+  <div class="cell" id="w-guide" style="grid-column:1/-1">
+    <h3>X · Гід /guides/id — прэв'ю прагулкі, не другі прадукт</h3>
+    <div class="surface webpage">
+      <div class="wtop"><span class="brand" style="font-weight:600;color:var(--accent)">KUDY</span><div class="links" style="font-size:13px"><span><strong>Беларуская</strong></span><span>English</span><span>Українська</span><span>Deutsch</span><span>Español</span><span>Français</span><span>Čeština</span><span>Svenska</span></div></div>
+      <div style="padding:20px 24px;display:grid;grid-template-columns:2fr 1fr;gap:20px">
+        <div>
+          <div class="h1screen" style="font-size:28px">Гісторыі набярэжнай</div>
+          <p class="note">Апісанне гіда; cover — публічны асет каталога.</p>
+          <div class="metarow"><span>Працягласць: 45 хв</span><span>Адлегласць: 2,1 км</span><span>Кропкі: 5</span><span>Мовы: be</span></div>
+          <div class="h2screen">Кропкі маршруту</div>
+          <div class="stoprow"><a href="#w-guide" style="color:var(--accent)"><b>Кропка 1 · Мост</b></a></div>
+          <div class="stoprow"><a href="#w-guide" style="color:var(--accent)"><b>Кропка 2 · Дом у вадзе</b></a></div>
+          <div class="lockweb"><span class="badge lock"><span class="luc"></span>кропка пад замком</span><span>Кропка 4 · Портавы кран — публічны анонс (<code>LockedStopRow</code>; сёння эмодзі 🔒 <span class="tag gap">H5</span>, прапанова lock.svg G25.04)</span></div>
+          <div class="h2screen">Аўдыё</div>
+          <p class="note">Аўдыё-файла няма ў публічным пакеце; тэкст гісторыі ніжэй чытаецца як звычайна. (<code>audioUnavailable</code>) · пазнака «толькі тэкст» (<code>textOnly</code>)</p>
+          <div class="h2screen">Крыніцы і аўтарства</div>
+          <p class="note">Атрыбуцыя кантэнту (<code>ContentAttribution</code>); «Правілы выкарыстання» (<code>usageRulesTitle</code>) — асобная старонка; шапка вэба — бренд + пераключальнік мовы інтэрфейсу (<code>site-shell.tsx</code>).</p>
+        </div>
+        <div>
+          <div class="wcard" style="position:sticky;top:0">
+            <div class="t">Без загрузкі і пакупкі</div>
+            <div class="s">Вэб-гід — прэв'ю прагулкі: спіс кропак і тэксты; download, start і purchase тут не існуюць (сумесныя інварыянты, <code>web/components/guide-page.tsx</code>).</div>
+            <div class="s" style="margin-top:8px">Поўная версія — у дадатку: GPS-аўтазапуск, офлайн, поўныя маршруты. <a href="#w-app">Адкрыць дадатак</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="ann"><b>разумнасць без усталёўкі:</b> усе кропкі чытаюцца як тэкст; замак не блакуе публічны анонс; адна CalmOffer унізе.</p>
+    <p class="fl">далей: <a href="#w-map">Y мапа</a></p>
+  </div>
+
+  <div class="cell" id="w-map" style="grid-column:1/-1">
+    <h3>Y · Карта /map — стан Error спадкуе спіс</h3>
+    <div class="surface webpage">
+      <div class="wtop"><span class="brand" style="font-weight:600;color:var(--accent)">KUDY</span><div class="links" style="font-size:13px"><span><strong>Беларуская</strong></span><span>English</span><span>Українська</span><span>Deutsch</span><span>Español</span><span>Français</span><span>Čeština</span><span>Svenska</span></div></div>
+      <div style="padding:20px 24px">
+        <div class="h1screen" style="font-size:28px">Карта горада</div>
+        <p class="note" style="margin-top:0">Агляд публічных маршрутаў і кропак. Пазіцыя наведвальніка не вызначаецца і не выкарыстоўваецца.</p>
+        <div class="banner error">Карта часова недаступная. Спіс маршрутаў ніжэй працуе звычайна. (<code>mapError</code>)</div>
+        <div class="mapbox" style="height:280px;margin-top:10px;opacity:.6">
+          <div class="st" style="left:0;top:140px;width:600px;height:26px;transform:rotate(-5deg)"></div>
+          <div class="st" style="left:220px;top:0;width:24px;height:260px"></div>
+          <div class="st" style="left:420px;top:180px;width:300px;height:22px;transform:rotate(7deg)"></div>
+          <div class="cap">Даныя карты © удзельнікі OpenStreetMap (ліцэнзія ODbL) (<code>mapAttribution</code>)</div>
+        </div>
+        <div class="h2screen">Маршруты на карце</div>
+        <div class="stoprow"><a href="#w-guide" style="color:var(--accent)"><b>Гісторыі набярэжнай</b></a><span class="n2">45 хв · 2,1 км</span></div>
+        <div class="stoprow"><b>Сакрэты Старога Горада</b><span class="n2">60 хв · 3,4 км</span></div>
+      </div>
+    </div>
+    <p class="ann"><b>праўда кадра:</b> вэб-мапа не вызначае пазіцыю; збой тайлаў не роніць старонку — спіс працуе (канон §5/схемы: іменаваны стан).</p>
+    <p class="fl">далей: <a href="#w-app">Z /app</a></p>
+  </div>
+
+  <div class="cell" id="w-app" style="grid-column:1/-1">
+    <h3>Z · /app — «неўсталяваны дадатак не дае тупік»</h3>
+    <div class="surface webpage">
+      <div class="wtop"><span class="brand" style="font-weight:600;color:var(--accent)">KUDY</span><div class="links" style="font-size:13px"><span><strong>Беларуская</strong></span><span>English</span><span>Українська</span><span>Deutsch</span><span>Español</span><span>Français</span><span>Čeština</span><span>Svenska</span></div></div>
+      <div style="padding:20px 24px;max-width:720px">
+        <div class="h1screen" style="font-size:28px">Поўная версія — у дадатку KUDY</div>
+        <div class="wcard" style="margin-top:10px"><div class="s">Што дадае дадатак да вэба:</div>
+          <div class="row" style="margin-top:8px"><span class="chip">GPS-аўтазапуск гісторый на месцы</span><span class="chip">Офлайн: маршруты пад рукой без інтэрнэту</span><span class="chip">Поўныя маршруты: усе кропкі і ўсё аўдыё</span></div>
+        </div>
+        <div class="h2screen">Знайсці дадатак:</div>
+        <div class="row"><a class="btn plain" href="#w-app">App Store — Хутка</a><a class="btn plain" href="#w-app">Google Play — Хутка</a></div>
+        <p class="note">З публікаванай старонкай крамаў кнопкі вядуць у крамы; да публікацыі — «Хутка» (<code>storeComingSoon</code>), старонка застаецца поўным адказам (16 G10.02).</p>
+        <div class="bigstrip">
+          <div class="cap1" style="font-size:20px">Працяг прагулкі ў дадатку</div>
+          <p class="note">Працяг у дадатку: вэб-гід → той самы гід у дадатку. <span class="tag prop">прапанова: глыбокая спасылка — маршрутызацыя па-за гэтай задачы, кантрактаў навігацыі не мяняем</span></p>
+        </div>
+        <p class="note">Прыватнасць: «Бясплатны вэб-канал не збірае акаўнтаў: рэгістрацыі і ўваходу няма, кантактныя даныя не запытваюцца. Старонкі каталога, гідаў і карт адкрываюцца без уводу асабістых даных.» (<code>privacyWeb</code>); старонка /privacy — у шапцы ўсіх кадраў.</p>
+      </div>
+    </div>
+    <p class="ann"><b>межы (out of scope):</b> публікацыя сайта, змена кантрактаў навігацыі/аўдыё/пакупак, увод вельмі патрэбнай усталёўкі — нічога з гэтага тут не робіцца; «install wall» адсутнічае — вэб карысны без дадатка.</p>
+    <p class="fl">далей: <a href="#s6">§6 карта пераходаў</a></p>
+  </div>
+
+  </div>
+</section>
+
+<section id="s6">
+  <h2>§6 · Карта пераходаў <small>крытэрый 1/4; рэдагуемая крыніца — <a href="interaction-map.svg">interaction-map.svg</a>; NAV-адлюстраванні — даслоўна схем G06.06</small></h2>
+  <div class="surface" style="padding:12px"><img src="interaction-map.svg" alt="Карта пераходаў: тэлефон (ланцуг прагулкі) і вэб (уваход без усталёўкі)" style="width:100%;height:auto"></div>
+  <table class="mtx">
+    <tr><th>NAV</th><th>Правіла (11 §16.9)</th><th>Дом у макетах</th></tr>
+    <tr><td>NAV1</td><td>горад → рубрыка → картка гіда → прэв'ю; адзін гід — адна картка</td><td><a href="#f-explore">A</a> → <a href="#f-guides">B</a> → <a href="#f-preview-free">C/D</a></td></tr>
+    <tr><td>NAV2</td><td>пустыя рубрыкі не рэндэруюцца</td><td><a href="#f-guides">B</a> (заўвага)</td></tr>
+    <tr><td>NAV3</td><td>горад: Побач і My KUDY; пусты горад — сумленны</td><td><a href="#f-explore">A</a>, <a href="#f-my">L</a></td></tr>
+    <tr><td>NAV4</td><td>Discovery: нуль exact — сумленнае паведамленне + alternatives</td><td><a href="#f-guides">B</a></td></tr>
+    <tr><td>NAV5</td><td>замкнёная кропка: назва, месца, анонс, замок; медыя няма</td><td><a href="#f-preview-free">C</a>, <a href="#f-locked">O</a></td></tr>
+    <tr><td>NAV6</td><td>пакупка/замок → прэв'ю, не Run</td><td><a href="#f-preview-paid">D</a></td></tr>
+    <tr><td>NAV7</td><td>«Прагулка» з любой паверхні раздзела 16 → Run у ранейшым становішчы</td><td><a href="#f-explore">A</a>, <a href="#f-my">L</a>/<a href="#f-return">Q</a></td></tr>
+    <tr><td>NAV8</td><td>Start іншага гіда — адзіны дыялог §4.1; End пацвярджэнне</td><td><a href="#f-switch">E</a>, <a href="#f-run-peek">F</a> → <a href="#f-end">J</a></td></tr>
+    <tr><td>NAV9</td><td>Back → паверхня-крыніца; сесія і гук нязменныя</td><td><a href="#f-guides">B</a>, <a href="#f-preview-free">C</a>, <a href="#f-locked">O</a></td></tr>
+    <tr><td>NAV10</td><td>форма ацэнкі — часовая паверхня; End/My KUDY</td><td><a href="#f-feedback">K</a>, <a href="#f-end">J</a>, <a href="#f-my">L</a></td></tr>
+    <tr><td>NAV11</td><td>падборка → член; без аўдыё; mixed не адкрывае платнае</td><td><a href="#s1">§1 інвентар</a> (кадр не малюецца — кампанент існы, змены не прапануе)</td></tr>
+  </table>
+</section>
+
+<section id="s7">
+  <h2>§7 · Чытанне ліста і межы <small>што даслоўна, што прапанова, чаго няма</small></h2>
+  <table class="mtx">
+    <tr><th>Катэгорыя</th><th>Змест</th></tr>
+    <tr><td><span class="tag canon">канон</span></td><td>токены, кнопкі, карткі, маркеры, панэль Run, назвы станаў — даслоўна канон G06.07 і код production; радкі інтэрфейсу — даслоўна <code>source.json</code> (be) і <code>web.ui.*</code>; рэплікі дракона — даслоўна брыф v1 §Сцэна.</td></tr>
+    <tr><td><span class="tag prop">прапанова</span></td><td>нявыначанае: глыбокая спасылка вэб→дадатак (маршрутызацыя), S1/S2-арыенціры да запісу #694, тагляйн/назвы B06 не ўведзеныя (кадры карыстаюцца дзейнымі радкамі).</td></tr>
+    <tr><td><span class="tag hypo">гіпотэза</span> <span class="tag proto">прататып</span></td><td>калекцыя і дасягненні (B08 — #704/#695/#696), «скарбы дракона» ў вэб і сакрэтныя кропкі па компасе (B10) — пазначаныя і па-за production-абсягам.</td></tr>
+    <tr><td><span class="tag gap">расыходжанні</span></td><td>перавыкарыстаныя handoff G25.06 без фіксаў: H3 (літара маркера), H4 (backdrop 40% vs 35%), H5 (вэб-замок эмодзі), H7 (POI-квадрат).</td></tr>
+    <tr><td>Недаступныя ўваходы</td><td>фота фігуркі — няма (падабенство кіта не пацверджанае); запіс свістулькі — няма (S1/S2 — плейсхолдэры); жывы рэндэр на прыладзе і ў рэальным браўзеры — не правяраўся; рэвізіі крыніц — у шапцы.</td></tr>
+    <tr><td>Out of scope</td><td>публікацыя сайта, змена кантрактаў навігацыі/аўдыё/пакупак, рэалізацыя калекцыі, «install wall». Механікі не прымаюцца: рашэнні — за рэестрам і ўладарам.</td></tr>
+  </table>
+  <p class="foot">G25.07 · выканаўца: zcode (GLM-5.3-Flash), сэсія sess_b04c5be7, галіна zcode/706 · рэдагуемая крыніца — гэты файл; растравы экспарт — contact-sheet.png; карта пераходаў — interaction-map.svg. Шрыфты — лакальны набор OFL з G25.01/G25.06 (спасылка на ../G25.06/fonts/, без дубля файлаў).</p>
+</section>
+
+</div>
+</html>
