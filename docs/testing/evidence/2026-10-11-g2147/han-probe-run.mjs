@@ -11,18 +11,24 @@
 // Prerequisites per docs/development_setup.md: booted AVD (kudy-test),
 // by.kudy.app installed, Metro on :8081 (`npm start`).
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const RUNTIME = join(HERE, "runtime");
-const ADB = join(process.env.ANDROID_HOME ?? `${process.env.HOME}/Android/Sdk`, "platform-tools", "adb");
-const SERIAL = "emulator-5554";
-// The Metro port is a parameter: a shared checkout can serve another
-// branch on the default 8081, and this driver must fetch ITS OWN bundle.
-const PORT = Number(process.env.KUDY_METRO_PORT ?? 8081);
-const PACKAGE = "by.kudy.app";
+import {
+  adb,
+  assertPreconditions,
+  deviceProps,
+  driverPaths,
+  ensureRuntimeDir,
+  escapeNonAscii,
+  fail,
+  PACKAGE,
+  PORT,
+  SERIAL,
+  screencap,
+} from "../device-run-lib.mjs";
+
+const { here: HERE, runtime: RUNTIME } = driverPaths(import.meta.url);
 const DEEP_LINK = "kudy://han-probe";
 const PROBE_CAPTION = "card hans / ui 400 / scaled";
 const WAIT_MS = 120000;
@@ -37,50 +43,12 @@ const argScale = (() => {
   return v;
 })();
 
-function fail(reason) {
-  console.error(`SKIP/BLOCKED: ${reason}`);
-  process.exit(1);
-}
-
-function adb(...args) {
-  return execFileSync(ADB, ["-s", SERIAL, ...args], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
-}
-
-// Escape-encode anything outside ASCII so committed machine files carry no
-// raw CJK bytes (the gitguard idiom of G21.40).
-const escapeNonAscii = (s) => String(s).replace(/[^\x20-\x7E]/g, (c) => [...c].map((ch) => `\\u${ch.codePointAt(0).toString(16).padStart(4, "0")}`).join(""));
-
 // ---- preconditions: adb, booted device, installed package, Metro up ----
-try {
-  execFileSync(ADB, ["devices"], { encoding: "utf8" });
-} catch {
-  fail("adb not available (ANDROID_HOME/platform-tools/adb)");
-}
-const devices = execFileSync(ADB, ["devices"], { encoding: "utf8" });
-if (!devices.split("\n").some((l) => l.startsWith(SERIAL) && l.includes("device"))) {
-  fail(`no booted ${SERIAL} in adb devices`);
-}
-const packages = adb("shell", "pm", "list", "packages");
-if (!packages.split("\n").includes(`package:${PACKAGE}`)) {
-  fail(`${PACKAGE} is not installed on ${SERIAL}`);
-}
-let metro = "";
-try {
-  metro = execFileSync("curl", ["-s", "--max-time", "5", `http://localhost:${PORT}/status`], { encoding: "utf8" });
-} catch {}
-if (metro.trim() !== "packager-status:running") {
-  fail(`Metro is not running on :${PORT} — start it first (expo start --dev-client --port ${PORT})`);
-}
-
-mkdirSync(RUNTIME, { recursive: true });
+assertPreconditions();
+ensureRuntimeDir(RUNTIME);
 
 // ---- device facts (rule 9: the environment state as command output) ----
-const props = Object.fromEntries(
-  ["ro.build.version.release", "ro.build.version.sdk", "ro.product.model", "ro.hardware"].map((p) => [
-    p,
-    adb("shell", "getprop", p).trim(),
-  ]),
-);
+const props = deviceProps();
 const fontScaleBefore = adb("shell", "settings", "get", "system", "font_scale").trim();
 const cjkFonts = adb("shell", "ls", "/system/fonts")
   .split("\n")
@@ -179,7 +147,7 @@ for (let pos = 0; pos < MAX_SCROLLS; pos++) {
     .filter((t) => t && !seen.has(t));
   for (const t of newCaptions) seen.add(t);
   const shot = `probe-scale${argScale}-pos${pos}.png`;
-  const png = execFileSync(ADB, ["-s", SERIAL, "exec-out", "screencap", "-p"], { maxBuffer: 64 * 1024 * 1024 });
+  const png = screencap();
   writeFileSync(join(RUNTIME, shot), png);
   writeFileSync(join(RUNTIME, `dump-scale${argScale}-pos${pos}.xml`), adb("shell", "cat", "/sdcard/kudy-probe-dump.xml"));
   screens.push({

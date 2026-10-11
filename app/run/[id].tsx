@@ -169,10 +169,10 @@ const styles = StyleSheet.create({
     color: tokens.colorAccent,
     fontSize: tokens.fontBaseSize,
   },
-  // The session menu (G06.04): the walk's pause and finish beside each
-  // other, one visual row under the paused banner.
+  // Long action labels must remain reachable at the capped text scale.
   sessionActions: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: tokens.spaceS,
     marginBottom: tokens.spaceS,
   },
@@ -441,7 +441,9 @@ export default function Run() {
     return (
       <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Run">
         <BackButton label={back} testID="btn-run-back" />
-        <ScaledText style={styles.centered}>{strings.unavailableTitle}</ScaledText>
+        <ScaledText style={styles.centered} testID="run-unavailable">
+          {strings.unavailableTitle}
+        </ScaledText>
         {surface !== null ? (
           <ScaledText style={styles.reason} testID="run-unavailable-reason">
             {runMapReason(surface.reason, strings)}
