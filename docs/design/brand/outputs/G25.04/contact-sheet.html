@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="be">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G25.04 — кантактны ліст функцыянальных іконак і кампаса</title>
+<style>
+  /* Токены — даслоўна з візуальнага канона G06.07 (docs/design/visual-language.md, «Дадатак»).
+     Гэтая старонка — дызайн-прапанова G25.04, production-токены яна не мяняе. */
+  :root {
+    --paper: #faf7f2; --ink: #22262b; --muted: #6b7280; --accent: #1d6b4f;
+    --accent-ink: #ffffff; --card: #ffffff; --line: #d8d2c6;
+    --map: #eef3ee; --street: #dfe7df; --person: #1f5aa8;
+    --marker-played: #1d6b4f; --marker-playing: #b3331f; --marker-available: #8a610e;
+    --marker-pending: #646c77; --marker-locked: #67707a;
+    --disabled-ink: #6b7280; --disabled-line: #6b7280;
+    --notice-bg: #fdf1d7; --notice-border: #e6c98c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: var(--paper); color: var(--ink);
+         font: 16px/1.45 system-ui, sans-serif; }
+  h1 { font-size: 24px; font-weight: 600; margin: 0 0 4px; }
+  h2 { font-size: 18px; font-weight: 600; margin: 32px 0 8px; border-top: 1px solid var(--line); padding-top: 16px; }
+  p.lede { color: var(--muted); margin: 0 0 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+  table { border-collapse: collapse; width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: middle; font-size: 14px; }
+  th { background: var(--paper); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .ico { display: inline-flex; flex: none; }
+  .ico svg { display: block; }
+  .s16 svg, svg.s16 { width: 16px; height: 16px; }
+  .s20 svg, svg.s20 { width: 20px; height: 20px; }
+  .s24 svg, svg.s24 { width: 24px; height: 24px; }
+  svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  /* Стан «выключана» — ghost-пара канона §5 (рашэнне ўладара 2026-10-03, issue #430):
+     тэкст і межа --disabled-ink/--disabled-line, празрысты фон, без полкі і без opacity-падмены. */
+  .demo-normal { color: var(--ink); background: var(--card); border: 1px solid var(--line);
+                 border-radius: 10px; padding: 8px 12px; display: inline-flex; align-items: center; gap: 8px; }
+  .demo-selected { color: var(--accent-ink); background: var(--accent); border: 1px solid var(--accent);
+                   border-radius: 10px; padding: 8px 12px; display: inline-flex; align-items: center; gap: 8px; }
+  .demo-disabled { color: var(--disabled-ink); background: transparent; border: 1px solid var(--disabled-line);
+                   border-radius: 10px; padding: 8px 12px; display: inline-flex; align-items: center; gap: 8px; }
+  /* Фокус — outline 3px accent з змяшчэннем 1px, аднолькавы для ўсіх інтэрактыўных элементаў (канон §5). */
+  .demo-focus { color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+                padding: 8px 12px; display: inline-flex; align-items: center; gap: 8px;
+                outline: 3px solid var(--accent); outline-offset: 1px; }
+  /* Дотык: мінімальная зона ≥44×44 (прэцэдэнт BackButton, UX 02) — пункцір паказвае яе вакол прыкладу 16px. */
+  .touch { display: inline-flex; align-items: center; justify-content: center;
+           min-width: 44px; min-height: 44px; outline: 1px dashed var(--muted); outline-offset: -1px; }
+  .marker { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #ffffff;
+            box-shadow: 0 1px 2px rgba(34,38,43,.25); flex: none; }
+  .person { width: 18px; height: 18px; border-radius: 50%; border: 3px solid #ffffff; background: var(--person); flex: none; }
+  .note { color: var(--muted); font-size: 13px; }
+  .proposal { display: inline-block; background: var(--notice-bg); border: 1px solid var(--notice-border);
+              border-radius: 99px; padding: 1px 10px; font-size: 12px; color: var(--ink); }
+  .pair { font-size: 13px; color: var(--muted); }
+  code { font-family: ui-monospace, monospace; font-size: 12.5px; background: var(--paper);
+         border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+  .compass-mock { background: var(--map); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .rolecard { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: var(--card); }
+  .rolecard h3 { margin: 0 0 6px; font-size: 15px; }
+  ul.checklist li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<h1>G25.04 — кантактны ліст функцыянальных іконак і кампаса</h1>
+<p class="lede">Крыніца: брыф «Атлас знаходак» v1 (08.10.2026, рэдакцыя <code>a11ea86</code>), рэестр рашэнняў (<code>c984bab</code>), візуальны канон G06.07 (<code>b6056ff</code>).
+Вынік задачы <code>#703</code>, эпік <code>#346</code>, 2026-10-11. Лаўнчар-іконка — асобна <code>#693</code>, інтэграцыя асетаў — <code>#429</code>.
+Усё, пазначанае <span class="proposal">ПРАПАНОВА</span>, канонам не з’яўляецца да рашэння ўладара (рэестр <code>decisions.md</code>).</p>
+
+<h2>1. Існыя гліфы — захаваць</h2>
+<p>Адзін набор — Lucide 1.49.0 (ISC) праз <code>CanonIcon</code> (G06.10.c): глыбокі імпарт <code>lucide-react-native/icons/&lt;назва&gt;</code>, колер і памер з токенаў, screen-reader подпіс абавязковы на кожным рэндэры (канон §9). Ніжэй — усе гліфы, што сёння жывуць у кодзе; іх набор гэтая задача не пашырае і не замяняе.</p>
+<table>
+  <tr><th>Гліф</th><th>16 px (звычайны)</th><th>Дзе ў кодзе</th><th>Сэнс</th><th>Пара (a11y + тэкст)</th><th>Рашэнне</th></tr>
+  <tr>
+    <td><code>arrow-left</code></td>
+    <td><span class="ico s16" style="color:var(--accent)"><svg viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span></td>
+    <td><code>components/back-button.tsx</code></td>
+    <td>Назад — навігацыя, не каманда</td>
+    <td class="pair">«Назад» (<code>native.chrome.back</code>) + слова «Назад» побач</td>
+    <td>захаваць</td>
+  </tr>
+  <tr>
+    <td><code>route</code></td>
+    <td><span class="ico s16"><svg viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg></span></td>
+    <td><code>app/map.tsx</code></td>
+    <td>Тып прапановы «Гід» на мапе Побач</td>
+    <td class="pair">«Гід» (<code>native.nearby.guideLabel</code>) + слова тыпу побач</td>
+    <td>захаваць</td>
+  </tr>
+  <tr>
+    <td><code>map-pin</code></td>
+    <td><span class="ico s16"><svg viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span></td>
+    <td><code>app/map.tsx</code>, <code>app/route/[id].tsx</code></td>
+    <td>Тып «Месца»; факт прэв’ю «кропкі»</td>
+    <td class="pair">«Месца» (<code>native.nearby.placeLabel</code>); падпіс факта (<code>previewStrings</code>)</td>
+    <td>захаваць</td>
+  </tr>
+  <tr>
+    <td><code>clock</code></td>
+    <td><span class="ico s16"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span></td>
+    <td><code>app/route/[id].tsx</code></td>
+    <td>Факт прэв’ю «працягласць»</td>
+    <td class="pair">подпіс факта (<code>previewStrings</code>) + лічба побач</td>
+    <td>захаваць</td>
+  </tr>
+  <tr>
+    <td><code>lock</code></td>
+    <td><span class="ico s16"><svg viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span></td>
+    <td><code>app/route/[id].tsx</code> (пазнака кропкі)</td>
+    <td>Кропка пад замком да пакупкі</td>
+    <td class="pair">«Зачынена» (<code>native.chrome.locked</code>)</td>
+    <td>захаваць; вэб-двайнік эмодзі 🔒 замяніць на SVG — гл. §6</td>
+  </tr>
+</table>
+<p class="note">Не маркеры і не кропка пазіцыі: станы кропак Run — колер па ADR G01.01 §4.5 з тэкставым подпісам, не Lucide-гліфы (гл. §3).</p>
+
+<h2>2. Станы і памеры</h2>
+<p>Прыклады на тэкставай кнопцы з гліфам-кандыдатам <code>play</code> — <span class="proposal">ПРАПАНОВА</span> (сёння радок аўдыё Run — чыста тэкставы, гл. §5). Значэнні станаў — даслоўна канон §5: націснуты чып — фон акцэнту; выключаны — ghost-пара без празрыстасці; фокус — outline 3 px акцэнту са змяшчэннем 1 px.</p>
+<div class="grid">
+  <div class="card"><div class="pair">звычайны</div>
+    <span class="touch"><span class="demo-normal"><span class="ico s16"><svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></span>Граць</span></span>
+  </div>
+  <div class="card"><div class="pair">націснуты (selected)</div>
+    <span class="demo-selected"><span class="ico s16"><svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></span>Паўза</span>
+  </div>
+  <div class="card"><div class="pair">выключаны (disabled)</div>
+    <span class="demo-disabled"><span class="ico s16"><svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></span>Граць</span>
+    <div class="note">прычына недаступнасці — заўсёды тэкстам побач (11 §7, issue #430)</div>
+  </div>
+  <div class="card"><div class="pair">фокус</div>
+    <span class="demo-focus"><span class="ico s16"><svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></span>Граць</span>
+  </div>
+  <div class="card"><div class="pair">буйны тэкст 1,25× (a11y-плашка)</div>
+    <span class="touch"><span class="demo-normal" style="font-size:20px"><span class="ico s20"><svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></span>Граць</span></span>
+  </div>
+  <div class="card"><div class="pair">зона дотыку ≥44×44</div>
+    <span class="touch"><span class="demo-normal"><span class="ico s16"><svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></span>Граць</span></span>
+    <div class="note">пункцір — мін. зона дотыку вакол прыкладу (прэцэдэнт BackButton, UX 02; hitSlop 8)</div>
+  </div>
+</div>
+
+<h2>3. Маркеры кропак і кропка пазіцыі — не Lucide</h2>
+<p>Стан чытаецца <b>не толькі колерам</b>: бачны подпіс «{назва} — {стан}» і a11y-назва «{назва}, {стан}» (<code>app/run/[id].tsx</code>, канон §5, §9). Заліўкі і назвы станаў — даслоўна ADR G01.01 §4.5; колер маркера = стан, новых назваў канон не дадае (§7).</p>
+<div class="card" style="background:var(--map);border-color:var(--line)">
+  <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+    <span style="display:inline-flex;align-items:center;gap:8px"><span class="marker" style="background:var(--marker-playing)"></span><span class="pair">Кропка — гучыць (<code>native.run.status.playing</code>)</span></span>
+    <span style="display:inline-flex;align-items:center;gap:8px"><span class="marker" style="background:var(--marker-available)"></span><span class="pair">Кропка — даступна (<code>.available</code>)</span></span>
+    <span style="display:inline-flex;align-items:center;gap:8px"><span class="marker" style="background:var(--marker-played)"></span><span class="pair">Кропка — праслухана (<code>.played</code>)</span></span>
+    <span style="display:inline-flex;align-items:center;gap:8px"><span class="marker" style="background:var(--marker-pending)"></span><span class="pair">Кропка — чакае (<code>.pending</code>)</span></span>
+    <span style="display:inline-flex;align-items:center;gap:8px"><span class="marker" style="background:var(--marker-locked)"></span><span class="pair">Кропка — зачынена (<code>.locked</code>)</span></span>
+    <span style="display:inline-flex;align-items:center;gap:8px"><span class="person"></span><span class="pair">кропка пазіцыі — <code>color.person</code>, без станаў кропак</span></span>
+  </div>
+</div>
+
+<h2>4. Кампас: тры розныя ролі</h2>
+<p>Брыф: «Компас — магчымая асабістая рэч героя. Месца ў іконцы адкрытае. Статычны эскіз на дошцы не паказвае рэальны напрамак». У кодзе кампаса сёння няма (<code>git grep -i compass</code> па production — пуста). Гэтая задача размяжоўвае ролі, каб яны не зляпляліся ў адну «іконку з стрэлкай».</p>
+<div class="grid">
+  <div class="rolecard">
+    <h3>Роля А — дэкаратыўны/брэндавы кампас</h3>
+    <div class="compass-mock" style="min-height:120px;display:flex;align-items:center;justify-content:center;color:var(--muted)">
+      плейсхолдар — асет уладара
+    </div>
+    <p class="note">Форма і месца кампаса ў лаўнчар-іконцы не абраныя: <code>B05</code> адкрытае, уладальнік — <code>#693</code>. У макетах малюецца як плейсхолдар з такой пазнакай, не як «кампас-гліф».</p>
+  </div>
+  <div class="rolecard">
+    <h3>Роля Б — дзеянне навігацыі</h3>
+    <p><span class="proposal">ПРАПАНОВА</span></p>
+    <span class="demo-normal"><span class="ico s16"><svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></span>Побач</span>
+    <p class="note">Сёння пераход да мапы — тэкставы лінк «Побач →» (<code>native.chrome.nearby</code>). Калі ўладар захоча гліф — кандыдат <code>navigation</code> (або <code>compass</code>) <b>абавязкова ў пару з тэкстам</b>; icon-only забаронены канонам §9. Дзеяння «прокласці маршрут» у прадукце няма.</p>
+  </div>
+  <div class="rolecard">
+    <h3>Роля В — рэальны паказчык напрамку</h3>
+    <p><span class="proposal">МАКЕТ — не рэальны напрамак</span></p>
+    <div class="compass-mock" style="text-align:center">
+      <svg class="s24" viewBox="0 0 24 24" style="width:64px;height:64px;margin:0 auto"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/></svg>
+      <div class="note">фікаваны вугал, намаляваны рукамі; крыніца — <code>kudy-compass-mock.svg</code></div>
+    </div>
+    <p class="note">Рэальнага сэнсарнага напрамку ў прадукце няма; сэнсарная логіка — па-за абсягам задачы. У статычным прататыпе напрамак толькі малюецца з пазнакай «макет» — працуючай стрэлкі не паказваем. Сакрэтныя кропкі па кампасе — адкладзена (<code>B10</code>).</p>
+  </div>
+</div>
+<h3>Ручныя альтэрнатывы для станаў пазіцыі/напрамку — ўжо ў кодзе, тэкстам</h3>
+<table>
+  <tr><th>Стан</th><th>Бачны тэкст (даслоўна, <code>native.nearby.*</code>)</th><th>Іконка</th></tr>
+  <tr><td>шукаем пазіцыю</td><td>Шукаем пазіцыю…</td><td class="note">не патрэбна — тэкст носьбіт</td></tr>
+  <tr><td>адмоўлена</td><td>Пазіцыя не дазволена — ручны агляд</td><td class="note">не патрэбна</td></tr>
+  <tr><td>нестабільная</td><td>Пазіцыя нестабільная</td><td class="note">не патрэбна</td></tr>
+  <tr><td>занятая прагулкай</td><td>Прагулка выкарыстоўвае пазіцыю — ручны агляд</td><td class="note">не патрэбна</td></tr>
+  <tr><td>мапа горада</td><td>Карта горада зʼявіцца пасля рашэння пра тайлы (<code>native.nearby.mapNote</code>)</td><td class="note">не патрэбна</td></tr>
+</table>
+<p class="note">Гэтыя рады — дзейны механізм ручной альтэрнатывы: няма пазіцыі/напрамку — гучыць тэкст, не працуе стрэлка.</p>
+
+<h2>5. Кандыдаты-гліфы — толькі прапановы</h2>
+<p>Ніякі з іх не прыменяецца да рашэння ўладара; іх месца — параўнальная дошка будучага рашэння, не production. Кожны — толькі ў пары з тэкстам (канон §9).</p>
+<table>
+  <tr><th>Гліф</th><th>Від</th><th>Дзе мог бы быць</th><th>Цяпер</th><th>Статус</th></tr>
+  <tr><td><code>play</code> / <code>pause</code></td>
+      <td><span class="ico s16"><svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg></span> <span class="ico s16"><svg viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg></span></td>
+      <td>радок аўдыё Run, тэйзер месца</td>
+      <td class="pair">тэкставыя кнопкі «Граць»/«Паўза», «Паслухаць тэйзер» (<code>native.run.*</code>, <code>native.place.*</code>); вэб — родны <code>&lt;audio controls&gt;</code></td>
+      <td><span class="proposal">ПРАПАНОВА</span></td></tr>
+  <tr><td><code>download</code></td>
+      <td><span class="ico s16" style="color:var(--muted)"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span></td>
+      <td>адзіная primary-кнопка прэв’ю «Загрузіць → Пачаць»</td>
+      <td class="pair">тэкст (<code>native.preview.label.download/start</code>); канон: адно галоўнае дзеянне на экран</td>
+      <td><span class="proposal">ПРАПАНОВА</span></td></tr>
+  <tr><td><code>star</code></td>
+      <td><span class="ico s16" style="color:var(--muted)"><svg viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg></span></td>
+      <td>шкала ацэнак 1–5 (кнопкі 40 px)</td>
+      <td class="pair">тэкставыя кнопкі «N з 5» (<code>native.feedback.starLabel</code>, канон §8)</td>
+      <td><span class="proposal">ПРАПАНОВА</span></td></tr>
+  <tr><td><code>navigation</code> / <code>compass</code></td>
+      <td><span class="ico s16" style="color:var(--muted)"><svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></span> <span class="ico s16" style="color:var(--muted)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/></svg></span></td>
+      <td>магчымая пара да «Побач» (роля Б кампаса)</td>
+      <td class="pair">тэкставы лінк «Побач →»</td>
+      <td><span class="proposal">ПРАПАНОВА</span></td></tr>
+</table>
+<p class="note">Што гэтая задача <b>не</b> рэкамендуе: другі набор іконак, замена маркераў/кропкі на гліфы, іконкі ў наладах/мове (самаіменныя чыпы і тэкставыя рады нясуць сэнс самі), іконкі ў шкале водгуку замест тэксту «N з 5».</p>
+
+<h2>6. Дадатак з абгрунтаваннем: вэб-замок і мок кампаса</h2>
+<div class="grid">
+  <div class="rolecard">
+    <h3><code>lock.svg</code> для вэб <span class="proposal">ПРАПАНОВА</span></h3>
+    <span class="ico s24" style="color:var(--ink)"><svg viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+    <p class="note">Вэб сёння малюе замок эмодзі 🔒 (<code>web/components/locked-stop-row.tsx</code>, <code>web.ui.lockedLabel</code>) — адзінае месца, дзе мабільны Lucide <code>lock</code> і вэб разыходзяцца візуальна. SVG-крыніца — тая ж геометрыя Lucide 1.49.0 (ISC); прымяненне ў <code>locked-stop-row.tsx</code> — асобны production-крок па-за гэтай задачай.</p>
+  </div>
+  <div class="rolecard">
+    <h3><code>kudy-compass-mock.svg</code> <span class="proposal">МАКЕТ</span></h3>
+    <p class="note">Статычны мок роля В: фікаваны вугал стрэлкі + пазнака «макет» у самым SVG. Прызначэнне — прататыпы і дошкі; у прадукт не ўваходзіць. Кастомнае імя з прэфіксам <code>kudy-</code> — гл. чэкліст ніжэй.</p>
+  </div>
+</div>
+
+<h2>7. Экспарт і нэймінг — чэкліст</h2>
+<ul class="checklist">
+  <li>Крыніца гліфаў — Lucide 1.49.0, ліцэнзія ISC; у RN толькі глыбокі імпарт <code>lucide-react-native/icons/&lt;kebab-nazva&gt;</code> (Metro не выразае нявыкарыстана з агульнага барэля — G06.10).</li>
+  <li>Вэб — інлайн-SVG з тымі ж <code>d</code>/<code>points</code>: <code>viewBox="0 0 24 24"</code>, <code>fill="none"</code>, <code>stroke="currentColor"</code>, <code>stroke-width="2"</code>, круглыя канцы/злучэнні.</li>
+  <li>Нэймінг файлаў: гліфы Lucide — родныя kebab-назвы без зменаў; уласныя (мокі, ілюстрацыі) — <code>kudy-&lt;назва&gt;.svg</code>.</li>
+  <li>Колер і памер — толькі праз токены/currentColor і <code>size</code> (канон: літаральны колер у іконкавым слоі — парушэнне; тэст на пераазначэнне ў <code>canon-icon.test.tsx</code> гэта фіксуе).</li>
+  <li>Кожны рэндэр гліфа — з screen-reader подпісам (канон §9); пусты label у <code>CanonIcon</code> кідае памылку — гэта кантракт, не зручнасць.</li>
+  <li>Памеры сямейства: 16 px (база), 20 px (буйны тэкст 1,25×), 24 px (viewBox); маркер 34 px, кропка пазіцыі 18 px, кнопкі шкалы 40 px — гэта не іконкавыя памеры, іх не падмяняць гліфамі.</li>
+  <li>Зона дотыку інтэрактыўнага элемента з гліфам — ≥44×44 з hitSlop 8 (прэцэдэнт BackButton, UX 02).</li>
+  <li>Эмодзі ў вэб-інтэрфейсе — не іконка: адзіны выпадак (🔒 у замкнёных кропках) вядзе да <code>lock.svg</code> з §6; новых эмодзі-«гліфаў» не дадаем.</li>
+  <li>Экспарт PNG — толькі калі платформа патрабуе (лаўнчар — <code>#693</code>/<code>#429</code>); іменаваць <code>&lt;назва&gt;-&lt;памер&gt;.png</code>.</li>
+</ul>
+</body>
+</html>
