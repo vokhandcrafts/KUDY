@@ -59,7 +59,7 @@ def main():
     out["minimal_raw_line1"] = {
         "glyph_clusters": len(boxes),
         "median_advance_px": median(adv),
-        "note": "uncapped Text at font_scale 2.0: advance ~74px = 1.77x of the 42px base (density 3.0), not the linear 2.0x=84px",
+        "note": "uncapped Text at font_scale 2.0: advance ~74px = 1.77x of the 42px base (16sp x 2.625 density, 420dpi), not the linear 2.0x=84px",
     }
 
     # The minimal size-control row (allowFontScaling=false, 28dp): y 967..1085.
@@ -102,8 +102,8 @@ def main():
         "note": "font_scale 1.0: 16 glyphs in one line, advance 42px = 1.0x, no clip",
     }
 
-    out["density"] = 3.0
-    out["base_font_px"] = 42
+    out["density"] = 2.625  # 420dpi physical (wm density); ro.sf.lcd_density is empty on this AVD image
+    out["base_font_px"] = 42  # 16sp (font.base-size) x 2.625 (420dpi)
     out["font_scale"] = 2.0
     out["non_linear_ratio"] = round(out["minimal_raw_line1"]["median_advance_px"] / 42, 3)
     out["linear_ratio"] = round(out["minimal_pinned_line1"]["median_advance_px"] / 42, 3)

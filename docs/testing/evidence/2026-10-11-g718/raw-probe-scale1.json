@@ -9,7 +9,6 @@
       "ro.build.version.sdk": "36",
       "ro.product.model": "Android SDK built for x86_64",
       "ro.hardware": "ranchu",
-      "ro.sf.lcd_density": "",
       "fontScaleBefore": "1.0",
       "fontScaleRun": 1,
       "fontScaleRestored": "1.0"
@@ -90,5 +89,6 @@
       "widthPx": 996,
       "heightPx": 62
     }
-  ]
+  ],
+  "fontScaleBefore": "1.0"
 }

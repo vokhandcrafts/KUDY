@@ -4,10 +4,12 @@
 // the booted AVD, at one system font_scale. Windows adaptation of the G21.47
 // driver (han-probe-run.mjs in the 2026-10-11-g2147 evidence): adb.exe path
 // resolution, fetch for the Metro status, an Atomics sleep (no POSIX sleep
-// binary). Zero dependencies, the same waits-on-conditions idiom: a missing
-// precondition exits with a reason and never reports a pass. Raw uiautomator
-// dumps stay in the gitignored runtime/ (they carry raw CJK bytes); the
-// emitted machine JSON re-encodes every non-ASCII codepoint. Reproduction:
+// binary), and a finally-restore of the device font_scale on every exit
+// path, thrown or failed. Zero dependencies, the same waits-on-conditions
+// idiom: a missing precondition fails with a reason and never reports a
+// pass. Raw uiautomator dumps stay in the gitignored runtime/ (they carry
+// raw CJK bytes); the emitted machine JSON re-encodes every non-ASCII
+// codepoint. Reproduction:
 //   node docs/testing/evidence/2026-10-11-g718/han-minimal-run.mjs --scale 2.0 --surface minimal
 //   node docs/testing/evidence/2026-10-11-g718/han-minimal-run.mjs --scale 2.0 --surface probe
 //   (scale 1.0 baselines the same surfaces)
@@ -52,9 +54,12 @@ const argSurface = (() => {
 })();
 const { link: DEEP_LINK, caption: PROBE_CAPTION } = SURFACES[argSurface];
 
+// A precondition failure throws: the run's finally block restores the device
+// state before the process exits.
+class Skip extends Error {}
 function fail(reason) {
   console.error(`SKIP/BLOCKED: ${reason}`);
-  process.exit(1);
+  throw new Skip(reason);
 }
 
 function adb(...args) {
@@ -63,159 +68,171 @@ function adb(...args) {
 
 const sleepSync = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 
-// Escape-encode anything outside ASCII so committed machine files carry no
-// raw CJK bytes (the gitguard idiom of G21.40).
-const escapeNonAscii = (s) => String(s).replace(/[^\x20-\x7E]/g, (c) => [...c].map((ch) => `\\u${ch.codePointAt(0).toString(16).padStart(4, "0")}`).join(""));
-
 // ---- preconditions: adb, booted device, installed package, Metro up ----
+// (none of these touch device state, so a plain exit is safe here)
 try {
   execFileSync(ADB, ["devices"], { encoding: "utf8" });
 } catch {
-  fail(`adb not available at ${ADB}`);
+  console.error(`SKIP/BLOCKED: adb not available at ${ADB}`);
+  process.exit(1);
 }
 const devices = execFileSync(ADB, ["devices"], { encoding: "utf8" });
 if (!devices.split("\n").some((l) => l.startsWith(SERIAL) && l.includes("device"))) {
-  fail(`no booted ${SERIAL} in adb devices`);
+  console.error(`SKIP/BLOCKED: no booted ${SERIAL} in adb devices`);
+  process.exit(1);
 }
 const packages = adb("shell", "pm", "list", "packages");
 // adb shell output on Windows carries CRLF — a split("\n") line keeps "\r".
 if (!packages.split("\n").map((l) => l.trim()).includes(`package:${PACKAGE}`)) {
-  fail(`${PACKAGE} is not installed on ${SERIAL}`);
+  console.error(`SKIP/BLOCKED: ${PACKAGE} is not installed on ${SERIAL}`);
+  process.exit(1);
 }
 let metro = "";
 try {
   metro = await (await fetch(`http://localhost:${PORT}/status`, { signal: AbortSignal.timeout(5000) })).text();
 } catch {}
 if (metro.trim() !== "packager-status:running") {
-  fail(`Metro is not running on :${PORT} — start it first (expo start --dev-client --port ${PORT})`);
+  console.error(`SKIP/BLOCKED: Metro is not running on :${PORT} — start it first (expo start --dev-client --port ${PORT})`);
+  process.exit(1);
 }
 
 mkdirSync(RUNTIME, { recursive: true });
 
-// ---- device facts (rule 9: the environment state as command output) ----
-const props = Object.fromEntries(
-  ["ro.build.version.release", "ro.build.version.sdk", "ro.product.model", "ro.hardware", "ro.sf.lcd_density"].map((p) => [
-    p,
-    adb("shell", "getprop", p).trim(),
-  ]),
-);
-const fontScaleBefore = adb("shell", "settings", "get", "system", "font_scale").trim();
-
-// ---- set scale, restart the app onto the surface ----
-// The dev-client flow: force-stop, VIEW lands on the launcher, tap the Metro
-// server entry, wait for the app session, deep link again.
-adb("shell", "settings", "put", "system", "font_scale", String(argScale));
-adb("shell", "am", "force-stop", PACKAGE);
-adb("reverse", `tcp:${PORT}`, `tcp:${PORT}`);
-const launch = (link) => adb("shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", link, PACKAGE);
-launch(DEEP_LINK);
-
-// One uiautomator pull, parsed by named groups; a stale or failed dump is
-// retried inside a 6-second window (time-bounded, not attempt-bounded — the
-// UI can be animating for a variable stretch).
-function pullNodes() {
-  const retryUntil = Date.now() + 6000;
-  for (;;) {
-    const out = adb("shell", "uiautomator", "dump", "/sdcard/kudy-minimal-dump.xml");
-    if (/dumped to/i.test(out)) {
-      const xml = adb("shell", "cat", "/sdcard/kudy-minimal-dump.xml");
-      const nodes = [...xml.matchAll(/<node[^>]*?text="(?<text>[^"]*)"[^>]*?bounds="\[(?<x1>\d+),(?<y1>\d+)\]\[(?<x2>\d+),(?<y2>\d+)\]"/g)].map(
-        (m) => ({ text: m.groups.text, bounds: [Number(m.groups.x1), Number(m.groups.y1), Number(m.groups.x2), Number(m.groups.y2)] }),
-      );
-      if (nodes.length > 0) return { nodes, xml };
-    }
-    if (Date.now() >= retryUntil) break;
-    sleepSync(1000);
+let result;
+let restoreTo = null; // the device font_scale as read, before the run touches it
+try {
+  result = await run();
+} catch (e) {
+  if (!(e instanceof Skip)) console.error(`ERROR: ${e?.message ?? e}`);
+  process.exitCode = 1;
+} finally {
+  // The device leaves this run exactly as it entered it — on every path.
+  if (restoreTo !== null) {
+    try {
+      adb("shell", "settings", "put", "system", "font_scale", restoreTo);
+    } catch {}
   }
-  return { nodes: [], xml: null };
+  if (result) emit(result);
 }
 
-function waitFor(desc, condition) {
-  const deadline = Date.now() + WAIT_MS;
-  for (;;) {
-    const { nodes, xml } = pullNodes();
-    if (condition(nodes)) return { nodes, xml };
-    if (Date.now() >= deadline) {
-      adb("shell", "settings", "put", "system", "font_scale", fontScaleBefore);
-      fail(`did not reach ${desc} within ${WAIT_MS} ms`);
+async function run() {
+  // ---- device facts (rule 9: the environment state as command output) ----
+  const props = Object.fromEntries(
+    ["ro.build.version.release", "ro.build.version.sdk", "ro.product.model", "ro.hardware"].map((p) => [
+      p,
+      adb("shell", "getprop", p).trim(),
+    ]),
+  );
+  const fontScaleBefore = adb("shell", "settings", "get", "system", "font_scale").trim();
+  restoreTo = fontScaleBefore;
+
+  // ---- set scale, restart the app onto the surface ----
+  adb("shell", "settings", "put", "system", "font_scale", String(argScale));
+  adb("shell", "am", "force-stop", PACKAGE);
+  adb("reverse", `tcp:${PORT}`, `tcp:${PORT}`);
+  const launch = (link) => adb("shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", link, PACKAGE);
+  launch(DEEP_LINK);
+
+  // One uiautomator pull, parsed by named groups; a stale or failed dump is
+  // retried inside a 6-second window (time-bounded — the UI can be animating
+  // for a variable stretch).
+  function pullNodes() {
+    const retryUntil = Date.now() + 6000;
+    for (;;) {
+      const out = adb("shell", "uiautomator", "dump", "/sdcard/kudy-minimal-dump.xml");
+      if (/dumped to/i.test(out)) {
+        const xml = adb("shell", "cat", "/sdcard/kudy-minimal-dump.xml");
+        const nodes = [...xml.matchAll(/<node[^>]*?text="(?<text>[^"]*)"[^>]*?bounds="\[(?<x1>\d+),(?<y1>\d+)\]\[(?<x2>\d+),(?<y2>\d+)\]"/g)].map(
+          (m) => ({ text: m.groups.text, bounds: [Number(m.groups.x1), Number(m.groups.y1), Number(m.groups.x2), Number(m.groups.y2)] }),
+        );
+        if (nodes.length > 0) return { nodes, xml };
+      }
+      if (Date.now() >= retryUntil) break;
+      sleepSync(1000);
     }
-    sleepSync(POLL_MS);
+    return { nodes: [], xml: null };
   }
-}
 
-const tapCenter = ([x1, y1, x2, y2]) => adb("shell", "input", "tap", String((x1 + x2) >> 1), String((y1 + y2) >> 1));
-const hasText = (text) => (nodes) => nodes.some((n) => n.text === text);
+  function waitFor(desc, condition) {
+    const deadline = Date.now() + WAIT_MS;
+    for (;;) {
+      const { nodes } = pullNodes();
+      if (condition(nodes)) return nodes;
+      if (Date.now() >= deadline) fail(`did not reach ${desc} within ${WAIT_MS} ms`);
+      sleepSync(POLL_MS);
+    }
+  }
 
-const launcher = waitFor("the dev client launcher with the Metro server entry", (n) =>
-  n.some((x) => x.text === `http://10.0.2.2:${PORT}`));
-tapCenter(launcher.nodes.find((x) => x.text === `http://10.0.2.2:${PORT}`).bounds);
-waitFor("the app session to take over the screen", (n) => !n.some((x) => x.text === "DEVELOPMENT SERVERS"));
-launch(DEEP_LINK);
-waitFor(`the surface (${argSurface})`, hasText(PROBE_CAPTION));
+  const tapCenter = ([x1, y1, x2, y2]) => adb("shell", "input", "tap", String((x1 + x2) >> 1), String((y1 + y2) >> 1));
 
-// ---- scroll to the end: the probe surface's scaling rows sit at the bottom ----
-const sameBounds = (a, b) => JSON.stringify(a.map((n) => n.bounds)) === JSON.stringify(b.map((n) => n.bounds));
-let settled = pullNodes().nodes;
-for (let i = 0; i < 12; i++) {
-  adb("shell", "input", "swipe", "540", "1900", "540", "300", "400");
+  const launcher = waitFor("the dev client launcher with the Metro server entry", (n) =>
+    n.some((x) => x.text === `http://10.0.2.2:${PORT}`));
+  tapCenter(launcher.find((x) => x.text === `http://10.0.2.2:${PORT}`).bounds);
+  waitFor("the app session to take over the screen", (n) => !n.some((x) => x.text === "DEVELOPMENT SERVERS"));
+  launch(DEEP_LINK);
+  waitFor(`the surface (${argSurface})`, (n) => n.some((x) => x.text === PROBE_CAPTION));
+
+  // ---- scroll to the end: the probe surface's scaling rows sit at the bottom ----
+  const sameBounds = (a, b) => JSON.stringify(a.map((n) => n.bounds)) === JSON.stringify(b.map((n) => n.bounds));
+  let settled = pullNodes().nodes;
+  for (let i = 0; i < 12; i++) {
+    adb("shell", "input", "swipe", "540", "1900", "540", "300", "400");
+    sleepSync(1500);
+    const cur = pullNodes().nodes;
+    if (sameBounds(cur, settled)) break;
+    settled = cur;
+  }
+  adb("shell", "input", "swipe", "540", "1900", "540", "1400", "600");
   sleepSync(1500);
-  const cur = pullNodes().nodes;
-  if (sameBounds(cur, settled)) break;
-  settled = cur;
-}
-adb("shell", "input", "swipe", "540", "1900", "540", "1400", "600");
-sleepSync(1500);
-settled = pullNodes().nodes;
-for (let i = 0; i < 10; i++) {
-  sleepSync(1000);
-  const cur = pullNodes().nodes;
-  if (sameBounds(cur, settled)) break;
-  settled = cur;
-}
+  settled = pullNodes().nodes;
+  for (let i = 0; i < 10; i++) {
+    sleepSync(1000);
+    const cur = pullNodes().nodes;
+    if (sameBounds(cur, settled)) break;
+    settled = cur;
+  }
+  if (settled.length === 0) fail("the settled hierarchy is empty — uiautomator stopped producing fresh dumps");
 
-// ---- capture: screenshot + fresh dump ----
-if (settled.length === 0) {
-  adb("shell", "settings", "put", "system", "font_scale", fontScaleBefore);
-  fail("the settled hierarchy is empty — uiautomator stopped producing fresh dumps");
-}
-const png = execFileSync(ADB, ["-s", SERIAL, "exec-out", "screencap", "-p"], { maxBuffer: 64 * 1024 * 1024 });
-writeFileSync(join(HERE, `${argSurface}-scale${argScale}.png`), png);
-const finalPull = pullNodes();
-if (!finalPull.xml) {
-  adb("shell", "settings", "put", "system", "font_scale", fontScaleBefore);
-  fail("the final uiautomator dump failed after the retries");
-}
-writeFileSync(join(RUNTIME, `dump-${argSurface}-scale${argScale}.xml`), finalPull.xml);
+  // ---- capture: screenshot + fresh dump ----
+  const png = execFileSync(ADB, ["-s", SERIAL, "exec-out", "screencap", "-p"], { maxBuffer: 64 * 1024 * 1024 });
+  writeFileSync(join(HERE, `${argSurface}-scale${argScale}.png`), png);
+  const finalPull = pullNodes();
+  if (!finalPull.xml) fail("the final uiautomator dump failed after the retries");
+  writeFileSync(join(RUNTIME, `dump-${argSurface}-scale${argScale}.xml`), finalPull.xml);
 
-// The Han text nodes (the probe strings), top-to-bottom; captions and Latin
-// rows excluded by length.
-const hanNodes = settled
-  .filter((n) => n.text && n.text.length >= 16 && !/^[A-Za-z0-9 .,=/()+-]+$/.test(n.text))
-  .sort((a, b) => a.bounds[1] - b.bounds[1]);
-const rows = hanNodes.map((n, i) => ({
-  row: `han-node-${i}`,
-  textLength: n.text.length,
-  bounds: n.bounds,
-  widthPx: n.bounds[2] - n.bounds[0],
-  heightPx: n.bounds[3] - n.bounds[1],
-}));
+  // The Han text nodes (the probe strings), top-to-bottom. A probe string is
+  // at least 30% non-ASCII characters — the Latin captions (with their em
+  // dashes) never reach that ratio, the shortest CJK row is all non-ASCII.
+  const hanNodes = settled
+    .filter((n) => n.text && n.text.length >= 16)
+    .filter((n) => [...n.text].filter((c) => c.charCodeAt(0) > 127).length / n.text.length >= 0.3)
+    .sort((a, b) => a.bounds[1] - b.bounds[1]);
+  const rows = hanNodes.map((n, i) => ({
+    row: `han-node-${i}`,
+    textLength: n.text.length,
+    bounds: n.bounds,
+    widthPx: n.bounds[2] - n.bounds[0],
+    heightPx: n.bounds[3] - n.bounds[1],
+  }));
 
-// ---- restore the device ----
-adb("shell", "settings", "put", "system", "font_scale", fontScaleBefore);
+  return {
+    run: {
+      task: "issue #718 (G21.47 follow-up)",
+      driver: "han-minimal-run.mjs",
+      surface: `${argSurface} (dev-only, __DEV__-gated)`,
+      device: { serial: SERIAL, ...props, fontScaleBefore, fontScaleRun: argScale, fontScaleRestored: fontScaleBefore },
+      metro: `http://localhost:${PORT}/status=packager-status:running`,
+      probeDeepLink: DEEP_LINK,
+    },
+    rows,
+    fontScaleBefore,
+  };
+}
 
 // ---- machine JSON (non-ASCII re-encoded; raw bytes stay in runtime/) ----
-const result = {
-  run: {
-    task: "issue #718 (G21.47 follow-up)",
-    driver: "han-minimal-run.mjs",
-    surface: `${argSurface} (dev-only, __DEV__-gated)`,
-    device: { serial: SERIAL, ...props, fontScaleBefore, fontScaleRun: argScale, fontScaleRestored: fontScaleBefore },
-    metro: `http://localhost:${PORT}/status=packager-status:running`,
-    probeDeepLink: DEEP_LINK,
-  },
-  rows,
-};
-const out = join(HERE, `raw-${argSurface}-scale${argScale}.json`);
-writeFileSync(out, JSON.stringify(result, null, 2).replace(/[^\x00-\x7F]/g, (c) => `\\u${c.codePointAt(0).toString(16).padStart(4, "0")}`) + "\n");
-console.log(`OK scale=${argScale} surface=${argSurface}: ${argSurface}-scale${argScale}.png -> ${out}`);
-for (const r of rows) console.log(`  ${r.row}: len=${r.textLength} ${r.widthPx}x${r.heightPx} at ${JSON.stringify(r.bounds)}`);
+function emit(result) {
+  const out = join(HERE, `raw-${argSurface}-scale${argScale}.json`);
+  writeFileSync(out, JSON.stringify(result, null, 2).replace(/[^\x00-\x7F]/g, (c) => `\\u${c.codePointAt(0).toString(16).padStart(4, "0")}`) + "\n");
+  console.log(`OK scale=${argScale} surface=${argSurface}: ${argSurface}-scale${argScale}.png -> ${out}`);
+  for (const r of result.rows) console.log(`  ${r.row}: len=${r.textLength} ${r.widthPx}x${r.heightPx} at ${JSON.stringify(r.bounds)}`);
+}

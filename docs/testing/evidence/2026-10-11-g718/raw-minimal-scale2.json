@@ -9,7 +9,6 @@
       "ro.build.version.sdk": "36",
       "ro.product.model": "Android SDK built for x86_64",
       "ro.hardware": "ranchu",
-      "ro.sf.lcd_density": "",
       "fontScaleBefore": "1.0",
       "fontScaleRun": 2,
       "fontScaleRestored": "1.0"
@@ -32,18 +31,6 @@
     },
     {
       "row": "han-node-1",
-      "textLength": 48,
-      "bounds": [
-        42,
-        468,
-        1038,
-        626
-      ],
-      "widthPx": 996,
-      "heightPx": 158
-    },
-    {
-      "row": "han-node-2",
       "textLength": 16,
       "bounds": [
         42,
@@ -55,7 +42,7 @@
       "heightPx": 214
     },
     {
-      "row": "han-node-3",
+      "row": "han-node-2",
       "textLength": 16,
       "bounds": [
         42,
@@ -66,5 +53,6 @@
       "widthPx": 996,
       "heightPx": 242
     }
-  ]
+  ],
+  "fontScaleBefore": "1.0"
 }
