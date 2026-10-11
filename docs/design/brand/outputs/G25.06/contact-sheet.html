@@ -288,12 +288,12 @@ table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
      <div style="position:absolute;inset:14px;background:#22262b66"></div>
      <div class="cardk" style="position:relative;max-width:400px;box-shadow:0 8px 30px #22262b33">
       <p style="margin-bottom:12px">Завяршыць прагулку?</p>
-      <span class="btn primary" style="display:block;text-align:center;margin-bottom:8px">Завершыць</span>
+      <span class="btn primary" style="display:block;text-align:center;margin-bottom:8px">Завяршыць</span>
       <span class="btn cancel">Скасаваць</span>
      </div>
     </div>
     <p class="note">Картка да 400px, радыус 10; зацміценне — <span class="tag gap">H4</span> канон §5 «35% чорнага», код — <code>rgba(34,38,43,.4)</code> (40% чарніла, вытворны адценне, UX 06). Скасаваць — актыўны акцэнтны контур, не прыцемнены дубль accept.</p>
-    <p class="ann"><b>Копія/a11y:</b> «Завяршыць прагулку?» <code>native.run.endConfirmTitle</code>; «Завершыць»/«Скасаваць» <code>native.run.endConfirmAccept/endConfirmCancel</code>; пераключэнне — <code>native.chrome.switchConfirm</code> + «Завершыць і пачаць». Сістэмны Back = cancel, без навігацыі. <b>Дзе:</b> components/modal-dialog.tsx:63.</p>
+    <p class="ann"><b>Копія/a11y:</b> «Завяршыць прагулку?» <code>native.run.endConfirmTitle</code>; «Завяршыць»/«Скасаваць» <code>native.run.endConfirmAccept/endConfirmCancel</code>; пераключэнне — <code>native.chrome.switchConfirm</code> (дыялог-пацверджанне з назвамі гідаў, з параметрамі). Сістэмны Back = cancel, без навігацыі. <b>Дзе:</b> components/modal-dialog.tsx:63.</p>
    </div>
   </div>
  </section>
@@ -366,7 +366,7 @@ table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
       <div class="row" style="margin-top:8px"><span class="btn primary" style="padding:8px 12px">Ацаніць гайд</span><span class="btn quiet">Не, дзякуй</span></div>
      </div>
     </div>
-    <p class="ann"><b>Копія/a11y:</b> «Прагулка завершана» <code>native.run.endedTitle</code>; «Як табе гайд?…» <code>native.feedback.inviteTitle</code>; «Ацаніць гайд»/«Не, дзякуй» <code>inviteRate/inviteDismiss</code>; «Ці быў ты тут?» <code>placeVisitTitle</code> — самаацэнка, не даказанае наведванне. <b>Дзе:</b> app/run/[id].tsx:608, :616.</p>
+    <p class="ann"><b>Копія/a11y:</b> «Прагулка завершана» <code>native.run.endedTitle</code>; «Як табе гайд?…» <code>native.feedback.inviteTitle</code>; «Ацаніць гайд»/«Не, дзякуй» <code>native.feedback.inviteRate/inviteDismiss</code>; «Ці быў ты тут?» <code>native.feedback.placeVisitTitle</code> — самаацэнка, не даказанае наведванне. <b>Дзе:</b> app/run/[id].tsx:608, :616.</p>
    </div>
   </div>
  </section>
@@ -396,7 +396,7 @@ table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
    <tr><td>Каталог</td><td>error/retry</td><td>«Каталог часова недаступны» + «Паўтарыць» · <code>catalogTemporarilyUnavailable/retry</code></td><td>error-пара + accent контур</td><td>live region polite; named retry</td><td>guide-card.tsx:384, :119</td></tr>
    <tr><td>Каталог</td><td>offline</td><td>«Папярэдні валідны кэш» + прычына · <code>validCache</code></td><td>notice-пара; спіс карткі з кэша</td><td>live region; прычына muted ніжэй</td><td>guide-card.tsx:402</td></tr>
    <tr><td>Кнопка primary</td><td>disabled</td><td>«Загрузіць»/«Купіць» + прычына «Патрэбна пакупка.»</td><td><code>disabled-ink/-line</code>, празрысты, без полкі</td><td>accessibilityState.disabled; прычына побач (11 §7)</td><td>route/[id].tsx:524; upgrade-offer.tsx:47</td></tr>
-   <tr><td>Кропка маршруту</td><td>locked</td><td>«зачынена» · <code>native.run.status.locked</code>; «Даступна пасля куплі» <code>lockedHint</code></td><td><code>color.marker.locked</code> + белы абвод</td><td>«{назва}, {стан}» + markerHint; не толькі колер</td><td>run/[id].tsx:699</td></tr>
+   <tr><td>Кропка маршруту</td><td>locked</td><td>«зачынена» · <code>native.run.status.locked</code>; «Даступна пасля куплі» <code>native.run.lockedHint</code></td><td><code>color.marker.locked</code> + белы абвод</td><td>«{назва}, {стан}» + markerHint; не толькі колер</td><td>run/[id].tsx:699</td></tr>
    <tr><td>Кропка маршруту</td><td>playing</td><td>«гучыць» · <code>status.playing</code></td><td><code>marker.playing</code> (≥3:1 на map/street)</td><td>тап = прэв'ю, не гук</td><td>run/[id].tsx:699</td></tr>
    <tr><td>Кропка маршруту</td><td>completed (played)</td><td>«праслухана» · <code>status.played</code></td><td><code>marker.played</code> = accent</td><td>таксама</td><td>run/[id].tsx:699</td></tr>
    <tr><td>Кропка маршруту</td><td>available / pending</td><td>«даступна» / «чакае» · <code>status.available/pending</code></td><td><code>marker.available</code> / <code>marker.pending</code></td><td>таксама</td><td>run/[id].tsx:699</td></tr>
@@ -432,7 +432,7 @@ table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
      <div class="panel half">
       <div class="row"><span class="t" style="font-weight:600">Зараз грае: Вада і горад</span><span class="btn outline-accent" style="padding:6px 10px">Паўза</span></div>
       <div class="track" style="margin-top:8px"><b style="width:42%"></b></div>
-      <div class="row" style="margin-top:10px"><span class="btn outline-accent" style="flex:1">Прыпыніць прагулку</span><span class="btn outline-accent" style="flex:1">Завершыць прагулку</span></div>
+      <div class="row" style="margin-top:10px"><span class="btn outline-accent" style="flex:1">Прыпыніць прагулку</span><span class="btn outline-accent" style="flex:1">Завяршыць прагулку</span></div>
       <p style="font-weight:600;margin-top:10px">Транскрыпт</p>
       <p style="margin-top:4px">Горад ідзе за сваёй вадой: порт, соль, цагель…</p>
      </div>
@@ -476,7 +476,7 @@ table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
 
  <section id="s12">
   <h2>12. Экспарт і праверка</h2>
-  <p class="note">· гэты ліст — <code>outputs/G25.06/contact-sheet.html</code> (рэдагуемы, шрыфты локальна ў <code>fonts/</code>, OFL); · вектар маркераў — <code>outputs/G25.06/markers.svg</code>; · растравы кантактны ліст — <code>outputs/G25.06/contact-sheet.png</code> (1680×7734); · матрыца станаў — §9 тут і ў <code>results/G25.06.md</code>; · карта кода — кампанент → file:line у §1–§8 і выніку. Прапановы B04.1/B04.2 (гліна/бурштын) у кампанентах не ўжываюцца — яны толькі для ілюстрацый і пазнак знаходак (#704), даслоўна B04.1/B04.2 рэестра.</p>
+  <p class="note">· гэты ліст — <code>outputs/G25.06/contact-sheet.html</code> (рэдагуемы, шрыфты локальна ў <code>fonts/</code>, OFL); · вектар маркераў — <code>outputs/G25.06/markers.svg</code>; · растравы кантактны ліст — <code>outputs/G25.06/contact-sheet.png</code> (1680×7729); · матрыца станаў — §9 тут і ў <code>results/G25.06.md</code>; · карта кода — кампанент → file:line у §1–§8 і выніку. Прапановы B04.1/B04.2 (гліна/бурштын) у кампанентах не ўжываюцца — яны толькі для ілюстрацый і пазнак знаходак (#704), даслоўна B04.1/B04.2 рэестра.</p>
  </section>
 
  <p class="foot">G25.06 · issue #705 · эпік #346 · спэцымены статычныя; праверка на жывой прыладзе не рабілася — пазначана невыкананай (прэцэдэнт G25.04). Прататып вэб-кадра — спрошчаны, production вэб трыма ўласную разметку site-shell.</p>
