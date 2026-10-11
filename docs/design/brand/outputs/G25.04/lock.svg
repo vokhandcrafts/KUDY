@@ -1,0 +1,13 @@
+<!--
+  lock.svg — G25.04 (#703), вэб-замок для замкнёных кропак.
+  Замена эмодзі 🔒 у web/components/locked-stop-row.tsx (прымяненне — асобны production-крок).
+  Геометрыя — даслоўная копія гліфа lock з lucide-react-native 1.49.0 (тыя ж шляхі, што
+  малюе мабільны app/route/[id].tsx праз CanonIcon); ліцэнзія ISC.
+  Правілы: viewBox 24, fill none, stroke currentColor, stroke-width 2, круглыя канцы.
+  Памер задаецца спажыўцом (width/height), колер — толькі currentColor, без літаралаў.
+  a11y: роля img з подпісам web.ui.lockedLabel («кропка пад замком») застаецца на абгортцы.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" role="img" aria-label="кропка пад замком">
+  <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+</svg>
