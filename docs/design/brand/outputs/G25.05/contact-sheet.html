@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="be">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G25.05 · Калекцыйныя прадметы і дасягненні · спецімен-ліст</title>
+<style>
+@font-face{font-family:Golos;src:url(fonts/GolosText_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Golos;src:url(fonts/GolosText_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Alegreya;src:url(fonts/Alegreya_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Caveat;src:url(fonts/Caveat_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+/* Значэнні — даслоўна канон G06.07 (docs/design/visual-language.md, «Дадатак»). */
+:root{
+ --paper:#faf7f2;--ink:#22262b;--muted:#6b7280;--accent:#1d6b4f;--accent-ink:#fff;--card:#fff;--line:#d8d2c6;
+ --clay:#805039;--amber:#d8a551; /* прапановы G25.01 (B04.1/B04.2), не production-токены */
+ --r:10px;--pill:99px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#ece7df;color:var(--ink);font:400 16px/1.45 Golos,system-ui,sans-serif}
+h1,h2,h3,p,table{margin:0}
+.sp{max-width:1660px;margin:auto;padding:24px}
+.sp-head{display:flex;justify-content:space-between;align-items:end;gap:24px;padding-bottom:16px;border-bottom:1px solid #b9b1a5}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--clay)}
+h1{font:600 36px/1.1 Alegreya,serif;margin-top:4px}
+.sp-head p{max-width:680px;font-size:14px}
+.src{font-size:12px;color:#4c5359;margin-top:6px}
+section{margin-top:26px}
+h2{font:600 22px/1.2 Alegreya,serif;padding-bottom:8px;border-bottom:2px solid var(--accent);margin-bottom:4px}
+h2 small{font:400 13px/1.4 Golos,sans-serif;color:#4c5359;display:block;margin-top:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:12px}
+.cell{background:var(--paper);border:1px solid #c9c1b1;border-radius:var(--r);padding:14px;overflow:hidden}
+.cell>h3{font-size:13px;font-weight:600;color:#4c5359;margin-bottom:10px}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:var(--pill);padding:2px 8px;color:#4c5359;background:#fff}
+.tag.canon{border-color:var(--accent);color:var(--accent)}
+.tag.prop{border-color:var(--clay);color:var(--clay)}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* картка знаходкі (протатып стану) — канонавая картка + пазнакі */
+.find-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;max-width:340px}
+.find-card .t{font-size:16px;font-weight:600;color:var(--ink)}
+.find-card .sub{color:var(--muted);font-size:13px;margin-top:2px}
+.find-card .art{display:flex;justify-content:center;padding:10px 0}
+.find-card .copy{font-size:14px;color:var(--ink);border-top:1px dashed var(--line);padding-top:8px;margin-top:6px}
+.badge{display:inline-block;border-radius:var(--pill);padding:2px 10px;font-size:12px;color:var(--ink)}
+.badge.souvenir{border:1px solid var(--clay);color:var(--clay);background:#fff}
+.badge.achv{background:var(--amber);color:var(--ink)} /* B04.2: бурштын — фон пазнакі з цёмным тэкстам */
+.badge.ghost{border:1px dashed var(--muted);color:var(--muted);background:transparent}
+.find-card.big-text .t,.find-card.big-text .copy{font-size:20px} /* 1.25× канон */
+.dragonline{font:400 22px/1.25 Caveat,cursive;color:var(--clay);margin-top:6px}
+
+/* паліца-спіс: мініяцюры */
+.shelf{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.shelf .thumb{width:96px;text-align:center}
+.shelf .thumb img{width:44px;height:44px;display:block;margin:auto}
+.shelf .thumb i{font-style:normal;font-size:11px;color:var(--muted);display:block;line-height:1.2;margin-top:3px}
+
+/* пустая калекцыя — экранная заглушка */
+.phoneframe{width:360px;background:var(--paper);border:1px solid #c9c1b1;border-radius:18px;padding:16px}
+.phoneframe .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.phoneframe .topbar b{font-size:18px;font-weight:600}
+.empty-shelf{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px 16px;text-align:center}
+.empty-shelf img{width:120px;height:120px;opacity:.9}
+.empty-shelf p{font-size:14px;color:var(--ink);margin-top:10px;text-align:left}
+
+/* правілы копіі */
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.rules .cell ul{margin:8px 0 0;padding-left:18px;font-size:14px}
+.rules .cell li{margin-bottom:6px}
+.rules .no li{color:#8a3a2a}
+.rules .yes li{color:var(--ink)}
+</style>
+<div class="sp">
+  <div class="sp-head">
+    <div>
+      <div class="eyebrow">G25.05 · issue <a href="https://github.com/vokhandcrafts/KUDY/issues/704">#704</a> · эпік #346</div>
+      <h1>Калекцыйныя прадметы і дасягненні — сям'я «Знаходкі»</h1>
+      <p>Сям'я керамічных медальёнаў: адзін матэрыял аб'ядноўвае гарады, сюжэт належыць гораду. Пробны прадмет «Адлюстраванне» — з брыфа. Чатыры станы калекцыянавання з копіяй, якая адрознівае добраахвотны сувенір ад праверанай умовы. Умовы атрымання <b>не зацверджаныя</b>: уся механіка — гіпотэзы для #695/#696.</p>
+      <div class="src">Крыніцы: брыф «Атлас знаходак» v1 (08.10.2026, рэвізія <code>a11ea86</code>) · рашэнні B03.1/B04.1–B04.3/B08 · канон G06.07 (visual-language.md) · брыф §Калекцыя і дасягненні. Статус: <b>прапанова хвалі G25, не production-асеты</b>; падабенства фігурцы не пацверджанае (фота адсутнічаюць — G24.02 §2).</div>
+    </div>
+    <div style="text-align:right;min-width:220px">
+      <span class="tag prop">прапанова G25.05</span><br><br>
+      <span class="tag canon">канон G06.07 цэлы</span>
+    </div>
+  </div>
+
+  <!-- ================= §1 ================= -->
+  <section>
+    <h2>§1 · Сям'я матэрыялаў <small>што пераносіцца паміж гарадамі, што належыць гораду</small></h2>
+    <div class="grid">
+      <div class="cell" style="grid-column:1/-1">
+        <h3>Анатомія сям'і</h3>
+        <img src="family-rules.svg" alt="Схема: бланк-медальён з падпісамі частак — пятля, гліняны контур, крэмавая кераміка, зялёная глазура, слот гарадскога адцення; справа — той жа бланк для іншага горада з пустым слотам" style="width:100%;max-width:1100px;display:block">
+        <p class="note"><b>Правіла пераносу:</b> крэмавая кераміка, гліняны контур (B04.1), зялёная глазура і пятля — заўсёды аднолькавыя. Сюжэт матыву і <b>адно</b> дадатковае гарадское адценне выбірае горад (Гданьск — бурштын B04.2). Другога акцэнту на прадмеце не бывае. Тэксту на прадмеце няма — назва жыве ў картцы.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= §2 ================= -->
+  <section>
+    <h2>§2 · Сем прадметаў: мініяцюра спісу і дэтальны выгляд <small>крытэрый 1: параўнанне малога і вялікага памеру; кожны сілуэт — канкрэтны досвед</small></h2>
+    <div class="grid" id="objects">
+      <!-- радок генеруецца ніжэй у HTML — 7 клетак -->
+    </div>
+    <div class="cell" style="margin-top:14px">
+      <h3>Паліца спісу: усе сем мініяцюр разам (44 px)</h3>
+      <div class="shelf" id="shelf"></div>
+      <p class="note">Праверка мініяцюры: сілуэт пазнавальны на 44 px — контур, глазурны матыў і адзіны бурштынавы акцэнт чытаюцца; дробныя дэталі (шпонкі, рыскі) прыбіраюцца з мініяцюры глыбінёй запаўнення, а не празрыстасцю.</p>
+    </div>
+  </section>
+
+  <!-- ================= §3 ================= -->
+  <section>
+    <h2>§3 · Чатыры станы калекцыянавання <small>крытэрый 2: асабісты сувенір · праверанае дасягненне · яшчэ не атрыманае · невядомае; стан чытаецца пазнакай і тэкстам, не толькі колерам</small></h2>
+    <div class="grid">
+      <div class="cell">
+        <h3>Стан 1 · Асабісты сувенір — добраахвотна</h3>
+        <div class="find-card">
+          <span class="badge souvenir">Сувенір — захавалі самі</span>
+          <div class="t" style="margin-top:8px">Адлюстраванне</div>
+          <div class="sub">Захавана вамі 11.10.2026</div>
+          <div class="art"><img src="object-reflection.svg" alt="Медальён «Адлюстраванне» у поўным колеры" style="width:150px;height:150px"></div>
+          <div class="copy">Вы самі выбралі «Захаваць знаходку». Гэта не дасягненне: ніякай умовы і праверкі, толькі ваш выбар.</div>
+        </div>
+        <p class="note">Поўны колер; пазнака — крэмавая з глінянай мяжой. Паходжанне дзеяння — «захавалі самі» — напісанае тэкстам, не намаляванае.</p>
+      </div>
+      <div class="cell">
+        <h3>Стан 2 · Праверанае дасягненне — умова выкананая</h3>
+        <div class="find-card">
+          <span class="badge achv">Дасягненне · умова выкананая</span>
+          <div class="t" style="margin-top:8px">Вежа</div>
+          <div class="sub">Умова (прапанова): прагулка завершаная</div>
+          <div class="art"><img src="object-tower.svg" alt="Медальён «Вежа» у поўным колеры" style="width:150px;height:150px"></div>
+          <div class="copy">Умова выкананая — праверана па фактах прагулкі на прыладзе. Прыклад — гіпотэза для #696: канчатковыя ўмовы не зацверджаныя.</div>
+        </div>
+        <p class="note">Пазнака — бурштынавы фон з цёмным тэкстам (B04.2). Сам прадмет выглядзіць гэтак жа, як сувенір: дасягненне не маляваць на прадмеце, пакуль механіка не ўхваленая.</p>
+      </div>
+      <div class="cell">
+        <h3>Стан 3 · Яшчэ не атрыманае</h3>
+        <div class="find-card">
+          <span class="badge ghost">Яшчэ не ў калекцыі</span>
+          <div class="t" style="margin-top:8px">Адлюстраванне</div>
+          <div class="sub">Прадмет з сям'і гэтай прагулкі</div>
+          <div class="art"><img src="state-outline.svg" alt="Контурны сілуэт медальёна «Адлюстраванне»: матыў і акцэнт пункцірам" style="width:150px;height:150px"></div>
+          <div class="copy">Пакуль не ў калекцыі — і гэта добра. Нічога даводзіць і наведваць не трэба.</div>
+        </div>
+        <p class="note">Контур без запаўненняў (<code>state-outline.svg</code>). Ніякага «засталося X», без прагрэсу і віны (брыф §Калекцыя).</p>
+      </div>
+      <div class="cell">
+        <h3>Стан 4 · Невядомае / неправеранае</h3>
+        <div class="find-card">
+          <span class="badge ghost">Невядома, ці гэта ваша</span>
+          <div class="t" style="margin-top:8px">Прадмет без назвы</div>
+          <div class="sub">Умова немагчыма праверыць</div>
+          <div class="art"><img src="state-unknown.svg" alt="Медальён з пункцірным абадком і знакам пытання" style="width:150px;height:150px"></div>
+          <div class="copy">Мы не ведаем, ці адбылося гэта. Пытанне застаецца адкрытым — ні сувенір, ні дасягненне.</div>
+        </div>
+        <p class="note">Пункцірны абадок + пытанка (<code>state-unknown.svg</code>). Не залічваецца анікуды; не маляваць матыў, бо назву яшчэ нельга пацвердзіць.</p>
+      </div>
+      <div class="cell">
+        <h3>Буйны тэкст 1,25× (плашка a11y)</h3>
+        <div class="find-card big-text">
+          <span class="badge souvenir">Сувенір — захавалі самі</span>
+          <div class="t" style="margin-top:8px">Адлюстраванне</div>
+          <div class="copy" style="margin-top:8px">Вы самі выбралі «Захаваць знаходку». Гэта не дасягненне: ніякай умовы і праверкі.</div>
+        </div>
+        <p class="note">Канонавы множнік 1,25× → 20px; пазнака і картка трымаюць мяжу 1px, перанос радкоў — натуральны.</p>
+      </div>
+      <div class="cell">
+        <h3>Голас дракона каля знаходкі (шрыфт Caveat, толькі рэплікі)</h3>
+        <div class="stage">
+          <div class="dragonline">Пакінем на памяць? Хвалю не забярэш, але знак для яе ў нас ёсць.</div>
+        </div>
+        <p class="note">Рэпліка з сцэны брыфа (2:40–2:50): прадмет з'яўляецца толькі пасля яўнага «Захаваць знаходку». Пры прапуску — ні прадмета, ні сігналу.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= §4 ================= -->
+  <section>
+    <h2>§4 · Пустая калекцыя <small>крытэрый 2: першы экран «Знаходкі» без прадметаў — без віны і ціску</small></h2>
+    <div class="grid">
+      <div class="cell">
+        <h3>Прататып экрана (тэлефон, 360 px)</h3>
+        <div class="phoneframe">
+          <div class="topbar"><b>Знаходкі</b><span style="font-size:12px;color:var(--muted)">назва калекцыі — прапанова B06</span></div>
+          <div class="empty-shelf">
+            <img src="state-outline.svg" alt="Пустая паліца: адзін контурны медальён">
+            <p>Тут жывуць вашыя знаходкі. Пачніце з любой прагулкі — ці проста паглядзіце горад. Пустая паліца таксама добрая.</p>
+          </div>
+          <p class="note" style="margin-top:10px">Без лічыльнікаў, без «у вас нічога няма», без закліку збіраць усё. Экран існуе, каб прыняць пустату спакойна.</p>
+        </div>
+      </div>
+      <div class="cell">
+        <h3>Што копія абавязкова адрознівае</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:14px">
+          <tr style="border-bottom:1px solid var(--line)"><td style="padding:8px 6px"><b>Сувенір</b></td><td style="padding:8px 6px">чалавек сам выбраў захаваць; назва дзеяння ў тэксце («захавалі самі»); ніякай умовы</td></tr>
+          <tr style="border-bottom:1px solid var(--line)"><td style="padding:8px 6px"><b>Дасягненне</b></td><td style="padding:8px 6px">умова названая і правераная сістэмай; назва ўмовы бачная ў дэталі; механіка — прапанова</td></tr>
+          <tr style="border-bottom:1px solid var(--line)"><td style="padding:8px 6px"><b>Не атрыманае</b></td><td style="padding:8px 6px">нейтральная назва, нулявы прагрэс бяз слоў «нядача» і «губля»</td></tr>
+          <tr><td style="padding:8px 6px"><b>Невядомае</b></td><td style="padding:8px 6px">назвы прадмета няма; незачыненае пытанне запісанае, не прыхаванае</td></tr>
+        </table>
+        <p class="note">Адкрыццё карткі нічога не прыпісвае чалавеку: ні наведвання, ні назірання, ні эмоцыі (брыф §Калекцыя; правіла крытэрыю 3).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= §5 ================= -->
+  <section>
+    <h2>§5 · Правілы копіі: заўсёды / ніколі <small>брыф: прадметы адзначаюць досвед; серыяў, выпадковых балаў і ціску ў канцэпцыі няма</small></h2>
+    <div class="rules">
+      <div class="cell yes">
+        <h3>Заўсёды</h3>
+        <ul>
+          <li>«Захавана вамі 11.10.2026» — дата і ўласнае дзеянне чалавека.</li>
+          <li>«Умова (прапанова): прагулка завершаная» — умова названая, статус адкрыты.</li>
+          <li>«Пакуль не ў калекцыі — і гэта добра».</li>
+          <li>«Мы не ведаем, ці адбылося гэта» — чэсна пра межы ведання.</li>
+          <li>Назвы прадметаў — назоўнікі вобраза: «Адлюстраванне», «Пад аркай».</li>
+        </ul>
+      </div>
+      <div class="cell no">
+        <h3>Ніколі</h3>
+        <ul>
+          <li>«Ты праЌніў 3 дні збірання» — штодзённыя серыі.</li>
+          <li>«+40 балаў, не страцяй серыю!» — выпадковыя балы і серыі.</li>
+          <li>«Засталося 5 з 12 — не спыняйся» — ціск сабраць усё.</li>
+          <li>«Вы наведалі Жураў» — прыпісанае наведванне праз адкрыццё карткі.</li>
+          <li>«Хадзіце часцей, каб пабачыць» — заклік паводзінаў з-за прадмета.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Экспарты і статус <small>усё рэдагуемае, у рэпазіторыі</small></h2>
+    <p class="note">Крыніцы: <code>family-rules.svg</code>, <code>object-reflection/arch/door/crane/amber/tower/vane.svg</code>, <code>state-outline.svg</code>, <code>state-unknown.svg</code>. Вядзенне прадметаў, умовы-гіпотэзы і handoff для #695/#696 — <code>docs/agent-tasks/results/G25.05.md</code>. Захоп PNG — гэты ліст у <code>contact-sheet.png</code>.</p>
+  </section>
+</div>
+
+<script>
+/* §2: сем прадметаў — мініяцюра + дэталь у адной клетцы */
+const OBJS=[
+ {f:'object-reflection.svg',n:'Адлюстраванне',d:'заўважыць горад у вадзе; захаваць па жаданні',m:'тры хвалі + бурштынавая кропка'},
+ {f:'object-arch.svg',n:'Пад аркай',d:'пачутая гісторыя на месцы',m:'арка, лесвіца, фонарык'},
+ {f:'object-door.svg',n:'Цень на дзверах',d:'заўважаная дэталь каля падказкі',m:'дзверы і касая паласа'},
+ {f:'object-crane.svg',n:'Жураў',d:'аўтарская гісторыя месца',m:'вежа з бэлькамі і грузам'},
+ {f:'object-amber.svg',n:'Бурштын',d:'праслуханы Moment-запрашэнне',m:'каменьчык на вальне'},
+ {f:'object-tower.svg',n:'Вежа',d:'завершаная прагулка (гіпотэза ўмовы)',m:'шпіль, гадзіннік, кветка'},
+ {f:'object-vane.svg',n:'Флюгер',d:'вяртанне ў горад, паўторная прагулка',m:'птушка на шпілі'}
+];
+document.getElementById('objects').innerHTML = OBJS.map(o=>`
+ <div class="cell">
+  <h3>${o.n} · <span style="font-weight:400">${o.d}</span></h3>
+  <div style="display:flex;gap:14px;align-items:flex-end">
+    <div class="stage" style="flex:1;display:flex;justify-content:center"><img src="${o.f}" alt="Медальён «${o.n}»: ${o.m}" style="width:170px;height:170px"></div>
+    <div style="width:64px;text-align:center"><img src="${o.f}" alt="" style="width:44px;height:44px;display:block;margin:auto"><span style="font-size:10px;color:var(--muted)">44 px</span></div>
+  </div>
+  <p class="note"><b>Матыў:</b> ${o.m}. <b>Сем'я:</b> крэм + гліняны контур + зялёная глазура; акцэнт — адзін, гарадскі.</p>
+ </div>`).join('');
+document.getElementById('shelf').innerHTML = OBJS.map(o=>`<div class="thumb"><img src="${o.f}" alt=""><i>${o.n}</i></div>`).join('');
+</script>
+</html>

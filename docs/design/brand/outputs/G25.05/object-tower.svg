@@ -1,0 +1,32 @@
+<!--
+  object-tower.svg — G25.05 (#704), прадмет «Вежа» (ратушны шпіль).
+  Досвед: завершаная прагулка (стан сесіі finished, ADR G01.03 — факт,
+  вядомы на прыладзе). Матыв — вежа з гадзіннікам і залатой кветкай
+  на шпілі (гданьская дэталь); кветка — адзіны бурштынавы акцэнт.
+  Прапанова хвалі G25, НЕ production-асет.
+  Сям'я: крэм #FAF7F2, гліна #805039 (B04.1), зялёная глазура #1D6B4F,
+  бурштын #D8A551 (B04.2), line #D8D2C6 — канон.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Медальён «Вежа»: зялёная вежа з крэмавым гадзіннікам, шатром і бурштынавай кветкай на шпілі">
+  <ellipse cx="256" cy="478" rx="140" ry="10" fill="#D8D2C6"/>
+  <circle cx="256" cy="74" r="24" fill="none" stroke="#805039" stroke-width="12"/>
+  <circle cx="256" cy="282" r="192" fill="#FAF7F2" stroke="#805039" stroke-width="11"/>
+  <circle cx="256" cy="282" r="168" fill="none" stroke="#D8D2C6" stroke-width="5"/>
+
+  <!-- корпус вежы -->
+  <path fill="#1D6B4F" d="M 208 428 L 214 210 L 298 210 L 304 428 Z"/>
+  <!-- шатар -->
+  <path fill="#1D6B4F" stroke="#805039" stroke-width="9" stroke-linejoin="round" d="M 204 216 L 256 132 L 308 216 Z"/>
+
+  <!-- залатая кветка на шпілі: адзіны бурштынавы акцэнт -->
+  <line x1="256" y1="132" x2="256" y2="112" stroke="#805039" stroke-width="7"/>
+  <circle cx="256" cy="100" r="14" fill="#D8A551"/>
+
+  <!-- гадзіннік: крэмавы круг з глінянымі пазнакамі -->
+  <circle cx="256" cy="286" r="42" fill="#FAF7F2" stroke="#805039" stroke-width="7"/>
+  <line x1="256" y1="286" x2="256" y2="262" stroke="#805039" stroke-width="6" stroke-linecap="round"/>
+  <line x1="256" y1="286" x2="274" y2="296" stroke="#805039" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- панэль цокаля ля асновы: крэмавая рыса -->
+  <rect x="196" y="404" width="120" height="16" fill="#FAF7F2" stroke="#805039" stroke-width="6"/>
+</svg>
