@@ -1,0 +1,55 @@
+<!--
+  family-rules.svg — G25.05 (#704), анатомія сям'і «Знаходак».
+  Адна сям'я матэрыялаў аб'ядноўвае гарады (брыф v1, §Калекцыя): крэмавая
+  кераміка, гліняны контур, зялёная глазура — заўжды; сюжэт і дадатковае
+  горадскае адценне — справа горада (Гданьск: бурштын). Прыклад «іншы горад»
+  паказвае толькі слот адцення, без вынайдзенага колеру. Прапанова хвалі G25.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 980" width="1100" height="980" role="img" aria-label="Анатомія сям'і: бланк-медальён з падпісамі частак і слот гарадскога адцення; долу — той жа бланк для іншага горада з пустым слотам">
+  <rect width="1100" height="980" fill="#FAF7F2"/>
+
+  <!-- === бланк-медальён === -->
+  <circle cx="240" cy="310" r="190" fill="#FFFFFF" stroke="#805039" stroke-width="11"/>
+  <circle cx="240" cy="310" r="148" fill="none" stroke="#1D6B4F" stroke-width="22"/>
+  <circle cx="240" cy="106" r="24" fill="none" stroke="#805039" stroke-width="12"/>
+  <!-- слот гарадскога акцэнту -->
+  <circle cx="322" cy="222" r="20" fill="#D8A551"/>
+
+  <!-- === выноскі (калонка справа, пераносы ўручную) === -->
+  <g font-family="Golos, system-ui, sans-serif" font-size="20" fill="#22262B">
+    <line x1="286" y1="106" x2="480" y2="96" stroke="#805039" stroke-width="3"/>
+    <text x="496" y="102">пятля — падвес на паліцы</text>
+
+    <line x1="330" y1="220" x2="480" y2="196" stroke="#805039" stroke-width="3"/>
+    <text x="496" y="190">горадскае адценне — слот</text>
+    <text x="496" y="216">на адзін акцэнт: Гданьск — бурштын #D8A551 (B04.2)</text>
+
+    <line x1="392" y1="310" x2="480" y2="310" stroke="#1D6B4F" stroke-width="3"/>
+    <text x="496" y="316">зялёная глазура — сям'я (#1D6B4F, канон)</text>
+
+    <line x1="380" y1="420" x2="480" y2="440" stroke="#805039" stroke-width="3"/>
+    <text x="496" y="436">крэмавая кераміка + гліняны контур —</text>
+    <text x="496" y="462">сям'я (#FAF7F2 + #805039, B04.1)</text>
+
+    <text x="496" y="560" fill="#6B7280" font-size="19">Матыў (сюжэт) — заўжды ад горада:</text>
+    <text x="496" y="586" fill="#6B7280" font-size="19">хвалі, арка, дзверы, вежа…</text>
+  </g>
+
+  <!-- === «іншы горад»: той жа бланк, слот адцення пусты === -->
+  <circle cx="870" cy="730" r="120" fill="#FFFFFF" stroke="#805039" stroke-width="9"/>
+  <circle cx="870" cy="730" r="92" fill="none" stroke="#1D6B4F" stroke-width="16"/>
+  <circle cx="870" cy="596" r="17" fill="none" stroke="#805039" stroke-width="10"/>
+  <circle cx="905" cy="690" r="14" fill="none" stroke="#805039" stroke-width="6" stroke-dasharray="7 8"/>
+
+  <g font-family="Golos, system-ui, sans-serif" font-size="20" fill="#22262B" text-anchor="middle">
+    <text x="870" y="892">іншы горад: тая ж сям'я,</text>
+    <text x="870" y="920">свой сюжэт і адценне — пакуль невядомыя</text>
+  </g>
+
+  <!-- === левая ніжняя расшыфроўка слота === -->
+  <g font-family="Golos, system-ui, sans-serif" font-size="19" fill="#6B7280">
+    <text x="80" y="760">пункцірны слот — адценне яшчэ</text>
+    <text x="80" y="786">не выбрана; вынаходзіць колер за горад</text>
+    <text x="80" y="812">забаронена</text>
+  </g>
+</svg>

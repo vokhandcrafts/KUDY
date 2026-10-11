@@ -1,0 +1,21 @@
+<!--
+  state-outline.svg — G25.05 (#704), стан «яшчэ не атрыманае».
+  Сілуэт таго ж прадмета «Адлюстраванне» толькі контурамі: корпус крэмавы,
+  матыў і акцэнт — гліняныя пункцірныя рыскі без запаўненняў. Настрой копіі:
+  ніякага ціску — «пакуль не ў калекцыі» бяз віны (гл. вынік G25.05 §копія).
+  Прапанова хвалі G25, НЕ production-асет.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Медальён «Адлюстраванне», якога яшчэ няма: крэмавы контур з глінянымі пункцірамі хваляў і кропкі-сонца">
+  <ellipse cx="256" cy="478" rx="140" ry="10" fill="#D8D2C6"/>
+  <circle cx="256" cy="74" r="24" fill="none" stroke="#805039" stroke-width="12"/>
+  <circle cx="256" cy="282" r="192" fill="#FAF7F2" stroke="#805039" stroke-width="11"/>
+  <circle cx="256" cy="282" r="168" fill="none" stroke="#D8D2C6" stroke-width="5"/>
+
+  <!-- сонца-кропка: толькі пункцір -->
+  <circle cx="300" cy="196" r="20" fill="none" stroke="#805039" stroke-width="6" stroke-dasharray="10 10"/>
+
+  <!-- хвалі: толькі пункцір -->
+  <path fill="none" stroke="#805039" stroke-width="9" stroke-linecap="round" stroke-dasharray="18 14" d="M 138 250 C 168 232, 196 232, 226 250 C 256 268, 284 268, 314 250 C 336 237, 356 236, 374 246"/>
+  <path fill="none" stroke="#805039" stroke-width="9" stroke-linecap="round" stroke-dasharray="18 14" d="M 138 310 C 168 292, 196 292, 226 310 C 256 328, 284 328, 314 310 C 336 297, 356 296, 374 306"/>
+  <path fill="none" stroke="#805039" stroke-width="9" stroke-linecap="round" stroke-dasharray="18 14" d="M 156 368 C 184 352, 210 352, 238 368 C 266 384, 292 384, 320 368 C 340 357, 356 356, 370 363"/>
+</svg>
