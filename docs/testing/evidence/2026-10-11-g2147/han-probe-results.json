@@ -1,0 +1,660 @@
+{
+  "run": {
+    "task": "G21.47 (issue #671)",
+    "analysis": "han-probe-analysis.mjs over runtime dumps of two han-probe-run.mjs captures",
+    "device": {
+      "serial": "emulator-5554",
+      "ro.build.version.release": "16",
+      "ro.build.version.sdk": "36",
+      "ro.product.model": "sdk_gphone64_x86_64",
+      "ro.hardware": "ranchu",
+      "fontScaleBefore": "1.0",
+      "fontScaleRun": 1,
+      "fontScaleRestored": "1.0"
+    },
+    "note": "same device and app instance for both scales; font_scale restored to 1.0 after each capture",
+    "screen": {
+      "width": 1080,
+      "height": 2400,
+      "scale1": [
+        1080,
+        2400
+      ],
+      "scale2": [
+        1080,
+        2400
+      ]
+    }
+  },
+  "deviceCjkFontFiles": [
+    "NotoSansCJK-Regular.ttc",
+    "NotoSerifCJK-Regular.ttc"
+  ],
+  "deviceCjkFamiliesFromFontsXml": [
+    {
+      "lang": "(no lang tag)",
+      "faces": [
+        {
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        }
+      ]
+    },
+    {
+      "lang": "(no lang tag)",
+      "faces": [
+        {
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        }
+      ]
+    },
+    {
+      "lang": "(no lang tag)",
+      "faces": [
+        {
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        }
+      ]
+    },
+    {
+      "lang": "(no lang tag)",
+      "faces": [
+        {
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        }
+      ]
+    }
+  ],
+  "glyphMetrics": {
+    "method": "ink-row profile over the content band cropped from the scroll-end screenshot",
+    "rows": {
+      "scaled-cap": {
+        "h1": 40,
+        "h2": 49,
+        "ratio": 1.23
+      },
+      "raw-full": {
+        "h1": 40,
+        "h2": 54,
+        "ratio": 1.35
+      },
+      "pinned-off": {
+        "h1": 85,
+        "h2": 85,
+        "ratio": 1
+      }
+    },
+    "expected": {
+      "scaled-cap": "~1.25 (font.big-text-factor cap on ScaledText)",
+      "raw-full": "~2.0 (system font_scale, no cap)",
+      "pinned-off": "1.0 (allowFontScaling=false)"
+    }
+  },
+  "scalingBehavior": {
+    "scaledCap": 1.26,
+    "rawFull": 1.26,
+    "pinnedOff": 1,
+    "expected": "scaledCap ~ 1.25 (font.big-text-factor cap), rawFull ~ 2.0 (system scale), pinnedOff 1.0"
+  },
+  "clippingScan": {
+    "definition": "an essential row is flagged when no captured scroll position shows it fully inside the viewport; empty list at a scale = the essential set is fully reachable and visible",
+    "scale1": [],
+    "scale2": []
+  },
+  "observedFindings": {
+    "strongWeight": "device inventory has no CJK Bold face (only -Regular .ttc files, fonts.xml zh-Hans family is weight 400 only); the strong row paints visibly heavier strokes over identical glyph shapes -> synthesized bold over the Regular fallback (strong-weight-compare.png)",
+    "regionalForms": "the S2 shared-codepoints row renders SC forms (simplified radicals in the canvas radicals) \u2014 no JP-form trap (probe-scale2-pos2.png vs the G21.40 S2 comparison)",
+    "uncappedScalingDefect": "at font_scale 2.0 the raw uncapped Text row paints anomalous CJK glyphs (a wrong glyph at the position of U+53F2, correct accessibility string) and a smaller-than-expected advance; the capped and pinned rows render the same string correctly \u2014 defect recorded, follow-up issue named in the results file",
+    "actionsRowOverflow": "at font_scale 2.0 the three-button actions row overflows the viewport width and the third button is cut at the screen edge (probe-scale2-pos0.png); production screens have similar fixed rows (app/route/[id].tsx) \u2014 follow-up issue named in the results file"
+  },
+  "rows": [
+    {
+      "row": "card-hans",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 62,
+      "height2": 78,
+      "bounds1": [
+        42,
+        373,
+        1038,
+        435
+      ],
+      "bounds2": [
+        42,
+        431,
+        1038,
+        509
+      ],
+      "text": "\\u5e03\\u62c9\\u683c\\u57ce\\u5821\\u5386\\u53f2\\u5efa\\u7b51\\u7fa4\\u4e0e\\u9ec4\\u91d1\\u5df7\\u5bfc\\u89c8"
+    },
+    {
+      "row": "card-hans-strong",
+      "requestedStyle": "fontFamilyUiStrong (GolosText_600SemiBold, 600)",
+      "height1": 62,
+      "height2": 78,
+      "bounds1": [
+        42,
+        510,
+        1038,
+        572
+      ],
+      "bounds2": [
+        42,
+        626,
+        1038,
+        704
+      ],
+      "text": "\\u5e03\\u62c9\\u683c\\u57ce\\u5821\\u5386\\u53f2\\u5efa\\u7b51\\u7fa4\\u4e0e\\u9ec4\\u91d1\\u5df7\\u5bfc\\u89c8"
+    },
+    {
+      "row": "card-hant",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 62,
+      "height2": 78,
+      "bounds1": [
+        42,
+        646,
+        1038,
+        708
+      ],
+      "bounds2": [
+        42,
+        820,
+        1038,
+        898
+      ],
+      "text": "\\u5e03\\u62c9\\u683c\\u57ce\\u5821\\u6b77\\u53f2\\u5efa\\u7bc9\\u7fa4\\u8207\\u9ec3\\u91d1\\u5df7\\u5c0e\\u89bd"
+    },
+    {
+      "row": "card-long",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 122,
+      "height2": 152,
+      "bounds1": [
+        42,
+        783,
+        1038,
+        905
+      ],
+      "bounds2": [
+        42,
+        1088,
+        1038,
+        1240
+      ],
+      "text": "\\u5e03\\u62c9\\u683c\\u57ce\\u5821\\u5386\\u53f2\\u5efa\\u7b51\\u7fa4\\u7b2c\\u4e8c\\u5ead\\u9662\\u4e0e\\u9ec4\\u91d1\\u5df7\\u8054\\u7968\\u552e\\u7968\\u5904\\u5165\\u53e3"
+    },
+    {
+      "row": "card-polish",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 57,
+      "height2": 71,
+      "bounds1": [
+        42,
+        979,
+        1038,
+        1036
+      ],
+      "bounds2": [
+        42,
+        1356,
+        1038,
+        1427
+      ],
+      "text": "\\u017belazowa Wola \\u2014 \\u0141\\u00f3d\\u017a \\u0105\\u0118\\u0119 \\u00d3\\u00f3\\u0144\\u015b\\u0107"
+    },
+    {
+      "row": "duration",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 62,
+      "height2": 78,
+      "bounds1": [
+        42,
+        1111,
+        1038,
+        1173
+      ],
+      "bounds2": [
+        42,
+        1544,
+        1038,
+        1622
+      ],
+      "text": "\\u65f6\\u957f 2\\u5c0f\\u65f630\\u5206\\u949f"
+    },
+    {
+      "row": "date",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 62,
+      "height2": 78,
+      "bounds1": [
+        42,
+        1247,
+        1038,
+        1309
+      ],
+      "bounds2": [
+        42,
+        1738,
+        1038,
+        1816
+      ],
+      "text": "1873\\u5e7410\\u67086\\u65e5\\uff0c\\u5f00\\u653e\\u81f318:00"
+    },
+    {
+      "row": "action-primary",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 110,
+      "height2": 156,
+      "bounds1": [
+        42,
+        1330,
+        273,
+        1440
+      ],
+      "bounds2": [
+        42,
+        1837,
+        401,
+        1993
+      ],
+      "text": "\\u5f00\\u59cb\\u6e38\\u89c8"
+    },
+    {
+      "row": "action-secondary",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 110,
+      "height2": 156,
+      "bounds1": [
+        294,
+        1330,
+        573,
+        1440
+      ],
+      "bounds2": [
+        422,
+        1837,
+        861,
+        1993
+      ],
+      "text": "\\u4e0b\\u8f7d\\u79bb\\u7ebf\\u5305"
+    },
+    {
+      "row": "action-disabled",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 110,
+      "height2": 156,
+      "bounds1": [
+        593,
+        1330,
+        830,
+        1440
+      ],
+      "bounds2": [
+        881,
+        1837,
+        1038,
+        1993
+      ],
+      "text": "\\u6682\\u4e0d\\u5f00\\u653e"
+    },
+    {
+      "row": "error",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 122,
+      "height2": 152,
+      "bounds1": [
+        76,
+        1569,
+        1004,
+        1691
+      ],
+      "bounds2": [
+        76,
+        2164,
+        1004,
+        2316
+      ],
+      "text": "\\u9519\\u8bef\\uff1a\\u5185\\u5bb9\\u4e0d\\u53ef\\u79bb\\u7ebf\\u4f7f\\u7528\\u3002\\u8bf7\\u8fde\\u63a5\\u7f51\\u7edc\\u540e\\u91cd\\u8bd5\\uff08\\u4ee3\\u7801 E-1042\\uff09\\u3002"
+    },
+    {
+      "row": "unavailable",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 62,
+      "height2": 78,
+      "bounds1": [
+        42,
+        1799,
+        1038,
+        1861
+      ],
+      "bounds2": [
+        42,
+        684,
+        1038,
+        762
+      ],
+      "text": "\\u6b64\\u7ad9\\u70b9\\u6682\\u65e0\\u4e2d\\u6587\\u8bd1\\u6587"
+    },
+    {
+      "row": "narrative",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 252,
+      "height2": 475,
+      "bounds1": [
+        42,
+        1957,
+        1038,
+        2209
+      ],
+      "bounds2": [
+        42,
+        900,
+        1038,
+        1375
+      ],
+      "text": "\\u57ce\\u5821\\u5efa\\u4e8e\\u516c\\u5143880\\u5e74\\u524d\\u540e\\uff0c\\u662f\\u6b27\\u6d32\\u6700\\u5927\\u7684\\u53e4\\u5efa\\u7b51\\u7fa4\\u4e4b\\u4e00\\u3002\\u300c\\u9ec4\\u91d1\\u5df7\\u300d\\u7684\\u5c0f\\u5c4b\\u572816\\u4e16\\u7eaa\\u4f4f\\u8fc7\\u91d1\\u5320\\uff0c1916\\u5e74\\u51ac\\uff0c\\u4f5c\\u5bb6\\u5361\\u592b\\u5361\\u66fe\\u5728\\u8fd9\\u91cc\\u77ed\\u6682\\u5c45\\u4f4f\\u3002\\u5168\\u6bb5\\u8bb2\\u89e3\\u7ea612\\u5206\\u949f\\uff0c\\u53ef\\u5728\\u79bb\\u7ebf\\u6a21\\u5f0f\\u6536\\u542c\\u3002"
+    },
+    {
+      "row": "timer",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 62,
+      "height2": 78,
+      "bounds1": [
+        42,
+        2283,
+        1038,
+        2345
+      ],
+      "bounds2": [
+        42,
+        1491,
+        1038,
+        1569
+      ],
+      "text": "\\u7b2c2\\u7ad9 \\u00b7 02\\u520605\\u79d2"
+    },
+    {
+      "row": "audio-label",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400)",
+      "height1": 62,
+      "height2": 78,
+      "bounds1": [
+        42,
+        1428,
+        1038,
+        1490
+      ],
+      "bounds2": [
+        42,
+        1686,
+        1038,
+        1764
+      ],
+      "text": "\\u5df2\\u6682\\u505c \\u00b7 12/24 \\u7ad9\\u70b9"
+    },
+    {
+      "row": "s2-shared",
+      "requestedStyle": "fontFamilyUi (GolosText_400Regular, 400), 48px",
+      "height1": 364,
+      "height2": 412,
+      "bounds1": [
+        42,
+        1564,
+        1038,
+        1928
+      ],
+      "bounds2": [
+        42,
+        1953,
+        1038,
+        2365
+      ],
+      "text": "\\u9aa8\\u76f4\\u4ee4\\u8fc7\\u8fb9\\u8bf7\\u51c0\\u6e29\\u6d77\\u8349"
+    },
+    {
+      "row": "scale-scaled-cap",
+      "requestedStyle": "fontFamilyUi, ScaledText (maxFontSizeMultiplier 1.25)",
+      "height1": 62,
+      "height2": 78,
+      "bounds1": [
+        42,
+        2003,
+        1038,
+        2065
+      ],
+      "bounds2": [
+        42,
+        1887,
+        1038,
+        1965
+      ],
+      "text": "\\u5e03\\u62c9\\u683c\\u57ce\\u5821\\u5386\\u53f2\\u5efa\\u7b51\\u7fa4\\u4e0e\\u9ec4\\u91d1\\u5df7\\u5bfc\\u89c8"
+    },
+    {
+      "row": "scale-raw-full",
+      "requestedStyle": "fontFamilyUi, raw Text (allowFontScaling default)",
+      "height1": 62,
+      "height2": 78,
+      "bounds1": [
+        42,
+        2139,
+        1038,
+        2201
+      ],
+      "bounds2": [
+        42,
+        2081,
+        1038,
+        2159
+      ],
+      "text": "\\u5e03\\u62c9\\u683c\\u57ce\\u5821\\u5386\\u53f2\\u5efa\\u7b51\\u7fa4\\u4e0e\\u9ec4\\u91d1\\u5df7\\u5bfc\\u89c8"
+    },
+    {
+      "row": "scale-pinned-off",
+      "requestedStyle": "fontFamilyUi, Text allowFontScaling=false",
+      "height1": 62,
+      "height2": 62,
+      "bounds1": [
+        42,
+        2276,
+        1038,
+        2338
+      ],
+      "bounds2": [
+        42,
+        2276,
+        1038,
+        2338
+      ],
+      "text": "\\u5e03\\u62c9\\u683c\\u57ce\\u5821\\u5386\\u53f2\\u5efa\\u7b51\\u7fa4\\u4e0e\\u9ec4\\u91d1\\u5df7\\u5bfc\\u89c8"
+    }
+  ]
+}

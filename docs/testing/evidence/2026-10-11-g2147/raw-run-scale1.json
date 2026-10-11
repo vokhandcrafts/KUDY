@@ -1,0 +1,129 @@
+{
+  "run": {
+    "task": "G21.47 (issue #671)",
+    "driver": "han-probe-run.mjs",
+    "surface": "app/han-probe.tsx (dev-only, __DEV__-gated)",
+    "device": {
+      "serial": "emulator-5554",
+      "ro.build.version.release": "16",
+      "ro.build.version.sdk": "36",
+      "ro.product.model": "sdk_gphone64_x86_64",
+      "ro.hardware": "ranchu",
+      "fontScaleBefore": "1.0",
+      "fontScaleRun": 1,
+      "fontScaleRestored": "1.0"
+    },
+    "metro": "http://localhost:8081/status=packager-status:running",
+    "probeDeepLink": "kudy://han-probe"
+  },
+  "deviceCjkFonts": [
+    "NotoSansCJK-Regular.ttc",
+    "NotoSerifCJK-Regular.ttc"
+  ],
+  "deviceCjkFamiliesFromFontsXml": [
+    {
+      "lang": "und-Nkoo",
+      "faces": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "file": "NotoSansNKo-Regular.ttf"
+        }
+      ]
+    },
+    {
+      "lang": "zh-Hans",
+      "faces": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        }
+      ]
+    },
+    {
+      "lang": "zh-Hant,zh-Bopo",
+      "faces": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        }
+      ]
+    },
+    {
+      "lang": "ja",
+      "faces": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        }
+      ]
+    },
+    {
+      "lang": "ja",
+      "faces": []
+    },
+    {
+      "lang": "ko",
+      "faces": [
+        {
+          "weight": 400,
+          "style": "normal",
+          "file": "NotoSerifCJK-Regular.ttc"
+        }
+      ]
+    }
+  ],
+  "screens": [
+    {
+      "position": 0,
+      "screenshot": "runtime/probe-scale1-pos0.png",
+      "dump": "runtime/dump-scale1-pos0.xml",
+      "newCaptions": [
+        "Han probe (G21.47)",
+        "card hans / ui 400 / scaled",
+        "\u5e03\u62c9\u683c\u57ce\u5821\u5386\u53f2\u5efa\u7b51\u7fa4\u4e0e\u9ec4\u91d1\u5df7\u5bfc\u89c8",
+        "card hans / ui strong 600 / scaled",
+        "\u5e03\u62c9\u683c\u57ce\u5821\u5386\u53f2\u5efa\u7b51\u7fa4\u4e0e\u9ec4\u91d1\u5df7\u5bfc\u89c8",
+        "card hant / ui 400 / scaled",
+        "\u5e03\u62c9\u683c\u57ce\u5821\u6b77\u53f2\u5efa\u7bc9\u7fa4\u8207\u9ec3\u91d1\u5df7\u5c0e\u89bd",
+        "long name, no spaces / ui 400 / scaled",
+        "\u5e03\u62c9\u683c\u57ce\u5821\u5386\u53f2\u5efa\u7b51\u7fa4\u7b2c\u4e8c\u5ead\u9662\u4e0e\u9ec4\u91d1\u5df7\u8054\u7968\u552e\u7968\u5904\u5165\u53e3",
+        "latin-ext control / ui 400 / scaled",
+        "\u017belazowa Wola \u2014 \u0141\u00f3d\u017a \u0105\u0118\u0119 \u00d3\u00f3\u0144\u015b\u0107",
+        "duration, digits+cjk",
+        "\u65f6\u957f 2\u5c0f\u65f630\u5206\u949f",
+        "date, digits+cjk",
+        "1873\u5e7410\u67086\u65e5\uff0c\u5f00\u653e\u81f318:00",
+        "\u5f00\u59cb\u6e38\u89c8",
+        "\u4e0b\u8f7d\u79bb\u7ebf\u5305",
+        "\u6682\u4e0d\u5f00\u653e",
+        "error state",
+        "\u9519\u8bef\uff1a\u5185\u5bb9\u4e0d\u53ef\u79bb\u7ebf\u4f7f\u7528\u3002\u8bf7\u8fde\u63a5\u7f51\u7edc\u540e\u91cd\u8bd5\uff08\u4ee3\u7801 E-1042\uff09\u3002",
+        "unavailable state",
+        "\u6b64\u7ad9\u70b9\u6682\u65e0\u4e2d\u6587\u8bd1\u6587",
+        "narrative / ui 400 / scaled",
+        "\u57ce\u5821\u5efa\u4e8e\u516c\u5143880\u5e74\u524d\u540e\uff0c\u662f\u6b27\u6d32\u6700\u5927\u7684\u53e4\u5efa\u7b51\u7fa4\u4e4b\u4e00\u3002\u300c\u9ec4\u91d1\u5df7\u300d\u7684\u5c0f\u5c4b\u572816\u4e16\u7eaa\u4f4f\u8fc7\u91d1\u5320\uff0c1916\u5e74\u51ac\uff0c\u4f5c\u5bb6\u5361\u592b\u5361\u66fe\u5728\u8fd9\u91cc\u77ed\u6682\u5c45\u4f4f\u3002\u5168\u6bb5\u8bb2\u89e3\u7ea612\u5206\u949f\uff0c\u53ef\u5728\u79bb\u7ebf\u6a21\u5f0f\u6536\u542c\u3002",
+        "timer / digits+cjk / middle dot",
+        "\u7b2c2\u7ad9 \u00b7 02\u520605\u79d2",
+        "audio identity label"
+      ]
+    },
+    {
+      "position": 1,
+      "screenshot": "runtime/probe-scale1-pos1.png",
+      "dump": "runtime/dump-scale1-pos1.xml",
+      "newCaptions": [
+        "\u5df2\u6682\u505c \u00b7 12/24 \u7ad9\u70b9",
+        "S2 shared codepoints (regional forms)",
+        "\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349",
+        "ScaledText (cap 1.25)",
+        "Text, no cap",
+        "allowFontScaling=false"
+      ],
+      "scrolledPastEnd": true
+    }
+  ]
+}

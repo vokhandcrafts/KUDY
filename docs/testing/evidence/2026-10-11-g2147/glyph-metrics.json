@@ -1,0 +1,25 @@
+{
+  "method": "ink-row profile over the content band cropped from the scroll-end screenshot",
+  "rows": {
+    "scaled-cap": {
+      "h1": 40,
+      "h2": 49,
+      "ratio": 1.23
+    },
+    "raw-full": {
+      "h1": 40,
+      "h2": 54,
+      "ratio": 1.35
+    },
+    "pinned-off": {
+      "h1": 85,
+      "h2": 85,
+      "ratio": 1.0
+    }
+  },
+  "expected": {
+    "scaled-cap": "~1.25 (font.big-text-factor cap on ScaledText)",
+    "raw-full": "~2.0 (system font_scale, no cap)",
+    "pinned-off": "1.0 (allowFontScaling=false)"
+  }
+}
