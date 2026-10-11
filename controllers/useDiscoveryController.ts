@@ -20,7 +20,17 @@ import {
   type DiscoverySeason,
 } from '../core/discovery/selectDiscovery.ts';
 import type { DiscoveryIndexState } from '../services/contentRepo/discoveryIndex.ts';
-import { isUiLocaleCode } from '../contracts/ui-locales.ts';
+import { isUiLocaleCode, OPEN_UI_LOCALES } from '../contracts/ui-locales.ts';
+
+// G21.50 (issue #711, criterion 5): the query's content locale is an OPEN
+// locale — a registered-but-closed code never becomes criteriaLocale or
+// content_locale. The fallback is the same open locale as the picker (be);
+// a closed code arriving through setCriteriaLocale keeps the previous value.
+const OPEN_CRITERIA_LOCALES: readonly string[] = OPEN_UI_LOCALES;
+
+function openCriteriaLocale(locale: string): string {
+  return OPEN_CRITERIA_LOCALES.includes(locale) ? locale : 'be';
+}
 
 export type {
   DiscoveryCollection,
@@ -210,9 +220,15 @@ export function createDiscoveryController(deps: DiscoveryDeps): ControllerStore<
     return {
       surface: { kind: 'loading' },
       refreshing: false,
-      criteriaLocale: deps.criteriaLocale,
+      criteriaLocale: openCriteriaLocale(deps.criteriaLocale),
       setCriteriaLocale: (locale) => {
-        if (typeof locale !== 'string' || !isUiLocaleCode(locale) || locale === get().criteriaLocale) return;
+        if (
+          typeof locale !== 'string' ||
+          !isUiLocaleCode(locale) ||
+          !OPEN_CRITERIA_LOCALES.includes(locale) ||
+          locale === get().criteriaLocale
+        )
+          return;
         set({ criteriaLocale: locale });
         reselect();
         const state = get();

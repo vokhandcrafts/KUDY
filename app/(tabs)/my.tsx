@@ -31,8 +31,10 @@ import {
 import { useStoreState } from "../../controllers/useControllerStore";
 // G21.09 (issue #542): the picker derives its options and labels from the
 // one locale registry — the registered complete catalogues only.
+// G21.50 (issue #711, criterion 2): the chips advertise the OPEN subset — a
+// registered-but-closed code is omitted, not styled or disabled.
 import {
-  COMPLETE_UI_LOCALES,
+  OPEN_UI_LOCALES,
   isUiLocaleCode,
   uiLocaleNativeName,
   type CompleteUiLocaleCode,
@@ -471,7 +473,7 @@ function UiLocaleRow({
   onPick: (code: CompleteUiLocaleCode) => void;
   strings: ReturnType<typeof uiStrings>;
 }) {
-  const codes = COMPLETE_UI_LOCALES;
+  const codes = OPEN_UI_LOCALES;
   return (
     <View testID="my-ui-locale">
       <ScaledText style={styles.section}>{strings.languageLabel}</ScaledText>

@@ -8,6 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createUiLocaleStore, UiLocaleError } from './uiLocaleStore.ts';
+import { OPEN_UI_LOCALES } from '../contracts/ui-locales.ts';
 
 test('G14.04.d #305: the store starts on be, the first preference', () => {
   const store = createUiLocaleStore();
@@ -100,4 +101,50 @@ test('G21.15 #549: after a failed write the next switch writes through again', (
   store.set('en');
   assert.deepEqual(written, ['en']);
   assert.equal(store.current(), 'en');
+});
+
+// G21.50 (issue #711, criterion 3): the switch vocabulary is the OPEN set,
+// not the complete set. The injected open set is the tests' seam — with no
+// registered-but-closed code in the real registry yet, a two-code fixture
+// plays the gate. Removing the fallback or the open-set check turns these red.
+test('G21.50 #711: a stored registered-but-closed code falls back to be without a write or a throw', () => {
+  const written: string[] = [];
+  const store = createUiLocaleStore({ read: () => 'en', write: (locale) => written.push(locale) }, ['be', 'uk']);
+  assert.equal(store.current(), 'be');
+  assert.deepEqual(written, [], 'the stored row is not overwritten');
+});
+
+test('G21.50 #711: the stored code restores on a later read once the open set includes it', () => {
+  const store = createUiLocaleStore({ read: () => 'en', write: () => {} }, ['be', 'en', 'uk']);
+  assert.equal(store.current(), 'en');
+});
+
+test('G21.50 #711: setting a registered-but-closed code is ui-locale-closed and moves nothing', () => {
+  const written: string[] = [];
+  const events: string[] = [];
+  const store = createUiLocaleStore({ read: () => null, write: (locale) => written.push(locale) }, ['be']);
+  store.subscribe(() => events.push(store.current()));
+  assert.throws(
+    () => store.set('en'),
+    (error: unknown) => error instanceof UiLocaleError && error.rule === 'ui-locale-closed',
+  );
+  assert.equal(store.current(), 'be');
+  assert.deepEqual(written, []);
+  assert.deepEqual(events, []);
+});
+
+test('G21.50 #711: an unregistered code keeps ui-locale-unknown under the open set', () => {
+  const store = createUiLocaleStore(undefined, ['be']);
+  assert.throws(
+    () => store.set('ru'),
+    (error: unknown) => error instanceof UiLocaleError && error.rule === 'ui-locale-unknown',
+  );
+});
+
+test('G21.50 #711: without an injection the open set is the registry fact', () => {
+  const store = createUiLocaleStore();
+  for (const code of OPEN_UI_LOCALES) {
+    store.set(code);
+    assert.equal(store.current(), code);
+  }
 });

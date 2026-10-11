@@ -10,6 +10,9 @@ import assert from 'node:assert/strict';
 import {
   UI_LOCALES,
   COMPLETE_UI_LOCALES,
+  OPEN_UI_LOCALES,
+  RELEASE_FLAG_ENV,
+  releaseOpenUiLocales,
   uiLocaleNativeName,
   isUiLocaleCode,
   isCompleteUiLocale,
@@ -101,4 +104,35 @@ test('the store derives its vocabulary from the registry and keeps unknown-input
   assert.equal(store.current(), 'sv');
   store.set('be');
   assert.equal(store.current(), 'be');
+});
+
+// G21.50 (issue #711): the open subset is a separate fact from the complete
+// set. The synthetic ninth code plays the first gated consumer (zh lands
+// with #669/#670): a code can be complete and still closed, only the flag
+// opens it, and the frozen eight stay open under every flag state. Removing
+// the resolver's union or its complete-set check turns these red.
+const NINE = [...COMPLETE_UI_LOCALES, 'zz'];
+
+test('the release resolver keeps the frozen eight open when the flag is absent, empty or corrupt (criterion 1)', () => {
+  for (const flag of [undefined, null, '', '   ', ',', ' , , ', 'bogus', 'ru', 'bogus, ,ru']) {
+    assert.deepEqual(
+      [...releaseOpenUiLocales(flag, NINE)],
+      [...COMPLETE_UI_LOCALES],
+      `flag ${JSON.stringify(flag)} opens nothing beyond the frozen default`,
+    );
+  }
+  // Production binding: the default `complete` is the real registry, where
+  // no gated code exists yet — even a flag naming `zh` opens nothing today.
+  assert.deepEqual([...releaseOpenUiLocales('zh')], [...COMPLETE_UI_LOCALES]);
+  assert.deepEqual([...OPEN_UI_LOCALES], [...COMPLETE_UI_LOCALES]);
+  assert.equal(RELEASE_FLAG_ENV, 'EXPO_PUBLIC_OPEN_UI_LOCALES');
+});
+
+test('the release resolver opens a registered complete code only when the flag names it, additively (criterion 1)', () => {
+  assert.deepEqual([...releaseOpenUiLocales('zz', NINE)], NINE);
+  assert.deepEqual([...releaseOpenUiLocales('  zz ,bogus,ru\t', NINE)], NINE);
+  // Additive only: naming an already-open code neither duplicates it nor
+  // removes any of the frozen eight (hiding sv is out of scope, #711).
+  assert.deepEqual([...releaseOpenUiLocales('be, en', NINE)], [...COMPLETE_UI_LOCALES]);
+  assert.deepEqual([...releaseOpenUiLocales('sv, zz', NINE)], NINE);
 });
