@@ -12,8 +12,8 @@
 // contracts/reader.mjs — this projection does not replace that validation.
 
 // Locale allowlist owner: localized-text.schema.json propertyNames.enum.
-export const SCHEMA_LOCALES = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'] as const;
-export type Locale = 'be' | 'en' | 'uk' | 'de' | 'es' | 'fr' | 'cs' | 'sv';
+export const SCHEMA_LOCALES = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh'] as const;
+export type Locale = 'be' | 'en' | 'uk' | 'de' | 'es' | 'fr' | 'cs' | 'sv' | 'zh';
 
 // localized-text.schema.json: a subset of the allowlist mapped to non-empty strings.
 export type LocalizedText = { [K in Locale]?: string };

@@ -395,3 +395,102 @@ test('G07.04: both number fields non-finite are each named (#391)', () => {
     JSON.stringify(res.errors),
   );
 });
+
+// G21.45 (issue #669) — the ninth content-locale code zh (ADR G21.42 §4:
+// «enums + zh, ліміты maxProperties/maxItems 8→9»; рашэнне ўладара ў #623).
+// Any Chinese sample value enters as a \uXXXX escape — repo bytes stay
+// CJK-free (criterion 7 of the issue).
+const ZH_SAMPLE = '\u4E2D\u6587';
+
+test('G21.45: localized-text (the allowlist owner) accepts zh and holds the 9-locale ceiling', () => {
+  const nine = { be: 'x', en: 'x', uk: 'x', de: 'x', es: 'x', fr: 'x', cs: 'x', sv: 'x', zh: ZH_SAMPLE };
+  assert.ok(schema('localized-text.schema.json', nine).ok, JSON.stringify(schema('localized-text.schema.json', nine).errors));
+  const ten = { ...nine, pl: 'x' };
+  const res = schema('localized-text.schema.json', ten);
+  assert.ok(!res.ok, 'a tenth locale must fail maxProperties');
+  assert.ok(res.errors.some((e) => e.keyword === 'maxProperties'), JSON.stringify(res.errors));
+  assert.ok(schema('localized-text.schema.json', { zh: ZH_SAMPLE }).ok, 'zh alone is a valid localized map');
+  assert.ok(!schema('localized-text.schema.json', { zh: '' }).ok, 'zh strings keep the minLength-1 rule');
+});
+
+test('G21.45: discovery availability accepts zh in both locale lists under the 9-item ceilings', () => {
+  const index = structuredClone(readJson('fixtures/discovery-contract/index-valid.json'));
+  index.offers[0].availability.text_locales.push('zh');
+  index.offers[0].availability.audio_locales.push('zh');
+  assert.ok(schema('discovery-index.schema.json', index).ok, JSON.stringify(schema('discovery-index.schema.json', index).errors));
+  assert.ok(checkIndexRules(index).ok, JSON.stringify(checkIndexRules(index).errors));
+  // The 10th item isolates maxItems: the enum has exactly nine valid codes,
+  // so the over-ceiling case must reuse a valid code — an unknown code would
+  // fail enum first and pin nothing about the count bound.
+  const ten = structuredClone(index);
+  ten.offers[0].availability.text_locales = Array(10).fill('be');
+  const res = schema('discovery-index.schema.json', ten);
+  assert.ok(!res.ok, 'a tenth text locale must fail maxItems');
+  assert.ok(res.errors.some((e) => e.keyword === 'maxItems'), JSON.stringify(res.errors));
+});
+
+test('G21.45: media locale and both feedback-target branches accept zh', () => {
+  const media = { ...readJson('contracts/examples/media-demo.json'), locale: 'zh' };
+  assert.ok(schema('media.schema.json', media).ok, JSON.stringify(schema('media.schema.json', media).errors));
+  const guide = { kind: 'guide', route_id: 'demo-route-a1', version: '1', locale: 'zh' };
+  const place = { kind: 'place', place_id: 'place-1', content_version: '1', locale: 'zh' };
+  assert.ok(schema('feedback-target.schema.json', guide).ok, JSON.stringify(schema('feedback-target.schema.json', guide).errors));
+  assert.ok(schema('feedback-target.schema.json', place).ok, JSON.stringify(schema('feedback-target.schema.json', place).errors));
+});
+
+test('G21.45: the 8→9 move is the only count-limit change; the residual mirrors stay at eight', () => {
+  const NINE = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh'];
+  const EIGHT = NINE.slice(0, 8);
+  // Extended spots (issue criteria 1, 3, 4, 5): the owner and its four
+  // declared projections. catalog.routes[].locales is the generator's
+  // fail-closed mirror (assertSameSet) — extending the owner without it
+  // fails `npm run contracts:wire:check`.
+  const localizedText = readJson('contracts/schemas/localized-text.schema.json');
+  assert.deepEqual(localizedText.propertyNames.enum, NINE);
+  assert.equal(localizedText.maxProperties, 9);
+  const offer = readJson('contracts/schemas/discovery-index.schema.json').definitions.offer.properties;
+  for (const list of ['text_locales', 'audio_locales']) {
+    assert.deepEqual(offer.availability.properties[list].items.enum, NINE, list);
+    assert.equal(offer.availability.properties[list].maxItems, 9, list);
+  }
+  assert.deepEqual(readJson('contracts/schemas/media.schema.json').properties.locale.enum, NINE);
+  const feedback = readJson('contracts/schemas/feedback-target.schema.json');
+  for (const [i, branch] of feedback.oneOf.entries()) {
+    assert.deepEqual(branch.properties.locale.enum, NINE, `feedback branch ${i}`);
+  }
+  const catalogLocales = readJson('contracts/schemas/catalog.schema.json').properties.routes.items.properties.locales;
+  assert.deepEqual(catalogLocales.items.enum, NINE);
+  assert.equal(catalogLocales.maxItems, 9);
+  // Residual mirrors (issue notes file list + ADR G21.42 §4 keep them out of
+  // this task's scope; the future zh-content/UI tasks extend them the way
+  // G21.16 did): these pins make any silent drift — either direction — fail.
+  const discovery = readJson('contracts/schemas/discovery-index.schema.json').definitions;
+  const residualDiscovery = [
+    discovery.offer.properties.localized.properties.title,
+    discovery.offer.properties.season_recommendations.items.properties.reason,
+    discovery.collection.properties.localized.properties.title,
+    discovery.text400,
+  ];
+  for (const [i, spot] of residualDiscovery.entries()) {
+    assert.deepEqual(spot.propertyNames.enum, EIGHT, `discovery residual map ${i}`);
+    assert.equal(spot.maxProperties, 8, `discovery residual map ${i}`);
+  }
+  const placeRefs = readJson('contracts/schemas/place.schema.json').properties.name_audio_refs;
+  assert.deepEqual(placeRefs.propertyNames.enum, EIGHT);
+  assert.equal(placeRefs.maxProperties, 8);
+  assert.deepEqual(readJson('contracts/schemas/voice.schema.json').items.properties.locale.enum, EIGHT);
+  // The tools/UI residuals are pinned at their source as well, so the claim
+  // "the whole residual list stays at eight" is test-checked, not prose:
+  // a silent widening there trips this pin too (and a zh task widening them
+  // consciously updates these lines with it).
+  const residualSources = [
+    ['tools/build-bundle/build-bundle.mjs', "['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']", 'LOCALE_ALLOWLIST'],
+    ['tools/validate/validate-authoring.mjs', "['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']", 'LOCALES'],
+    ['tools/validate/validate-package.mjs', "['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']", 'MEDIA_LOCALES'],
+    ['contracts/ui-locales.ts', '["be", "en", "uk", "de", "es", "fr", "cs", "sv"]', 'COMPLETE_UI_LOCALES'],
+  ];
+  for (const [file, eight, label] of residualSources) {
+    const text = fs.readFileSync(path.join(REPO, file), 'utf8');
+    assert.ok(text.includes(eight), `${file} ${label} must stay at the residual eight until a zh task extends it`);
+  }
+});

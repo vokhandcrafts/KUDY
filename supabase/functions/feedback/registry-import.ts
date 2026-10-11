@@ -37,10 +37,11 @@ export type ExportVerdict = { ok: true; keys: FeedbackTargetKey[] } | { ok: fals
 /**
  * The registry contract's locale enum read from the committed schema file
  * (feedback-target.schema.json pins {be,en,uk,de,es,fr,cs,sv} since G21.16,
- * issue #550); the core suite guards the constant against the file. The
- * publisher cannot register a target the schema does not describe.
+ * issue #550; zh joins the schema enum with G21.45, issue #669 — ADR G21.42);
+ * the core suite guards the constant against the file. The publisher cannot
+ * register a target the schema does not describe.
  */
-export const REGISTRY_LOCALES: readonly string[] = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'];
+export const REGISTRY_LOCALES: readonly string[] = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh'];
 
 export function validateRegistryExport(candidate: unknown): ExportVerdict {
   if (typeof candidate !== 'object' || candidate === null || Array.isArray(candidate)) {
