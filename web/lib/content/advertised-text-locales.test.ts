@@ -9,7 +9,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { advertisedTextLocales } from './site.ts';
+import { uiLocales } from '../i18n/index.ts';
+import { advertisedTextLocales, readSiteCatalogPage } from './site.ts';
+import { buildDemoFixture } from './test-fixture.ts';
 
 test('advertisedTextLocales filters the published-text fact through the release gate', () => {
   // zh is declarable by fact (the schema allowlist accepts it) but closed:
@@ -23,4 +25,24 @@ test('advertisedTextLocales filters the published-text fact through the release 
     ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'],
   );
   assert.deepEqual(advertisedTextLocales([]), []);
+});
+
+test('the languages row rides the same gate through the production reader', async () => {
+  // Rule 15: the pin reaches the real surface — the catalog page's language
+  // facts come from the same intersection, not a second raw-fact path. The
+  // demo fixture declares be/en/uk text, all gate-open, so the rows are the
+  // fact itself; the assertion fails if languageFacts ever bypasses the gate
+  // (a gate-closed code would then leak into a user-visible row).
+  const { publicRoot } = await buildDemoFixture();
+  for (const locale of uiLocales) {
+    const { cards } = readSiteCatalogPage(publicRoot, locale);
+    for (const card of cards) {
+      for (const fact of card.languages) {
+        assert.ok(
+          (uiLocales as readonly string[]).includes(fact.locale),
+          `language fact ${fact.locale} must sit inside the release-gated set`,
+        );
+      }
+    }
+  }
 });

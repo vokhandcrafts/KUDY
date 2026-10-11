@@ -97,8 +97,13 @@ export interface LanguageFact {
 
 // Per-locale availability is shown by fact (09 §8): the row lists the locales
 // the index declares for text, and marks which of them actually have audio.
+// G21.45 (issue #669): the row is a user-visible surface too — it derives
+// through the same fact ∩ gate intersection as every advertised URL surface,
+// so a gate-closed code declared in the index never renders as a language
+// fact either (ADR G21.42 §11: everything that makes a locale visible is
+// gated).
 function languageFacts(offer: DiscoveryOffer): LanguageFact[] {
-  return offer.availability.text_locales.map((locale) => ({
+  return advertisedTextLocales(offer.availability.text_locales).map((locale) => ({
     locale,
     audio: offer.availability.audio_locales.includes(locale),
   }));

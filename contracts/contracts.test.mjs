@@ -479,4 +479,18 @@ test('G21.45: the 8→9 move is the only count-limit change; the residual mirror
   assert.deepEqual(placeRefs.propertyNames.enum, EIGHT);
   assert.equal(placeRefs.maxProperties, 8);
   assert.deepEqual(readJson('contracts/schemas/voice.schema.json').items.properties.locale.enum, EIGHT);
+  // The tools/UI residuals are pinned at their source as well, so the claim
+  // "the whole residual list stays at eight" is test-checked, not prose:
+  // a silent widening there trips this pin too (and a zh task widening them
+  // consciously updates these lines with it).
+  const residualSources = [
+    ['tools/build-bundle/build-bundle.mjs', "['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']", 'LOCALE_ALLOWLIST'],
+    ['tools/validate/validate-authoring.mjs', "['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']", 'LOCALES'],
+    ['tools/validate/validate-package.mjs', "['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']", 'MEDIA_LOCALES'],
+    ['contracts/ui-locales.ts', '["be", "en", "uk", "de", "es", "fr", "cs", "sv"]', 'COMPLETE_UI_LOCALES'],
+  ];
+  for (const [file, eight, label] of residualSources) {
+    const text = fs.readFileSync(path.join(REPO, file), 'utf8');
+    assert.ok(text.includes(eight), `${file} ${label} must stay at the residual eight until a zh task extends it`);
+  }
 });
