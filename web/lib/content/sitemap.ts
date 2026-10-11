@@ -7,7 +7,7 @@
 // publication switches it on with no contract change.
 import { appLinks, type AppLinks } from '../app-links.ts';
 import { uiLocales } from '../i18n/index.ts';
-import { guideStaticParams, localePath, routeTextLocales, stopStaticParams } from './site.ts';
+import { advertisedTextLocales, guideStaticParams, localePath, routeTextLocales, stopStaticParams } from './site.ts';
 
 // The chrome paths published in every UI locale (plan §4): the catalog, the
 // map, the app fallback and the privacy policy.
@@ -30,7 +30,10 @@ export function sitemapPaths(root: string): string[] {
     else stopsByRoute.set(route_id, [stop_id]);
   }
   for (const { route_id } of guideStaticParams(root)) {
-    const textLocales = routeTextLocales(root, route_id);
+    // G21.45 (issue #669): the advertised set is the published-text fact
+    // intersected with the release-gated UI route set — a gate-closed code
+    // declared in the index never becomes a sitemap path.
+    const textLocales = advertisedTextLocales(routeTextLocales(root, route_id));
     for (const locale of textLocales) {
       paths.push(localePath(locale, `/guides/${route_id}`));
     }

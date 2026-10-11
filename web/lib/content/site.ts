@@ -26,7 +26,7 @@ import type {
   RejectionCode,
   RouteDoc,
 } from './types.ts';
-import { defaultUiLocale, type UiLocale } from '../i18n/index.ts';
+import { defaultUiLocale, uiLocales, type UiLocale } from '../i18n/index.ts';
 
 export class SiteDataError extends Error {
   readonly code: RejectionCode;
@@ -249,6 +249,17 @@ function resolvedCatalogRoute(root: string, routeId: string): {
 // this list renders the localized unavailable state instead of content.
 export function routeTextLocales(root: string, routeId: string): Locale[] {
   return resolvedCatalogRoute(root, routeId).offer.availability.text_locales;
+}
+
+// G21.45 (issue #669): the content-locale allowlist (nine codes, the schema
+// owner) is wider than the advertised route set — the G21.50 release gate
+// (web/lib/i18n) opens only codes the UI registry registers complete. The
+// published-text fact a URL surface derives from is the intersection: a
+// gate-closed code (zh until the registry and the release flag open it) never
+// becomes a sitemap path or an hreflang entry, and the prerendered route
+// family never gains it. One intersection point for every advertised surface.
+export function advertisedTextLocales(locales: readonly Locale[]): UiLocale[] {
+  return locales.filter((locale): locale is UiLocale => (uiLocales as readonly string[]).includes(locale));
 }
 
 export function readSiteGuidePage(root: string, locale: UiLocale, routeId: string): GuidePageData {
