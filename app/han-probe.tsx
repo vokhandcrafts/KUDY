@@ -128,9 +128,6 @@ const styles = StyleSheet.create({
     fontFamily: tokens.fontFamilyUi,
     fontSize: 48,
   },
-  title: {
-    ...screenStyles.title,
-  },
 });
 
 function ProbeRow({ testId, caption, children }: { testId: string; caption: string; children: ReactNode }) {
@@ -171,9 +168,9 @@ function HanProbeSurface() {
         paddingTop: insets.top + tokens.spaceL,
         paddingBottom: insets.bottom + tokens.spaceL,
       }}
-      testID="screen-han-probe"
+      testID="screen-Han probe"
     >
-      <ScaledText style={styles.title} testID="han-probe/title">
+      <ScaledText style={screenStyles.title} testID="han-probe/title">
         Han probe (G21.47)
       </ScaledText>
 

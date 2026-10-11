@@ -32,52 +32,52 @@
   ],
   "deviceCjkFamiliesFromFontsXml": [
     {
-      "lang": "(no lang tag)",
+      "lang": "zh-Hans",
       "faces": [
         {
           "weight": "100",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "200",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "300",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "400",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "500",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "600",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "700",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "800",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "900",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "400",
@@ -87,52 +87,52 @@
       ]
     },
     {
-      "lang": "(no lang tag)",
+      "lang": "zh-Hant,zh-Bopo",
       "faces": [
         {
           "weight": "100",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "200",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "300",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "400",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "500",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "600",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "700",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "800",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "900",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "400",
@@ -142,52 +142,52 @@
       ]
     },
     {
-      "lang": "(no lang tag)",
+      "lang": "ja",
       "faces": [
         {
           "weight": "100",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "200",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "300",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "400",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "500",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "600",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "700",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "800",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "900",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "400",
@@ -197,52 +197,52 @@
       ]
     },
     {
-      "lang": "(no lang tag)",
+      "lang": "ko",
       "faces": [
         {
           "weight": "100",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "200",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "300",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "400",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "500",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "600",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "700",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "800",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "900",
           "style": "normal",
-          "file": "NotoSerifCJK-Regular.ttc"
+          "file": "NotoSansCJK-Regular.ttc"
         },
         {
           "weight": "400",
@@ -266,8 +266,8 @@
         "ratio": 1.35
       },
       "pinned-off": {
-        "h1": 85,
-        "h2": 85,
+        "h1": 40,
+        "h2": 40,
         "ratio": 1
       }
     },
@@ -289,7 +289,7 @@
     "scale2": []
   },
   "observedFindings": {
-    "strongWeight": "device inventory has no CJK Bold face (only -Regular .ttc files, fonts.xml zh-Hans family is weight 400 only); the strong row paints visibly heavier strokes over identical glyph shapes -> synthesized bold over the Regular fallback (strong-weight-compare.png)",
+    "strongWeight": "device inventory has no separate CJK Bold file (only -Regular .ttc files), while fonts.xml declares a variable wght axis 100-900 on NotoSansCJK-Regular.ttc; the strong row paints visibly heavier strokes over identical glyph shapes (strong-weight-compare.png) - consistent with both a variable instance and synthetic emboldening; the mechanism is undetermined by this run",
     "regionalForms": "the S2 shared-codepoints row renders SC forms (simplified radicals in the canvas radicals) \u2014 no JP-form trap (probe-scale2-pos2.png vs the G21.40 S2 comparison)",
     "uncappedScalingDefect": "at font_scale 2.0 the raw uncapped Text row paints anomalous CJK glyphs (a wrong glyph at the position of U+53F2, correct accessibility string) and a smaller-than-expected advance; the capped and pinned rows render the same string correctly \u2014 defect recorded, follow-up issue named in the results file",
     "actionsRowOverflow": "at font_scale 2.0 the three-button actions row overflows the viewport width and the third button is cut at the screen edge (probe-scale2-pos0.png); production screens have similar fixed rows (app/route/[id].tsx) \u2014 follow-up issue named in the results file"
@@ -517,9 +517,9 @@
       ],
       "bounds2": [
         42,
-        684,
+        690,
         1038,
-        762
+        768
       ],
       "text": "\\u6b64\\u7ad9\\u70b9\\u6682\\u65e0\\u4e2d\\u6587\\u8bd1\\u6587"
     },
@@ -536,9 +536,9 @@
       ],
       "bounds2": [
         42,
-        900,
+        906,
         1038,
-        1375
+        1381
       ],
       "text": "\\u57ce\\u5821\\u5efa\\u4e8e\\u516c\\u5143880\\u5e74\\u524d\\u540e\\uff0c\\u662f\\u6b27\\u6d32\\u6700\\u5927\\u7684\\u53e4\\u5efa\\u7b51\\u7fa4\\u4e4b\\u4e00\\u3002\\u300c\\u9ec4\\u91d1\\u5df7\\u300d\\u7684\\u5c0f\\u5c4b\\u572816\\u4e16\\u7eaa\\u4f4f\\u8fc7\\u91d1\\u5320\\uff0c1916\\u5e74\\u51ac\\uff0c\\u4f5c\\u5bb6\\u5361\\u592b\\u5361\\u66fe\\u5728\\u8fd9\\u91cc\\u77ed\\u6682\\u5c45\\u4f4f\\u3002\\u5168\\u6bb5\\u8bb2\\u89e3\\u7ea612\\u5206\\u949f\\uff0c\\u53ef\\u5728\\u79bb\\u7ebf\\u6a21\\u5f0f\\u6536\\u542c\\u3002"
     },
@@ -555,9 +555,9 @@
       ],
       "bounds2": [
         42,
-        1491,
+        1497,
         1038,
-        1569
+        1575
       ],
       "text": "\\u7b2c2\\u7ad9 \\u00b7 02\\u520605\\u79d2"
     },
@@ -574,9 +574,9 @@
       ],
       "bounds2": [
         42,
-        1686,
+        1692,
         1038,
-        1764
+        1770
       ],
       "text": "\\u5df2\\u6682\\u505c \\u00b7 12/24 \\u7ad9\\u70b9"
     },
@@ -593,9 +593,9 @@
       ],
       "bounds2": [
         42,
-        1953,
+        1959,
         1038,
-        2365
+        2371
       ],
       "text": "\\u9aa8\\u76f4\\u4ee4\\u8fc7\\u8fb9\\u8bf7\\u51c0\\u6e29\\u6d77\\u8349"
     },

@@ -47,8 +47,9 @@ def bands(dump: Path):
                 # extends to the next ASCII caption below — the next row's
                 # label — or the screen bottom for the last row.
                 nxt = next((n for n in nodes[i + 1 :] if n[0] and n[0].isascii() and n[2] >= y2), None)
-                out[key] = (by1, nxt[2] if nxt else 2400)
-                break
+            # keep the window clear of the gesture-nav zone at the bottom
+            out[key] = (by1, min(nxt[2] if nxt else 2400, 2400 - 50))
+            break
     return out
 
 
@@ -60,7 +61,18 @@ def ink_height(img: Image.Image, y0: int, y1: int) -> int:
         for y in range(max(0, y0), min(img.height, y1))
         if sum(1 for x in range(X0, min(X1, img.width), 2) if px[x, y] < DARK) >= MIN_DARK
     ]
-    return (rows[-1] - rows[0] + 1) if rows else 0
+    if not rows:
+        return 0
+    # The largest contiguous ink run: the gesture-nav handle at the screen
+    # bottom is dark too and must not extend a text measurement.
+    runs = []
+    for y in rows:
+        if runs and y - runs[-1][1] <= 3:
+            runs[-1][1] = y
+        else:
+            runs.append([y, y])
+    best = max(runs, key=lambda r: r[1] - r[0])
+    return best[1] - best[0] + 1
 
 
 result = {"method": "ink-row profile over the content band cropped from the scroll-end screenshot", "rows": {}}

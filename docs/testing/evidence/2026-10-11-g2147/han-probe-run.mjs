@@ -19,6 +19,9 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const RUNTIME = join(HERE, "runtime");
 const ADB = join(process.env.ANDROID_HOME ?? `${process.env.HOME}/Android/Sdk`, "platform-tools", "adb");
 const SERIAL = "emulator-5554";
+// The Metro port is a parameter: a shared checkout can serve another
+// branch on the default 8081, and this driver must fetch ITS OWN bundle.
+const PORT = Number(process.env.KUDY_METRO_PORT ?? 8081);
 const PACKAGE = "by.kudy.app";
 const DEEP_LINK = "kudy://han-probe";
 const PROBE_CAPTION = "card hans / ui 400 / scaled";
@@ -63,10 +66,10 @@ if (!packages.split("\n").includes(`package:${PACKAGE}`)) {
 }
 let metro = "";
 try {
-  metro = execFileSync("curl", ["-s", "--max-time", "5", "http://localhost:8081/status"], { encoding: "utf8" });
+  metro = execFileSync("curl", ["-s", "--max-time", "5", `http://localhost:${PORT}/status`], { encoding: "utf8" });
 } catch {}
 if (metro.trim() !== "packager-status:running") {
-  fail("Metro is not running on :8081 — start it with `npm start` (expo start --dev-client) first");
+  fail(`Metro is not running on :${PORT} — start it first (expo start --dev-client --port ${PORT})`);
 }
 
 mkdirSync(RUNTIME, { recursive: true });
@@ -84,16 +87,21 @@ const cjkFonts = adb("shell", "ls", "/system/fonts")
   .map((l) => l.trim())
   .filter((l) => /CJK/i.test(l));
 const fontsXml = adb("shell", "cat", "/system/etc/fonts.xml");
-const cjkFamilies = [...fontsXml.matchAll(/<family[^>]*lang="([^"]*(?:zh|ja|ko)[^"]*)"[^>]*>([\s\S]*?)<\/family>/g)].map(
-  (m) => ({
-    lang: m[1],
-    faces: [...m[2].matchAll(/<font[^>]*weight="(\d+)"[^>]*style="(\w+)"[^>]*>([^<]+)<\/font>/g)].map((f) => ({
-      weight: Number(f[1]),
-      style: f[2],
-      file: f[3].trim(),
+// Family blocks parsed verbatim: a family is CJK when its block names a CJK
+// face file (a lang-substring test alone miscounts e.g. und-Nkoo), and a
+// <font> element may carry child elements (<axis tag="wght">) — a text-only
+// body regex silently drops those faces.
+const cjkFamilies = [...fontsXml.matchAll(/<family\b([^>]*)>([\s\S]*?)<\/family>/g)]
+  .map((m) => ({ attrs: m[1], body: m[2] }))
+  .filter((f) => /CJK/.test(f.body))
+  .map(({ attrs, body: b }) => ({
+    lang: (attrs.match(/lang="([^"]*)"/) ?? [])[1] ?? "(no lang tag)",
+    faces: [...b.matchAll(/<font\b([^>]*)>([\s\S]*?)<\/font>/g)].map((f) => ({
+      weight: (f[1].match(/weight="(\d+)"/) ?? [])[1] ?? null,
+      style: (f[1].match(/style="(\w+)"/) ?? [])[1] ?? null,
+      file: ((f[2].match(/>([^<>]+)<\/$/) ?? [])[1] ?? (f[2].match(/([A-Za-z0-9_-]+\.(?:ttf|otf|ttc))/) ?? [])[1] ?? "").trim(),
     })),
-  }),
-);
+  }));
 
 // ---- set scale, restart the app onto the probe ----
 // The dev client intercepts a cold deep link: force-stop + VIEW lands on its
@@ -101,7 +109,7 @@ const cjkFamilies = [...fontsXml.matchAll(/<family[^>]*lang="([^"]*(?:zh|ja|ko)[
 // server entry, wait for the app to take the screen, then deep link again.
 adb("shell", "settings", "put", "system", "font_scale", String(argScale));
 adb("shell", "am", "force-stop", PACKAGE);
-adb("reverse", "tcp:8081", "tcp:8081");
+adb("reverse", `tcp:${PORT}`, `tcp:${PORT}`);
 adb("shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", DEEP_LINK, PACKAGE);
 
 function dumpNodes() {
@@ -136,7 +144,7 @@ function pollUntil(condition, what) {
   fail(`did not reach ${what} within ${WAIT_MS} ms`);
 }
 
-const serverEntry = (nodes) => nodes.find((n) => n.text === "http://10.0.2.2:8081");
+const serverEntry = (nodes) => nodes.find((n) => n.text === `http://10.0.2.2:${PORT}`);
 const launcherGone = (nodes) => !nodes.some((n) => n.text === "DEVELOPMENT SERVERS");
 
 let nodes = pollUntil((n) => Boolean(serverEntry(n)), "the dev client launcher with the Metro server entry");
@@ -165,7 +173,7 @@ function waitForStable() {
 const screens = [];
 const seen = new Set();
 nodes = waitForStable();
-for (let pos = 0; pos <= MAX_SCROLLS; pos++) {
+for (let pos = 0; pos < MAX_SCROLLS; pos++) {
   const newCaptions = nodes
     .map((n) => n.text)
     .filter((t) => t && !seen.has(t));
@@ -200,7 +208,7 @@ const result = {
     driver: "han-probe-run.mjs",
     surface: "app/han-probe.tsx (dev-only, __DEV__-gated)",
     device: { serial: SERIAL, ...props, fontScaleBefore, fontScaleRun: argScale, fontScaleRestored: fontScaleBefore },
-    metro: "http://localhost:8081/status=packager-status:running",
+    metro: `http://localhost:${PORT}/status=packager-status:running`,
     probeDeepLink: DEEP_LINK,
   },
   deviceCjkFonts: cjkFonts,

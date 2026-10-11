@@ -59,7 +59,7 @@ describe("G21.47 (issue #671): the dev-only Han probe surface", () => {
     // The insets ride contentContainerStyle (the scrollable content), not
     // the frame style — a frame padding never joins the scroll extent, so
     // the last rows stay unreachable behind the gesture bar.
-    const container = screen.getByTestId("screen-han-probe").props.contentContainerStyle;
+    const container = screen.getByTestId("screen-Han probe").props.contentContainerStyle;
     expect(container.paddingTop).toBe(66);
     expect(container.paddingBottom).toBe(50);
   });

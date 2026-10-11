@@ -105,24 +105,10 @@ const s2 = extract(2);
 const raw1 = JSON.parse(readFileSync(join(HERE, "raw-run-scale1.json"), "utf8"));
 const raw2 = JSON.parse(readFileSync(join(HERE, "raw-run-scale2.json"), "utf8"));
 
-// The CJK families in fonts.xml: family blocks naming a CJK face file, with
-// every (weight, style, file) face inside — verbatim from the device file.
-const fontsXml = readFileSync(join(RUNTIME, "fonts.xml"), "utf8");
-const cjkFamilies = [...fontsXml.matchAll(/<family[^>]*>([\s\S]*?)<\/family>/g)]
-  .map((m) => m[1])
-  .filter((b) => /CJK/.test(b))
-  .map((b) => ({
-    lang: (b.match(/lang="([^"]*)"/) ?? [])[1] ?? "(no lang tag)",
-    faces: [...b.matchAll(/<font\b[^>]*>/g)].map((f) => {
-      const tag = f[0];
-      const file = (tag.match(/>([^<>]+)<\//) ?? [])[1] ?? (b.match(/>(Noto[^<]*CJK[^<]*)</) ?? [])[1];
-      return {
-        weight: (tag.match(/weight="(\d+)"/) ?? [])[1] ?? null,
-        style: (tag.match(/style="(\w+)"/) ?? [])[1] ?? null,
-        file: (file ?? "").trim(),
-      };
-    }),
-  }));
+// The CJK families come verbatim from the driver's machine output (it parses
+// the device fonts.xml during the run — one parser, one source; a second
+// copy here was a jscpd clone).
+const cjkFamilies = raw1.deviceCjkFamiliesFromFontsXml;
 
 const ESSENTIAL = ROWS.map((r) => r.key);
 function fullyVisibleScan(extracted) {
@@ -181,7 +167,7 @@ const result = {
   },
   observedFindings: {
     strongWeight:
-      "device inventory has no CJK Bold face (only -Regular .ttc files, fonts.xml zh-Hans family is weight 400 only); the strong row paints visibly heavier strokes over identical glyph shapes -> synthesized bold over the Regular fallback (strong-weight-compare.png)",
+      "device inventory has no separate CJK Bold file (only -Regular .ttc files), while fonts.xml declares a variable wght axis 100-900 on NotoSansCJK-Regular.ttc; the strong row paints visibly heavier strokes over identical glyph shapes (strong-weight-compare.png) - consistent with both a variable instance and synthetic emboldening; the mechanism is undetermined by this run",
     regionalForms:
       "the S2 shared-codepoints row renders SC forms (simplified radicals in the canvas radicals) — no JP-form trap (probe-scale2-pos2.png vs the G21.40 S2 comparison)",
     uncappedScalingDefect:

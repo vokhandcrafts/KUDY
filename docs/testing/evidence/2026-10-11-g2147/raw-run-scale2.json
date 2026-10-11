@@ -13,7 +13,7 @@
       "fontScaleRun": 2,
       "fontScaleRestored": "1.0"
     },
-    "metro": "http://localhost:8081/status=packager-status:running",
+    "metro": "http://localhost:8082/status=packager-status:running",
     "probeDeepLink": "kudy://han-probe"
   },
   "deviceCjkFonts": [
@@ -22,20 +22,55 @@
   ],
   "deviceCjkFamiliesFromFontsXml": [
     {
-      "lang": "und-Nkoo",
-      "faces": [
-        {
-          "weight": 400,
-          "style": "normal",
-          "file": "NotoSansNKo-Regular.ttf"
-        }
-      ]
-    },
-    {
       "lang": "zh-Hans",
       "faces": [
         {
-          "weight": 400,
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
           "style": "normal",
           "file": "NotoSerifCJK-Regular.ttc"
         }
@@ -45,7 +80,52 @@
       "lang": "zh-Hant,zh-Bopo",
       "faces": [
         {
-          "weight": 400,
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
           "style": "normal",
           "file": "NotoSerifCJK-Regular.ttc"
         }
@@ -55,21 +135,107 @@
       "lang": "ja",
       "faces": [
         {
-          "weight": 400,
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
           "style": "normal",
           "file": "NotoSerifCJK-Regular.ttc"
         }
       ]
-    },
-    {
-      "lang": "ja",
-      "faces": []
     },
     {
       "lang": "ko",
       "faces": [
         {
-          "weight": 400,
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
           "style": "normal",
           "file": "NotoSerifCJK-Regular.ttc"
         }
@@ -118,8 +284,7 @@
         "audio identity label",
         "\u5df2\u6682\u505c \u00b7 12/24 \u7ad9\u70b9",
         "S2 shared codepoints (regional forms)",
-        "\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349",
-        "ScaledText (cap 1.25)"
+        "\u9aa8\u76f4\u4ee4\u8fc7\u8fb9\u8bf7\u51c0\u6e29\u6d77\u8349"
       ]
     },
     {
@@ -127,6 +292,7 @@
       "screenshot": "runtime/probe-scale2-pos2.png",
       "dump": "runtime/dump-scale2-pos2.xml",
       "newCaptions": [
+        "ScaledText (cap 1.25)",
         "Text, no cap",
         "allowFontScaling=false"
       ],

@@ -13,7 +13,7 @@
       "fontScaleRun": 1,
       "fontScaleRestored": "1.0"
     },
-    "metro": "http://localhost:8081/status=packager-status:running",
+    "metro": "http://localhost:8082/status=packager-status:running",
     "probeDeepLink": "kudy://han-probe"
   },
   "deviceCjkFonts": [
@@ -22,20 +22,55 @@
   ],
   "deviceCjkFamiliesFromFontsXml": [
     {
-      "lang": "und-Nkoo",
-      "faces": [
-        {
-          "weight": 400,
-          "style": "normal",
-          "file": "NotoSansNKo-Regular.ttf"
-        }
-      ]
-    },
-    {
       "lang": "zh-Hans",
       "faces": [
         {
-          "weight": 400,
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
           "style": "normal",
           "file": "NotoSerifCJK-Regular.ttc"
         }
@@ -45,7 +80,52 @@
       "lang": "zh-Hant,zh-Bopo",
       "faces": [
         {
-          "weight": 400,
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
           "style": "normal",
           "file": "NotoSerifCJK-Regular.ttc"
         }
@@ -55,21 +135,107 @@
       "lang": "ja",
       "faces": [
         {
-          "weight": 400,
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
           "style": "normal",
           "file": "NotoSerifCJK-Regular.ttc"
         }
       ]
-    },
-    {
-      "lang": "ja",
-      "faces": []
     },
     {
       "lang": "ko",
       "faces": [
         {
-          "weight": 400,
+          "weight": "100",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "200",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "300",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "500",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "600",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "700",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "800",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "900",
+          "style": "normal",
+          "file": "NotoSansCJK-Regular.ttc"
+        },
+        {
+          "weight": "400",
           "style": "normal",
           "file": "NotoSerifCJK-Regular.ttc"
         }
