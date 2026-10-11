@@ -5,15 +5,16 @@
 // (AC2), the words follow the walk's pinned locale in BE and EN (AC5) with
 // screen-reader labels on the markers, and the surface without the run ports
 // shows its honest unavailable state (AC4's composition-root rule).
-import { afterEach, describe, expect, jest, test } from "@jest/globals";
+import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, renderRouter, screen, waitFor, within } from "expo-router/testing-library";
 import { act } from "@testing-library/react-native";
 
-import { Modal } from "react-native";
+import { Dimensions, Modal, type ScaledSize } from "react-native";
 
 import Run from "./run/[id]";
 import FeedbackForm from "./feedback";
 import { feedbackStrings } from "../controllers/useFeedbackController";
+import { runMapStrings } from "../controllers/run/runMap";
 import { createFeedbackSync } from "../services/feedbackSync";
 import { NOW, okPut, openIdentifiedStore, scriptedTransport, secretBox } from "../tests/feedback/queue-fixture";
 import { createServices } from "../controllers/createServices";
@@ -1075,5 +1076,33 @@ describe("G16.03: the End invitation (issue #74)", () => {
     fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
     expect(await screen.findByTestId("run-ended")).toBeTruthy();
     expect(screen.queryByTestId("run-feedback-invite")).toBeNull();
+  });
+});
+
+// Jest checks the style contract; the AVD sweep checks native layout.
+const scale2Window: ScaledSize = { width: 411, height: 875, scale: 3, fontScale: 2 };
+describe("G21.47 follow-up: the actions row holds at the pinned 200% (issue #719)", () => {
+  beforeEach(() => {
+    jest.spyOn(Dimensions, "get").mockReturnValue(scale2Window);
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test("the session actions row wraps and its labels stay capped under fontScale 2.0", async () => {
+    await mountedRunBe();
+    expect(flatStyle(screen.getByTestId("run-session-actions")).flexWrap).toBe("wrap");
+    // The effective paint factor at the pinned 200% is min(scale, cap): the
+    // cap governs — exactly the ScaledText bound the hold rests on.
+    const words = runMapStrings("be");
+    for (const [testId, word] of [
+      ["btn-run-pause", words.pauseWalk],
+      ["btn-run-end", words.endWalk],
+    ] as const) {
+      const label = within(screen.getByTestId(testId)).getByText(word);
+      expect(Math.min(scale2Window.fontScale, label.props.maxFontSizeMultiplier)).toBe(
+        tokens.fontBigTextFactor,
+      );
+    }
   });
 });

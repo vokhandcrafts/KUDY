@@ -41,3 +41,14 @@ kudy-demo-374-*
 
 # G21.40 (issue #621): generated probe assets (font copies + subsets)
 spikes/G21.40-han-layout/runtime/
+
+# G21.47 (issue #671): device-run runtime artifacts (raw UI dumps, logs) — machine
+# JSON committed to the evidence dir is escape-encoded, the raw pulls are not.
+docs/testing/evidence/2026-10-11-g2147/runtime/
+# G21.47 follow-up (issue #719): device-run runtime artifacts (raw UI dumps) —
+# machine JSON committed to the evidence dir is escape-encoded, the raw pulls are not.
+docs/testing/evidence/2026-10-11-g219/runtime/
+
+# G23.03 (issue #661): Android E2E runtime artifacts (screenshots, UI dumps,
+# Metro/origin logs) — never tracked.
+tools/e2e-android/artifacts/

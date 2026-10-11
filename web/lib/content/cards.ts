@@ -9,7 +9,7 @@
 import type { Metadata } from 'next';
 import { appLinks, type AppLinks } from '../app-links.ts';
 import type { GuidePageData, StopPageData } from './site.ts';
-import { localePath, readSiteGuidePage, readSiteStopPage, routeTextLocales } from './site.ts';
+import { advertisedTextLocales, localePath, readSiteGuidePage, readSiteStopPage, routeTextLocales } from './site.ts';
 import { getUiStrings, uiLocales, type UiLocale } from '../i18n/index.ts';
 
 export interface CardMeta {
@@ -60,7 +60,7 @@ export function guidePageMetadata(root: string, locale: UiLocale, routeId: strin
   if (!textLocales.includes(locale)) return unavailablePageMetadata(locale);
   return {
     ...toMetadata(guideCardMeta(readSiteGuidePage(root, locale, routeId))),
-    alternates: pageAlternates(locale, `/guides/${routeId}`, textLocales),
+    alternates: pageAlternates(locale, `/guides/${routeId}`, advertisedTextLocales(textLocales)),
   };
 }
 
@@ -69,7 +69,7 @@ export function stopPageMetadata(root: string, locale: UiLocale, routeId: string
   if (!textLocales.includes(locale)) return unavailablePageMetadata(locale);
   return {
     ...toMetadata(stopCardMeta(readSiteStopPage(root, locale, routeId, stopId))),
-    alternates: pageAlternates(locale, `/guides/${routeId}/stops/${stopId}`, textLocales),
+    alternates: pageAlternates(locale, `/guides/${routeId}/stops/${stopId}`, advertisedTextLocales(textLocales)),
   };
 }
 
