@@ -15,8 +15,9 @@
 // port lands it writes the durable `settings` row (the consent idiom).
 
 // G21.09 (issue #542, criterion 4): the store's vocabulary derives from the
-// one locale registry — the complete catalogues (be/en/uk today); a planned
-// code is not switchable. The unknown-input semantics below are unchanged.
+// one locale registry — the complete catalogues (all eight since G21.14); a
+// planned code is not switchable. The unknown-input semantics below are
+// unchanged.
 // G21.50 (issue #711): switchable means OPEN, not merely complete — the
 // open set rides the release flag (the openLocales injection is the tests'
 // seam; production derives it from the registry module's OPEN_UI_LOCALES).

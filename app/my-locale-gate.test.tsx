@@ -16,12 +16,13 @@ import { layoutWith } from "../test/render-helpers";
 import * as contracts from "../contracts/ui-locales";
 
 jest.mock("../contracts/ui-locales", () => {
-  const actual = jest.requireActual("../contracts/ui-locales");
+  const actual = jest.requireActual("../contracts/ui-locales") as typeof import("../contracts/ui-locales");
   return {
     ...actual,
     OPEN_UI_LOCALES: [...actual.COMPLETE_UI_LOCALES],
     COMPLETE_UI_LOCALES: [...actual.COMPLETE_UI_LOCALES, "zz"],
-    uiLocaleNativeName: (code: string) => (code === "zz" ? "Testnine" : actual.uiLocaleNativeName(code)),
+    uiLocaleNativeName: (code: string) =>
+      code === "zz" ? "Testnine" : actual.uiLocaleNativeName(code as Parameters<typeof actual.uiLocaleNativeName>[0]),
   };
 });
 
