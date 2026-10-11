@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="be">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G25.06 · Кампаненты і станы · спецімен-ліст</title>
+<style>
+@font-face{font-family:Golos;src:url(fonts/GolosText_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Golos;src:url(fonts/GolosText_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Alegreya;src:url(fonts/Alegreya_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Caveat;src:url(fonts/Caveat_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+/* Значэнні — даслоўна канон G06.07 (docs/design/visual-language.md, «Дадатак»). */
+:root{
+ --paper:#faf7f2;--ink:#22262b;--muted:#6b7280;--accent:#1d6b4f;--accent-ink:#fff;--card:#fff;--line:#d8d2c6;
+ --shelf-accent:#154f3a;--shelf-line:#c9c1b1;--disabled-ink:#6b7280;--disabled-line:#6b7280;
+ --map:#eef3ee;--street:#dfe7df;--person:#1f5aa8;
+ --notice-bg:#fdf1d7;--notice-border:#e6c98c;--error-bg:#fdeaea;--error-border:#e0a2a2;
+ --hint-bg:#f6faff;--hint-border:#bcd2f0;--moment-bg:#fff7ec;--moment-border:#ecd9b0;
+ --badge-paid:#fdf1d7;--badge-free:#e7f2ec;--badge-mixed:#ece7f8;--badge-lock:#eceff1;
+ --marker-played:#1d6b4f;--marker-playing:#b3331f;--marker-available:#8a610e;--marker-pending:#646c77;--marker-locked:#67707a;
+ /* прапановы G25.01 (B04.1/B04.2) — не production-токены */
+ --clay:#805039;--amber:#d8a551;
+ --r:10px;--pill:99px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#ece7df;color:var(--ink);font:400 16px/1.45 Golos,system-ui,sans-serif}
+h1,h2,h3,p,table{margin:0}
+.sp{max-width:1660px;margin:auto;padding:24px}
+.sp-head{display:flex;justify-content:space-between;align-items:end;gap:24px;padding-bottom:16px;border-bottom:1px solid #b9b1a5}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--clay)}
+h1{font:600 36px/1.1 Alegreya,serif;margin-top:4px}
+.sp-head p{max-width:640px;font-size:14px}
+.src{font-size:12px;color:#4c5359;margin-top:6px}
+section{margin-top:26px}
+h2{font:600 22px/1.2 Alegreya,serif;padding-bottom:8px;border-bottom:2px solid var(--accent);margin-bottom:4px}
+h2 small{font:400 13px/1.4 Golos,sans-serif;color:#4c5359;display:block;margin-top:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:12px}
+.cell{background:var(--paper);border:1px solid #c9c1b1;border-radius:var(--r);padding:14px;overflow:hidden}
+.cell>h3{font-size:13px;font-weight:600;color:#4c5359;margin-bottom:10px}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.note code,.ann code{font-family:ui-monospace,monospace;font-size:11px;background:#22262b0d;padding:1px 4px;border-radius:4px}
+.ann{font-size:12px;color:#4c5359;margin-top:8px;border-top:1px dashed #b9b1a5;padding-top:7px}
+.ann b{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--clay)}
+.tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:var(--pill);padding:2px 8px;color:#4c5359;background:#fff}
+.tag.canon{border-color:var(--accent);color:var(--accent)}
+.tag.gap{border-color:var(--clay);color:var(--clay)}
+.tag.prop{border-color:var(--amber);color:#7a5a17;background:#fdf6e6}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* — канонавыя кампаненты (значэнні з кода production, не вынаходствы) — */
+.btn{display:inline-block;border-radius:var(--r);padding:12px;font-size:16px;line-height:1.45;font-family:Golos,sans-serif}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);font-weight:600;box-shadow:0 4px 0 var(--shelf-accent)}
+.btn.primary.pressed{opacity:.9;transform:translateY(2px);box-shadow:0 2px 0 var(--shelf-accent)}
+.btn.ghost-primary{background:transparent;color:var(--disabled-ink);border:1px solid var(--disabled-line);box-shadow:none}
+.btn.plain{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.outline-accent{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.cancel{background:transparent;color:var(--accent);border:1px solid var(--accent);width:100%}
+.btn.quiet{background:transparent;color:var(--muted);border:0;padding:8px 12px}
+.btn.focus{outline:3px solid var(--accent);outline-offset:1px}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;font-size:16px;color:var(--muted);background:transparent}
+.chip.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.chip.rating{min-width:40px;min-height:44px;text-align:center;display:inline-flex;align-items:center;justify-content:center}
+.chip.rating.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.badge{display:inline-block;border-radius:var(--pill);padding:2px 8px;font-size:12px;color:var(--ink)}
+.badge.free{background:var(--badge-free)}.badge.paid{background:var(--badge-paid)}.badge.mixed{background:var(--badge-mixed)}.badge.lock{background:var(--badge-lock)}
+.badge .luc{display:inline-block;width:10px;height:10px;border:2px solid var(--ink);border-radius:3px;vertical-align:-1px;margin-right:4px}
+.banner{border-radius:var(--r);border-width:1px;border-style:solid;padding:12px;font-size:16px}
+.banner.notice{background:var(--notice-bg);border-color:var(--notice-border)}
+.banner.error{background:var(--error-bg);border-color:var(--error-border)}
+.banner .why{color:var(--muted);font-size:12px;margin-top:8px}
+.banner .btn{margin-top:8px}
+.cardk{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.cardk .t{font-size:16px;font-weight:600;color:var(--ink);margin-bottom:8px}
+.cardk .s{color:var(--muted);font-size:16px;margin-bottom:8px}
+.cardk .loc{color:var(--muted);font-size:16px;margin-top:8px}
+.cardk.hintpair{background:var(--hint-bg);border-color:var(--hint-border)}
+.cardk.momentpair{background:var(--moment-bg);border-color:var(--moment-border)}
+.cardk .dragon{font:400 22px/1.25 Caveat,cursive;color:var(--clay);margin-top:6px}
+.marker{width:34px;height:34px;border-radius:999px;border:2px solid var(--accent-ink);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;font-weight:600;box-shadow:0 1px 2px #22262b40}
+.m-played{background:var(--marker-played)}.m-playing{background:var(--marker-playing)}.m-available{background:var(--marker-available)}.m-pending{background:var(--marker-pending)}.m-locked{background:var(--marker-locked)}
+.person{width:18px;height:18px;border-radius:999px;border:3px solid #fff;background:var(--person);display:inline-block}
+.poi{width:14px;height:14px;border-radius:4px;background:var(--badge-mixed);border:1px solid var(--muted);display:inline-block}
+.mk{display:inline-flex;flex-direction:column;align-items:center;gap:2px;min-height:44px;justify-content:flex-start}
+.mk i{font-style:normal;font-size:12px;color:var(--ink);text-align:center;max-width:110px}
+.mapbox{background:var(--map);border:1px solid var(--line);border-radius:var(--r);position:relative;height:190px;overflow:hidden}
+.mapbox .st{position:absolute;background:var(--street)}
+.mapbox .cap{position:absolute;left:10px;top:8px;font-size:12px;color:var(--muted)}
+.track{height:6px;background:var(--line);border:1px solid var(--muted);border-radius:999px;overflow:hidden}
+.track b{display:block;height:100%;background:var(--accent)}
+.fact{display:inline-flex;gap:6px;align-items:center;font-size:16px}
+.fact .ic{width:16px;height:16px;border:2px solid var(--accent);border-radius:3px;display:inline-block}
+
+/* — кадры прылад — */
+.frames{display:grid;grid-template-columns:414px minmax(0,1fr);gap:20px;margin-top:12px}
+.surface{background:var(--paper);border:1px solid #c9c1b1;border-radius:var(--r);overflow:hidden;box-shadow:0 6px 20px #22262b14}
+.phone{width:390px;height:844px;overflow-y:auto;position:relative}
+.web{min-height:844px}
+.ptop{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px}
+.ptop .brand{font-weight:600;color:var(--accent);letter-spacing:.05em}
+.runmap{height:300px;background:var(--panel,#eef3ee)}
+.panel{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);border-radius:var(--r) var(--r) 0 0;padding:12px}
+.panel.half{height:45%}
+.bar{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px}
+.bar .row{justify-content:space-between}
+.bar .t{font-weight:600;flex:1}
+.wtop{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-bottom:1px solid var(--line);padding:12px 24px}
+.wtop .links{display:flex;gap:18px;font-size:14px}
+.wtop .links span:first-child{border-bottom:3px solid var(--accent);padding-bottom:2px}
+.wcols{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:20px 24px}
+.wfull{grid-column:1/-1}
+.bigstrip{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-top:10px}
+.bigstrip .z{font-size:32px;line-height:1.45}
+.bigstrip .cap1{font-size:25px;line-height:1.45}
+/* — табліцы — */
+table.mtx{border-collapse:collapse;width:100%;background:#fff;font-size:13px;margin-top:12px}
+table.mtx th,table.mtx td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+table.mtx th{background:var(--paper);font-weight:600}
+table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
+.foot{font-size:12px;color:#4c5359;margin-top:20px;border-top:1px solid #b9b1a5;padding-top:10px}
+@media(max-width:980px){.frames{grid-template-columns:1fr}.phone{width:100%}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<main class="sp">
+ <header class="sp-head">
+  <div>
+   <div class="eyebrow">KUDY · G25.06 · спецімен-ліст кампанентаў</div>
+   <h1>Кампаненты і ўсе іх станы</h1>
+   <p>Пакрыццё крытэраў #705: карта існых кампанентаў на спецімен-лісце, станы з даслоўнымі копіямі і токенамі, тэлефон/вэб і даступнасць, экспарты. Знешні выгляд бярэцца з кода production; адзіныя прапановы — сінія/цёплыя пары канона і контурная акцэнтная кнопка, яны пазначаныя.</p>
+   <p class="src">Крыніцы: брыф v1 <code>a11ea86</code> (#699) · рэестр рашэнняў <code>c984bab</code> · канон G06.07 <code>b6056ff</code> · код main <code>c756663</code>. Радкі кантэнту — даслоўна <code>contracts/ui-messages/source.json</code> (be).</p>
+  </div>
+  <span class="tag">дызайн-задача · код не змяняецца</span>
+ </header>
+
+ <section id="s1">
+  <h2>1. Кнопкі і чыпы <small>канон §5; wrappers: PressableSurface (полка, pressed, dip), ScaledText (ліміт 1,25×)</small></h2>
+  <div class="grid">
+   <div class="cell"><h3>Primary — «гліняная» з полкай</h3>
+    <div class="stage row">
+     <span class="btn primary">Прагулка</span>
+     <span class="btn primary pressed">Прагулка</span>
+     <span class="btn primary focus">Прагулка</span>
+     <span class="btn ghost-primary" aria-disabled="true">Загрузіць</span>
+    </div>
+    <p class="note">Полка 4px <code>color.shelf.accent</code>; націск — прыцемненне ≥10% (<code>opacity .9</code>) + пагружэнне 2px, полка трымае ніжнюю мяжу. Выключаная — ghost-пара <code>disabled-ink/-line</code>, празрысты фон, <b>без полкі</b> (рашэнне #430, варыянт А).</p>
+    <p class="ann"><b>Копія/a11y:</b> «Прагулка» <code>native.chrome.walk</code>; «Загрузіць» <code>native.preview.label.download</code>; <code>accessibilityRole="button"</code>, <code>accessibilityState.disabled</code>, прычына побач (<code>11 §7</code>). <b>Дзе:</b> components/walk-button.tsx:37, app/route/[id].tsx:524.</p>
+   </div>
+   <div class="cell"><h3>Контурныя і ціхія</h3>
+    <div class="stage row">
+     <span class="btn outline-accent">Прыпыніць прагулку</span>
+     <span class="btn plain">Звычайная (канон)</span>
+     <span class="btn quiet">Не, дзякуй</span>
+     <span class="btn quiet">Схаваць</span>
+    </div>
+    <p class="note"><span class="tag gap">РАЗЫХОДЖАННЕ H6</span> Канон §5 задае «звычайную» (<code>card</code>+<code>line</code>), а код шырока карыстае контурную акцэнтную (празрысты фон, межа <code>color.accent</code>, тэкст <code>color.accent</code>): sessionButton, retryButton, ModalDialogCancel, readButton, barControl (межа <code>line</code>). Прапанова — назваць стыль у каноне, не перафарбоўваць паасобку.</p>
+    <p class="ann"><b>Копія/a11y:</b> «Прыпыніць прагулку» <code>native.run.pauseWalk</code>; «Не, дзякуй» <code>native.feedback.inviteDismiss</code>; «Схаваць» <code>guide-hint-strings.be.dismiss</code>. Ціхія рады — тэкст, не кнопка-плітка; зона дотыку трымаецца hitSlop. <b>Дзе:</b> app/run/[id].tsx:179, components/modal-dialog.tsx:103, components/GuideHintCard.tsx:145.</p>
+   </div>
+   <div class="cell"><h3>Чыпы: мовы і ацэнка</h3>
+    <div class="stage">
+     <div class="row"><span class="chip on">Беларуская</span><span class="chip">English</span><span class="chip">Українська</span></div>
+     <div class="row" style="margin-top:10px">
+      <span class="chip rating">1 з 5</span><span class="chip rating on">3 з 5</span><span class="chip rating">5 з 5</span>
+     </div>
+    </div>
+    <p class="note">Чып мовы — межа <code>line</code> → <code>accent</code> у выбранай. Шкала — пяць кнопак ≥40px, <code>role="group"</code>, <code>aria-pressed</code>; выбраная <code>accent</code>+<code>accent-ink</code>; прычыны — да 3 унікальных, лішак — disabled (канон §8, 20 §7).</p>
+    <p class="ann"><b>Копія/a11y:</b> самаіменныя мовы <code>native.chrome.languageSelfNames.*</code>; «${score} з 5» <code>native.feedback.starLabel</code>; падказка «1 — вельмі не спадабалася · 5 — вельмі спадабалася» <code>native.feedback.scaleHint</code>. <b>Дзе:</b> app/(tabs)/my.tsx:110, app/feedback.tsx:70.</p>
+   </div>
+   <div class="cell"><h3>Пазнакі-пілюлі</h3>
+    <div class="stage row">
+     <span class="badge free">Бясплатна</span><span class="badge paid">Платна</span><span class="badge mixed">Змешана</span>
+     <span class="badge lock"><span class="luc"></span>Зачынена</span>
+    </div>
+    <p class="note">Фон пазнакі — дапаможны, слова носьбіт (тэкст <code>color.ink</code>, не колер). Пазнака замка на мабільным — Lucide <code>lock</code> праз CanonIcon; на вэб — эмодзі 🔒 (<span class="tag gap">H5, замена lock.svg з G25.04</span>).</p>
+    <p class="ann"><b>Копія/a11y:</b> «Бясплатна/Платна/Змешана» <code>native.chrome.access.*</code>; «Зачынена» <code>native.chrome.locked</code>; картка чытаецца цэлам — «{назва}, {доступ}». <b>Дзе:</b> components/guide-card.tsx:183, app/route/[id].tsx:507, web/components/locked-stop-row.tsx:13.</p>
+   </div>
+  </div>
+ </section>
+
+ <section id="s2">
+  <h2>2. Карткі — роўна тры віды <small>канон §5 «Карткі»; чацвёрты выгляд забаронены як мясцовая стылізацыя</small></h2>
+  <div class="grid">
+   <div class="cell"><h3>Звычайная картка (guide/story) <span class="tag canon">канон</span></h3>
+    <div class="cardk">
+     <div class="t">Набярэжная і яе гісторыі</div>
+     <div class="s">Прагулка ўздоўж вады: чатыры гісторыі пра горад, што ідзе за сваёй вадой.</div>
+     <span class="badge free">Бясплатна</span>
+     <div class="loc">Тэкст: be, en; аўдыё: be</div>
+    </div>
+    <p class="note">Белы фон, межа <code>color.line</code>, радыус 10, падшэўка 12. Картка — кнопка цэлам; пазнака сама ніколі не нясе тарыф.</p>
+    <p class="ann"><b>Копія/a11y:</b> «{назва}, {доступ}» — <code>accessibilityLabel</code> карткі; радкі моваў <code>native.chrome.textAudioLine</code> / <code>languagesLine</code>. <b>Дзе:</b> components/guide-card.tsx:254.</p>
+   </div>
+   <div class="cell"><h3>Картка-падказка R07 <span class="tag gap">канонавая пара не ў кодзе — H1</span></h3>
+    <div class="cardk hintpair">
+     <div class="t">Побач ёсць гід…</div>
+     <div class="row"><span style="color:var(--ink)">Набярэжная і яе гісторыі</span><span style="color:var(--muted)">платны</span></div>
+     <span class="btn quiet" style="padding-left:0">Схаваць</span>
+    </div>
+    <p class="note">Спецымен малюе канонавую пару <code>hint.bg #f6faff</code>/<code>hint.border #bcd2f0</code>. У кодзе GuideHintCard малюецца белай базавай (<code>colorCard</code>+<code>colorLine</code>) — токенаў hint у люстры <code>design-tokens.ts</code> няма. Ціхая картка: не запускае аўдыё/сесію/куплю (R07, 11 §15).</p>
+    <p class="ann"><b>Копія/a11y:</b> загаловак <code>guide-hint-strings.be.heading</code>; радок «{назва} (платны)» у <code>accessibilityLabel</code>; хінт «Адкрыць апісанне гіда»; адмова «Схаваць». <b>Дзе:</b> components/GuideHintCard.tsx:111.</p>
+   </div>
+   <div class="cell"><h3>Картка Moment <span class="tag prop">канонавая пара · тэйзер</span></h3>
+    <div class="cardk momentpair">
+     <div class="t">Момент: лебедзі на Матоўле</div>
+     <div class="dragon">Паглядзіце на ваду.</div>
+     <span class="btn outline-accent" style="margin-top:8px">Паслухаць тэйзер</span>
+    </div>
+    <p class="note">Цёплая пара <code>moment.bg #fff7ec</code>/<code>moment.border #ecd9b0</code> + яўны Play (ADR G01.02 §3.6) — у кодзе тэйзер жыве тэкставымі кнопкамі месца (<code>native.place.*</code>) на фон nowPlaying-радка Run; пара moment у люстры таксама адсутнічае (<span class="tag gap">H2</span>).</p>
+    <p class="ann"><b>Копія/a11y:</b> «Паслухаць тэйзер» <code>native.place.playLabel</code>, «Працягнуць»/«Спыніць» <code>native.place.resumeLabel/stopLabel</code>; адмовы <code>native.place.refusalText.*</code>. <b>Дзе:</b> app/place/[id].tsx.</p>
+   </div>
+   <div class="cell"><h3>Ціхая прапанова (UpgradeOffer) — варыянт базавай</h3>
+    <div class="cardk">
+     <div class="t">Усе гісторыі гіда</div>
+     <div class="s">Адна пакупка адкрывае гісторыі гэтага гіда.</div>
+     <div class="row" style="margin-top:8px"><span class="btn primary">Купіць</span><span class="btn ghost-primary" aria-disabled="true">Купіць (busy)</span></div>
+     <span class="btn quiet" style="padding-left:0">Не цяпер</span>
+    </div>
+    <p class="note">Адно галоўнае дзеянне; адмова — ціхі тэкст. Выключаная пад busy — ghost-пара; націск не нырае. onLayout = факт паказу для падзеі ўражання (AC3), не маунт.</p>
+    <p class="ann"><b>Копія/a11y:</b> «Усе гісторыі гіда»/«Адна пакупка…» <code>native.offer.offerTitle/offerBody</code>; «Купіць» <code>native.offer.buy</code>; «Не цяпер» <code>native.offer.dismiss</code>. <b>Дзе:</b> components/upgrade-offer.tsx:73, app/route/[id].tsx:467.</p>
+   </div>
+  </div>
+ </section>
+
+ <section id="s3">
+  <h2>3. Маркеры мапы, кропка пазіцыі, POI <small>канон §5; станы даслоўна ADR G01.01 §4.5</small></h2>
+  <div class="grid">
+   <div class="cell" style="grid-column:1/-1"><h3>Пяць станаў кропкі — 34px, белы абвод 2px, цень; літара стану — канон, код малюе кропку без літары</h3>
+    <div class="stage row" style="gap:26px">
+     <span class="mk"><span class="marker m-locked">З</span><i>Вежа — зачынена</i></span>
+     <span class="mk"><span class="marker m-playing">Г</span><i>Вежа — гучыць</i></span>
+     <span class="mk"><span class="marker m-played">П</span><i>Вежа — праслухана</i></span>
+     <span class="mk"><span class="marker m-available">Д</span><i>Вежа — даступна</i></span>
+     <span class="mk"><span class="marker m-pending">Ч</span><i>Вежа — чакае</i></span>
+     <span class="mk"><span class="marker m-locked">&nbsp;</span><i>код сёння: без літары<br>(app/run/[id].tsx:699)</i></span>
+     <span class="mk"><span class="person"></span><i>кропка пазіцыі 18px,<br><code>color.person</code>, без станаў</i></span>
+     <span class="mk"><span class="poi"></span><i>POI 14px, <code>badge-mixed</code>+<code>muted</code> — паза канонам §5 (H7)</i></span>
+    </div>
+    <p class="note">Стан чытаецца не толькі колерам: літара ўнутры (канон) + «{назва} — {стан}» пад кропкай + <code>aria-label</code> «{назва}, {стан}» + падказка «Прагляд кропкі. Аўдыё не запускаецца.» Тап — прэв'ю, ніколі не гук. Кантраст залівак на <code>map</code>/<code>street</code> ≥3:1 — пары канона. Меткі 12px чытэльныя (UX 04 #350).</p>
+    <p class="ann"><b>Копія/a11y:</b> <code>native.run.status.locked/playing/played/available/pending</code> = «зачынена/гучыць/праслухана/даступна/чакае»; «Прагляд кропкі…» <code>native.run.markerHint</code>; POI «Славутасць» <code>native.run.poiKind.sight</code>. Вектарны экспарт — <a href="markers.svg">markers.svg</a>. <b>Дзе:</b> app/run/[id].tsx:699, канон §5 «Маркеры».</p>
+   </div>
+   <div class="cell" style="grid-column:1/-1"><h3>Схема кропак на фоне мапы</h3>
+    <div class="mapbox">
+     <span class="st" style="left:0;right:0;top:120px;height:16px"></span>
+     <span class="st" style="left:150px;top:0;bottom:0;width:14px"></span>
+     <span class="st" style="left:0;right:0;top:60px;height:8px"></span>
+     <span class="cap">Схема кропак маршруту — карта горада зʼявіцца пасля рашэння пра тайлы (native.run.schematicNote)</span>
+     <span class="mk" style="position:absolute;left:70px;top:30px"><span class="marker m-played">П</span><i>Кранны — праслухана</i></span>
+     <span class="mk" style="position:absolute;left:200px;top:88px"><span class="marker m-playing">Г</span><i>Матоўля — гучыць</i></span>
+     <span class="mk" style="position:absolute;left:290px;top:24px"><span class="marker m-locked">З</span><i>Вежа — зачынена</i></span>
+     <span class="mk" style="position:absolute;left:110px;top:128px"><span class="person"></span><i>Вы</i></span>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <section id="s4">
+  <h2>4. Notices, банэры і сям'і станаў <small>канон §5 «Дыялог і стужкі», §7; ніколі не mascot-only; live region polite</small></h2>
+  <div class="grid">
+   <div class="cell"><h3>Notice-пара: офлайн-кэш</h3>
+    <div class="banner notice">Папярэдні валідны кэш<div class="why">сець адсутнічае з 20:12</div></div>
+    <p class="ann"><b>Копія/a11y:</b> «Папярэдні валідны кэш» <code>native.chrome.validCache</code>; прычына — 12px <code>muted</code> ніжэй (StateBanner: <code>accessibilityLiveRegion="polite"</code>). <b>Дзе:</b> components/guide-card.tsx:285, app/run/[id].tsx:131.</p>
+   </div>
+   <div class="cell"><h3>Error-пара + іменаваны retry</h3>
+    <div class="banner error">Каталог часова недаступны<div class="why">network unreachable</div><span class="btn outline-accent">Паўтарыць</span></div>
+    <p class="ann"><b>Копія/a11y:</b> «Каталог часова недаступны» <code>native.chrome.catalogTemporarilyUnavailable</code>; «Паўтарыць» <code>native.chrome.retry</code> — выхад збою named, не тупік (G06.05 AC4). <b>Дзе:</b> components/guide-card.tsx:384, :119.</p>
+   </div>
+   <div class="cell"><h3>Паўза і дэградацыі Run</h3>
+    <div class="banner notice">Прагулка прыпынена</div>
+    <p class="note" style="margin-top:8px">Тыя ж notice-скрынкі: «Частка звестак часова недаступная» <code>native.chrome.degradedData</code>; «Аўтаматычныя гісторыі прыпыненыя» <code>native.run.autoplaySuspendedTitle</code>; «Пазіцыя састарэлая» + «Аўтазапуск і чарга заблакаваныя» <code>native.run.gpsStalled</code> + Detail; «Аўтаматычныя гісторыі не працуюць — я не бачу вашай пазіцыі» <code>native.run.deniedGps</code>.</p>
+    <p class="ann"><b>Дзе:</b> app/run/[id].tsx:582, :594, :143 (bannerDetailText).</p>
+   </div>
+   <div class="cell"><h3>Стан водгуку (21 §5.4, даслоўна)</h3>
+    <div class="stage">
+     <p style="font-size:14px">Чарнавік захаваны на прыладзе</p>
+     <p style="font-size:14px">Захавана на прыладзе — адправім пры сетцы</p>
+     <p style="font-size:14px">Адпраўлена</p>
+     <p style="font-size:14px">Канфлікт: на серверы наведшая змена · <span style="color:var(--accent)">Праверыць на серверы</span></p>
+     <p style="font-size:14px">Адпраўка спынена: патрэбна ўвага</p>
+    </div>
+    <p class="ann"><b>Копія:</b> <code>native.feedback.stateDraft/statePending/stateSent/stateConflict/stateActionRequired</code>; збой вяртае pending; «Выдаленне чакае сеткі» <code>stateDeletePending</code>. <b>Дзе:</b> app/feedback.tsx, contracts source.json.</p>
+   </div>
+  </div>
+ </section>
+
+ <section id="s5">
+  <h2>5. Дыялог <small>UX 06 #352: сапраўдны Modal; анімацыя none — reduced-motion без пункту адключэння</small></h2>
+  <div class="grid">
+   <div class="cell"><h3>Пацвярджэнне завяршэння</h3>
+    <div class="stage" style="position:relative;min-height:190px;background:#22262b66">
+     <div style="position:absolute;inset:14px;background:#22262b66"></div>
+     <div class="cardk" style="position:relative;max-width:400px;box-shadow:0 8px 30px #22262b33">
+      <p style="margin-bottom:12px">Завяршыць прагулку?</p>
+      <span class="btn primary" style="display:block;text-align:center;margin-bottom:8px">Завершыць</span>
+      <span class="btn cancel">Скасаваць</span>
+     </div>
+    </div>
+    <p class="note">Картка да 400px, радыус 10; зацміценне — <span class="tag gap">H4</span> канон §5 «35% чорнага», код — <code>rgba(34,38,43,.4)</code> (40% чарніла, вытворны адценне, UX 06). Скасаваць — актыўны акцэнтны контур, не прыцемнены дубль accept.</p>
+    <p class="ann"><b>Копія/a11y:</b> «Завяршыць прагулку?» <code>native.run.endConfirmTitle</code>; «Завершыць»/«Скасаваць» <code>native.run.endConfirmAccept/endConfirmCancel</code>; пераключэнне — <code>native.chrome.switchConfirm</code> + «Завершыць і пачаць». Сістэмны Back = cancel, без навігацыі. <b>Дзе:</b> components/modal-dialog.tsx:63.</p>
+   </div>
+  </div>
+ </section>
+
+ <section id="s6">
+  <h2>6. Загрузка, прагрэс і факт-рады прэв'ю <small>канон §5 «Панэль Run» (паласа), 11 §7 (прычыны побач)</small></h2>
+  <div class="grid">
+   <div class="cell"><h3>Адзінае галоўнае дзеянне прэв'ю</h3>
+    <div class="stage">
+     <div class="row"><span class="btn primary">Загрузіць</span><span class="btn ghost-primary" aria-disabled="true">Загрузіць</span><span class="btn primary">Пачаць</span></div>
+     <p class="note">«Загрузіць» → «Пачаць» — адна кнопка, розныя станы кантролера; выключаная — ghost + прычына/дэталь побач: «Патрэбна пакупка.» <code>reason#purchase-required</code>, «пакет няпоўны» <code>native.preview.detail</code>; «не хапае месца: патрэбна яшчэ ${mb} МБ» + «Вызваліць месца ў KUDY»; збой — «Збой загрузкі.» + retry <code>btn-download-retry</code>.</p>
+     <p class="ann"><b>Копія/a11y:</b> <code>native.preview.label.download/start</code>, <code>native.preview.reason.preview#*</code>, <code>native.preview.storageFullDetail/storageExit</code>, <code>native.preview.downloadFailed</code>. <b>Дзе:</b> app/route/[id].tsx:524–547, :442–455.</p>
+    </div>
+   </div>
+   <div class="cell"><h3>Паласа прагрэсу (WalkProgress)</h3>
+    <div class="stage">
+     <div class="track" style="width:240px"><b style="width:0"></b></div>
+     <div class="track" style="width:240px;margin-top:10px"><b style="width:42%"></b></div>
+     <div class="track" style="width:240px;margin-top:10px"><b style="width:100%"></b></div>
+     <p style="font-size:12px;color:var(--muted);margin-top:6px">42%</p>
+    </div>
+    <p class="note">6px запаўненне <code>accent</code> на трэку <code>line</code> + muted 1px мяжа (≥3:1 на картцы). Ease 400ms <code>inOut(ease)</code>; лічба-фініш — крос-фейд; reduce-motion — імгненна (канон §9).</p>
+    <p class="ann"><b>Дзе:</b> components/walk-progress.tsx:74 (Run: app/run/[id].tsx:759).</p>
+   </div>
+   <div class="cell"><h3>Факт-рады прэв'ю</h3>
+    <div class="stage">
+     <div class="fact"><span class="ic"></span>42 хв</div>
+     <div class="fact" style="margin-top:6px"><span class="ic" style="border-radius:999px"></span>Кропкі: 5</div>
+     <p class="note" style="margin-top:8px">«Памер: 18 МБ» <code>native.chrome.sizeMb</code>; «Кропак бясплатна: 2» <code>native.chrome.freeStopsCount</code>; «Час: ад 30 да 45 хв» <code>durationRange</code>; «час не ацэнены» <code>differenceText.duration_unknown</code>.</p>
+     <p class="ann"><b>a11y:</b> рад = адзін элемент: іконка маўчыць, тэкст нясе «Працягласць»/<code>durationLabel</code>, «Кропкі»/<code>stopsLabel</code>. <b>Дзе:</b> app/route/[id].tsx:375–410.</p>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <section id="s7">
+  <h2>7. Панэль Run <small>09 §6.5, 11 §3.2: Peek/Half/Full; цела ≤320px пракруткі; без зерня</small></h2>
+  <div class="grid">
+   <div class="cell"><h3>Peek-бар: нічога не грае / грае</h3>
+    <div class="stage">
+     <div class="bar" style="position:static"><div class="row"><span class="t">Нічога не грае</span></div></div>
+     <div class="bar" style="position:static;margin-top:10px;border:1px solid var(--line);border-radius:var(--r)"><div class="row"><span class="t">Зараз грае: Вада і горад</span><span class="btn outline-accent" style="padding:8px 12px">Паўза</span></div><div class="track" style="margin-top:10px"><b style="width:42%"></b></div></div>
+    </div>
+    <p class="ann"><b>Копія/a11y:</b> «Зараз грае: {назва}» / «Нічога не грае» <code>native.run.nowPlayingLabel/nothingPlaying</code>; «Граць»/«Паўза» <code>native.run.playAudio/pauseAudio</code> — кантрол запускае толькі гід, момант ідзе сваёй дарогай. <b>Дзе:</b> app/run/[id].tsx:731–770.</p>
+   </div>
+   <div class="cell"><h3>Цяпер грае + транскрыпт</h3>
+    <div class="stage">
+     <div style="border:1px solid var(--notice-border);border-radius:var(--r);padding:8px">Зараз грае: Вада і горад · 02:14</div>
+     <p style="font-weight:600;margin-top:10px">Транскрыпт</p>
+     <p style="font-size:12px;color:var(--muted)">Тэкст прыйдзе з кантэнтам пакета</p>
+     <p style="margin-top:6px">Горад ідзе за сваёй вадой…</p>
+     <span class="btn outline-accent" style="margin-top:8px">Чытаць</span>
+    </div>
+    <p class="ann"><b>Копія:</b> «Зараз грае» <code>native.run.nowPlayingLabel</code>; «Транскрыпт»/«Тэкст прыйдзе з кантэнтам пакета» <code>native.run.transcript/transcriptPending</code>; «Чытаць» <code>native.run.readMore</code>; атрыбуцыя «Дадзеныя © удзельнікі OpenStreetMap, ODbL» <code>native.run.attribution</code>. <b>Дзе:</b> app/run/[id].tsx:791, :306–333.</p>
+   </div>
+   <div class="cell"><h3>Слоі гісторыі і дзеянні сесіі</h3>
+    <div class="stage">
+     <div class="row"><span class="chip on" style="flex:1;text-align:center">Асноўная гісторыя</span><span class="chip" style="flex:1;text-align:center">Дадатковая гісторыя</span></div>
+     <div class="row" style="margin-top:10px"><span class="btn outline-accent">Прыпыніць прагулку</span><span class="btn outline-accent">Завяршыць прагулку</span></div>
+     <div style="margin-top:10px"><span class="btn primary">Працягнуць</span></div>
+    </div>
+    <p class="note">Дзве ўкладкі — адна група (AC3); актыўная мяжа <code>accent</code>. Рад дзеянняў — <code>flexWrap</code> (#729): доўгія подпісы пераносяцца, трымаюцца дасяжнымі на капе 200%. Завяршэнне — праз дыялог §5.</p>
+    <p class="ann"><b>Копія:</b> <code>native.run.storyBase/storyExtended</code>; «Прыпыніць прагулку»/«Завяршыць прагулку» <code>native.run.pauseWalk/endWalk</code>; «Працягнуць» <code>native.run.resume</code>. <b>Дзе:</b> app/run/[id].tsx:151, :173, :190, :660, :672, :834.</p>
+   </div>
+   <div class="cell"><h3>Завершана + ціхі водгук</h3>
+    <div class="stage">
+     <p style="font-weight:600">Прагулка завершана</p>
+     <div class="cardk" style="margin-top:8px">
+      <p>Як табе гайд? Можна ацаніць — гэта неабавязкова.</p>
+      <div class="row" style="margin-top:8px"><span class="btn primary" style="padding:8px 12px">Ацаніць гайд</span><span class="btn quiet">Не, дзякуй</span></div>
+     </div>
+    </div>
+    <p class="ann"><b>Копія/a11y:</b> «Прагулка завершана» <code>native.run.endedTitle</code>; «Як табе гайд?…» <code>native.feedback.inviteTitle</code>; «Ацаніць гайд»/«Не, дзякуй» <code>inviteRate/inviteDismiss</code>; «Ці быў ты тут?» <code>placeVisitTitle</code> — самаацэнка, не даказанае наведванне. <b>Дзе:</b> app/run/[id].tsx:608, :616.</p>
+   </div>
+  </div>
+ </section>
+
+ <section id="s8">
+  <h2>8. Гісторыя і мова (My KUDY) <small>канон §7: sessionStates active/paused/finished без новых назваў</small></h2>
+  <div class="grid">
+   <div class="cell"><h3>Рады праходаў</h3>
+    <div class="stage">
+     <p style="font-weight:600">Бягучая прагулка</p>
+     <p style="font-size:14px">актыўная — з 11.10 — праслышана: 2</p>
+     <p style="font-weight:600;margin-top:8px">Папярэднія праходы</p>
+     <p style="font-size:14px">10.10 — 10.10 — праслышана: 4</p>
+     <p style="font-size:14px;color:var(--muted)">Папярэдніх праходаў няма</p>
+    </div>
+    <p class="ann"><b>Копія:</b> <code>native.chrome.currentWalk/pastWalks/noPastWalks/noCurrentWalk</code>; радкі <code>liveRowLine/pastRowLine</code>; станы <code>stateLabel.active/paused/finished</code>. <b>Дзе:</b> app/(tabs)/my.tsx:272, :305, :389.</p>
+   </div>
+  </div>
+ </section>
+
+ <section id="s9">
+  <h2>9. Матрыца станаў <small>крытэрый 2: loading / empty / error+retry / offline / disabled / locked / paused / completed — дзе прымальныя, копія, токены, a11y</small></h2>
+  <table class="mtx">
+   <tr><th>Кампанент</th><th>Стан</th><th>Копія (be, даслоўна · id)</th><th>Токены</th><th>a11y</th><th>Дзе ў кодзе</th></tr>
+   <tr><td>Каталог Explore/Гіды</td><td>loading</td><td>«Загрузка…» · <code>native.chrome.loading</code></td><td>muted тэкст + ActivityIndicator muted</td><td>рад = label тэксту, спінер маўчыць</td><td>components/loading-indicator.tsx:24</td></tr>
+   <tr><td>Каталог</td><td>empty</td><td>«не апублікавана» · <code>notPublished</code>; «Гідаў з тэкстам на гэтай мове яшчэ няма.» · <code>textLocaleEmpty</code></td><td>muted (CityMessage)</td><td>тэкст, не збой; NAV3</td><td>components/guide-card.tsx:429</td></tr>
+   <tr><td>Каталог</td><td>error/retry</td><td>«Каталог часова недаступны» + «Паўтарыць» · <code>catalogTemporarilyUnavailable/retry</code></td><td>error-пара + accent контур</td><td>live region polite; named retry</td><td>guide-card.tsx:384, :119</td></tr>
+   <tr><td>Каталог</td><td>offline</td><td>«Папярэдні валідны кэш» + прычына · <code>validCache</code></td><td>notice-пара; спіс карткі з кэша</td><td>live region; прычына muted ніжэй</td><td>guide-card.tsx:402</td></tr>
+   <tr><td>Кнопка primary</td><td>disabled</td><td>«Загрузіць»/«Купіць» + прычына «Патрэбна пакупка.»</td><td><code>disabled-ink/-line</code>, празрысты, без полкі</td><td>accessibilityState.disabled; прычына побач (11 §7)</td><td>route/[id].tsx:524; upgrade-offer.tsx:47</td></tr>
+   <tr><td>Кропка маршруту</td><td>locked</td><td>«зачынена» · <code>native.run.status.locked</code>; «Даступна пасля куплі» <code>lockedHint</code></td><td><code>color.marker.locked</code> + белы абвод</td><td>«{назва}, {стан}» + markerHint; не толькі колер</td><td>run/[id].tsx:699</td></tr>
+   <tr><td>Кропка маршруту</td><td>playing</td><td>«гучыць» · <code>status.playing</code></td><td><code>marker.playing</code> (≥3:1 на map/street)</td><td>тап = прэв'ю, не гук</td><td>run/[id].tsx:699</td></tr>
+   <tr><td>Кропка маршруту</td><td>completed (played)</td><td>«праслухана» · <code>status.played</code></td><td><code>marker.played</code> = accent</td><td>таксама</td><td>run/[id].tsx:699</td></tr>
+   <tr><td>Кропка маршруту</td><td>available / pending</td><td>«даступна» / «чакае» · <code>status.available/pending</code></td><td><code>marker.available</code> / <code>marker.pending</code></td><td>таксама</td><td>run/[id].tsx:699</td></tr>
+   <tr><td>Сесія Run</td><td>paused</td><td>«Прагулка прыпынена» + «Працягнуць» · <code>pausedTitle/resume</code></td><td>notice-пара; resume primary</td><td>live region; кнопка рэзюме адна</td><td>run/[id].tsx:594</td></tr>
+   <tr><td>Сесія Run</td><td>completed (ended)</td><td>«Прагулка завершана» · <code>endedTitle</code></td><td>тэкст; інвайт — базавая картка</td><td>інвайт неабавязковы (F01)</td><td>run/[id].tsx:608</td></tr>
+   <tr><td>Peek-бар</td><td>empty</td><td>«Нічога не грае» · <code>nothingPlaying</code></td><td>контрол схаваны без playingGuide</td><td>рад тэксту; кантрол з'яўляецца з аўдыё</td><td>run/[id].tsx:734</td></tr>
+   <tr><td>GPS-аўтазапуск</td><td>denied / stalled / suspended</td><td>«Аўтаматычныя гісторыі не працуюць — я не бачу вашай пазіцыі» / «Пазіцыя састарэлая»+«Аўтазапуск і чарга заблакаваныя» / «Аўтаматычныя гісторыі прыпыненыя»</td><td>notice-пара; дэталь muted</td><td>не mascot-only; тэкст праўды</td><td>run/[id].tsx:582–594</td></tr>
+   <tr><td>Прэв'ю гіда</td><td>locked stop</td><td>«Зачынена» · <code>native.chrome.locked</code>; вэб «кропка пад замком» <code>web.ui.lockedLabel</code></td><td>Lucide lock / эмодзі (H5)</td><td>рад = label «Зачынена», слова побач з іменем</td><td>route/[id].tsx:507; web/components/locked-stop-row.tsx:13</td></tr>
+   <tr><td>Прэв'ю</td><td>storage full</td><td>«не хапае месца: патрэбна яшчэ ${mb} МБ» + «Вызваліць месца ў KUDY» · <code>storageFullDetail/storageExit</code></td><td>тэкст прычыны; выхад named</td><td>дзеянне дасяжнае, не тупік</td><td>route/[id].tsx:442–455</td></tr>
+   <tr><td>Загрузка пакета</td><td>error</td><td>«Збой загрузкі.» · <code>downloadFailed</code> + «Паўтарыць» <code>retry</code></td><td>тэкст + outline retry</td><td>named retry побач</td><td>route/[id].tsx:442</td></tr>
+   <tr><td>Водгук</td><td>busy</td><td>кнопкі disabled пад адпраўкай</td><td>ghost-пара</td><td>accessibilityState.disabled+selected</td><td>app/feedback.tsx:70, :211</td></tr>
+   <tr><td>Водгук</td><td>delivery draft→sent</td><td>«Чарнавік захаваны на прыладзе» … «Адпраўлена» · <code>stateDraft/Pending/Sent</code>; «Канфлікт…» + «Праверыць на серверы»; «Адпраўка спынена: патрэбна ўвага»</td><td>тэкставы стан; conflict — акцыя accent</td><td>21 §5.4 даслоўна; збой → pending</td><td>contracts source.json native.feedback.state*</td></tr>
+   <tr><td>Вэб каталог</td><td>empty</td><td>«Гідаў з тэкстам на гэтай мове яшчэ няма.» · <code>web.ui.catalogEmpty</code></td><td>web тэкст muted</td><td>тэкст</td><td>web/components/catalog-page.tsx</td></tr>
+   <tr><td>Вэб тэкст гіда</td><td>unavailable</td><td>«Тэкст гіда на гэтай мове пакуль недаступны» · <code>web.ui.textUnavailableTitle</code></td><td>base картка</td><td>тэкст, не збой</td><td>web/components/text-unavailable.tsx</td></tr>
+   <tr><td>Вэб карта</td><td>error</td><td>«Карта часова недаступная. Спіс маршрутаў ніжэй працуе звычайна.» · <code>web.ui.mapError</code></td><td>тэкст</td><td>спіс застаецца працаздольным</td><td>web/components/city-map.tsx</td></tr>
+  </table>
+ </section>
+
+ <section id="s10">
+  <h2>10. Тэлефон і вэб, буйны тэкст, даступнасць <small>крытэрый 3</small></h2>
+  <div class="frames">
+   <div>
+    <p class="note" style="margin:0 0 6px">Тэлефон 390×844 · Run, Half-панэль</p>
+    <div class="surface phone">
+     <div class="ptop"><span class="brand">KUDY</span><span style="font-size:14px">Прагулка</span></div>
+     <div class="runmap mapbox" style="border:0;border-radius:0;height:300px">
+      <span class="st" style="left:0;right:0;top:150px;height:16px"></span>
+      <span class="st" style="left:180px;top:0;bottom:0;width:14px"></span>
+      <span class="mk" style="position:absolute;left:80px;top:60px"><span class="marker m-played">П</span><i>Кранны — праслухана</i></span>
+      <span class="mk" style="position:absolute;left:230px;top:120px"><span class="marker m-playing">Г</span><i>Матоўля — гучыць</i></span>
+      <span class="mk" style="position:absolute;left:120px;top:200px"><span class="person"></span><i>Вы</i></span>
+     </div>
+     <div class="panel half">
+      <div class="row"><span class="t" style="font-weight:600">Зараз грае: Вада і горад</span><span class="btn outline-accent" style="padding:6px 10px">Паўза</span></div>
+      <div class="track" style="margin-top:8px"><b style="width:42%"></b></div>
+      <div class="row" style="margin-top:10px"><span class="btn outline-accent" style="flex:1">Прыпыніць прагулку</span><span class="btn outline-accent" style="flex:1">Завершыць прагулку</span></div>
+      <p style="font-weight:600;margin-top:10px">Транскрыпт</p>
+      <p style="margin-top:4px">Горад ідзе за сваёй вадой: порт, соль, цагель…</p>
+     </div>
+    </div>
+   </div>
+   <div>
+    <p class="note" style="margin:0 0 6px">Вэб 1280 · каталог, уласная сетка вэб-абалонкі ў дзве калонкі</p>
+    <div class="surface web">
+     <div class="wtop"><span class="brand">KUDY</span><nav class="links" aria-label="Меню"><span>Гарады</span><span>Гіды</span><span>Пра KUDY</span></nav></div>
+     <div class="wcols">
+      <div class="cardk"><div class="t">Набярэжная і яе гісторыі</div><div class="s">Чатыры гісторыі пра горад, што ідзе за сваёй вадой.</div><span class="badge free">Бясплатна</span><div class="loc">Тэкст: be, en; аўдыё: be</div></div>
+      <div class="cardk"><div class="t">Вежа на Вялікім Млочы</div><div class="s">Адна доўгая гісторыя з двума ярусамі.</div><span class="badge paid">Платна</span><div class="loc">Тэкст: be, en; аўдыё: be</div></div>
+      <div class="cardk wfull" style="background:var(--badge-lock)"><div class="t">Вежа на Вялікім Млочы · кропка 3</div><div class="row"><span class="badge lock"><span class="luc"></span>Зачынена</span><span style="color:var(--muted);font-size:14px">кропка пад замком — дасяжна толькі ў дадатку</span></div></div>
+     </div>
+    </div>
+    <p class="note">Вэб трыма тыя ж токены; чып/кнопка hover — прыцемненне ≥10% аналагічна pressed; клавіяцурны фокус — той жа outline 3px/<code>:focus-visible</code>.</p>
+   </div>
+  </div>
+  <div class="bigstrip">
+   <h3 style="font-size:14px;color:#4c5359">Буйны тэкст: кап ScaledText 1,25× (канон a11y-плашка) і сістэмныя 200% на адкрытым Text</h3>
+   <p class="cap1">Прыпыніць прагулку · 1,25× — трымае радок, пераносіцца цэлым словам.</p>
+   <p class="z">Прыпыніць прагулку · 200% — ScaledText капуе да 1,25×; адкрыты Text (poiLabel, run/[id].tsx:695) не капуецца — сям'я дэфекту #718.</p>
+   <p class="note">Рад дзеянняў сесіі — flexWrap (#729): на любой капе подпісы пераносяцца, кнопкі застаюцца дасяжнымі. Маркерныя меткі — 12px, ніжняя мяжа чытэльнасці; полка/дып не мяняюць зону дотыку ≥44px. Focus: outline 3px accent, offset 1 — адзін для ўсіх інтэрактыўных. Reduced-motion: дыялогі не аніміруюцца (animationType none), прагрэс імгненны, полка без пераходаў.</p>
+  </div>
+ </section>
+
+ <section id="s11">
+  <h2>11. Handoff — расыходжанні канона і кода <small>фіксы тут не робяцца; гэта дызайн-задача</small></h2>
+  <table class="mtx">
+   <tr><th>ID</th><th>Што ў каноне</th><th>Што ў кодзе сёння</th><th>Прапанова перадачы</th></tr>
+   <tr><td>H1</td><td>hintcard — сіняваты фон <code>hint.bg/#f6faff</code> + <code>hint.border/#bcd2f0</code> (§5)</td><td>GuideHintCard — белая базавая пара; токенаў hint у components/design-tokens.ts няма</td><td>дадаць токены ў люстра + перафарбаваць картку; гард пар канона ўжо ёсць</td></tr>
+   <tr><td>H2</td><td>momentcard — цёплая пара <code>moment.bg/#fff7ec</code> + <code>moment.border/#ecd9b0</code> (§5)</td><td>тэйзер жыве тэкставымі кнопкамі; пара не спажываецца</td><td>токены + фон nowPlaying/тэйзера ў інтэрфейсе месца</td></tr>
+   <tr><td>H3</td><td>маркер: «белая літара першай літары стану» (§5)</td><td>кропка без літары (state чытаецца меткай+aria)</td><td>ці дадаваць літару, ці допіс у канон — рашэнне ўладара</td></tr>
+   <tr><td>H4</td><td>дыялог: backdrop «35% чорнага» (§5)</td><td><code>rgba(34,38,43,.4)</code> — 40% чарніла (UX 06, вытворнае адценне)</td><td>узгадніць адзінае значэнне ў каноне; пара не ў contrastPairs</td></tr>
+   <tr><td>H5</td><td>адзіны іконкавы слой (G25.04)</td><td>вэб замок — эмодзі 🔒 (locked-stop-row.tsx:13)</td><td>замена на lock.svg з G25.04</td></tr>
+   <tr><td>H6</td><td>кнопкі: primary / звычайная / выключаная (§5)</td><td>шырокі чацвёрты фактычны стыль: контурная акцэнтная (session, retry, cancel, read, layers)</td><td>прапанова новага запісу рэестра: назваць «контурную акцэнтную» ў каноне разам з правілам выкарыстання</td></tr>
+   <tr><td>H7</td><td>канон §5 задае толькі кропкі станаў і кропку пазіцыі</td><td>POI-квадрат 14px badgeMixed+muted (run/[id].tsx:109)</td><td>допіс POI у канон §5 як асобная адзінка мапы</td></tr>
+   <tr><td>H8</td><td>усё тэкставае праз ScaledText (кап 1,25×)</td><td>poiLabel — адкрыты Text (run/[id].tsx:695); сям'я дэфекту #718/#727</td><td>перавесці на ScaledText у follow-up G21.47</td></tr>
+  </table>
+ </section>
+
+ <section id="s12">
+  <h2>12. Экспарт і праверка</h2>
+  <p class="note">· гэты ліст — <code>outputs/G25.06/contact-sheet.html</code> (рэдагуемы, шрыфты локальна ў <code>fonts/</code>, OFL); · вектар маркераў — <code>outputs/G25.06/markers.svg</code>; · растравы кантактны ліст — <code>outputs/G25.06/contact-sheet.png</code> (1680×7734); · матрыца станаў — §9 тут і ў <code>results/G25.06.md</code>; · карта кода — кампанент → file:line у §1–§8 і выніку. Прапановы B04.1/B04.2 (гліна/бурштын) у кампанентах не ўжываюцца — яны толькі для ілюстрацый і пазнак знаходак (#704), даслоўна B04.1/B04.2 рэестра.</p>
+ </section>
+
+ <p class="foot">G25.06 · issue #705 · эпік #346 · спэцымены статычныя; праверка на жывой прыладзе не рабілася — пазначана невыкананай (прэцэдэнт G25.04). Прататып вэб-кадра — спрошчаны, production вэб трыма ўласную разметку site-shell.</p>
+</main>
