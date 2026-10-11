@@ -272,7 +272,9 @@ export default function RoutePreview() {
         {/* UX 02 (issue #348): even the unavailable state keeps the frame —
             with the native header off there is no other way back (AC2). */}
         <BackButton label={strings.back} testID="btn-preview-back" />
-        <ScaledText style={styles.unavailable}>{strings.catalogUnavailable}</ScaledText>
+        <ScaledText style={styles.unavailable} testID="route-unavailable">
+          {strings.catalogUnavailable}
+        </ScaledText>
       </View>
     );
   }
