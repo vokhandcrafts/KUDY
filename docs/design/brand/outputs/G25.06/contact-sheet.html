@@ -255,7 +255,7 @@ table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
   <h2>4. Notices, банэры і сям'і станаў <small>канон §5 «Дыялог і стужкі», §7; ніколі не mascot-only; live region polite</small></h2>
   <div class="grid">
    <div class="cell"><h3>Notice-пара: офлайн-кэш</h3>
-    <div class="banner notice">Папярэдні валідны кэш<div class="why">сеть адсутнічае з 20:12</div></div>
+    <div class="banner notice">Папярэдні валідны кэш<div class="why">сець адсутнічае з 20:12</div></div>
     <p class="ann"><b>Копія/a11y:</b> «Папярэдні валідны кэш» <code>native.chrome.validCache</code>; прычына — 12px <code>muted</code> ніжэй (StateBanner: <code>accessibilityLiveRegion="polite"</code>). <b>Дзе:</b> components/guide-card.tsx:285, app/run/[id].tsx:131.</p>
    </div>
    <div class="cell"><h3>Error-пара + іменаваны retry</h3>
@@ -455,7 +455,7 @@ table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
    <h3 style="font-size:14px;color:#4c5359">Буйны тэкст: кап ScaledText 1,25× (канон a11y-плашка) і сістэмныя 200% на адкрытым Text</h3>
    <p class="cap1">Прыпыніць прагулку · 1,25× — трымае радок, пераносіцца цэлым словам.</p>
    <p class="z">Прыпыніць прагулку · 200% — ScaledText капуе да 1,25×; адкрыты Text (poiLabel, run/[id].tsx:695) не капуецца — сям'я дэфекту #718.</p>
-   <p class="note">Rad дзеянняў сесіі — flexWrap (#729): на любой капе подпісы пераносяцца, кнопкі застаюцца дасяжнымі. Маркерныя меткі — 12px падлога чытэльнасці; полка/дып не мяняюць зону дотыку ≥44px. Focus: outline 3px accent, offset 1 — адзін для ўсіх інтэрактыўных. Reduced-motion: дыялогі не аніміруюцца (animationType none), прагрэс імгненны, полка без пераходаў.</p>
+   <p class="note">Рад дзеянняў сесіі — flexWrap (#729): на любой капе подпісы пераносяцца, кнопкі застаюцца дасяжнымі. Маркерныя меткі — 12px, ніжняя мяжа чытэльнасці; полка/дып не мяняюць зону дотыку ≥44px. Focus: outline 3px accent, offset 1 — адзін для ўсіх інтэрактыўных. Reduced-motion: дыялогі не аніміруюцца (animationType none), прагрэс імгненны, полка без пераходаў.</p>
   </div>
  </section>
 
@@ -468,7 +468,7 @@ table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
    <tr><td>H3</td><td>маркер: «белая літара першай літары стану» (§5)</td><td>кропка без літары (state чытаецца меткай+aria)</td><td>ці дадаваць літару, ці допіс у канон — рашэнне ўладара</td></tr>
    <tr><td>H4</td><td>дыялог: backdrop «35% чорнага» (§5)</td><td><code>rgba(34,38,43,.4)</code> — 40% чарніла (UX 06, вытворнае адценне)</td><td>узгадніць адзінае значэнне ў каноне; пара не ў contrastPairs</td></tr>
    <tr><td>H5</td><td>адзіны іконкавы слой (G25.04)</td><td>вэб замок — эмодзі 🔒 (locked-stop-row.tsx:13)</td><td>замена на lock.svg з G25.04</td></tr>
-   <tr><td>H6</td><td>кнопкі: primary / звычайная / выключаная (§5)</td><td>шырокі чацвёрты фактычны стыль: контурная акцэнтная (session, retry, cancel, read, layers)</td><td>прапанова B11: назваць «контурную акцэнтную» ў каноне разам з правілам выкарыстання</td></tr>
+   <tr><td>H6</td><td>кнопкі: primary / звычайная / выключаная (§5)</td><td>шырокі чацвёрты фактычны стыль: контурная акцэнтная (session, retry, cancel, read, layers)</td><td>прапанова новага запісу рэестра: назваць «контурную акцэнтную» ў каноне разам з правілам выкарыстання</td></tr>
    <tr><td>H7</td><td>канон §5 задае толькі кропкі станаў і кропку пазіцыі</td><td>POI-квадрат 14px badgeMixed+muted (run/[id].tsx:109)</td><td>допіс POI у канон §5 як асобная адзінка мапы</td></tr>
    <tr><td>H8</td><td>усё тэкставае праз ScaledText (кап 1,25×)</td><td>poiLabel — адкрыты Text (run/[id].tsx:695); сям'я дэфекту #718/#727</td><td>перавесці на ScaledText у follow-up G21.47</td></tr>
   </table>
@@ -476,7 +476,7 @@ table.mtx td code{font-family:ui-monospace,monospace;font-size:11px}
 
  <section id="s12">
   <h2>12. Экспарт і праверка</h2>
-  <p class="note">· гэты ліст — <code>outputs/G25.06/contact-sheet.html</code> (рэдагуемы, шрыфты локальна ў <code>fonts/</code>, OFL); · вектар маркераў — <code>outputs/G25.06/markers.svg</code>; · растравы кантактны ліст — <code>outputs/G25.06/contact-sheet.png</code> (1616px шырыня); · матрыца станаў — §9 тут і ў <code>results/G25.06.md</code>; · карта кода — кампанент → file:line у §1–§8 і выніку. Прапановы B04.1/B04.2 (гліна/бурштын) у кампанентах не ўжываюцца — яны толькі для ілюстрацый і пазнак знаходак (#704), даслоўна B04.1/B04.2 рэестра.</p>
+  <p class="note">· гэты ліст — <code>outputs/G25.06/contact-sheet.html</code> (рэдагуемы, шрыфты локальна ў <code>fonts/</code>, OFL); · вектар маркераў — <code>outputs/G25.06/markers.svg</code>; · растравы кантактны ліст — <code>outputs/G25.06/contact-sheet.png</code> (1680×7734); · матрыца станаў — §9 тут і ў <code>results/G25.06.md</code>; · карта кода — кампанент → file:line у §1–§8 і выніку. Прапановы B04.1/B04.2 (гліна/бурштын) у кампанентах не ўжываюцца — яны толькі для ілюстрацый і пазнак знаходак (#704), даслоўна B04.1/B04.2 рэестра.</p>
  </section>
 
  <p class="foot">G25.06 · issue #705 · эпік #346 · спэцымены статычныя; праверка на жывой прыладзе не рабілася — пазначана невыкананай (прэцэдэнт G25.04). Прататып вэб-кадра — спрошчаны, production вэб трыма ўласную разметку site-shell.</p>
