@@ -98,6 +98,32 @@ test('AC1: lock.json is [{path, bytes, sha256}] covering every layer file except
   }
 });
 
+test('#727: every published layer carries and pins the package documents the run reads', async () => {
+  const out = await buildDemoFixture();
+  for (const lockRel of [
+    'public/bundle/demo-route-a1/1/be/base/lock.json',
+    'public/bundle/demo-route-a1/1/en/base/lock.json',
+    'public/bundle/demo-route-a1/1/uk/base/lock.json',
+    'private/bundle/demo-route-a1/1/be/extended/lock.json',
+    'private/bundle/demo-route-a1/1/en/extended/lock.json',
+  ]) {
+    const lock = readJson(out, lockRel);
+    const pinned = new Map(lock.map((entry) => [entry.path, entry]));
+    const layerDir = path.posix.dirname(lockRel);
+    const bundleRoot = path.join('public', ...lockRel.split('/').slice(1, 4));
+    for (const doc of ['route.json', 'places.json', 'voices.json']) {
+      const entry = pinned.get(doc);
+      assert.ok(entry, `${lockRel} must pin ${doc} (issue #727 criterion 3)`);
+      const layerBytes = await fsp.readFile(path.join(out, ...layerDir.split('/'), doc));
+      const rootBytes = await fsp.readFile(path.join(out, ...bundleRoot.split('/'), doc));
+      assert.equal(entry.bytes, layerBytes.length, `${lockRel}: ${doc}.bytes`);
+      assert.equal(entry.sha256, sha256Hex(layerBytes), `${lockRel}: ${doc}.sha256`);
+      // The layer copy is the canonical bundle-root document, byte for byte.
+      assert.equal(layerBytes.equals(rootBytes), true, `${lockRel}: ${doc} must equal the bundle-root document`);
+    }
+  }
+});
+
 test('AC1: release manifest lists every artifact with bytes and sha256', async () => {
   const out = await buildDemoFixture();
   const manifest = readJson(out, 'release/release-manifest.json');

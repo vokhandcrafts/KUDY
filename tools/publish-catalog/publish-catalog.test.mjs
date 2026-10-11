@@ -374,8 +374,16 @@ test('manifest-hygiene: the published release manifest lists only public entries
   const privateEntries = staged.artifacts.filter((artifact) => !artifact.path.startsWith('public/'));
   assert.ok(privateEntries.length > 0, 'staging keeps the full manifest');
   const raw = await fsp.readFile(storedPath, 'utf8');
+  // #727: a private artifact whose bytes are published verbatim on the
+  // public side (the extended layer's copies of the bundle-root documents)
+  // shares the public entry's sha256 — the hash is published by the public
+  // entry itself, so only a private-only hash can leak.
+  const publicHashes = new Set(
+    staged.artifacts.filter((artifact) => artifact.path.startsWith('public/')).map((artifact) => artifact.sha256),
+  );
   for (const entry of privateEntries) {
     assert.equal(raw.includes(entry.path), false, 'manifest-hygiene');
+    if (publicHashes.has(entry.sha256)) continue;
     assert.equal(raw.includes(entry.sha256), false, 'manifest-hygiene');
   }
   assert.equal(raw.includes('/extended/'), false, 'manifest-hygiene');
