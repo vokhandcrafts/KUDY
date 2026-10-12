@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-12 — G24.05: вырашы межы пілота A1
+Што зрабіць: Калі A1 ухвалены ў #695, прачытай [вынік G24.05](agent-tasks/results/G24.05.md) і запішы ў [рэестр рашэнняў](design/brand/decisions.md), дзе паказваць картку, ці яна даступная пры паўзе і ці захоўваць адказ пасля перазапуску. Правер бачнасць #696 у GitHub Project: токен гэтай сесіі не мае `read:project`.
+PR: https://github.com/vokhandcrafts/KUDY/pull/744 · Issue: [#696](https://github.com/vokhandcrafts/KUDY/issues/696)
+
 ### 2026-10-12 — G24.04: зацвердзі ці адхілі пілот узаемадзеі дракона
 Што зрабіць: прачытай раздзел «Што просіць уладар» у [выніку G24.04](docs/agent-tasks/results/G24.04.md) і каментаром у [#695](https://github.com/vokhandcrafts/KUDY/issues/695) прымі ці адхілі рэкамендаваны пілот A1 «Падні вочы» (чарга пасля яго: A4 → A2 → A5; гукі чакаюць #694).
 PR: https://github.com/vokhandcrafts/KUDY/pull/740 · Issue: [#695](https://github.com/vokhandcrafts/KUDY/issues/695)
