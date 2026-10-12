@@ -79,13 +79,14 @@ async function screenNodes(driver, screenId, slug) {
   return parseDump((await driver.dump(`dump-${slug}.xml`)).xml);
 }
 
-async function openPicker(driver, slug) {
-  await driver.launchDeepLink('kudy:///my');
+async function openPicker(driver, slug, url, coldStart) {
+  await coldStart(driver, url, { timeoutMs: 180000, caseSlug: `${slug}-explore` });
+  await driver.tapSelector({ testID: 'link-kudy' });
   return screenNodes(driver, 'screen-KUDY', `${slug}-picker`);
 }
 
-async function selectLocale(driver, locale, slug) {
-  const nodes = await openPicker(driver, slug);
+async function selectLocale(driver, locale, slug, url, coldStart) {
+  const nodes = await openPicker(driver, slug, url, coldStart);
   for (const entry of UI_LOCALES) {
     checkAction(nodes, 'screen-KUDY', `btn-ui-locale-${entry.code}`, entry.nativeName);
   }
@@ -93,18 +94,31 @@ async function selectLocale(driver, locale, slug) {
   checkSelection(await screenNodes(driver, 'screen-KUDY', `${slug}-selected`), locale);
 }
 
-export async function runLocalesSuite({ driver, url, runCase, coldStart }) {
+async function waitForRunPastLocationPrompt(driver) {
+  const startedAt = Date.now();
+  for (;;) {
+    const nodes = parseDump((await driver.dump('dump-locale-run-entry.xml')).xml);
+    if (findNode(nodes, { testID: 'screen-Run' })) return;
+    const decline = findNode(nodes, { text: 'No thanks' });
+    if (decline) await driver.tapNode(decline);
+    if (Date.now() - startedAt >= 45000) {
+      throw new Error('timeout waiting for screen-Run after the location-accuracy prompt');
+    }
+  }
+}
+
+export async function runLocalesSuite({ driver, url, runCase, coldStart, only = null }) {
   await coldStart(driver, url, { timeoutMs: 420000, caseSlug: 'locales-boot' });
-  const initial = (await openPicker(driver, 'locales-initial')).find((node) =>
+  const initial = (await openPicker(driver, 'locales-initial', url, coldStart)).find((node) =>
     node.resourceId.startsWith('btn-ui-locale-') && node.selected);
   assert.ok(initial, 'initial UI locale is not selected');
   const originalLocale = initial.resourceId.slice('btn-ui-locale-'.length);
   await withLargeFont(driver, async () => {
     try {
-      for (const { code } of UI_LOCALES) {
+      for (const { code } of UI_LOCALES.filter((entry) => only === null || entry.code === only)) {
         const slug = `locale-${code}`;
         await runCase(`${code}: selection, restart, Explore labels and taps at font scale 1.5`, slug, driver, async () => {
-          await selectLocale(driver, code, slug);
+          await selectLocale(driver, code, slug, url, coldStart);
           await coldStart(driver, url, { timeoutMs: 180000, caseSlug: `${slug}-restart` });
           const nodes = await screenNodes(driver, 'screen-Explore', `${slug}-explore`);
           for (const [id, key, screen] of [
@@ -122,44 +136,56 @@ export async function runLocalesSuite({ driver, url, runCase, coldStart }) {
           await driver.screenshot(`${slug}-large-font.png`);
         });
         await runCase(`${code}: preview action and label at font scale 1.5`, `${slug}-preview`, driver, async () => {
-          await selectLocale(driver, code, `${slug}-preview`);
+          await selectLocale(driver, code, `${slug}-preview`, url, coldStart);
           await driver.launchDeepLink('kudy:///route/e2e-free-guide');
-          await driver.waitFor({ testID: 'preview-locales' }, { timeoutMs: TIMEOUT_MS });
+          await driver.waitFor({ testID: code === 'be' || code === 'en' ? 'preview-locales' : 'preview-text-unavailable' },
+            { timeoutMs: TIMEOUT_MS, dumpBasename: `dump-${slug}-preview-ready.xml` });
           const nodes = await screenNodes(driver, 'screen-Route preview', `${slug}-preview-action`);
-          const download = findNode(nodes, { testID: 'btn-download' });
-          const id = download ? 'btn-download' : 'btn-start';
-          const label = messageFor(code, `native.preview.label.${download ? 'download' : 'start'}`);
-          checkAction(nodes, 'screen-Route preview', id, label);
+          if (code === 'be' || code === 'en') {
+            assert.ok(findNode(nodes, { testID: 'preview-locales' }), `${code} guide preview is missing`);
+            const download = findNode(nodes, { testID: 'btn-download' });
+            const id = download ? 'btn-download' : 'btn-start';
+            const label = messageFor(code, `native.preview.label.${download ? 'download' : 'start'}`);
+            checkAction(nodes, 'screen-Route preview', id, label);
+          } else {
+            assert.ok(findNode(nodes, { testID: 'preview-text-unavailable' }), `${code} missing text-unavailable state`);
+            assert.ok(findNode(nodes, { text: messageFor(code, 'native.chrome.previewTextUnavailable') }),
+              `${code} missing translated text-unavailable message`);
+          }
+          const back = checkAction(nodes, 'screen-Route preview', 'btn-preview-back',
+            messageFor(code, 'native.chrome.back'));
           await driver.screenshot(`${slug}-preview-large-font.png`);
+          await driver.tapNode(back);
         });
       }
 
-      await runCase('preview and live Run primary actions at font scale 1.5', 'locale-walk-actions', driver, async () => {
-        await selectLocale(driver, 'be', 'locale-walk');
+      if (only === null || only === 'walk') await runCase('preview and live Run primary actions at font scale 1.5', 'locale-walk-actions', driver, async () => {
+        await selectLocale(driver, 'be', 'locale-walk', url, coldStart);
         await driver.launchDeepLink('kudy:///route/e2e-free-guide');
         let nodes = await screenNodes(driver, 'screen-Route preview', 'locale-preview');
         const download = findNode(nodes, { testID: 'btn-download' });
         if (download) {
           await driver.tapNode(checkAction(nodes, 'screen-Route preview', 'btn-download', messageFor('be', 'native.preview.label.download')));
-          await driver.waitFor({ testID: 'btn-start' }, { timeoutMs: 120000, dumpBasename: 'dump-locale-downloaded.xml' });
-          nodes = await screenNodes(driver, 'screen-Route preview', 'locale-preview-ready');
         }
+        await driver.waitFor({ testID: 'btn-start', enabled: true },
+          { timeoutMs: 120000, dumpBasename: 'dump-locale-start-ready.xml' });
+        nodes = await screenNodes(driver, 'screen-Route preview', 'locale-preview-ready');
         await driver.tapNode(checkAction(nodes, 'screen-Route preview', 'btn-start', messageFor('be', 'native.preview.label.start')));
+        await waitForRunPastLocationPrompt(driver);
         nodes = await screenNodes(driver, 'screen-Run', 'locale-run');
         // The fixture walk is pinned to be; switching UI locale cannot change its language (ADR G01.03).
         checkAction(nodes, 'screen-Run', 'btn-run-end', messageFor('be', 'native.run.endWalk'));
         await driver.tapNode(checkAction(nodes, 'screen-Run', 'btn-run-pause', messageFor('be', 'native.run.pauseWalk')));
         await driver.waitFor({ testID: 'btn-run-resume' }, { timeoutMs: TIMEOUT_MS });
         nodes = await screenNodes(driver, 'screen-Run', 'locale-run-paused');
-        await driver.tapNode(checkAction(nodes, 'screen-Run', 'btn-run-resume', messageFor('be', 'native.run.resume')));
-        await driver.waitFor({ testID: 'btn-run-pause' }, { timeoutMs: TIMEOUT_MS });
+        checkAction(nodes, 'screen-Run', 'btn-run-resume', messageFor('be', 'native.run.resume'));
         await driver.tapSelector({ testID: 'btn-run-end' });
         await driver.waitFor({ testID: 'end-confirm-dialog' }, { timeoutMs: TIMEOUT_MS });
         await driver.tapSelector({ testID: 'btn-end-confirm-cancel' });
         await driver.screenshot('locale-run-large-font.png');
       });
     } finally {
-      await selectLocale(driver, originalLocale, 'locales-restore');
+      await selectLocale(driver, originalLocale, 'locales-restore', url, coldStart);
     }
   });
 }

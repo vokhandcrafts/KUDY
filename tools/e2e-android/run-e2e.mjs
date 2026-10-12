@@ -392,6 +392,11 @@ async function main() {
     console.error(`unknown suite: ${suite} (known suites: smoke, locales)`);
     process.exit(2);
   }
+  const only = argValue('--only');
+  if (only !== null && (suite !== 'locales' || !['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'walk'].includes(only))) {
+    console.error(`--only requires --suite locales and one of be/en/uk/de/es/fr/cs/sv/walk (got ${only})`);
+    process.exit(2);
+  }
   const metroPort = Number(argValue('--metro-port') ?? 8083);
   const originPort = Number(argValue('--origin-port') ?? 8792);
 
@@ -405,9 +410,22 @@ async function main() {
     process.exit(0);
   }
   const { adbPath, serial, apkPath, skipInstall } = target;
+  if (suite === 'locales' && !/^emulator-\d+$/.test(serial)) {
+    console.log(`SKIP e2e:android locales — serial ${serial} is not an emulator`);
+    process.exit(0);
+  }
   info(`adb: ${adbPath}; serial: ${serial}; apk: ${apkPath}${skipInstall ? ' (install skipped)' : ''}`);
 
   const driver = new E2eDriver({ adbPath, serial, artifactsDir: runDir, pkg: APP_PACKAGE });
+
+  // The locale suite downloads a synthetic guide. A prior run can leave its
+  // package directory in the emulator, making the next download fail before
+  // any locale assertion. This runner accepts emulator serials only.
+  if (suite === 'locales' && await driver.isPackageInstalled(APP_PACKAGE)) {
+    info(`clearing ${APP_PACKAGE} test data on ${serial} before locale cases`);
+    const cleared = await driver.exec(['shell', 'pm', 'clear', APP_PACKAGE]);
+    if (cleared.stdout.trim() !== 'Success') throw new Error(`pm clear ${APP_PACKAGE} failed: ${cleared.stdout.trim()}`);
+  }
 
   if (!skipInstall) {
     info(`installing ${APP_PACKAGE} from ${apkPath} …`);
@@ -425,11 +443,12 @@ async function main() {
   let origin = null;
   try {
     if (suite === 'locales') {
+      if (only !== null) info(`running only locale case: ${only}`);
       origin = await startOriginServer({ port: originPort, logPath: path.join(runDir, 'origin-locales.log'), outDir: path.join(runDir, 'origin') });
       metro = await startMetro({ port: metroPort,
         env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://10.0.2.2:${originPort}` }, logPath: path.join(runDir, 'metro-locales.log') });
       await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
-      await runLocalesSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart });
+      await runLocalesSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, only });
     } else {
       info('phase A: no catalog origin — starting Metro');
       metro = await startMetro({ port: metroPort, env: {}, logPath: path.join(runDir, 'metro-a.log') });

@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
+import os from 'node:os';
+import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
@@ -99,6 +101,23 @@ test('the public locales command reaches prerequisite resolution instead of reje
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /SKIP e2e:android locales/);
   assert.doesNotMatch(result.stdout, /PASS /);
+});
+
+test('the locales command skips a physical serial before clearing app data', { skip: process.platform === 'win32' }, () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-adb-'));
+  const adb = path.join(dir, 'adb');
+  const touched = path.join(dir, 'touched');
+  fs.writeFileSync(adb, `#!/bin/sh\nif [ "$1" = devices ]; then printf 'List of devices attached\\nphysical-serial\\tdevice\\n'; else touch '${touched}'; fi\n`, { mode: 0o755 });
+  try {
+    const result = spawnSync(process.execPath, [fileURLToPath(new URL('./run-e2e.mjs', import.meta.url)), '--suite', 'locales', '--serial', 'physical-serial'], {
+      encoding: 'utf8', env: { ...process.env, KUDY_ADB: adb, KUDY_E2E_SKIP_INSTALL: '1' }, timeout: 15000,
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /SKIP e2e:android locales — serial physical-serial is not an emulator/);
+    assert.equal(fs.existsSync(touched), false, 'a physical device received a mutation command');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('runner cleanup stops the process it started on this platform', { timeout: 20000 }, async () => {

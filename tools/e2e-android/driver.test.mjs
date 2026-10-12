@@ -104,6 +104,18 @@ test('waitFor resolves through the production lookup on a recorded dump', async 
   assert.ok(node.center.x > 0);
 });
 
+test('waitFor ignores a disabled Start until the device reports it enabled', async () => {
+  const driver = testDriver();
+  let dumps = 0;
+  driver.dump = async () => ({
+    localPath: '/tmp/start.xml',
+    xml: `<node resource-id="btn-start" enabled="${++dumps > 1}" bounds="[0,0][40,40]"/>`,
+  });
+  const node = await driver.waitFor({ testID: 'btn-start', enabled: true }, { timeoutMs: 5000 });
+  assert.equal(node.enabled, true);
+  assert.equal(dumps, 2);
+});
+
 test('waitFor times out readably on a missing element: selector, deadline, dump path', async () => {
   const driver = testDriver();
   driver.dump = async () => ({
