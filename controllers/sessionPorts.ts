@@ -24,13 +24,13 @@ import {
   switchSession,
 } from '../services/db/db.ts';
 import type { SessionHistoryCursor, SqlDriver } from '../services/db/types.ts';
-import { readLayerFacts } from '../services/contentRepo/inventory.ts';
+import { readLayerFacts, validateLayerKey } from '../services/contentRepo/inventory.ts';
 import { STAGING } from '../services/download/download.ts';
 import { readRunMapFacts } from '../services/contentRepo/runMapFacts.ts';
 import { readRunStoryFacts } from '../services/contentRepo/runStoryFacts.ts';
 import { isSafeSegment } from '../services/safe-path.ts';
 import { COMPLETE_UI_LOCALES, type CompleteUiLocaleCode } from '../contracts/ui-locales.ts';
-import type { BundlesStore, Readiness, Tier } from '../services/contentRepo/types.ts';
+import type { BundlesStore, LayerKey, Readiness, Tier } from '../services/contentRepo/types.ts';
 import type { RunSessionStore } from './useRunController.ts';
 import type { GuideHintStore } from './useNearbyController.ts';
 import type { RunPinnedPackagePort, RunSessionPorts } from './run/runSurfaceController.ts';
@@ -360,6 +360,38 @@ export function createRunReadinessFor(input: {
       };
     },
   });
+}
+
+// #727 — the preview's Start-gate verify verdict over the device bundles
+// tree: the same map-facts read the run surface does
+// (services/contentRepo/runMapFacts.ts), so a downloaded layer the walk
+// would refuse answers the preview's repair path (run-map#route-json-missing
+// and siblings) instead of a verdict the run contradicts. Extended stays
+// access-locked: the ServicePorts.evaluateLayer contract carries no grants
+// and the device has no grant source until G20.21 wires the live path (the
+// composition idiom — honest unavailable, never an invented grant).
+export function createEvaluateLayer(input: {
+  bundlesStore: BundlesStore;
+}): (key: LayerKey) => Promise<Readiness> {
+  const { bundlesStore } = input;
+  return async (key) => {
+    const diagnostics = validateLayerKey(key);
+    if (diagnostics.length > 0) return { status: 'incomplete', missing: diagnostics };
+    if (key.tier === 'extended') return { status: 'access-locked', tier: key.tier };
+    const facts = await readRunMapFacts(
+      bundlesStore,
+      layerPath(key.routeId, key.version, key.locale, key.tier),
+      { routeId: key.routeId, version: key.version },
+    );
+    if (!facts.ok) return { status: 'incomplete', missing: [facts.diagnostic] };
+    return {
+      status: 'ready',
+      routeId: key.routeId,
+      version: key.version,
+      tier: key.tier,
+      tierAvailable: ['base'],
+    };
+  };
 }
 
 // G06.04 — the My KUDY history read over the keyset page the store serves.

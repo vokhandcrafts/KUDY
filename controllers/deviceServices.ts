@@ -34,6 +34,7 @@ import type { ServicePorts } from './createServices.ts';
 import type { CommercePort } from './commerce/commerceController.ts';
 import { createUnavailableCommercePort } from '../services/entitlement/unavailable-port.ts';
 import {
+  createEvaluateLayer,
   createRunPackageStopsPort,
   createRunReadinessFor,
   createRunRecoveryPort,
@@ -151,6 +152,10 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
     bundlesStore,
     teaserAudioProbe,
     downloadLayer,
+    // #727 — the preview's verify rides the run's own map facts: the Start
+    // button derives a real evaluate verdict, never verify-unavailable on a
+    // downloaded layer.
+    evaluateLayer: createEvaluateLayer({ bundlesStore }),
     commerce,
     sessionHistory: createSessionHistoryPort(driver),
     uiLocalePersistence: createUiLocalePersistence(driver),

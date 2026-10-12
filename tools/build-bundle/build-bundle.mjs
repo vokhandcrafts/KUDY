@@ -478,6 +478,10 @@ export async function buildBundle({ inDir, outDir }) {
   const publicFiles = new Map();
   const privateFiles = new Map();
   const kinds = new Map();
+  // #727 criterion 3: the layer-carried copies of the bundle-root documents
+  // (the rels below) ride the private side for extended layers — they are
+  // public documents, not private text, so the leak scan must not gram them.
+  const layerRootDocRels = new Set();
 
   // 09 §3 bundle root files are public.
   for (const rel of ['route.json', 'places.json', 'voices.json']) {
@@ -529,6 +533,22 @@ export async function buildBundle({ inDir, outDir }) {
             extendedStories.get(locale).push(...stories.filter((story) => story && typeof story === 'object'));
           }
         }
+      }
+      // #727 criterion 3: the run readers read the package documents from
+      // the layer directory (09 §7: the layer is the lock-verified unit)
+      // and the device download channel fetches lock-pinned files only —
+      // each published layer therefore carries its own copy of the
+      // bundle-root documents and its lock pins them. The canonical
+      // bundle-root bytes win over an author-shipped layer copy of the
+      // same name.
+      for (const rel of ['route.json', 'places.json', 'voices.json']) {
+        const relOut = `${bundleRoot}/${locale}/${tier}/${rel}`;
+        target.set(relOut, publicFiles.get(`${bundleRoot}/${rel}`));
+        layerRootDocRels.add(relOut);
+        kinds.set(
+          `${tier === 'base' ? 'public' : 'private'}/${relOut}`,
+          tier === 'base' ? 'public_bundle' : 'private_bundle',
+        );
       }
       if (tier === 'base') {
         if (files.some((rel) => rel === `${locale}/base/stops.json`)) textLocales.push(locale);
@@ -667,7 +687,13 @@ export async function buildBundle({ inDir, outDir }) {
   // may lead to an extended asset or quote private text.
   scanPublicForLeaks(
     new Map([...publicFiles].map(([rel, buf]) => [`public/${rel}`, buf])),
-    buildPrivateGrams([...privateFiles.keys()], privateFiles),
+    buildPrivateGrams(
+      // #727: the layer-carried copies of the public bundle-root documents
+      // are not private text — their grams would match the bundle-root
+      // originals and fail the scan on every extended build.
+      [...privateFiles.keys()].filter((rel) => !layerRootDocRels.has(rel)),
+      privateFiles,
+    ),
   );
 
   // Registry export (21 §5.2): guide targets per published text locale,
