@@ -34,6 +34,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { DriverError, E2eDriver, findNode, listBootedDevices, parseDump, resolveAdb } from './driver.mjs';
+import { UI_LOCALES } from '../../contracts/ui-locales.ts';
 import { runLocalesSuite } from './locales.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -393,8 +394,9 @@ async function main() {
     process.exit(2);
   }
   const only = argValue('--only');
-  if (only !== null && (suite !== 'locales' || !['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'walk'].includes(only))) {
-    console.error(`--only requires --suite locales and one of be/en/uk/de/es/fr/cs/sv/walk (got ${only})`);
+  const onlyCases = [...UI_LOCALES.map(({ code }) => code), 'walk'];
+  if (only !== null && (suite !== 'locales' || !onlyCases.includes(only))) {
+    console.error(`--only requires --suite locales and one of ${onlyCases.join('/')} (got ${only})`);
     process.exit(2);
   }
   const metroPort = Number(argValue('--metro-port') ?? 8083);
