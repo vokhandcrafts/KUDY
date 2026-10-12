@@ -67,6 +67,7 @@ function projectOfferCore(value: unknown, preference: readonly string[]): {
   editorial_order: number;
   title: string | null;
   summary: string | null;
+  themes: readonly string[];
   text_locales: readonly string[];
   audio_locales: readonly string[];
   access: 'free' | 'paid' | 'mixed';
@@ -124,6 +125,9 @@ function projectOfferCore(value: unknown, preference: readonly string[]): {
     editorial_order: v.editorial_order,
     title: localizedLabel(localized.title, preference),
     summary: localizedLabel(localized.summary, preference),
+    themes: Array.isArray(v.themes)
+      ? v.themes.filter((theme): theme is string => typeof theme === 'string')
+      : [],
     text_locales: textLocales,
     audio_locales: audioLocales,
     access,
@@ -147,6 +151,7 @@ function projectOffer(value: unknown, preference: readonly string[]): CatalogOff
     editorial_order: core.editorial_order,
     title: core.title,
     summary: core.summary,
+    themes: core.themes,
     text_locales: core.text_locales,
     audio_locales: core.audio_locales,
     access: core.access,
@@ -291,8 +296,12 @@ export function projectGuides(
 // and the Nearby projection (loadNearby, G07.01); no consumer re-implements
 // the reader policy (implementation-rules 3).
 type RawOffers = ReadonlyArray<Record<string, unknown>>;
+interface RawIndex {
+  readonly offers: RawOffers;
+  readonly themes: RawOffers;
+}
 
-async function readValidatedIndex(deps: CatalogDeps, envelope: CatalogEnvelope): Promise<RawOffers | null> {
+async function readValidatedIndex(deps: CatalogDeps, envelope: CatalogEnvelope): Promise<RawIndex | null> {
   const pointer = envelope.discovery_index;
   if (!pointer) return null;
   // 21 §3.3: paths, ids and URLs are untrusted input even from the CDN —
@@ -320,9 +329,10 @@ async function readValidatedIndex(deps: CatalogDeps, envelope: CatalogEnvelope):
   const digest = await deps.sha256(bytes);
   if (digest !== pointer.sha256 || bytes.byteLength !== pointer.bytes) return null;
   if (!Array.isArray(index.offers)) return null;
-  return index.offers.filter(
-    (raw): raw is Record<string, unknown> => raw !== null && typeof raw === 'object' && !Array.isArray(raw),
-  );
+  const objects = (rows: unknown): RawOffers => Array.isArray(rows)
+    ? rows.filter((raw): raw is Record<string, unknown> => raw !== null && typeof raw === 'object' && !Array.isArray(raw))
+    : [];
+  return { offers: objects(index.offers), themes: objects(index.themes) };
 }
 
 async function loadIndex(
@@ -332,7 +342,7 @@ async function loadIndex(
 ): Promise<CatalogOfferFacts[] | null> {
   const raw = await readValidatedIndex(deps, envelope);
   if (raw === null) return null;
-  return projectGuideOffers(raw, options.localePreference);
+  return projectGuideOffers(raw.offers, options.localePreference);
 }
 
 // The guide-offer projection of the validated raw offers — extracted so
@@ -376,6 +386,26 @@ function projectPlaceTitles(
   return titles;
 }
 
+function projectPreviewThemes(
+  themeIds: readonly string[],
+  definitions: RawOffers,
+  preference: readonly string[],
+): ReadonlyArray<{ id: string; label: string }> {
+  const labels = new Map<string, string>();
+  for (const definition of definitions) {
+    if (typeof definition.id !== 'string' || labels.has(definition.id)) continue;
+    const label = localizedLabel(definition.labels, preference);
+    if (label !== null) labels.set(definition.id, label);
+  }
+  const seen = new Set<string>();
+  return themeIds.flatMap((id) => {
+    if (seen.has(id)) return [];
+    seen.add(id);
+    const label = labels.get(id);
+    return label === undefined ? [] : [{ id, label }];
+  });
+}
+
 // G07.01 (issue #281) — the Nearby offer list: the same envelope read and
 // reader policy as the city list, projected for guide and place offers. One
 // ref shows once (21 §4 rule 6, the issue #324 canon): the list is ordered
@@ -393,7 +423,7 @@ export async function loadNearby(
       ? { kind: 'offline', offers: previous, reason: read.reason }
       : { kind: 'error', reason: read.reason };
   }
-  let raw: RawOffers | null = null;
+  let raw: RawIndex | null = null;
   try {
     raw = await readValidatedIndex(deps, read.envelope);
   } catch {
@@ -402,7 +432,7 @@ export async function loadNearby(
   const offers: NearbyOfferFacts[] = [];
   if (raw !== null) {
     const projected: NearbyOfferFacts[] = [];
-    for (const entry of raw) {
+    for (const entry of raw.offers) {
       const offer = projectNearbyOffer(entry, options.localePreference);
       if (offer !== null) projected.push(offer);
     }
@@ -625,14 +655,14 @@ export async function loadPreview(
   // titles (UX 05, issue #351) — no second fetch path. A null raw index
   // (absent pointer, failed pin) degrades both: the route-only card and the
   // hidden place lines — the raw place_id never renders.
-  let raw: RawOffers | null = null;
+  let raw: RawIndex | null = null;
   try {
     raw = await readValidatedIndex(deps, read.envelope);
   } catch {
     raw = null;
   }
-  const offers = raw === null ? null : projectGuideOffers(raw, options.localePreference);
-  const placeTitles = raw === null ? null : projectPlaceTitles(raw, options.localePreference);
+  const offers = raw === null ? null : projectGuideOffers(raw.offers, options.localePreference);
+  const placeTitles = raw === null ? null : projectPlaceTitles(raw.offers, options.localePreference);
   // The preview shows the same offer the city list dedups to (issue #324):
   // the sorted-first offer of the route, never an arbitrary duplicate.
   const offer =
@@ -654,6 +684,9 @@ export async function loadPreview(
       version: entry.version,
       title: card.title,
       summary: card.summary,
+      themes: offer && raw
+        ? projectPreviewThemes(offer.themes, raw.themes, options.localePreference)
+        : [],
       textLocales: card.textLocales,
       audioLocales: card.audioLocales,
       localesKnown: card.localesKnown,

@@ -203,6 +203,35 @@ describe("guide preview surface (G06.01.b)", () => {
     expect(screen.queryByTestId("preview-text-unavailable")).toBeNull();
   });
 
+  test("the preview shows the discovery theme label in the selected locale", async () => {
+    serve(CATALOG_FIXTURES);
+    const services = createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 });
+    renderRouter(withPreviewRoutes(services), { initialUrl: "/route/guide-route-a1" });
+    const theme = await screen.findByTestId("preview-theme");
+    expect(within(theme).getByText("Гісторыя")).toBeTruthy();
+    expect(screen.getByText("Гісторыі сукнараў: ад мытні да порта")).toBeTruthy();
+  });
+
+  test("the preview projects its theme when opened in another content locale", async () => {
+    serve(CATALOG_FIXTURES);
+    const services = createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 });
+    act(() => services.uiLocale.set("uk"));
+    renderRouter(withPreviewRoutes(services), { initialUrl: "/route/guide-route-a1" });
+    expect(await screen.findByText("Історія")).toBeTruthy();
+    expect(screen.getByText("Історії сукнарів: від митниці до порту")).toBeTruthy();
+  });
+
+  test("a route without a known theme has no theme row and keeps the preview usable", async () => {
+    serve(CATALOG_FIXTURES);
+    renderRouter(
+      withPreviewRoutes(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 })),
+      { initialUrl: "/route/guide-route-b1" },
+    );
+    expect(await screen.findByTestId("screen-Route preview")).toBeTruthy();
+    expect(await screen.findByTestId("btn-start")).toBeTruthy();
+    expect(screen.queryByTestId("preview-theme")).toBeNull();
+  });
+
   test("open and locked stops are distinguishable; the locked row shows name, place, announce and lock only (NAV5)", async () => {
     serve(CATALOG_FIXTURES);
     renderRouter(

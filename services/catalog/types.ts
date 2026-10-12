@@ -38,6 +38,7 @@ export interface CatalogOfferFacts {
   readonly editorial_order: number;
   readonly title: string | null;
   readonly summary: string | null;
+  readonly themes: readonly string[];
   readonly text_locales: readonly string[];
   readonly audio_locales: readonly string[];
   readonly access: 'free' | 'paid' | 'mixed';
@@ -164,6 +165,9 @@ export interface GuidePreview {
   readonly version: string;
   readonly title: string;
   readonly summary: string | null;
+  // Labels of themes named by this guide's discovery offer, in offer order.
+  // Unknown or unlabeled IDs are omitted; route-only previews have none.
+  readonly themes: readonly { readonly id: string; readonly label: string }[];
   readonly textLocales: readonly string[];
   readonly audioLocales: readonly string[];
   readonly localesKnown: boolean;

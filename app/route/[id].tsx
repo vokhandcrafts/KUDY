@@ -69,6 +69,12 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
+  theme: {
+    color: tokens.colorMuted,
+    fontFamily: tokens.fontFamilyUi,
+    fontSize: tokens.fontBaseSize,
+    marginBottom: tokens.spaceS,
+  },
   // G21.21: the audio choice chips — the pill row under the locales line,
   // the selected chip reads the accent outline (the canon ghost pair for
   // the unselected, the accent for the selected — §5).
@@ -331,6 +337,11 @@ export default function RoutePreview() {
             <ScaledText style={screenStyles.displayTitle}>{state.surface.preview.title}</ScaledText>
             {state.surface.preview.summary ? (
               <ScaledText style={styles.summary}>{state.surface.preview.summary}</ScaledText>
+            ) : null}
+            {state.surface.preview.themes.length > 0 ? (
+              <ScaledText style={styles.theme} testID="preview-theme">
+                {state.surface.preview.themes.map((theme) => theme.label).join(", ")}
+              </ScaledText>
             ) : null}
             <AccessBadge access={state.surface.preview.access} locale={locale} />
             <LocalesLine
