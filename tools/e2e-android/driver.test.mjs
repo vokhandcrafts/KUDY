@@ -58,6 +58,17 @@ test('entity decode in attribute values', () => {
   assert.equal(nodes[0].text, 'a&b <c>');
 });
 
+test('parseDump preserves selected and enabled state for locale and action checks', () => {
+  const [selected, disabled] = parseDump(
+    '<node resource-id="locale" selected="true" enabled="true"/>' +
+    '<node resource-id="start" selected="false" enabled="false"/>',
+  );
+  assert.equal(selected.selected, true);
+  assert.equal(selected.enabled, true);
+  assert.equal(disabled.selected, false);
+  assert.equal(disabled.enabled, false);
+});
+
 test('corrupt input yields diagnostics, never a throw', () => {
   assert.deepEqual(parseDump('not xml at all'), []);
   assert.deepEqual(parseDump(null), []);

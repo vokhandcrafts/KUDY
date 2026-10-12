@@ -8,6 +8,7 @@
 // — the wiring is composed, not copied (implementation-rules 2/3).
 //
 //   npm run e2e:android                            # smoke: phases A + B
+//   npm run e2e:android -- --suite locales         # G23.07
 //   node tools/e2e-android/run-e2e.mjs --serial emulator-5558
 //   node tools/e2e-android/run-e2e.mjs --apk <path> --metro-port 8083
 //
@@ -24,15 +25,16 @@
 // cases stay independent; the unknown-deep-link case alone reuses the
 // running app, because "Back returns to Explore" needs Explore in the back
 // stack.
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { DriverError, E2eDriver, findNode, listBootedDevices, parseDump, resolveAdb } from './driver.mjs';
+import { runLocalesSuite } from './locales.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const ORIGIN_TOOL = path.join(REPO_ROOT, 'tools', 'e2e-origin', 'serve-e2e-origin.mjs');
@@ -143,10 +145,8 @@ function pollHttpOk(url, timeoutMs) {
 
 // Metro and the origin server run in their own process groups and are
 // stopped by group id — the listening PID's whole tree, per
-// implementation-rules 11 (never shell job pids). POSIX boundary: the
-// group kill is the Unix idiom; on Windows it degrades to the logged
-// warning plus the port-closed poll (verified only on Linux — rule 9;
-// a taskkill /T branch is the documented follow-up).
+// implementation-rules 11 (never shell job pids). Windows uses the same
+// owned-PID tree cleanup as tools/android-build/emulator-scenarios.ps1.
 function startGroupProcess(command, args, { cwd, env, logPath }) {
   const log = fs.openSync(logPath, 'a');
   fs.appendFileSync(log, `$ ${command} ${args.join(' ')}\n`);
@@ -154,14 +154,22 @@ function startGroupProcess(command, args, { cwd, env, logPath }) {
     cwd,
     env,
     detached: true,
+    windowsHide: true,
     stdio: ['ignore', log, log],
   });
   fs.closeSync(log);
   return child;
 }
 
-async function stopGroupProcess(child, port, label) {
+export async function stopGroupProcess(child, port, label) {
   if (child.exitCode !== null || child.signalCode !== null) return;
+  if (process.platform === 'win32') {
+    const exited = new Promise((resolve) => child.once('exit', resolve));
+    execFileSync('taskkill.exe', ['/T', '/F', '/PID', String(child.pid)], { encoding: 'utf8' });
+    await exited;
+    await waitForPortClosed(port, 10000);
+    return;
+  }
   try {
     process.kill(-child.pid, 'SIGTERM');
   } catch (error) {
@@ -178,9 +186,10 @@ async function stopGroupProcess(child, port, label) {
 
 function waitForPortClosed(port, timeoutMs) {
   const startedAt = Date.now();
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const attempt = () => {
-      const request = http.get({ host: '127.0.0.1', port, path: '/', timeout: 500 }, () => {
+      const request = http.get({ host: '127.0.0.1', port, path: '/', timeout: 500 }, (response) => {
+        response.resume();
         retry();
       });
       request.on('error', () => {
@@ -193,7 +202,7 @@ function waitForPortClosed(port, timeoutMs) {
     };
     const retry = () => {
       if (Date.now() - startedAt >= timeoutMs) {
-        resolve();
+        reject(new DriverError(`port ${port} is still listening after cleanup`));
         return;
       }
       setTimeout(attempt, 300).unref();
@@ -228,8 +237,8 @@ async function startMetro({ port, env, logPath }) {
   throw new DriverError('Metro start: unreachable state');
 }
 
-async function startOriginServer({ port, logPath }) {
-  const child = startGroupProcess(process.execPath, [ORIGIN_TOOL, '--port', String(port)], {
+async function startOriginServer({ port, logPath, outDir }) {
+  const child = startGroupProcess(process.execPath, [ORIGIN_TOOL, '--port', String(port), ...(outDir ? ['--out', outDir] : [])], {
     cwd: REPO_ROOT,
     env: { ...process.env, EXPO_NO_TELEMETRY: '1' },
     logPath,
@@ -379,8 +388,8 @@ async function main() {
     return index === -1 ? null : argv[index + 1];
   };
   const suite = argValue('--suite') ?? 'smoke';
-  if (suite !== 'smoke') {
-    console.error(`unknown suite: ${suite} (only "smoke" exists in G23.03)`);
+  if (!['smoke', 'locales'].includes(suite)) {
+    console.error(`unknown suite: ${suite} (known suites: smoke, locales)`);
     process.exit(2);
   }
   const metroPort = Number(argValue('--metro-port') ?? 8083);
@@ -392,7 +401,7 @@ async function main() {
 
   const target = await resolveTarget({ serial: argValue('--serial'), apk: argValue('--apk') });
   if (target.skip !== undefined) {
-    console.log(`SKIP e2e:android smoke — ${target.skip}`);
+    console.log(`SKIP e2e:android ${suite} — ${target.skip}`);
     process.exit(0);
   }
   const { adbPath, serial, apkPath, skipInstall } = target;
@@ -404,7 +413,7 @@ async function main() {
     info(`installing ${APP_PACKAGE} from ${apkPath} …`);
     await driver.install(apkPath);
   } else if (!(await driver.isPackageInstalled(APP_PACKAGE))) {
-    console.log(`SKIP e2e:android smoke — ${APP_PACKAGE} is not installed on ${serial} and KUDY_E2E_SKIP_INSTALL=1 was set`);
+    console.log(`SKIP e2e:android ${suite} — ${APP_PACKAGE} is not installed on ${serial} and KUDY_E2E_SKIP_INSTALL=1 was set`);
     process.exit(0);
   }
   if (fs.existsSync(apkPath)) {
@@ -415,38 +424,53 @@ async function main() {
   let metro = null;
   let origin = null;
   try {
-    info('phase A: no catalog origin — starting Metro');
-    metro = await startMetro({ port: metroPort, env: {}, logPath: path.join(runDir, 'metro-a.log') });
-    await driver.exec(['reverse', '--remove', `tcp:${metroPort}`]).catch((error) => {
-      fs.appendFileSync(path.join(runDir, 'runner.log'), `reverse remove: ${error.message}\n`);
-    });
-    await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
-    await phaseA(driver, metroPort);
+    if (suite === 'locales') {
+      origin = await startOriginServer({ port: originPort, logPath: path.join(runDir, 'origin-locales.log'), outDir: path.join(runDir, 'origin') });
+      metro = await startMetro({ port: metroPort,
+        env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://10.0.2.2:${originPort}` }, logPath: path.join(runDir, 'metro-locales.log') });
+      await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
+      await runLocalesSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart });
+    } else {
+      info('phase A: no catalog origin — starting Metro');
+      metro = await startMetro({ port: metroPort, env: {}, logPath: path.join(runDir, 'metro-a.log') });
+      await driver.exec(['reverse', '--remove', `tcp:${metroPort}`]).catch((error) => {
+        fs.appendFileSync(path.join(runDir, 'runner.log'), `reverse remove: ${error.message}\n`);
+      });
+      await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
+      await phaseA(driver, metroPort);
 
-    info('phase B: G23.01 origin — starting origin and Metro with EXPO_PUBLIC_CATALOG_ORIGIN');
-    origin = await startOriginServer({ port: originPort, logPath: path.join(runDir, 'origin-b.log') });
-    await stopGroupProcess(metro, metroPort, 'metro-a');
-    metro = await startMetro({
-      port: metroPort,
-      env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://10.0.2.2:${originPort}` },
-      logPath: path.join(runDir, 'metro-b.log'),
-    });
-    await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
-    await phaseB(driver, metroPort);
+      info('phase B: G23.01 origin — starting origin and Metro with EXPO_PUBLIC_CATALOG_ORIGIN');
+      origin = await startOriginServer({ port: originPort, logPath: path.join(runDir, 'origin-b.log') });
+      await stopGroupProcess(metro, metroPort, 'metro-a');
+      metro = await startMetro({
+        port: metroPort,
+        env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://10.0.2.2:${originPort}` },
+        logPath: path.join(runDir, 'metro-b.log'),
+      });
+      await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
+      await phaseB(driver, metroPort);
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     failCount += 1;
     console.log(`FAIL suite infrastructure — ${message.split(/\r?\n/)[0]}`);
   } finally {
-    if (metro !== null) await stopGroupProcess(metro, metroPort, 'metro');
-    if (origin !== null) await stopGroupProcess(origin, originPort, 'origin');
+    const cleanup = await Promise.allSettled([
+      metro === null ? Promise.resolve() : stopGroupProcess(metro, metroPort, 'metro'),
+      origin === null ? Promise.resolve() : stopGroupProcess(origin, originPort, 'origin'),
+    ]);
+    for (const result of cleanup) {
+      if (result.status === 'rejected') fail('suite cleanup', String(result.reason));
+    }
     await driver.exec(['reverse', '--remove', `tcp:${metroPort}`]).catch((error) => {
       fs.appendFileSync(path.join(runDir, 'runner.log'), `reverse remove: ${error.message}\n`);
     });
   }
 
-  console.log(`\nsmoke: ${passCount} passed, ${failCount} failed (artifacts: ${runDir})`);
+  console.log(`\n${suite}: ${passCount} passed, ${failCount} failed (artifacts: ${runDir})`);
   process.exit(failCount > 0 ? 1 : 0);
 }
 
-await main();
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  await main();
+}

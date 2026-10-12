@@ -176,6 +176,8 @@ export function parseDump(xml) {
       contentDesc: attrs['content-desc'] ?? '',
       cls: attrs.class ?? '',
       clickable: attrs.clickable === 'true',
+      enabled: attrs.enabled === 'true',
+      selected: attrs.selected === 'true',
       bounds: attrs.bounds ?? '',
       center: nodeCenter(attrs.bounds),
     });
