@@ -642,14 +642,14 @@ describe('G21.21: preview controller — the audio choice', () => {
       schema_version: 1,
       revision: 'r-g2121',
       city_id: 'gdansk',
-      themes: [],
+      themes: [{ id: 'theme-walk', labels: { be: 'Прагулка', en: 'Walk' } }],
       offers: [
         {
           offer_id: 'offer-r1-guide',
           ref: { kind: 'guide', route_id: 'r-1', version: '1' },
           city_id: 'gdansk',
           editorial_order: 1,
-          themes: [],
+          themes: ['theme-walk'],
           access: 'free',
           localized: { title: { be: 'Гід раз' } },
           availability: { text_locales: ['be'], audio_locales: audioLocales },
@@ -727,6 +727,20 @@ describe('G21.21: preview controller — the audio choice', () => {
     const noAudio = createPreviewController(makePorts(FULL_LOADER, {}), 'r-1');
     await waitUntil(() => noAudio.getState().surface.kind === 'ready');
     assert.equal(noAudio.getState().audioChoice, null, 'no audio published — text-only default');
+  });
+
+  it('passes the localized theme through and keeps a route-only preview theme-free', async () => {
+    const themed = createPreviewController(makePorts(audioLoader(['be']), {}), 'r-1');
+    await waitUntil(() => themed.getState().surface.kind === 'ready');
+    const themedSurface = themed.getState().surface;
+    assert.ok(themedSurface.kind === 'ready');
+    assert.deepEqual(themedSurface.preview.themes, [{ id: 'theme-walk', label: 'Прагулка' }]);
+
+    const routeOnly = createPreviewController(makePorts(FULL_LOADER, {}), 'r-1');
+    await waitUntil(() => routeOnly.getState().surface.kind === 'ready');
+    const routeOnlySurface = routeOnly.getState().surface;
+    assert.ok(routeOnlySurface.kind === 'ready');
+    assert.deepEqual(routeOnlySurface.preview.themes, []);
   });
 
   it('an explicit chip choice re-derives the button; an unready en layer holds Download', async () => {

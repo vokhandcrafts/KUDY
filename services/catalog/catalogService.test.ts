@@ -413,6 +413,7 @@ describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
     assert.ok(state.kind === 'ready');
     const preview = state.preview;
     assert.equal(preview.title, 'Гісторыі сукнараў: ад мытні да порта');
+    assert.deepEqual(preview.themes, [{ id: 'theme-history', label: 'Гісторыя' }]);
     assert.equal(preview.access, 'paid');
     assert.equal(preview.routeAccess, 'paid');
     assert.equal(preview.durationMin, 45);
@@ -520,6 +521,66 @@ describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
     assert.equal(preview.localesKnown, false);
     assert.equal(preview.durationMin, 35);
     assert.equal(preview.estimatedDuration, null);
+    assert.deepEqual(preview.themes, []);
+  });
+
+  it('projects the free E2E guide theme from the pinned discovery index in the selected locale', async () => {
+    const index = JSON.parse(readFileSync(path.resolve(import.meta.dirname, '../../fixtures/e2e/free-guide/discovery.json'), 'utf8'));
+    // The fixture is packager input; publishing derives these offer fields
+    // from the route and content locales before the app reads the index.
+    index.offers[0].access = 'free';
+    index.offers[0].availability = { text_locales: ['be', 'en'], audio_locales: [] };
+    const routeDoc = readFileSync(path.resolve(import.meta.dirname, '../../fixtures/e2e/free-guide/route.json'), 'utf8');
+    const base = serveIndexPair(
+      [{ route_id: 'e2e-free-guide', version: '1', locales: ['be', 'en'], layers: ['base'] }],
+      index,
+      { 'bundle/e2e-free-guide/1/route.json': routeDoc },
+    );
+    const calls: string[] = [];
+    const loader: CatalogPathLoader = (relPath) => {
+      calls.push(relPath);
+      return base(relPath);
+    };
+    const be = await loadPreview({ loader, sha256 }, opts, 'e2e-free-guide', null);
+    const en = await loadPreview({ loader, sha256 }, { localePreference: ['en', 'be'] }, 'e2e-free-guide', null);
+    assert.ok(be.kind === 'ready' && en.kind === 'ready');
+    assert.deepEqual(be.preview.themes, [{ id: 'theme-e2e-walk', label: 'E2E-прагулка' }]);
+    assert.deepEqual(en.preview.themes, [{ id: 'theme-e2e-walk', label: 'E2E walk' }]);
+    assert.deepEqual(calls, [
+      'catalog.json', 'discovery/index.json', 'bundle/e2e-free-guide/1/route.json',
+      'catalog.json', 'discovery/index.json', 'bundle/e2e-free-guide/1/route.json',
+    ], 'one index read per preview; no theme fetch');
+  });
+
+  it('omits unknown and unlabeled theme IDs without inventing a label or fetching another file', async () => {
+    const index = {
+      themes: [
+        { id: 'known', labels: { en: 'Known' } },
+        { id: 'unlabeled', labels: {} },
+      ],
+      offers: [{
+        offer_id: 'offer-guide',
+        ref: { kind: 'guide', route_id: 'guide-route-b1', version: '3' },
+        editorial_order: 1,
+        themes: ['missing', 'unlabeled', 'known', 'known'],
+        localized: { title: { be: 'Гід' } },
+        availability: { text_locales: ['be'], audio_locales: [] },
+        access: 'free',
+      }],
+    };
+    const loader = serveIndexPair(
+      [{ route_id: 'guide-route-b1', version: '3', locales: ['be'], layers: ['base'] }],
+      index,
+    );
+    const state = await loadPreview({ loader, sha256 }, opts, 'guide-route-b1', null);
+    assert.ok(state.kind === 'ready');
+    assert.deepEqual(state.preview.themes, [{ id: 'known', label: 'Known' }]);
+    index.offers[0].themes = ['missing', 'unlabeled'];
+    const empty = await loadPreview({ loader: serveIndexPair(
+      [{ route_id: 'guide-route-b1', version: '3', locales: ['be'], layers: ['base'] }], index,
+    ), sha256 }, opts, 'guide-route-b1', null);
+    assert.ok(empty.kind === 'ready');
+    assert.deepEqual(empty.preview.themes, []);
   });
 
   it('a missing route document degrades with the named reason, stops are null — nothing invented', async () => {
@@ -714,6 +775,7 @@ describe('loadPreview — the guide preview assembly (G06.01.b)', () => {
       version: '3',
       title: 'guide-route-b1',
       summary: null,
+      themes: [],
       textLocales: ['be'],
       audioLocales: [],
       localesKnown: false,
