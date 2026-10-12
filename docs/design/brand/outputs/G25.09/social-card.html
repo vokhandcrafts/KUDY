@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="be">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G25.09 · Сацыяльная картка · шаблон</title>
+<style>
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Alegreya;src:url(../G25.06/fonts/Alegreya_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Caveat;src:url(../G25.06/fonts/Caveat_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+/* Значэнні — даслоўна канон G06.07; --clay/--amber — прапановы B04.1/B04.2. */
+:root{--paper:#faf7f2;--ink:#22262b;--muted:#6b7280;--accent:#1d6b4f;--accent-ink:#fff;--card:#fff;--line:#d8d2c6;--clay:#805039;--amber:#d8a551;--r:10px}
+*{box-sizing:border-box}
+body{margin:0;background:#ece7df;color:var(--ink);font:400 16px/1.45 Golos,system-ui,sans-serif}
+h1,h2,p{margin:0}
+.kit{max-width:1400px;margin:auto;padding:24px}
+.kit-head{padding-bottom:16px;border-bottom:1px solid #b9b1a5}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--clay)}
+h1{font:600 34px/1.15 Alegreya,serif;margin-top:4px}
+.kit p{max-width:780px;font-size:14px;margin-top:8px}
+.src{font-size:12px;color:#4c5359;margin-top:6px}
+section{margin-top:28px}
+h2{font:600 21px/1.2 Alegreya,serif;padding-bottom:8px;border-bottom:2px solid var(--accent);margin-bottom:10px}
+h2 small{font:400 13px/1.4 Golos,sans-serif;color:#4c5359;display:block;margin-top:3px}
+.pair{display:flex;gap:24px;flex-wrap:wrap;margin-top:12px}
+figure{margin:0}
+figcaption{font-size:12px;color:#4c5359;margin-top:6px;max-width:600px}
+pre{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px;font-size:12px;overflow:auto;max-width:780px}
+.canvas{background:var(--paper);position:relative;overflow:hidden;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.safe{position:absolute;border:2px dashed #b9b1a5;pointer-events:none}
+.safe i{position:absolute;top:6px;left:10px;font-style:normal;font-size:18px;color:#a89f92}
+.s-brand{position:absolute;display:flex;align-items:center;gap:18px}
+.s-mark{border-radius:22%;background:#fff;border:2px solid var(--line)}
+.s-name{font:600 1.4em Alegreya,serif;color:var(--ink);letter-spacing:.02em}
+.s-line{position:absolute;font:400 1.05em/1.15 Alegreya,serif;color:var(--ink)}
+.s-line small{display:block;font:600 .55em Golos,sans-serif;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:.5em}
+.s-dragonline{position:absolute;font:400 1.15em/1.2 Caveat,cursive;color:var(--clay)}
+.s-tag{position:absolute;right:16px;bottom:12px;font-size:15px;font-weight:600;color:var(--muted);border:2px solid var(--muted);border-radius:99px;padding:2px 12px;background:#fff;opacity:.85}
+</style>
+<div class="kit">
+  <div class="kit-head">
+    <div class="eyebrow">G25.09 · issue <a href="https://github.com/vokhandcrafts/KUDY/issues/707">#707</a> · эпік #346 · шаблон 3/4</div>
+    <h1>Сацыяльная картка — 1200×630</h1>
+    <p>Адзін прадукт + адзін сэнс на канву: назва прадукта, ідэнтыфікавальны сказ, дракон з формулай-зваротам, бурштынавы акцэнт медальёна. Без URL на канве: <code>og:url</code>/<code>og:image</code> канчаткова абсалютызуюцца ад <code>siteOrigin</code>, які да публікацыі G10.02.b неапублікаваны (<code>web/lib/app-links.ts</code>) — выяўленая канва нічога не абяцае пра адрас.</p>
+    <div class="src">Крыніцы: брыф v1 (<code>a11ea86</code>) · канон G06.07 · пазы G25.03 · медальён G25.05 · слот іконкі — напрамак G24.02/#693. Патрабаванне праверана 12.10.2026: og:image 1200×630 (1.91:1), PNG/JPG ≤ 2 МБ, мета <code>og:image:width/height</code>; X <code>summary_large_image</code> малюе 1200×675 (16:9) з падразаньнем — крытычнае змесьціва трымаецца ў бяспечнай зоне 1080×510 пасярэдзіне.</div>
+  </div>
+
+  <!-- og:image сніпет: глядзі §2 → спіс -->
+  <section>
+    <h2>§1 · Беларуская і англійская канвы <small>пункцір — бяспечная зона 1080×510 (пасярод 1200×630); унутры яе трымаецца ўсё крытычнае</small></h2>
+    <div class="pair">
+      <figure>
+        <div class="canvas" id="social-be" style="width:1200px;height:630px;font-size:56px">
+          <div class="safe" style="left:60px;top:60px;width:1080px;height:510px"><i>бяспечная зона 1080×510</i></div>
+          <div class="s-brand" style="left:96px;top:104px">
+            <img class="s-mark" src="../G24.02/icon-i1.svg" alt="Слот іконкі — напрамак I1" style="width:88px;height:88px">
+            <span class="s-name">KUDY</span>
+          </div>
+          <div class="s-line" style="left:96px;top:270px;width:620px;font-size:64px">
+            Аўдыёгіды для гарадскіх прагулак
+            <small>тэкст і аўдыё · бясплатна · без акаўнта</small>
+          </div>
+          <img src="../G25.03/pose-curious.svg" alt="Дракон, поза «цікаўны»" style="position:absolute;right:120px;top:130px;width:330px;height:330px">
+          <div class="s-dragonline" style="right:110px;top:64px;font-size:48px">Куды? Хадзем, паглядзім</div>
+          <img src="../G25.05/object-reflection.svg" alt="Медальён «Адлюстраванне»" style="position:absolute;right:84px;bottom:48px;width:110px;height:110px">
+          <div class="s-tag">канцэпт · іконка чакае #693</div>
+        </div>
+        <figcaption>Ідэнтыфікавальны сказ — даслоўна <code>web.ui.privacyIntro</code> «KUDY — аўдыёгіды для гарадскіх прагулак» (без «Гэтая старонка…»); малая стужка — факт <code>web.ui.audioAndText</code> + <code>native.chrome.access.free</code> + тэза <code>web.ui.privacyWeb</code>. Рэпліка — даслоўна формула брыфа §Сутнасць. Іконка — <b>слот</b>: паказаны напрамак I1 з G24.02 як пазнака, фінальны асет — пасля выбару ўладара ў #693.</figcaption>
+      </figure>
+      <figure>
+        <div class="canvas" id="social-en" style="width:1200px;height:630px;font-size:56px">
+          <div class="safe" style="left:60px;top:60px;width:1080px;height:510px"><i>safe zone 1080×510</i></div>
+          <div class="s-brand" style="left:96px;top:104px">
+            <img class="s-mark" src="../G24.02/icon-i1.svg" alt="Icon slot — direction I1" style="width:88px;height:88px">
+            <span class="s-name">KUDY</span>
+          </div>
+          <div class="s-line" style="left:96px;top:270px;width:620px;font-size:64px">
+            Audio guides for city walks
+            <small>audio and text · free · no account</small>
+          </div>
+          <img src="../G25.03/pose-curious.svg" alt="Dragon, curious pose" style="position:absolute;right:120px;top:130px;width:330px;height:330px">
+          <div class="s-dragonline" style="right:110px;top:64px;font-size:48px">Where to? Let’s go and see</div>
+          <img src="../G25.05/object-reflection.svg" alt="“Reflection” medallion" style="position:absolute;right:84px;bottom:48px;width:110px;height:110px">
+          <div class="s-tag">concept · icon awaits #693</div>
+        </div>
+        <figcaption>EN: «Audio guides for city walks» — аўтарскі пераклад даслоўнага be-радка; чыпы і рэпліка — аўтарскія пераклады з пазнакай. Пры gap-прыгоне EN-сказ карацей BE — зона трымае абедзве.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>§2 · Уключэнне ў старонку <small>меты трымаюць памер яўна — платформа рэндэрыць прэв'ю адразу без перавымянення</small></h2>
+    <pre>&lt;meta property="og:title" content="KUDY — аўдыёгіды для гарадскіх прагулак"&gt;
+&lt;meta property="og:description" content="Бясплатны вэб-канал: тэкст і аўдыё ў браўзеры. Поўная версія — у дадатку."&gt;
+&lt;!-- og:image і og:url абсалютызуюцца ад siteOrigin у web/lib/app-links.ts пасля G10.02.b;
+     да публікацыі origin { kind: "unpublished" } і не мацуецца ў разметцы. --&gt;
+&lt;meta property="og:image" content="{siteOrigin}/og/kudy-card-be.png"&gt;
+&lt;meta property="og:image:width" content="1200"&gt;
+&lt;meta property="og:image:height" content="630"&gt;
+&lt;meta name="twitter:card" content="summary_large_image"&gt;</pre>
+    <p style="font-size:13px;max-width:780px">Сніпет — узор разметкі для будучай вэб-публікацыі; сам шаблон нідзе яго ўключае. Прысваенне адрасаў і публікацыя — асобныя рашэнні (Out of scope карткі).</p>
+  </section>
+</div>
+<script>
+// Экспарт: ?only=<canvas-id> хавае ўсё, акрамя зададзенага канва.
+const only=new URLSearchParams(location.search).get('only');
+if(only){
+  const c=document.getElementById(only);
+  document.querySelectorAll('.kit').forEach(el=>el.remove());
+  if(c){document.body.appendChild(c);document.body.style.background='#faf7f2';}
+}
+</script>
+</html>

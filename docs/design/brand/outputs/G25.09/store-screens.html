@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="be">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G25.09 · Кампазіцыя скрыншотаў крам · шаблон</title>
+<style>
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Alegreya;src:url(../G25.06/fonts/Alegreya_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Caveat;src:url(../G25.06/fonts/Caveat_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+/* Значэнні — даслоўна канон G06.07 (docs/design/visual-language.md, «Дадатак»).
+   --clay/--amber — прапановы G25.01 (B04.1/B04.2), не production-токены. */
+:root{--paper:#faf7f2;--ink:#22262b;--muted:#6b7280;--accent:#1d6b4f;--accent-ink:#fff;--card:#fff;--line:#d8d2c6;--clay:#805039;--amber:#d8a551;--map:#eef3ee;--street:#dfe7df;--r:10px}
+*{box-sizing:border-box}
+body{margin:0;background:#ece7df;color:var(--ink);font:400 16px/1.45 Golos,system-ui,sans-serif}
+h1,h2,p,table{margin:0}
+.kit{max-width:1720px;margin:auto;padding:24px}
+.kit-head{padding-bottom:16px;border-bottom:1px solid #b9b1a5}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--clay)}
+h1{font:600 34px/1.15 Alegreya,serif;margin-top:4px}
+.kit p{max-width:760px;font-size:14px;margin-top:8px}
+.src{font-size:12px;color:#4c5359;margin-top:6px}
+section{margin-top:28px}
+h2{font:600 21px/1.2 Alegreya,serif;padding-bottom:8px;border-bottom:2px solid var(--accent);margin-bottom:10px}
+h2 small{font:400 13px/1.4 Golos,sans-serif;color:#4c5359;display:block;margin-top:3px}
+.zone-table{border-collapse:collapse;font-size:13px;background:#fff;max-width:1100px}
+.zone-table th,.zone-table td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+.zone-table th{background:var(--paper);font-weight:600}
+.canvas{background:var(--paper);position:relative;overflow:hidden;flex:none}
+.canvas .c-tag{position:absolute;right:24px;bottom:24px;font-size:22px;font-weight:600;letter-spacing:.04em;color:var(--muted);border:2px solid var(--muted);border-radius:99px;padding:6px 18px;background:#fff;opacity:.85}
+.canvas .c-dim{position:absolute;left:24px;bottom:24px;font-size:20px;color:var(--muted);opacity:.7}
+.pair{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px}
+figure{margin:0}
+figcaption{font-size:12px;color:#4c5359;margin-top:6px;max-width:420px}
+
+/* ===== змесьціва кампазіцыі ===== */
+.c-head{position:absolute;left:72px;right:72px}
+.c-head h3{font:600 1em/1.14 Alegreya,serif;color:var(--ink)}
+.c-head .c-sub{font:400 1em/1.3 Golos,sans-serif;color:var(--muted);margin-top:.35em}
+.chips{position:absolute;left:72px;display:flex;gap:12px}
+.chip{border:2px solid var(--line);border-radius:99px;background:#fff;color:var(--ink);font-weight:600;padding:.35em .8em}
+.chip.real{border-color:var(--accent);color:var(--accent)}
+.device{position:absolute;background:#fff;border:3px solid var(--ink);border-radius:44px;overflow:hidden}
+.d-top{display:flex;justify-content:space-between;align-items:center;padding:.5em .8em .4em}
+.d-top b{font-weight:600;font-size:1.25em}
+.d-city{font-size:.9em;color:var(--muted)}
+.d-tabs{display:flex;gap:.7em;padding:.2em .8em .5em;border-bottom:2px solid var(--line);font-size:.85em;color:var(--muted);font-weight:600}
+.d-tabs .on{color:var(--accent)}
+.d-card{margin:.7em .8em;background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:.7em .8em}
+.d-badge{display:inline-block;border-radius:99px;padding:.15em .7em;font-size:.8em;font-weight:600;color:var(--ink)}
+.d-badge.free{background:#e7f2ec}
+.d-badge.mixed{background:#ece7f8}
+.d-title{font:600 1.5em/1.2 Alegreya,serif;color:var(--ink);margin-top:.25em}
+.d-meta{font-size:.9em;color:var(--muted);margin-top:.3em}
+.d-btn{display:inline-block;margin-top:.55em;background:var(--accent);color:var(--accent-ink);font-weight:600;border-radius:var(--r);padding:.5em 1.4em;box-shadow:0 3px 0 #154f3a}
+.d-map{margin:.7em .8em;background:var(--map);border:2px solid var(--line);border-radius:var(--r);position:relative;height:5.2em}
+.d-map .st{position:absolute;border:2px solid var(--street);border-radius:99px}
+.d-map .mk{position:absolute;width:1.9em;height:1.9em;border-radius:50%;border:3px solid #fff;color:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,.25)}
+.d-run{position:absolute;left:.8em;right:.8em;bottom:.7em;background:#fff;border:2px solid var(--line);border-radius:var(--r);padding:.6em .8em}
+.d-run .np{display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.d-run .sub{font-size:.85em;color:var(--muted);margin-top:.15em}
+.d-prog{height:6px;background:var(--line);border-radius:99px;margin-top:.5em}
+.d-prog i{display:block;height:6px;width:42%;background:var(--accent);border-radius:99px}
+.dragonline{position:absolute;font:400 1em/1.2 Caveat,cursive;color:var(--clay)}
+.dragon-art{position:absolute}
+.medal{position:absolute}
+</style>
+<div class="kit">
+  <div class="kit-head">
+    <div class="eyebrow">G25.09 · issue <a href="https://github.com/vokhandcrafts/KUDY/issues/707">#707</a> · эпік #346 · шаблон 1/4</div>
+    <h1>Кампазіцыя скрыншотаў крам — тэлефон</h1>
+    <p>Адзін складнік кампазіцыі: загалоўная зона → прылада з жывой паверхняй прадукта → дракон з рэплікай → бурштынавы акцэнт медальёна. Слот паверхні перасоўваецца: спіс каталога ці панэль Run. Радкі інтэрфейсу ў прыладзе — <b>даслоўна</b> <code>contracts/ui-messages/source.json</code> (be) і <code>translations/en.json</code> (en); прэс-тэкст загалоўкаў і рэпліка дракона — аўтарскія, пазначаныя ў кожным пункце <code>figcaption</code>.</p>
+    <div class="src">Крыніцы: брыф «Атлас знаходак» v1 (08.10.2026, рэдакцыя <code>a11ea86</code>) · канон G06.07 (<code>visual-language.md</code>) · пазы дракона G25.03 · медальён G25.05 · слоўнік G25.02 · патрабаванні крам, правераныя 12.10.2026 (§1). Статус: <b>канцэпт, не фінальныя здымкі</b>; фінальныя скрыншоты робяцца з жывой зборкі перад публікацыяй.</div>
+  </div>
+
+  <!-- ===== §1 ===== -->
+  <section>
+    <h2>§1 · Анатомія кампазіцыі <small>зоны, бяспечныя прасторы, правілы напаўнення</small></h2>
+    <table class="zone-table">
+      <tr><th>Зона (зверху ўніз)</th><th>Змест</th><th>Шрыфт і колер</th><th>Правілы напаўнення</th></tr>
+      <tr><td>Загалоўная зона</td><td>1–2 радкі прэс-тэксту + падзагаловак з дзейнай ідэнтыфікацыяй прадукта</td><td>Alegreya 600; подпіс — Golos, muted</td><td>≤ 2 радкі загалоўка; калі не лезе ў абедзьве мовы — <b>караціць копію, не памер шрыфта</b>. Ніжняя мяжа зоны — верх прылады (падрабязна §6 і ў results).</td></tr>
+      <tr><td>Бяспечная прастора згоры</td><td>пустая паласа над загалоўкам</td><td>—</td><td>Play і App Store малююць сваю стужку/загаловак над скрыншотам у рэгіёне; крытычны тэкст не бліжэй за 96 px (Play) / 120 px (App Store) ад вярху.</td></tr>
+      <tr><td>Слот прылады</td><td>паверхня прадукта: спіс каталога (в. A) або панэль Run (в. B)</td><td>Golos + Alegreya; канонавыя карткі і кнопкі</td><td>радкі — даслоўна са слоўніка; усё, што паказана ў прыладзе, мае дзейную здольнасць прадукта. Пазнакі «канцэпт» на канве — абавязковыя.</td></tr>
+      <tr><td>Дракон</td><td>поза «спакойны» (в. A) / «цікаўны» (в. B) + рэпліка Caveat</td><td>Caveat, clay (6.29:1 на паперы)</td><td>дракон — твар, не лагатып (канон §6); рэпліка — даслоўна формула з брыфа «Куды? Хадзем, паглядзім» / аўтарскі пераклад.</td></tr>
+      <tr><td>Бурштынавы акцэнт</td><td>медальён «Адлюстраванне» малы</td><td>Golos на бурштыне: ink, 6.83:1</td><td>адзін акцэнт на канве; бурштын — прапанова B04.2, толькі з цёмным тэкстам.</td></tr>
+      <tr><td>Ніжняя стужка</td><td>да 3 чыпаў рэальных магчымасцяў</td><td>Golos 600; чып real — акцэнт</td><td>толькі дзейныя факты (аўдыё і тэкст / Бясплатна / мовы). Абяцанняў пра ўзнагароды, падарункі і «усе гіды» няма.</td></tr>
+    </table>
+    <p style="font-size:13px;margin-top:10px;max-width:1100px">Памеры канваў і крыніцы патрабаванняў — §2–§5 падпісы і §1 ліста вынікаў (<code>results/G25.09.md</code>). Экспарт PNG: дадаць да адрасу <code>?only=&lt;canvas-id&gt;</code>, здымак <code>chromium --headless --screenshot --window-size=&lt;W×H&gt;</code>; каманды — у README тэчкі.</p>
+  </section>
+
+  <!-- ===== §2 ===== -->
+  <section>
+    <h2>§2 · Google Play · 1080×1920 (9:16) · беларуская <small>патрабаванне, праверанае 12.10.2026: 320–3840 px на бок, 16:9/9:16, JPEG або 24-біт PNG без альфы, ≤ 8 МБ, 2–8 здымкаў — support.google.com/googleplay/android-developer/answer/9866151</small></h2>
+    <div class="pair">
+      <figure>
+        <div class="canvas" id="play-be" style="width:1080px;height:1920px;font-size:28px">
+          <div style="position:absolute;left:72px;top:88px;right:72px;height:2px;border-top:2px dashed #c9c1b1"></div>
+          <div style="position:absolute;left:72px;top:96px;font-size:20px;color:#a89f92">бяспечная прастора згоры 96 px — стужка крамы</div>
+          <div class="c-head" style="top:170px;font-size:88px">
+            <h3>Аўдыёпрагулкі<br>па горадзе</h3>
+            <div class="c-sub" style="font-size:38px">Аўдыёгіды для гарадскіх прагулак</div>
+          </div>
+          <div class="device" style="left:96px;top:620px;width:640px;height:1080px;font-size:34px">
+            <div class="d-top"><b>KUDY</b><span class="d-city">Горад</span></div>
+            <div class="d-tabs"><span class="on">Прагулка</span><span>Чым заняцца →</span><span>Побач →</span><span>KUDY</span></div>
+            <div class="d-card">
+              <span class="d-badge free">Бясплатна</span>
+              <div class="d-title">Воднае люстра Гданьска</div>
+              <div class="d-meta">Час: 45 хв · Кропкі: 7 · Кропак бясплатна: 3</div>
+              <span class="d-btn">Загрузіць</span>
+            </div>
+            <div class="d-card">
+              <span class="d-badge mixed">Змешана</span>
+              <div class="d-title">Стокі і краны</div>
+              <div class="d-meta">Час: ад 30 да 60 хв · Кропкі: 9</div>
+            </div>
+            <div class="d-map"><div class="st" style="left:6%;top:18%;width:34%;height:12%"></div><div class="st" style="left:52%;top:44%;width:12%;height:48%"></div><div class="mk" style="left:18%;top:40%;background:#1d6b4f">p</div><div class="mk" style="left:60%;top:16%;background:#67707a">l</div></div>
+          </div>
+          <img class="dragon-art" src="../G25.03/pose-calm.svg" alt="Дракон, поза «спакойны»" style="left:640px;top:1380px;width:360px;height:360px">
+          <div class="dragonline" style="left:700px;top:1320px;font-size:44px;max-width:360px">Куды? Хадзем, паглядзім</div>
+          <img class="medal" src="../G25.05/object-reflection.svg" alt="Медальён «Адлюстраванне»" style="left:840px;top:180px;width:150px;height:150px">
+          <div class="chips" style="bottom:96px;font-size:30px">
+            <span class="chip real">аўдыё і тэкст</span>
+            <span class="chip real">Бясплатна</span>
+            <span class="chip">Мовы: be en uk de es fr cs sv</span>
+          </div>
+          <div class="c-dim">1080×1920 · play-be</div>
+          <div class="c-tag">канцэпт — не фінальны здымак</div>
+        </div>
+        <figcaption>Прэс-тэкст загалоўка і падзагаловак — аўтарскія; падзагаловак трымае даслоўны радок <code>web.ui.privacyIntro</code> «Аўдыёгіды для гарадскіх прагулак». Рэпліка дракона — даслоўна формула брыфа §Сутнасць. Назвы гідаў у картках — аўтарскія ўзоры кантэнту (пазначаны ў §7 правах).</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== §3 ===== -->
+  <section>
+    <h2>§3 · Google Play · 1080×1920 (9:16) · англійская <small>тыя ж патрабаванні, што §2; пераклады — даслоўна translations/en.json; аўтарскі прэс-тэкст перакладзены з пазнакай</small></h2>
+    <div class="pair">
+      <figure>
+        <div class="canvas" id="play-en" style="width:1080px;height:1920px;font-size:28px">
+          <div style="position:absolute;left:72px;top:88px;right:72px;height:2px;border-top:2px dashed #c9c1b1"></div>
+          <div class="c-head" style="top:170px;font-size:88px">
+            <h3>Audio walks<br>around the city</h3>
+            <div class="c-sub" style="font-size:38px">Audio guides for city walks</div>
+          </div>
+          <div class="device" style="left:96px;top:620px;width:640px;height:1080px;font-size:34px">
+            <div class="d-top"><b>KUDY</b><span class="d-city">City</span></div>
+            <div class="d-tabs"><span class="on">Walk</span><span>What to do →</span><span>Nearby →</span><span>KUDY</span></div>
+            <div class="d-card">
+              <span class="d-badge free">Free</span>
+              <div class="d-title">The water mirror of Gdańsk</div>
+              <div class="d-meta">Time: 45 min · Stops: 7 · Free stops: 3</div>
+              <span class="d-btn">Download</span>
+            </div>
+            <div class="d-card">
+              <span class="d-badge mixed">Mixed</span>
+              <div class="d-title">Shipyard cranes</div>
+              <div class="d-meta">Time: 30–60 min · Stops: 9</div>
+            </div>
+            <div class="d-map"><div class="st" style="left:6%;top:18%;width:34%;height:12%"></div><div class="st" style="left:52%;top:44%;width:12%;height:48%"></div><div class="mk" style="left:18%;top:40%;background:#1d6b4f">p</div><div class="mk" style="left:60%;top:16%;background:#67707a">l</div></div>
+          </div>
+          <img class="dragon-art" src="../G25.03/pose-calm.svg" alt="Dragon, calm pose" style="left:640px;top:1380px;width:360px;height:360px">
+          <div class="dragonline" style="left:700px;top:1280px;font-size:44px;max-width:360px">Where to? Let’s go<br>and see</div>
+          <img class="medal" src="../G25.05/object-reflection.svg" alt="“Reflection” medallion" style="left:840px;top:180px;width:150px;height:150px">
+          <div class="chips" style="bottom:96px;font-size:30px">
+            <span class="chip real">audio and text</span>
+            <span class="chip real">Free</span>
+            <span class="chip">Languages: be en uk de es fr cs sv</span>
+          </div>
+          <div class="c-dim">1080×1920 · play-en</div>
+          <div class="c-tag">concept — not a final capture</div>
+        </div>
+        <figcaption>EN-радкі інтэрфейсу — даслоўна <code>translations/en.json</code> (Walk, What to do →, Nearby →, Free, Mixed, Download, Time: ${minutes} min…). Прэс-тэкст і рэпліка дракона — аўтарскі пераклад беларускай версіі, не з каталога перакладаў.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== §4 ===== -->
+  <section>
+    <h2>§4 · App Store · 1320×2868 (6.9″) · беларуская і англійская <small>патрабаванне, праверанае 12.10.2026: вядучы памер 6.9″ 1320×2868, PNG/JPEG без празрыстасці, маштабуецца на меншыя дысплеі — developer.apple.com/help/app-store-connect/reference/screenshot-specifications</small></h2>
+    <div class="pair">
+      <figure>
+        <div class="canvas" id="as-be" style="width:1320px;height:2868px;font-size:34px">
+          <div style="position:absolute;left:96px;top:112px;right:96px;height:2px;border-top:2px dashed #c9c1b1"></div>
+          <div style="position:absolute;left:96px;top:122px;font-size:24px;color:#a89f92">бяспечная прастора згоры 120 px</div>
+          <div class="c-head" style="top:250px;font-size:104px;left:96px;right:96px">
+            <h3>Аўдыёпрагулкі<br>па горадзе</h3>
+            <div class="c-sub" style="font-size:44px">Аўдыёгіды для гарадскіх прагулак</div>
+          </div>
+          <div class="device" style="left:128px;top:900px;width:800px;height:1500px;font-size:40px">
+            <div class="d-top"><b>KUDY</b><span class="d-city">Горад</span></div>
+            <div class="d-tabs"><span class="on">Прагулка</span><span>Чым заняцца →</span><span>Побач →</span><span>KUDY</span></div>
+            <div class="d-card">
+              <span class="d-badge free">Бясплатна</span>
+              <div class="d-title">Воднае люстра Гданьска</div>
+              <div class="d-meta">Час: 45 хв · Кропкі: 7 · Кропак бясплатна: 3</div>
+              <span class="d-btn">Загрузіць</span>
+            </div>
+            <div class="d-card">
+              <span class="d-badge mixed">Змешана</span>
+              <div class="d-title">Стокі і краны</div>
+              <div class="d-meta">Час: ад 30 да 60 хв · Кропкі: 9</div>
+            </div>
+            <div class="d-map"><div class="st" style="left:6%;top:18%;width:34%;height:12%"></div><div class="st" style="left:52%;top:44%;width:12%;height:48%"></div><div class="mk" style="left:18%;top:40%;background:#1d6b4f">p</div><div class="mk" style="left:60%;top:16%;background:#67707a">l</div></div>
+          </div>
+          <img class="dragon-art" src="../G25.03/pose-calm.svg" alt="Дракон, поза «спакойны»" style="left:850px;top:2000px;width:420px;height:420px">
+          <div class="dragonline" style="left:900px;top:1930px;font-size:52px;max-width:420px">Куды? Хадзем, паглядзім</div>
+          <img class="medal" src="../G25.05/object-reflection.svg" alt="Медальён «Адлюстраванне»" style="left:1050px;top:280px;width:180px;height:180px">
+          <div class="chips" style="left:96px;bottom:130px;font-size:36px">
+            <span class="chip real">аўдыё і тэкст</span>
+            <span class="chip real">Бясплатна</span>
+            <span class="chip">Мовы: be en uk de es fr cs sv</span>
+          </div>
+          <div class="c-dim">1320×2868 · as-be</div>
+          <div class="c-tag">канцэпт — не фінальны здымак</div>
+        </div>
+        <figcaption>Тая ж кампазіцыя, шырэйшы канва: бяспечная прастора згоры 120 px, загалоўкавая зона да 900 px, ніжняя стужка чыпаў на 130 px. Уся аўтарская копія — тая ж, што §2, без перапісвання.</figcaption>
+      </figure>
+      <figure>
+        <div class="canvas" id="as-en" style="width:1320px;height:2868px;font-size:34px">
+          <div style="position:absolute;left:96px;top:112px;right:96px;height:2px;border-top:2px dashed #c9c1b1"></div>
+          <div class="c-head" style="top:250px;font-size:104px;left:96px;right:96px">
+            <h3>Audio walks<br>around the city</h3>
+            <div class="c-sub" style="font-size:44px">Audio guides for city walks</div>
+          </div>
+          <div class="device" style="left:128px;top:900px;width:800px;height:1500px;font-size:40px">
+            <div class="d-top"><b>KUDY</b><span class="d-city">City</span></div>
+            <div class="d-tabs"><span class="on">Walk</span><span>What to do →</span><span>Nearby →</span><span>KUDY</span></div>
+            <div class="d-card">
+              <span class="d-badge free">Free</span>
+              <div class="d-title">The water mirror of Gdańsk</div>
+              <div class="d-meta">Time: 45 min · Stops: 7 · Free stops: 3</div>
+              <span class="d-btn">Download</span>
+            </div>
+            <div class="d-card">
+              <span class="d-badge mixed">Mixed</span>
+              <div class="d-title">Shipyard cranes</div>
+              <div class="d-meta">Time: 30–60 min · Stops: 9</div>
+            </div>
+            <div class="d-map"><div class="st" style="left:6%;top:18%;width:34%;height:12%"></div><div class="st" style="left:52%;top:44%;width:12%;height:48%"></div><div class="mk" style="left:18%;top:40%;background:#1d6b4f">p</div><div class="mk" style="left:60%;top:16%;background:#67707a">l</div></div>
+          </div>
+          <img class="dragon-art" src="../G25.03/pose-calm.svg" alt="Dragon, calm pose" style="left:850px;top:2000px;width:420px;height:420px">
+          <div class="dragonline" style="left:900px;top:1900px;font-size:52px;max-width:420px">Where to? Let’s go<br>and see</div>
+          <img class="medal" src="../G25.05/object-reflection.svg" alt="“Reflection” medallion" style="left:1050px;top:280px;width:180px;height:180px">
+          <div class="chips" style="left:96px;bottom:130px;font-size:36px">
+            <span class="chip real">audio and text</span>
+            <span class="chip real">Free</span>
+            <span class="chip">Languages: be en uk de es fr cs sv</span>
+          </div>
+          <div class="c-dim">1320×2868 · as-en</div>
+          <div class="c-tag">concept — not a final capture</div>
+        </div>
+        <figcaption>EN-версія таго ж канва; пераклады радкоў — даслоўна <code>translations/en.json</code>.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== §5 ===== -->
+  <section>
+    <h2>§5 · Варыянт B слота прылады — панэль Run · Google Play 1080×1920 · беларуская <small>доказ перасоўнага слота: тая ж кампазіцыя, іншая жывая паверхня</small></h2>
+    <div class="pair">
+      <figure>
+        <div class="canvas" id="play-be-run" style="width:1080px;height:1920px;font-size:28px">
+          <div style="position:absolute;left:72px;top:88px;right:72px;height:2px;border-top:2px dashed #c9c1b1"></div>
+          <div class="c-head" style="top:170px;font-size:88px">
+            <h3>Пачуй гісторыю<br>на месцы</h3>
+            <div class="c-sub" style="font-size:38px">Гісторыі гучаць на кропках, тэмп — твой</div>
+          </div>
+          <div class="device" style="left:96px;top:620px;width:640px;height:1080px;font-size:34px;background:var(--map)">
+            <div class="d-top"><b>KUDY</b><span class="d-city">Прагулка</span></div>
+            <div class="d-map" style="margin:.5em .8em;height:17.5em;background:var(--map)">
+              <div class="st" style="left:4%;top:12%;width:44%;height:9%"></div><div class="st" style="left:62%;top:6%;width:9%;height:78%"></div><div class="st" style="left:14%;top:58%;width:36%;height:9%"></div><div class="st" style="left:34%;top:34%;width:30%;height:8%"></div>
+              <div class="mk" style="left:10%;top:44%;background:#1d6b4f">p</div>
+              <div class="mk" style="left:40%;top:24%;background:#b3331f">g</div>
+              <div class="mk" style="left:58%;top:38%;background:#8a610e">a</div>
+              <div class="mk" style="left:78%;top:14%;background:#67707a">l</div>
+              <div style="position:absolute;left:10px;bottom:10px;right:10px;font-size:.75em;color:#6b7280">Схема кропак маршруту — карта горада зʼявіцца пасля рашэння пра тайлы</div>
+            </div>
+            <div class="d-run">
+              <div class="np"><span>Зараз грае</span><span>Паўза</span></div>
+              <div style="font-weight:600;margin-top:.15em">Гданьскі кран</div>
+              <div class="sub">Кропка 3 · Асноўная гісторыя</div>
+              <div class="d-prog"><i></i></div>
+            </div>
+          </div>
+          <img class="dragon-art" src="../G25.03/pose-curious.svg" alt="Дракон, поза «цікаўны»" style="left:640px;top:1380px;width:360px;height:360px">
+          <div class="dragonline" style="left:700px;top:1320px;font-size:44px;max-width:360px">Куды? Хадзем, паглядзім</div>
+          <img class="medal" src="../G25.05/object-reflection.svg" alt="Медальён «Адлюстраванне»" style="left:840px;top:180px;width:150px;height:150px">
+          <div class="chips" style="bottom:96px;font-size:30px">
+            <span class="chip real">GPS-аўтазапуск на месцы</span>
+            <span class="chip">Офлайн без інтэрнэту</span>
+          </div>
+          <div class="c-dim">1080×1920 · play-be-run</div>
+          <div class="c-tag">канцэпт — не фінальны здымак</div>
+        </div>
+        <figcaption>Варыянт B: панэль Run у сяктуры Peek. Радок «Зараз грае» — даслоўна <code>native.run.nowPlayingLabel</code>; маркеры — станавыя заливкі канона (played/playing/available/locked). GPS-аўтазапуск і офлайн — даслоўныя факты <code>web.ui.appBenefitGps</code>/<code>appBenefitOffline</code> у кароткай форме; аўтарскі загалоўкавы варыянт — «Пачуй гісторыю на месцы». «Зараз грае», «Паўза», «Асноўная гісторыя», «Кропка ${position}» — даслоўна слоўнік; назва гісторыі — аўтарскі ўзор (§7).</figcaption>
+      </figure>
+    </div>
+  </section>
+</div>
+<script>
+// Экспарт: ?only=<canvas-id> хавае ўсё, акрамя зададзенага канва — здымак робіцца ў памер канва.
+const only=new URLSearchParams(location.search).get('only');
+if(only){
+  const c=document.getElementById(only);
+  document.querySelectorAll('.kit').forEach(el=>el.remove());
+  if(c){document.body.appendChild(c);document.body.style.background='#faf7f2';}
+}
+</script>
+</html>

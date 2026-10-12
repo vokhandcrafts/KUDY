@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="be">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G25.09 · Вэб-блок уводзін · шаблон</title>
+<style>
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Alegreya;src:url(../G25.06/fonts/Alegreya_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Caveat;src:url(../G25.06/fonts/Caveat_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+/* Значэнні — даслоўна канон G06.07; --clay — прапанова B04.1. */
+:root{--paper:#faf7f2;--ink:#22262b;--muted:#6b7280;--accent:#1d6b4f;--accent-ink:#fff;--card:#fff;--line:#d8d2c6;--clay:#805039;--r:10px}
+*{box-sizing:border-box}
+body{margin:0;background:#ece7df;color:var(--ink);font:400 16px/1.45 Golos,system-ui,sans-serif}
+h1,h2,p{margin:0}
+.kit{max-width:1560px;margin:auto;padding:24px}
+.kit-head{padding-bottom:16px;border-bottom:1px solid #b9b1a5}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--clay)}
+h1{font:600 34px/1.15 Alegreya,serif;margin-top:4px}
+.kit p{max-width:760px;font-size:14px;margin-top:8px}
+.src{font-size:12px;color:#4c5359;margin-top:6px}
+section{margin-top:28px}
+h2{font:600 21px/1.2 Alegreya,serif;padding-bottom:8px;border-bottom:2px solid var(--accent);margin-bottom:10px}
+h2 small{font:400 13px/1.4 Golos,sans-serif;color:#4c5359;display:block;margin-top:3px}
+.canvas{background:var(--paper);position:relative;overflow:hidden;flex:none}
+.canvas .c-tag{position:absolute;right:20px;bottom:16px;font-size:18px;font-weight:600;color:var(--muted);border:2px solid var(--muted);border-radius:99px;padding:4px 14px;background:#fff;opacity:.85}
+.canvas .c-dim{position:absolute;left:20px;bottom:16px;font-size:16px;color:var(--muted);opacity:.7}
+.pair{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px}
+figure{margin:0}
+figcaption{font-size:12px;color:#4c5359;margin-top:6px;max-width:520px}
+.w-left{position:absolute}
+.w-head{font:600 1em/1.12 Alegreya,serif;color:var(--ink)}
+.w-eyebrow{font-size:.5em;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:.6em}
+.w-copy{font-size:.4em;color:var(--ink);margin-top:.9em;max-width:26em}
+.w-copy .toapp{color:var(--muted)}
+.w-chips{display:flex;gap:12px;flex-wrap:wrap;margin-top:.5em;font-size:.5em}
+.w-chip{border:2px solid var(--line);border-radius:99px;background:#fff;font-weight:600;padding:.4em .9em}
+.w-chip.real{border-color:var(--accent);color:var(--accent)}
+.w-cta{display:flex;gap:16px;align-items:center;margin-top:.8em;font-size:.55em}
+.w-btn{display:inline-block;background:var(--accent);color:var(--accent-ink);font-weight:600;border-radius:var(--r);padding:.55em 1.5em;box-shadow:0 3px 0 #154f3a}
+.w-ghost{color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:.2em}
+.w-dragon{position:absolute}
+.w-dragonline{position:absolute;font:400 1em/1.2 Caveat,cursive;color:var(--clay)}
+.skyline{position:absolute;left:0;right:0;bottom:0}
+</style>
+<div class="kit">
+  <div class="kit-head">
+    <div class="eyebrow">G25.09 · issue <a href="https://github.com/vokhandcrafts/KUDY/issues/707">#707</a> · эпік #346 · шаблон 2/4</div>
+    <h1>Вэб-блок уводзін — галоўная вітрына канала</h1>
+    <p>Блок для верху вэб-галоўнай: ідэнтыфікацыя прадукта → адно абяцанне → дзейныя магчымасці чыпаў → адзін галоўны CTA. Прынцыпы канала: вэб — <b>прэв'ю прагулкі, не другі прадукт</b>; проджы працягу ў дадатку — адзін блок унізе. Радкі — даслоўна са слоўніка (<code>web.ui.*</code>, <code>native.chrome.*</code>); загаловак — аўтарскі.</p>
+    <div class="src">Крыніцы: брыф v1 (<code>a11ea86</code>) · канон G06.07 · слоўнік G25.02 · пазы G25.03 · патрабаванні вэб-канала: 09 §8 (8 моў), G10.02 (вэб-аўдыёверсія). Статус: <b>канцэпт</b>; сілуэт горада — заглушка, рэальная ілюстрацыя патрабуе асетаў з правамі (§7 ліста).</div>
+  </div>
+
+  <section>
+    <h2>§1 · Настольны канва 1440×900 · беларускі і англійскі <small>верх старонкі каталога; далей старонка жыве звычайна — блок не малюе нічога, чаго няма на канале</small></h2>
+    <div class="pair">
+      <figure>
+        <div class="canvas" id="web-be" style="width:1440px;height:900px;font-size:76px">
+          <div class="w-left" style="left:72px;top:88px;width:840px">
+            <div class="w-eyebrow">KUDY · бясплатны вэб-канал</div>
+            <div class="w-head">Адкрый горад сам —<br>пачуй яго гісторыі</div>
+            <p class="w-copy">Выберы прагулку і пачуй гісторыю на месцы — тэкст і аўдыё проста ў браўзеры, без акаўнта. <span class="toapp">Поўная версія — у дадатку: GPS-аўтазапуск, офлайн, поўныя маршруты.</span></p>
+            <div class="w-chips">
+              <span class="w-chip real">аўдыё і тэкст</span>
+              <span class="w-chip real">Бясплатна</span>
+            </div>
+            <div class="w-cta"><span class="w-btn">Гіды →</span><span class="w-ghost">Адкрыць дадатак</span></div>
+          </div>
+          <img class="w-dragon" src="../G25.03/pose-inviting.svg" alt="Дракон, поза «кліча»" style="right:150px;top:330px;width:430px;height:430px">
+          <div class="w-dragonline" style="right:170px;top:240px;font-size:.6em;max-width:380px">Хадзем, пакажу</div>
+          <svg class="skyline" viewBox="0 0 1440 170" style="height:130px" aria-hidden="true">
+            <g fill="#dfe7df">
+              <rect x="40" y="60" width="120" height="110"/><polygon points="160,60 220,60 220,30 190,6 160,30"/>
+              <rect x="250" y="90" width="90" height="80"/><rect x="370" y="50" width="140" height="120"/>
+              <polygon points="540,170 540,80 570,50 600,80 600,170"/><rect x="630" y="95" width="110" height="75"/>
+              <rect x="770" y="40" width="100" height="130"/><rect x="900" y="75" width="150" height="95"/>
+              <polygon points="1080,170 1080,70 1110,34 1140,70 1140,170"/><rect x="1170" y="100" width="120" height="70"/>
+              <rect x="1320" y="65" width="90" height="105"/>
+            </g>
+          </svg>
+          <div class="c-dim">1440×900 · web-be</div>
+          <div class="c-tag">канцэпт — сілуэт горада заглушка</div>
+        </div>
+        <figcaption>Загаловак — аўтарскі. «Поўная версія — у дадатку: GPS-аўтазапуск, офлайн, поўныя маршруты.» — даслоўна <code>web.ui.calmOfferText</code>; тэза «без акаўнта» — з <code>web.ui.privacyWeb</code> («Бясплатны вэб-канал не збірае акаўнтаў»). Чыпы (на гэтай шырыні ≤ 2): <code>web.ui.audioAndText</code>, <code>native.chrome.access.free</code>. Факт васьмі UI-моваў (R11: be en uk de es fr cs sv) на блок не выносіцца — поўны пералік жыве на старонцы гіда (<code>web.ui.languagesLine</code>). CTA: <code>native.chrome.guidesLink</code> і <code>web.ui.calmOfferCta</code>. Рэпліка дракона — даслоўна брыф §Сутнасць.</figcaption>
+      </figure>
+      <figure>
+        <div class="canvas" id="web-en" style="width:1440px;height:900px;font-size:76px">
+          <div class="w-left" style="left:72px;top:88px;width:840px">
+            <div class="w-eyebrow">KUDY · free web channel</div>
+            <div class="w-head">Open the city —<br>hear its stories</div>
+            <p class="w-copy">Pick a walk and hear the story on the spot — text and audio right in the browser, no account. <span class="toapp">The full version — in the app: GPS autoplay, offline, complete routes.</span></p>
+            <div class="w-chips">
+              <span class="w-chip real">audio and text</span>
+              <span class="w-chip real">Free</span>
+            </div>
+            <div class="w-cta"><span class="w-btn">Guides →</span><span class="w-ghost">Open the app</span></div>
+          </div>
+          <img class="w-dragon" src="../G25.03/pose-inviting.svg" alt="Dragon, inviting pose" style="right:150px;top:330px;width:430px;height:430px">
+          <div class="w-dragonline" style="right:170px;top:240px;font-size:.6em;max-width:380px">Come, I’ll show you</div>
+          <svg class="skyline" viewBox="0 0 1440 170" style="height:130px" aria-hidden="true">
+            <g fill="#dfe7df">
+              <rect x="40" y="60" width="120" height="110"/><polygon points="160,60 220,60 220,30 190,6 160,30"/>
+              <rect x="250" y="90" width="90" height="80"/><rect x="370" y="50" width="140" height="120"/>
+              <polygon points="540,170 540,80 570,50 600,80 600,170"/><rect x="630" y="95" width="110" height="75"/>
+              <rect x="770" y="40" width="100" height="130"/><rect x="900" y="75" width="150" height="95"/>
+              <polygon points="1080,170 1080,70 1110,34 1140,70 1140,170"/><rect x="1170" y="100" width="120" height="70"/>
+              <rect x="1320" y="65" width="90" height="105"/>
+            </g>
+          </svg>
+          <div class="c-dim">1440×900 · web-en</div>
+          <div class="c-tag">concept — city skyline is a placeholder</div>
+        </div>
+        <figcaption>EN: «The full version — in the app: GPS autoplay, offline, complete routes.» — даслоўна <code>web.ui.calmOfferText</code> з <code>translations/en.json</code>; CTA — <code>guidesLink</code>/<code>calmOfferCta</code>. Загаловак, увядзінны сказ і рэпліка дракона — аўтарскі пераклад з пазнакай; факт васьмі UI-моваў (R11) на блок не выносіцца — гл. be-подпіс.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>§2 · Мабільны канва 375×640 · беларускі і англійскі <small>той самы блок у вузкай раскладцы; парадак зон захоўваецца, чыпы пераносяцца</small></h2>
+    <div class="pair">
+      <figure>
+        <div class="canvas" id="web-be-m" style="width:375px;height:640px;font-size:26px">
+          <div class="w-left" style="left:16px;top:20px;width:330px">
+            <div class="w-eyebrow">KUDY · бясплатны вэб-канал</div>
+            <div class="w-head" style="font-size:30px">Адкрый горад сам —<br>пачуй яго гісторыі</div>
+            <p class="w-copy" style="font-size:15px;max-width:none">Выберы прагулку і пачуй гісторыю на месцы. Тэкст і аўдыё — проста ў браўзеры, без акаўнта. <span class="toapp">Поўная версія — у дадатку.</span></p>
+            <div class="w-chips" style="font-size:12px">
+              <span class="w-chip real">аўдыё і тэкст</span>
+              <span class="w-chip real">Бясплатна</span>
+            </div>
+            <div class="w-cta" style="font-size:15px"><span class="w-btn">Гіды →</span><span class="w-ghost">Адкрыць дадатак</span></div>
+          </div>
+          <img class="w-dragon" src="../G25.03/pose-inviting.svg" alt="Дракон, поза «кліча»" style="right:12px;top:400px;width:180px;height:180px">
+          <div class="w-dragonline" style="left:16px;top:460px;font-size:20px;max-width:190px">Хадзем, пакажу</div>
+          <svg class="skyline" viewBox="0 0 1440 170" style="height:56px" aria-hidden="true"><g fill="#dfe7df"><rect x="40" y="60" width="120" height="110"/><polygon points="160,60 220,60 220,30 190,6 160,30"/><rect x="250" y="90" width="90" height="80"/><rect x="370" y="50" width="140" height="120"/><polygon points="540,170 540,80 570,50 600,80 600,170"/><rect x="630" y="95" width="110" height="75"/><rect x="770" y="40" width="100" height="130"/><rect x="900" y="75" width="150" height="95"/><polygon points="1080,170 1080,70 1110,34 1140,70 1140,170"/><rect x="1170" y="100" width="120" height="70"/><rect x="1320" y="65" width="90" height="105"/></g></svg>
+          <div class="c-dim">375×640 · web-be-m</div>
+          <div class="c-tag" style="font-size:12px;padding:2px 10px">канцэпт</div>
+        </div>
+        <figcaption>Мабільны канва: мовы-чып апушчаны (на вузкай шырыні пераносіцца на другі радок — правілы пашырэння тэксту §6 ліста), палітра і парадак зон тыя ж.</figcaption>
+      </figure>
+      <figure>
+        <div class="canvas" id="web-en-m" style="width:375px;height:640px;font-size:26px">
+          <div class="w-left" style="left:16px;top:20px;width:330px">
+            <div class="w-eyebrow">KUDY · free web channel</div>
+            <div class="w-head" style="font-size:30px">Open the city —<br>hear its stories</div>
+            <p class="w-copy" style="font-size:15px;max-width:none">Pick a walk and hear the story on the spot. Text and audio right in the browser, no account. <span class="toapp">The full version — in the app.</span></p>
+            <div class="w-chips" style="font-size:12px">
+              <span class="w-chip real">audio and text</span>
+              <span class="w-chip real">Free</span>
+            </div>
+            <div class="w-cta" style="font-size:15px"><span class="w-btn">Guides →</span><span class="w-ghost">Open the app</span></div>
+          </div>
+          <img class="w-dragon" src="../G25.03/pose-inviting.svg" alt="Dragon, inviting pose" style="right:12px;top:400px;width:180px;height:180px">
+          <div class="w-dragonline" style="left:16px;top:460px;font-size:20px;max-width:190px">Come, I’ll show you</div>
+          <svg class="skyline" viewBox="0 0 1440 170" style="height:56px" aria-hidden="true"><g fill="#dfe7df"><rect x="40" y="60" width="120" height="110"/><polygon points="160,60 220,60 220,30 190,6 160,30"/><rect x="250" y="90" width="90" height="80"/><rect x="370" y="50" width="140" height="120"/><polygon points="540,170 540,80 570,50 600,80 600,170"/><rect x="630" y="95" width="110" height="75"/><rect x="770" y="40" width="100" height="130"/><rect x="900" y="75" width="150" height="95"/><polygon points="1080,170 1080,70 1110,34 1140,70 1140,170"/><rect x="1170" y="100" width="120" height="70"/><rect x="1320" y="65" width="90" height="105"/></g></svg>
+          <div class="c-dim">375×640 · web-en-m</div>
+          <div class="c-tag" style="font-size:12px;padding:2px 10px">concept</div>
+        </div>
+        <figcaption>EN-мабільны: загаловак скарочаны супраць настольнага («Open the city — hear its stories») паводле правіла пашырэння: два радкі максімум, кароткая форма для вузкай шырыні.</figcaption>
+      </figure>
+    </div>
+  </section>
+</div>
+<script>
+// Экспарт: ?only=<canvas-id> хавае ўсё, акрамя зададзенага канва.
+const only=new URLSearchParams(location.search).get('only');
+if(only){
+  const c=document.getElementById(only);
+  document.querySelectorAll('.kit').forEach(el=>el.remove());
+  if(c){document.body.appendChild(c);document.body.style.background='#faf7f2';}
+}
+</script>
+</html>
