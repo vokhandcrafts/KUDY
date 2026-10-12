@@ -25,32 +25,10 @@ import { FakeLocationOsPort } from '../services/location/fake-port.ts';
 import { FakeAudioPlayerPort } from '../services/audio/fake-port.ts';
 import { LocationService } from '../services/location/service.ts';
 import { AudioService } from '../services/audio/service.ts';
+// The synthetic free package documents ride the shared controllers fixture
+// (one restatement, the copy-paste gate's own demand).
+import { enc, PLACES_JSON, ROUTE_JSON } from './test-fixture.ts';
 
-const enc = (text: string) => new TextEncoder().encode(text);
-
-// The synthetic free package: route-491@1, be, base — one stop, one place,
-// one story, one audio file. The layer documents mirror the run suites'
-// world fixtures and the contentRepo sample package (implementation-rules 2:
-// the same field names the contracts own).
-const ROUTE_JSON = JSON.stringify({
-  route_id: 'route-491',
-  version: '1',
-  city_id: 'city-491',
-  access: 'free_base',
-  stops: [
-    {
-      id: 'stop-1',
-      position: 0,
-      place_id: 'place-1',
-      access_tier: 'base',
-      story_base_id: 'story-1',
-      preview: { name: { be: 'Брама' } },
-    },
-  ],
-});
-const PLACES_JSON = JSON.stringify([
-  { id: 'place-1', content_version: 'cv-1', lat: 54.352, lng: 18.648, trigger_radius_m: 30, kind: 'historic' },
-]);
 const STOPS_JSON = JSON.stringify([
   {
     story_id: 'story-1',
@@ -197,6 +175,10 @@ test('G20.20: the free synthetic package walks the whole production composition'
   assert.equal(afterDownload.surface.kind, 'ready');
   if (afterDownload.surface.kind !== 'ready') return;
   assert.equal(afterDownload.button.action, 'start', afterDownload.downloadError ?? '');
+  // #727 — the enabled bit is the real Start gate: without the wired
+  // evaluateLayer the derivation falls to preview#verify-unavailable and
+  // Start stays disabled even though the action reads start.
+  assert.ok(afterDownload.button.enabled, JSON.stringify(afterDownload.button));
   assert.ok(fs.files.has('/root/bundles/route-491/1/be/base/lock.json'), 'the layer lock lands on the device');
   assert.ok(fs.files.has('/root/bundles/route-491/1/be/base/audio/story-1.m4a'));
 

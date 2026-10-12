@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="be">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G25.09 · Шаблоны прэзентацыі брэнда · кантактны ліст</title>
+<style>
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Alegreya;src:url(../G25.06/fonts/Alegreya_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+/* Значэнні — даслоўна канон G06.07; --clay/--amber — прапановы B04.1/B04.2. */
+:root{--paper:#faf7f2;--ink:#22262b;--muted:#6b7280;--accent:#1d6b4f;--card:#fff;--line:#d8d2c6;--clay:#805039;--amber:#d8a551;--r:10px}
+*{box-sizing:border-box}
+body{margin:0;background:#ece7df;color:var(--ink);font:400 16px/1.45 Golos,system-ui,sans-serif}
+h1,h2,h3,p,table{margin:0}
+.sp{max-width:1720px;margin:auto;padding:24px}
+.sp-head{display:flex;justify-content:space-between;align-items:end;gap:24px;padding-bottom:16px;border-bottom:1px solid #b9b1a5}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--clay)}
+h1{font:600 36px/1.1 Alegreya,serif;margin-top:4px}
+.sp-head p{max-width:720px;font-size:14px}
+.src{font-size:12px;color:#4c5359;margin-top:6px}
+section{margin-top:26px}
+h2{font:600 22px/1.2 Alegreya,serif;padding-bottom:8px;border-bottom:2px solid var(--accent);margin-bottom:10px}
+h2 small{font:400 13px/1.4 Golos,sans-serif;color:#4c5359;display:block;margin-top:3px}
+table.t{border-collapse:collapse;font-size:13px;background:#fff;max-width:1240px;margin-top:10px}
+.t th,.t td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+.t th{background:var(--paper);font-weight:600}
+.t code{font-size:12px}
+.tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:99px;padding:2px 8px;color:#4c5359;background:#fff}
+.tag.prop{border-color:var(--clay);color:var(--clay)}
+.tag.canon{border-color:var(--accent);color:var(--accent)}
+.grid2{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px;align-items:flex-start}
+.cell{background:var(--paper);border:1px solid #c9c1b1;border-radius:var(--r);padding:14px}
+.cell h3{font-size:13px;font-weight:600;color:#4c5359;margin-bottom:8px}
+.cell img{display:block;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.12)}
+.note{font-size:12px;color:var(--muted);margin-top:8px;max-width:900px}
+.shot{max-width:540px}
+.shot-tall{max-width:360px}
+.shot-mid{max-width:460px}
+ul.rules{margin:8px 0 0;padding-left:18px;font-size:14px}
+ul.rules li{margin-bottom:6px}
+</style>
+<div class="sp">
+  <div class="sp-head">
+    <div>
+      <div class="eyebrow">G25.09 · issue <a href="https://github.com/vokhandcrafts/KUDY/issues/707">#707</a> · эпік #346</div>
+      <h1>Шаблоны прэзентацыі брэнда — кантактны ліст</h1>
+      <p>Чатыры перавыкарыстоўныя шаблоны з адзінай крыніцы: кампазіцыя скрыншотаў крам, вэб-блок уводзін, сацыяльная картка і картка-запрашэнне з QR. Беларускія і англійскія прыклады, правілы пашырэння тэксту, правы і крыніцы выяў, адкладзены спіс. Усё — <b>канцэпты для праектавання, не фінальныя здымкі і не production-асеты</b>.</p>
+      <div class="src">Крыніцы: брыф «Атлас знаходак» v1 (08.10.2026, рэдакцыя <code>a11ea86</code>) · рашэнні B01–B10 + B03.1/B04.1–B04.3 · канон G06.07 (<code>visual-language.md</code>) · слоўнік G25.02 (<code>cc2b581</code>) · пазы дракона G25.03 (<code>b79bfda</code>) · прадметы G25.05 (<code>86b3866</code>) · іконкі G24.02 (#693). Редакцыі кантрактаў — на HEAD галіны <code>zcode/707</code> (база <code>e2ff047</code>; пасля інтэграцыі main <code>6f0eead</code> — <code>d50678a</code>).</div>
+    </div>
+    <div style="text-align:right;min-width:220px">
+      <span class="tag prop">прапанова G25.09</span><br><br>
+      <span class="tag canon">канон G06.07 цэлы</span>
+    </div>
+  </div>
+
+  <!-- ===== §1 ===== -->
+  <section>
+    <h2>§1 · Платформавыя патрабаванні <small>правераныя на момант выканання 12.10.2026; перад публікацыяй пераправерыць</small></h2>
+    <table class="t">
+      <tr><th>Платформа / носьбіт</th><th>Патрабаванне</th><th>Крыніца</th></tr>
+      <tr><td>Google Play · тэлефонныя скрыншоты</td><td>9:16 (тут 1080×1920); кожны бок 320–3840 px; JPEG або 24-біт PNG без альфы; ≤ 8 МБ; 2–8 здымкаў</td><td><code>support.google.com/googleplay/android-developer/answer/9866151</code></td></tr>
+      <tr><td>Google Play · feature graphic</td><td>1024×500, JPEG/PNG без альфы</td><td>там жа</td></tr>
+      <tr><td>App Store · вядучы набор</td><td>6.9″ партрэт 1320×2868; PNG/JPEG без празрыстасці; маштабуецца на меншыя класы дысплеяў</td><td><code>developer.apple.com/help/app-store-connect/reference/screenshot-specifications</code></td></tr>
+      <tr><td>Сацыяльныя прэв'ю (og:image)</td><td>1200×630 (1.91:1); PNG/JPG ≤ 2 МБ; меты <code>og:image:width/height</code>; X <code>summary_large_image</code> малюе 1200×675 — крытычнае ў бяспечнай зоне 1080×510</td><td><code>ogp.me</code>; дакументацыя X Card</td></tr>
+      <tr><td>QR на друкаванай картцы</td><td>цішынная зона ≥ 4 модулі з кожнага боку (ISO/IEC 18004); для скану з рукі ≥ 25×25 мм — тут 28×28 мм; код закадаваны толькі ад жывога <code>siteOrigin</code></td><td>ISO/IEC 18004; кантракт <code>web/lib/qr.ts</code></td></tr>
+    </table>
+    <p class="note">Каманды перагенеравання PNG — у <a href="README.md">README тэчкі</a>. Памеры канваў зашытыя ў шаблонах як фіксаваныя <code>width/height</code> — экспарт робіцца здымкам канва, не масабойным перакадаваннем.</p>
+  </section>
+
+  <!-- ===== §2 ===== -->
+  <section>
+    <h2>§2 · Кампазіцыя скрыншотаў крам <small>загалоўная зона → прылада з жывой паверхняй → дракон → бурштынавы акцэнт → стужка чыпаў; слот паверхні перасоўны (каталог / Run)</small></h2>
+    <div class="grid2">
+      <div class="cell"><h3>play-be · 1080×1920 · варыянт A (каталог)</h3><img class="shot-tall" src="store-play-be.png" alt="Сторы-канва play-be"></div>
+      <div class="cell"><h3>play-be-run · 1080×1920 · варыянт B (панэль Run)</h3><img class="shot-tall" src="store-play-be-run.png" alt="Сторы-канва play-be-run"></div>
+      <div class="cell"><h3>as-be · 1320×2868 · App Store</h3><img class="shot-tall" src="store-appstore-be.png" alt="Сторы-канва as-be"></div>
+      <div class="cell"><h3>EN-канвы</h3><img class="shot-tall" src="store-play-en.png" alt="Сторы-канва play-en"><p class="note">play-en · таксама store-appstore-en.png (1320×2868) — тая ж кампазіцыя.</p></div>
+    </div>
+    <p class="note">Радкі ў прыладзе — даслоўна <code>contracts/ui-messages/source.json</code> (be) і <code>translations/en.json</code> (en); прэс-тэкст загалоўкаў, рэпліка дракона і назвы гідаў — аўтарскія (пазначаныя ў figcaption кожнага канва). Ніякіх абяцанняў узнагародаў; «Бясплатна»/«Змешана» — дзейныя пазнакі доступу.</p>
+  </section>
+
+  <!-- ===== §3 ===== -->
+  <section>
+    <h2>§3 · Вэб-блок уводзін <small>1440×900 і 375×640; ідэнтыфікацыя → адно абяцанне → чыпы → адзін CTA; вэб — прэв'ю прагулкі, не другі прадукт</small></h2>
+    <div class="grid2">
+      <div class="cell"><h3>web-be · 1440×900</h3><img class="shot" src="web-intro-be.png" alt="Вэб-блок be"></div>
+      <div class="cell"><h3>web-en · 1440×900</h3><img class="shot" src="web-intro-en.png" alt="Вэб-блок en"></div>
+      <div class="cell"><h3>мабільныя 375×640</h3><img class="shot-mid" src="web-intro-be-375.png" alt="Вэб-блок be мабільны"><img class="shot-mid" src="web-intro-en-375.png" alt="Вэб-блок en мабільны" style="margin-top:10px"></div>
+    </div>
+    <p class="note">«Поўная версія — у дадатку: GPS-аўтазапуск, офлайн, поўныя маршруты.» — даслоўна <code>web.ui.calmOfferText</code>; чыпы — <code>web.ui.audioAndText</code> і <code>native.chrome.access.free</code>; тэза «без акаўнта» — з <code>web.ui.privacyWeb</code>. Сілуэт горада — заглушка: рэальная ілюстрацыя патрабуе асетаў з правамі (§7).</p>
+  </section>
+
+  <!-- ===== §4 ===== -->
+  <section>
+    <h2>§4 · Сацыяльная картка 1200×630 <small>бяспечная зона 1080×510 пасярод — трымае падразаньне X 1200×675; URL на канве няма да рашэння G10.02.b</small></h2>
+    <div class="grid2">
+      <div class="cell"><h3>social-be</h3><img class="shot" src="social-card-be.png" alt="Сацыяльная картка be"></div>
+      <div class="cell"><h3>social-en</h3><img class="shot" src="social-card-en.png" alt="Сацыяльная картка en"></div>
+      <div class="cell" style="max-width:520px"><h3>Слот іконкі</h3>
+        <ul class="rules">
+          <li>Паказаны напрамак I1 з <a href="../G24.02/compare.html">G24.02</a> як пазнака напрамку — <b>не фінальны асет</b>.</li>
+          <li>Фінальная іконка/заставка трапляе ва ўсе шаблоны пасля выбару ўладара ў #693; незалежны візуальны кірунак не пачынаецца.</li>
+          <li>Сніпет меты <code>og:image</code> — у <a href="social-card.html">social-card.html</a> §2; абсалютызацыя адрасоў — толькі праз <code>siteOrigin</code> (<code>web/lib/app-links.ts</code>).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== §5 ===== -->
+  <section>
+    <h2>§5 · Картка-запрашэнне з QR · A6 105×148 мм, 300 dpi <small>цішынная зона ≥ 4 модулі; QR — плейсхолдер з вадзяным знакам «УЗОР»; узор прызначэння — тэставы домен рэпы</small></h2>
+    <div class="grid2">
+      <div class="cell"><h3>qr-be · 1240×1748</h3><img class="shot-tall" src="qr-invitation-be.png" alt="Запрашэнне be"></div>
+      <div class="cell"><h3>qr-en · 1240×1748</h3><img class="shot-tall" src="qr-invitation-en.png" alt="Запрашэнне en"></div>
+      <div class="cell" style="max-width:560px"><h3>Асноўныя правілы</h3>
+        <ul class="rules">
+          <li>Тэкставы ўзор прызначэння побач з QR: <code>kudy-test.example/&lt;локаль&gt;/guides/demo-route-a1</code> — зарэзерваваны <code>.example</code>, той самы, што ў тэстах <code>web/lib/qr.test.ts</code>.</li>
+          <li>Рэальны QR піша <code>scripts/build-qr.ts</code> з <code>app-links.siteOrigin</code> пасля рашэння G10.02.b; да таго — толькі плейсхолдер (<code>web/lib/qr.ts</code>: выдуманы домен шлёа наведвальніка на чужы адрас).</li>
+          <li>Ніякіх абяцанняў падарункаў, кэшу або схаваных кропак — адкладзены спіс B10 (§8).</li>
+          <li>Поўная табліца «заўсёды/ніколі» — у <a href="qr-invitation.html">qr-invitation.html</a> §2.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== §6 ===== -->
+  <section>
+    <h2>§6 · Правілы пашырэння тэксту <small>замеры з канчатковых копій гэтых шаблонаў; носьбіт мовы перад публікацыяй не правяраўся</small></h2>
+    <table class="t">
+      <tr><th>Зона</th><th>be (зн / радкоў)</th><th>en (зн / радкоў)</th><th>Правіла зоны</th></tr>
+      <tr><td>Сторы-загаловак (88–104 px)</td><td>24 / 2 — «Аўдыёпрагулкі па горадзе»</td><td>27 / 2 — «Audio walks around the city»</td><td>≤ 2 радкі; ≤ 14 зн на радок пры 88 px; даўжэйшая мова вызначае памер зоны</td></tr>
+      <tr><td>Сторы-подзагаловак</td><td>32 / 1 — урэзка з <code>web.ui.privacyIntro</code></td><td>27 / 1</td><td>1 радок; калі пераносіцца — кароціць, не паменшваць кегль</td></tr>
+      <tr><td>Вэб-загаловак (76 px)</td><td>37 / 2 — «Адкрый горад сам — пачуй яго гісторыі»</td><td>32 / 2 — «Open the city — hear its stories»</td><td>≤ 2 радкі ў шырыні 840 px; на вузкай шырыні — кароткая форма (гл. мабільны канва)</td></tr>
+      <tr><td>Вэб-копія (30 px)</td><td>157 / 4</td><td>164 / 4</td><td>≤ 4 радкі на дэсктопе, ≤ 5 на мабільным; en трымае даслоўны <code>calmOfferText</code></td></tr>
+      <tr><td>Чыпы</td><td>≤ 2 чыпы на вэб-канве (3-і не лезе пры 840 px — вымерана); на сторах ≤ 3, кожны ≤ 34 зн (be 29 / en 34, вымерана на 1080 px)</td><td>таго ж</td><td>чып = адзін факт; пералік моваў жыве на старонцы гіда (<code>languagesLine</code>), не ў чыпе</td></tr>
+      <tr><td>Рэпліка дракона (Caveat)</td><td>23 / 2 — «Куды? Хадзем, паглядзім»</td><td>26 / 2 — «Where to? Let's go and see»</td><td>яўны <code>&lt;br&gt;</code>; не шырэй 360 px на сторах; толькі рэплікі з брыфа ці аўтарскія з пазнакай</td></tr>
+      <tr><td>Назва прагулкі (QR-картка, 88 px)</td><td>22 / 2 — «Воднае люстра Гданьска»</td><td>26 / 2 — «The water mirror of Gdańsk»</td><td>≤ 2 радкі ў шырыні 1040 px; узорны кантэнт — замяніць рэальным</td></tr>
+    </table>
+    <ul class="rules" style="max-width:1000px;margin-top:10px">
+      <li><b>Караціць копію, не кегль:</b> калі тэкст не лезе ў зону ва ўсіх мовах, скарачаецца сказ, а памер шрыфта трымаецца; выключэнне — мабільны загаловак, дзе вызначаная кароткая форма загадзя.</li>
+      <li><b>Няма аўтаматычнага сціску:</b> у HTML-шаблонах няма <code>transform: scale</code> тэксту — перапаўненне бачнае адразу пры рэндэры.</li>
+      <li><b>Кірунак адрознення:</b> у гэтых копіях be каротэй en у 4 зонах з 6 (−4%…−15%); даўжэйшы — падзагаловак стору (+19%) і вэб-загаловак (+16%). Адзінага напрамку няма: зоны праектуюцца па даўжэйшай мове, не «у сярэднім».</li>
+      <li><b>Пазнакі моў:</b> усе радкі інтэрфейсу маюць ідэнтыфікатар запісу ў figcaption/подпісе; аўтарскі тэкст пазначаны «аўтарскі» яўна.</li>
+    </ul>
+  </section>
+
+  <!-- ===== §7 ===== -->
+  <section>
+    <h2>§7 · Правы і крыніцы выяў <small>усякое выкарыстанне па-за матэрыяламі KUDY — асобнае рашэнне ўладара</small></h2>
+    <table class="t">
+      <tr><th>Асет</th><th>Крыніца</th><th>Правы і статус</th></tr>
+      <tr><td>Позы дракона («спакойны», «цікаўны», «кліча»)</td><td><a href="../G25.03/pose-calm.svg">outputs/G25.03</a> (<code>b79bfda</code>)</td><td>лічбавы персанаж па фігурцы заснавальніка; уласнасць заснавальніка, выкарыстанне толькі ў матэрыялах KUDY (канон §6); падабенства фігурцы <b>не пацверджанае</b> — арыгінальныя фота адсутнічаюць (G24.02)</td></tr>
+      <tr><td>Медальён «Адлюстраванне»</td><td><a href="../G25.05/object-reflection.svg">outputs/G25.05</a> (#704)</td><td>прапанова хвалі G25; гіпотэза B08; умовы атрымання не зацверджаныя</td></tr>
+      <tr><td>Іконка-слот (напрамак I1)</td><td><a href="../G24.02/icon-i1.svg">outputs/G24.02</a> (#693)</td><td>напрамак A1/B2; фінальны асет і застаўка — пасля выбару ўладара ў #693; інтэграцыя — #429</td></tr>
+      <tr><td>Шрыфты Golos Text, Alegreya, Caveat</td><td><a href="../G25.06/fonts/README.md">outputs/G25.06/fonts</a></td><td>OFL 1.1, файлы ліцэнзій побач; self-host, знешняе падцягванне забароненае (канон §3)</td></tr>
+      <tr><td>Сілуэт горада (вэб-блок)</td><td>намаляваны ў гэтай задачы</td><td>заглушка; рэальная ілюстрацыя/фота патрабуе асета з правамі перад публікацыяй</td></tr>
+      <tr><td>QR-плейсхолдер</td><td><a href="qr-placeholder.svg">qr-placeholder.svg</a></td><td>дэтэрмінаваны ўзор з вадзяным знакам, нічога не закадавана; рэальны QR — <code>scripts/build-qr.ts</code> пасля G10.02.b</td></tr>
+      <tr><td>Радкі інтэрфейсу be/en</td><td><code>contracts/ui-messages/source.json</code>, <code>translations/en.json</code></td><td>скапіяваныя даслоўна з указанымі ідэнтыфікатарамі; правераныя на HEAD галіны</td></tr>
+      <tr><td>Назвы гідаў і гісторый («Воднае люстра Гданьска», «Стокі і краны», «Гданьскі кран»)</td><td>аўтарскія ўзоры гэтай задачы</td><td>узорны кантэнт з пазнакай; перад публікацыяй замяняецца рэальным кантэнтам з праверанымі крыніцамі</td></tr>
+      <tr><td>Кантрасты прапанаваных колераў</td><td>вымерана ў гэтай задачы</td><td>clay #805039 на паперы 6.29:1; ink на бурштыне #D8A551 6.83:1; accent-ink на акцэнце 6.43:1; muted на паперы 4.52:1; clay на бурштыне 3.02:1 — не выкарыстоўваецца для тэксту</td></tr>
+    </table>
+  </section>
+
+  <!-- ===== §8 ===== -->
+  <section>
+    <h2>§8 · Адкладзены спіс <small>трымаецца па-за гэтай хваляй; у шаблонах не мацуецца</small></h2>
+    <table class="t">
+      <tr><th>Тэма</th><th>Статус</th><th>Уладальнік рашэння</th></tr>
+      <tr><td>Фізічныя «скарбы дракона», размяшчэнне прадметаў у горадзе, раздача і кампаніі</td><td>адкладзена (B10); у картках-запрашэннях забаронена абяцаць</td><td><a href="https://github.com/vokhandcrafts/KUDY/issues/695">#695</a> (ацэнка пілота) → <a href="https://github.com/vokhandcrafts/KUDY/issues/696">#696</a> (кантракты) → асобны брэйншторм</td></tr>
+      <tr><td>Сакрэтныя кропкі па кампасе</td><td>адкладзена (B10); кампас у шаблонах не з'яўляецца</td><td>#695/#696; месца кампаса ў іконцы — B05 у #693</td></tr>
+      <tr><td>Публікацыя ў крамах і сацсетках, рэклама, QR-налепкі, падарункі</td><td>Out of scope картки #707</td><td>G11.01 (<a href="https://github.com/vokhandcrafts/KUDY/issues/296">#296</a>) і ўладар</td></tr>
+      <tr><td>Рэальны QR і <code>og:image</code> з жывым адрасам</td><td>чакае <code>siteOrigin</code></td><td>G10.02.b (<a href="https://github.com/vokhandcrafts/KUDY/issues/320">#320</a>)</td></tr>
+      <tr><td>Фінальныя скрыншоты крам</td><td>робяцца з жывых зборак перад публікацыяй; гэтыя канвы — кампазіцыйныя шаблоны</td><td>рэліз-праверка #296</td></tr>
+    </table>
+  </section>
+</div>
+</html>
