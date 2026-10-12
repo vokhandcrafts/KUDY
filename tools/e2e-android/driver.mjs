@@ -176,6 +176,8 @@ export function parseDump(xml) {
       contentDesc: attrs['content-desc'] ?? '',
       cls: attrs.class ?? '',
       clickable: attrs.clickable === 'true',
+      enabled: attrs.enabled === 'true',
+      selected: attrs.selected === 'true',
       bounds: attrs.bounds ?? '',
       center: nodeCenter(attrs.bounds),
     });
@@ -184,11 +186,12 @@ export function parseDump(xml) {
 }
 
 function matches(node, selector) {
-  if (typeof selector.testID === 'string') return node.resourceId === selector.testID;
-  if (typeof selector.text === 'string') return node.text === selector.text;
-  if (typeof selector.textContains === 'string') return node.text.includes(selector.textContains);
-  if (typeof selector.contentDesc === 'string') return node.contentDesc === selector.contentDesc;
-  return false;
+  let matched = false;
+  if (typeof selector.testID === 'string') matched = node.resourceId === selector.testID;
+  else if (typeof selector.text === 'string') matched = node.text === selector.text;
+  else if (typeof selector.textContains === 'string') matched = node.text.includes(selector.textContains);
+  else if (typeof selector.contentDesc === 'string') matched = node.contentDesc === selector.contentDesc;
+  return matched && (typeof selector.enabled !== 'boolean' || node.enabled === selector.enabled);
 }
 
 // The single selector semantics of the suite: exact testID/resource-id,
@@ -199,10 +202,11 @@ export function findNode(nodes, selector) {
 }
 
 export function describeSelector(selector) {
-  if (typeof selector.testID === 'string') return `testID "${selector.testID}"`;
-  if (typeof selector.text === 'string') return `text "${selector.text}"`;
-  if (typeof selector.textContains === 'string') return `text containing "${selector.textContains}"`;
-  if (typeof selector.contentDesc === 'string') return `content-desc "${selector.contentDesc}"`;
+  const enabled = typeof selector.enabled === 'boolean' ? ` enabled=${selector.enabled}` : '';
+  if (typeof selector.testID === 'string') return `testID "${selector.testID}"${enabled}`;
+  if (typeof selector.text === 'string') return `text "${selector.text}"${enabled}`;
+  if (typeof selector.textContains === 'string') return `text containing "${selector.textContains}"${enabled}`;
+  if (typeof selector.contentDesc === 'string') return `content-desc "${selector.contentDesc}"${enabled}`;
   return JSON.stringify(selector);
 }
 

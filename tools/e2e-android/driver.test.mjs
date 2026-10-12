@@ -58,6 +58,17 @@ test('entity decode in attribute values', () => {
   assert.equal(nodes[0].text, 'a&b <c>');
 });
 
+test('parseDump preserves selected and enabled state for locale and action checks', () => {
+  const [selected, disabled] = parseDump(
+    '<node resource-id="locale" selected="true" enabled="true"/>' +
+    '<node resource-id="start" selected="false" enabled="false"/>',
+  );
+  assert.equal(selected.selected, true);
+  assert.equal(selected.enabled, true);
+  assert.equal(disabled.selected, false);
+  assert.equal(disabled.enabled, false);
+});
+
 test('corrupt input yields diagnostics, never a throw', () => {
   assert.deepEqual(parseDump('not xml at all'), []);
   assert.deepEqual(parseDump(null), []);
@@ -91,6 +102,18 @@ test('waitFor resolves through the production lookup on a recorded dump', async 
   driver.dump = async () => ({ localPath: 'fixture://dump-explore.xml', xml: readFixture('dump-explore.xml') });
   const node = await driver.waitFor({ testID: 'screen-Explore' }, { timeoutMs: 5000 });
   assert.ok(node.center.x > 0);
+});
+
+test('waitFor ignores a disabled Start until the device reports it enabled', async () => {
+  const driver = testDriver();
+  let dumps = 0;
+  driver.dump = async () => ({
+    localPath: '/tmp/start.xml',
+    xml: `<node resource-id="btn-start" enabled="${++dumps > 1}" bounds="[0,0][40,40]"/>`,
+  });
+  const node = await driver.waitFor({ testID: 'btn-start', enabled: true }, { timeoutMs: 5000 });
+  assert.equal(node.enabled, true);
+  assert.equal(dumps, 2);
 });
 
 test('waitFor times out readably on a missing element: selector, deadline, dump path', async () => {
