@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="be">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G25.09 · Картка-запрашэнне з QR · шаблон</title>
+<style>
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Golos;src:url(../G25.06/fonts/GolosText_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Alegreya;src:url(../G25.06/fonts/Alegreya_600SemiBold.ttf) format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:Caveat;src:url(../G25.06/fonts/Caveat_400Regular.ttf) format('truetype');font-weight:400;font-display:swap}
+/* Значэнні — даслоўна канон G06.07; --clay/--amber — прапановы B04.1/B04.2. */
+:root{--paper:#faf7f2;--ink:#22262b;--muted:#6b7280;--accent:#1d6b4f;--accent-ink:#fff;--card:#fff;--line:#d8d2c6;--clay:#805039;--amber:#d8a551;--r:10px}
+*{box-sizing:border-box}
+body{margin:0;background:#ece7df;color:var(--ink);font:400 16px/1.45 Golos,system-ui,sans-serif}
+h1,h2,p{margin:0}
+.kit{max-width:1400px;margin:auto;padding:24px}
+.kit-head{padding-bottom:16px;border-bottom:1px solid #b9b1a5}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--clay)}
+h1{font:600 34px/1.15 Alegreya,serif;margin-top:4px}
+.kit p{max-width:780px;font-size:14px;margin-top:8px}
+.src{font-size:12px;color:#4c5359;margin-top:6px}
+section{margin-top:28px}
+h2{font:600 21px/1.2 Alegreya,serif;padding-bottom:8px;border-bottom:2px solid var(--accent);margin-bottom:10px}
+h2 small{font:400 13px/1.4 Golos,sans-serif;color:#4c5359;display:block;margin-top:3px}
+.pair{display:flex;gap:24px;flex-wrap:wrap;margin-top:12px}
+figure{margin:0}
+figcaption{font-size:12px;color:#4c5359;margin-top:6px;max-width:560px}
+.rules{border-collapse:collapse;font-size:13px;background:#fff;max-width:900px;margin-top:12px}
+.rules th,.rules td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+.rules th{background:var(--paper);font-weight:600}
+.rules .no td:first-child{color:#8a3a2a}
+.canvas{background:var(--paper);position:relative;overflow:hidden;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.safe{position:absolute;border:2px dashed #b9b1a5;pointer-events:none}
+.safe i{position:absolute;top:10px;left:14px;font-style:normal;font-size:24px;color:#a89f92}
+.qr{position:absolute;display:flex;flex-direction:column;align-items:center;gap:14px}
+.qr img{width:330px;height:330px;background:#fff;border:0}
+.qr .qr-note{font-size:17px;color:var(--muted);text-align:center;max-width:420px;line-height:1.35}
+.qr .qr-url{font-size:19px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:99px;padding:8px 20px;letter-spacing:.01em}
+.q-title{position:absolute;font:600 1em/1.15 Alegreya,serif;color:var(--ink)}
+.q-kicker{position:absolute;font:600 .3em Golos,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.q-dragonline{position:absolute;font:400 1.05em/1.2 Caveat,cursive;color:var(--clay)}
+.q-free{position:absolute;font-size:.34em;font-weight:600;color:var(--ink);background:var(--amber);border-radius:99px;padding:.5em 1em}
+.q-foot{position:absolute;left:56px;right:56px;bottom:64px;font-size:.28em;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;line-height:1.4}
+.s-tag{position:absolute;font-size:15px;font-weight:600;color:var(--muted);border:2px solid var(--muted);border-radius:99px;padding:2px 12px;background:#fff;opacity:.85}
+</style>
+<div class="kit">
+  <div class="kit-head">
+    <div class="eyebrow">G25.09 · issue <a href="https://github.com/vokhandcrafts/KUDY/issues/707">#707</a> · эпік #346 · шаблон 4/4</div>
+    <h1>Картка-запрашэнне з QR — A6 105×148 мм, 300 dpi (1240×1748 px)</h1>
+    <p>Друкаваны адлівак вэб-увходу: назва прагулкі → адзін драконавы зварот → QR → тэкставы ўзор прызначэння. QR на шаблоне — <b>плейсхолдер</b>: у рэпе <code>web/lib/qr.ts</code> піша, што QR толькі гэткі, як закадаваны URL, і выдуманы домен шлёа наведвальніка на чужы адрас; таму рэальны QR піша <code>scripts/build-qr.ts</code> з <code>app-links.siteOrigin</code> пасля рашэння G10.02.b. Узор прызначэння — тэставы домен рэпы <code>kudy-test.example</code> (зарэзерваваны <code>.example</code>), што выкарыстоўваюць і тэсты <code>web/lib/qr.test.ts</code>.</p>
+    <div class="src">Крыніцы: брыф v1 (<code>a11ea86</code>) · канон G06.07 · пазы G25.03 · QR-кантракт <code>web/lib/qr.ts</code> + <code>app-links.ts</code>. Патрабаванні QR, правераныя 12.10.2026: цішынная зона ≥ 4 модулі з кожнага боку (ISO/IEC 18004); на друкаванай картцы ў руку — QR ≥ 25×25 мм (тут 28 мм). Забароненыя абяцанні: падарунак, кэш, «калектуй усё» (адкладзены спіс B10 → #695).</div>
+  </div>
+
+  <section>
+    <h2>§1 · Канвы A6 · беларуская і англійская <small>пункцір — бяспечная зона друку 4 мм ад краю (47 px); важлівае змесьціва — толькі ўнутры</small></h2>
+    <div class="pair">
+      <figure>
+        <div class="canvas" id="qr-be" style="width:1240px;height:1748px;font-size:56px">
+          <div class="safe" style="left:47px;top:47px;width:1146px;height:1654px"><i>бяспечная зона друку 4 мм</i></div>
+          <img src="../G24.02/icon-i1.svg" alt="Слот іконкі — напрамак I1" style="position:absolute;left:80px;top:80px;width:96px;height:96px;border-radius:22%;background:#fff;border:2px solid var(--line)">
+          <div class="q-kicker" style="left:80px;top:236px">Прагулка ў KUDY</div>
+          <div class="q-title" style="left:80px;top:300px;width:1040px;font-size:88px">Воднае люстра<br>Гданьска</div>
+          <div class="q-dragonline" style="left:80px;top:560px;font-size:56px;max-width:600px">Хадзем, пакажу</div>
+          <p style="position:absolute;left:80px;top:680px;width:520px;font-size:30px;color:var(--ink)">Аўдыёгіды для гарадскіх прагулак: тэкст і аўдыё ў браўзеры, без усталёўкі і акаўнта.</p>
+          <span class="q-free" style="left:80px;top:850px;font-size:44px">Бясплатна</span>
+          <div class="qr" style="right:96px;top:700px">
+            <img src="qr-placeholder.svg" alt="Плейсхолдер QR — не скануецца">
+            <div class="qr-note">плейсхолдер — рэальны QR піша <code>scripts/build-qr.ts</code> пасля рашэння пра домен (G10.02.b)</div>
+            <div class="qr-url">kudy-test.example/be/guides/demo-route-a1</div>
+          </div>
+          <img src="../G25.03/pose-calm.svg" alt="Дракон, поза «спакойны»" style="position:absolute;left:80px;bottom:260px;width:300px;height:300px"><div class="q-foot">Узор прызначэння — тэставы домен <code>kudy-test.example</code>; назва прагулкі — аўтарскі ўзор кантэнту (§7 ліста). Цішынная зона QR ≥ 4 модулі (ISO/IEC 18004); QR 28×28 мм. Ніякіх абяцанняў пра ўзнагароды, падарункі або схаваныя кропкі.</div>
+          <div class="s-tag" style="right:20px;bottom:20px">канцэпт · QR плейсхолдер</div>
+        </div>
+        <figcaption>«Прагулка ў KUDY» — аўтарскі кікер; «Хадзем, пакажу» — даслоўна брыф §Сутнасць (казка дракона, які ведае месца). «Аўдыёгіды для гарадскіх прагулак» — урэзка з <code>web.ui.privacyIntro</code> (запіс пачынаецца «KUDY — …» і мае хвост пра старонку); «Бясплатна» — <code>native.chrome.access.free</code> на бурштыне B04.2 з ink-тэкстам 6.83:1. Слот іконкі — напрамак I1 G24.02, фінальны асет пасля #693.</figcaption>
+      </figure>
+      <figure>
+        <div class="canvas" id="qr-en" style="width:1240px;height:1748px;font-size:56px">
+          <div class="safe" style="left:47px;top:47px;width:1146px;height:1654px"><i>print safe area 4 mm</i></div>
+          <img src="../G24.02/icon-i1.svg" alt="Icon slot — direction I1" style="position:absolute;left:80px;top:80px;width:96px;height:96px;border-radius:22%;background:#fff;border:2px solid var(--line)">
+          <div class="q-kicker" style="left:80px;top:236px">A walk in KUDY</div>
+          <div class="q-title" style="left:80px;top:300px;width:1040px;font-size:88px">The water mirror<br>of Gdańsk</div>
+          <div class="q-dragonline" style="left:80px;top:560px;font-size:56px;max-width:600px">Come, I’ll show you</div>
+          <p style="position:absolute;left:80px;top:680px;width:520px;font-size:30px;color:var(--ink)">Audio guides for city walks: text and audio in the browser, no install, no account.</p>
+          <span class="q-free" style="left:80px;top:850px;font-size:44px">Free</span>
+          <div class="qr" style="right:96px;top:700px">
+            <img src="qr-placeholder.svg" alt="QR placeholder — not scannable">
+            <div class="qr-note">placeholder — the real QR is written by <code>scripts/build-qr.ts</code> after the domain decision (G10.02.b)</div>
+            <div class="qr-url">kudy-test.example/en/guides/demo-route-a1</div>
+          </div>
+          <img src="../G25.03/pose-calm.svg" alt="Dragon, calm pose" style="position:absolute;left:80px;bottom:260px;width:300px;height:300px"><div class="q-foot">Sample destination — the repo’s test domain <code>kudy-test.example</code>; the walk title is authored sample content (§7 of the results). QR quiet zone ≥ 4 modules (ISO/IEC 18004); QR 28×28 mm. No promises of rewards, gifts or hidden spots.</div>
+          <div class="s-tag" style="right:20px;bottom:20px">concept · QR placeholder</div>
+        </div>
+        <figcaption>EN: кікер, зварот дракона і ўводзінны сказ — аўтарскі пераклад з пазнакай; назва прагулкі і URL-узор — узорны кантэнт. <code>localePath</code> дае префікс мовы ў адрасе (<code>web/lib/content/site.ts</code>) — en-версія ўзору гэта адлюстроўвае.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>§2 · Правілы напаўнення запрашэння <small>што заўсёды, што ніколі — пазнакі ўдзельнікаў G25.08 бяруць адсюль</small></h2>
+    <table class="rules">
+      <tr><th>Заўсёды</th><th>Змест/правіла</th></tr>
+      <tr><td>Ідэнтыфікацыя прадукта</td><td>іконка/слот + «Прагулка ў KUDY»; дракон толькі як твар і зварот, не лагатып (канон §6)</td></tr>
+      <tr><td>Адна прапанова</td><td>адна назва прагулкі; спіс гідаў на картцы не жыве</td></tr>
+      <tr><td>Тэкставы ўзор прызначэння</td><td>адрас побач з QR чытаецца вачыма — без скану зразумела, куды вядзе картка</td></tr>
+      <tr><td>Цішынная зона</td><td>≥ 4 модулі; на QR ні тэксту, ні штампаў, ні налепак зверху</td></tr>
+      <tr><th style="color:#8a3a2a">Ніколі</th><th style="color:#8a3a2a">Чаму</th></tr>
+      <tr class="no"><td>Абяцанне падарунка/кэша</td><td>картка не абяцае ўзнагароду за скан; фізічныя скарбы — адкладзены спіс B10 (рашэнне #695/#696, асобны брэйншторм)</td></tr>
+      <tr class="no"><td>«Калектуй усё», лічыльнікі, балы</td><td>штодзённыя серыі і ціск — па-за канцэпцыяй (брыф §Калекцыя)</td></tr>
+      <tr class="no"><td>Сканавальны QR з выдуманым доменам</td><td>выдуманы origin шлёа наведвальніка на чужы адрас — кантракт <code>web/lib/qr.ts</code></td></tr>
+      <tr class="no"><td>Гістарычныя сцвярджэнні на картцы</td><td>мастацкія рэплікі дракона не падмяняюць гістарычныя крыніцы (брыф §Дракон)</td></tr>
+    </table>
+  </section>
+</div>
+<script>
+// Экспарт: ?only=<canvas-id> хавае ўсё, акрамя зададзенага канва.
+const only=new URLSearchParams(location.search).get('only');
+if(only){
+  const c=document.getElementById(only);
+  document.querySelectorAll('.kit').forEach(el=>el.remove());
+  if(c){document.body.appendChild(c);document.body.style.background='#faf7f2';}
+}
+</script>
+</html>
