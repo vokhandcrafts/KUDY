@@ -1,0 +1,10 @@
+Праверка аўдыё на Android, 2026-10-13 UTC
+Прылада: kudy-e2e / emulator-5556
+Версія Android: 16
+Узровень API: 36
+SHA-256 APK: d344acd113350ed8a33f488daedb35d2d2f4cdb5786b95453a06b7858837cc0c
+Маркер uiautomator: e2e-stop-1 — праслухана
+Колькасць памылак у logcat пасля logcat -c, загрузкі гіда і прайгравання: 0
+Шуканыя маркеры: FileNotFoundException, database is locked, audio-file-unavailable, FATAL EXCEPTION
+Крокі: ачышчаныя даныя праграмы; лакальны origin G23.01; Metro на порце 8083; «Загрузіць»; «Пачаць»; ручны «Граць» на stop-1; чаканне стану «праслухана».
+Здымкі: downloaded.png, playing.png, heard.png, heard.xml.

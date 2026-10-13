@@ -34,6 +34,9 @@ class FakeFile extends Entry {
   get exists(): boolean {
     return this.fs.files.has(this.path);
   }
+  get uri(): string {
+    return `file://${this.path}`;
+  }
   get size(): number {
     return this.fs.files.get(this.path)?.byteLength ?? 0;
   }

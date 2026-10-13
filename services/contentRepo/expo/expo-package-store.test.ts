@@ -10,6 +10,7 @@ import { test } from 'node:test';
 import { createExpoDownloadStore } from '../../download/expo/expo-download-store.ts';
 import {
   createExpoBundlesStore,
+  createExpoAudioUriResolver,
   createExpoPackageStore,
   createExpoTeaserAudioProbe,
 } from './expo-package-store.ts';
@@ -49,6 +50,18 @@ test('bundles store lists, sizes and refuses unsafe rels', async () => {
   fs.files.set('/root/b/1/be/base/empty.mp3', new Uint8Array(0));
   assert.equal(await probe('b/1/be/base/empty.mp3'), false);
   assert.equal(await probe('../b/1/be/base/lock.json'), false);
+});
+
+test('audio URI resolution stays inside downloaded, nonempty bundle files', () => {
+  const resolveAudioUri = createExpoAudioUriResolver(classes, root);
+  fs.files.set('/root/bundles/r/1/be/base/audio/story.m4a', encoder.encode('audio'));
+  fs.files.set('/root/bundles/r/1/be/base/audio/empty.m4a', new Uint8Array());
+  assert.equal(resolveAudioUri('bundles/r/1/be/base/audio/story.m4a'), 'file:///root/bundles/r/1/be/base/audio/story.m4a');
+  assert.equal(resolveAudioUri('bundles/r/1/be/base/audio/empty.m4a'), null);
+  assert.equal(resolveAudioUri('bundles/r/1/be/base/audio/absent.m4a'), null);
+  assert.equal(resolveAudioUri('bundles/r/1/be/base/audio/../../escape.m4a'), null);
+  assert.equal(resolveAudioUri('/bundles/r/1/be/base/audio/story.m4a'), null);
+  assert.equal(resolveAudioUri('other/r/1/be/base/audio/story.m4a'), null);
 });
 
 test('download store round-trip: ensure, write, rename, remove, freeBytes', async () => {

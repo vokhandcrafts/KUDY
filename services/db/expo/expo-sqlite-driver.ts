@@ -24,18 +24,19 @@ export function createExpoSqliteDriver(db: SQLiteDatabase): SqlDriver {
     prepare: (sql): SqlStatement => ({
       run: (...params: SqlValue[]) => {
         assertBindable(params);
-        const result = db.prepareSync(sql).executeSync<Record<string, SqlValue>>(...(params as never[]));
+        // Expo's database wrappers finalize their prepared statements. A
+        // bare prepareSync/executeSync leaves a cursor open and the next
+        // BEGIN IMMEDIATE can fail with `database is locked` on Android.
+        const result = db.runSync(sql, ...(params as never[]));
         return { changes: result.changes };
       },
       get: (...params: SqlValue[]) => {
         assertBindable(params);
-        const result = db.prepareSync(sql).executeSync<Record<string, SqlValue>>(...(params as never[]));
-        return result.getFirstSync() ?? undefined;
+        return db.getFirstSync<Record<string, SqlValue>>(sql, ...(params as never[])) ?? undefined;
       },
       all: (...params: SqlValue[]) => {
         assertBindable(params);
-        const result = db.prepareSync(sql).executeSync<Record<string, SqlValue>>(...(params as never[]));
-        return result.getAllSync();
+        return db.getAllSync<Record<string, SqlValue>>(sql, ...(params as never[]));
       },
     }),
   };

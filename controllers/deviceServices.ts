@@ -19,6 +19,7 @@ import { createOriginByteSource } from '../services/download/origin-bytes.ts';
 import { createExpoDownloadStore } from '../services/download/expo/expo-download-store.ts';
 import {
   createExpoBundlesStore,
+  createExpoAudioUriResolver,
   createExpoTeaserAudioProbe,
 } from '../services/contentRepo/expo/expo-package-store.ts';
 import { openDatabase } from '../services/db/db.ts';
@@ -106,6 +107,7 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
   openDatabase(driver);
   const bundlesStore = createExpoBundlesStore(fileSystem, bundlesRoot);
   const teaserAudioProbe = createExpoTeaserAudioProbe(fileSystem, bundlesRoot);
+  const audioUriFor = createExpoAudioUriResolver(fileSystem, bundlesRoot);
   const downloadStore = createExpoDownloadStore(fileSystem, bundlesRoot);
   const fetchBytes = createOriginByteSource(origin);
   const access = createAccessPort();
@@ -164,6 +166,7 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
       session: {
         location,
         audio,
+        audioUriFor,
         clock: { now: () => Date.now() },
         engineConfig: defaultEngineConfig,
         pipelineConfig: { dwellMs: 0 },

@@ -46,6 +46,8 @@ import {
 import { nodeSqliteDriver } from '../../services/db/test-fixture.ts';
 import { memoryBundles } from '../../test/memory-bundles.ts';
 import { readMomentFacts } from '../../services/contentRepo/momentFacts.ts';
+import { createExpoAudioUriResolver } from '../../services/contentRepo/expo/expo-package-store.ts';
+import { makeFakeFs, makeFakeFsModule } from '../../services/contentRepo/expo/fs-test-fixture.ts';
 import type { SqlDriver } from '../../services/db/types.ts';
 
 // The synthetic pinned package: route-map@1, be, paid. Four stops — stop-1
@@ -212,7 +214,10 @@ function recoveryPortOver(driver: SqlDriver): RunRecovery {
   };
 }
 
-function mapWorld(files: Record<string, string> = DEFAULT_FILES): World {
+function mapWorld(
+  files: Record<string, string> = DEFAULT_FILES,
+  audioUriFor?: (rel: string) => string | null,
+): World {
   // An owned copy: a scenario mutating the disk truth must not leak into the
   // module-level default fixture of the later worlds.
   const owned = { ...files };
@@ -244,6 +249,7 @@ function mapWorld(files: Record<string, string> = DEFAULT_FILES): World {
   const session: RunSessionPorts = {
     location: new LocationService({ port: locationPort, clock, permissions: { foreground: 'fg', background: 'bg' } }),
     audio: new AudioService({ createPort: () => audioPort }),
+    audioUriFor,
     clock,
     engineConfig: defaultEngineConfig,
     pipelineConfig: { dwellMs: 0 },
@@ -647,13 +653,13 @@ const MOMENT_FILES: Record<string, string> = {
 // The live-walk arrangement the moment scenarios share: the walk started,
 // the stop-1 guide launch sounding (the manual pick — deterministic, no
 // dwell), the place-9 teaser fact resolved by the production reader.
-async function momentWorld(): Promise<{
+async function momentWorld(audioUriFor?: (rel: string) => string | null): Promise<{
   world: World;
   surface: ControllerStore<RunSurfaceState>;
   controller: ControllerStore<RunControllerState>;
   teaser: { momentId: string; storyId: string; audioPath: string };
 }> {
-  const world = mapWorld({ ...DEFAULT_FILES, ...MOMENT_FILES });
+  const world = mapWorld({ ...DEFAULT_FILES, ...MOMENT_FILES }, audioUriFor);
   const opened = await openSurface(world);
   if (opened.state.status !== 'ready') throw new Error('the walk surface never opened');
   const controller = opened.state.controller;
@@ -747,6 +753,49 @@ test('G07.03 PROOF (AC1): a Play Moment mid-Run keeps the session and its progre
   assert.deepEqual(after.autoFired, before.autoFired);
   assert.equal(after.autoplaySuspended, true);
   assert.equal(after.queued, null);
+});
+
+test('G23.04-P3: guide and session Moment use the injected device audio URI boundary', async () => {
+  const disk = makeFakeFs();
+  const expo = makeFakeFsModule(disk);
+  for (const rel of [`${LAYER}/audio/story-1.m4a`, MOMENT_AUDIO_PATH]) {
+    disk.files.set(`/root/${rel}`, new TextEncoder().encode('audio'));
+  }
+  const audioUriFor = createExpoAudioUriResolver(
+    { File: expo.File as never, Directory: expo.Directory as never },
+    expo.Paths.document as never,
+  );
+  const { world, teaser } = await momentWorld(audioUriFor);
+  assert.deepEqual(world.audioPort.commands, [
+    'play 1:file:///root/bundles/route-map/1/be/base/audio/story-1.m4a',
+  ]);
+  assert.deepEqual(
+    momentBinding(world).play({ momentId: teaser.momentId, storyId: teaser.storyId, path: teaser.audioPath }),
+    { outcome: 'routed' },
+  );
+  assert.deepEqual(world.audioPort.commands, [
+    'play 1:file:///root/bundles/route-map/1/be/base/audio/story-1.m4a',
+    'stop',
+    `play 2:file:///root/${MOMENT_AUDIO_PATH}`,
+  ]);
+});
+
+test('G23.04-P3: an absent device audio file uses the existing failed-play transition', async () => {
+  const { world, controller, teaser } = await momentWorld((rel) =>
+    rel === MOMENT_AUDIO_PATH ? null : `file:///root/${rel}`,
+  );
+  assert.deepEqual(
+    momentBinding(world).play({ momentId: teaser.momentId, storyId: teaser.storyId, path: teaser.audioPath }),
+    { refused: 'moment#session-refused' },
+  );
+  const run = controller.getState().run;
+  assert.notEqual(run.phase, 'Idle');
+  if (run.phase === 'Idle') return;
+  assert.equal(run.autoplaySuspended, true);
+  assert.deepEqual(world.audioPort.commands, [
+    'play 1:file:///root/bundles/route-map/1/be/base/audio/story-1.m4a',
+    'stop',
+  ]);
 });
 
 test('G07.03 (AC2): a dwell during the moment sounds nothing — no second audio owner, no GPS touch', async () => {

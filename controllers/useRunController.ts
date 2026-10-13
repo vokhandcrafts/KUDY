@@ -166,6 +166,9 @@ export interface RunPackageStops {
 export interface RunControllerDeps {
   location: LocationService;
   audio: AudioService;
+  // Device-only boundary from document-root relative paths to physical URIs.
+  // Tests without a device adapter keep their relative path observations.
+  audioUriFor?: (rel: string) => string | null;
   // The same clock instance the orchestrator and the services hold; the
   // controller never reads a clock of its own (criterion 6).
   clock: RunClock;
@@ -357,6 +360,7 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
   const orchestrator = new RunOrchestrator({
     location: deps.location,
     audio: deps.audio,
+    audioUriFor: deps.audioUriFor,
     clock: deps.clock,
     engineConfig: deps.engineConfig,
     pipelineConfig: deps.pipelineConfig,
