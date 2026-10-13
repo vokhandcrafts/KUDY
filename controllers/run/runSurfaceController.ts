@@ -42,6 +42,7 @@ import { useMemo } from 'react';
 export interface RunSessionPorts {
   readonly location: RunControllerDeps['location'];
   readonly audio: RunControllerDeps['audio'];
+  readonly audioUriFor?: RunControllerDeps['audioUriFor'];
   readonly clock: RunClock;
   readonly engineConfig: EngineConfig;
   readonly pipelineConfig: PipelineConfig;
@@ -209,6 +210,7 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
   const controller = createRunController({
     location: deps.session.location,
     audio: deps.session.audio,
+    audioUriFor: deps.session.audioUriFor,
     clock: deps.session.clock,
     engineConfig: deps.session.engineConfig,
     pipelineConfig: deps.session.pipelineConfig,

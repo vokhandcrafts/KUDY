@@ -114,3 +114,21 @@ export function createExpoTeaserAudioProbe(classes: FileSystemClasses, root: Dir
     }
   };
 }
+
+// The physical player needs a file URI, while package readers and engine
+// commands use paths relative to the device document root. Reuse the same
+// confined segment lookup as the stores above; a missing or empty file has
+// no playable URI.
+export function createExpoAudioUriResolver(classes: FileSystemClasses, root: Directory): (rel: string) => string | null {
+  const { File } = classes;
+  return (rel) => {
+    const segments = segmentsOf(rel);
+    if (segments === null || segments[0] !== 'bundles') return null;
+    try {
+      const file = new File(root, ...segments);
+      return file.exists && file.size > 0 ? file.uri : null;
+    } catch {
+      return null;
+    }
+  };
+}
