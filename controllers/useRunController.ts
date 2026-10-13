@@ -71,7 +71,7 @@ import type { AudioService } from '../services/audio/service.ts';
 import type { LocationService } from '../services/location/service.ts';
 import type { EngineConfig } from '../core/engine/reducer.ts';
 import type { PipelineConfig } from '../core/pipeline/types.ts';
-import { initialRunState, type PlayToken, type RunSessionState, type RunState } from '../core/engine/state.ts';
+import { missedStories, initialRunState, type PlayToken, type RunSessionState, type RunState } from '../core/engine/state.ts';
 
 // The durable session row through services/db's public API (allowed outputs):
 // the composition root implements the port over startSession/checkpointProgress;
@@ -258,6 +258,15 @@ export type RunStartResult = { ok: true; sessionId: string } | { ok: false; reas
 // controller's consumers.
 export type { RunPanelPosition } from './run/runPanel.ts';
 
+export function missedStoryRows(state: RunState): ReadonlyArray<{ storyId: string; stopId: string }> {
+  if (state.phase !== 'Ended') return [];
+  return missedStories(state).flatMap((storyId) => {
+    const stop = state.stops.find((candidate) =>
+      candidate.storyBaseId === storyId || candidate.storyExtendedId === storyId);
+    return stop ? [{ storyId, stopId: stop.stopId }] : [];
+  });
+}
+
 export interface RunControllerState {
   // The engine's committed state, mirrored on every accepted event — the
   // single source the screens read.
@@ -281,6 +290,7 @@ export interface RunControllerState {
   readonly pauseSession: () => void;
   readonly resumeSession: () => void;
   readonly end: () => void;
+  readonly missedStories: () => ReadonlyArray<{ storyId: string; stopId: string }>;
   // G06.04 — the composition root's call when this controller's session was
   // finished by a confirmed guide switch elsewhere (11 §4.1): the engine
   // mirror becomes Ended without a dispatch (the row is already history —
@@ -545,6 +555,7 @@ export function createRunController(deps: RunControllerDeps): ControllerStore<Ru
     resumeAudio: (token) => orchestrator.resumeAudio(token),
     guideResume: () => orchestrator.guideResume(),
     playMoment: (momentId, storyId, path) => orchestrator.playMoment(momentId, storyId, path),
+    missedStories: () => missedStoryRows(orchestrator.state),
     openCard: (stopId) => {
       const current = store?.getState();
       if (!current) return;
