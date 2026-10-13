@@ -10,9 +10,22 @@ export function LockedStopRow({ stop, strings }: { stop: StopRow; strings: UiStr
   return (
     <li>
       <a href={stop.href}>
-        <span role="img" aria-label={strings.lockedLabel}>
-          🔒
-        </span>{' '}
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          width="16"
+          height="16"
+          role="img"
+          aria-label={strings.lockedLabel}
+          focusable="false"
+        >
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>{' '}
         <strong>{stop.name}</strong>
       </a>
       <p>{stop.announce}</p>

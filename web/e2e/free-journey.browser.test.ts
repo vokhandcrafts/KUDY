@@ -19,10 +19,18 @@ import type { JourneyContext } from '../test-browser/e2e-harness.mjs';
 import { withE2ePage, assertCleanJourney, webOutRoot, servedContent, discoveryIndex } from '../test-browser/e2e-harness.mjs';
 import { evaluateValue } from '../test-browser/cdp-browser.mjs';
 import { be } from '../lib/i18n/be.ts';
+import { en } from '../lib/i18n/en.ts';
 import { appLinks } from '../lib/app-links.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, '..', '..');
+const LOCK_SOURCE = fs.readFileSync(path.join(REPO_ROOT, 'docs/design/brand/outputs/G25.04/lock.svg'), 'utf8');
+
+function lockSourceAttributes(tag: 'svg' | 'rect' | 'path') {
+  const element = LOCK_SOURCE.match(new RegExp(`<${tag}\\b([^>]*)>`));
+  assert.ok(element, `G25.04 lock.svg must contain <${tag}>`);
+  return Object.fromEntries([...element[1].matchAll(/([\w-]+)="([^"]*)"/g)].map((match) => [match[1], match[2]]));
+}
 
 function guideOffer() {
   const index = discoveryIndex();
@@ -88,6 +96,10 @@ test('G23.02: catalog → guide → free stop with playable audio → locked sto
         // The stops live in the ordered list; the attribution section
         // (G21.44.a) carries its own text-only list items.
         const rows = Array.from(document.querySelectorAll('main ol > li'));
+        const icon = rows[1]?.querySelector('svg[role="img"]');
+        const attrs = (element) => element
+          ? Object.fromEntries(Array.from(element.attributes).map((attr) => [attr.name, attr.value]))
+          : null;
         return {
           heading: document.querySelector('h1')?.textContent ?? null,
           summary: document.querySelector('main li p, main > p')?.textContent ?? null,
@@ -96,6 +108,13 @@ test('G23.02: catalog → guide → free stop with playable audio → locked sto
             lockedLabel: row.querySelector('[aria-label]')?.getAttribute('aria-label') ?? null,
             lockedName: row.querySelector('strong')?.textContent ?? null,
           })),
+          lockIcon: icon ? {
+            svg: attrs(icon),
+            rect: attrs(icon.querySelector('rect')),
+            path: attrs(icon.querySelector('path')),
+          } : null,
+          lockedRowAnnouncement: rows[1]?.querySelector('p')?.textContent ?? null,
+          lockedRowHasEmoji: rows[1]?.textContent?.includes('🔒') ?? false,
         };
       })()`,
     );
@@ -109,6 +128,31 @@ test('G23.02: catalog → guide → free stop with playable audio → locked sto
       { href: '/guides/e2e-paid-guide/stops/e2e-stop-1', lockedLabel: null, lockedName: freePlace.name.be },
       { href: '/guides/e2e-paid-guide/stops/e2e-stop-2', lockedLabel: be.lockedLabel, lockedName: preview.name },
     ]);
+    assert.ok(guide.lockIcon, 'the locked row must render an inline SVG');
+    const sourceSvg = lockSourceAttributes('svg');
+    for (const key of ['viewBox', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin']) {
+      assert.equal(guide.lockIcon.svg[key], sourceSvg[key], `lock SVG ${key} must match G25.04`);
+    }
+    assert.deepEqual(guide.lockIcon.rect, lockSourceAttributes('rect'));
+    assert.deepEqual(guide.lockIcon.path, lockSourceAttributes('path'));
+    assert.equal(guide.lockIcon.svg['aria-label'], be.lockedLabel);
+    assert.equal(guide.lockedRowAnnouncement, preview.announce);
+    assert.equal(guide.lockedRowHasEmoji, false);
+
+    await goto('/en/guides/e2e-paid-guide');
+    const enLock = await evaluateValue(browser, page, `(() => {
+      const row = document.querySelector('main ol > li:nth-child(2)');
+      return {
+        href: row?.querySelector('a')?.getAttribute('href') ?? null,
+        label: row?.querySelector('svg[role="img"]')?.getAttribute('aria-label') ?? null,
+        name: row?.querySelector('strong')?.textContent ?? null,
+        announce: row?.querySelector('p')?.textContent ?? null,
+      };
+    })()`);
+    assert.equal(enLock.href, '/en/guides/e2e-paid-guide/stops/e2e-stop-2');
+    assert.equal(enLock.label, en.lockedLabel);
+    assert.equal(enLock.name, publishedPreview('en').name);
+    assert.equal(enLock.announce, publishedPreview('en').announce);
 
     // Free stop: transcript plus a real audio track per bundle locale with
     // audio — be first (sorted), then en. The be track must actually load
