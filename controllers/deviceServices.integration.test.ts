@@ -522,7 +522,7 @@ test('G21.21 mixed_language_offline_restart: fr text and en audio through the pr
   }
   assert.deepEqual(
     audioPort.commands.filter((command) => command.startsWith('play ')),
-    ['play 1:en/base/audio/story-1.m4a'],
+    ['play 1:file:///root/bundles/route-553/1/en/base/audio/story-1.m4a'],
     'the en layer sounds, never the text locale substitute',
   );
   audioPort.finish(1);
@@ -562,7 +562,7 @@ test('G21.21 mixed_language_offline_restart: fr text and en audio through the pr
   });
   assert.deepEqual(
     audioPort.commands.filter((command) => command.startsWith('play ')),
-    ['play 1:en/base/audio/story-1.m4a'],
+    ['play 1:file:///root/bundles/route-553/1/en/base/audio/story-1.m4a'],
     'nothing sounds by itself after the restore',
   );
 

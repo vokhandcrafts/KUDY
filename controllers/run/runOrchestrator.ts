@@ -91,6 +91,7 @@ export interface RunRoute {
 export interface RunOrchestratorDeps {
   location: LocationService;
   audio: AudioService;
+  audioUriFor?: (rel: string) => string | null;
   // The same clock instance the two services hold, so the pipeline's
   // timestamps, the engine's freshness windows and the watchdog agree.
   clock: RunClock;
@@ -124,6 +125,7 @@ export interface RunOrchestratorDeps {
 export class RunOrchestrator {
   private readonly location: LocationService;
   private readonly audio: AudioService;
+  private readonly audioUriFor: ((rel: string) => string | null) | undefined;
   private readonly access: DownloadAccessPort | undefined;
   private readonly clock: RunClock;
   private readonly engineConfig: EngineConfig;
@@ -162,6 +164,7 @@ export class RunOrchestrator {
   constructor(deps: RunOrchestratorDeps) {
     this.location = deps.location;
     this.audio = deps.audio;
+    this.audioUriFor = deps.audioUriFor;
     this.access = deps.access;
     this.clock = deps.clock;
     this.engineConfig = deps.engineConfig;
@@ -521,7 +524,16 @@ export class RunOrchestrator {
     for (const command of commands) {
       switch (command.type) {
         case 'PlayStory':
-          void this.audio.play({ token: command.token, path: command.path });
+          if (this.audioUriFor) {
+            const uri = this.audioUriFor(`bundles/${this.route.routeId}/${this.route.version}/${command.path}`);
+            if (uri === null) {
+              this.onAudioEvent({ type: 'story_play_failed', token: command.token, reason: 'audio-file-unavailable' });
+              break;
+            }
+            void this.audio.play({ token: command.token, path: uri });
+          } else {
+            void this.audio.play({ token: command.token, path: command.path });
+          }
           break;
         case 'PlayMoment': {
           // The moment path is a content-resolution concern (G05.05): the
@@ -533,7 +545,13 @@ export class RunOrchestrator {
           const pending = this.pendingMomentPath;
           const carried =
             pending !== null && pending.seq === command.token.seq ? pending.path : '';
-          void this.audio.play({ token: command.token, path: command.path ?? carried });
+          const path = command.path ?? carried;
+          const uri = this.audioUriFor ? this.audioUriFor(path) : path;
+          if (uri === null) {
+            this.onAudioEvent({ type: 'story_play_failed', token: command.token, reason: 'audio-file-unavailable' });
+            break;
+          }
+          void this.audio.play({ token: command.token, path: uri });
           break;
         }
         case 'StopAudio':
