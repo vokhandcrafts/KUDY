@@ -11,7 +11,7 @@ with open('/tmp/kudy-746-demo.json') as f:
     result = json.load(f)
 assert result['numFailedTests'] == 0
 assert result['numPassedTests'] == 4
-print('G23.04-P2 UI tests: 4 passed, 0 failed')
+print(f"G23.04-P2 UI tests: {result['numPassedTests']} passed, {result['numFailedTests']} failed")
 PYTEST
 ```
 
