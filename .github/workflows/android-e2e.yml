@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/android-e2e.yml
+      - tools/e2e-android/**
   workflow_dispatch:
   schedule:
     - cron: '17 2 * * *'

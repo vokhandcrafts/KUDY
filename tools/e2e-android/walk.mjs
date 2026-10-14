@@ -94,13 +94,18 @@ async function waitForAudioActive(driver, expected) {
   }
 }
 
-async function waitForRun(driver, slug) {
+export async function waitForRun(driver, slug) {
   const deadline = Date.now() + 45000;
   for (;;) {
     const nodes = parseDump((await driver.dump(`dump-walk-${slug}.xml`)).xml);
     if (findNode(nodes, { testID: 'screen-Run' }) && findNode(nodes, { testID: 'run-map' })) return;
     const accuracyPrompt = findNode(nodes, { text: 'No thanks' });
-    if (accuracyPrompt) await driver.tapNode(accuracyPrompt);
+    if (accuracyPrompt) {
+      // Declining rejects Expo's pending watch with LocationSettingsUnsatisfiedException.
+      const accept = findNode(nodes, { testID: 'android:id/button1' });
+      assert.ok(accept, 'location accuracy prompt has no positive button');
+      await driver.tapNode(accept);
+    }
     if (Date.now() >= deadline) throw new Error(`timeout waiting for Run map (${slug})`);
     await delay();
   }
