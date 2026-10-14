@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-14 — правер бачнасць #751 і #752 на дошцы
+Што зрабіць: адкрый GitHub Project і правер, што #751 бачны ў backlog, а #752 — у працы. Калі картак няма, дадай іх у адпаведныя калонкі, не змяняючы статусных пазнак issues. CLI-токен выканаўцы не мае `read:project`, а публічны прагляд не паказвае дошку.
+PR: https://github.com/vokhandcrafts/KUDY/pull/753 · Issues: [#751](https://github.com/vokhandcrafts/KUDY/issues/751), [#752](https://github.com/vokhandcrafts/KUDY/issues/752)
+
 ### 2026-10-12 — G24.05: вырашы межы пілота A1
 Што зрабіць: Калі A1 ухвалены ў #695, прачытай [вынік G24.05](agent-tasks/results/G24.05.md) і запішы ў [рэестр рашэнняў](design/brand/decisions.md), дзе паказваць картку, ці яна даступная пры паўзе і ці захоўваць адказ пасля перазапуску. Правер бачнасць #696 у GitHub Project: токен гэтай сесіі не мае `read:project`.
 PR: https://github.com/vokhandcrafts/KUDY/pull/744 · Issue: [#696](https://github.com/vokhandcrafts/KUDY/issues/696)
