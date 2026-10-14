@@ -26,7 +26,9 @@ test('Android E2E builds APK and runs both suites on a scheduled or manual emula
   const { source, workflow } = read('android-e2e.yml');
   assert.ok(workflow.on.workflow_dispatch !== undefined);
   assert.ok(workflow.on.schedule?.length > 0);
+  assert.ok(!JSON.stringify(workflow.jobs['smoke-and-walk'].env).includes('${{ runner.'), 'runner context is unavailable in jobs.env');
   const steps = workflow.jobs['smoke-and-walk'].steps;
+  assert.ok(steps.some((step) => step.run?.includes('ANDROID_AVD_HOME="$ANDROID_USER_HOME/avd"') && step.run.includes('>> "$GITHUB_ENV"')));
   assert.ok(steps.some((step) => step.run?.includes('expo prebuild') && step.run.includes('assembleDebug')));
   assert.ok(steps.some((step) => step.run?.includes('test -f "$ANDROID_AVD_HOME/kudy-ci.ini"')));
   assert.ok(steps.some((step) => step.run?.includes('npm run e2e:android -- --suite "$suite"')));
