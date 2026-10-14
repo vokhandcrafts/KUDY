@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-14 — правер бачнасць #751 і #752 на дошцы
+Што зрабіць: адкрый GitHub Project і правер, што #751 бачны ў backlog, а #752 — у працы. Калі картак няма, дадай іх у адпаведныя калонкі, не змяняючы статусных пазнак issues. CLI-токен выканаўцы не мае `read:project`, а публічны прагляд не паказвае дошку.
+PR: https://github.com/vokhandcrafts/KUDY/pull/753 · Issues: [#751](https://github.com/vokhandcrafts/KUDY/issues/751), [#752](https://github.com/vokhandcrafts/KUDY/issues/752)
+
 ### 2026-10-13 — праверка Project пасля #746
 Што зрабіць: Правер бачнасць і статус #746 і #662 у GitHub Project або дай CLI права `read:project`, каб агент мог праверыць дошку. У гэтай сесіі даступныя толькі issue і іх пазнакі; запыт Project адхілены праз адсутнае права.
 Issue: https://github.com/vokhandcrafts/KUDY/issues/746
