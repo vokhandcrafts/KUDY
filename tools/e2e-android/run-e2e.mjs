@@ -286,6 +286,7 @@ async function saveArtifacts(driver, caseSlug) {
   fs.mkdirSync(dir, { recursive: true });
   for (const [name, args] of [
     ['location.txt', ['shell', 'dumpsys', 'location']],
+    ['location-access.txt', ['shell', 'cmd', 'appops', 'get', 'by.kudy.app', 'FINE_LOCATION']],
     ['logcat.txt', ['logcat', '-d', '-t', '2000']],
   ]) {
     const result = await driver.exec(args);

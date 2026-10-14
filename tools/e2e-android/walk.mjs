@@ -111,11 +111,15 @@ export async function waitForRun(driver, slug) {
   }
 }
 
-async function locationListeners(driver) {
+export async function locationListeners(driver) {
   const { stdout } = await driver.exec(['shell', 'dumpsys', 'location']);
   const providerState = stdout.split('  Historical Aggregate Location Provider Data:')[0];
   assert.ok(providerState.includes('Location Providers:'), 'dumpsys location has no provider section');
-  return providerState.split(/\r?\n/).filter((line) => line.includes('by.kudy.app'));
+  const direct = providerState.split(/\r?\n/).filter((line) => line.includes('by.kudy.app'));
+  if (direct.length > 0) return direct;
+  // Play Services owns the OS listener; AppOps attributes its active access to our app.
+  const access = await driver.exec(['shell', 'cmd', 'appops', 'get', 'by.kudy.app', 'FINE_LOCATION']);
+  return access.stdout.split(/\r?\n/).filter((line) => /\(running\)/.test(line));
 }
 
 async function waitForLocationListeners(driver, present) {

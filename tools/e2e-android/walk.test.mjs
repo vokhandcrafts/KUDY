@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { assertNoReadyStart, waitForRun } from './walk.mjs';
+import { assertNoReadyStart, waitForRun, locationListeners } from './walk.mjs';
 
 const target = 'bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a';
 const start = `E2E stall start: ${target}\n`;
@@ -44,4 +44,16 @@ test('walk accepts location accuracy so the pending GPS watch can start', async 
   };
   await waitForRun(driver, 'accuracy');
   assert.equal(accepted, true);
+});
+
+test('location observer checks app-attributed running access behind Play Services', async () => {
+  let running = true;
+  const driver = { exec: async (args) => {
+    if (args.includes('dumpsys')) return { stdout: 'Location Providers:\n com.google.android.gms[fused_location_provider]\n  Historical Aggregate Location Provider Data:\n by.kudy.app' };
+    assert.deepEqual(args, ['shell', 'cmd', 'appops', 'get', 'by.kudy.app', 'FINE_LOCATION']);
+    return { stdout: running ? 'FINE_LOCATION: allow; time=+1s ago; (running)' : 'FINE_LOCATION: allow; time=+1s ago; duration=+2s' };
+  } };
+  assert.equal((await locationListeners(driver)).length, 1);
+  running = false;
+  assert.deepEqual(await locationListeners(driver), []);
 });
