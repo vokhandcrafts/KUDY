@@ -118,3 +118,7 @@ test('G23.02: 320/390/1440 px keep pages inside the viewport with primary action
     assertCleanJourney({ pageErrors, blockedRequests });
   });
 });
+
+test('G23.08 CI failure proof', () => {
+  assert.fail('intentional failure on throwaway branch for issue #666');
+});
