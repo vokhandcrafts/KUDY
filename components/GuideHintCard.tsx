@@ -34,8 +34,8 @@ export function guideHintStrings(locale: string): GuideHintStrings {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
+    backgroundColor: tokens.colorHintBg,
+    borderColor: tokens.colorHintBorder,
     borderRadius: tokens.radiusBase,
     borderWidth: 1,
     marginBottom: tokens.spaceM,
