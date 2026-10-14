@@ -9,6 +9,7 @@
 //
 //   npm run e2e:android                            # smoke: phases A + B
 //   npm run e2e:android -- --suite locales         # G23.07
+//   npm run e2e:android -- --suite walk            # G23.04
 //   node tools/e2e-android/run-e2e.mjs --serial emulator-5558
 //   node tools/e2e-android/run-e2e.mjs --apk <path> --metro-port 8083
 //
@@ -21,10 +22,8 @@
 // Phases: A — no catalog origin (the honest unavailable states, criterion
 // 3); B — the G23.01 origin (the fixture guide card, criterion 4). The
 // origin env is baked into the JS bundle by Metro, so each phase runs its
-// own Metro lifecycle. Every case starts from a force-stopped cold start so
-// cases stay independent; the unknown-deep-link case alone reuses the
-// running app, because "Back returns to Explore" needs Explore in the back
-// stack.
+// own Metro lifecycle. Smoke cases start from a force-stopped cold start;
+// the walk suite carries one session through its cases.
 import { spawn, execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -36,6 +35,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { DriverError, E2eDriver, findNode, listBootedDevices, parseDump, resolveAdb } from './driver.mjs';
 import { UI_LOCALES } from '../../contracts/ui-locales.ts';
 import { runLocalesSuite } from './locales.mjs';
+import { runWalkSuite } from './walk.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const ORIGIN_TOOL = path.join(REPO_ROOT, 'tools', 'e2e-origin', 'serve-e2e-origin.mjs');
@@ -238,8 +238,9 @@ async function startMetro({ port, env, logPath }) {
   throw new DriverError('Metro start: unreachable state');
 }
 
-async function startOriginServer({ port, logPath, outDir }) {
-  const child = startGroupProcess(process.execPath, [ORIGIN_TOOL, '--port', String(port), ...(outDir ? ['--out', outDir] : [])], {
+async function startOriginServer({ port, logPath, outDir, fault }) {
+  const child = startGroupProcess(process.execPath, [ORIGIN_TOOL, '--port', String(port), ...(outDir ? ['--out', outDir] : []),
+    ...(fault ? ['--fault', fault] : [])], {
     cwd: REPO_ROOT,
     env: { ...process.env, EXPO_NO_TELEMETRY: '1' },
     logPath,
@@ -389,8 +390,8 @@ async function main() {
     return index === -1 ? null : argv[index + 1];
   };
   const suite = argValue('--suite') ?? 'smoke';
-  if (!['smoke', 'locales'].includes(suite)) {
-    console.error(`unknown suite: ${suite} (known suites: smoke, locales)`);
+  if (!['smoke', 'locales', 'walk'].includes(suite)) {
+    console.error(`unknown suite: ${suite} (known suites: smoke, locales, walk)`);
     process.exit(2);
   }
   const only = argValue('--only');
@@ -412,19 +413,19 @@ async function main() {
     process.exit(0);
   }
   const { adbPath, serial, apkPath, skipInstall } = target;
-  if (suite === 'locales' && !/^emulator-\d+$/.test(serial)) {
-    console.log(`SKIP e2e:android locales — serial ${serial} is not an emulator`);
+  if ((suite === 'locales' || suite === 'walk') && !/^emulator-\d+$/.test(serial)) {
+    console.log(`SKIP e2e:android ${suite} — serial ${serial} is not an emulator`);
     process.exit(0);
   }
   info(`adb: ${adbPath}; serial: ${serial}; apk: ${apkPath}${skipInstall ? ' (install skipped)' : ''}`);
 
   const driver = new E2eDriver({ adbPath, serial, artifactsDir: runDir, pkg: APP_PACKAGE });
 
-  // The locale suite downloads a synthetic guide. A prior run can leave its
+  // The locale and walk suites download synthetic guides. A prior run can leave a
   // package directory in the emulator, making the next download fail before
   // any locale assertion. This runner accepts emulator serials only.
-  if (suite === 'locales' && await driver.isPackageInstalled(APP_PACKAGE)) {
-    info(`clearing ${APP_PACKAGE} test data on ${serial} before locale cases`);
+  if ((suite === 'locales' || suite === 'walk') && await driver.isPackageInstalled(APP_PACKAGE)) {
+    info(`clearing ${APP_PACKAGE} test data on ${serial} before ${suite} cases`);
     const cleared = await driver.exec(['shell', 'pm', 'clear', APP_PACKAGE]);
     if (cleared.stdout.trim() !== 'Success') throw new Error(`pm clear ${APP_PACKAGE} failed: ${cleared.stdout.trim()}`);
   }
@@ -444,13 +445,16 @@ async function main() {
   let metro = null;
   let origin = null;
   try {
-    if (suite === 'locales') {
+    if (suite === 'locales' || suite === 'walk') {
       if (only !== null) info(`running only locale case: ${only}`);
-      origin = await startOriginServer({ port: originPort, logPath: path.join(runDir, 'origin-locales.log'), outDir: path.join(runDir, 'origin') });
+      const originLogPath = path.join(runDir, `origin-${suite}.log`);
+      origin = await startOriginServer({ port: originPort, logPath: originLogPath, outDir: path.join(runDir, 'origin'),
+        ...(suite === 'walk' ? { fault: 'stall:bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a' } : {}) });
       metro = await startMetro({ port: metroPort,
-        env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://10.0.2.2:${originPort}` }, logPath: path.join(runDir, 'metro-locales.log') });
+        env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://10.0.2.2:${originPort}` }, logPath: path.join(runDir, `metro-${suite}.log`) });
       await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
-      await runLocalesSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, only });
+      if (suite === 'locales') await runLocalesSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, only });
+      else await runWalkSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, originLogPath });
     } else {
       info('phase A: no catalog origin — starting Metro');
       metro = await startMetro({ port: metroPort, env: {}, logPath: path.join(runDir, 'metro-a.log') });

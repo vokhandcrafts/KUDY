@@ -111,8 +111,12 @@ describe("route placeholders (19 §2.5)", () => {
     );
     expect(await screen.findByTestId("my-live-section")).toBeTruthy();
     expect(screen.getByTestId("my-session-walk-live")).toBeTruthy();
+    expect(screen.getByTestId("my-live-state-walk-live")).toBeTruthy();
+    expect(screen.queryByTestId("my-history-state-walk-live")).toBeNull();
     expect(screen.getByTestId("my-history-section")).toBeTruthy();
     expect(screen.getByTestId("my-session-walk-old")).toBeTruthy();
+    expect(screen.getByTestId("my-history-state-walk-old")).toBeTruthy();
+    expect(screen.queryByTestId("my-live-state-walk-old")).toBeNull();
     // The row's own facts: the paused state word, the local started day and
     // the heard count. The catalog is absent here — the raw id stays the
     // row's title (UX 05, AC2's honest fallback).

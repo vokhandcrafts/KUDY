@@ -146,7 +146,9 @@ test('the fault switch answers 404/500/stall for named files (criterion 5)', asy
     '500:catalog.json',
     'stall:catalog.previous.json',
   ]);
-  const server = createE2EOriginServer({ root: build.target, faults, stallMs: 300 });
+  const stallEvents = [];
+  const server = createE2EOriginServer({ root: build.target, faults, stallMs: 300,
+    onStall: (target, phase) => stallEvents.push(`${phase}:${target}`) });
   const port = await listen(server);
   const base = `http://127.0.0.1:${port}`;
   try {
@@ -158,6 +160,8 @@ test('the fault switch answers 404/500/stall for named files (criterion 5)', asy
     const stalled = await fetch(`${base}/catalog.previous.json`);
     assert.ok(Date.now() - stalledAt >= 300, 'a stalled file must answer no earlier than the stall');
     assert.equal(stalled.status, 200, 'a stalled file answers normally after the stall');
+    await stalled.arrayBuffer();
+    assert.deepEqual(stallEvents, ['start:catalog.previous.json', 'complete:catalog.previous.json']);
     const healthy = await fetch(`${base}/bundle/e2e-free-guide/1/route.json`);
     assert.equal(healthy.status, 200);
   } finally {

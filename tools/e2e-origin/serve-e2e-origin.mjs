@@ -146,7 +146,7 @@ export async function buildE2EOrigin({ outDir = 'tools/e2e-origin/build', now = 
   };
 }
 
-export function createE2EOriginServer({ root, faults = new Map(), stallMs = 15000 }) {
+export function createE2EOriginServer({ root, faults = new Map(), stallMs = 15000, onStall = () => {} }) {
   if (!Number.isInteger(stallMs) || stallMs < 0) fail('invalid-stall-ms', { stall_ms: stallMs });
   return createServer((request, response) => {
     // request.url is the origin-form request target; parse it directly — the
@@ -195,6 +195,8 @@ export function createE2EOriginServer({ root, faults = new Map(), stallMs = 1500
       );
     };
     if (kind === 'stall') {
+      onStall(faultTarget, 'start');
+      response.once('finish', () => onStall(faultTarget, 'complete'));
       setTimeout(serve, stallMs);
       return;
     }
@@ -258,7 +260,12 @@ async function main() {
     console.log(formatOriginSummary({ port: null, build, faults, stallMs: args['stall-ms'] }));
     return;
   }
-  const server = createE2EOriginServer({ root: build.target, faults, stallMs: args['stall-ms'] });
+  const server = createE2EOriginServer({
+    root: build.target,
+    faults,
+    stallMs: args['stall-ms'],
+    onStall: (target, phase) => console.log(`E2E stall ${phase}: ${target}`),
+  });
   // Loopback only: the Android emulator reaches the host through 10.0.2.2,
   // which is an alias for the host loopback — no LAN exposure is needed.
   await new Promise((resolve) => server.listen(args.port, '127.0.0.1', resolve));

@@ -63,6 +63,23 @@ const pois = (n: number): RunPlaceFact[] =>
 const markersById = (view: RunMapView): Map<string, RunMapView['markers'][number]> =>
   new Map(view.markers.map((marker) => [marker.stopId, marker]));
 
+test('the eastern E2E stop stays inside the map', () => {
+  const state = session(3);
+  const stops: RunStop[] = [
+    { stopId: 'stop-0', lat: 53.9, lng: 27.56, radius: 30 },
+    { stopId: 'stop-1', lat: 53.901, lng: 27.561, radius: 25 },
+    { stopId: 'stop-2', lat: 53.902, lng: 27.562, radius: 25 },
+  ];
+  const view = runMapView(state, stops, facts(idsOf(state)), [], ['be']);
+  const east = markersById(view).get('stop-2');
+  assert.ok(east, 'the last stop must be projected');
+  assert.ok(east.nx >= 0.08 && east.nx <= 0.92, `east marker escaped the map: ${east.nx}`);
+  for (const marker of view.markers) {
+    assert.ok(marker.nx >= 0 && marker.nx <= 1, `${marker.stopId} is outside horizontal bounds`);
+    assert.ok(marker.ny >= 0 && marker.ny <= 1, `${marker.stopId} is outside vertical bounds`);
+  }
+});
+
 test('run_map_projection_reads_scale_linearly', () => {
   // Counts indexed reads of every input array around the real function: a
   // full scan per marker shows as quadratic growth, a lookup built once per

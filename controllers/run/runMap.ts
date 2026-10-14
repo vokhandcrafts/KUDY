@@ -56,8 +56,9 @@ interface Point {
   readonly lng: number;
 }
 
-// The lng axis is compressed by cos(mid-lat) so east-west distances keep
-// their proportion to north-south ones at the route's latitude. A single
+// Both axes are fitted into the same 0..1 map bounds. Equirectangular
+// compression cancels when applied to both a longitude delta and its span;
+// applying it to the span alone pushes eastern markers off the map. A single
 // point (or a zero span on an axis) sits at that axis's center.
 function project(points: ReadonlyArray<Point>): ReadonlyArray<{ nx: number; ny: number }> {
   if (points.length === 0) return [];
@@ -67,9 +68,8 @@ function project(points: ReadonlyArray<Point>): ReadonlyArray<{ nx: number; ny: 
   const maxLat = Math.max(...lats);
   const minLng = Math.min(...lngs);
   const maxLng = Math.max(...lngs);
-  const midLat = (minLat + maxLat) / 2;
   const spanLat = maxLat - minLat;
-  const spanLng = (maxLng - minLng) * Math.max(0.01, Math.cos((midLat * Math.PI) / 180));
+  const spanLng = maxLng - minLng;
   const MARGIN = 0.08;
   const fit = (value: number, low: number, span: number): number =>
     span <= 0 ? 0.5 : MARGIN + ((value - low) / span) * (1 - 2 * MARGIN);
