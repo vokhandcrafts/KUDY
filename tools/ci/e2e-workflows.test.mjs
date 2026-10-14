@@ -32,6 +32,7 @@ test('Android E2E builds APK and runs both suites on a scheduled or manual emula
   assert.ok(steps.some((step) => step.run?.includes('expo prebuild') && step.run.includes('assembleDebug')));
   assert.ok(steps.some((step) => step.run?.includes('test -f "$ANDROID_AVD_HOME/kudy-ci.ini"')));
   assert.ok(steps.some((step) => step.run?.includes('npm run e2e:android -- --suite "$suite"')));
+  assert.match(source, /--device pixel_5/);
   assert.match(source, /for suite in smoke walk/);
   assert.match(source, /SKIP e2e:android/);
   assert.ok(steps.some((step) => step.uses?.startsWith('actions/upload-artifact@') && step.if === 'failure()'));

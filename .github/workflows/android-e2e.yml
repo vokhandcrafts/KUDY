@@ -40,7 +40,7 @@ jobs:
             'platforms;android-36' 'build-tools;36.0.0' 'platform-tools' \
             'emulator' 'system-images;android-36;google_apis;x86_64'
           echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd \
-            --name kudy-ci --package 'system-images;android-36;google_apis;x86_64' \
+            --name kudy-ci --device pixel_5 --package 'system-images;android-36;google_apis;x86_64' \
             --path "$ANDROID_AVD_HOME/kudy-ci.avd" --force
           test -f "$ANDROID_AVD_HOME/kudy-ci.ini"
           "$ANDROID_HOME/emulator/emulator" -list-avds | grep -Fxq kudy-ci
