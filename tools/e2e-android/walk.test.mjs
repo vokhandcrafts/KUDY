@@ -50,8 +50,8 @@ test('location observer checks app-attributed running access behind Play Service
   let running = true;
   const driver = { exec: async (args) => {
     if (args.includes('dumpsys')) return { stdout: 'Location Providers:\n com.google.android.gms[fused_location_provider]\n  Historical Aggregate Location Provider Data:\n by.kudy.app' };
-    assert.deepEqual(args, ['shell', 'cmd', 'appops', 'get', 'by.kudy.app', 'FINE_LOCATION']);
-    return { stdout: running ? 'FINE_LOCATION: allow; time=+1s ago; (running)' : 'FINE_LOCATION: allow; time=+1s ago; duration=+2s' };
+    assert.deepEqual(args, ['shell', 'cmd', 'appops', 'get', 'by.kudy.app', 'MONITOR_LOCATION']);
+    return { stdout: running ? 'MONITOR_LOCATION: allow; time=+1s ago; (running)' : 'MONITOR_LOCATION: allow; time=+1s ago; duration=+2s' };
   } };
   assert.equal((await locationListeners(driver)).length, 1);
   running = false;

@@ -118,7 +118,7 @@ export async function locationListeners(driver) {
   const direct = providerState.split(/\r?\n/).filter((line) => line.includes('by.kudy.app'));
   if (direct.length > 0) return direct;
   // Play Services owns the OS listener; AppOps attributes its active access to our app.
-  const access = await driver.exec(['shell', 'cmd', 'appops', 'get', 'by.kudy.app', 'FINE_LOCATION']);
+  const access = await driver.exec(['shell', 'cmd', 'appops', 'get', 'by.kudy.app', 'MONITOR_LOCATION']);
   return access.stdout.split(/\r?\n/).filter((line) => /\(running\)/.test(line));
 }
 
