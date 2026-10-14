@@ -284,6 +284,13 @@ async function coldStart(driver, url, { timeoutMs, caseSlug }) {
 async function saveArtifacts(driver, caseSlug) {
   const dir = path.join(driver.artifactsDir, caseSlug);
   fs.mkdirSync(dir, { recursive: true });
+  for (const [name, args] of [
+    ['location.txt', ['shell', 'dumpsys', 'location']],
+    ['logcat.txt', ['logcat', '-d', '-t', '2000']],
+  ]) {
+    const result = await driver.exec(args);
+    fs.writeFileSync(path.join(dir, name), result.stdout);
+  }
   const dumpPath = driver.artifactPath('last-wait-dump.xml');
   if (fs.existsSync(dumpPath)) fs.copyFileSync(dumpPath, path.join(dir, 'final-dump.xml'));
   const shot = await driver.screenshot('failure.png');
