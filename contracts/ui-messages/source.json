@@ -1790,6 +1790,17 @@
       "sourceHash": "39f780e448149f38eb59cf40d230c2ab1539f1082ad7d357a191d46bd0f20739"
     },
     {
+      "id": "native.run.missedStoriesTitle",
+      "source": "Яшчэ можна адкрыць",
+      "context": "Загаловак спіса даступных непраслуханых гісторый пасля завяршэння прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#missedStoriesTitle"
+      ],
+      "sourceHash": "d97cc467dde15e59ecef9ae960f232f5c4d5b79228abbebb1290fc437978a4a3"
+    },
+    {
       "id": "native.run.gpsStalled",
       "source": "Пазіцыя састарэлая",
       "context": "Банер: пазіцыя састарэлая",

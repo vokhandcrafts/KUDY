@@ -771,6 +771,24 @@ describe("G06.05 accessibility and honest failures (issue #280)", () => {
     return makeRunSession({ recovery });
   }
 
+  test("G23.04-P2: an unheard additional story opens after its primary story was heard", async () => {
+    const env = restoredWorld(["base", "extended"], "ready");
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session: env.session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    fireEvent.press(screen.getByTestId("run-marker-stop-1"));
+    fireEvent.press(screen.getByTestId("btn-card-play"));
+    act(() => env.audioPort.finish(1));
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
+    await screen.findByTestId("run-ended");
+    expect(screen.queryByTestId("run-missed-story-story-1")).toBeNull();
+    fireEvent.press(screen.getByTestId("run-missed-story-story-1x"));
+    await screen.findByTestId("run-panel-full");
+    expect(screen.getByTestId("btn-story-extended").props.accessibilityState).toEqual({ selected: true });
+    expect(screen.getByText("Транскрыпт дадатковай гісторыі")).toBeTruthy();
+  });
+
   test("AC4: a denied GPS renders the contract banner; manual play still launches the audio", async () => {
     const env = makeRunSession({ permission: "denied" });
     const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session: env.session } });
@@ -1104,5 +1122,55 @@ describe("G21.47 follow-up: the actions row holds at the pinned 200% (issue #719
         tokens.fontBigTextFactor,
       );
     }
+  });
+});
+
+
+describe("G23.04-P2: missed stories after End", () => {
+  test("heard and locked stories are absent; opening a row keeps audio and GPS ended", async () => {
+    const world = await mountedRunBe();
+    await soundStop2(world);
+    act(() => world.audioPort.finish(1));
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
+    await screen.findByTestId("run-missed-stories");
+    expect(screen.getByText("Яшчэ можна адкрыць")).toBeTruthy();
+    expect(screen.queryByTestId("run-missed-story-story-2")).toBeNull();
+    expect(screen.queryByTestId("run-missed-story-story-3")).toBeNull();
+    const audio = [...world.audioPort.commands];
+    const location = [...world.locationPort.commands];
+    fireEvent.press(screen.getByTestId("run-missed-story-story-1"));
+    await screen.findByTestId("run-panel-full");
+    expect(screen.getByText("Транскрыпт мытні")).toBeTruthy();
+    expect(screen.getByTestId("run-ended")).toBeTruthy();
+    expect(screen.queryByTestId("btn-card-play")).toBeNull();
+    expect(world.audioPort.commands).toEqual(audio);
+    expect(world.locationPort.commands).toEqual(location);
+    expect(screen.getByTestId("btn-run-back")).toBeTruthy();
+  });
+
+  test("all accessible stories heard leaves no list and keeps Back", async () => {
+    const world = await mountedRunBe();
+    fireEvent.press(screen.getByTestId("run-marker-stop-1"));
+    fireEvent.press(screen.getByTestId("btn-card-play"));
+    act(() => world.audioPort.finish(1));
+    await soundStop2(world);
+    act(() => world.audioPort.finish(2));
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
+    await screen.findByTestId("run-ended");
+    expect(screen.queryByTestId("run-missed-stories")).toBeNull();
+    expect(screen.getByTestId("btn-run-back")).toBeTruthy();
+  });
+
+  test("the heading follows the pinned English locale", async () => {
+    const world = makeRunSession();
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("en")), run: { session: world.session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map?locale=en" });
+    await screen.findByTestId("run-map");
+    fireEvent.press(screen.getByTestId("btn-run-end"));
+    fireEvent.press(screen.getByTestId("btn-end-confirm-accept"));
+    await screen.findByTestId("run-missed-stories");
+    expect(screen.getByText("Still available to open")).toBeTruthy();
   });
 });

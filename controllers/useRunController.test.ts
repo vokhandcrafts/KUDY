@@ -15,6 +15,7 @@ import path from 'node:path';
 
 import {
   createRunController,
+  missedStoryRows,
   type RunControllerState,
   type RunRecovery,
   type RunRecoveryLayer,
@@ -1562,4 +1563,30 @@ test('G21.21: a NULL row restores as the monolingual pin of its own locale', asy
   // The restored monolingual walk sounds exactly like the legacy one.
   second.getState().selectStop('stop-1');
   assert.deepEqual(w.audioPort.commands, ['play 1:be/base/audio/story-b.m4a']);
+});
+
+
+test('G23.04-P2: ended rows preserve story order, exclude heard/locked and keep additional stories', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  await w.store.getState().start();
+  assert.deepEqual(w.store.getState().missedStories(), []);
+  w.store.getState().end();
+  assert.deepEqual(w.store.getState().missedStories(), [{ storyId: 'story-b', stopId: 'stop-1' }]);
+  const ended: RunSessionState = {
+    ...live(w),
+    stops: [
+      { stopId: 'stop-1', storyBaseId: 'story-b', storyExtendedId: 'story-additional' },
+      { stopId: 'stop-2', storyBaseId: 'story-e', storyExtendedId: 'story-additional' },
+      { stopId: 'locked', storyBaseId: 'story-locked' },
+    ],
+    accessibleStopIds: ['stop-1', 'stop-2'],
+    tierAvailable: ['base', 'extended'],
+    heard: ['story-b'],
+  };
+  assert.deepEqual(missedStoryRows(ended), [
+    { storyId: 'story-additional', stopId: 'stop-1' },
+    { storyId: 'story-e', stopId: 'stop-2' },
+  ]);
+  assert.deepEqual(missedStoryRows({ ...ended, heard: ['story-b', 'story-e', 'story-additional'] }), []);
 });

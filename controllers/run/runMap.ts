@@ -145,6 +145,7 @@ export interface RunMapStrings {
   readonly endConfirmAccept: string;
   readonly endConfirmCancel: string;
   readonly endedTitle: string;
+  readonly missedStoriesTitle: string;
   readonly close: string;
   readonly loading: string;
   readonly unavailableTitle: string;

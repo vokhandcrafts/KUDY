@@ -15,7 +15,7 @@
 // this surface owns no GPS, no player and no engine (AC4).
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { FlatList, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { runMapView, runMapReason, runMapStrings } from "../../controllers/run/runMap";
@@ -338,6 +338,19 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
+  missedList: { marginTop: tokens.spaceS, maxHeight: 180 },
+  missedRow: {
+    borderBottomColor: tokens.colorLine,
+    borderBottomWidth: 1,
+    minHeight: 44,
+    padding: tokens.spaceS,
+    justifyContent: "center",
+  },
+  missedTitle: {
+    color: tokens.colorInk,
+    fontSize: tokens.fontBaseSize,
+    fontWeight: tokens.fontWeightStrong,
+  },
   // G16.03 (issue #74): the End invitation's quiet card — the invite sits in
   // the scroll flow under the ended word, never over the map or the controls.
   feedbackInvite: {
@@ -467,6 +480,7 @@ export default function Run() {
   // and the audible launch the bar mirrors. Independent by design: the card
   // follows the taps, the bar follows the sound.
   const session = run.run.phase === "Idle" ? null : run.run;
+  const missed = run.missedStories();
   const playing = session?.playing ?? null;
   const playingGuide = playing && playing.owner === "guide" ? playing : null;
   const playingName = playing
@@ -604,9 +618,43 @@ export default function Run() {
         </View>
       ) : null}
       {run.run.phase === "Ended" ? (
-        <ScaledText style={styles.centered} testID="run-ended" accessibilityLiveRegion="polite">
-          {strings.endedTitle}
-        </ScaledText>
+        <>
+          <ScaledText style={styles.centered} testID="run-ended" accessibilityLiveRegion="polite">
+            {strings.endedTitle}
+          </ScaledText>
+          {missed.length > 0 ? (
+            <View testID="run-missed-stories">
+              <ScaledText style={styles.missedTitle}>{strings.missedStoriesTitle}</ScaledText>
+              <FlatList
+                style={styles.missedList}
+                data={missed}
+                keyExtractor={(item) => item.storyId}
+                renderItem={({ item: { storyId, stopId } }) => {
+                  const stop = session?.stops.find((candidate) => candidate.stopId === stopId);
+                  const layer = stop?.storyExtendedId === storyId ? "extended" : "base";
+                  const name = view.markers.find((marker) => marker.stopId === stopId)?.name ?? stopId;
+                  const label = `${name} — ${layer === "extended" ? strings.storyExtended : strings.storyBase}`;
+                  return (
+                    <PressableSurface
+                      key={storyId}
+                      testID={`run-missed-story-${storyId}`}
+                      accessibilityRole="button"
+                      accessibilityLabel={label}
+                      style={styles.missedRow}
+                      onPress={() => {
+                        setLayerByStop({ stopId, layer });
+                        run.openCard(stopId);
+                        run.expandPanel();
+                      }}
+                    >
+                      <ScaledText>{label}</ScaledText>
+                    </PressableSurface>
+                  );
+                }}
+              />
+            </View>
+          ) : null}
+        </>
       ) : null}
       {run.run.phase === "Ended" && session !== null && invitation !== null && session.sessionId === invitation.sessionId ? (
         // The End invitation of 20 §7 (G16.03): quiet, non-modal by

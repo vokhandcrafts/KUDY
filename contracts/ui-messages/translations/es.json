@@ -1380,6 +1380,15 @@
       }
     },
     {
+      "id": "native.run.missedStoriesTitle",
+      "value": "Aún puedes abrir",
+      "reviewedSourceHash": "d97cc467dde15e59ecef9ae960f232f5c4d5b79228abbebb1290fc437978a4a3",
+      "review": {
+        "outcome": "approved",
+        "note": "G23.04-P2: translated for this Run heading and checked against the Belarusian source."
+      }
+    },
+    {
       "id": "native.run.gpsStalled",
       "value": "La posición está desactualizada",
       "reviewedSourceHash": "dcb4aab6a116aa3dfec4b0cc420890b7291cec06bb1d00ecc640e66632c25c0d",
