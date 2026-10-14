@@ -4,7 +4,7 @@
 // red, so the suite cannot silently leave the default test command or start
 // polluting git status again.
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
@@ -23,6 +23,21 @@ test('the npm-test glob includes the e2e-android suite', () => {
 
 test('the e2e:android script points at the runner', () => {
   assert.equal(packageJson.scripts['e2e:android'], 'node tools/e2e-android/run-e2e.mjs');
+});
+
+test('the walk command reaches device checks instead of rejecting the suite', () => {
+  const runner = path.join(repoRoot, 'tools/e2e-android/run-e2e.mjs');
+  const source = fs.readFileSync(runner, 'utf8');
+  assert.match(source, /await runWalkSuite\(\{ driver, url: devClientUrl\(metroPort\), runCase, coldStart \}\)/,
+    'the walk CLI must execute the walk suite after device checks');
+  const result = spawnSync(process.execPath, [runner, '--suite', 'walk', '--serial', 'emulator-missing'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    timeout: 15000,
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /SKIP e2e:android walk/);
+  assert.doesNotMatch(result.stdout, /PASS /);
 });
 
 test('the driver artifacts folder is git-ignored', () => {
