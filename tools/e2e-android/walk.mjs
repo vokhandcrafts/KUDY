@@ -3,6 +3,7 @@
 // G23.03 driver; polling intervals only pace observations, never stand in
 // for a state transition.
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 import { findNode, parseDump } from './driver.mjs';
 
@@ -11,6 +12,7 @@ const DOWNLOAD_MS = 120000;
 const POLL_MS = 300;
 const FREE = 'e2e-free-guide';
 const PAID = 'e2e-paid-guide';
+const HELD_FILE = 'bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a';
 
 const delay = () => new Promise((resolve) => setTimeout(resolve, POLL_MS));
 
@@ -38,14 +40,23 @@ async function waitForId(driver, id, predicate, slug, timeoutMs = SHORT_MS) {
   }
 }
 
-async function assertNoReadyStart(driver, durationMs) {
-  const deadline = Date.now() + durationMs;
+export async function assertNoReadyStart(driver, originLogPath, timeoutMs = DOWNLOAD_MS) {
+  const deadline = Date.now() + timeoutMs;
+  const started = `E2E stall start: ${HELD_FILE}`;
+  const completed = `E2E stall complete: ${HELD_FILE}`;
   for (;;) {
     const nodes = parseDump((await driver.dump('dump-walk-download-held.xml')).xml);
     requireId(nodes, 'screen-Route preview');
-    assert.equal(findNode(nodes, { testID: 'btn-start', enabled: true }), undefined,
-      'Start became enabled before the held package file was delivered');
-    if (Date.now() >= deadline) return;
+    const events = fs.readFileSync(originLogPath, 'utf8').split(/\r?\n/);
+    if (!events.includes(completed)) {
+      assert.equal(findNode(nodes, { testID: 'btn-start', enabled: true }), undefined,
+        'Start became enabled before the held package file was delivered');
+    }
+    if (events.includes(completed)) {
+      assert.ok(events.includes(started), 'the held response completed without a start event');
+      return;
+    }
+    if (Date.now() >= deadline) throw new Error(`the held package file did not complete; origin log: ${originLogPath}`);
     await delay();
   }
 }
@@ -128,7 +139,20 @@ function sessionRow(nodes) {
   return rows[0].resourceId;
 }
 
-export async function runWalkSuite({ driver, url, runCase, coldStart }) {
+async function tapMarkerAboveBar(driver, id) {
+  const nodes = await nodesOn(driver, 'screen-Run', 'marker-above-bar');
+  const marker = requireId(nodes, id);
+  const bar = requireId(nodes, 'run-panel-bar');
+  const markerBounds = /^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$/.exec(marker.bounds);
+  const barBounds = /^\[(\d+),(\d+)\]/.exec(bar.bounds);
+  assert.ok(markerBounds && barBounds && marker.center, 'marker and bar must have screen bounds');
+  const visibleBottom = Math.min(Number(markerBounds[4]), Number(barBounds[2]));
+  const top = Number(markerBounds[2]);
+  assert.ok(visibleBottom > top + 16, `${id} is covered by the audio bar`);
+  await driver.tapNode({ ...marker, center: { x: marker.center.x, y: Math.floor((top + visibleBottom) / 2) } });
+}
+
+export async function runWalkSuite({ driver, url, runCase, coldStart, originLogPath }) {
   let rowId = null;
   await runCase('walk: Explore, Guides and preview show theme, languages and locks', 'walk-preview', driver, async () => {
     await coldStart(driver, url, { timeoutMs: 420000, caseSlug: 'walk-explore' });
@@ -137,9 +161,10 @@ export async function runWalkSuite({ driver, url, runCase, coldStart }) {
     await driver.waitFor({ testID: 'screen-Guides' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: `guide-card-${PAID}` });
     let nodes = await nodesOn(driver, 'screen-Route preview', 'paid-preview');
-    requireId(nodes, 'preview-locales');
+    assert.equal(requireId(nodes, 'preview-locales').text, 'Мовы: be, en');
     requireId(nodes, 'stop-e2e-stop-1');
     requireId(nodes, 'stop-e2e-stop-2');
+    requireId(nodes, 'stop-locked-e2e-stop-1');
     requireId(nodes, 'stop-locked-e2e-stop-2');
     await driver.tapSelector({ testID: 'btn-preview-back' });
     await driver.waitFor({ testID: 'screen-Guides' }, { timeoutMs: SHORT_MS });
@@ -147,17 +172,19 @@ export async function runWalkSuite({ driver, url, runCase, coldStart }) {
     await driver.waitFor({ testID: 'preview-theme' }, { timeoutMs: SHORT_MS });
     await driver.waitFor({ testID: 'btn-download' }, { timeoutMs: SHORT_MS });
     nodes = await nodesOn(driver, 'screen-Route preview', 'free-preview');
-    requireId(nodes, 'preview-theme');
-    requireId(nodes, 'preview-locales');
-    for (const stop of [1, 2, 3]) requireId(nodes, `stop-e2e-stop-${stop}`);
+    assert.equal(requireId(nodes, 'preview-theme').text, 'E2E-прагулка');
+    assert.equal(requireId(nodes, 'preview-locales').text, 'Тэкст: be, en; аўдыё: be, en');
+    for (const stop of [1, 2, 3]) {
+      requireId(nodes, `stop-e2e-stop-${stop}`);
+      assert.equal(findNode(nodes, { testID: `stop-locked-e2e-stop-${stop}` }), undefined);
+    }
     requireId(nodes, 'btn-download');
   });
 
   await runCase('walk: Download becomes Start only after verified package delivery', 'walk-download', driver, async () => {
     await driver.tapSelector({ testID: 'btn-download' });
-    // The origin holds the final synthetic audio object for 12 s. During
-    // that outstanding response a usable Start must never appear.
-    await assertNoReadyStart(driver, 3000);
+    // Observe the full held response, including its completion event.
+    await assertNoReadyStart(driver, originLogPath);
     await driver.waitFor({ testID: 'btn-start', enabled: true },
       { timeoutMs: DOWNLOAD_MS, dumpBasename: 'dump-walk-start-ready.xml' });
   });
@@ -169,9 +196,9 @@ export async function runWalkSuite({ driver, url, runCase, coldStart }) {
     await driver.geoFix(53.9, 27.56);
     await waitForId(driver, 'run-status-e2e-stop-1', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
       'stop-1-played', DOWNLOAD_MS);
-    // Start another story by hand so the session pause is exercised while
-    // audio is active, not after the six-second synthetic clip has ended.
-    await driver.tapSelector({ testID: 'run-marker-e2e-stop-2' });
+    // Replay the already heard stop 1 so stop 2 remains unheard for End.
+    // Pause still exercises active audio rather than an idle session.
+    await tapMarkerAboveBar(driver, 'run-marker-e2e-stop-1');
     await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: 'btn-card-play' });
     await waitForAudioActive(driver, true);
@@ -184,7 +211,7 @@ export async function runWalkSuite({ driver, url, runCase, coldStart }) {
     await assertNoPlaying(driver, 1500, 'paused-at-stop-3');
     await driver.tapSelector({ testID: 'btn-run-resume' });
     await waitForLocationListeners(driver, true);
-    // The inspected stop-2 card covers the lower map, including marker 3.
+    // The inspected stop-1 card covers the lower map, including marker 3.
     // Dismiss it before checking the out-of-order marker by testID.
     const resumedNodes = await nodesOn(driver, 'screen-Run', 'resumed');
     if (findNode(resumedNodes, { testID: 'btn-panel-close' })) await driver.tapSelector({ testID: 'btn-panel-close' });
@@ -202,6 +229,8 @@ export async function runWalkSuite({ driver, url, runCase, coldStart }) {
     const myNodes = await nodesOn(driver, 'screen-KUDY', 'my-live');
     requireId(myNodes, 'my-live-section');
     rowId = sessionRow(myNodes);
+    requireId(myNodes, `my-live-state-${rowId.slice('my-session-'.length)}`);
+    assert.equal(findNode(myNodes, { testID: `my-history-state-${rowId.slice('my-session-'.length)}` }), undefined);
     await driver.launchDeepLink(`kudy:///run/${FREE}`);
     await waitForRun(driver, 'return-to-run');
   });
@@ -222,6 +251,8 @@ export async function runWalkSuite({ driver, url, runCase, coldStart }) {
     const historyNodes = await nodesOn(driver, 'screen-KUDY', 'my-history');
     requireId(historyNodes, 'my-history-section');
     requireId(historyNodes, rowId);
+    requireId(historyNodes, `my-history-state-${rowId.slice('my-session-'.length)}`);
+    assert.equal(findNode(historyNodes, { testID: `my-live-state-${rowId.slice('my-session-'.length)}` }), undefined);
   });
 
   await runCase('walk: no fresh position cannot autoplay; manual Play still works', 'walk-manual', driver, async () => {

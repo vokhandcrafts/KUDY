@@ -28,7 +28,7 @@ test('the e2e:android script points at the runner', () => {
 test('the walk command reaches device checks instead of rejecting the suite', () => {
   const runner = path.join(repoRoot, 'tools/e2e-android/run-e2e.mjs');
   const source = fs.readFileSync(runner, 'utf8');
-  assert.match(source, /await runWalkSuite\(\{ driver, url: devClientUrl\(metroPort\), runCase, coldStart \}\)/,
+  assert.match(source, /await runWalkSuite\(\{ driver, url: devClientUrl\(metroPort\), runCase, coldStart, originLogPath \}\)/,
     'the walk CLI must execute the walk suite after device checks');
   const result = spawnSync(process.execPath, [runner, '--suite', 'walk', '--serial', 'emulator-missing'], {
     cwd: repoRoot,

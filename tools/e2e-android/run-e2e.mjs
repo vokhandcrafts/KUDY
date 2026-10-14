@@ -447,13 +447,14 @@ async function main() {
   try {
     if (suite === 'locales' || suite === 'walk') {
       if (only !== null) info(`running only locale case: ${only}`);
-      origin = await startOriginServer({ port: originPort, logPath: path.join(runDir, `origin-${suite}.log`), outDir: path.join(runDir, 'origin'),
+      const originLogPath = path.join(runDir, `origin-${suite}.log`);
+      origin = await startOriginServer({ port: originPort, logPath: originLogPath, outDir: path.join(runDir, 'origin'),
         ...(suite === 'walk' ? { fault: 'stall:bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a' } : {}) });
       metro = await startMetro({ port: metroPort,
         env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://10.0.2.2:${originPort}` }, logPath: path.join(runDir, `metro-${suite}.log`) });
       await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
       if (suite === 'locales') await runLocalesSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, only });
-      else await runWalkSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart });
+      else await runWalkSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, originLogPath });
     } else {
       info('phase A: no catalog origin — starting Metro');
       metro = await startMetro({ port: metroPort, env: {}, logPath: path.join(runDir, 'metro-a.log') });

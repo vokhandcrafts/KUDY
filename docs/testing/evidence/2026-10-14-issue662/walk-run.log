@@ -1,8 +1,10 @@
-(node:121788) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/viktar/Projects/KUDY-worktrees/codex-662/contracts/ui-locales.ts is not specified and it doesn't parse as CommonJS.
+npm notice run kudy@0.1.0 e2e:android
+npm notice run node tools/e2e-android/run-e2e.mjs --suite walk --serial emulator-5558 --apk /home/viktar/Projects/KUDY/android/app/build/outputs/apk/debug/app-debug.apk
+(node:31544) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/viktar/Projects/KUDY-worktrees/codex-662/contracts/ui-locales.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to /home/viktar/Projects/KUDY-worktrees/codex-662/package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
--- adb: /home/viktar/Android/Sdk/platform-tools/adb; serial: emulator-5558; apk: /home/viktar/Projects/KUDY/android/app/build/outputs/apk/debug/app-debug.apk
+-- adb: adb; serial: emulator-5558; apk: /home/viktar/Projects/KUDY/android/app/build/outputs/apk/debug/app-debug.apk
 -- clearing by.kudy.app test data on emulator-5558 before walk cases
 -- installing by.kudy.app from /home/viktar/Projects/KUDY/android/app/build/outputs/apk/debug/app-debug.apk …
 -- APK SHA-256: d344acd113350ed8a33f488daedb35d2d2f4cdb5786b95453a06b7858837cc0c
@@ -17,4 +19,4 @@ PASS walk: End lists unheard stories and moves the same session to history
 -- walk: no fresh position cannot autoplay; manual Play still works
 PASS walk: no fresh position cannot autoplay; manual Play still works
 
-walk: 5 passed, 0 failed (artifacts: /home/viktar/Projects/KUDY-worktrees/codex-662/tools/e2e-android/artifacts/2026-10-14T11-27-31-528Z)
+walk: 5 passed, 0 failed (artifacts: /home/viktar/Projects/KUDY-worktrees/codex-662/tools/e2e-android/artifacts/2026-10-14T17-04-04-712Z)

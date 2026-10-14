@@ -358,7 +358,7 @@ function LiveRow({
   return (
     <View style={styles.row} testID={`my-session-${row.sessionId}`}>
       <ScaledText style={styles.rowTitle}>{guideTitle(row.routeId)}</ScaledText>
-      <ScaledText style={styles.rowLine}>
+      <ScaledText style={styles.rowLine} testID={`my-live-state-${row.sessionId}`}>
         {strings.liveRowLine(
           strings.stateLabel[row.state] ?? row.state,
           localDay(row.startedAt),
@@ -385,7 +385,7 @@ function HistoryRow({
   return (
     <View style={styles.row} testID={`my-session-${summary.sessionId}`}>
       <ScaledText style={styles.rowTitle}>{guideTitle(summary.routeId)}</ScaledText>
-      <ScaledText style={styles.rowLine}>
+      <ScaledText style={styles.rowLine} testID={`my-history-state-${summary.sessionId}`}>
         {strings.pastRowLine(
           localDay(summary.startedAt),
           summary.finishedAt === null ? null : localDay(summary.finishedAt),
