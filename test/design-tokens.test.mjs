@@ -245,6 +245,11 @@ test('production surface tokens stay verbatim with the canon (G06.01.a)', () => 
   const stringEntries = [...source.matchAll(/(\w+):\s*'([^']+)',\s*\/\/\s*([\w.-]+)/g)];
   const numberEntries = [...source.matchAll(/(\w+):\s*(\d+(?:\.\d+)?),\s*\/\/\s*([\w.-]+)/g)];
   assert.ok(stringEntries.length + numberEntries.length >= 20, 'the surface token file must keep its canon-anchored entries');
+  for (const [key, tokenName] of [['colorHintBg', 'color.hint.bg'], ['colorHintBorder', 'color.hint.border']]) {
+    const entry = stringEntries.find(([, entryKey]) => entryKey === key);
+    assert.ok(entry, `${key}: hint token mirror must exist`);
+    assert.equal(entry[3], tokenName, `${key}: must anchor to ${tokenName}`);
+  }
   for (const [, key, value, tokenName] of stringEntries) {
     // G06.10.b: the font-family mirror entries are anchored to the canon
     // token but hold the named per-weight face React Native loads, not the

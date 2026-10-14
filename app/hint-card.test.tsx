@@ -9,7 +9,7 @@
 // world's store is the memory wiring.
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
-import { AppState } from "react-native";
+import { AppState, StyleSheet } from "react-native";
 
 import Map from "./map";
 import PlaceDetail from "./place/[id]";
@@ -103,7 +103,12 @@ describe("Guide hint card (G07.05)", () => {
     // Twenty-one seconds of continuous presence in the zone: the card shows.
     setNow(21_000);
     emitFix(21_000);
-    expect(await screen.findByTestId("guide-hint-card")).toBeTruthy();
+    const card = await screen.findByTestId("guide-hint-card");
+    // Canon: docs/design/visual-language.md §5, color.hint.bg/border.
+    expect(StyleSheet.flatten(card.props.style)).toMatchObject({
+      backgroundColor: "#f6faff",
+      borderColor: "#bcd2f0",
+    });
     expect(screen.getByTestId("guide-hint-row-guide-route-a1")).toBeTruthy();
     // The one shown event, identifiers only.
     expect(events).toHaveLength(1);

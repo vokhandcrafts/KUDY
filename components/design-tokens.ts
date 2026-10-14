@@ -29,6 +29,8 @@ export const tokens = {
   colorNoticeBorder: '#e6c98c', // color.notice.border
   colorErrorBg: '#fdeaea', // color.error.bg
   colorErrorBorder: '#e0a2a2', // color.error.border
+  colorHintBg: '#f6faff', // color.hint.bg
+  colorHintBorder: '#bcd2f0', // color.hint.border
   colorMap: '#eef3ee', // color.map — фон мапы Побач і Run
   colorMarkerPlaying: '#b3331f', // color.marker.playing
   colorMarkerPlayed: '#1d6b4f', // color.marker.played
