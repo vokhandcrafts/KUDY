@@ -9,7 +9,10 @@ import fs from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-const DEVTOOLS_TIMEOUT_MS = 15000;
+// Node 24 CI can spend more than 15 seconds starting the system Chromium
+// while the test matrix runs concurrently. Keep this below the 60-second
+// per-test limit so a browser that never starts still fails promptly.
+const DEVTOOLS_TIMEOUT_MS = 35000;
 const COMMAND_TIMEOUT_MS = 15000;
 const CLOSE_TIMEOUT_MS = 2000;
 const PROFILE_REMOVAL_ATTEMPTS = 5;
@@ -105,7 +108,8 @@ export async function launchBrowser(binary, extraArgs = []) {
       const timer = setTimeout(() => {
         if (settled) return;
         settled = true;
-        reject(new Error('chromium did not report a DevTools endpoint within 15s'));
+        const detail = buffer.trim().slice(-1200);
+        reject(new Error(`chromium did not report a DevTools endpoint within ${DEVTOOLS_TIMEOUT_MS / 1000}s${detail ? `: ${detail}` : ''}`));
       }, DEVTOOLS_TIMEOUT_MS);
       const finish = (fn, value) => {
         if (settled) return;
@@ -131,7 +135,7 @@ export async function launchBrowser(binary, extraArgs = []) {
     await new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         ws.close();
-        reject(new Error('DevTools WebSocket did not open within 15s'));
+        reject(new Error(`DevTools WebSocket did not open within ${DEVTOOLS_TIMEOUT_MS / 1000}s`));
       }, DEVTOOLS_TIMEOUT_MS);
       ws.addEventListener('open', () => {
         clearTimeout(timer);
