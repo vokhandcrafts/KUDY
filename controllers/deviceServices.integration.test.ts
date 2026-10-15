@@ -17,6 +17,7 @@ import path from 'node:path';
 
 import { createServices } from './createServices.ts';
 import { createDeviceServicePorts } from './deviceServices.ts';
+import { loadDemoBytes, loadDemoText } from './demoCatalog.ts';
 import { UI_LOCALE_KEY } from './sessionPorts.ts';
 import { nodeSqliteDriver, nodeSqliteFileDriver } from '../services/db/test-fixture.ts';
 import { getLiveSession, setSetting } from '../services/db/db.ts';
@@ -239,6 +240,18 @@ test('G20.20: the free synthetic package walks the whole production composition'
   if (!commerce) throw new Error('the root constructed no commerce member');
   assert.equal(commerce.stateOf('route_491_extended'), 'not-owned');
   assert.deepEqual(await commerce.purchase('route_491_extended'), { kind: 'unavailable' });
+});
+
+test('offline demo supplies the verified discovery surface through device composition', async () => {
+  const device = createDeviceServicePorts({
+    ...facilities(),
+    demoSource: { loadText: loadDemoText, loadBytes: loadDemoBytes },
+  });
+  const services = createServices(device.ports);
+  assert.ok(services.discovery);
+  await services.discovery.controller.getState().refresh();
+  assert.equal(services.discovery.controller.getState().surface.kind, 'ready');
+  device.teardown();
 });
 
 test('G20.20: without a catalog origin the gate answers null and the root passes the empty port set', async () => {

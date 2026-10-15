@@ -79,6 +79,7 @@ export interface ServicePorts {
   // device crypto task; until then the root constructs no catalog service
   // and the surfaces show their honest unavailable state.
   readonly catalogOrigin?: string;
+  readonly catalogLoader?: (relPath: string) => Promise<string>;
   readonly catalogSha256?: Sha256;
   // G06.01.b — the preview button's disk truth: the read-only bundles store
   // (09 §7 layout) the layer facts read; the verify verdict and the download
@@ -332,7 +333,7 @@ export function createServices(ports: ServicePorts): Services {
     uiLocalePersistence,
     readinessFor,
   } = ports;
-  const catalogLoader = catalogOrigin ? createOriginCatalogLoader(catalogOrigin) : undefined;
+  const catalogLoader = ports.catalogLoader ?? (catalogOrigin ? createOriginCatalogLoader(catalogOrigin) : undefined);
   // MVP display-locale order: Belarusian first (21 §3.2 allowlist; G14.04.d's
   // ui-locale switch below changes the chrome words' display locale, this
   // content-display preference stays the composition fact until the uk

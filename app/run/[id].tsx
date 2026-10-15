@@ -76,6 +76,25 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: "hidden",
   },
+  demoRoad: {
+    backgroundColor: "#fffdf7",
+    height: 22,
+    position: "absolute",
+    width: "135%",
+  },
+  demoMapLabel: {
+    backgroundColor: "#fffdf7",
+    borderRadius: 9,
+    color: tokens.colorInk,
+    fontSize: 13,
+    fontWeight: tokens.fontWeightStrong,
+    left: 13,
+    overflow: "hidden",
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    position: "absolute",
+    top: 13,
+  },
   note: {
     color: tokens.colorMuted,
     fontSize: 12,
@@ -728,6 +747,14 @@ export default function Run() {
       ) : null}
       {view.markers.length > 0 ? (
         <View style={styles.map} testID="run-map">
+          {process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? (
+            <>
+              <View style={[styles.demoRoad, { left: "-15%", top: "23%", transform: [{ rotate: "-16deg" }] }]} />
+              <View style={[styles.demoRoad, { left: "-8%", top: "57%", transform: [{ rotate: "12deg" }] }]} />
+              <View style={[styles.demoRoad, { left: "-16%", top: "83%", transform: [{ rotate: "-9deg" }] }]} />
+              <ScaledText style={styles.demoMapLabel}>{locale === "be" ? "Схема кропак · дэма" : "Stop diagram · demo"}</ScaledText>
+            </>
+          ) : null}
           {view.pois.map((poi) => {
             // UX 05 (issue #351): the label goes through the run strings'
             // kind dictionary — a kind without an entry renders no label,
@@ -736,7 +763,7 @@ export default function Run() {
             return (
               <View
                 key={poi.placeId}
-                style={[styles.marker, { left: `${poi.nx * 100}%`, top: `${poi.ny * 100}%`, transform: [{ translateX: -60 }, { translateY: -9 }] }]}
+                style={[styles.marker, { left: `${(process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? 0.2 + poi.nx * 0.6 : poi.nx) * 100}%`, top: `${(process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? 0.18 + poi.ny * 0.62 : poi.ny) * 100}%`, transform: [{ translateX: -60 }, { translateY: -9 }] }]}
                 testID={`run-poi-${poi.placeId}`}
               >
                 <View style={styles.poi} />
@@ -755,7 +782,7 @@ export default function Run() {
                 styles.marker,
                 // UX 04 (issue #350): the dot centers on the point whatever
                 // the canon markerSize — the label hangs below it.
-                { left: `${marker.nx * 100}%`, top: `${marker.ny * 100}%`, transform: [{ translateX: -60 }, { translateY: -(tokens.markerSize / 2) }] },
+                { left: `${(process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? 0.2 + marker.nx * 0.6 : marker.nx) * 100}%`, top: `${(process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? 0.18 + marker.ny * 0.62 : marker.ny) * 100}%`, transform: [{ translateX: -60 }, { translateY: -(tokens.markerSize / 2) }] },
               ]}
               testID={`run-marker-${marker.stopId}`}
             >

@@ -15,18 +15,32 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCatalogController } from "../../controllers/catalog/useCatalogController";
 import { useServices, useUiLocale } from "../_layout";
 import { tokens } from "../../components/design-tokens";
-import { CityCatalogBody } from "../../components/guide-card";
+import { CityCatalogBody, StateBanner } from "../../components/guide-card";
 import { PaperSurface } from "../../components/paper-surface";
 import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
 import { uiStrings } from "../../components/ui-strings";
 
 const styles = StyleSheet.create({
+  brand: {
+    color: tokens.colorAccent,
+    fontSize: 14,
+    fontWeight: tokens.fontWeightStrong,
+    letterSpacing: 2,
+    marginBottom: tokens.spaceM,
+  },
   middleLink: {
     color: tokens.colorInk,
     fontSize: tokens.fontBaseSize,
     fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceM,
+  },
+  middleRow: {
+    backgroundColor: tokens.colorCard,
+    borderColor: tokens.colorLine,
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    marginBottom: tokens.spaceS,
+    padding: tokens.spaceM,
   },
 });
 
@@ -36,7 +50,7 @@ const styles = StyleSheet.create({
 function SurfaceLink({ href, label, testID }: { href: string; label: string; testID: string }) {
   return (
     <Link href={href} asChild>
-      <PressableSurface accessibilityRole="link" accessibilityLabel={label} hitSlop={12} testID={testID}>
+      <PressableSurface accessibilityRole="link" accessibilityLabel={label} hitSlop={12} style={styles.middleRow} testID={testID}>
         <ScaledText style={styles.middleLink}>{label}</ScaledText>
       </PressableSurface>
     </Link>
@@ -66,6 +80,7 @@ export default function Explore() {
       }}
       testID="screen-Explore"
     >
+      <ScaledText style={styles.brand}>{strings.kudyLink.replace(/\s*→$/, "")}</ScaledText>
       <CityCatalogBody
         walk={services.walk}
         catalog={controller?.surface ?? null}
@@ -74,6 +89,16 @@ export default function Explore() {
         locale={locale}
         middle={
           <>
+            {process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? (
+              <StateBanner
+                tone="notice"
+                reason={locale === "be" ? "Дэманстрацыйная версія" : "Demo version"}
+                detail={locale === "be"
+                  ? "Гісторыі, кропкі і гукі тут прыкладныя. Гэта не гатовы маршрут для навігацыі."
+                  : "Stories, stops and sounds are samples. This is not a route for navigation."}
+                testID="demo-notice"
+              />
+            ) : null}
             <SurfaceLink href="/map" label={strings.nearby} testID="link-nearby" />
             <SurfaceLink href="/discovery" label={strings.whatToDo} testID="link-discovery" />
             <SurfaceLink href="/my" label={strings.kudyLink} testID="link-kudy" />

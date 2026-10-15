@@ -23,7 +23,26 @@ describe("Explore paper grain (G06.10.e)", () => {
     expect(screen.queryByTestId("paper-grain")).toBeNull();
     expect(screen.getByTestId("paper-grain", { includeHiddenElements: true })).toBeTruthy();
     expect(flatStyle(screen.getByTestId("screen-Explore")).backgroundColor).toBe(tokens.colorPaper);
+    expect(screen.getByText("KUDY")).toBeTruthy();
     // The content above the grain: the nearby link is reachable.
     expect(screen.getByTestId("link-nearby")).toBeTruthy();
+    expect(flatStyle(screen.getByTestId("link-nearby")).backgroundColor).toBe(tokens.colorCard);
+  });
+
+  test("demo build labels sample content and keeps the city routes", async () => {
+    const previous = process.env.EXPO_PUBLIC_DEMO_MODE;
+    process.env.EXPO_PUBLIC_DEMO_MODE = "1";
+    try {
+      renderRouter(
+        { _layout: layoutWith(createServices({})), "(tabs)/explore": Explore },
+        { initialUrl: "/explore" },
+      );
+      expect(await screen.findByTestId("demo-notice")).toBeTruthy();
+      expect(screen.getByText("Дэманстрацыйная версія")).toBeTruthy();
+      expect(screen.getByTestId("link-nearby")).toBeTruthy();
+    } finally {
+      if (previous === undefined) delete process.env.EXPO_PUBLIC_DEMO_MODE;
+      else process.env.EXPO_PUBLIC_DEMO_MODE = previous;
+    }
   });
 });

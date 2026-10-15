@@ -349,7 +349,7 @@ async function phaseA(driver, metroPort) {
     ['run shows its unavailable state', 'unavailable-run', 'kudy://run/e2e-missing', 'screen-Run', 'run-unavailable'],
     ['place shows its unavailable state', 'unavailable-place', 'kudy://place/e2e-missing', 'screen-Place detail', 'place-unavailable'],
     ['collection shows its unavailable state', 'unavailable-collection', 'kudy://collection/e2e-missing', 'screen-Collection', 'city-message'],
-    ['city guides shows its unavailable state', 'unavailable-guides', 'kudy://city/e2e-city/guides', 'screen-Guides', 'city-message'],
+    ['city guides shows its unavailable state', 'unavailable-guides', 'kudy://city/e2e-city/guides', 'screen-Guides', 'catalog-unavailable'],
   ]) {
     await runCase(name, slug, driver, async () => {
       // Cold-start the dev client first, then fire the route link at the

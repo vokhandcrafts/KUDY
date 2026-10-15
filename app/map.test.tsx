@@ -123,7 +123,7 @@ describe("Nearby surface (G07.01)", () => {
     renderRouter(withMapRoutes(services), { initialUrl: "/map" });
     await screen.findByTestId("nearby-mode");
     // The uk catalogue is complete — the explanation renders in uk.
-    expect(screen.getByTestId("nearby-message").props.children).toBe("Гідів з текстом цією мовою ще немає.");
+    expect(within(screen.getByTestId("nearby-message")).getByText("Гідів з текстом цією мовою ще немає.")).toBeTruthy();
     expect(screen.queryByTestId(/^nearby-card-/)).toBeNull();
   });
 
@@ -247,7 +247,7 @@ describe("Nearby surface (G07.01)", () => {
     });
     expect(await screen.findByTestId("nearby-degraded")).toBeTruthy();
     expect(screen.getByText("Індэкс прапаноў часова недаступны")).toBeTruthy();
-    expect(screen.getByTestId("nearby-message").props.children).toBe("Прапановы пакуль не апублікаваны");
+    expect(within(screen.getByTestId("nearby-message")).getByText("Прапановы пакуль не апублікаваны")).toBeTruthy();
     expect(screen.queryByTestId(/^nearby-card-/)).toBeNull();
   });
 
@@ -257,7 +257,7 @@ describe("Nearby surface (G07.01)", () => {
       initialUrl: "/map",
     });
     await screen.findByTestId("nearby-mode");
-    expect(screen.getByTestId("nearby-message").props.children).toBe("Прапановы пакуль не апублікаваны");
+    expect(within(screen.getByTestId("nearby-message")).getByText("Прапановы пакуль не апублікаваны")).toBeTruthy();
     expect(screen.queryByTestId("nearby-degraded")).toBeNull();
   });
 
