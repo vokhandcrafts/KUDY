@@ -137,8 +137,7 @@ function DiscoveryBody({
   if (state.surface.kind === "unavailable") {
     return (
       <View testID="discovery-unavailable">
-        <CityMessage text={strings.discoveryTemporarilyUnavailable} />
-        <Text style={styles.facts}>{state.surface.reason}</Text>
+        <StateBanner tone="error" reason={strings.discoveryTemporarilyUnavailable} detail={state.surface.reason} testID="discovery-unavailable-notice" />
       </View>
     );
   }

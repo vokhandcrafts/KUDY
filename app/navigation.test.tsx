@@ -295,11 +295,22 @@ describe("city surface on the published catalog (G06.01.a)", () => {
 
   test("a build without the catalog ports renders its honest unavailable state", async () => {
     renderRouter(withCatalogRoutes(layoutWith(createServices({}))), { initialUrl: "/explore" });
-    expect(await screen.findByText("Каталог недаступны")).toBeTruthy();
+    const notice = await screen.findByTestId("catalog-unavailable");
+    expect(within(notice).getByText("Каталог недаступны")).toBeTruthy();
+    expect(notice.props.accessibilityLiveRegion).toBe("polite");
+    expect(screen.queryByTestId("catalog-retry")).toBeNull();
   });
 });
 
 describe("rubric surface and the canonical chain (11 §16.1–16.2)", () => {
+  test("the rubric shows the unavailable notice without a catalog service", async () => {
+    renderRouter(withCatalogRoutes(layoutWith(createServices({}))), { initialUrl: "/city/e2e-city/guides" });
+    expect(await screen.findByTestId("screen-Guides")).toBeTruthy();
+    const notice = await screen.findByTestId("catalog-unavailable");
+    expect(within(notice).getByText("Каталог недаступны")).toBeTruthy();
+    expect(screen.queryByTestId("city-message")).toBeNull();
+  });
+
   test("the rubric lists the published guides and a card leads to the preview", async () => {
     serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
     renderRouter(withCatalogRoutes(layoutWith(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 }))), {

@@ -44,6 +44,50 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
   },
+  demoMap: {
+    backgroundColor: "#eaf1eb",
+    borderColor: "#cbdccf",
+    borderRadius: tokens.radiusBase,
+    borderWidth: 1,
+    height: 174,
+    marginBottom: tokens.spaceM,
+    overflow: "hidden",
+  },
+  demoStreet: {
+    backgroundColor: "#fffdf7",
+    height: 15,
+    position: "absolute",
+    width: "125%",
+  },
+  demoMapLabel: {
+    backgroundColor: "#fffdf7",
+    borderRadius: 9,
+    color: tokens.colorInk,
+    fontSize: 13,
+    fontWeight: tokens.fontWeightStrong,
+    left: 13,
+    overflow: "hidden",
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    position: "absolute",
+    top: 12,
+  },
+  demoPin: {
+    alignItems: "center",
+    backgroundColor: "#176d51",
+    borderColor: "#fffdf7",
+    borderRadius: 18,
+    borderWidth: 3,
+    height: 36,
+    justifyContent: "center",
+    position: "absolute",
+    width: 36,
+  },
+  demoPinText: {
+    color: "#fffdf7",
+    fontSize: 15,
+    fontWeight: tokens.fontWeightStrong,
+  },
   modeHeader: {
     color: tokens.colorInk,
     fontSize: tokens.fontBaseSize,
@@ -54,16 +98,6 @@ const styles = StyleSheet.create({
     color: tokens.colorMuted,
     fontSize: tokens.fontBaseSize,
     marginBottom: tokens.spaceM,
-  },
-  message: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceS,
-  },
-  reason: {
-    color: tokens.colorMuted,
-    fontSize: 12,
-    marginTop: tokens.spaceS,
   },
   card: {
     backgroundColor: tokens.colorCard,
@@ -191,6 +225,27 @@ function locationNote(view: NearbyLocationView, strings: ReturnType<typeof nearb
   return view.note === "acquiring" ? strings.noteAcquiring : strings.noteUnstable;
 }
 
+function DemoMapPreview({ locale }: { locale: string }) {
+  const strings = uiStrings(locale);
+  return (
+    <View style={styles.demoMap} testID="nearby-demo-map" accessibilityLabel={strings.demoNearbyMapAccessibility}>
+      <View style={[styles.demoStreet, { left: -24, top: 54, transform: [{ rotate: "-13deg" }] }]} />
+      <View style={[styles.demoStreet, { left: -18, top: 119, transform: [{ rotate: "11deg" }] }]} />
+      <View style={[styles.demoStreet, { left: 132, top: 14, transform: [{ rotate: "74deg" }] }]} />
+      <ScaledText style={styles.demoMapLabel}>{strings.demoNearbyMapLabel}</ScaledText>
+      {([
+        { left: "17%", top: 91 },
+        { left: "48%", top: 65 },
+        { left: "75%", top: 109 },
+      ] as const).map((pin, index) => (
+        <View key={index} style={[styles.demoPin, pin]}>
+          <ScaledText style={styles.demoPinText}>{index + 1}</ScaledText>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export default function Map() {
   const services = useServices();
   // One binding per open: the factory resolves the offers store and the
@@ -245,17 +300,20 @@ export default function Map() {
           reachable beyond the fold, never cut by the screen edge. */}
       <ScrollView testID="scroll-nearby">
         <ScaledText style={styles.title}>{strings.title}</ScaledText>
-        <ScaledText style={styles.mapNote}>{strings.mapNote}</ScaledText>
+        {process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? (
+          <DemoMapPreview locale={uiLocale} />
+        ) : (
+          <ScaledText style={styles.mapNote}>{strings.mapNote}</ScaledText>
+        )}
         {surface === null ? (
           <View testID="nearby-error">
-            <ScaledText style={styles.message}>{strings.unavailable}</ScaledText>
+            <StateBanner tone="notice" reason={strings.unavailable} testID="nearby-unavailable-notice" />
           </View>
         ) : surface.kind === "loading" ? (
           <LoadingIndicator testID="nearby-message" text={strings.loading} />
         ) : surface.kind === "error" ? (
           <View testID="nearby-error">
-            <ScaledText style={styles.message}>{strings.unavailable}</ScaledText>
-            <ScaledText style={styles.reason}>{surface.reason}</ScaledText>
+            <StateBanner tone="error" reason={strings.unavailable} detail={surface.reason} testID="nearby-unavailable-notice" />
           </View>
         ) : (
           <>
@@ -271,11 +329,11 @@ export default function Map() {
               <StateBanner tone="notice" reason={strings.indexDegraded} testID="nearby-degraded" />
             ) : null}
             {list.length === 0 ? (
-              <ScaledText style={styles.message} testID="nearby-message">
-                {/* G21.17 (issue #551): the language explanation when other
-                    languages have offers, the honest NAV3 empty otherwise. */}
-                {offers.length === 0 ? strings.empty : uiStrings(uiLocale).textLocaleEmpty}
-              </ScaledText>
+              <StateBanner
+                tone="notice"
+                reason={offers.length === 0 ? strings.empty : uiStrings(uiLocale).textLocaleEmpty}
+                testID="nearby-message"
+              />
             ) : (
               list.map((offer) => (
                 <NearbyCard key={offer.offer_id} offer={offer} strings={strings} locale={uiLocale} />

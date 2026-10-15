@@ -138,6 +138,61 @@
       "sourceHash": "c6a254fe804abb64bc54bbe20e172db06ed99322075f21a9f868ba5e35a923b1"
     },
     {
+      "id": "native.chrome.demoNearbyMapAccessibility",
+      "source": "Прыкладная схема трох кропак",
+      "context": "Пазнака для чытача экрана: дэма-схема на экране Побач",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#demoNearbyMapAccessibility"
+      ],
+      "sourceHash": "0e0f487df8a6cdd6b102b55fad23fd34872990e187a2f2ff8045950fbfa6b419"
+    },
+    {
+      "id": "native.chrome.demoNearbyMapLabel",
+      "source": "Схема прагулкі · дэма",
+      "context": "Бачны подпіс прыкладнай схемы на экране Побач",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#demoNearbyMapLabel"
+      ],
+      "sourceHash": "1829b6458dc887619cb8377e2ac100758f5cad90061438a550be0a620fa1e833"
+    },
+    {
+      "id": "native.chrome.demoNoticeDetail",
+      "source": "Гісторыі, кропкі і гукі тут прыкладныя. Гэта не гатовы маршрут для навігацыі.",
+      "context": "Заўвага пра прыкладны дэма-кантэнт і забарону выкарыстоўваць яго для навігацыі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#demoNoticeDetail"
+      ],
+      "sourceHash": "25cbc93df0b908ae3ae7b81353ad38253b44c79bc3fd50fedebf5e9391b819e8"
+    },
+    {
+      "id": "native.chrome.demoRunMapLabel",
+      "source": "Схема кропак · дэма",
+      "context": "Бачны подпіс прыкладнай схемы на экране прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#demoRunMapLabel"
+      ],
+      "sourceHash": "2b2cf7128548b97eb8fdc8ed19819669c87c9b8afa19d11ac8a9f77706552f4b"
+    },
+    {
+      "id": "native.chrome.demoVersion",
+      "source": "Дэманстрацыйная версія",
+      "context": "Загаловак заўвагі пра прыкладны кантэнт на галоўным экране",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#demoVersion"
+      ],
+      "sourceHash": "0840fd5f0145a4f2d62a33cc2c765c6d5d478fc0b5591a3fc165311437e3d25d"
+    },
+    {
       "id": "native.chrome.differenceText.duration_unknown",
       "source": "час не ацэнены",
       "context": "Адрозненне прапановы: час не ацэнены",

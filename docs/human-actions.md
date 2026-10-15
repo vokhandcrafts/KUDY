@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-15 — усталюй дэманстрацыйную версію KUDY
+Што зрабіць: збяры дэма-APK паводле [інструкцыі](demo-preview.md), затым усталюй `android/app/build/outputs/apk/release/app-release.apk` на Android-прыладу. Гэта асобны пакет `by.kudy.app.demo` з прыкладным кантэнтам; не выкарыстоўвай яго маршрут для навігацыі.
+PR: https://github.com/vokhandcrafts/KUDY/pull/760
+
 ### 2026-10-14 — вырашы перадумовы для Android E2E #664
 Што зрабіць: прачытай [блокер у #664](https://github.com/vokhandcrafts/KUDY/issues/664#issuecomment-6175820694) і вырашы, ці вылучыць асобныя задачы на падключэнне Discovery, падказак гідаў і водгукаў у Android, а таксама на тэставы сервер водгукаў, ці пашырыць абсяг #664. Пасля гатоўнасці неабходных інтэграцый вярні #664 у чаргу.
 PR: https://github.com/vokhandcrafts/KUDY/pull/756 · Issue: [#664](https://github.com/vokhandcrafts/KUDY/issues/664)

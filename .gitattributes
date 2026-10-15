@@ -32,6 +32,7 @@ fixtures/discovery-contract/index-stop-places.json eol=lf
 # G21.06 (#539): the wire-types freshness check compares the committed output
 # byte-wise against what the generator renders; the generator always writes LF.
 contracts/wire/wire-types.ts eol=lf
+controllers/demoCatalog.generated.ts eol=lf
 
 # G21.06 (#539): every committed trace must regenerate byte for byte from its
 # seeded generator; the generator serializes LF.

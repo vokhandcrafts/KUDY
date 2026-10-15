@@ -378,7 +378,9 @@ export function CatalogStateView({
   onRetry?: () => void;
 }) {
   const strings = uiStrings(locale);
-  if (state === null) return <CityMessage text={strings.catalogUnavailable} />;
+  if (state === null) {
+    return <StateBanner tone="notice" reason={strings.catalogUnavailable} testID="catalog-unavailable" />;
+  }
   if (state.kind === "loading") return <LoadingIndicator text={strings.loading} testID="city-message" />;
   if (state.kind === "error") {
     return (

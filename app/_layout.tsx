@@ -13,7 +13,7 @@ function createDeviceServiceSet(): ReturnType<
   typeof import("../controllers/deviceRoot")["createDeviceServiceSet"]
 > | null {
   const origin = process.env.EXPO_PUBLIC_CATALOG_ORIGIN;
-  if (!origin) return null;
+  if (!origin && process.env.EXPO_PUBLIC_DEMO_MODE !== '1') return null;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const deviceRoot = require("../controllers/deviceRoot") as typeof import("../controllers/deviceRoot");
   return deviceRoot.createDeviceServiceSet();

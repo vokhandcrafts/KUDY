@@ -74,6 +74,11 @@ export interface DeviceFacilities {
   bundlesRoot: Directory;
   /** The configured public catalog origin (EXPO_PUBLIC_CATALOG_ORIGIN). */
   origin: string;
+  /** Present only in the explicitly labeled offline demo build. */
+  demoSource?: {
+    loadText: (path: string) => Promise<string>;
+    loadBytes: (path: string) => Promise<Uint8Array>;
+  };
   /** The content-locale preference for fresh-walk pin picks; the composition default. */
   preferredLocales?: () => readonly string[];
 }
@@ -109,7 +114,7 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
   const teaserAudioProbe = createExpoTeaserAudioProbe(fileSystem, bundlesRoot);
   const audioUriFor = createExpoAudioUriResolver(fileSystem, bundlesRoot);
   const downloadStore = createExpoDownloadStore(fileSystem, bundlesRoot);
-  const fetchBytes = createOriginByteSource(origin);
+  const fetchBytes = facilities.demoSource?.loadBytes ?? createOriginByteSource(origin);
   const access = createAccessPort();
   const gate = createDeletionGate();
   const wakelock: DeviceWakelock = createDeviceWakelock(keepAwake);
@@ -148,8 +153,18 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
   // The compile-time structural check of the unavailable port against the
   // controller's contract (services cannot import controllers for it).
   const commerce: CommercePort = createUnavailableCommercePort();
+  // A demo catalog is immutable and already bundled. The selector still goes
+  // through its verified snapshot contract; this cache is rebuildable on boot.
+  let demoSnapshot: Uint8Array | null = null;
   const ports: ServicePorts = {
     catalogOrigin: origin,
+    ...(facilities.demoSource ? { catalogLoader: facilities.demoSource.loadText } : {}),
+    ...(facilities.demoSource ? {
+      discoverySnapshot: {
+        read: async () => demoSnapshot?.slice() ?? null,
+        write: async (bytes: Uint8Array) => { demoSnapshot = bytes.slice(); },
+      },
+    } : {}),
     catalogSha256: sha256,
     bundlesStore,
     teaserAudioProbe,
