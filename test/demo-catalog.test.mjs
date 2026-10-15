@@ -55,6 +55,8 @@ test('the app composition reads the embedded guide as a normal catalog', async (
 });
 
 test('checked-in sample bytes match the publishing path', () => {
+  const eol = execFileSync('git', ['check-attr', 'eol', '--', 'controllers/demoCatalog.generated.ts'], { encoding: 'utf8' });
+  assert.match(eol, /: eol: lf\s*$/);
   const out = execFileSync(process.execPath, ['tools/demo/build-demo.mjs', '--check'], { encoding: 'utf8' });
   assert.match(out, /demo catalog:/);
 });

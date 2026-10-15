@@ -90,6 +90,23 @@ afterEach(() => {
 });
 
 describe("Nearby surface (G07.01)", () => {
+  test("only the demo build shows the illustrative map", async () => {
+    const previous = process.env.EXPO_PUBLIC_DEMO_MODE;
+    try {
+      process.env.EXPO_PUBLIC_DEMO_MODE = "1";
+      const demo = renderRouter(withMapRoutes(createServices({})), { initialUrl: "/map" });
+      expect(await screen.findByTestId("nearby-demo-map")).toBeTruthy();
+      demo.unmount();
+
+      process.env.EXPO_PUBLIC_DEMO_MODE = "0";
+      renderRouter(withMapRoutes(createServices({})), { initialUrl: "/map" });
+      expect(await screen.findByTestId("screen-Map")).toBeTruthy();
+      expect(screen.queryByTestId("nearby-demo-map")).toBeNull();
+    } finally {
+      if (previous === undefined) delete process.env.EXPO_PUBLIC_DEMO_MODE;
+      else process.env.EXPO_PUBLIC_DEMO_MODE = previous;
+    }
+  });
   // G21.17 (issue #551, AC1/AC5): the Nearby list shows only the offers whose
   // published text covers the selected UI language; a filtered-empty list is
   // the language explanation, never a service failure, and the switch back

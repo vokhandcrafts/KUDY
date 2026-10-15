@@ -45,6 +45,11 @@ export interface UiStrings {
   // The KUDY surface's Explore entry (issue #426): the owner's 2026-10-01
   // decision — the history surface is named «KUDY», not «My KUDY».
   readonly kudyLink: string;
+  readonly demoVersion: string;
+  readonly demoNoticeDetail: string;
+  readonly demoNearbyMapAccessibility: string;
+  readonly demoNearbyMapLabel: string;
+  readonly demoRunMapLabel: string;
   readonly retry: string;
   readonly catalogUnavailable: string;
   readonly catalogTemporarilyUnavailable: string;

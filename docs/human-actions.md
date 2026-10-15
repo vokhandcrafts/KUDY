@@ -18,7 +18,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 ## Што трэба зрабіць
 
 ### 2026-10-15 — усталюй дэманстрацыйную версію KUDY
-Што зрабіць: усталюй лакальную APK `dist/KUDY-Demo-Android.apk` на Android-прыладу камандай `adb install -r dist/KUDY-Demo-Android.apk` з каталога гэтай працоўнай копіі. Гэта асобны пакет `by.kudy.app.demo` з прыкладным кантэнтам; не выкарыстоўвай яго маршрут для навігацыі.
+Што зрабіць: збяры дэма-APK паводле [інструкцыі](demo-preview.md), затым усталюй `android/app/build/outputs/apk/release/app-release.apk` на Android-прыладу. Гэта асобны пакет `by.kudy.app.demo` з прыкладным кантэнтам; не выкарыстоўвай яго маршрут для навігацыі.
 PR: https://github.com/vokhandcrafts/KUDY/pull/760
 
 ### 2026-10-14 — вырашы перадумовы для Android E2E #664

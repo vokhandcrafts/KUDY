@@ -226,13 +226,13 @@ function locationNote(view: NearbyLocationView, strings: ReturnType<typeof nearb
 }
 
 function DemoMapPreview({ locale }: { locale: string }) {
-  const be = locale === "be";
+  const strings = uiStrings(locale);
   return (
-    <View style={styles.demoMap} testID="nearby-demo-map" accessibilityLabel={be ? "Прыкладная схема трох кропак" : "Illustrative three-stop diagram"}>
+    <View style={styles.demoMap} testID="nearby-demo-map" accessibilityLabel={strings.demoNearbyMapAccessibility}>
       <View style={[styles.demoStreet, { left: -24, top: 54, transform: [{ rotate: "-13deg" }] }]} />
       <View style={[styles.demoStreet, { left: -18, top: 119, transform: [{ rotate: "11deg" }] }]} />
       <View style={[styles.demoStreet, { left: 132, top: 14, transform: [{ rotate: "74deg" }] }]} />
-      <ScaledText style={styles.demoMapLabel}>{be ? "Схема прагулкі · дэма" : "Walk diagram · demo"}</ScaledText>
+      <ScaledText style={styles.demoMapLabel}>{strings.demoNearbyMapLabel}</ScaledText>
       {([
         { left: "17%", top: 91 },
         { left: "48%", top: 65 },

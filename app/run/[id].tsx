@@ -752,7 +752,7 @@ export default function Run() {
               <View style={[styles.demoRoad, { left: "-15%", top: "23%", transform: [{ rotate: "-16deg" }] }]} />
               <View style={[styles.demoRoad, { left: "-8%", top: "57%", transform: [{ rotate: "12deg" }] }]} />
               <View style={[styles.demoRoad, { left: "-16%", top: "83%", transform: [{ rotate: "-9deg" }] }]} />
-              <ScaledText style={styles.demoMapLabel}>{locale === "be" ? "Схема кропак · дэма" : "Stop diagram · demo"}</ScaledText>
+              <ScaledText style={styles.demoMapLabel}>{uiStrings(locale).demoRunMapLabel}</ScaledText>
             </>
           ) : null}
           {view.pois.map((poi) => {

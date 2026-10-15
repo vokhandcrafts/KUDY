@@ -92,10 +92,8 @@ export default function Explore() {
             {process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? (
               <StateBanner
                 tone="notice"
-                reason={locale === "be" ? "Дэманстрацыйная версія" : "Demo version"}
-                detail={locale === "be"
-                  ? "Гісторыі, кропкі і гукі тут прыкладныя. Гэта не гатовы маршрут для навігацыі."
-                  : "Stories, stops and sounds are samples. This is not a route for navigation."}
+                reason={strings.demoVersion}
+                detail={strings.demoNoticeDetail}
                 testID="demo-notice"
               />
             ) : null}
