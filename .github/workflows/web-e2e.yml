@@ -1,0 +1,28 @@
+name: web-e2e
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  journeys:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: install (root)
+        run: npm ci
+      - name: install (web)
+        run: npm ci
+        working-directory: web
+      - name: install lockfile-pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: web journeys (build and test)
+        run: |
+          set -euo pipefail
+          export KUDY_CHROMIUM="$(node -e "process.stdout.write(require('playwright').chromium.executablePath())")"
+          test -x "$KUDY_CHROMIUM"
+          npm run e2e:web
