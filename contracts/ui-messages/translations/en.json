@@ -109,7 +109,7 @@
       "reviewedSourceHash": "0e0f487df8a6cdd6b102b55fad23fd34872990e187a2f2ff8045950fbfa6b419",
       "review": {
         "outcome": "approved",
-        "note": "Codex-authored demo copy; review with this PR."
+        "note": "Пазнака чытача экрана называе ілюстратыўную схему трох кропак; тэрмін маршруту en «stop» узгоднены з глосарыем stop."
       }
     },
     {
@@ -118,7 +118,7 @@
       "reviewedSourceHash": "1829b6458dc887619cb8377e2ac100758f5cad90061438a550be0a620fa1e833",
       "review": {
         "outcome": "approved",
-        "note": "Codex-authored demo copy; review with this PR."
+        "note": "Кароткі подпіс называе схему прагулкі і адкрыта пазначае дэма; назва прагулкі en «walk» узгоднена з глосарыем walk."
       }
     },
     {
@@ -127,7 +127,7 @@
       "reviewedSourceHash": "25cbc93df0b908ae3ae7b81353ad38253b44c79bc3fd50fedebf5e9391b819e8",
       "review": {
         "outcome": "approved",
-        "note": "Codex-authored demo copy; review with this PR."
+        "note": "Паведамленне называе гісторыі, кропкі і гукі прыкладамі і захоўвае прамую забарону выкарыстоўваць маршрут для навігацыі; тэрмін en «stop» узгоднены з глосарыем stop."
       }
     },
     {
@@ -136,7 +136,7 @@
       "reviewedSourceHash": "2b2cf7128548b97eb8fdc8ed19819669c87c9b8afa19d11ac8a9f77706552f4b",
       "review": {
         "outcome": "approved",
-        "note": "Codex-authored demo copy; review with this PR."
+        "note": "Подпіс схемы кропак пазначае дэма; тэрмін en «stop» узгоднены з глосарыем stop."
       }
     },
     {
@@ -145,7 +145,7 @@
       "reviewedSourceHash": "0840fd5f0145a4f2d62a33cc2c765c6d5d478fc0b5591a3fc165311437e3d25d",
       "review": {
         "outcome": "approved",
-        "note": "Codex-authored demo copy; review with this PR."
+        "note": "Загаловак дакладна называе версію дэманстрацыйнай і не абяцае сапраўдны кантэнт або навігацыю."
       }
     },
     {
