@@ -11,7 +11,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { runMapView, type RunMapView } from './runMap.ts';
+import { runMapCameraFix, runMapView, type RunMapView } from './runMap.ts';
+import { initialPipelineState } from '../../core/pipeline/types.ts';
+
+test('camera uses the walk pipeline: a sudden GPS jump cannot move the map', () => {
+  const first = runMapCameraFix(initialPipelineState, { lat: 54.35, lng: 18.65, accuracy: 5, at: 1_000 }, 1_000);
+  assert.deepEqual(first.center, [18.65, 54.35]);
+  const spike = runMapCameraFix(first.state, { lat: 54.36, lng: 18.66, accuracy: 5, at: 2_000 }, 2_000);
+  assert.equal(spike.center, null);
+  assert.equal(spike.state, first.state);
+  const poor = runMapCameraFix(first.state, { lat: 54.35001, lng: 18.65001, accuracy: 100, at: 3_000 }, 3_000);
+  assert.equal(poor.center, null);
+});
 import { stopStatus, type RunSessionState } from '../../core/engine/state.ts';
 import type { RunStopFact, RunPlaceFact } from '../../services/contentRepo/runMapFacts.ts';
 import type { RunStop } from './runOrchestrator.ts';

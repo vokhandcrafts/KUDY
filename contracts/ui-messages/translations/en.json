@@ -1488,6 +1488,24 @@
       }
     },
     {
+      "id": "native.run.points",
+      "value": "Route stops",
+      "reviewedSourceHash": "7f8f19103a112298d7480abecc5107770297f14d6af636c8330fa5847c4c6d52",
+      "review": {
+        "outcome": "approved",
+        "note": "Accessible list button for native map stops; checked against the Belarusian source in this change."
+      }
+    },
+    {
+      "id": "native.run.recenter",
+      "value": "Center on my location",
+      "reviewedSourceHash": "7c9707a52b4598b4df1427e7609582b876d93d53e78eefc086b2ea6e9d0574cc",
+      "review": {
+        "outcome": "approved",
+        "note": "New accessibility label for the map recenter button; checked against the Belarusian source in this change."
+      }
+    },
+    {
       "id": "native.run.resume",
       "value": "Resume",
       "reviewedSourceHash": "eebc12f1f868df6992e266f4de878022ad7ba731a55d869b203f5e44b2562286",
@@ -1497,10 +1515,11 @@
     },
     {
       "id": "native.run.schematicNote",
-      "value": "Route points schematic — the city map arrives after the tiles decision",
-      "reviewedSourceHash": "7202049786e88c0cfb035a2fcf10a56d78f72c8911d0a3a06810d076909d7939",
+      "value": "Map loading or unavailable — route points shown as a schematic",
+      "reviewedSourceHash": "2dd5575beeb4e2eceddcb133bd66d0755c8731a769f657860033a6605224b3f7",
       "review": {
-        "outcome": "approved"
+        "outcome": "approved",
+        "note": "Updated fallback wording for the native map loading and error states; reviewed against the changed Belarusian source."
       }
     },
     {

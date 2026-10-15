@@ -149,17 +149,18 @@ function sessionRow(nodes) {
   return rows[0].resourceId;
 }
 
-async function tapMarkerAboveBar(driver, id) {
-  const nodes = await nodesOn(driver, 'screen-Run', 'marker-above-bar');
-  const marker = requireId(nodes, id);
-  const bar = requireId(nodes, 'run-panel-bar');
-  const markerBounds = /^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$/.exec(marker.bounds);
-  const barBounds = /^\[(\d+),(\d+)\]/.exec(bar.bounds);
-  assert.ok(markerBounds && barBounds && marker.center, 'marker and bar must have screen bounds');
-  const visibleBottom = Math.min(Number(markerBounds[4]), Number(barBounds[2]));
-  const top = Number(markerBounds[2]);
-  assert.ok(visibleBottom > top + 16, `${id} is covered by the audio bar`);
-  await driver.tapNode({ ...marker, center: { x: marker.center.x, y: Math.floor((top + visibleBottom) / 2) } });
+// MapLibre draws marker children into its Android surface. The points list
+// exposes the same stop-card action to accessibility and uiautomator.
+async function tapMapPoint(driver, stopId) {
+  await driver.tapSelector({ testID: 'run-map-points' });
+  await driver.tapSelector({ testID: `run-point-${stopId}` });
+}
+
+async function visiblePointStatus(driver, stopId, predicate, slug, timeoutMs = SHORT_MS) {
+  await driver.tapSelector({ testID: 'run-map-points' });
+  const result = await waitForId(driver, `run-point-status-${stopId}`, predicate, slug, timeoutMs);
+  await driver.tapSelector({ testID: 'run-map-points' });
+  return result;
 }
 
 export async function waitForManualStart(driver) {
@@ -218,11 +219,11 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     await waitForRun(driver, 'run-entry');
     await waitForLocationListeners(driver, true);
     await driver.geoFix(53.9, 27.56);
-    await waitForId(driver, 'run-status-e2e-stop-1', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
+    await visiblePointStatus(driver, 'e2e-stop-1', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
       'stop-1-played', DOWNLOAD_MS);
     // Replay the already heard stop 1 so stop 2 remains unheard for End.
     // Pause still exercises active audio rather than an idle session.
-    await tapMarkerAboveBar(driver, 'run-marker-e2e-stop-1');
+    await tapMapPoint(driver, 'e2e-stop-1');
     await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: 'btn-card-play' });
     await waitForAudioActive(driver, true);
@@ -239,9 +240,9 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     // Dismiss it before checking the out-of-order marker by testID.
     const resumedNodes = await nodesOn(driver, 'screen-Run', 'resumed');
     if (findNode(resumedNodes, { testID: 'btn-panel-close' })) await driver.tapSelector({ testID: 'btn-panel-close' });
-    await driver.waitFor({ testID: 'run-marker-e2e-stop-3' }, { timeoutMs: SHORT_MS });
+    await driver.waitFor({ testID: 'run-map-points' }, { timeoutMs: SHORT_MS });
     await driver.geoFix(53.902, 27.562);
-    await waitForId(driver, 'run-status-e2e-stop-3', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
+    await visiblePointStatus(driver, 'e2e-stop-3', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
       'stop-3-played', DOWNLOAD_MS);
     const nodes = await nodesOn(driver, 'screen-Run', 'before-back');
     assert.equal(findNode(nodes, { testID: 'run-ended' }), undefined);
@@ -287,7 +288,7 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
       await driver.tapSelector({ testID: 'btn-start', enabled: true });
       await waitForRun(driver, 'no-location-entry', false);
       await assertNoPlaying(driver, 2500, 'no-fresh-position');
-      await driver.tapSelector({ testID: 'run-marker-e2e-stop-2' });
+      await tapMapPoint(driver, 'e2e-stop-2');
       await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
       await driver.tapSelector({ testID: 'btn-card-play' });
       await waitForAudioActive(driver, true);

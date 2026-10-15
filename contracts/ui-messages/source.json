@@ -2164,6 +2164,28 @@
       "sourceHash": "0e2062fc47a4936d773e4e014d5f1f11c31481de99dceb81a4aa9166acdc30f1"
     },
     {
+      "id": "native.run.points",
+      "source": "Кропкі маршруту",
+      "context": "Назва кнопкі, якая адкрывае даступны спіс кропак на натыўнай карце",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#points"
+      ],
+      "sourceHash": "7f8f19103a112298d7480abecc5107770297f14d6af636c8330fa5847c4c6d52"
+    },
+    {
+      "id": "native.run.recenter",
+      "source": "Да майго месцазнаходжання",
+      "context": "Даступная назва кнопкі вяртання камеры карты да бягучай пазіцыі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#recenter"
+      ],
+      "sourceHash": "7c9707a52b4598b4df1427e7609582b876d93d53e78eefc086b2ea6e9d0574cc"
+    },
+    {
       "id": "native.run.resume",
       "source": "Працягнуць",
       "context": "Кнопка працягу прыпыненай прагулкі",
@@ -2176,14 +2198,14 @@
     },
     {
       "id": "native.run.schematicNote",
-      "source": "Схема кропак маршруту — карта горада зʼявіцца пасля рашэння пра тайлы",
-      "context": "Заўвага схематычнай карты: тайлы чакаюць рашэння",
+      "source": "Карта загружаецца або недаступная — паказана схема кропак маршруту",
+      "context": "Заўвага схематычнай карты падчас загрузкі або пры недаступнасці тайлаў",
       "format": "plain",
       "parameters": [],
       "migratedFrom": [
         "controllers/run/runMap.ts#schematicNote"
       ],
-      "sourceHash": "7202049786e88c0cfb035a2fcf10a56d78f72c8911d0a3a06810d076909d7939"
+      "sourceHash": "2dd5575beeb4e2eceddcb133bd66d0755c8731a769f657860033a6605224b3f7"
     },
     {
       "id": "native.run.status.available",

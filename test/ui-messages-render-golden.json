@@ -10886,19 +10886,19 @@
    "id": "native.run.schematicNote",
    "locale": "be",
    "args": null,
-   "out": "Схема кропак маршруту — карта горада зʼявіцца пасля рашэння пра тайлы"
+   "out": "Карта загружаецца або недаступная — паказана схема кропак маршруту"
   },
   {
    "id": "native.run.schematicNote",
    "locale": "en",
    "args": null,
-   "out": "Route points schematic — the city map arrives after the tiles decision"
+   "out": "Map loading or unavailable — route points shown as a schematic"
   },
   {
    "id": "native.run.schematicNote",
    "locale": "uk",
    "args": null,
-   "out": "Схема точок маршруту — карта міста з’явиться після рішення про тайли"
+   "out": "Карта завантажується або недоступна — показано схему точок маршруту"
   },
   {
    "id": "native.run.status.available",

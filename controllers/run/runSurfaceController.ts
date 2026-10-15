@@ -31,6 +31,8 @@ import type { AudioService } from '../../services/audio/service.ts';
 import type { PlaybackState } from '../../services/audio/types.ts';
 import type { LocationService } from '../../services/location/service.ts';
 import type { LocationStatus } from '../../services/location/types.ts';
+import { initialPipelineState } from '../../core/pipeline/types.ts';
+import { runMapCameraFix } from './runMap.ts';
 import type { DownloadAccessPort } from '../../services/download/access.ts';
 import { useStoreState } from '../useControllerStore.ts';
 
@@ -124,6 +126,9 @@ export type RunSurfaceState =
       // denied/stalled banners of 11 §7 read it per render (any engine or
       // panel state change re-renders the screen and re-reads it).
       locationStatus: () => LocationStatus;
+      // A read-only observer of the walk's existing GPS subscription for the
+      // map camera. It never arms a second location provider.
+      onMapPosition: (handler: (center: [number, number]) => void) => () => void;
       locale: string;
       // G21.21 (ADR G21.20 §3.2): the effective audio pin of the surface —
       // null = the text-only session; the screens read it, the engine owns
@@ -271,6 +276,14 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
     storiesExtended: pinned.storiesExtended,
     playback: () => deps.session.audio.playbackState(),
     locationStatus: () => deps.session.location.status(),
+    onMapPosition: (handler) => {
+      let state = initialPipelineState;
+      return deps.session.location.onRawFix((fix) => {
+        const next = runMapCameraFix(state, fix, deps.session.clock.now());
+        state = next.state;
+        if (next.center) handler(next.center);
+      });
+    },
     locale: pinned.locale,
     audioLocale,
   });
