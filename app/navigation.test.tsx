@@ -295,7 +295,10 @@ describe("city surface on the published catalog (G06.01.a)", () => {
 
   test("a build without the catalog ports renders its honest unavailable state", async () => {
     renderRouter(withCatalogRoutes(layoutWith(createServices({}))), { initialUrl: "/explore" });
-    expect(await screen.findByText("Каталог недаступны")).toBeTruthy();
+    const notice = await screen.findByTestId("catalog-unavailable");
+    expect(within(notice).getByText("Каталог недаступны")).toBeTruthy();
+    expect(notice.props.accessibilityLiveRegion).toBe("polite");
+    expect(screen.queryByTestId("catalog-retry")).toBeNull();
   });
 });
 
