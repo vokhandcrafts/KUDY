@@ -94,23 +94,33 @@ async function waitForAudioActive(driver, expected) {
   }
 }
 
-async function waitForRun(driver, slug) {
+export async function waitForRun(driver, slug, allowLocationSettings = true) {
   const deadline = Date.now() + 45000;
   for (;;) {
     const nodes = parseDump((await driver.dump(`dump-walk-${slug}.xml`)).xml);
     if (findNode(nodes, { testID: 'screen-Run' }) && findNode(nodes, { testID: 'run-map' })) return;
     const accuracyPrompt = findNode(nodes, { text: 'No thanks' });
-    if (accuracyPrompt) await driver.tapNode(accuracyPrompt);
+    if (accuracyPrompt) {
+      // Declining rejects Expo's pending watch with LocationSettingsUnsatisfiedException.
+      const accept = allowLocationSettings
+        ? findNode(nodes, { testID: 'android:id/button1' }) : accuracyPrompt;
+      assert.ok(accept, 'location accuracy prompt has no positive button');
+      await driver.tapNode(accept);
+    }
     if (Date.now() >= deadline) throw new Error(`timeout waiting for Run map (${slug})`);
     await delay();
   }
 }
 
-async function locationListeners(driver) {
+export async function locationListeners(driver) {
   const { stdout } = await driver.exec(['shell', 'dumpsys', 'location']);
   const providerState = stdout.split('  Historical Aggregate Location Provider Data:')[0];
   assert.ok(providerState.includes('Location Providers:'), 'dumpsys location has no provider section');
-  return providerState.split(/\r?\n/).filter((line) => line.includes('by.kudy.app'));
+  const direct = providerState.split(/\r?\n/).filter((line) => line.includes('by.kudy.app'));
+  if (direct.length > 0) return direct;
+  // Play Services owns the OS listener; AppOps attributes its active access to our app.
+  const access = await driver.exec(['shell', 'cmd', 'appops', 'get', 'by.kudy.app', 'MONITOR_LOCATION']);
+  return access.stdout.split(/\r?\n/).filter((line) => /\(running\)/.test(line));
 }
 
 async function waitForLocationListeners(driver, present) {
@@ -150,6 +160,20 @@ async function tapMarkerAboveBar(driver, id) {
   const top = Number(markerBounds[2]);
   assert.ok(visibleBottom > top + 16, `${id} is covered by the audio bar`);
   await driver.tapNode({ ...marker, center: { x: marker.center.x, y: Math.floor((top + visibleBottom) / 2) } });
+}
+
+export async function waitForManualStart(driver) {
+  const deadline = Date.now() + SHORT_MS;
+  for (;;) {
+    const nodes = parseDump((await driver.dump('dump-manual-start.xml')).xml);
+    if (findNode(nodes, { text: 'No location access' })) {
+      const close = findNode(nodes, { testID: 'android:id/button2', text: 'Close' });
+      assert.ok(close, 'location-disabled notice has no Close button');
+      await driver.tapNode(close);
+    } else if (findNode(nodes, { testID: 'btn-start', enabled: true })) return;
+    if (Date.now() >= deadline) throw new Error('timeout waiting for manual Start with location disabled');
+    await delay();
+  }
 }
 
 export async function runWalkSuite({ driver, url, runCase, coldStart, originLogPath }) {
@@ -259,9 +283,9 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     await driver.exec(['shell', 'cmd', 'location', 'set-location-enabled', 'false']);
     try {
       await driver.launchDeepLink(`kudy:///route/${FREE}`);
-      await driver.waitFor({ testID: 'btn-start', enabled: true }, { timeoutMs: SHORT_MS });
+      await waitForManualStart(driver);
       await driver.tapSelector({ testID: 'btn-start', enabled: true });
-      await waitForRun(driver, 'no-location-entry');
+      await waitForRun(driver, 'no-location-entry', false);
       await assertNoPlaying(driver, 2500, 'no-fresh-position');
       await driver.tapSelector({ testID: 'run-marker-e2e-stop-2' });
       await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
