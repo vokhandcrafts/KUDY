@@ -1876,6 +1876,24 @@
       }
     },
     {
+      "id": "native.run.points",
+      "value": "Étapes du parcours",
+      "reviewedSourceHash": "7f8f19103a112298d7480abecc5107770297f14d6af636c8330fa5847c4c6d52",
+      "review": {
+        "outcome": "approved",
+        "note": "Accessible list button for native map stops; checked against the Belarusian source in this change."
+      }
+    },
+    {
+      "id": "native.run.recenter",
+      "value": "Centrer sur ma position",
+      "reviewedSourceHash": "7c9707a52b4598b4df1427e7609582b876d93d53e78eefc086b2ea6e9d0574cc",
+      "review": {
+        "outcome": "approved",
+        "note": "New accessibility label for the map recenter button; checked against the Belarusian source in this change."
+      }
+    },
+    {
       "id": "native.run.resume",
       "value": "Reprendre",
       "reviewedSourceHash": "eebc12f1f868df6992e266f4de878022ad7ba731a55d869b203f5e44b2562286",
@@ -1886,8 +1904,8 @@
     },
     {
       "id": "native.run.schematicNote",
-      "value": "Schéma des étapes de l'itinéraire — la carte de la ville arrivera après la décision sur les tuiles",
-      "reviewedSourceHash": "7202049786e88c0cfb035a2fcf10a56d78f72c8911d0a3a06810d076909d7939",
+      "value": "La carte se charge ou est indisponible — les étapes sont affichées sous forme de schéma",
+      "reviewedSourceHash": "2dd5575beeb4e2eceddcb133bd66d0755c8731a769f657860033a6605224b3f7",
       "review": {
         "outcome": "approved",
         "note": "сэнс адпавядае арыгіналу; tutoiement; UI-рэгістр правераны"
@@ -2307,11 +2325,11 @@
     },
     {
       "id": "web.ui.privacyLocation",
-      "value": "La localisation n'est utilisée que dans l'application et seulement pendant une visite active : la détection de position en arrière-plan fonctionne tant que la visite va et s'arrête avec elle. Les coordonnées ne quittent pas l'appareil — elles ne sont pas transmises au serveur et n'entrent pas dans le journal d'événements. Sur le canal web, la position des visiteurs n'est pas déterminée du tout.",
-      "reviewedSourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58",
+      "value": "La localisation est utilisée dans l’application pendant une visite active : la localisation en arrière-plan fonctionne pendant la visite et s’arrête avec elle. L’application n’envoie pas les coordonnées GPS précises au serveur KUDY et ne les inscrit pas dans le journal d’événements. La carte en ligne charge des tuiles depuis OpenFreeMap ; ces requêtes révèlent au fournisseur la zone affichée, y compris autour de la position actuelle lorsque le suivi est activé. Le site web ne détecte pas la position du visiteur.",
+      "reviewedSourceHash": "5c86b06615ae7aa3da7eb2585ba4d46a4e77d5828b159601ca6748a411e476fc",
       "review": {
         "outcome": "approved",
-        "note": "прыватнасць: каардынаты не пакідаюць прыладу («ne quittent pas l'appareil»)"
+        "note": "Map tile requests disclose the viewed area to OpenFreeMap; precise GPS coordinates are not sent to the KUDY server or event log."
       },
       "terminology": {
         "status": "resolved",

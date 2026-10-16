@@ -24,6 +24,7 @@ module.exports = {
   // test/app-jest-wiring.test.mjs: dropping the mapping loads the real base
   // and its worklet runtime, which jest cannot run.
   moduleNameMapper: {
+    "^@maplibre/maplibre-react-native$": "<rootDir>/test/maplibre-react-native-mock.js",
     "^react-native-reanimated$": "<rootDir>/test/reanimated-mock.js",
     "^react-native-reanimated/mock$": "<rootDir>/test/reanimated-mock-subpath.js",
     "^lucide-react-native/icons/(.*)$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/icons/$1.js",

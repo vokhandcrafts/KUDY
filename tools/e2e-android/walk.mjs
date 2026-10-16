@@ -149,17 +149,40 @@ function sessionRow(nodes) {
   return rows[0].resourceId;
 }
 
-async function tapMarkerAboveBar(driver, id) {
-  const nodes = await nodesOn(driver, 'screen-Run', 'marker-above-bar');
-  const marker = requireId(nodes, id);
-  const bar = requireId(nodes, 'run-panel-bar');
-  const markerBounds = /^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$/.exec(marker.bounds);
-  const barBounds = /^\[(\d+),(\d+)\]/.exec(bar.bounds);
-  assert.ok(markerBounds && barBounds && marker.center, 'marker and bar must have screen bounds');
-  const visibleBottom = Math.min(Number(markerBounds[4]), Number(barBounds[2]));
-  const top = Number(markerBounds[2]);
-  assert.ok(visibleBottom > top + 16, `${id} is covered by the audio bar`);
-  await driver.tapNode({ ...marker, center: { x: marker.center.x, y: Math.floor((top + visibleBottom) / 2) } });
+// MapLibre draws marker children into its Android surface. The points list
+// exposes the same stop-card action to accessibility and uiautomator.
+async function mapPointPath(driver, stopId) {
+  const deadline = Date.now() + SHORT_MS;
+  for (;;) {
+    const nodes = parseDump((await driver.dump('dump-map-point.xml')).xml);
+    if (findNode(nodes, { testID: 'run-map-points' })) return 'native';
+    if (findNode(nodes, { testID: `run-marker-${stopId}` })) return 'schematic';
+    if (Date.now() >= deadline) throw new Error(`map point ${stopId} unavailable in native and schematic views`);
+    await delay();
+  }
+}
+
+export async function tapMapPoint(driver, stopId) {
+  const path = await mapPointPath(driver, stopId);
+  console.log(`walk map point ${stopId}: ${path}`);
+  if (path === 'native') await driver.tapSelector({ testID: 'run-map-points' });
+  await driver.tapSelector({ testID: path === 'native' ? `run-point-${stopId}` : `run-marker-${stopId}` });
+}
+
+export async function visiblePointStatus(driver, stopId, predicate, slug, timeoutMs = SHORT_MS) {
+  const path = await mapPointPath(driver, stopId);
+  console.log(`walk map status ${stopId}: ${path}`);
+  if (path === 'native') await driver.tapSelector({ testID: 'run-map-points' });
+  const result = await waitForId(driver, path === 'native' ? `run-point-status-${stopId}` : `run-status-${stopId}`, predicate, slug, timeoutMs);
+  if (path === 'native') await driver.tapSelector({ testID: 'run-map-points' });
+  return result;
+}
+
+export async function startWalkAtLocation(driver, latitude, longitude) {
+  // Seed before the watcher starts so a fresh AVD cannot supply a distant
+  // default fix that makes the next fix look like an impossible GPS jump.
+  await driver.geoFix(latitude, longitude);
+  await driver.tapSelector({ testID: 'btn-start', enabled: true });
 }
 
 export async function waitForManualStart(driver) {
@@ -214,15 +237,15 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
   });
 
   await runCase('walk: GPS starts stop 1 and stop 3 out of order; pause and Back preserve the session', 'walk-run', driver, async () => {
-    await driver.tapSelector({ testID: 'btn-start', enabled: true });
+    await startWalkAtLocation(driver, 53.9, 27.56);
     await waitForRun(driver, 'run-entry');
     await waitForLocationListeners(driver, true);
     await driver.geoFix(53.9, 27.56);
-    await waitForId(driver, 'run-status-e2e-stop-1', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
+    await visiblePointStatus(driver, 'e2e-stop-1', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
       'stop-1-played', DOWNLOAD_MS);
     // Replay the already heard stop 1 so stop 2 remains unheard for End.
     // Pause still exercises active audio rather than an idle session.
-    await tapMarkerAboveBar(driver, 'run-marker-e2e-stop-1');
+    await tapMapPoint(driver, 'e2e-stop-1');
     await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: 'btn-card-play' });
     await waitForAudioActive(driver, true);
@@ -239,9 +262,9 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     // Dismiss it before checking the out-of-order marker by testID.
     const resumedNodes = await nodesOn(driver, 'screen-Run', 'resumed');
     if (findNode(resumedNodes, { testID: 'btn-panel-close' })) await driver.tapSelector({ testID: 'btn-panel-close' });
-    await driver.waitFor({ testID: 'run-marker-e2e-stop-3' }, { timeoutMs: SHORT_MS });
+    await mapPointPath(driver, 'e2e-stop-3');
     await driver.geoFix(53.902, 27.562);
-    await waitForId(driver, 'run-status-e2e-stop-3', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
+    await visiblePointStatus(driver, 'e2e-stop-3', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
       'stop-3-played', DOWNLOAD_MS);
     const nodes = await nodesOn(driver, 'screen-Run', 'before-back');
     assert.equal(findNode(nodes, { testID: 'run-ended' }), undefined);
@@ -287,7 +310,7 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
       await driver.tapSelector({ testID: 'btn-start', enabled: true });
       await waitForRun(driver, 'no-location-entry', false);
       await assertNoPlaying(driver, 2500, 'no-fresh-position');
-      await driver.tapSelector({ testID: 'run-marker-e2e-stop-2' });
+      await tapMapPoint(driver, 'e2e-stop-2');
       await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
       await driver.tapSelector({ testID: 'btn-card-play' });
       await waitForAudioActive(driver, true);

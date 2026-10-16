@@ -4,7 +4,33 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { assertNoReadyStart, waitForRun, locationListeners, waitForManualStart } from './walk.mjs';
+import { assertNoReadyStart, waitForRun, locationListeners, waitForManualStart, tapMapPoint, visiblePointStatus, startWalkAtLocation } from './walk.mjs';
+
+test('walk seeds the emulator position before starting its location watcher', async () => {
+  const calls = [];
+  await startWalkAtLocation({
+    geoFix: async (...coordinates) => { calls.push(['fix', ...coordinates]); },
+    tapSelector: async (selector) => { calls.push(['tap', selector]); },
+  }, 53.9, 27.56);
+  assert.deepEqual(calls, [['fix', 53.9, 27.56], ['tap', { testID: 'btn-start', enabled: true }]]);
+});
+
+test('walk map point helpers use native list or schematic marker as rendered', async () => {
+  for (const path of ['native', 'schematic']) {
+    const taps = [];
+    const driver = {
+      dump: async () => ({ xml: path === 'native'
+        ? '<node resource-id="run-map-points"/><node resource-id="run-point-status-stop-1" text="played"/>'
+        : '<node resource-id="run-marker-stop-1"/><node resource-id="run-status-stop-1" text="played"/>' }),
+      tapSelector: async ({ testID }) => { taps.push(testID); },
+    };
+    await tapMapPoint(driver, 'stop-1');
+    await visiblePointStatus(driver, 'stop-1', (node) => node.text === 'played', 'fallback-test', 0);
+    assert.deepEqual(taps, path === 'native'
+      ? ['run-map-points', 'run-point-stop-1', 'run-map-points', 'run-map-points']
+      : ['run-marker-stop-1']);
+  }
+});
 
 const target = 'bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a';
 const start = `E2E stall start: ${target}\n`;

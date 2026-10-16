@@ -44,7 +44,7 @@ export const cs = {
   "privacyContact": "Dotazy k těmto zásadám soukromí je možné pokládat do issues veřejného repozitáře projektu:",
   "privacyDeletion": "Smazání dat: v aplikaci, v sekci My KUDY, je tlačítko smazání zařízení — vyčistí log událostí na serveru i záznam zařízení; stažený obsah zůstává. Není potřeba posílat dopis ani žádost.",
   "privacyIntro": "KUDY jsou audioprůvodci pro městské procházky. Tato stránka popisuje, která data projekt zpracovává: bezplatnou vrstvu webového kanálu a mobilní aplikaci.",
-  "privacyLocation": "Poloha se používá jen v aplikaci a jen během aktivní procházky: zjišťování polohy na pozadí funguje, dokud procházka probíhá, a zastavuje se s ní. Souřadnice neopouštějí zařízení — neposílají se na server a nedostávají se do logu událostí. Na webovém kanálu se poloha návštěvníka nezjišťuje vůbec.",
+  "privacyLocation": "Poloha se používá v aplikaci během aktivní procházky: zjišťování polohy na pozadí funguje po dobu procházky a končí s ní. Aplikace neposílá přesné GPS souřadnice na server KUDY ani je neukládá do záznamu událostí. Online mapa načítá dlaždice od OpenFreeMap; tyto požadavky poskytovateli odhalují zobrazenou oblast mapy, včetně okolí aktuální polohy při zapnutém sledování. Webová verze polohu návštěvníka nezjišťuje.",
   "privacyPurchases": "Nákupy probíhají přes obchody aplikací (App Store, Google Play): platební údaje zpracovává obchod a aplikace zaznamenává jen fakt nákupu — trasu, variantu, výsledek — bez bankovních údajů.",
   "privacyRetention": "Doba uchování: syrové odeslané události se uchovávají 14 měsíců, poté se mažou naplánovaným úkolem; agregované čísla podle tras zůstávají bez identifikátoru zařízení.",
   "privacyTitle": "Soukromí",

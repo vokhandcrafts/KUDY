@@ -7,6 +7,8 @@
 // row through the live selectors — now fed by the generated catalogues — and
 // demands byte-equal output: the generation replaced the authoring location,
 // never the words (issue #558, criterion 5: existing be/en/uk behavior).
+// PR #761 intentionally revises the privacyLocation rows after online map
+// tiles made the old claim about coordinates leaving the device inaccurate.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';

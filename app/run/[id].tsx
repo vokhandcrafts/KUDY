@@ -1,6 +1,7 @@
 // G06.02 (issue #278) + G06.03 (issue #279) — the Run surface (11 §6): the
-// route's points on an honest schematic map — no tile engine exists until
-// the map decision (ADR G00.02) is accepted — with the five marker states
+// route's points on a native map with an honest schematic fallback while
+// tiles load or fail; the offline map decision (ADR G00.02) remains open.
+// The five marker states
 // computed by the engine (ADR G01.01 §4.5), the POI points visually distinct
 // from the audio points, and the ODbL attribution visible and tappable.
 // G06.03 adds the history panel (11 §2): one bottom sheet over the map with
@@ -34,6 +35,7 @@ import {
 } from "../../components/modal-dialog";
 import { ScaledText } from "../../components/scaled-text";
 import { WalkProgress } from "../../components/walk-progress";
+import { RunNativeMap } from "../../components/run-native-map";
 import { useServices, useUiLocale } from "../_layout";
 
 const OSM_ATTRIBUTION_URL = "https://www.openstreetmap.org/copyright";
@@ -444,6 +446,7 @@ export default function Run() {
   // surface-side gate (a hook, before the early returns); the controller's
   // end() stays the only session write and runs only on the confirmation.
   const [endConfirm, setEndConfirm] = useState(false);
+  const [nativeMapReadyRouteId, setNativeMapReadyRouteId] = useState<string | null>(null);
   // G06.05 (AC3): the card's story-layer switch bookkeeping — the switch
   // belongs to one card, another opened card starts back on the base story.
   const [layerByStop, setLayerByStop] = useState<{ stopId: string | null; layer: "base" | "extended" }>({
@@ -746,7 +749,23 @@ export default function Run() {
         </View>
       ) : null}
       {view.markers.length > 0 ? (
-        <View style={styles.map} testID="run-map">
+        <RunNativeMap
+          key={routeId}
+          nativeDisabled={process.env.EXPO_PUBLIC_DEMO_MODE === "1"}
+          view={view}
+          stops={surface.stops}
+          places={surface.places}
+          onMapPosition={surface.onMapPosition}
+          onOpenStop={(stopId) => run.openCard(stopId)}
+          onReadyChange={(ready) => setNativeMapReadyRouteId(ready ? routeId : null)}
+          recenterLabel={strings.recenter}
+          pointsLabel={strings.points}
+          retryLabel={uiStrings(locale).retry}
+          markerHint={strings.markerHint}
+          statusWords={strings.status}
+          statusColors={STATUS_COLOR}
+          poiWords={strings.poiKind}
+          fallback={<View style={styles.map} testID="run-map-schematic">
           {process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? (
             <>
               <View style={[styles.demoRoad, { left: "-15%", top: "23%", transform: [{ rotate: "-16deg" }] }]} />
@@ -792,9 +811,10 @@ export default function Run() {
               </ScaledText>
             </Pressable>
           ))}
-        </View>
+          </View>}
+        />
       ) : null}
-      <ScaledText style={styles.note}>{strings.schematicNote}</ScaledText>
+      {nativeMapReadyRouteId !== routeId ? <ScaledText style={styles.note}>{strings.schematicNote}</ScaledText> : null}
       {/* UX 04 (issue #350, AC3): the in-flow spot only when the peek bar is
           down — the bar's own copy replaces it while the bar covers the flow. */}
       {peekBarOpen ? null : attribution}
