@@ -1,0 +1,2812 @@
+{
+  "translation_schema_version": 1,
+  "locale": "zh",
+  "provenance": {
+    "kind": "authored",
+    "reviewer": "opencode (DeepSeek-V4.1-Flash), session #670",
+    "evidence": "аўтарскі спрошчана-кітайскі (zh-Hans, мацерыковая норма) пераклад у задачы G21.46 (#670): зроблены з беларускага арыгіналу source.json з апорай на зацверджаныя en/uk наборы і прэцэдэнты de/es/fr/cs/sv (G21.10\u2013G21.14); рэгістр \u2014 нейтральная сучасная мацерыковая норма, кнопкі ў загадным ладзе (стандарт кітайскага UI); тэрміны батарэі G21.39 \u00A76.3 занкерваныя на корпус AOSP zh-rCN (\u4E0A\u4E00\u6B65/\u53D6\u6D88/\u8BBE\u7F6E/\u5BFC\u89C8/\u505C\u6B62/\u6563\u6B65/\u4E0B\u8F7D/\u8D2D\u4E70/\u6062\u590D/\u4E0D\u53EF\u7528) са следамі G21.27 у запісах; незалежны рэвью кітайскамоўнага LLM \u2014 асобны праход паводле рашэння ўладара 2026-10-14 (гл. results/G21.46.md)."
+  },
+  "records": [
+    {
+      "id": "native.chrome.access.free",
+      "value": "\u514D\u8D39",
+      "reviewedSourceHash": "82e16c5b12218d14ab2c468f999861493c22fd508e1f225f286674ecffbac141",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака доступу; звыклая кітайская пазнака бясплатнага доступу"
+      }
+    },
+    {
+      "id": "native.chrome.access.mixed",
+      "value": "\u90E8\u5206\u514D\u8D39",
+      "reviewedSourceHash": "d434ea3d59a4874db509a395e9df857ee017bee8ed9cf40bdf911b4c745459c5",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака доступу; змешаны доступ: частка змесціва бясплатная \u2014 коратка і без дужак"
+      }
+    },
+    {
+      "id": "native.chrome.access.paid",
+      "value": "\u4ED8\u8D39",
+      "reviewedSourceHash": "4b081dc73d3045c6977b49c2140888c6106630d14333a0bc68abd96750d2dffb",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака доступу; пара да \u514D\u8D39 у тым жа стылі"
+      }
+    },
+    {
+      "id": "native.chrome.back",
+      "value": "\u4E0A\u4E00\u6B65",
+      "reviewedSourceHash": "b1138bccd114e81d7e8305ace5a529060269c32c1dd21e669ff30f4a2f36d7a0",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка вяртання на папярэдні экран; мацерыковы корпус AOSP трымае менавіта \u4E0A\u4E00\u6B65, не \u8FD4\u56DE (той самы сэнс праз \u8FD4\u56DE нясе кнопка вяртання ўводу)"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "looked-up",
+        "source": "android",
+        "locator": "docs/reports/chinese/language-and-dictionaries-evidence.json#battery.back (frameworks/base#back_button_label, zh-rCN)",
+        "term": "\u4E0A\u4E00\u6B65",
+        "date": "2026-10-17",
+        "reason": "батарэя G21.39: кнопка Back у мацерыковым UI \u2014 гэта \u4E0A\u4E00\u6B65, а не слоўнікавае \u8FD4\u56DE; сэнс \u00ABвярнуцца на папярэдні экран\u00BB"
+      }
+    },
+    {
+      "id": "native.chrome.backToCity",
+      "value": "\u57CE\u5E02",
+      "reviewedSourceHash": "c3196e598662ddc30063829a3d53b88c16855ef719f72189dcb748a4c7e72200",
+      "review": {
+        "outcome": "approved",
+        "note": "кароткі пункт вяртання да экрана горада, як be \u00ABГорад\u00BB"
+      }
+    },
+    {
+      "id": "native.chrome.cancel",
+      "value": "\u53D6\u6D88",
+      "reviewedSourceHash": "0edad8c85ababf7db09011d81672c3470f30745ce80436b8a1e3f77f8fa7150d",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка скасавання дыялога; супадзенне слоўнікавага і корпуснага сэнсу"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "looked-up",
+        "source": "android",
+        "locator": "docs/reports/chinese/language-and-dictionaries-evidence.json#battery.cancel (frameworks/base#cancel, zh-rCN)",
+        "term": "\u53D6\u6D88",
+        "date": "2026-10-17",
+        "reason": "батарэя G21.39: акцыя скасавання дыялога \u2014 \u53D6\u6D88 у CEDICT/MOE і ў корпусе AOSP (адзіны сэнс)"
+      }
+    },
+    {
+      "id": "native.chrome.catalogTemporarilyUnavailable",
+      "value": "\u76EE\u5F55\u6682\u65F6\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "1db04f4cab5a569077412e68b581db2461473397a0b1f1ba55ce094f9c65f144",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану; тэрмін недаступнасці \u2014 па батарэі unavailable, \u00ABчасова\u00BB \u2014 звыклая кітайская прыслоўе-прыстаўка"
+      }
+    },
+    {
+      "id": "native.chrome.catalogUnavailable",
+      "value": "\u76EE\u5F55\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "5da4e9377f0d520cf9f61c7ff0fa655d10fd902089cdd63b979ff8f8d19d0745",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану; тэрмін недаступнасці ўзяты з корпуса AOSP, не са слоўнікаў"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "looked-up",
+        "source": "android",
+        "locator": "docs/reports/chinese/language-and-dictionaries-evidence.json#battery.unavailable (frameworks/base, zh-rCN \u00AB\u2026\u4E0D\u53EF\u7528\u00BB)",
+        "term": "\u4E0D\u53EF\u7528",
+        "date": "2026-10-17",
+        "reason": "слоўнікавы прабел (няма ні ў CEDICT, ні ў MOE); сэнс даказваны толькі корпусам AOSP"
+      }
+    },
+    {
+      "id": "native.chrome.collectionUnavailable",
+      "value": "\u7CBE\u9009\u96C6\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "f835b71196437961eeaeb3074ef18024e8204716abc2801515bbdf6a8c4b51d3",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану; падборка \u2192 \u7CBE\u9009\u96C6 (куратаваная падборка)"
+      }
+    },
+    {
+      "id": "native.chrome.collectionUnresolved",
+      "value": "\u7CBE\u9009\u4E2D\u90E8\u5206\u5185\u5BB9\u5C1A\u672A\u53D1\u5E03\u3002",
+      "reviewedSourceHash": "a5e630ad534dffdc7196d67ccc73dd0266f09f81d681a7a5b811a354ab5fd20b",
+      "review": {
+        "outcome": "approved",
+        "note": "частка членаў падборкі не апублікаваная; захаваны сказ з кропкай, як у крыніцы"
+      }
+    },
+    {
+      "id": "native.chrome.currentWalk",
+      "value": "\u5F53\u524D\u6563\u6B65",
+      "reviewedSourceHash": "f9408779fd160eda48f9d52e41c0a274afa34f1fc10c34ed16c655a630413f88",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі; walk \u2192 \u6563\u6B65 па батарэі, актуалізацыя праз \u5F53\u524D"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u6563\u6B65",
+        "date": "2026-10-17",
+        "reason": "батарэя G21.39 \u00A76.3: walk = \u6563\u6B65 (зацверджаная рашэннем рэкамендацыя); ні AOSP, ні зацверджаныя слоўнікі не даюць піна для гэтага сэнсу, таму рашэнне рэцэнзента з апорай на рашэнне ўладара"
+      }
+    },
+    {
+      "id": "native.chrome.degradedData",
+      "value": "\u90E8\u5206\u6570\u636E\u6682\u65F6\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "c6a254fe804abb64bc54bbe20e172db06ed99322075f21a9f868ba5e35a923b1",
+      "review": {
+        "outcome": "approved",
+        "note": "банер дэградацыі; частка звестак \u2014 \u90E8\u5206\u6570\u636E"
+      }
+    },
+    {
+      "id": "native.chrome.demoNearbyMapAccessibility",
+      "value": "\u4E09\u4E2A\u5730\u70B9\u7684\u793A\u4F8B\u793A\u610F\u56FE",
+      "reviewedSourceHash": "0e0f487df8a6cdd6b102b55fad23fd34872990e187a2f2ff8045950fbfa6b419",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака для чытача экрана; тры кропкі \u2014 \u4E09\u4E2A\u5730\u70B9, \u793A\u4F8B\u793A\u610F\u56FE \u2014 прыкладная схема"
+      }
+    },
+    {
+      "id": "native.chrome.demoNearbyMapLabel",
+      "value": "\u6563\u6B65\u793A\u610F\u56FE \u00B7 \u6F14\u793A",
+      "reviewedSourceHash": "1829b6458dc887619cb8377e2ac100758f5cad90061438a550be0a620fa1e833",
+      "review": {
+        "outcome": "approved",
+        "note": "бачны подпіс прыкладнай схемы; demo \u2192 \u6F14\u793A, як у іншых мовах"
+      }
+    },
+    {
+      "id": "native.chrome.demoNoticeDetail",
+      "value": "\u8FD9\u91CC\u7684\u6545\u4E8B\u3001\u5730\u70B9\u548C\u97F3\u9891\u5747\u4E3A\u793A\u4F8B\u3002\u8FD9\u4E0D\u662F\u53EF\u7528\u4E8E\u5BFC\u822A\u7684\u6B63\u5F0F\u8DEF\u7EBF\u3002",
+      "reviewedSourceHash": "25cbc93df0b908ae3ae7b81353ad38253b44c79bc3fd50fedebf5e9391b819e8",
+      "review": {
+        "outcome": "approved",
+        "note": "заўвага пра прыкладны дэма-кантэнт і забарону навігацыі; два сказы захаваныя"
+      }
+    },
+    {
+      "id": "native.chrome.demoRunMapLabel",
+      "value": "\u5730\u70B9\u793A\u610F\u56FE \u00B7 \u6F14\u793A",
+      "reviewedSourceHash": "2b2cf7128548b97eb8fdc8ed19819669c87c9b8afa19d11ac8a9f77706552f4b",
+      "review": {
+        "outcome": "approved",
+        "note": "бачны подпіс прыкладнай схемы на экране прагулкі; пара да папярэдняга запісу"
+      }
+    },
+    {
+      "id": "native.chrome.demoVersion",
+      "value": "\u6F14\u793A\u7248\u672C",
+      "reviewedSourceHash": "0840fd5f0145a4f2d62a33cc2c765c6d5d478fc0b5591a3fc165311437e3d25d",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак заўвагі пра прыкладны кантэнт на галоўным экране"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.duration_unknown",
+      "value": "\u672A\u8BC4\u4F30\u65F6\u95F4",
+      "reviewedSourceHash": "aa5a112078a2bbce5d31cfb2eaf8e7ffc469607accdc26f9e44e18b8d6dbe659",
+      "review": {
+        "outcome": "approved",
+        "note": "адрозненне прапановы; стан адсутнасці ацэнкі"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.over_time",
+      "value": "\u8D85\u51FA\u6240\u8BF7\u6C42\u7684\u65F6\u95F4",
+      "reviewedSourceHash": "95f858f684ec50f63854358e44ef3e68fb7c3c322ff5732fc957046244703404",
+      "review": {
+        "outcome": "approved",
+        "note": "адрозненне прапановы; даўжэй за запыт"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.season_not_recommended",
+      "value": "\u4E0D\u9002\u5408\u672C\u5B63\u8282",
+      "reviewedSourceHash": "b3976a641f5d9d01ed1186b8256e629a92bff51fc5f65f14563df0f60da468d0",
+      "review": {
+        "outcome": "approved",
+        "note": "адрозненне прапановы; сезонная неадпаведнасць"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.season_unassessed",
+      "value": "\u672A\u8BC4\u4F30\u5B63\u8282",
+      "reviewedSourceHash": "e06820b8dbcdffc5d4e083b1b251714326a070dd61d11c589dc48b1ab551da42",
+      "review": {
+        "outcome": "approved",
+        "note": "адрозненне прапановы; сезон не ацэнены"
+      }
+    },
+    {
+      "id": "native.chrome.differenceText.theme_mismatch",
+      "value": "\u4E3B\u9898\u4E0D\u7B26",
+      "reviewedSourceHash": "518dfdb5f1459fb582bff8fef2e6f5130e9b6277546581bb5c06a49da31312e4",
+      "review": {
+        "outcome": "approved",
+        "note": "адрозненне прапановы; іншая тэма"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryAlternatives",
+      "value": "\u5176\u4ED6\u9009\u9879",
+      "reviewedSourceHash": "6b9f5202ccfa8bebff4109104041f656688d06f08ddaa652292d65f40af5ba0e",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі іншых варыянтаў падбора"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryEmpty",
+      "value": "\u6CA1\u6709\u5B8C\u5168\u5339\u914D\u7684\u7ED3\u679C\u2014\u2014\u8BF7\u653E\u5BBD\u6761\u4EF6\uFF0C\u6216\u770B\u770B\u5176\u4ED6\u9009\u9879\u3002",
+      "reviewedSourceHash": "831cdd7dfd6d729661152d21f5c107ebf2438ec405db988ddc8d2cd62633521d",
+      "review": {
+        "outcome": "approved",
+        "note": "пусты стан падбора; працяжнік захаваны як знак паўзы, парада ў канцы"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryTemporarilyUnavailable",
+      "value": "\u7CBE\u9009\u6682\u65F6\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "9252d5d0294115694f781e58a88257ae4b90cca39cb8c14091efd477f0721935",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану; той самы тэрмін недаступнасці, што і ў каталога"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryTitle",
+      "value": "\u73A9\u4EC0\u4E48",
+      "reviewedSourceHash": "73a869d121cfe785ef9b06081df8484b6a878a6bb51140ad668c80a4357bd816",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак экрана падбора; размоўная кітайская формула выбару занятку"
+      }
+    },
+    {
+      "id": "native.chrome.discoveryUnavailable",
+      "value": "\u7CBE\u9009\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "262a86e4e8647e231e8d140b8e62fdbf5d769ab8c08400d9d87afb962676211a",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану; падборка \u2192 \u7CBE\u9009"
+      }
+    },
+    {
+      "id": "native.chrome.durationLabel",
+      "value": "\u65F6\u957F",
+      "reviewedSourceHash": "367751046f034b1e95b6562ea3eb4809debffb78ea7af63d3de645321bdeecc9",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана для ўмяшчальніка працягласці"
+      }
+    },
+    {
+      "id": "native.chrome.durationMinutes",
+      "value": "\u65F6\u95F4\uFF1A${minutes}\u5206\u949F",
+      "reviewedSourceHash": "e9a5925bfd57c9831a26edeecf7bcb583cbd7d875c8e9fabbbd4d10449028fe4",
+      "review": {
+        "outcome": "approved",
+        "note": "радок працягласці, адзінае значэнне; паміж лічбай і \u5206\u949F прабелу няма, як патрабуе рашэнне пра вёрстку"
+      }
+    },
+    {
+      "id": "native.chrome.durationRange",
+      "value": "\u65F6\u95F4\uFF1A${minMinutes}\u2013${maxMinutes}\u5206\u949F",
+      "reviewedSourceHash": "78add4278ac05d6aa17374a52f30bb5c313f6da5834ace6e464ed213dcafeee9",
+      "review": {
+        "outcome": "approved",
+        "note": "радок працягласці, дыяпазон; тырэ захаваны, прабелаў вакол лічбаў няма"
+      }
+    },
+    {
+      "id": "native.chrome.freeStopsCount",
+      "value": "\u514D\u8D39\u5730\u70B9\uFF1A${count}",
+      "reviewedSourceHash": "780c5d18130bb93df4355222162c7d4d8cc0cc3510971a9e6376751dff00a953",
+      "review": {
+        "outcome": "approved",
+        "note": "радок факту; кропкі \u2192 \u5730\u70B9 (мясцовы сэнс кропак маршруту)"
+      }
+    },
+    {
+      "id": "native.chrome.guidesLink",
+      "value": "\u5BFC\u89C8 \u2192",
+      "reviewedSourceHash": "ae59ec899a5964dea00463b49e7dd6348684069736ce95f6183d3c79b94c389c",
+      "review": {
+        "outcome": "approved",
+        "note": "ссылка на раздзел гідаў; кітайскі тэрмін электроннага аўдыягіда \u2014 \u5BFC\u89C8 (не \u5BFC\u6E38, чалавек-экскурсавод)"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u5BFC\u89C8",
+        "date": "2026-10-17",
+        "reason": "батарэя G21.39 \u00A76.3: электронны гід = \u5BFC\u89C8, чалавек-экскурсавод = \u5BFC\u6E38; ні AOSP, ні зацверджаныя слоўнікі не піняць сэнс, таму рашэнне рэцэнзента"
+      }
+    },
+    {
+      "id": "native.chrome.heardCount",
+      "value": "\u5DF2\u542C\uFF1A${count}",
+      "reviewedSourceHash": "974ee6f7afa147c26e872b3306efc390dbf3446e84d770041ded77527ab0342a",
+      "review": {
+        "outcome": "approved",
+        "note": "лічба праслуханых гісторый; дзеяслоў-вынік \u5DF2\u542C без змены роду"
+      }
+    },
+    {
+      "id": "native.chrome.historyUnavailable",
+      "value": "\u5386\u53F2\u8BB0\u5F55\u4E0D\u53EF\u7528\u3002",
+      "reviewedSourceHash": "e533a4767a8b973cf00efbfea8c16a7163f08f541ae657e853eea36baa0ccdc9",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану са сказам з кропкай; гісторыя \u2192 \u5386\u53F2\u8BB0\u5F55"
+      }
+    },
+    {
+      "id": "native.chrome.kudyLink",
+      "value": "KUDY \u2192",
+      "reviewedSourceHash": "6215ec8b2ead10ed524e46f5c1ddd0a0567f909e21330a8e7a0229422917383b",
+      "review": {
+        "outcome": "approved",
+        "note": "ссылка на паверхню KUDY; назва брэнда не перакладаецца"
+      }
+    },
+    {
+      "id": "native.chrome.languageLabel",
+      "value": "\u8BED\u8A00",
+      "reviewedSourceHash": "85cd11e030ecf41b369de4b859dfd71a507a92c832924c27ff037d43425b9c92",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака рада выбару мовы"
+      }
+    },
+    {
+      "id": "native.chrome.languagesLine",
+      "value": "\u8BED\u8A00\uFF1A${textLocales}",
+      "reviewedSourceHash": "39f5323a4494e7cca7ba60c1fd4f2820d3336a75365fcac547b6a37319e7f9a0",
+      "review": {
+        "outcome": "approved",
+        "note": "радок моваў гіда; падзельнік спісу прыходзіць з кананічнага параметра, не з перакладу"
+      }
+    },
+    {
+      "id": "native.chrome.liveRowLine",
+      "value": "${state} \u2014 ${day} \u2014 \u5DF2\u542C\uFF1A${heard}",
+      "reviewedSourceHash": "22477d4a8f0fcab537019080057be843ff31fc7ea592e85d5fb8fe5700fe6081",
+      "review": {
+        "outcome": "approved",
+        "note": "цэлы радок жывой прагулкі; працяжнікі і адсутнасць прыназоўніка захаваныя"
+      }
+    },
+    {
+      "id": "native.chrome.loading",
+      "value": "\u52A0\u8F7D\u4E2D\u2026",
+      "reviewedSourceHash": "0f54c6960ddd3180b3b6aac5d89f08b7c6f51017a06bf42789acdb26fca33706",
+      "review": {
+        "outcome": "approved",
+        "note": "агульны радок загрузкі; мнагакроп'е кітайскае"
+      }
+    },
+    {
+      "id": "native.chrome.locked",
+      "value": "\u5DF2\u9501\u5B9A",
+      "reviewedSourceHash": "ff9f67bdfdb9c424fe56f9a9bda42414eeb402ea9b2e1ceca7551e8626c019db",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака зачыненай кропкі; стан, не дзеянне"
+      }
+    },
+    {
+      "id": "native.chrome.myKudy",
+      "value": "KUDY",
+      "reviewedSourceHash": "f5ef5b9f4e464f378e5652777e46ce86225013cf03b06a4f66665e92c0b2dfb6",
+      "review": {
+        "outcome": "approved",
+        "note": "назва паверхні гісторый; рашэнне ўладара \u2014 KUDY без My"
+      }
+    },
+    {
+      "id": "native.chrome.nearby",
+      "value": "\u9644\u8FD1 \u2192",
+      "reviewedSourceHash": "19bbc736b6509867eccfc55e37450d946ccf5ceede28120e16baedd862349d82",
+      "review": {
+        "outcome": "approved",
+        "note": "пункт ніжняй навігацыі; побач \u2192 \u9644\u8FD1"
+      }
+    },
+    {
+      "id": "native.chrome.noCurrentWalk",
+      "value": "\u5F53\u524D\u6CA1\u6709\u6563\u6B65",
+      "reviewedSourceHash": "71cc9155745464cb983daa06f1a7dbedd11879c5af5a0954cdfafd33bd07f7bd",
+      "review": {
+        "outcome": "approved",
+        "note": "радок адсутнасці бягучай прагулкі; канструкцыя без дзеяслова, як у крыніцы"
+      }
+    },
+    {
+      "id": "native.chrome.noPastWalks",
+      "value": "\u6CA1\u6709\u5386\u53F2\u6563\u6B65",
+      "reviewedSourceHash": "0bfbeda8ef7061ce1ba34816528ba7e430b242d9b3f048e4865475cdf7ba8ebf",
+      "review": {
+        "outcome": "approved",
+        "note": "радок адсутнасці папярэдніх праходаў"
+      }
+    },
+    {
+      "id": "native.chrome.notFoundHint",
+      "value": "\u76EE\u5F55\u8FD8\u5728\u7B49\u5F85\u2014\u2014\u8BF7\u7528\u201C\u8FD4\u56DE\u201D\u6309\u94AE\u56DE\u5230\u76EE\u5F55\u3002",
+      "reviewedSourceHash": "28b7420ef0dc476a3c2ffc4b4eeeabd2f9dc647507d9f66a081d1b4fab127d40",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка на экране адсутнага глыбокага лінку; назва кнопкі ўзятая з гэтага ж набору"
+      }
+    },
+    {
+      "id": "native.chrome.notFoundTitle",
+      "value": "\u6CA1\u6709\u8FD9\u4E2A\u9875\u9762",
+      "reviewedSourceHash": "f30571fd886be738567f5f0e1e368307332c1d93251f31339d7290de2cf81928",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак экрана, калі глыбокі лінк не знайшоў экран"
+      }
+    },
+    {
+      "id": "native.chrome.notPublished",
+      "value": "\u672A\u53D1\u5E03",
+      "reviewedSourceHash": "41760064e818aa82c125dc79e1b2961a5cd566a4419228253f62469206893e03",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака неапублікаванага змесціва"
+      }
+    },
+    {
+      "id": "native.chrome.pastRowLine",
+      "value": "${startedDay} \u2014 ${finishedDay} \u2014 \u5DF2\u542C\uFF1A${heard}",
+      "reviewedSourceHash": "3b31a3236db946ff49cd0ec5a56bb0e89a5804eda909cd8793de141584cb70aa",
+      "review": {
+        "outcome": "approved",
+        "note": "цэлы радок завершанай прагулкі; запасное значэнне для ${finishedDay} прыходзіць з кананічнага параметра"
+      }
+    },
+    {
+      "id": "native.chrome.pastWalks",
+      "value": "\u5386\u53F2\u6563\u6B65",
+      "reviewedSourceHash": "639c686aee401287c7c2224cfce2606da6a128852a23771f4fab41e4275081d8",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі папярэдніх праходаў; пара да \u5F53\u524D\u6563\u6B65"
+      }
+    },
+    {
+      "id": "native.chrome.previewUnavailable",
+      "value": "\u9884\u89C8\u6682\u65F6\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "29f58b35ed2a5502011a9f0b5ad3a15c8eb857bc954349a865e0053875ed8808",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану; прэв'ю \u2192 \u9884\u89C8"
+      }
+    },
+    {
+      "id": "native.chrome.previewTextUnavailable",
+      "value": "\u6240\u9009\u754C\u9762\u8BED\u8A00\u4E0B\u6CA1\u6709\u8FD9\u4E2A\u5BFC\u89C8\u3002",
+      "reviewedSourceHash": "6eb593b874ec34a4594861008c051696cafb4d710a8ff5473c9cdd35ddc730f8",
+      "review": {
+        "outcome": "approved",
+        "note": "прэв'ю па прамой спасылцы без тэксту на выбранай мове; без падстаноўкі іншай мовы"
+      }
+    },
+    {
+      "id": "native.chrome.textLocaleEmpty",
+      "value": "\u8FD9\u79CD\u8BED\u8A00\u6682\u65F6\u8FD8\u6CA1\u6709\u5E26\u6587\u672C\u7684\u5BFC\u89C8\u3002",
+      "reviewedSourceHash": "886f9de4222ee5680e6beb950cddb086d31f9eb0793730fda31ceeb52a872c23",
+      "review": {
+        "outcome": "approved",
+        "note": "пусты каталог пасля адбору па мове; тлумачэнне адсутнасці тэксту, не збой службы"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.editorial",
+      "value": "\u7F16\u8F91\u63A8\u8350",
+      "reviewedSourceHash": "be32560fb8b57fff44f9193fdeac0d3b5fa3312e6d1526ce09f5c88ec8ac9d56",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына прапановы падбора: рэдакцыйны выбар"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.season_recommended",
+      "value": "\u672C\u5B63\u63A8\u8350",
+      "reviewedSourceHash": "83c822a95860d2c4821e05dc1b6a51d346b4e5c49e015c2e796ee56b09459002",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына прапановы падбора: рэкамендавана на сезон"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.theme_match",
+      "value": "\u4E3B\u9898\u76F8\u7B26",
+      "reviewedSourceHash": "fe66528dbcc40721fc40e604ec985777b0d5425401ab8d38f58c81124c37470b",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына прапановы падбора: супадзенне тэмы"
+      }
+    },
+    {
+      "id": "native.chrome.reasonText.within_time",
+      "value": "\u65F6\u95F4\u5408\u9002",
+      "reviewedSourceHash": "41dcea7bd6cbb320a2935ace330501a46b878eef030a85cf775fed8029ad2575",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына прапановы падбора: падыходзіць па часе"
+      }
+    },
+    {
+      "id": "native.chrome.retry",
+      "value": "\u91CD\u8BD5",
+      "reviewedSourceHash": "cc165ee110aa25bc187cee0368038bf687085da79f7d388ea91787197328053d",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка паўтору спробы"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.autumn",
+      "value": "\u79CB\u5B63",
+      "reviewedSourceHash": "33f4c1943bc36c7e4550c9987ea85f4a9255b28100446d208517c1a78bd2233d",
+      "review": {
+        "outcome": "approved",
+        "note": "назва сезона"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.spring",
+      "value": "\u6625\u5B63",
+      "reviewedSourceHash": "94c0fb9dc8cd9aa1175988b7b4a193f53fa1f5348c4e3f1110da3fa842721aa2",
+      "review": {
+        "outcome": "approved",
+        "note": "назва сезона"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.summer",
+      "value": "\u590F\u5B63",
+      "reviewedSourceHash": "e58561f7639c8f6bd4aded2de457fa86cdb8c58a31155ca61ba4a34242034346",
+      "review": {
+        "outcome": "approved",
+        "note": "назва сезона"
+      }
+    },
+    {
+      "id": "native.chrome.seasonName.winter",
+      "value": "\u51AC\u5B63",
+      "reviewedSourceHash": "d585e12a829acc78ad036bad2de425546dd4ca75f5be37b7049201a909ca5f74",
+      "review": {
+        "outcome": "approved",
+        "note": "назва сезона"
+      }
+    },
+    {
+      "id": "native.chrome.sizeMb",
+      "value": "\u5927\u5C0F\uFF1A${mb}MB",
+      "reviewedSourceHash": "0979953f9427de22d5b78144e7648e877c2056592ac17ca64512e003e83980f2",
+      "review": {
+        "outcome": "approved",
+        "note": "радок факту пра памер пакета; адзінка MB лацінская, прабелаў вакол лічбы няма"
+      }
+    },
+    {
+      "id": "native.chrome.stateLabel.active",
+      "value": "\u8FDB\u884C\u4E2D",
+      "reviewedSourceHash": "50f925a180afc7d20f1521f3a9576ad1fc36b264eb1ae21a8aa08a8d2e576a19",
+      "review": {
+        "outcome": "approved",
+        "note": "статус прагулкі ў радках гісторыі; стан, а не наказ"
+      }
+    },
+    {
+      "id": "native.chrome.stateLabel.finished",
+      "value": "\u5DF2\u5B8C\u6210",
+      "reviewedSourceHash": "89521119203d65f39c6f1f334394eb73f3d477408af4a8bc9956f0ccb36cc4bc",
+      "review": {
+        "outcome": "approved",
+        "note": "статус прагулкі: завершаная"
+      }
+    },
+    {
+      "id": "native.chrome.stateLabel.paused",
+      "value": "\u5DF2\u6682\u505C",
+      "reviewedSourceHash": "d4525430de737faa9202eba337ae8fdd6979666e06ec6f5de931d5dab20d0669",
+      "review": {
+        "outcome": "approved",
+        "note": "статус прагулкі: прыпыненая"
+      }
+    },
+    {
+      "id": "native.chrome.stopNumber",
+      "value": "\u5730\u70B9 ${position}",
+      "reviewedSourceHash": "732b0324729bf9f41fd27f86c569da9b0d5b75f6c1081c90b3e611c3fd6113c9",
+      "review": {
+        "outcome": "approved",
+        "note": "нумар кропкі на экране прагулкі; кропкі маршруту \u2014 \u5730\u70B9"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u5730\u70B9",
+        "date": "2026-10-17",
+        "reason": "назоўнікавы сэнс \u00ABпрыпынак\u00BB у батарэі G21.39 \u2014 \u5DF4\u58EB\u7AD9 (транспартны), не падыходзіць для кропак пешай экскурсіі; \u5730\u70B9 \u2014 рашэнне рэцэнзента для кропак маршруту"
+      }
+    },
+    {
+      "id": "native.chrome.stopsCount",
+      "value": "\u5730\u70B9\uFF1A${count}",
+      "reviewedSourceHash": "e6c16b6c3a55c0e09e51b370c85d5604eae87ecfda33b559d4598b68d7a37ba7",
+      "review": {
+        "outcome": "approved",
+        "note": "радок факту пра колькасць кропак гіда"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u5730\u70B9",
+        "date": "2026-10-17",
+        "reason": "той самы выбар, што і ў native.chrome.stopNumber: кропкі пешага маршруту \u2014 \u5730\u70B9, не транспартнае \u5DF4\u58EB\u7AD9"
+      }
+    },
+    {
+      "id": "native.chrome.stopsLabel",
+      "value": "\u5730\u70B9",
+      "reviewedSourceHash": "543419762c01ac0a64ee4638eca6b11c812136c3c39a11e196be70d391bc7eae",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана для ўмяшчальніка колькасці кропак"
+      }
+    },
+    {
+      "id": "native.chrome.switchAccept",
+      "value": "\u7ED3\u675F\u5E76\u5F00\u59CB",
+      "reviewedSourceHash": "09f9461a08fbf1066bb37f8a0c9afc3f52b9c2cb9919ed054ed16a6ec0f4f482",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка пацвярджэння пераключэння прагулкі"
+      }
+    },
+    {
+      "id": "native.chrome.switchConfirm",
+      "value": "\u7ED3\u675F\u201C${liveTitle}\u201D\u5E76\u5F00\u59CB\u201C${candidateTitle}\u201D\uFF1F",
+      "reviewedSourceHash": "7cb787411af9ba9b7fad2486e30c358743ded0e27b84f0d07be6a89e9500fb7d",
+      "review": {
+        "outcome": "approved",
+        "note": "дыялог пераключэння; кітайскія двукоссі замест еўрапейскіх, пытальнік поўнашырынны"
+      }
+    },
+    {
+      "id": "native.chrome.textAudioLine",
+      "value": "\u6587\u672C\uFF1A${textLocales}\uFF1B\u97F3\u9891\uFF1A${audioLocales}",
+      "reviewedSourceHash": "f4933f8d3f6e148b08c0458cfd8c82eda3f2e49657df777c47f9d5dd55e1bd05",
+      "review": {
+        "outcome": "approved",
+        "note": "радок \u00ABтэкст/аўдыё\u00BB; падзельнік-кропка з коскай поўнашырынны, аўдыё-сегмент умоўны як і ў крыніцы"
+      }
+    },
+    {
+      "id": "native.chrome.timeCap",
+      "value": "\u6700\u591A${minutes}\u5206\u949F",
+      "reviewedSourceHash": "4d2caf84a22f5db795338af5e935fc8654189716b361c93b3dd9cdb468de6eec",
+      "review": {
+        "outcome": "approved",
+        "note": "верхняя мяжа часу; кітайская мова не мае катэгорыі множнага ліку \u2014 формы толькі дыскрэтныя, як і ў крыніцы"
+      },
+      "forms": {
+        "60": "\u6700\u591A\u4E00\u5C0F\u65F6",
+        "120": "\u6700\u591A\u4E24\u5C0F\u65F6",
+        "240": "\u534A\u5929"
+      }
+    },
+    {
+      "id": "native.chrome.timeUnlimited",
+      "value": "\u4E0D\u9650\u65F6\u95F4",
+      "reviewedSourceHash": "8f02cfdec9242fdb41cbc1944150ea1fe80af35eaaa00df319679c664a2c3573",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака без абмежавання часу"
+      }
+    },
+    {
+      "id": "native.chrome.validCache",
+      "value": "\u4E0A\u4E00\u4E2A\u6709\u6548\u7F13\u5B58",
+      "reviewedSourceHash": "d69e1aa70b6573e5e7a801e70fcc8ead0ae58ffd214d39a82227fc88b78f86d0",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану: паказ папярэдняга валіднага кэша"
+      }
+    },
+    {
+      "id": "native.chrome.walk",
+      "value": "\u6563\u6B65",
+      "reviewedSourceHash": "b8fec3bf3468c4b2444846dc70c2c43539c6323117bad9e4b42a9a6455b6de54",
+      "review": {
+        "outcome": "approved",
+        "note": "пункт ніжняй навігацыі; адзіны тэрмін праходу па батарэі G21.39"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u6563\u6B65",
+        "date": "2026-10-17",
+        "reason": "батарэя G21.39 \u00A76.3 фіксуе \u6563\u6B65 як тэрмін прагулкі (альтэрнатыва \u6F2B\u6B65 адхіленая); піна ў зацверджаных крыніцах няма, таму рашэнне рэцэнзента з апорай на рашэнне ўладара"
+      }
+    },
+    {
+      "id": "native.chrome.whatToDo",
+      "value": "\u73A9\u4EC0\u4E48 \u2192",
+      "reviewedSourceHash": "ca14a57064eb242bdc4b06cd3228d38e64e9866fc1e79e9128614b5565e7b179",
+      "review": {
+        "outcome": "approved",
+        "note": "ссылка на паверхню падбора ў ніжняй навігацыі; пара да загалоўка экрана"
+      }
+    },
+    {
+      "id": "native.guideHint.dismiss",
+      "value": "\u9690\u85CF",
+      "reviewedSourceHash": "ef41daab2552c03555650792656b97d33407771656bc80aea288af4b0527ad24",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака і подпіс кнопкі схавання карткі падказкі"
+      }
+    },
+    {
+      "id": "native.guideHint.heading",
+      "value": "\u9644\u8FD1\u6709\u5BFC\u89C8\u2026",
+      "reviewedSourceHash": "afa6c69cf50b58dde34a24aa9f742b7ebffee946eeb17e76d90f7ae65a8ae6b7",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак ціхай карткі падказкі; мнагакроп'е захаванае"
+      }
+    },
+    {
+      "id": "native.guideHint.openHint",
+      "value": "\u6253\u5F00\u5BFC\u89C8\u8BF4\u660E",
+      "reviewedSourceHash": "c6c3fe285c1f5c311a4672cef712ff39d26fe314541ef3328e3bd2bf66608d3a",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка чытача экрана: адкрыццё апісання гіда; guide \u2192 \u5BFC\u89C8"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u5BFC\u89C8",
+        "date": "2026-10-17",
+        "reason": "той самы выбар тэрміну, што і ў native.chrome.guidesLink: электронны аўдыягід \u2014 \u5BFC\u89C8"
+      }
+    },
+    {
+      "id": "native.guideHint.paid",
+      "value": "\u4ED8\u8D39",
+      "reviewedSourceHash": "36ba7c558c7b95ed0958922ae1e2269d9c1099bcd8ed1c65e14ce9d34d29cd07",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака платнага гіда на радку карткі падказкі; пара да \u514D\u8D39"
+      }
+    },
+    {
+      "id": "native.nearby.audioLabel",
+      "value": "\u97F3\u9891",
+      "reviewedSourceHash": "cb431707d9d9fd0564a385237b4a2110724296ccb5bc97ac13f1dab07eb4364c",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана для факту аўдыё"
+      }
+    },
+    {
+      "id": "native.nearby.cardHint",
+      "value": "\u63A8\u8350\u5361\u7247\u3002\u97F3\u9891\u4E0D\u4F1A\u64AD\u653E\u3002",
+      "reviewedSourceHash": "cf10a7f77cfd055dd909d8128643901c5d57292f5f2c7e57586c31ed7da56c08",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка карткі прапановы; два сказы, як у крыніцы"
+      }
+    },
+    {
+      "id": "native.nearby.durationUnit",
+      "value": "\u5206\u949F",
+      "reviewedSourceHash": "079d7b14c190534468f60ebb89dd03327a392891ea21637e93923654586f2fa9",
+      "review": {
+        "outcome": "approved",
+        "note": "адзінка хвіліны ў радках фактаў побач"
+      }
+    },
+    {
+      "id": "native.nearby.empty",
+      "value": "\u63A8\u8350\u5C1A\u672A\u53D1\u5E03",
+      "reviewedSourceHash": "14efad64c2bf1a387eb5bc911f0fe955d664fb8402c294606a5085094340ae3c",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану: прапановы пакуль не апублікаваны"
+      }
+    },
+    {
+      "id": "native.nearby.guideLabel",
+      "value": "\u5BFC\u89C8",
+      "reviewedSourceHash": "0f078d9620a6142a92a06859ae6287ba7c43811e3bc9d69951cf9fc1f030161a",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана для карткі гіда"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u5BFC\u89C8",
+        "date": "2026-10-17",
+        "reason": "тэрмін электроннага гіда \u5BFC\u89C8, зацверджаны батарэяй G21.39 \u00A76.3; піна ў зацверджаных крыніцах няма"
+      }
+    },
+    {
+      "id": "native.nearby.indexDegraded",
+      "value": "\u63A8\u8350\u7D22\u5F15\u6682\u65F6\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "c36e91739b7d13aaae6a9e2a1bb1892c27935ef285c05dfc35384667a87945bf",
+      "review": {
+        "outcome": "approved",
+        "note": "радок дэградацыі; тэрмін недаступнасці па батарэі unavailable"
+      }
+    },
+    {
+      "id": "native.nearby.loading",
+      "value": "\u52A0\u8F7D\u4E2D\u2026",
+      "reviewedSourceHash": "76864c4c66c674c255382af4c8287404979066900d2b793bd18b722acbce8be4",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану загрузкі побач; той самы радок, што і ў агульнай абалонкі"
+      }
+    },
+    {
+      "id": "native.nearby.mapNote",
+      "value": "\u57CE\u5E02\u5730\u56FE\u5C06\u5728\u786E\u5B9A\u74E6\u7247\u65B9\u6848\u540E\u4E0A\u7EBF",
+      "reviewedSourceHash": "0be5495b00bd2c309da665137618d7af6ff0427f66e93426eb8944a88bb1e673",
+      "review": {
+        "outcome": "approved",
+        "note": "заўвага карты; тайлы \u2192 \u74E6\u7247"
+      }
+    },
+    {
+      "id": "native.nearby.noteAcquiring",
+      "value": "\u6B63\u5728\u83B7\u53D6\u4F4D\u7F6E\u2026",
+      "reviewedSourceHash": "f9fe47bc78d531a4f95a80b4eff4b6c272932890908241d99d23f16dcad1d467",
+      "review": {
+        "outcome": "approved",
+        "note": "заўвага: шукаем пазіцыю"
+      }
+    },
+    {
+      "id": "native.nearby.noteDenied",
+      "value": "\u672A\u6388\u6743\u4F4D\u7F6E\u2014\u2014\u624B\u52A8\u6D4F\u89C8",
+      "reviewedSourceHash": "51d96de0382db6c57b90bc679f3fac2001a7cffe7230898f5f8be0d0fa9d2bfe",
+      "review": {
+        "outcome": "approved",
+        "note": "заўвага: пазіцыя не дазволена; ручны агляд \u2192 \u624B\u52A8\u6D4F\u89C8"
+      }
+    },
+    {
+      "id": "native.nearby.noteHeldByWalk",
+      "value": "\u6563\u6B65\u6B63\u5728\u4F7F\u7528\u4F4D\u7F6E\u2014\u2014\u624B\u52A8\u6D4F\u89C8",
+      "reviewedSourceHash": "0da6932f1e990ff833d7c1eacbd3bb65469cda844e7f5e6658b41c2e4bd4db2d",
+      "review": {
+        "outcome": "approved",
+        "note": "заўвага: прагулка выкарыстоўвае пазіцыю; працяжнік захаваны"
+      }
+    },
+    {
+      "id": "native.nearby.noteUnstable",
+      "value": "\u4F4D\u7F6E\u4E0D\u7A33\u5B9A",
+      "reviewedSourceHash": "8a9fc12e97a5c012d92b4e4e4d80dd068ce0fcf39c225583dc9dd7ec9f22d7d6",
+      "review": {
+        "outcome": "approved",
+        "note": "заўвага: пазіцыя нестабільная"
+      }
+    },
+    {
+      "id": "native.nearby.placeLabel",
+      "value": "\u5730\u70B9",
+      "reviewedSourceHash": "13a42dfb51ce1366b0e65f3501044e2c663561c12bceb5e1eefd1c1ba648f15a",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана для карткі месца"
+      }
+    },
+    {
+      "id": "native.nearby.proximityHeader",
+      "value": "\u9644\u8FD1",
+      "reviewedSourceHash": "b5941200d2dc75a64cfe58b3c12d1545651c2d2c64bd1991cbca8907bd5fdbce",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі паблізу"
+      }
+    },
+    {
+      "id": "native.nearby.reviewHeader",
+      "value": "\u6D4F\u89C8",
+      "reviewedSourceHash": "b0a03f871419d1e16a7933749a3525cadf600c0fa064d06255ebb70426f00c08",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі ручнога агляду"
+      }
+    },
+    {
+      "id": "native.nearby.textLabel",
+      "value": "\u6587\u672C",
+      "reviewedSourceHash": "aa2bf96ea1849308fd1afb7c10aa4de03d87adc7b9c115e7b4071b777c684e3e",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака чытача экрана для факту тэксту"
+      }
+    },
+    {
+      "id": "native.nearby.title",
+      "value": "\u9644\u8FD1",
+      "reviewedSourceHash": "ceb1585e913e83295e615727dc433f621f160b3acd8ed18e40faea444c847749",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак экрана \u00ABПобач\u00BB"
+      }
+    },
+    {
+      "id": "native.nearby.unavailable",
+      "value": "\u76EE\u5F55\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "04fe5b8f33920f11dafd234f90a5d21ab4b0181eb6d3da85d1d569d755da2a65",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану; той самы тэрмін недаступнасці, што і ў каталога"
+      }
+    },
+    {
+      "id": "native.offer.buy",
+      "value": "\u8D2D\u4E70",
+      "reviewedSourceHash": "6e1f4eb2c0e8449facc0335b8898b51fab9b11e827e31dcbecda830f9419d02a",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка пакупкі; тэрмін па батарэі purchase"
+      }
+    },
+    {
+      "id": "native.offer.continueFree",
+      "value": "\u7EE7\u7EED\u514D\u8D39",
+      "reviewedSourceHash": "f2baa69bab47ea9162dea9324f9eff5abb2a07b1975929b3bedf9e26d72d3072",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка працягу без пакупкі"
+      }
+    },
+    {
+      "id": "native.offer.dismiss",
+      "value": "\u4EE5\u540E\u518D\u8BF4",
+      "reviewedSourceHash": "e5a837b139f912633fb94f4a98e64036a82ed35e7b6a1bc4b71560c725427e49",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка адмовы: не цяпер, без канфліктнага \u00ABніколі\u00BB"
+      }
+    },
+    {
+      "id": "native.offer.errorBody",
+      "value": "\u53EF\u4EE5\u91CD\u8BD5\uFF0C\u6216\u7EE7\u7EED\u514D\u8D39\u4F7F\u7528\u3002",
+      "reviewedSourceHash": "87664abf9c7fce9953aa6feaec27017bb4357b50cf8e3ca6055f12ac1c693b0f",
+      "review": {
+        "outcome": "approved",
+        "note": "тэкст збою: можна паўтарыць або працягнуць бясплатна"
+      }
+    },
+    {
+      "id": "native.offer.errorTitle",
+      "value": "\u8D2D\u4E70\u672A\u5B8C\u6210",
+      "reviewedSourceHash": "ad99eb072eccd3dd6856951ed1bf49b93585795feb10cf036caa86b53e5a10ce",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак збою пакупкі; факт незавершанасці, не пагроза"
+      }
+    },
+    {
+      "id": "native.offer.offerBody",
+      "value": "\u4E00\u6B21\u8D2D\u4E70\u5373\u53EF\u89E3\u9501\u672C\u5BFC\u89C8\u7684\u5168\u90E8\u6545\u4E8B\u3002",
+      "reviewedSourceHash": "889d9131c470607574c44341056ad5a06e938fbd72b2c8d9eba39d86642421be",
+      "review": {
+        "outcome": "approved",
+        "note": "тэкст прапановы: адна пакупка адкрывае гісторыі гіда"
+      }
+    },
+    {
+      "id": "native.offer.offerTitle",
+      "value": "\u5BFC\u89C8\u7684\u5168\u90E8\u6545\u4E8B",
+      "reviewedSourceHash": "4a049233a864eaccd079db45a0db5435b7f443eb40f4c4f77e300ee153cce067",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак прапановы пакупкі"
+      }
+    },
+    {
+      "id": "native.offer.purchasedPending",
+      "value": "\u5DF2\u8D2D\u4E70 \u00B7 \u9700\u8981\u4E0B\u8F7D",
+      "reviewedSourceHash": "73351aee750908e898ef326402d359a6064c68200c51608aba858cd3512cffac",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану пасля крамы: куплена, трэба загрузіць; сярэдняя кропка захаваная"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u8D2D\u4E70",
+        "date": "2026-10-17",
+        "reason": "тэрмін пакупкі \u8D2D\u4E70 па батарэі G21.39 \u00A76.3; адзіная крыніца \u2014 рашэнне ўладара, піна ў зацверджаных крыніцах няма"
+      }
+    },
+    {
+      "id": "native.offer.tryAgain",
+      "value": "\u91CD\u8BD5",
+      "reviewedSourceHash": "a1dbc2b68cb546fc6d006f50fbaae7e8f536bd97c68b0e15aaa9102d8bb237e4",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка паўтору пакупкі; пара да агульнага \u91CD\u8BD5"
+      }
+    },
+    {
+      "id": "native.place.audioLabel",
+      "value": "\u97F3\u9891",
+      "reviewedSourceHash": "9cba9aefe283b909867ca3c7b7fdfa081738a88eda904be2c8857e8b4dbaecda",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака наяўнасці аўдыё"
+      }
+    },
+    {
+      "id": "native.place.durationUnit",
+      "value": "\u5206\u949F",
+      "reviewedSourceHash": "5fb07a573d2f240d1203235ebd8c9730bd39304c864a7b4674fb00c5a40e8cbb",
+      "review": {
+        "outcome": "approved",
+        "note": "адзінка хвіліны ў радках фактаў месца"
+      }
+    },
+    {
+      "id": "native.place.empty",
+      "value": "\u8FD9\u4E2A\u5730\u70B9\u6CA1\u6709\u8BD5\u542C\u7247\u6BB5",
+      "reviewedSourceHash": "c10b21985ac88ed9bb6b0ae9d95e3ce080839a622e1d3f09b92ec534ee0040ff",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану: тэйзераў для месца няма; тэйзер \u2192 \u8BD5\u542C\u7247\u6BB5"
+      }
+    },
+    {
+      "id": "native.place.error",
+      "value": "\u65E0\u6CD5\u6253\u5F00\u5730\u70B9",
+      "reviewedSourceHash": "78a267a1e105f648cf74264ed59e4a3ee9b334ade5135f94b24826e31fd9abda",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану: не ўдалося адкрыць месца"
+      }
+    },
+    {
+      "id": "native.place.guideLink",
+      "value": "\u5BFC\u89C8\u9884\u89C8",
+      "reviewedSourceHash": "6689ad59dbaf7e5400f58ed1c55c89ef10dfca451dc4c1d9e4d9d257200211d5",
+      "review": {
+        "outcome": "approved",
+        "note": "ссылка на прэв'ю гіда з карткі месца"
+      }
+    },
+    {
+      "id": "native.place.guideLinkHint",
+      "value": "\u6253\u5F00\u5BFC\u89C8\u9884\u89C8\uFF0C\u800C\u4E0D\u662F\u5F00\u59CB\u6563\u6B65\u3002",
+      "reviewedSourceHash": "2d8e625a33b415b8a144097cf43e9b9b7566c68f36fc80fdf472b01d4ca79714",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка ссылки: адкрывае прэв'ю, не запуск прагулкі"
+      }
+    },
+    {
+      "id": "native.place.loading",
+      "value": "\u52A0\u8F7D\u4E2D\u2026",
+      "reviewedSourceHash": "9fdf727adcd5b226497b6726d48906a85ffbf4ea7192fb2f52f9c5569577671f",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану загрузкі дэталі месца"
+      }
+    },
+    {
+      "id": "native.place.noAudio",
+      "value": "\u8BD5\u542C\u97F3\u9891\u672A\u53D1\u5E03",
+      "reviewedSourceHash": "f10b57d945775369b50aa834570f60cb191aad9445d68ea7c11549e2b433aaf3",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану: аўдыё тэйзера не апублікавана"
+      }
+    },
+    {
+      "id": "native.place.noFacts",
+      "value": "\u8BE5\u5730\u70B9\u5C1A\u672A\u5728\u76EE\u5F55\u4E2D\u53D1\u5E03",
+      "reviewedSourceHash": "6a837f315b4fc07df8e72f31ac5802801e3e69123b032eb3ddbe6990ef5ec9be",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану: месца пакуль не апублікавана ў каталога"
+      }
+    },
+    {
+      "id": "native.place.nowPlaying",
+      "value": "\u6B63\u5728\u64AD\u653E",
+      "reviewedSourceHash": "31c53b2b89b3c44e240d3860a4995fab290ac654eaabbfa98283f52915cc70e4",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака \u00ABзараз грае\u00BB для тэйзера"
+      }
+    },
+    {
+      "id": "native.place.paused",
+      "value": "\u5DF2\u6682\u505C",
+      "reviewedSourceHash": "36eaaecbe287e6c605f6875703cfd53540fa068c8b32c36eb140109003df230e",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака паўзы тэйзера; стан, не дзеянне"
+      }
+    },
+    {
+      "id": "native.place.playFailed",
+      "value": "\u58F0\u97F3\u6CA1\u6709\u5F00\u59CB\u3002",
+      "reviewedSourceHash": "7057a04fb254bea27c4c76ad7523f0b96822383dbe1b0b3a275667acbde5655d",
+      "review": {
+        "outcome": "approved",
+        "note": "радок збою запуску гуку; сказ з кропкай, як у крыніцы"
+      }
+    },
+    {
+      "id": "native.place.playFailedHint",
+      "value": "\u8BF7\u518D\u8BD5\u4E00\u6B21\u3002",
+      "reviewedSourceHash": "a5244be645a80ce3e76fcc8f58e81ba9ecd87663b73973ff264dbf01b068178c",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка пасля збою"
+      }
+    },
+    {
+      "id": "native.place.playHint",
+      "value": "\u901A\u8FC7\u552F\u4E00\u64AD\u653E\u5668\u663E\u5F0F\u64AD\u653E\u8BD5\u542C\u3002",
+      "reviewedSourceHash": "0bd0d8468494d897c96315c9ad3ac8f5633afb4d4a9af15acddcaca6e981f1f6",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка кнопкі: яўны Play тэйзера праз адзіны плэер"
+      }
+    },
+    {
+      "id": "native.place.playLabel",
+      "value": "\u8BD5\u542C",
+      "reviewedSourceHash": "98676c06c005f69e0596c1aa422f373aea133813f59122713f352e99f388cba4",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка: паслухаць тэйзер; кароткі загадны лад"
+      }
+    },
+    {
+      "id": "native.place.refusalText.moment#audio-unpublished",
+      "value": "\u8BD5\u542C\u97F3\u9891\u672A\u53D1\u5E03\u3002",
+      "reviewedSourceHash": "75adba4e79892068236ecd0f592b01a59142ad866d4e157556c2d8f7ee690a9b",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова гуку: тэйзер не апублікаваны; сказ з кропкай"
+      }
+    },
+    {
+      "id": "native.place.refusalText.moment#session-refused",
+      "value": "\u8BD5\u542C\u5F53\u524D\u65E0\u6CD5\u64AD\u653E\u2014\u2014\u8BF7\u518D\u8BD5\u4E00\u6B21\u3002",
+      "reviewedSourceHash": "27f2c6c3a5f9c950a31c4bd3719c6197ccbb81c08574f11f589d9ee1c548f137",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова гуку: тэйзер зараз не запускаецца"
+      }
+    },
+    {
+      "id": "native.place.refusalText.moment#session-unroutable",
+      "value": "\u8BD5\u542C\u5728\u6563\u6B65\u4E2D\u65E0\u6CD5\u64AD\u653E\u2014\u2014\u8BF7\u5728\u6B64\u91CD\u65B0\u64AD\u653E\u3002",
+      "reviewedSourceHash": "b4a69a45fa3ce27bf828742abaf9056f319804794f2ee31db62bca527194b08b",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова гуку: тэйзер не гучыць у прагулцы"
+      }
+    },
+    {
+      "id": "native.place.resumeLabel",
+      "value": "\u7EE7\u7EED",
+      "reviewedSourceHash": "b8246a13f259bdb46e8425d790c5ffbeba1bf2905c36f9b0e81c71ae30246870",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка: працягнуць тэйзер"
+      }
+    },
+    {
+      "id": "native.place.stopLabel",
+      "value": "\u505C\u6B62",
+      "reviewedSourceHash": "7c29f6636e7181c50f70cb3990251dd5a2b40e1823d9a27135fd168bdf559a90",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка: спыніць тэйзер; дзеянне, асобнае ад назоўнікавага \u5730\u70B9"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u505C\u6B62",
+        "date": "2026-10-17",
+        "reason": "батарэя G21.39 \u00A76.3: дзеянне \u00ABспыніць\u00BB \u2014 \u505C\u6B62; назоўнік-прыпынак (\u5DF4\u58EB\u7AD9) не падыходзіць для дзеяння, таму асобны тэрмін"
+      }
+    },
+    {
+      "id": "native.place.teaserLabel",
+      "value": "\u8BD5\u542C",
+      "reviewedSourceHash": "e81ae6243c1a8f05cd365f4dfe9c2b18e0ff1ad2419f103a55573d9b9e2991b8",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака тэйзера"
+      }
+    },
+    {
+      "id": "native.place.textLabel",
+      "value": "\u6587\u672C",
+      "reviewedSourceHash": "9d32629dfe52f43658702381d2ab2c662cca5a395dbde1e8177280f0b94c43a6",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака наяўнасці тэксту"
+      }
+    },
+    {
+      "id": "native.place.unavailable",
+      "value": "\u5730\u70B9\u8BE6\u60C5\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "04c287ef15935302a75cab52776883ca52481197e2e22798268a4436c64413a9",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану: дэталь месца недаступная; тэрмін недаступнасці па батарэі"
+      }
+    },
+    {
+      "id": "native.preview.detail",
+      "value": "\u5B89\u88C5\u5305\u4E0D\u5B8C\u6574",
+      "reviewedSourceHash": "22fe4c2b5e44f41bb7cafc1b0262f1f737e96b86317ce4830a1a8160b57e57eb",
+      "review": {
+        "outcome": "approved",
+        "note": "дэталь стану пакета прэв'ю; названыя формы захаваныя па ключах крыніцы, колькасць у другой форме"
+      },
+      "forms": {
+        "damaged": "\u5B89\u88C5\u5305\u5DF2\u635F\u574F\uFF1A\u9700\u8981\u91CD\u65B0\u4E0B\u8F7D",
+        "missing-files": "\u7F3A\u5C11\u6587\u4EF6\uFF1A${count}",
+        "stale": "\u6709\u53EF\u7528\u66F4\u65B0"
+      }
+    },
+    {
+      "id": "native.preview.downloadFailed",
+      "value": "\u4E0B\u8F7D\u5931\u8D25\u3002",
+      "reviewedSourceHash": "4470dfde12ba5d2478989694d06ff50d49447bc872a0d0ef153c02fda3e77a40",
+      "review": {
+        "outcome": "approved",
+        "note": "радок збою загрузкі; адзіны корань \u4E0B\u8F7D для абодвух сэнсаў, як en/uk"
+      }
+    },
+    {
+      "id": "native.preview.label.download",
+      "value": "\u4E0B\u8F7D",
+      "reviewedSourceHash": "a549fbfb60c21722178889b8deb230cc530a13f81c505c996076e24826545daf",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка прэв'ю: загрузіць; дзеяслоў і назоўнік \u2014 адно слова"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "looked-up",
+        "source": "android",
+        "locator": "docs/reports/chinese/language-and-dictionaries-evidence.json#battery.download (packages/providers/DownloadProvider#root_downloads, zh-rCN)",
+        "term": "\u4E0B\u8F7D",
+        "date": "2026-10-17",
+        "reason": "батарэя G21.39: назоўнікавы сэнс \u00ABспампоўка\u00BB ёсць толькі ў корпусе AOSP (\u4E0B\u8F7D/\u4E0B\u8F7D\u5185\u5BB9); у слоўніках толькі дзеяслоў \u2014 прабел закрыты корпусам"
+      }
+    },
+    {
+      "id": "native.preview.label.start",
+      "value": "\u5F00\u59CB",
+      "reviewedSourceHash": "d86b1af3ba0b10036ebc2e53b826d50440fda0416b79bdcdcf0b6cc548277293",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка прэв'ю: пачаць"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#download-unavailable",
+      "value": "\u6B64\u7248\u672C\u4E0D\u652F\u6301\u4E0B\u8F7D\u3002",
+      "reviewedSourceHash": "c92fa779597efd3693633519bd657c144bf3c77398a05850305192c9834424ff",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прэв'ю: загрузка недаступная на гэтай зборцы; адмоўная форма без літаральнага \u4E0D\u53EF\u7528, каб не згубіць сэнс \u00ABне падтрымліваецца\u00BB"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#not-published",
+      "value": "\u5BFC\u89C8\u672A\u53D1\u5E03\u3002",
+      "reviewedSourceHash": "f4026de96b2bf6d2f5337774d08a4a6e28073ac9a55e76292f5cf6bc6998359d",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прэв'ю: гід не апублікаваны; сказ з кропкай"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#purchase-required",
+      "value": "\u9700\u8981\u8D2D\u4E70\u3002",
+      "reviewedSourceHash": "e786d174f1074f25fbb00fd84bf85cca15b645d1967c920ab8b61812aa8315e4",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прэв'ю: патрэбна пакупка"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u8D2D\u4E70",
+        "date": "2026-10-17",
+        "reason": "тэрмін пакупкі \u8D2D\u4E70 па батарэі G21.39 \u00A76.3; крыніцы-піна няма, рашэнне рэцэнзента"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#storage-unknown",
+      "value": "\u5B58\u50A8\u4E0D\u53EF\u7528\u3002",
+      "reviewedSourceHash": "662280ea45ace6b68da87b0c542fdc84235041ae588aa93b2c0e6e45c4137b7a",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прэв'ю: сховішча недаступнае"
+      }
+    },
+    {
+      "id": "native.preview.reason.preview#verify-unavailable",
+      "value": "\u6821\u9A8C\u4E0D\u53EF\u7528\u3002",
+      "reviewedSourceHash": "03f7bad1b0dd05221dcbf5a4acf62a639853decfcbe6ca6490ddb5c2cea9b7b0",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прэв'ю: праверка недаступная"
+      }
+    },
+    {
+      "id": "native.preview.retry",
+      "value": "\u91CD\u8BD5",
+      "reviewedSourceHash": "0cc5f813736728a6851f72c2b114f9add2a61f58d47c1a5781e3d445464c9d3b",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка паўтору ў прэв'ю"
+      }
+    },
+    {
+      "id": "native.preview.storageExit",
+      "value": "\u5728KUDY\u4E2D\u91CA\u653E\u7A7A\u95F4",
+      "reviewedSourceHash": "7694206992bd6471e7d0db23d132c82854618caee70263270c8f2fe3e6ef3a35",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка выхаду на вызваленне месца; назва брэнда не перакладаецца"
+      }
+    },
+    {
+      "id": "native.preview.storageFullDetail",
+      "value": "\u7A7A\u95F4\u4E0D\u8DB3\uFF1A\u8FD8\u9700\u8981${mb}MB",
+      "reviewedSourceHash": "246c064641fd53a3c0f04b126c2a29f5b161c9b846290e2595292279abf0ae08",
+      "review": {
+        "outcome": "approved",
+        "note": "дэталь поўнага сховішча; адзінка MB лацінская, прабелаў вакол лічбы няма"
+      }
+    },
+    {
+      "id": "native.run.attribution",
+      "value": "\u6570\u636E \u00A9 OpenStreetMap \u8D21\u732E\u8005\uFF0CODbL",
+      "reviewedSourceHash": "c2b14d03ca62503c507e49ef77155a31d8423716a313ab878c7b0d751bcd23d3",
+      "review": {
+        "outcome": "approved",
+        "note": "атрыбуцыя даных OpenStreetMap; назва ліцэнзіі не перакладаецца"
+      }
+    },
+    {
+      "id": "native.run.autoplaySuspendedTitle",
+      "value": "\u81EA\u52A8\u6545\u4E8B\u5DF2\u6682\u505C",
+      "reviewedSourceHash": "127dc05744cfc9564cbbe4cb47cfc30c780ee2c30b55e7a16c84c19d04c134f7",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак прыпынення аўтапрайгравання"
+      }
+    },
+    {
+      "id": "native.run.close",
+      "value": "\u5173\u95ED",
+      "reviewedSourceHash": "fdcf5f36d5dc627a9fe0d52a9fb62fdcad04dae25ac94910de28dcadebf566df",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка зачынення экрана"
+      }
+    },
+    {
+      "id": "native.run.deniedGps",
+      "value": "\u81EA\u52A8\u6545\u4E8B\u65E0\u6CD5\u8FD0\u884C\u2014\u2014\u6211\u65E0\u6CD5\u83B7\u53D6\u60A8\u7684\u4F4D\u7F6E",
+      "reviewedSourceHash": "4c2d57377f5bee5ce40cccc7e2393893218a2c5c87e74e60c3065cff7b28af0b",
+      "review": {
+        "outcome": "approved",
+        "note": "банер адмовы GPS; гаворка ад першай асобы, як у крыніцы, ветлівая форма \u60A8"
+      }
+    },
+    {
+      "id": "native.run.endConfirmAccept",
+      "value": "\u7ED3\u675F",
+      "reviewedSourceHash": "a8437ed726559ff94e98019d7f0d093963e380d035f5f61215a0fe521d9871e2",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка пацвярджэння завяршэння"
+      }
+    },
+    {
+      "id": "native.run.endConfirmCancel",
+      "value": "\u53D6\u6D88",
+      "reviewedSourceHash": "6f2c024243297acae4ebcd87bbd44dadb04f728c836f0c126e069ecb0705bbca",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка скасавання завяршэння; тэрмін па батарэі cancel"
+      }
+    },
+    {
+      "id": "native.run.endConfirmTitle",
+      "value": "\u7ED3\u675F\u6563\u6B65\uFF1F",
+      "reviewedSourceHash": "914dc880a971016df429bf5b22ea8f703e1287530f6e50654589ee9a40aa3b34",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак дыялога завяршэння прагулкі; пытальнік поўнашырынны"
+      }
+    },
+    {
+      "id": "native.run.endWalk",
+      "value": "\u7ED3\u675F\u6563\u6B65",
+      "reviewedSourceHash": "1d896d738e1170ab489de6baa61a4fbf015a3482ad6f1ea26d5ace4663e9775c",
+      "review": {
+        "outcome": "approved",
+        "note": "пункт меню сесіі: завяршыць прагулку"
+      }
+    },
+    {
+      "id": "native.run.endedTitle",
+      "value": "\u6563\u6B65\u5DF2\u7ED3\u675F",
+      "reviewedSourceHash": "39f780e448149f38eb59cf40d230c2ab1539f1082ad7d357a191d46bd0f20739",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак экрана завершанай прагулкі"
+      }
+    },
+    {
+      "id": "native.run.missedStoriesTitle",
+      "value": "\u8FD8\u53EF\u4EE5\u6536\u542C",
+      "reviewedSourceHash": "d97cc467dde15e59ecef9ae960f232f5c4d5b79228abbebb1290fc437978a4a3",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак спіса даступных непраслуханых гісторый пасля завяршэння"
+      }
+    },
+    {
+      "id": "native.run.gpsStalled",
+      "value": "\u4F4D\u7F6E\u5DF2\u8FC7\u671F",
+      "reviewedSourceHash": "dcb4aab6a116aa3dfec4b0cc420890b7291cec06bb1d00ecc640e66632c25c0d",
+      "review": {
+        "outcome": "approved",
+        "note": "банер: пазіцыя састарэлая"
+      }
+    },
+    {
+      "id": "native.run.gpsStalledDetail",
+      "value": "\u81EA\u52A8\u64AD\u653E\u548C\u961F\u5217\u5DF2\u6682\u505C",
+      "reviewedSourceHash": "c0f1d04f075143656fd943a339c28fb79f392bc8837d049a52ba499398f3f55c",
+      "review": {
+        "outcome": "approved",
+        "note": "дэталь банеру: аўтазапуск і чарга заблакаваныя"
+      }
+    },
+    {
+      "id": "native.run.loading",
+      "value": "\u52A0\u8F7D\u4E2D\u2026",
+      "reviewedSourceHash": "040940eda93e7404d57a64daf645d628ab55ebf399ce3b32883736cf9bf238fc",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану загрузкі карты прагулкі"
+      }
+    },
+    {
+      "id": "native.run.lockedHint",
+      "value": "\u8D2D\u4E70\u540E\u53EF\u7528",
+      "reviewedSourceHash": "8a2f3f3dd06cc4f068baefe2af315554d551a6ed4b1920ff46455715bcc3d166",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка зачыненай карткі: даступна пасля куплі"
+      }
+    },
+    {
+      "id": "native.run.manualPlayHint",
+      "value": "\u6BCF\u4E2A\u6545\u4E8B\u90FD\u9700\u4ECE\u5730\u70B9\u5361\u7247\u624B\u52A8\u64AD\u653E",
+      "reviewedSourceHash": "001c5d5c664209b77fd781de374acc525f425af430263b370b05c3de2a980c05",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка ручнога рэжыму; кропка \u2192 \u5730\u70B9"
+      }
+    },
+    {
+      "id": "native.run.markerHint",
+      "value": "\u5730\u70B9\u6D4F\u89C8\u3002\u97F3\u9891\u4E0D\u4F1A\u64AD\u653E\u3002",
+      "reviewedSourceHash": "c93b6f3471a36cc43c3089c07070a0a7bc55d14d900f12e49c4454c3cfdf8ee5",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка прагляду кропкі; два сказы"
+      }
+    },
+    {
+      "id": "native.run.nothingPlaying",
+      "value": "\u6CA1\u6709\u6B63\u5728\u64AD\u653E\u7684\u5185\u5BB9",
+      "reviewedSourceHash": "3fa2e1172cf976d39cdaf06d27f957c31e00afa29d29a2d8caddc8b2690203da",
+      "review": {
+        "outcome": "approved",
+        "note": "просты стан бару прайгравання"
+      }
+    },
+    {
+      "id": "native.run.nowPlayingLabel",
+      "value": "\u6B63\u5728\u64AD\u653E",
+      "reviewedSourceHash": "0410c32b080f07cb67c2f1263ffe9887008786f97a5f011e7e7c75237dec7759",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака \u00ABзараз грае\u00BB на радку вяртання"
+      }
+    },
+    {
+      "id": "native.run.pauseAudio",
+      "value": "\u6682\u505C",
+      "reviewedSourceHash": "fb5c796b96e75da399f5c2807919772e99309921718eb232cf8e2081d0bac312",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка паўзы аўдыё; загадны лад"
+      }
+    },
+    {
+      "id": "native.run.pauseWalk",
+      "value": "\u6682\u505C\u6563\u6B65",
+      "reviewedSourceHash": "9d38a19be03985d1f816485664843efdc5472ef71c462500c868d744d6efd978",
+      "review": {
+        "outcome": "approved",
+        "note": "пункт меню сесіі: прыпыніць прагулку"
+      }
+    },
+    {
+      "id": "native.run.pausedTitle",
+      "value": "\u6563\u6B65\u5DF2\u6682\u505C",
+      "reviewedSourceHash": "166ec9cb061eebb2770a359e48eb2be38c3ecbb4d8f6a613a4c9ad91400a6d2c",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак прыпыненай прагулкі"
+      }
+    },
+    {
+      "id": "native.run.playAudio",
+      "value": "\u64AD\u653E",
+      "reviewedSourceHash": "c511387ceea931680ada61ac8be6aefde228ae5a310e471ff5d091f3c09ffb49",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка запуску аўдыё"
+      }
+    },
+    {
+      "id": "native.run.playStoryHint",
+      "value": "\u64AD\u653E\u8FD9\u4E2A\u6545\u4E8B\u7684\u58F0\u97F3",
+      "reviewedSourceHash": "d3c9a3ebd3822df15a6417d6aa92f55565d3572b61cfd9f2f98aba808bafe554",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка карткі гісторыі"
+      }
+    },
+    {
+      "id": "native.run.poiKind.sight",
+      "value": "\u666F\u70B9",
+      "reviewedSourceHash": "42e94abcf55015b5817b57f0395ce601910d38d1eb02af1c761d091f1cdbc79b",
+      "review": {
+        "outcome": "approved",
+        "note": "назва тыпу кропкі (places.json kind); невядомы тып не рэндэрыцца"
+      }
+    },
+    {
+      "id": "native.run.readMore",
+      "value": "\u9605\u8BFB",
+      "reviewedSourceHash": "8dfb154f8883603f925a09be40080f3693a1788640a0be59cbcf0e0848dc54db",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка разгортвання поўнага транскрыпта"
+      }
+    },
+    {
+      "id": "native.run.reasonText.fallback",
+      "value": "\u5931\u8D25\u3002",
+      "reviewedSourceHash": "0da87870411b9e1873d84f74989b9f36d3178c3bc2f945c6c8b2a73a4bbc8710",
+      "review": {
+        "outcome": "approved",
+        "note": "апошняя адмова без канкрэтнай прычыны; сказ з кропкай"
+      }
+    },
+    {
+      "id": "native.run.reasonText.live-session-exists",
+      "value": "\u5DF2\u6709\u8FDB\u884C\u4E2D\u7684\u6563\u6B65\u3002",
+      "reviewedSourceHash": "38876047ff189a5c3cc8b4aaad58364154accfcfa128fee9758d8de7b072b59a",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова старта: ужо ёсць жывая прагулка"
+      }
+    },
+    {
+      "id": "native.run.reasonText.package-access-locked",
+      "value": "\u5BFC\u89C8\u5C1A\u672A\u89E3\u9501\u3002",
+      "reviewedSourceHash": "305486b141166aae4f39c37fd522ba73ca70cad152735f62c7b6ea8f4c62b899",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова старта: доступ да гіда яшчэ не адкрыты"
+      }
+    },
+    {
+      "id": "native.run.reasonText.package-incomplete",
+      "value": "\u5BFC\u89C8\u4E0D\u5B8C\u6574\u3002",
+      "reviewedSourceHash": "8d26cfe8dc716a252873caead724a2a04f2feba74d796194d51c96f869b943ef",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова старта: гід не поўны"
+      }
+    },
+    {
+      "id": "native.run.reasonText.package-needs-recovery",
+      "value": "\u5BFC\u89C8\u9700\u8981\u4FEE\u590D\u3002",
+      "reviewedSourceHash": "b8b4c2c7f540bb529eb784dc36f405b7b2e7c818a813a2aa5c6001e5eb12861e",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова старта: гід патрабуе аднаўлення пакета; дзеяслоў \u4FEE\u590D для пакета, не для сесіі"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#locale-missing",
+      "value": "\u672A\u627E\u5230\u5BFC\u89C8\u8BED\u8A00\u3002",
+      "reviewedSourceHash": "69fb0a7ed42523063e1634201b51bfbfe554e375e3a5a3a8fe3831bff4b4a937",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прагулкі: мова гіда не знойдзена"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#package-ambiguous",
+      "value": "\u78C1\u76D8\u4E0A\u5B58\u5728\u591A\u4E2A\u5BFC\u89C8\u7248\u672C\u3002",
+      "reviewedSourceHash": "fdd1faa5c76b85d38f095cfdfdc5a95f2735d003bf0cfd1d04605ca19d3faa19",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прагулкі: на дыску некалькі версій гіда"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#package-not-downloaded",
+      "value": "\u5BFC\u89C8\u672A\u4E0B\u8F7D\u3002",
+      "reviewedSourceHash": "5912049b75ae0d205c03dc16c4766fbb92a49f85a06dd5fbf43979b076f3a6f4",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прагулкі: гід не спампаваны; адзіны корань \u4E0B\u8F7D, як і ў кнопкі"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "looked-up",
+        "source": "android",
+        "locator": "docs/reports/chinese/language-and-dictionaries-evidence.json#battery.download (packages/providers/DownloadProvider#root_downloads, zh-rCN)",
+        "term": "\u4E0B\u8F7D",
+        "date": "2026-10-17",
+        "reason": "адзіны корань \u4E0B\u8F7D для дзеяння і стану; назоўнікавы сэнс \u2014 па корпусе AOSP"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#package-read-failed",
+      "value": "\u5BFC\u89C8\u65E0\u6CD5\u8BFB\u53D6\u3002",
+      "reviewedSourceHash": "cb97f828950ec915bd80a937e1c569a2e255c380aa2dc70db18883b66eeeb0ea",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прагулкі: гід не чытаецца"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#recovery-failed",
+      "value": "\u8BFB\u53D6\u8FDB\u884C\u4E2D\u7684\u4F1A\u8BDD\u5931\u8D25\u3002",
+      "reviewedSourceHash": "dc38ee4a64a7e63371d24d15a8811bec2db3a5cc769f78da944fe0c00d11f75b",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прагулкі: збой чытання жывой сесіі"
+      }
+    },
+    {
+      "id": "native.run.reasonText.run#unsafe-route-id",
+      "value": "\u8DEF\u7EBF\u6807\u8BC6\u7B26\u65E0\u6548\u3002",
+      "reviewedSourceHash": "d340822c39b89b886e5951a52bc64b20fca3d6f84871c9e1e5a862235c7b033c",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова прагулкі: няверны ідэнтыфікатар маршруту"
+      }
+    },
+    {
+      "id": "native.run.reasonText.switch-no-live-session",
+      "value": "\u8FDB\u884C\u4E2D\u7684\u6563\u6B65\u5DF2\u4E0D\u5B58\u5728\u2014\u2014\u8BF7\u91CD\u65B0\u5F00\u59CB\u3002",
+      "reviewedSourceHash": "8db71669436a5adb6fe155900507136c66e4bc436e26865e0408659b50457ecd",
+      "review": {
+        "outcome": "approved",
+        "note": "адмова пераключэння: жывой прагулкі ўжо няма"
+      }
+    },
+    {
+      "id": "native.run.restoredTitle",
+      "value": "\u6563\u6B65\u5DF2\u4ECE\u4FDD\u5B58\u7684\u4F1A\u8BDD\u7EE7\u7EED",
+      "reviewedSourceHash": "0e2062fc47a4936d773e4e014d5f1f11c31481de99dceb81a4aa9166acdc30f1",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак аднаўлення; канон restore без метафары аднаўлення \u2014 працяг са захаванай сесіі"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u4ECE\u4FDD\u5B58\u7684\u4F1A\u8BDD\u7EE7\u7EED",
+        "date": "2026-10-17",
+        "reason": "батарэя G21.39: слова \u6062\u590D \u2014 слоўнікавы пераклад restore, але канон KUDY перадае сэнс праз \u00ABпрацягнута са захаванай сесіі\u00BB; выбраная канструкцыя без метафары аднаўлення, як en/uk/de/es/fr/cs/sv"
+      }
+    },
+    {
+      "id": "native.run.points",
+      "value": "\u8DEF\u7EBF\u5730\u70B9",
+      "reviewedSourceHash": "7f8f19103a112298d7480abecc5107770297f14d6af636c8330fa5847c4c6d52",
+      "review": {
+        "outcome": "approved",
+        "note": "назва кнопкі, што адкрывае даступны спіс кропак на натыўнай карце"
+      }
+    },
+    {
+      "id": "native.run.recenter",
+      "value": "\u56DE\u5230\u6211\u7684\u4F4D\u7F6E",
+      "reviewedSourceHash": "7c9707a52b4598b4df1427e7609582b876d93d53e78eefc086b2ea6e9d0574cc",
+      "review": {
+        "outcome": "approved",
+        "note": "даступная назва кнопкі вяртання камеры да бягучай пазіцыі"
+      }
+    },
+    {
+      "id": "native.run.resume",
+      "value": "\u7EE7\u7EED",
+      "reviewedSourceHash": "eebc12f1f868df6992e266f4de878022ad7ba731a55d869b203f5e44b2562286",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка працягу прыпыненай прагулкі"
+      }
+    },
+    {
+      "id": "native.run.schematicNote",
+      "value": "\u5730\u56FE\u6B63\u5728\u52A0\u8F7D\u6216\u4E0D\u53EF\u7528\u2014\u2014\u5DF2\u663E\u793A\u8DEF\u7EBF\u5730\u70B9\u793A\u610F\u56FE",
+      "reviewedSourceHash": "2dd5575beeb4e2eceddcb133bd66d0755c8731a769f657860033a6605224b3f7",
+      "review": {
+        "outcome": "approved",
+        "note": "заўвага схематычнай карты падчас загрузкі або пры недаступнасці тайлаў"
+      }
+    },
+    {
+      "id": "native.run.status.available",
+      "value": "\u53EF\u6536\u542C",
+      "reviewedSourceHash": "9793aad53a23abdc305d5548a29cb946b00e25523d81d73dd6fc44ec65584cf2",
+      "review": {
+        "outcome": "approved",
+        "note": "статус кропкі: даступна для праслухоўвання; стан, не планаўка даступнасці"
+      }
+    },
+    {
+      "id": "native.run.status.locked",
+      "value": "\u5DF2\u9501\u5B9A",
+      "reviewedSourceHash": "6a99f5e753bfc059766d06244cd27adca7e2aef32f319d076e3df63d742e94a7",
+      "review": {
+        "outcome": "approved",
+        "note": "статус кропкі: зачынена"
+      }
+    },
+    {
+      "id": "native.run.status.pending",
+      "value": "\u5F85\u6536\u542C",
+      "reviewedSourceHash": "9f528a418df5a9a0b3669164831060f48a64ee91f09944317edbf68f59fccda9",
+      "review": {
+        "outcome": "approved",
+        "note": "статус кропкі: чакае"
+      }
+    },
+    {
+      "id": "native.run.status.played",
+      "value": "\u5DF2\u6536\u542C",
+      "reviewedSourceHash": "a502b3cc111fa9e67cfd2cf9ed81c5255f9e620b48382d72345b3dc81661fe36",
+      "review": {
+        "outcome": "approved",
+        "note": "статус кропкі: праслухана"
+      }
+    },
+    {
+      "id": "native.run.status.playing",
+      "value": "\u64AD\u653E\u4E2D",
+      "reviewedSourceHash": "d1eef5a55b531148b786b73a9273d9f72d6de945391799a4b8c69b6f9b5ad31b",
+      "review": {
+        "outcome": "approved",
+        "note": "статус кропкі на карце: гучыць"
+      }
+    },
+    {
+      "id": "native.run.storyBase",
+      "value": "\u4E3B\u8981\u6545\u4E8B",
+      "reviewedSourceHash": "6c2b75554d07c595a721ae6fa62de6e6e5f0157b2d7bc79dd445ca7dcbd3fd08",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака асноўнай гісторыі"
+      }
+    },
+    {
+      "id": "native.run.storyExtended",
+      "value": "\u9644\u52A0\u6545\u4E8B",
+      "reviewedSourceHash": "3570a8bfad2653d9dcd5fe9b60241a9ec8313f4a1a3ad34085dd92117b7b044b",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака дадатковай гісторыі; ярус \u2192 \u9644\u52A0"
+      }
+    },
+    {
+      "id": "native.run.tierUnavailable",
+      "value": "\u9644\u52A0\u5C42\u7EA7\u5728\u6062\u590D\u7684\u4F1A\u8BDD\u4E2D\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "96e6c8ab2f1326360751f35cbe3a8f97c05b372dbe078097523afeb01a06201c",
+      "review": {
+        "outcome": "approved",
+        "note": "заўвага: дадатковы ярус недаступны ў адноўленай сесіі; ярус \u2192 \u5C42\u7EA7"
+      }
+    },
+    {
+      "id": "native.run.transcript",
+      "value": "\u6587\u5B57\u7A3F",
+      "reviewedSourceHash": "ed28a2f5c9457fcfa1fa39bec597498948a3909f658583f316145309b493a477",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак транскрыпта"
+      }
+    },
+    {
+      "id": "native.run.transcriptPending",
+      "value": "\u6587\u672C\u5C06\u968F\u5185\u5BB9\u5305\u4E00\u8D77\u63D0\u4F9B",
+      "reviewedSourceHash": "e4d1078ae54a91a1baba09622433a75af468a6b88cbe1d1fb319edf4126fbada",
+      "review": {
+        "outcome": "approved",
+        "note": "ганаровая заўвага: тэкст прыйдзе з кантэнтам пакета"
+      }
+    },
+    {
+      "id": "native.run.unavailableTitle",
+      "value": "\u4F1A\u8BDD\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "749dd4d5710f98ecf3c7147c540c4f2f65368b228adcaf1d050f9c738fed73a6",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак недаступнай сесіі"
+      }
+    },
+    {
+      "id": "web.ui.appBenefitFullRoutes",
+      "value": "\u5B8C\u6574\u8DEF\u7EBF\uFF1A\u6240\u6709\u5730\u70B9\u548C\u5168\u90E8\u97F3\u9891",
+      "reviewedSourceHash": "d4b091d52be3bca3e28259c32c45de553cdae2bff23890f1466f43539a648fb6",
+      "review": {
+        "outcome": "approved",
+        "note": "выгода дадатку: поўныя маршруты, усе кропкі і аўдыё"
+      }
+    },
+    {
+      "id": "web.ui.appBenefitGps",
+      "value": "\u5230\u573A\u540E\u81EA\u52A8\u64AD\u653E\u6545\u4E8B",
+      "reviewedSourceHash": "dd1f0b20a9989171a0f7ee937b8a2b300e77510c6fede71cea44091ffd88075e",
+      "review": {
+        "outcome": "approved",
+        "note": "выгода дадатку: GPS-аўтазапуск гісторый на месцы"
+      }
+    },
+    {
+      "id": "web.ui.appBenefitOffline",
+      "value": "\u79BB\u7EBF\u53EF\u7528\uFF1A\u65E0\u9700\u7F51\u7EDC\uFF0C\u8DEF\u7EBF\u968F\u624B\u53EF\u5F97",
+      "reviewedSourceHash": "0938d9674742b7ca8d10e18f403e12aec968da0f2d0727b9159f6718ec177d9e",
+      "review": {
+        "outcome": "approved",
+        "note": "выгода дадатку: офлайн маршруты"
+      }
+    },
+    {
+      "id": "web.ui.appPageStores",
+      "value": "\u83B7\u53D6\u5E94\u7528\uFF1A",
+      "reviewedSourceHash": "41e9d325b3f4b67c7a5286cc11354b0a207839e2fee05e651cc270869ed5f0ec",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака секцыі крам на старонцы дадатку"
+      }
+    },
+    {
+      "id": "web.ui.appPageTitle",
+      "value": "\u5B8C\u6574\u7248\u672C\u2014\u2014\u5728KUDY\u5E94\u7528\u91CC",
+      "reviewedSourceHash": "a824a45caa613d7d9d0cb29d968595e6d42c3db635115d8aa4946823e2bbbebe",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак старонкі дадатку; назва брэнда не перакладаецца"
+      }
+    },
+    {
+      "id": "web.ui.appStoreName",
+      "value": "App Store",
+      "reviewedSourceHash": "7047842a47bf44a3707f7389b795b8484c66306e2026e9dcd5ea02e387c9c54c",
+      "review": {
+        "outcome": "approved",
+        "note": "назва крамы \u2014 брэнд, не перакладаецца"
+      }
+    },
+    {
+      "id": "web.ui.audioAndText",
+      "value": "\u97F3\u9891\u548C\u6587\u672C",
+      "reviewedSourceHash": "0f4aff6c5476865b0bd3977657d0f3361fd3d04dcea6e8e4734b6bfdbdba5a0a",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака набору: аўдыё і тэкст"
+      }
+    },
+    {
+      "id": "web.ui.audioHeading",
+      "value": "\u97F3\u9891",
+      "reviewedSourceHash": "42ce7ded17f5749b83970a0155fde0b9503d572f14685c475940bbf1dc3a4022",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі аўдыё"
+      }
+    },
+    {
+      "id": "web.ui.audioUnavailable",
+      "value": "\u516C\u5F00\u5185\u5BB9\u5305\u4E2D\u6CA1\u6709\u97F3\u9891\u6587\u4EF6\uFF1B\u4E0B\u65B9\u6545\u4E8B\u6587\u672C\u4ECD\u53EF\u6B63\u5E38\u9605\u8BFB\u3002",
+      "reviewedSourceHash": "97c74598be80ccfc34d8de9326cccdd19a2e3131cd88bcd8d5a36907f528157e",
+      "review": {
+        "outcome": "approved",
+        "note": "ганаровая заўвага: аўдыё-файла няма ў публічным пакеце, тэкст чытаецца як звычайна"
+      }
+    },
+    {
+      "id": "web.ui.backToGuide",
+      "value": "\u8FD4\u56DE\u5BFC\u89C8\u9875\u9762",
+      "reviewedSourceHash": "d74d46d2484a23efcb8b7fe0c7c0cad37cd687fd47b549476567a7551dcb1fde",
+      "review": {
+        "outcome": "approved",
+        "note": "ссылка вяртання да старонкі гіда"
+      }
+    },
+    {
+      "id": "web.ui.brand",
+      "value": "KUDY",
+      "reviewedSourceHash": "1885cd40ff3259455dab4cd3fda86af65df621059911963040af3482180755bd",
+      "review": {
+        "outcome": "approved",
+        "note": "назва брэнда ў шапцы сайта"
+      }
+    },
+    {
+      "id": "web.ui.calmOfferCta",
+      "value": "\u6253\u5F00\u5E94\u7528",
+      "reviewedSourceHash": "59b840b0a9ba1fb1402597545ca1e919111a9825e9ddc94d8ab8270c7ddcafef",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка ціхай прапановы: адкрыць дадатак"
+      }
+    },
+    {
+      "id": "web.ui.calmOfferText",
+      "value": "\u5B8C\u6574\u7248\u672C\u5728\u5E94\u7528\u4E2D\uFF1A\u81EA\u52A8\u64AD\u653E\u3001\u79BB\u7EBF\u53EF\u7528\u3001\u5B8C\u6574\u8DEF\u7EBF\u3002",
+      "reviewedSourceHash": "fca9b8721b8f42038c5bd8672d0019ca3e492ba30ac6fa7f2fb175bdf404ea2e",
+      "review": {
+        "outcome": "approved",
+        "note": "ціхая прапанова дадатку; тры выгоды праз коску, як у крыніцы"
+      }
+    },
+    {
+      "id": "web.ui.catalogTitle",
+      "value": "\u57CE\u5E02\u5BFC\u89C8",
+      "reviewedSourceHash": "670058fc54d284f2e46f7e8e09997332a46ab937ce627c51f1f2cfaa998f82ff",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак каталога гідаў на галоўнай"
+      }
+    },
+    {
+      "id": "web.ui.distance",
+      "value": "\u8DDD\u79BB",
+      "reviewedSourceHash": "bee0a3a7d35a29807e46345e626e3bca28a4970e701c0b66c236c9d84c074c04",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака рада адлегласці"
+      }
+    },
+    {
+      "id": "web.ui.duration",
+      "value": "\u65F6\u957F",
+      "reviewedSourceHash": "9276104996f45e284d966794e70c4fc2d52b329a5a5f4666515e718f8bf12f16",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака рада працягласці"
+      }
+    },
+    {
+      "id": "web.ui.homeLink",
+      "value": "\u56DE\u5230\u9996\u9875",
+      "reviewedSourceHash": "30e2d60f17153ff35aa1adda3bab5116845e1991e0e4143d79ea1b50bb13389e",
+      "review": {
+        "outcome": "approved",
+        "note": "ссылка на галоўную"
+      }
+    },
+    {
+      "id": "web.ui.kilometersShort",
+      "value": "\u516C\u91CC",
+      "reviewedSourceHash": "f0799d4b6ae84c9fafe93c5a3e8ae85bf7675912cad3a7737f48c0448aa00f50",
+      "review": {
+        "outcome": "approved",
+        "note": "кароткая адзінка кіламетра"
+      }
+    },
+    {
+      "id": "web.ui.languages",
+      "value": "\u8BED\u8A00",
+      "reviewedSourceHash": "c06833252de3a6b56c05b65b42dfa0b95e4005eedd8189e5bf9f2f64b4490716",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака рада моваў гіда"
+      }
+    },
+    {
+      "id": "web.ui.lockedLabel",
+      "value": "\u5DF2\u9501\u5B9A\u7684\u5730\u70B9",
+      "reviewedSourceHash": "aafde1b7e9811c639b3f9340e59d0b53d6879b56fffc2cb6bcd74a616b2870e8",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака зачыненай кропкі ў спісе; кропка \u2192 \u5730\u70B9"
+      }
+    },
+    {
+      "id": "web.ui.mapAttribution",
+      "value": "\u5730\u56FE\u6570\u636E \u00A9 OpenStreetMap \u8D21\u732E\u8005\uFF08ODbL \u8BB8\u53EF\uFF09",
+      "reviewedSourceHash": "1044b87f28683a787262f17f1017ec49cf859cf8ba6c9773717fc8be6f16a536",
+      "review": {
+        "outcome": "approved",
+        "note": "атрыбуцыя карт OpenStreetMap; назва ліцэнзіі не перакладаецца"
+      }
+    },
+    {
+      "id": "web.ui.mapError",
+      "value": "\u5730\u56FE\u6682\u65F6\u4E0D\u53EF\u7528\u3002\u4E0B\u65B9\u8DEF\u7EBF\u5217\u8868\u4ECD\u53EF\u6B63\u5E38\u4F7F\u7528\u3002",
+      "reviewedSourceHash": "5d6c08e18afd5e725fb09490c6227e3ea83cadb649a78c776408948b6fa9963e",
+      "review": {
+        "outcome": "approved",
+        "note": "радок збою карты: спіс маршрутаў працуе звычайна"
+      }
+    },
+    {
+      "id": "web.ui.mapIntro",
+      "value": "\u6D4F\u89C8\u516C\u5F00\u8DEF\u7EBF\u548C\u5730\u70B9\u3002\u4E0D\u4F1A\u83B7\u53D6\u6216\u4F7F\u7528\u8BBF\u5BA2\u7684\u4F4D\u7F6E\u3002",
+      "reviewedSourceHash": "c597a6c22daf0b31484af6251a55b92c9ddf3827aaac5719073d93a17caec838",
+      "review": {
+        "outcome": "approved",
+        "note": "уводзіны карты: пазіцыя наведвальніка не вызначаецца і не выкарыстоўваецца"
+      }
+    },
+    {
+      "id": "web.ui.mapRoutesHeading",
+      "value": "\u5730\u56FE\u4E0A\u7684\u8DEF\u7EBF",
+      "reviewedSourceHash": "35d577ece11ecfe53eb50cc7fd5ce8f60212ada6f4e892602acb5b06449a21f1",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак секцыі маршрутаў на карце"
+      }
+    },
+    {
+      "id": "web.ui.mapTitle",
+      "value": "\u57CE\u5E02\u5730\u56FE",
+      "reviewedSourceHash": "9ef7a5aa47a5315ef13466f4ff1aa67b6286c442ff261c0bbaccfc208ab85887",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак старонкі карты горада"
+      }
+    },
+    {
+      "id": "web.ui.minutesShort",
+      "value": "\u5206\u949F",
+      "reviewedSourceHash": "e8c16fd4349955ecde6b8e54ca7e348713cdfc4bea556dfba5ed9c03fd384e93",
+      "review": {
+        "outcome": "approved",
+        "note": "кароткая адзінка хвіліны"
+      }
+    },
+    {
+      "id": "web.ui.nextStop",
+      "value": "\u4E0B\u4E00\u4E2A\u5730\u70B9",
+      "reviewedSourceHash": "371e0d77c5507a43edee3b356ad0cfb56f8b7c21a246ea346daed28f22a10799",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка наступнай кропкі; кропка \u2192 \u5730\u70B9"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u5730\u70B9",
+        "date": "2026-10-17",
+        "reason": "той самы выбар для кропак пешага маршруту, што і ў натыўнай абалонцы; транспартнае \u5DF4\u58EB\u7AD9 не падыходзіць"
+      }
+    },
+    {
+      "id": "web.ui.playStoreName",
+      "value": "Google Play",
+      "reviewedSourceHash": "4d2b5bdd1768b08ed60798c2baf6ea51b51a4a14c75d19063d9f16134116ce03",
+      "review": {
+        "outcome": "approved",
+        "note": "назва крамы \u2014 брэнд, не перакладаецца"
+      }
+    },
+    {
+      "id": "web.ui.prevStop",
+      "value": "\u4E0A\u4E00\u4E2A\u5730\u70B9",
+      "reviewedSourceHash": "91521bae33c1fc37a67fc215efdc36f06c0e7fd6c7bab32e70f3e7b7443f53dd",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка папярэдняй кропкі; пара да \u4E0B\u4E00\u4E2A\u5730\u70B9"
+      }
+    },
+    {
+      "id": "web.ui.privacyAnalytics",
+      "value": "\u53EA\u6709\u5728\u660E\u786E\u540C\u610F\u540E\u624D\u4F1A\u8FDB\u884C\u5206\u6790\u3002\u4E8B\u4EF6\u5728\u540C\u610F\u4E4B\u540E\u624D\u4F1A\u53D1\u9001\u5230\u670D\u52A1\u5668\uFF1B\u62D2\u7EDD\u5219\u65E5\u5FD7\u53EA\u4FDD\u7559\u5728\u8BBE\u5907\u4E0A\uFF0C\u5E94\u7528\u4ECD\u53EF\u5B8C\u6574\u4F7F\u7528\u3002\u5750\u6807\u3001\u59D3\u540D\u548C\u7528\u6237\u8F93\u5165\u7684\u6587\u672C\u7EDD\u4E0D\u4F1A\u88AB\u53D1\u9001\u3002",
+      "reviewedSourceHash": "d02dc665b1db4856113cad4e30c33fb438f48dd157f66c4da39aa242b941340b",
+      "review": {
+        "outcome": "approved",
+        "note": "параграф прыватнасці пра аналітыку; тры сказы захаваныя, катэгарычнае \u7EDD\u4E0D\u4F1A"
+      }
+    },
+    {
+      "id": "web.ui.privacyAppData",
+      "value": "\u5E94\u7528\u65E0\u9700\u8D26\u53F7\u5373\u53EF\u4F7F\u7528\u3002\u5B83\u4F1A\u5728\u8BBE\u5907\u4E0A\u4FDD\u5B58\u672C\u5730\u4E8B\u4EF6\u65E5\u5FD7\uFF08\u6253\u5F00\u8FC7\u54EA\u4E9B\u6545\u4E8B\u3001\u4E0B\u8F7D\u8FC7\u54EA\u4E9B\u8DEF\u7EBF\uFF09\uFF0C\u5E76\u4FDD\u5B58\u5DF2\u4E0B\u8F7D\u7684\u5185\u5BB9\u3002\u65E5\u5FD7\u4E0D\u542B\u59D3\u540D\u548C\u81EA\u7531\u6587\u672C\uFF0C\u53EA\u4E0E\u968F\u673A\u8BBE\u5907\u6807\u8BC6\u7B26\u5173\u8054\u2014\u2014\u8FD9\u662F\u5047\u540D\u5316\u6570\u636E\uFF0C\u800C\u975E\u533F\u540D\u6570\u636E\u3002",
+      "reviewedSourceHash": "440680a83706fc8e822376da9efc4e06bef21b3f33ecc4566ef35f3c68ec5470",
+      "review": {
+        "outcome": "approved",
+        "note": "параграф прыватнасці: лакальны лог і псеўданімізацыя; тэрмін \u5047\u540D\u5316 супрацьпастаўлены \u533F\u540D"
+      }
+    },
+    {
+      "id": "web.ui.privacyContact",
+      "value": "\u6709\u5173\u672C\u9690\u79C1\u653F\u7B56\u7684\u95EE\u9898\uFF0C\u53EF\u4EE5\u5728\u9879\u76EE\u516C\u5F00\u4ED3\u5E93\u7684 issues \u91CC\u63D0\u51FA\uFF1A",
+      "reviewedSourceHash": "8155e69060cfd2c7c434816554419619f7c6880d668891dd3d836b609cf425c6",
+      "review": {
+        "outcome": "approved",
+        "note": "параграф прыватнасці: пытанні праз issues рэпазіторыя"
+      }
+    },
+    {
+      "id": "web.ui.privacyDeletion",
+      "value": "\u5220\u9664\u6570\u636E\uFF1A\u5E94\u7528\u4E2D\u7684\u201CKUDY\u201D\u9875\u9762\u6709\u4E00\u4E2A\u5220\u9664\u8BBE\u5907\u6309\u94AE\u2014\u2014\u5B83\u4F1A\u6E05\u9664\u670D\u52A1\u5668\u4E0A\u7684\u4E8B\u4EF6\u65E5\u5FD7\u548C\u8BBE\u5907\u8BB0\u5F55\uFF1B\u5DF2\u4E0B\u8F7D\u7684\u5185\u5BB9\u4F1A\u4FDD\u7559\u3002\u65E0\u9700\u53D1\u9001\u90AE\u4EF6\u6216\u7533\u8BF7\u3002",
+      "reviewedSourceHash": "6620748446af7ada3e3599b198bf82640983b0568c88d3c19f97e59b25bfc897",
+      "review": {
+        "outcome": "approved",
+        "note": "параграф прыватнасці: выдаленне даных прылады; \u65E0\u9700\u2026\u7533\u8BF7 замяняе беларускае \u00ABліст ці заяўку дасылаць не трэба\u00BB"
+      }
+    },
+    {
+      "id": "web.ui.privacyIntro",
+      "value": "KUDY \u662F\u7528\u4E8E\u57CE\u5E02\u6563\u6B65\u7684\u97F3\u9891\u5BFC\u89C8\u3002\u672C\u9875\u9762\u8BF4\u660E\u9879\u76EE\u5904\u7406\u54EA\u4E9B\u6570\u636E\uFF1A\u7F51\u9875\u6E20\u9053\u7684\u516C\u5F00\u90E8\u5206\u548C\u79FB\u52A8\u5E94\u7528\u3002",
+      "reviewedSourceHash": "87c3fd8b911d11bafbc0a20e65b2312422d246dd45ebb630ee9d3942b301e33a",
+      "review": {
+        "outcome": "approved",
+        "note": "уводзіны палітыкі прыватнасці"
+      }
+    },
+    {
+      "id": "web.ui.privacyLocation",
+      "value": "\u4F4D\u7F6E\u53EA\u5728\u5E94\u7528\u4E2D\u3001\u4E14\u53EA\u5728\u6563\u6B65\u8FDB\u884C\u671F\u95F4\u4F7F\u7528\uFF1A\u540E\u53F0\u5B9A\u4F4D\u5728\u6563\u6B65\u671F\u95F4\u6301\u7EED\u8FD0\u884C\uFF0C\u5E76\u968F\u6563\u6B65\u7ED3\u675F\u800C\u505C\u6B62\u3002\u5E94\u7528\u4E0D\u4F1A\u628A\u7CBE\u786E\u7684GPS\u5750\u6807\u4F20\u5230KUDY\u670D\u52A1\u5668\uFF0C\u4E5F\u4E0D\u4F1A\u5C06\u5176\u5199\u5165\u4E8B\u4EF6\u65E5\u5FD7\u3002\u5728\u7EBF\u5730\u56FE\u4ECEOpenFreeMap\u52A0\u8F7D\u74E6\u7247\uFF1A\u8BF7\u6C42\u4F1A\u5411\u63D0\u4F9B\u5546\u66B4\u9732\u5730\u56FE\u533A\u57DF\uFF0C\u5728\u5F00\u542F\u8DDF\u968F\u65F6\u4E5F\u5305\u62EC\u5F53\u524D\u4F4D\u7F6E\u5468\u8FB9\u3002\u7F51\u9875\u6E20\u9053\u4E0D\u83B7\u53D6\u8BBF\u5BA2\u7684\u4F4D\u7F6E\u3002",
+      "reviewedSourceHash": "5c86b06615ae7aa3da7eb2585ba4d46a4e77d5828b159601ca6748a411e476fc",
+      "review": {
+        "outcome": "approved",
+        "note": "параграф прыватнасці: GPS падчас прагулкі і анлайн-тайлы; тры сказы, назвы сэрвісаў не перакладаюцца"
+      }
+    },
+    {
+      "id": "web.ui.privacyPurchases",
+      "value": "\u8D2D\u4E70\u901A\u8FC7\u5E94\u7528\u5546\u5E97\uFF08App Store\u3001Google Play\uFF09\u8FDB\u884C\uFF1A\u652F\u4ED8\u6570\u636E\u7531\u5546\u5E97\u5904\u7406\uFF0C\u5E94\u7528\u53EA\u8BB0\u5F55\u8D2D\u4E70\u4E8B\u4EF6\u672C\u8EAB\u2014\u2014\u8DEF\u7EBF\u3001\u9009\u9879\u3001\u7ED3\u679C\u2014\u2014\u4E0D\u542B\u94F6\u884C\u4FE1\u606F\u3002",
+      "reviewedSourceHash": "9befc36b7704fa57cf77cb50c7277a86c5dd0ebd6fcdd4ee8f69d48d6a993dce",
+      "review": {
+        "outcome": "approved",
+        "note": "параграф прыватнасці: пакупкі праз крамы; толькі факт падзеі, без плацёжных даных"
+      },
+      "terminology": {
+        "status": "resolved",
+        "kind": "reviewer-judgment",
+        "term": "\u8D2D\u4E70",
+        "date": "2026-10-17",
+        "reason": "тэрмін пакупкі \u8D2D\u4E70 па батарэі G21.39 \u00A76.3; фраза \u00ABrestore purchases\u00BB не слоўнікавая і ў тэксце не ўжываецца"
+      }
+    },
+    {
+      "id": "web.ui.privacyRetention",
+      "value": "\u4FDD\u7559\u671F\u9650\uFF1A\u539F\u59CB\u53D1\u9001\u4E8B\u4EF6\u4FDD\u755914\u4E2A\u6708\uFF0C\u4E4B\u540E\u7531\u4EFB\u52A1\u5220\u9664\uFF1B\u6309\u8DEF\u7EBF\u6C47\u603B\u7684\u6570\u5B57\u4E0D\u5305\u542B\u8BBE\u5907\u6807\u8BC6\u7B26\u3002",
+      "reviewedSourceHash": "e859c436d72b484bfcf48110c474213d847ef7326797107354710ba929c6fa52",
+      "review": {
+        "outcome": "approved",
+        "note": "параграф прыватнасці: тэрмін захавання сырых падзей"
+      }
+    },
+    {
+      "id": "web.ui.privacyTitle",
+      "value": "\u9690\u79C1",
+      "reviewedSourceHash": "22162a33a385d2a42f1db6a44f8673e8d8d2f0b0180dfecf547178cfeac498fb",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак старонкі прыватнасці"
+      }
+    },
+    {
+      "id": "web.ui.privacyWeb",
+      "value": "\u514D\u8D39\u7F51\u9875\u6E20\u9053\u4E0D\u6536\u96C6\u8D26\u53F7\uFF1A\u6CA1\u6709\u6CE8\u518C\u548C\u767B\u5F55\uFF0C\u4E5F\u4E0D\u7D22\u53D6\u8054\u7CFB\u65B9\u5F0F\u3002\u76EE\u5F55\u3001\u5BFC\u89C8\u548C\u5730\u56FE\u9875\u9762\u65E0\u9700\u8F93\u5165\u4E2A\u4EBA\u6570\u636E\u5373\u53EF\u6253\u5F00\u3002",
+      "reviewedSourceHash": "4d4fe908d535fe3996570f0917999a33a649dc1b85d21a9444352b0f2ad6341c",
+      "review": {
+        "outcome": "approved",
+        "note": "параграф прыватнасці: вэб-канал не збірае акаўнтаў"
+      }
+    },
+    {
+      "id": "web.ui.stopListHeading",
+      "value": "\u8DEF\u7EBF\u5730\u70B9",
+      "reviewedSourceHash": "379fd21b7a21e645950a361e2a27c81ffb28a9b8c5ff5d3b40ae867ed3aa4244",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак спіса кропак маршруту"
+      }
+    },
+    {
+      "id": "web.ui.stops",
+      "value": "\u5730\u70B9",
+      "reviewedSourceHash": "f01a41e8069f5a10f7446d7892a4663bc206dcc63d79c0f0bcd747d09ef05a9d",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака рада колькасці кропак"
+      }
+    },
+    {
+      "id": "web.ui.storeComingSoon",
+      "value": "\u5373\u5C06\u63A8\u51FA",
+      "reviewedSourceHash": "a4a928d1751b51e8124728e4b4f8cc411f60787f509a56129e2e6ffcbdf6f679",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака \u00ABхутка\u00BB для крам"
+      }
+    },
+    {
+      "id": "web.ui.storyTextHeading",
+      "value": "\u6545\u4E8B\u6587\u672C",
+      "reviewedSourceHash": "c8c99c777db7f030957de2c87bb2807e6453c815734d5c6fcfdf762c4649be5a",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак тэксту гісторыі на старонцы кропкі"
+      }
+    },
+    {
+      "id": "web.ui.textOnly",
+      "value": "\u4EC5\u6587\u672C",
+      "reviewedSourceHash": "60adcac9c17b1b2348bdc25bf9408963fe25e9d161f6b51d2a82561c7e470515",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака набору: толькі тэкст"
+      }
+    },
+    {
+      "id": "web.ui.versionUnavailable",
+      "value": "\u7248\u672C\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "6d0903ab3a0d160167c966e6b09cdce71900eb1271487b48f51ecb738379bd8e",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану: версія недаступная"
+      }
+    },
+    {
+      "id": "web.ui.catalogEmpty",
+      "value": "\u8FD9\u79CD\u8BED\u8A00\u6682\u65F6\u8FD8\u6CA1\u6709\u5E26\u6587\u672C\u7684\u5BFC\u89C8\u3002",
+      "reviewedSourceHash": "2696e018ae715ff1d8dfe7f26331d68f1325eff673496c9c213f3d4abeec1d5e",
+      "review": {
+        "outcome": "approved",
+        "note": "пусты стан вэб-каталога; люстра натыўнага радка textLocaleEmpty"
+      }
+    },
+    {
+      "id": "web.ui.textUnavailableTitle",
+      "value": "\u8FD9\u79CD\u8BED\u8A00\u4E0B\u7684\u5BFC\u89C8\u6587\u672C\u6682\u65F6\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "a19ea9ba76a34afce8fd2edd63ecbdc865dce15d8a5cd7d4e1828d7286e6216c",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак старонкі гіда без тэксту выбранай мовы"
+      }
+    },
+    {
+      "id": "web.ui.textUnavailableBody",
+      "value": "\u8FD9\u4E2A\u5BFC\u89C8\u6CA1\u6709\u6240\u9009\u754C\u9762\u8BED\u8A00\u7684\u6587\u672C\u3002\u5B83\u7684\u6587\u672C\u8BED\u8A00\u663E\u793A\u5728\u76EE\u5F55\u7684\u8BED\u8A00\u5217\u8868\u4E2D\u3002",
+      "reviewedSourceHash": "07a46c3e0babecfe136297ae2458d4fd0a86e5b2425cead4f1372ac6edb59953",
+      "review": {
+        "outcome": "approved",
+        "note": "тэкст старонкі недаступнасці; адсылае да факт-радка моваў"
+      }
+    },
+    {
+      "id": "native.feedback.unavailable",
+      "value": "\u8BC4\u4EF7\u4E0D\u53EF\u7528",
+      "reviewedSourceHash": "f64d18490a73d3cc2bfe6f4fdd502f5347a84b5ae7d0234ec4a53cbb9ed5169b",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану: водгук недаступны"
+      }
+    },
+    {
+      "id": "native.feedback.invalidTarget",
+      "value": "\u8BC4\u4EF7\u94FE\u63A5\u4E0D\u5B8C\u6574",
+      "reviewedSourceHash": "13b2ca38180a286de285582a9e0d9af9a6ce1f8c163e55ce33187fbae8a3c081",
+      "review": {
+        "outcome": "approved",
+        "note": "радок стану: спасылка на ацэнку няпоўная"
+      }
+    },
+    {
+      "id": "native.feedback.formTitleGuide",
+      "value": "\u8FD9\u4E2A\u5BFC\u89C8\u600E\u4E48\u6837\uFF1F",
+      "reviewedSourceHash": "2faf43c1b42bc5021922c44730c5c9bec3c25f40dcca3ff3e7123112831c8dca",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак формы ацэнкі гіда; размоўнае пытанне да \u00ABты\u00BB, як у крыніцы"
+      }
+    },
+    {
+      "id": "native.feedback.formTitlePlace",
+      "value": "\u8FD9\u91CC\u503C\u5F97\u6765\u5417\uFF1F",
+      "reviewedSourceHash": "0154a38c9b8759273bc0d13d11d6db7ec3cbad6506a780c86a8aef5b46bdf0e7",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак формы ацэнкі месца: ці варта было сюды зайсці"
+      }
+    },
+    {
+      "id": "native.feedback.targetLine",
+      "value": "\u5185\u5BB9\u8BED\u8A00\uFF1A${locale} \u00B7 \u7248\u672C\uFF1A${version}",
+      "reviewedSourceHash": "ba6f03bbf78712a759d9a3623817dea04b241abb111d12cf07475fde952c50fb",
+      "review": {
+        "outcome": "approved",
+        "note": "радок аб'екта ацэнкі; мова зместу і версія, сярэдняя кропка захаваная"
+      }
+    },
+    {
+      "id": "native.feedback.scaleHint",
+      "value": "1\u2014\u2014\u5F88\u4E0D\u559C\u6B22 \u00B7 5\u2014\u2014\u5F88\u559C\u6B22",
+      "reviewedSourceHash": "763a359b696b12e109cb8be62e435ed8f2b9e0b4fcf1a0a18a345ff13159b8b9",
+      "review": {
+        "outcome": "approved",
+        "note": "падказка шкалы 1\u20135; дваццаціпрацяжнік замяняе беларускае \u00ABвельмі не\u00BB"
+      }
+    },
+    {
+      "id": "native.feedback.starLabel",
+      "value": "5\u5206\u4E2D\u7684${score}\u5206",
+      "reviewedSourceHash": "0ffa854d51fbc16346c56b9bf020629ca9ac9b116243731cdd0e5611c9e401d0",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака зорак для чытача экрана; пазіцыя лічбы захаваная"
+      }
+    },
+    {
+      "id": "native.feedback.reasonsTitle",
+      "value": "\u539F\u56E0\uFF08\u53EF\u9009\uFF0C\u6700\u591A\u4E09\u9879\uFF09",
+      "reviewedSourceHash": "1d9b758cdb750b52ef9c0194691f66b411f1446cf47d274509fe7c43bf465776",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак блока прычын; неабавязковасць і мяжа ў дужках"
+      }
+    },
+    {
+      "id": "native.feedback.disclosureTitle",
+      "value": "\u8C01\u53EF\u4EE5\u770B\u5230\u8BC4\u4EF7",
+      "reviewedSourceHash": "7cd4231b4890b4597dee9a5246054c686599f0528b8346290fdbf329cb81087f",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак раскрыцця: хто бачыць ацэнку"
+      }
+    },
+    {
+      "id": "native.feedback.disclosureBody",
+      "value": "KUDY\u56E2\u961F\u4F1A\u770B\u5230\u8BC4\u4EF7\uFF0C\u5E76\u7528\u5B83\u6765\u6539\u8FDB\u63A8\u8350\u3002\u8BC4\u4EF7\u4E0D\u4F1A\u516C\u5F00\u5C55\u793A\u3002",
+      "reviewedSourceHash": "40ac74ccd705297733e68136eb9bbad6d682c6be1a731e09562eb577f35439d8",
+      "review": {
+        "outcome": "approved",
+        "note": "тэкст раскрыцця: ацэнку бачыць каманда і не паказвае публічна"
+      }
+    },
+    {
+      "id": "native.feedback.disclosureAnalytics",
+      "value": "\u8FD9\u4E0D\u662F\u5206\u6790\u6570\u636E\uFF1A\u63D0\u4EA4\u8BC4\u4EF7\u4E0D\u4EE3\u8868\u540C\u610F\u5206\u6790\uFF0C\u4E5F\u4E0E\u5206\u6790\u65E0\u5173\u3002",
+      "reviewedSourceHash": "5c3e76cd244614b2707e554c450e8f58db3b6a2ab3330ff2e2de572e1f6419d3",
+      "review": {
+        "outcome": "approved",
+        "note": "тэкст раскрыцця: адпраўка водгуку не звязаная са згодай на аналітыку"
+      }
+    },
+    {
+      "id": "native.feedback.send",
+      "value": "\u63D0\u4EA4",
+      "reviewedSourceHash": "5d1b61cf3441db7560a769aee30416dc0c9b5d5e4d0cb6c5e5af2fdc227e7bdb",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка адпраўкі водгуку"
+      }
+    },
+    {
+      "id": "native.feedback.deleteButton",
+      "value": "\u5220\u9664\u8BC4\u4EF7",
+      "reviewedSourceHash": "d18d68ce08b0873d2405ed8b503398644dc5a660e3c4c4c326ba456eee781cf9",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка выдалення ацэнкі на прыладзе"
+      }
+    },
+    {
+      "id": "native.feedback.resolveConflict",
+      "value": "\u5728\u670D\u52A1\u5668\u4E0A\u68C0\u67E5",
+      "reviewedSourceHash": "1c75021c3be06110e2689aed8eaf2ec49e49f0145f7e4daef51eded800b0d138",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка вырашэння канфлікту: праверыць стан на серверы"
+      }
+    },
+    {
+      "id": "native.feedback.stateDraft",
+      "value": "\u8349\u7A3F\u5DF2\u4FDD\u5B58\u5728\u8BBE\u5907\u4E0A",
+      "reviewedSourceHash": "1f9828d67e933d0c4365984ed54b521600ffe764cf76ea26fe372c564c4d70a4",
+      "review": {
+        "outcome": "approved",
+        "note": "стан чарнавіка водгуку"
+      }
+    },
+    {
+      "id": "native.feedback.statePending",
+      "value": "\u5DF2\u4FDD\u5B58\u5728\u8BBE\u5907\u4E0A\u2014\u2014\u8054\u7F51\u540E\u63D0\u4EA4",
+      "reviewedSourceHash": "7195387e99f36c3ed874cba5e91a09c9bda100636d233899ecb181ac4950d043",
+      "review": {
+        "outcome": "approved",
+        "note": "стан чаргі: захавана лакальна, адправім пры сетцы"
+      }
+    },
+    {
+      "id": "native.feedback.stateSent",
+      "value": "\u5DF2\u63D0\u4EA4",
+      "reviewedSourceHash": "ee6e31c6ff3e7f4a976a16d2cf3e05e945fd2497f20240eead476c966b9cd470",
+      "review": {
+        "outcome": "approved",
+        "note": "стан: водгук адпраўлены"
+      }
+    },
+    {
+      "id": "native.feedback.stateConflict",
+      "value": "\u51B2\u7A81\uFF1A\u670D\u52A1\u5668\u4E0A\u6709\u66F4\u65B0\u7684\u66F4\u6539",
+      "reviewedSourceHash": "1fefa8a95ccc366bf67ebe9edffb1259c1f3264030082b01a1ab678b762205ac",
+      "review": {
+        "outcome": "approved",
+        "note": "стан канфлікту версій водгуку"
+      }
+    },
+    {
+      "id": "native.feedback.stateActionRequired",
+      "value": "\u63D0\u4EA4\u5DF2\u505C\u6B62\uFF1A\u9700\u8981\u5904\u7406",
+      "reviewedSourceHash": "9d3a4807b3c9bbffd40f0adb70348a542c4935461df074bcb77bb0bc9fda1b2e",
+      "review": {
+        "outcome": "approved",
+        "note": "стан, што патрабуе ўвагі карыстальніка"
+      }
+    },
+    {
+      "id": "native.feedback.stateDeletePending",
+      "value": "\u5220\u9664\u7B49\u5F85\u8054\u7F51",
+      "reviewedSourceHash": "5e80f91330578bbbc12509891dacb61ccf3d86569cd63e2c19c8b0061b3dac4a",
+      "review": {
+        "outcome": "approved",
+        "note": "стан чаргі выдалення"
+      }
+    },
+    {
+      "id": "native.feedback.inviteTitle",
+      "value": "\u8FD9\u4E2A\u5BFC\u89C8\u600E\u4E48\u6837\uFF1F\u53EF\u4EE5\u8BC4\u4EF7\u2014\u2014\u5B8C\u5168\u81EA\u613F\u3002",
+      "reviewedSourceHash": "c7bee40548b81ff38a6a66ec43b05e53fbddef58c6708cda09261e14969ac192",
+      "review": {
+        "outcome": "approved",
+        "note": "запрашэнне да ацэнкі; неабавязковасць падкрэсленая"
+      }
+    },
+    {
+      "id": "native.feedback.inviteRate",
+      "value": "\u8BC4\u4EF7\u5BFC\u89C8",
+      "reviewedSourceHash": "bff14adc9bcb8d672c62ee6ff83e10e26542a927104e7a053ac287c5bda11c3f",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка запрашэння: ацаніць гайд"
+      }
+    },
+    {
+      "id": "native.feedback.inviteDismiss",
+      "value": "\u4E0D\u7528\u4E86\uFF0C\u8C22\u8C22",
+      "reviewedSourceHash": "974b4b9cc64413a1293c3743bc76db631f6dd4c5f5639b0631869c67474cfeaf",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка адмовы ад запрашэння; ветліва, без наказу"
+      }
+    },
+    {
+      "id": "native.feedback.ratePlace",
+      "value": "\u8BC4\u4EF7\u5730\u70B9",
+      "reviewedSourceHash": "6e2584651cd2326b0266694baa27f4fff406f1f8b837f0d8a71ad801cc5d466b",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка ацэнкі месца"
+      }
+    },
+    {
+      "id": "native.feedback.placeVisitTitle",
+      "value": "\u4F60\u6765\u8FC7\u8FD9\u91CC\u5417\uFF1F",
+      "reviewedSourceHash": "0994331436fdf28985b497ebebc27eda56b5554fe582e29ce82b2b30f853be3a",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак самаацэнкі візіту"
+      }
+    },
+    {
+      "id": "native.feedback.placeVisitBody",
+      "value": "\u5730\u70B9\u8BC4\u4EF7\u662F\u81EA\u884C\u786E\u8BA4\u5230\u8BBF\uFF0C\u5E76\u975E\u5DF2\u6838\u5B9E\u7684\u8BBF\u95EE\u3002",
+      "reviewedSourceHash": "e89b4ab7e51c7a16d7d4fabf295cfec3cda0541e67d1e43625e17ccfaa08efad",
+      "review": {
+        "outcome": "approved",
+        "note": "тлумачэнне: самаацэнка візіту, не праверанае наведванне"
+      }
+    },
+    {
+      "id": "native.feedback.placeVisitAccept",
+      "value": "\u6765\u8FC7\u2014\u2014\u53BB\u8BC4\u4EF7",
+      "reviewedSourceHash": "0e1ffe61222b1128e9dbd9f7cfa8b3ee8434076f10e2de057164a605e328737a",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка прыняцця візіту і пераходу да ацэнкі"
+      }
+    },
+    {
+      "id": "native.feedback.mySection",
+      "value": "\u6211\u7684\u8BC4\u4EF7",
+      "reviewedSourceHash": "18fa60ddb291c97c36851de7137bef11352764d5351e9feefa70017f9dd00f46",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак уласных ацэнак"
+      }
+    },
+    {
+      "id": "native.feedback.myEmpty",
+      "value": "\u8FD8\u6CA1\u6709\u81EA\u5DF1\u7684\u8BC4\u4EF7",
+      "reviewedSourceHash": "ee12ec4175a34a04399cba704ce02b3f82083d2997d3b3797b32c2310a8bdf8a",
+      "review": {
+        "outcome": "approved",
+        "note": "пусты стан уласных ацэнак"
+      }
+    },
+    {
+      "id": "native.feedback.myEdit",
+      "value": "\u4FEE\u6539",
+      "reviewedSourceHash": "1e2c31b3f9c9402946eb392ff6897700c2c783770a794069b734a01a42a35a04",
+      "review": {
+        "outcome": "approved",
+        "note": "кнопка змены ўласнай ацэнкі"
+      }
+    },
+    {
+      "id": "native.feedback.guideWord",
+      "value": "\u5BFC\u89C8",
+      "reviewedSourceHash": "70a569cfca827aef72de7c814f0c0b3760b520f5c21dc43a67fdaad90af74272",
+      "review": {
+        "outcome": "approved",
+        "note": "слова \u00ABгід\u00BB у спісе ўласных ацэнак; тэрмін \u5BFC\u89C8"
+      }
+    },
+    {
+      "id": "native.feedback.placeWord",
+      "value": "\u5730\u70B9",
+      "reviewedSourceHash": "e176e75a0103ac1243532bb956a4ee2dcc9af7aaad80c35938170679577839f7",
+      "review": {
+        "outcome": "approved",
+        "note": "слова \u00ABмесца\u00BB ў спісе ўласных ацэнак"
+      }
+    },
+    {
+      "id": "native.feedback.ratingOf",
+      "value": "5\u5206\u4E2D\u7684${score}\u5206",
+      "reviewedSourceHash": "c71e6b03486be62dcfc58bf64e222b7d93e4f974732e5f621d966b031562bc69",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака ацэнкі ў спісе; той жа шаблон, што і ў starLabel"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.interesting_stories",
+      "value": "\u6545\u4E8B\u6709\u8DA3",
+      "reviewedSourceHash": "9959daf3a456d2382c1efd4faca72b689f0df1ed2923ab0cd4e821446c3120d6",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына ацэнкі гіда"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.clear_delivery",
+      "value": "\u8BB2\u8FF0\u6E05\u6670",
+      "reviewedSourceHash": "d74083aa9de049473fa1b5f857260c195797d52ddcbe3c1fa64c49748c08adc1",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына ацэнкі гіда"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.too_long",
+      "value": "\u592A\u957F",
+      "reviewedSourceHash": "14403d1bc95f6a5d57217237ac27a05879d0191466a34aafa1cd624ee9ebe116",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына ацэнкі гіда"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.hard_to_navigate",
+      "value": "\u96BE\u4EE5\u5BFC\u822A",
+      "reviewedSourceHash": "079108e7d5462f0bcbd157ec5da0e366f87e54d39e35364ce6debfc82a419ca8",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына ацэнкі гіда"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.audio_problem",
+      "value": "\u97F3\u9891\u95EE\u9898",
+      "reviewedSourceHash": "c3ef154e822117153d07ef625a31c3a886cf523099025dcf69b3941542c6e61a",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына ацэнкі гіда"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.description_mismatch",
+      "value": "\u4E0E\u63CF\u8FF0\u4E0D\u7B26",
+      "reviewedSourceHash": "75d78626465f6da0aa52eaf8b48754720f68b28c6af0c8feeea58eef98bfbce2",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына ацэнкі гіда"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.worth_visiting",
+      "value": "\u503C\u5F97\u4E00\u6E38",
+      "reviewedSourceHash": "2ae5e44e2805dc7511473cce8c1d43338792b3eef17802eb05c01193bbe53643",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына ацэнкі месца"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.hard_to_reach",
+      "value": "\u96BE\u4EE5\u5230\u8FBE",
+      "reviewedSourceHash": "f97aeea0ff8926e5bf06bddaa142ec75cc4be468a7bdb601c486504f12b5f7bd",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына ацэнкі месца"
+      }
+    },
+    {
+      "id": "native.feedback.reasonText.access_problem",
+      "value": "\u901A\u9053\u95EE\u9898",
+      "reviewedSourceHash": "f4417031a4fef7cc54c3916e66770fcda831e75baa3bb6e70b3dd08b9cf9f54e",
+      "review": {
+        "outcome": "approved",
+        "note": "прычына ацэнкі месца"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-input-invalid",
+      "value": "\u6570\u636E\u672A\u88AB\u63A5\u53D7\uFF1A\u8BF7\u68C0\u67E5\u6240\u9009\u9879",
+      "reviewedSourceHash": "b22dd71560cdeeb665203c01ed389749a1e6a9c1bf8f642df722e8896dd5bd94",
+      "review": {
+        "outcome": "approved",
+        "note": "памылка водгуку: звесткі не прынятыя"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-write-failed",
+      "value": "\u5199\u5165\u5931\u8D25\uFF1A\u8BF7\u91CD\u8BD5",
+      "reviewedSourceHash": "4a76d282ed50222f4700e03541a4b46ea0fa43e4c7f715bd742c082c694b2999",
+      "review": {
+        "outcome": "approved",
+        "note": "памылка водгуку: збой запісу"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-transport-failed",
+      "value": "\u7F51\u7EDC\u65E0\u54CD\u5E94\uFF1A\u8BF7\u91CD\u8BD5",
+      "reviewedSourceHash": "ca9f043892af3e9f4cbb37a64b494f6162aef9910123df3b2221f133621b462d",
+      "review": {
+        "outcome": "approved",
+        "note": "памылка водгуку: збой перадачы праз сетку"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-send-no-draft",
+      "value": "\u6CA1\u6709\u53EF\u63D0\u4EA4\u7684\u8349\u7A3F",
+      "reviewedSourceHash": "606c54918b744dbaf923e0375c7be1d96fed06d613e39668887c420ab7b3855c",
+      "review": {
+        "outcome": "approved",
+        "note": "памылка водгуку: няма чарнавіка для адпраўкі"
+      }
+    },
+    {
+      "id": "native.feedback.errorText.feedback-resolution-required",
+      "value": "\u8BF7\u5148\u5728\u670D\u52A1\u5668\u4E0A\u68C0\u67E5\u72B6\u6001",
+      "reviewedSourceHash": "d16eb424c719e978864af4ab241f6608a78f9eead95acc2db963e3829b630555",
+      "review": {
+        "outcome": "approved",
+        "note": "памылка водгуку: спачатку трэба вырашыць канфлікт на серверы"
+      }
+    },
+    {
+      "id": "web.ui.attributionHeading",
+      "value": "\u6765\u6E90\u4E0E\u7F72\u540D",
+      "reviewedSourceHash": "262a71e1ab35a50b648afe2d0ff23ef8717a62f70fba6352bd968d683f484fa0",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак блока атрыбуцыі гіда і кропкі"
+      }
+    },
+    {
+      "id": "web.ui.authorPhoto",
+      "value": "\u4F5C\u8005\u7167\u7247",
+      "reviewedSourceHash": "255e15ab9725891d3876cf7fa0c0e80961748701bb583a51c41bdd5714bb864a",
+      "review": {
+        "outcome": "approved",
+        "note": "пазнака фота з media.json license author_own"
+      }
+    },
+    {
+      "id": "web.ui.usageRulesTitle",
+      "value": "\u4F7F\u7528\u89C4\u5219",
+      "reviewedSourceHash": "f3e2ee1e865651348bc54a8a9e679279bd31f087ff6057d72569f85a2b043212",
+      "review": {
+        "outcome": "approved",
+        "note": "загаловак і ссылка на старонку правілаў выкарыстання"
+      }
+    },
+    {
+      "id": "web.ui.usageRulesIntro",
+      "value": "\u5386\u53F2\u8D44\u6599\u7684\u6765\u6E90\u6807\u6CE8\u5728\u5BFC\u89C8\u548C\u5730\u70B9\u9875\u9762\u4E0A\u3002",
+      "reviewedSourceHash": "d2f27dc53f8052c06eb56bac06f8619251d5b371d0f3e4c5c45e9476a0690ff9",
+      "review": {
+        "outcome": "approved",
+        "note": "тлумачэнне на старонцы правілаў выкарыстання"
+      }
+    },
+    {
+      "id": "web.ui.usageRulesReuse",
+      "value": "\u518D\u6B21\u4F7F\u7528\u8D44\u6599\u524D\uFF0C\u8BF7\u5728\u539F\u51FA\u5904\u6838\u5B9E\u5176\u6743\u5229\uFF0C\u6216\u8054\u7CFB\u6743\u5229\u4EBA\u3002",
+      "reviewedSourceHash": "b9dc6996d20d14ad7a565f18f0cb0c1726e49c4ac4d7f8ae1dd3d9f8628ffb94",
+      "review": {
+        "outcome": "approved",
+        "note": "агульная засцярога на старонцы правілаў выкарыстання"
+      }
+    }
+  ]
+}

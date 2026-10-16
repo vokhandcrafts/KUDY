@@ -154,4 +154,22 @@ export const PREVIEW_STRINGS_DATA = {
     "storageExit": "Frigör utrymme i KUDY",
     "storageFullDetail": (mb: number) => `det saknas utrymme: ytterligare ${mb} MB krävs`,
   },
+  "zh": {
+    "detail": (detail: { readonly kind: string; readonly count?: number }) => detail.kind === "damaged" ? `\u5B89\u88C5\u5305\u5DF2\u635F\u574F\uFF1A\u9700\u8981\u91CD\u65B0\u4E0B\u8F7D` : detail.kind === "missing-files" ? `\u7F3A\u5C11\u6587\u4EF6\uFF1A${detail.count}` : detail.kind === "stale" ? `\u6709\u53EF\u7528\u66F4\u65B0` : `\u5B89\u88C5\u5305\u4E0D\u5B8C\u6574`,
+    "downloadFailed": "\u4E0B\u8F7D\u5931\u8D25\u3002",
+    "label": {
+      "download": "\u4E0B\u8F7D",
+      "start": "\u5F00\u59CB",
+    },
+    "reason": {
+      "preview#download-unavailable": "\u6B64\u7248\u672C\u4E0D\u652F\u6301\u4E0B\u8F7D\u3002",
+      "preview#not-published": "\u5BFC\u89C8\u672A\u53D1\u5E03\u3002",
+      "preview#purchase-required": "\u9700\u8981\u8D2D\u4E70\u3002",
+      "preview#storage-unknown": "\u5B58\u50A8\u4E0D\u53EF\u7528\u3002",
+      "preview#verify-unavailable": "\u6821\u9A8C\u4E0D\u53EF\u7528\u3002",
+    },
+    "retry": "\u91CD\u8BD5",
+    "storageExit": "\u5728KUDY\u4E2D\u91CA\u653E\u7A7A\u95F4",
+    "storageFullDetail": (mb: number) => `\u7A7A\u95F4\u4E0D\u8DB3\uFF1A\u8FD8\u9700\u8981${mb}MB`,
+  },
 };

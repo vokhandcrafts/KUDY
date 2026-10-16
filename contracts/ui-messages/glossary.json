@@ -4,7 +4,7 @@
   "provenance": {
     "kind": "glossary",
     "reviewer": "owner",
-    "evidence": "тэрміны выцягнутыя з зацверджаных перакладных набораў en/uk (міграцыя G06.05 #280 + рэв'ю G21.25 #558), анкераваныя на кананічныя запісы source.json; паходжанне кожнага тэрміна — у яго provenance па форме G21.27; дапоўнена de-тэрмінамі ў задачы G21.10 (#544): выбары занкерваныя на лакатары de-набору, сэмантычны рэвью — у results/G21.10.md; дапоўнена es-тэрмінамі ў задачы G21.11 (#545): выбары занкерваныя на лакатары es-набору, сэмантычны рэвью — у results/G21.11.md; дапоўнена fr-тэрмінамі ў задачы G21.12 (#546): выбары занкерваныя на лакатары fr-набору, сэмантычны рэвью — у results/G21.12.md; дапоўнена cs-тэрмінамі ў задачы G21.13 (#547): выбары занкерваныя на лакатары cs-набору, сэмантычны рэвью — у results/G21.13.md"
+    "evidence": "тэрміны выцягнутыя з зацверджаных перакладных набораў en/uk (міграцыя G06.05 #280 + рэв'ю G21.25 #558), анкераваныя на кананічныя запісы source.json; паходжанне кожнага тэрміна — у яго provenance па форме G21.27; дапоўнена de-тэрмінамі ў задачы G21.10 (#544): выбары занкерваныя на лакатары de-набору, сэмантычны рэвью — у results/G21.10.md; дапоўнена es-тэрмінамі ў задачы G21.11 (#545): выбары занкерваныя на лакатары es-набору, сэмантычны рэвью — у results/G21.11.md; дапоўнена fr-тэрмінамі ў задачы G21.12 (#546): выбары занкерваныя на лакатары fr-набору, сэмантычны рэвью — у results/G21.12.md; дапоўнена cs-тэрмінамі ў задачы G21.13 (#547): выбары занкерваныя на лакатары cs-набору, сэмантычны рэвью — у results/G21.13.md; дапоўнена zh-тэрмінамі ў задачы G21.46 (#670): выбары занкерваныя на лакатары zh-набору, тэрміны батарэі G21.39 §6.3 (корпус AOSP zh-rCN), рэвью — у results/G21.46.md"
   },
   "entries": [
     {
@@ -91,6 +91,17 @@
             "locator": "translations/sv.json#native.nearby.guideLabel",
             "reason": "sv трымае запазычаны guide (Guider →, Guide, Öppna guidebeskrivningen) — як en, кароткі і нэўтральны для каталога і карткі падказкі",
             "date": "2026-10-05"
+          }
+        },
+        "zh": {
+          "term": "\u5BFC\u89C8",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "\u5BFC\u89C8",
+            "locator": "translations/zh.json#native.nearby.guideLabel",
+            "reason": "zh трымае \u5BFC\u89C8 у запісах (\u5BFC\u89C8 →, \u5BFC\u89C8, \u6253\u5F00\u5BFC\u89C8\u8BF4\u660E) — электронны аўдыягід па батарэі G21.39; \u5BFC\u6E38 (чалавек-экскурсавод) свядома не ўжываецца",
+            "date": "2026-10-17"
           }
         }
       }
@@ -181,6 +192,17 @@
             "reason": "sv трымае стоп (ett) — словаформа інварыянтная ў лічбах (Stopp: 5, Stopp 3, Nästa stopp), правільна без ICU; дзеянне спыніць тэйзер — асобнае Stoppa",
             "date": "2026-10-05"
           }
+        },
+        "zh": {
+          "term": "\u5730\u70B9",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "\u5730\u70B9",
+            "locator": "translations/zh.json#native.chrome.stopsCount",
+            "reason": "назоўнік — \u5730\u70B9 (\u5730\u70B9\uFF1AN, \u5730\u70B9 N, \u4E0B\u4E00\u4E2A\u5730\u70B9); кропкі маршруту пешай экскурсіі, не транспартнае \u5DF4\u58EB\u7AD9; дзеянне спыніць тэйзер — асобнае \u505C\u6B62 (native.place.stopLabel), uk/de/es/fr/cs-прэцэдэнт немешвання сэнсаў",
+            "date": "2026-10-17"
+          }
         }
       }
     },
@@ -268,6 +290,17 @@
             "locator": "translations/sv.json#native.chrome.currentWalk",
             "reason": "walk → promenad паўсюль у зацверджаным sv-наборы (Promenad, Aktuell promenad, Tidigare promenader, Avsluta promenaden)",
             "date": "2026-10-05"
+          }
+        },
+        "zh": {
+          "term": "\u6563\u6B65",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "\u6563\u6B65",
+            "locator": "translations/zh.json#native.chrome.currentWalk",
+            "reason": "walk → \u6563\u6B65 паўсюль у zh-наборы (\u6563\u6B65, \u5F53\u524D\u6563\u6B65, \u5386\u53F2\u6563\u6B65, \u7ED3\u675F\u6563\u6B65) — тэрмін батарэі G21.39 §6.3; альтэрнатыва \u6F2B\u6B65 адхіленая",
+            "date": "2026-10-17"
           }
         }
       }
@@ -357,6 +390,17 @@
             "reason": "адзін корань ladda ner для абодвух сэнсаў (Ladda ner, Nedladdningen misslyckades, inte nedladdad) — en/uk-прэцэдэнт",
             "date": "2026-10-05"
           }
+        },
+        "zh": {
+          "term": "\u4E0B\u8F7D",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "\u4E0B\u8F7D",
+            "locator": "translations/zh.json#native.preview.label.download",
+            "reason": "адзін корань \u4E0B\u8F7D для абодвух сэнсаў (\u4E0B\u8F7D, \u4E0B\u8F7D\u5931\u8D25\u3002, \u5BFC\u89C8\u672A\u4E0B\u8F7D\u3002) — назоўнікавы сэнс па корпусе AOSP zh-rCN (\u4E0B\u8F7D\u5185\u5BB9), бо слоўнікі даюць толькі дзеяслоў",
+            "date": "2026-10-17"
+          }
         }
       }
     },
@@ -443,6 +487,17 @@
             "locator": "translations/sv.json#native.chrome.catalogUnavailable",
             "reason": "тэрмін недаступнасці; радкі стану трымаюць шведскую канструкцыю «är inte tillgänglig» (Katalogen är inte tillgänglig), ад'ектыўнае otillgänglig у дэградацыйных/часовых радках",
             "date": "2026-10-05"
+          }
+        },
+        "zh": {
+          "term": "\u4E0D\u53EF\u7528",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "\u4E0D\u53EF\u7528",
+            "locator": "translations/zh.json#native.chrome.catalogUnavailable",
+            "reason": "unavailable → \u4E0D\u53EF\u7528 у радках стану (\u76EE\u5F55\u4E0D\u53EF\u7528, \u7CBE\u9009\u4E0D\u53EF\u7528, \u5730\u70B9\u8BE6\u60C5\u4E0D\u53EF\u7528); слоўнікавы прабел закрыты корпусам AOSP zh-rCN, не слоўнікамі",
+            "date": "2026-10-17"
           }
         }
       }
@@ -532,6 +587,17 @@
             "reason": "purchase → köp (Köp, Köp krävs, Köpt · väntar på nedladdning, Tillgängligt efter köp) — адзін корань ва ўсіх радках",
             "date": "2026-10-05"
           }
+        },
+        "zh": {
+          "term": "\u8D2D\u4E70",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "\u8D2D\u4E70",
+            "locator": "translations/zh.json#native.preview.reason.preview#purchase-required",
+            "reason": "purchase → \u8D2D\u4E70 (\u8D2D\u4E70, \u9700\u8981\u8D2D\u4E70\u3002, \u5DF2\u8D2D\u4E70 · \u9700\u8981\u4E0B\u8F7D, \u8D2D\u4E70\u540E\u53EF\u7528); фраза «restore purchases» не слоўнікавая і ў zh не перакладаецца літаральна",
+            "date": "2026-10-17"
+          }
         }
       }
     },
@@ -617,6 +683,17 @@
             "locator": "translations/sv.json#native.run.restoredTitle",
             "reason": "канон без рэстаўрацыйнай метафары (Promenaden fortsätter från en sparad session), тая самая пабудова be/en/uk/de/es/fr/cs; «аднаўленне пакета» → reparera, як es reparación",
             "date": "2026-10-05"
+          }
+        },
+        "zh": {
+          "term": "\u4ECE\u4FDD\u5B58\u7684\u4F1A\u8BDD\u7EE7\u7EED",
+          "provenance": {
+            "status": "resolved",
+            "kind": "reviewed-terminology",
+            "term": "\u4ECE\u4FDD\u5B58\u7684\u4F1A\u8BDD\u7EE7\u7EED",
+            "locator": "translations/zh.json#native.run.restoredTitle",
+            "reason": "канон без рэстаўрацыйнай метафары: \u6563\u6B65\u5DF2\u4ECE\u4FDD\u5B58\u7684\u4F1A\u8BDD\u7EE7\u7EED — тая самая пабудова, што be/en/uk/de/es/fr/cs/sv; слоўнікавае \u6062\u590D свядома не ўжытае",
+            "date": "2026-10-17"
           }
         }
       }

@@ -63,7 +63,7 @@ export const DOMAINS = [
       {
         file: 'components/ui-strings.generated.ts',
         exportName: 'UI_STRINGS',
-        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'],
+        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh'],
         annotation: 'Record<CompleteUiLocaleCode, UiStrings>',
         imports: [
           'import { completeUiLocaleSelfNames, type CompleteUiLocaleCode } from "../contracts/ui-locales.ts";',
@@ -78,13 +78,13 @@ export const DOMAINS = [
   },
   {
     domain: 'native.guideHint',
-    note: 'the nearby guide-hint card\'s words (G07.05 #284); uk keeps the documented be fallback (uk-release-scope §6.4) until its words are authored, de renders its own catalogue (G21.10 #544), es too (G21.11 #545), fr too (G21.12 #546), cs too (G21.13 #547), sv too (G21.14 #548)',
+    note: 'the nearby guide-hint card\'s words (G07.05 #284); uk keeps the documented be fallback (uk-release-scope §6.4) until its words are authored, de renders its own catalogue (G21.10 #544), es too (G21.11 #545), fr too (G21.12 #546), cs too (G21.13 #547), sv too (G21.14 #548), zh too (G21.46 #670)',
     outputs: [
       {
         file: 'components/guide-hint-strings.generated.ts',
         exportName: 'GUIDE_HINT_STRINGS',
-        locales: ['be', 'en', 'de', 'es', 'fr', 'cs', 'sv'],
-        annotation: 'Record<"be" | "en" | "de" | "es" | "fr" | "cs" | "sv", GuideHintStrings>',
+        locales: ['be', 'en', 'de', 'es', 'fr', 'cs', 'sv', 'zh'],
+        annotation: 'Record<"be" | "en" | "de" | "es" | "fr" | "cs" | "sv" | "zh", GuideHintStrings>',
         imports: ['import type { GuideHintStrings } from "../contracts/ui-message-types.ts";'],
       },
     ],
@@ -96,7 +96,7 @@ export const DOMAINS = [
       {
         file: 'controllers/catalog/preview-strings.generated.ts',
         exportName: 'PREVIEW_STRINGS_DATA',
-        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'],
+        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh'],
         signature: {
           // The detail function receives the controller's PreviewDetail state
           // object (kind + the missing-files count), not the raw parameters;
@@ -117,7 +117,7 @@ export const DOMAINS = [
       {
         file: 'controllers/run/runMap-strings.generated.ts',
         exportName: 'RUN_MAP_STRINGS_DATA',
-        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'],
+        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh'],
       },
     ],
   },
@@ -128,7 +128,7 @@ export const DOMAINS = [
       {
         file: 'controllers/place/placeDetail-strings.generated.ts',
         exportName: 'PLACE_DETAIL_STRINGS_DATA',
-        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'],
+        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh'],
       },
     ],
   },
@@ -139,7 +139,7 @@ export const DOMAINS = [
       {
         file: 'controllers/nearby/nearbySurface-strings.generated.ts',
         exportName: 'NEARBY_STRINGS_DATA',
-        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'],
+        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh'],
       },
     ],
   },
@@ -150,7 +150,7 @@ export const DOMAINS = [
       {
         file: 'controllers/commerce/commerce-strings.generated.ts',
         exportName: 'OFFER_STRINGS_DATA',
-        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'],
+        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh'],
       },
     ],
   },
@@ -161,7 +161,7 @@ export const DOMAINS = [
       {
         file: 'controllers/feedback-strings.generated.ts',
         exportName: 'FEEDBACK_STRINGS_DATA',
-        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'],
+        locales: ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh'],
       },
     ],
   },
@@ -177,6 +177,7 @@ export const DOMAINS = [
       { file: 'web/lib/i18n/fr.ts', exportName: 'fr', locales: ['fr'] },
       { file: 'web/lib/i18n/cs.ts', exportName: 'cs', locales: ['cs'] },
       { file: 'web/lib/i18n/sv.ts', exportName: 'sv', locales: ['sv'] },
+      { file: 'web/lib/i18n/zh.ts', exportName: 'zh', locales: ['zh'] },
     ],
   },
 ];
@@ -195,6 +196,28 @@ export function escapeTemplate(text) {
     .replaceAll('\r', '\\r')
     .replaceAll('\n', '\\n')
     .replaceAll('\t', '\\t');
+}
+
+// G21.46 (issue #670, criterion 7): repo bytes stay CJK-free. Every Han,
+// CJK-punctuation, kana or fullwidth codepoint in generated static text is
+// written as a \uXXXX escape, so the committed generated catalogues carry
+// ASCII bytes while the runtime decodes the real glyphs. Cyrillic and
+// Latin-1/Latin-Extended stay literal — the shipped be/uk/de/es/fr/cs/sv
+// words are byte-identical to before. Applied after escapeTemplate or
+// JSON.stringify (both produce literal source text, and the escape is a
+// no-op for every non-CJK codepoint, so it cannot alter those languages).
+const CJK_PATTERN =
+  /[\u2E80-\u2FFF\u3000-\u303F\u3040-\u30FF\u3100-\u312F\u3190-\u31BF\u3200-\u33FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFE10-\uFE4F\uFF00-\uFFEF]|[\u{20000}-\u{2FFFF}]/gu;
+
+export function escapeRepoBytes(text) {
+  return text.replace(CJK_PATTERN, (character) => {
+    const codePoint = character.codePointAt(0);
+    // Astral-plane CJK (Extension B and beyond) needs the \u{...} form —
+    // \uXXXX would only encode the high surrogate and produce broken source.
+    return codePoint > 0xffff
+      ? `\\u{${codePoint.toString(16).toUpperCase()}}`
+      : `\\u${codePoint.toString(16).toUpperCase().padStart(4, '0')}`;
+  });
 }
 
 // Splits a message pattern into literal and parameter segments (the ${name}
@@ -237,7 +260,7 @@ function renderBody(record, value, paramPaths = {}) {
   const body = parseTemplate(value)
     .map((segment) =>
       segment.text !== undefined
-        ? escapeTemplate(segment.text)
+        ? escapeRepoBytes(escapeTemplate(segment.text))
         : `\${${parameterExpression(record, segment.param, paramPaths)}}`,
     )
     .join('');
@@ -301,7 +324,7 @@ export function renderTemplateRecord(record, localeValue, signature) {
       ? `${parameter.name}.length > 0`
       : `${parameter.name} !== ""`;
     const render = (parts) => parts.map((segment) => segment.text !== undefined
-      ? escapeTemplate(segment.text)
+      ? escapeRepoBytes(escapeTemplate(segment.text))
       : `\${${parameterExpression(record, segment.param)}}`).join('');
     return `${head}\`${render(head2)}\${${guard} ? \`${render(tail)}\` : ""}\``;
   }
@@ -362,7 +385,7 @@ function emitTree(tree, indent) {
     if (value && value.selfNames) {
       lines.push(`${indent}${quoted}: completeUiLocaleSelfNames(),`);
     } else if (typeof value === 'string') {
-      lines.push(`${indent}${quoted}: ${JSON.stringify(value)},`);
+      lines.push(`${indent}${quoted}: ${escapeRepoBytes(JSON.stringify(value))},`);
     } else if (value && value.fn) {
       lines.push(`${indent}${quoted}: ${value.fn},`);
     } else {
