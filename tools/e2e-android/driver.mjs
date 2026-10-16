@@ -19,7 +19,9 @@ import path from 'node:path';
 const ADB_TIMEOUT_MS = 15000;
 const INSTALL_TIMEOUT_MS = 300000;
 const DUMP_TIMEOUT_MS = 15000;
-const DUMP_ATTEMPTS = 3;
+const DUMP_ATTEMPTS = 5;
+const DUMP_RETRY_DELAY_MS = 400;
+const DUMP_MIN_COMMAND_WINDOW_MS = 100;
 const DUMP_DEVICE_PATH = '/sdcard/kudy-e2e-ui.xml';
 const POLL_INTERVAL_MS = 500;
 const ARTIFACT_BASENAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
@@ -284,30 +286,52 @@ export class E2eDriver {
     await this.exec(['emu', 'geo', 'fix', String(longitude), String(latitude)]);
   }
 
-  // Dump the current UI hierarchy to a local file. The device-side file is
-  // removed first and the local one never pre-exists, so a dump can only be
-  // this screen's (G21.36 protocol).
+  // Dump the current UI hierarchy to a local file. Both copies are cleared
+  // before every attempt so a retry cannot pull an earlier screen (G21.36).
   async dump(basename, { timeoutMs = DUMP_TIMEOUT_MS } = {}) {
     const localPath = this.artifactPath(basename);
-    fs.rmSync(localPath, { force: true });
-    await this.exec(['shell', 'rm', '-f', DUMP_DEVICE_PATH], { timeoutMs: 5000 }).catch((error) => {
-      // A missing file makes rm fail on some images; the dump below still
-      // decides. Surface the reason instead of swallowing it.
-      fs.appendFileSync(this.artifactPath('driver.log'), `rm before dump: ${error.message}\n`);
-    });
+    const deadline = Date.now() + timeoutMs;
     let lastError = null;
     for (let attempt = 1; attempt <= DUMP_ATTEMPTS; attempt += 1) {
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) break;
+      if (remainingMs < DUMP_MIN_COMMAND_WINDOW_MS) break;
       try {
-        await this.exec(['shell', 'uiautomator', 'dump', DUMP_DEVICE_PATH], { timeoutMs });
-        await this.exec(['pull', DUMP_DEVICE_PATH, localPath], { timeoutMs });
+        fs.rmSync(localPath, { force: true });
+        await this.exec(
+          ['shell', 'rm', '-f', DUMP_DEVICE_PATH],
+          { timeoutMs: Math.min(5000, remainingMs) },
+        ).catch((error) => {
+          // A missing file makes rm fail on some images; the dump below still
+          // decides. Surface the reason instead of swallowing it.
+          fs.appendFileSync(this.artifactPath('driver.log'), `rm before dump attempt ${attempt}: ${error.message}\n`);
+        });
+        const dumpTimeoutMs = deadline - Date.now();
+        if (dumpTimeoutMs < DUMP_MIN_COMMAND_WINDOW_MS) {
+          lastError ??= new DriverError(`dump deadline left no useful window before uiautomator on attempt ${attempt}`);
+          break;
+        }
+        await this.exec(['shell', 'uiautomator', 'dump', DUMP_DEVICE_PATH], { timeoutMs: dumpTimeoutMs });
+        const pullTimeoutMs = deadline - Date.now();
+        if (pullTimeoutMs < DUMP_MIN_COMMAND_WINDOW_MS) {
+          lastError ??= new DriverError(`dump deadline left no useful window before pull on attempt ${attempt}`);
+          break;
+        }
+        await this.exec(['pull', DUMP_DEVICE_PATH, localPath], { timeoutMs: pullTimeoutMs });
         const xml = fs.readFileSync(localPath, 'utf8');
         if (xml.includes('<node')) return { localPath, xml };
         lastError = new DriverError(`dump at ${localPath} has no <node> content (${xml.length} bytes)`);
       } catch (error) {
         lastError = error;
       }
+      if (attempt < DUMP_ATTEMPTS) {
+        const remainingMs = deadline - Date.now();
+        const delayMs = Math.min(DUMP_RETRY_DELAY_MS * attempt, remainingMs);
+        if (remainingMs - delayMs < DUMP_MIN_COMMAND_WINDOW_MS) break;
+        if (delayMs > 0) await pollDelay(delayMs);
+      }
     }
-    throw new DriverError(`uiautomator dump failed after ${DUMP_ATTEMPTS} attempts: ${lastError?.message ?? 'unknown'}`);
+    throw new DriverError(`uiautomator dump failed within ${timeoutMs} ms: ${lastError?.message ?? 'unknown'}`);
   }
 
   async screenshot(basename) {
@@ -324,22 +348,45 @@ export class E2eDriver {
   // deadline passes. The rolling dump file always holds the LAST observed
   // screen, so a timeout names the selector and where to look.
   async waitFor(selector, { timeoutMs = 30000, dumpBasename = 'last-wait-dump.xml' } = {}) {
-    const startedAt = Date.now();
+    const deadline = Date.now() + timeoutMs;
     let lastDumpPath = null;
+    let lastDumpError = null;
     for (;;) {
-      const dump = await this.dump(dumpBasename, { timeoutMs: DUMP_TIMEOUT_MS });
-      lastDumpPath = dump.localPath;
-      const node = findNode(parseDump(dump.xml), selector);
-      if (node) return node;
-      if (Date.now() - startedAt >= timeoutMs) {
-        throw new DriverError(
-          `timeout after ${timeoutMs} ms waiting for ${describeSelector(selector)}; ` +
-            `last UI dump: ${lastDumpPath} (screenshot with .screenshot() for the same moment)`,
-          { selector: describeSelector(selector), dump: lastDumpPath },
-        );
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) break;
+      if (remainingMs < DUMP_MIN_COMMAND_WINDOW_MS) {
+        await pollDelay(remainingMs);
+        break;
       }
-      await pollDelay();
+      let dump;
+      try {
+        dump = await this.dump(dumpBasename, { timeoutMs: Math.min(DUMP_TIMEOUT_MS, remainingMs) });
+      } catch (error) {
+        lastDumpPath = null;
+        lastDumpError = error;
+      }
+      if (dump) {
+        lastDumpPath = dump.localPath;
+        lastDumpError = null;
+        const node = findNode(parseDump(dump.xml), selector);
+        if (node) return node;
+      }
+      const remainingAfterDump = deadline - Date.now();
+      if (remainingAfterDump <= 0) break;
+      const delayMs = Math.min(POLL_INTERVAL_MS, remainingAfterDump);
+      if (remainingAfterDump - delayMs < DUMP_MIN_COMMAND_WINDOW_MS) {
+        await pollDelay(remainingAfterDump);
+        break;
+      }
+      await pollDelay(delayMs);
     }
+    const lastDump = lastDumpPath ?? '(no successful dump)';
+    const dumpError = lastDumpError ? `; last dump error: ${lastDumpError.message}` : '';
+    throw new DriverError(
+      `timeout after ${timeoutMs} ms waiting for ${describeSelector(selector)}; ` +
+        `last UI dump: ${lastDump}${dumpError} (screenshot with .screenshot() for the same moment)`,
+      { selector: describeSelector(selector), dump: lastDumpPath },
+    );
   }
 
   async tapNode(node) {
@@ -355,8 +402,8 @@ export class E2eDriver {
   }
 }
 
-async function pollDelay() {
+async function pollDelay(intervalMs = POLL_INTERVAL_MS) {
   await new Promise((resolve) => {
-    setTimeout(resolve, POLL_INTERVAL_MS);
+    setTimeout(resolve, intervalMs);
   });
 }

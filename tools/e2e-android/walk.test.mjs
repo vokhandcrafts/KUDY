@@ -18,11 +18,16 @@ test('walk seeds the emulator position before starting its location watcher', as
 test('walk map point helpers use native list or schematic marker as rendered', async () => {
   for (const path of ['native', 'schematic']) {
     const taps = [];
+    let pointsListOpen = false;
     const driver = {
       dump: async () => ({ xml: path === 'native'
-        ? '<node resource-id="run-map-points"/><node resource-id="run-point-status-stop-1" text="played"/>'
+        ? `<node resource-id="run-map-points"/>${pointsListOpen ? '<node resource-id="run-point-status-stop-1" text="played"/>' : ''}`
         : '<node resource-id="run-marker-stop-1"/><node resource-id="run-status-stop-1" text="played"/>' }),
-      tapSelector: async ({ testID }) => { taps.push(testID); },
+      tapSelector: async ({ testID }) => {
+        taps.push(testID);
+        if (testID === 'run-map-points') pointsListOpen = !pointsListOpen;
+        if (testID === 'run-point-stop-1') pointsListOpen = false;
+      },
     };
     await tapMapPoint(driver, 'stop-1');
     await visiblePointStatus(driver, 'stop-1', (node) => node.text === 'played', 'fallback-test', 0);
@@ -30,6 +35,27 @@ test('walk map point helpers use native list or schematic marker as rendered', a
       ? ['run-map-points', 'run-point-stop-1', 'run-map-points', 'run-map-points']
       : ['run-marker-stop-1']);
   }
+});
+
+test('walk status polling follows the native map when it loads after the schematic', async () => {
+  const taps = [];
+  let dumps = 0;
+  let pointsListOpen = false;
+  const driver = {
+    dump: async () => {
+      dumps += 1;
+      if (dumps === 1) return { xml: '<node resource-id="run-marker-stop-1"/><node resource-id="run-status-stop-1" text="чакае"/>' };
+      return { xml: `<node resource-id="run-map-points"/>${pointsListOpen ? '<node resource-id="run-point-status-stop-1" text="played"/>' : ''}` };
+    },
+    tapSelector: async ({ testID }) => {
+      taps.push(testID);
+      if (testID === 'run-map-points') pointsListOpen = !pointsListOpen;
+    },
+  };
+
+  const status = await visiblePointStatus(driver, 'stop-1', (node) => node.text === 'played', 'native-load', 1000);
+  assert.equal(status.resourceId, 'run-point-status-stop-1');
+  assert.deepEqual(taps, ['run-map-points', 'run-map-points']);
 });
 
 const target = 'bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a';

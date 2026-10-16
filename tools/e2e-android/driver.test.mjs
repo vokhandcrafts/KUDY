@@ -104,6 +104,113 @@ test('waitFor resolves through the production lookup on a recorded dump', async 
   assert.ok(node.center.x > 0);
 });
 
+test('waitFor retries a transient UI dump failure within its deadline', async () => {
+  const driver = testDriver();
+  let dumps = 0;
+  driver.dump = async (_basename, options) => {
+    dumps += 1;
+    assert.ok(options.timeoutMs > 0 && options.timeoutMs <= 1200);
+    if (dumps === 1) throw new DriverError('simulated transient uiautomator timeout');
+    return { localPath: '/tmp/recovered.xml', xml: readFixture('dump-explore.xml') };
+  };
+
+  const node = await driver.waitFor({ testID: 'screen-Explore' }, { timeoutMs: 1200 });
+  assert.ok(node.center.x > 0);
+  assert.equal(dumps, 2, 'waitFor should continue after a transient dump failure');
+});
+
+test('waitFor bounds dump attempts by its deadline and reports the last dump error', async () => {
+  const driver = testDriver();
+  let dumps = 0;
+  let dumpTimeoutMs = 0;
+  driver.dump = async (_basename, options) => {
+    dumps += 1;
+    dumpTimeoutMs = options.timeoutMs;
+    throw new DriverError('simulated uiautomator unavailable');
+  };
+
+  await assert.rejects(
+    () => driver.waitFor({ testID: 'screen-Missing' }, { timeoutMs: 250 }),
+    (error) => {
+      assert.ok(error instanceof DriverError);
+      assert.match(error.message, /timeout after 250 ms waiting for testID "screen-Missing"/);
+      assert.match(error.message, /last dump error: simulated uiautomator unavailable/);
+      assert.match(error.message, /no successful dump/);
+      return true;
+    },
+  );
+  assert.equal(dumps, 1, 'waitFor must not begin another dump after the deadline');
+  assert.ok(dumpTimeoutMs > 0 && dumpTimeoutMs <= 250);
+});
+
+test('dump retries transiently missing device files before giving up', async () => {
+  const driver = testDriver();
+  let pulls = 0;
+  driver.exec = async (args) => {
+    if (args[0] === 'pull') {
+      pulls += 1;
+      if (pulls < 4) throw new DriverError('device UI dump file is not ready yet');
+      fs.writeFileSync(args[2], '<hierarchy><node resource-id="screen-Explore"/></hierarchy>');
+    }
+    return { stdout: '', stderr: '' };
+  };
+
+  const dump = await driver.dump('dump-retry.xml');
+  assert.equal(pulls, 4, 'a transiently missing file should be retried');
+  assert.match(dump.xml, /screen-Explore/);
+});
+
+test('dump clears the device file before each retry instead of pulling an older screen', async () => {
+  const driver = testDriver();
+  let deviceFileExists = false;
+  let dumps = 0;
+  let pulls = 0;
+  driver.exec = async (args) => {
+    if (args[0] === 'shell' && args[1] === 'rm') deviceFileExists = false;
+    if (args[0] === 'shell' && args[1] === 'uiautomator') {
+      dumps += 1;
+      if (dumps === 1) deviceFileExists = true;
+    }
+    if (args[0] === 'pull') {
+      pulls += 1;
+      if (pulls === 1) throw new DriverError('simulated pull failure after a dump');
+      if (!deviceFileExists) throw new DriverError('remote UI dump file is missing');
+      fs.writeFileSync(args[2], '<hierarchy><node resource-id="old-screen"/></hierarchy>');
+    }
+    return { stdout: '', stderr: '' };
+  };
+
+  await assert.rejects(
+    () => driver.dump('dump-no-stale-retry.xml', { timeoutMs: 1000 }),
+    /remote UI dump file is missing/,
+  );
+  assert.equal(dumps, 2, 'the second attempt must not reuse the first attempt’s device file');
+});
+
+test('dump preserves the last error when backoff leaves no useful retry window', async () => {
+  const driver = testDriver();
+  let dumps = 0;
+  let pulls = 0;
+  let dumpTimeoutMs = 0;
+  driver.exec = async (args, options = {}) => {
+    if (args[0] === 'shell' && args[1] === 'uiautomator') {
+      dumps += 1;
+      dumpTimeoutMs = options.timeoutMs;
+      throw new DriverError('simulated uiautomator timeout');
+    }
+    if (args[0] === 'pull') pulls += 1;
+    return { stdout: '', stderr: '' };
+  };
+
+  await assert.rejects(
+    () => driver.dump('dump-budget.xml', { timeoutMs: 250 }),
+    /uiautomator dump failed within 250 ms: simulated uiautomator timeout/,
+  );
+  assert.equal(dumps, 1, 'the driver must not start a retry without a useful time window');
+  assert.equal(pulls, 0, 'no pull should start after the dump attempt fails');
+  assert.ok(dumpTimeoutMs >= 100 && dumpTimeoutMs <= 250);
+});
+
 test('waitFor ignores a disabled Start until the device reports it enabled', async () => {
   const driver = testDriver();
   let dumps = 0;
