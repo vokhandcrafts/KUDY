@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-17 — назаві кітайскамоўную мадэль для рэвью каталога zh (#670)
+Што зрабіць: выберы LLM, якая зробіць незалежнае рэвью кітайскага UI-каталога (уваходы і працэдура — у [выніку G21.46](agent-tasks/results/G21.46.md), раздзел «Аўтарскі рэвью»), і запусьці гэты праход; без яго задача застаецца blocked-external, а PR не мержыцца. Калі ласка, дай назву і версію мадэлі ў issue.
+PR: https://github.com/vokhandcrafts/KUDY/pull/763 · Issue: [#670](https://github.com/vokhandcrafts/KUDY/issues/670)
+
 ### 2026-10-15 — усталюй дэманстрацыйную версію KUDY
 Што зрабіць: збяры дэма-APK паводле [інструкцыі](demo-preview.md), затым усталюй `android/app/build/outputs/apk/release/app-release.apk` на Android-прыладу. Гэта асобны пакет `by.kudy.app.demo` з прыкладным кантэнтам; не выкарыстоўвай яго маршрут для навігацыі.
 PR: https://github.com/vokhandcrafts/KUDY/pull/760
