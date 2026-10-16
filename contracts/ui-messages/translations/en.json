@@ -104,6 +104,51 @@
       }
     },
     {
+      "id": "native.chrome.demoNearbyMapAccessibility",
+      "value": "Illustrative three-stop diagram",
+      "reviewedSourceHash": "0e0f487df8a6cdd6b102b55fad23fd34872990e187a2f2ff8045950fbfa6b419",
+      "review": {
+        "outcome": "approved",
+        "note": "Пазнака чытача экрана называе ілюстратыўную схему трох кропак; тэрмін маршруту en «stop» узгоднены з глосарыем stop."
+      }
+    },
+    {
+      "id": "native.chrome.demoNearbyMapLabel",
+      "value": "Walk diagram · demo",
+      "reviewedSourceHash": "1829b6458dc887619cb8377e2ac100758f5cad90061438a550be0a620fa1e833",
+      "review": {
+        "outcome": "approved",
+        "note": "Кароткі подпіс называе схему прагулкі і адкрыта пазначае дэма; назва прагулкі en «walk» узгоднена з глосарыем walk."
+      }
+    },
+    {
+      "id": "native.chrome.demoNoticeDetail",
+      "value": "Stories, stops and sounds are samples. This is not a route for navigation.",
+      "reviewedSourceHash": "25cbc93df0b908ae3ae7b81353ad38253b44c79bc3fd50fedebf5e9391b819e8",
+      "review": {
+        "outcome": "approved",
+        "note": "Паведамленне называе гісторыі, кропкі і гукі прыкладамі і захоўвае прамую забарону выкарыстоўваць маршрут для навігацыі; тэрмін en «stop» узгоднены з глосарыем stop."
+      }
+    },
+    {
+      "id": "native.chrome.demoRunMapLabel",
+      "value": "Stop diagram · demo",
+      "reviewedSourceHash": "2b2cf7128548b97eb8fdc8ed19819669c87c9b8afa19d11ac8a9f77706552f4b",
+      "review": {
+        "outcome": "approved",
+        "note": "Подпіс схемы кропак пазначае дэма; тэрмін en «stop» узгоднены з глосарыем stop."
+      }
+    },
+    {
+      "id": "native.chrome.demoVersion",
+      "value": "Demo version",
+      "reviewedSourceHash": "0840fd5f0145a4f2d62a33cc2c765c6d5d478fc0b5591a3fc165311437e3d25d",
+      "review": {
+        "outcome": "approved",
+        "note": "Загаловак дакладна называе версію дэманстрацыйнай і не абяцае сапраўдны кантэнт або навігацыю."
+      }
+    },
+    {
       "id": "native.chrome.differenceText.duration_unknown",
       "value": "duration not assessed",
       "reviewedSourceHash": "aa5a112078a2bbce5d31cfb2eaf8e7ffc469607accdc26f9e44e18b8d6dbe659",
@@ -1443,6 +1488,24 @@
       }
     },
     {
+      "id": "native.run.points",
+      "value": "Route stops",
+      "reviewedSourceHash": "7f8f19103a112298d7480abecc5107770297f14d6af636c8330fa5847c4c6d52",
+      "review": {
+        "outcome": "approved",
+        "note": "Accessible list button for native map stops; checked against the Belarusian source in this change."
+      }
+    },
+    {
+      "id": "native.run.recenter",
+      "value": "Center on my location",
+      "reviewedSourceHash": "7c9707a52b4598b4df1427e7609582b876d93d53e78eefc086b2ea6e9d0574cc",
+      "review": {
+        "outcome": "approved",
+        "note": "New accessibility label for the map recenter button; checked against the Belarusian source in this change."
+      }
+    },
+    {
       "id": "native.run.resume",
       "value": "Resume",
       "reviewedSourceHash": "eebc12f1f868df6992e266f4de878022ad7ba731a55d869b203f5e44b2562286",
@@ -1452,10 +1515,11 @@
     },
     {
       "id": "native.run.schematicNote",
-      "value": "Route points schematic — the city map arrives after the tiles decision",
-      "reviewedSourceHash": "7202049786e88c0cfb035a2fcf10a56d78f72c8911d0a3a06810d076909d7939",
+      "value": "Map loading or unavailable — route points shown as a schematic",
+      "reviewedSourceHash": "2dd5575beeb4e2eceddcb133bd66d0755c8731a769f657860033a6605224b3f7",
       "review": {
-        "outcome": "approved"
+        "outcome": "approved",
+        "note": "Updated fallback wording for the native map loading and error states; reviewed against the changed Belarusian source."
       }
     },
     {
@@ -1820,10 +1884,11 @@
     },
     {
       "id": "web.ui.privacyLocation",
-      "value": "Location is used only in the app and only during an active walk: background location works while the walk is on and stops with it. Coordinates never leave the device — they are not sent to the server and do not enter the event log. On the web channel the visitor’s position is never detected at all.",
-      "reviewedSourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58",
+      "value": "Location is used in the app during an active walk: background location runs while the walk is active and stops with it. The app does not send precise GPS coordinates to the KUDY server or record them in the event log. The online map loads tiles from OpenFreeMap; tile requests reveal the viewed map area to that provider, including the area around your current position while map following is on. The web channel does not detect the visitor’s position.",
+      "reviewedSourceHash": "5c86b06615ae7aa3da7eb2585ba4d46a4e77d5828b159601ca6748a411e476fc",
       "review": {
-        "outcome": "approved"
+        "outcome": "approved",
+        "note": "Map tile requests disclose the viewed area to OpenFreeMap; precise GPS coordinates are not sent to the KUDY server or event log."
       }
     },
     {

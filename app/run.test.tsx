@@ -248,6 +248,30 @@ afterEach(() => {
 });
 
 describe("run map surface", () => {
+  test("only the demo build labels the run diagram", async () => {
+    const previous = process.env.EXPO_PUBLIC_DEMO_MODE;
+    try {
+      process.env.EXPO_PUBLIC_DEMO_MODE = "1";
+      await mountedRunBe();
+      expect(screen.getByText("Схема кропак · дэма")).toBeTruthy();
+    } finally {
+      if (previous === undefined) delete process.env.EXPO_PUBLIC_DEMO_MODE;
+      else process.env.EXPO_PUBLIC_DEMO_MODE = previous;
+    }
+  });
+
+  test("ordinary build has no demo run diagram", async () => {
+    const previous = process.env.EXPO_PUBLIC_DEMO_MODE;
+    process.env.EXPO_PUBLIC_DEMO_MODE = "0";
+    try {
+      await mountedRunBe();
+      expect(screen.queryByText("Схема кропак · дэма")).toBeNull();
+    } finally {
+      if (previous === undefined) delete process.env.EXPO_PUBLIC_DEMO_MODE;
+      else process.env.EXPO_PUBLIC_DEMO_MODE = previous;
+    }
+  });
+
   test("AC1: the map renders the engine's marker states live", async () => {
     const { session, locationPort, audioPort, advance } = makeRunSession();
     const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
@@ -278,6 +302,19 @@ describe("run map surface", () => {
       audioPort.focusLoss();
     });
     await waitFor(() => expect(textOf("run-status-stop-2")).toBe("Порт — даступна"));
+  });
+
+  test("Run hides the schematic note when native tiles load and restores it on failure", async () => {
+    const { session } = makeRunSession();
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    const map = await screen.findByTestId("run-native-map");
+    expect(screen.getByText("Карта загружаецца або недаступная — паказана схема кропак маршруту")).toBeTruthy();
+    act(() => fireEvent(map, "onDidFinishLoadingMap"));
+    expect(screen.queryByText("Карта загружаецца або недаступная — паказана схема кропак маршруту")).toBeNull();
+    act(() => fireEvent(map, "onDidFailLoadingMap"));
+    expect(screen.getByText("Карта загружаецца або недаступная — паказана схема кропак маршруту")).toBeTruthy();
+    expect(screen.getByTestId("run-map-retry")).toBeTruthy();
   });
 
   test("AC3: a marker tap opens the point card on the panel and starts nothing", async () => {

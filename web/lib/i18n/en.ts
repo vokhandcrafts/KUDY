@@ -44,7 +44,7 @@ export const en = {
   "privacyContact": "Questions about this privacy policy can be asked in the issues of the project’s public repository:",
   "privacyDeletion": "Data deletion: in the app, the My KUDY section has a device-deletion button — it clears the event log on the server and the device record; content downloads stay. No email or request needs to be sent.",
   "privacyIntro": "KUDY — audio guides for city walks. This page describes which data the project processes: the free web channel and the mobile app.",
-  "privacyLocation": "Location is used only in the app and only during an active walk: background location works while the walk is on and stops with it. Coordinates never leave the device — they are not sent to the server and do not enter the event log. On the web channel the visitor’s position is never detected at all.",
+  "privacyLocation": "Location is used in the app during an active walk: background location runs while the walk is active and stops with it. The app does not send precise GPS coordinates to the KUDY server or record them in the event log. The online map loads tiles from OpenFreeMap; tile requests reveal the viewed map area to that provider, including the area around your current position while map following is on. The web channel does not detect the visitor’s position.",
   "privacyPurchases": "Purchases go through the app stores (App Store, Google Play): payment data is handled by the store, and the app records only the purchase event fact — route, tier, outcome — with no banking details.",
   "privacyRetention": "Retention: raw sent events are kept for 14 months, then deleted by a scheduled job; aggregated counts per route remain without the device identifier.",
   "privacyTitle": "Privacy",

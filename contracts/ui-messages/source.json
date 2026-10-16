@@ -138,6 +138,61 @@
       "sourceHash": "c6a254fe804abb64bc54bbe20e172db06ed99322075f21a9f868ba5e35a923b1"
     },
     {
+      "id": "native.chrome.demoNearbyMapAccessibility",
+      "source": "Прыкладная схема трох кропак",
+      "context": "Пазнака для чытача экрана: дэма-схема на экране Побач",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#demoNearbyMapAccessibility"
+      ],
+      "sourceHash": "0e0f487df8a6cdd6b102b55fad23fd34872990e187a2f2ff8045950fbfa6b419"
+    },
+    {
+      "id": "native.chrome.demoNearbyMapLabel",
+      "source": "Схема прагулкі · дэма",
+      "context": "Бачны подпіс прыкладнай схемы на экране Побач",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#demoNearbyMapLabel"
+      ],
+      "sourceHash": "1829b6458dc887619cb8377e2ac100758f5cad90061438a550be0a620fa1e833"
+    },
+    {
+      "id": "native.chrome.demoNoticeDetail",
+      "source": "Гісторыі, кропкі і гукі тут прыкладныя. Гэта не гатовы маршрут для навігацыі.",
+      "context": "Заўвага пра прыкладны дэма-кантэнт і забарону выкарыстоўваць яго для навігацыі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#demoNoticeDetail"
+      ],
+      "sourceHash": "25cbc93df0b908ae3ae7b81353ad38253b44c79bc3fd50fedebf5e9391b819e8"
+    },
+    {
+      "id": "native.chrome.demoRunMapLabel",
+      "source": "Схема кропак · дэма",
+      "context": "Бачны подпіс прыкладнай схемы на экране прагулкі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#demoRunMapLabel"
+      ],
+      "sourceHash": "2b2cf7128548b97eb8fdc8ed19819669c87c9b8afa19d11ac8a9f77706552f4b"
+    },
+    {
+      "id": "native.chrome.demoVersion",
+      "source": "Дэманстрацыйная версія",
+      "context": "Загаловак заўвагі пра прыкладны кантэнт на галоўным экране",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "components/ui-strings.ts#demoVersion"
+      ],
+      "sourceHash": "0840fd5f0145a4f2d62a33cc2c765c6d5d478fc0b5591a3fc165311437e3d25d"
+    },
+    {
       "id": "native.chrome.differenceText.duration_unknown",
       "source": "час не ацэнены",
       "context": "Адрозненне прапановы: час не ацэнены",
@@ -2109,6 +2164,28 @@
       "sourceHash": "0e2062fc47a4936d773e4e014d5f1f11c31481de99dceb81a4aa9166acdc30f1"
     },
     {
+      "id": "native.run.points",
+      "source": "Кропкі маршруту",
+      "context": "Назва кнопкі, якая адкрывае даступны спіс кропак на натыўнай карце",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#points"
+      ],
+      "sourceHash": "7f8f19103a112298d7480abecc5107770297f14d6af636c8330fa5847c4c6d52"
+    },
+    {
+      "id": "native.run.recenter",
+      "source": "Да майго месцазнаходжання",
+      "context": "Даступная назва кнопкі вяртання камеры карты да бягучай пазіцыі",
+      "format": "plain",
+      "parameters": [],
+      "migratedFrom": [
+        "controllers/run/runMap.ts#recenter"
+      ],
+      "sourceHash": "7c9707a52b4598b4df1427e7609582b876d93d53e78eefc086b2ea6e9d0574cc"
+    },
+    {
       "id": "native.run.resume",
       "source": "Працягнуць",
       "context": "Кнопка працягу прыпыненай прагулкі",
@@ -2121,14 +2198,14 @@
     },
     {
       "id": "native.run.schematicNote",
-      "source": "Схема кропак маршруту — карта горада зʼявіцца пасля рашэння пра тайлы",
-      "context": "Заўвага схематычнай карты: тайлы чакаюць рашэння",
+      "source": "Карта загружаецца або недаступная — паказана схема кропак маршруту",
+      "context": "Заўвага схематычнай карты падчас загрузкі або пры недаступнасці тайлаў",
       "format": "plain",
       "parameters": [],
       "migratedFrom": [
         "controllers/run/runMap.ts#schematicNote"
       ],
-      "sourceHash": "7202049786e88c0cfb035a2fcf10a56d78f72c8911d0a3a06810d076909d7939"
+      "sourceHash": "2dd5575beeb4e2eceddcb133bd66d0755c8731a769f657860033a6605224b3f7"
     },
     {
       "id": "native.run.status.available",
@@ -2627,14 +2704,14 @@
     },
     {
       "id": "web.ui.privacyLocation",
-      "source": "Лакацыя выкарыстоўваецца толькі ў дадатку і толькі падчас актыўнай прагулкі: фонавае вызначэнне месца працуе, пакуль ідзе прагулка, і спыняецца разам з ёй. Каардынаты не пакідаюць прыладу — яны не перадаюцца на сервер і не трапляюць у лог падзей. На вэб-канале пазіцыя наведвальніка не вызначаецца зусім.",
-      "context": "Параграф прыватнасці: лакацыя толькі ў дадатку падчас прагулкі",
+      "source": "Лакацыя выкарыстоўваецца толькі ў дадатку і толькі падчас актыўнай прагулкі: фонавае вызначэнне месца працуе, пакуль ідзе прагулка, і спыняецца разам з ёй. Дадатак не перадае дакладныя GPS-каардынаты на сервер KUDY і не запісвае іх у лог падзей. Анлайн-карта загружае тайлы з OpenFreeMap: запыты раскрываюць правайдару вобласць карты, у тым ліку вакол бягучай пазіцыі, калі ўключана сачэнне. На вэб-канале пазіцыя наведвальніка не вызначаецца.",
+      "context": "Параграф прыватнасці: GPS падчас прагулкі і анлайн-тайлы OpenFreeMap",
       "format": "plain",
       "parameters": [],
       "migratedFrom": [
         "web/lib/i18n/be.ts#privacyLocation"
       ],
-      "sourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58"
+      "sourceHash": "5c86b06615ae7aa3da7eb2585ba4d46a4e77d5828b159601ca6748a411e476fc"
     },
     {
       "id": "web.ui.privacyPurchases",

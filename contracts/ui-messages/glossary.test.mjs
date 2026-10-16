@@ -56,6 +56,42 @@ test('the seven translator-facing terms of issue criterion 1 are present and cov
   }
 });
 
+test('demo map copy uses the reviewed stop terminology and records review reasons', () => {
+  const demoIds = [
+    'native.chrome.demoNearbyMapAccessibility',
+    'native.chrome.demoNearbyMapLabel',
+    'native.chrome.demoNoticeDetail',
+    'native.chrome.demoRunMapLabel',
+    'native.chrome.demoVersion',
+  ];
+  for (const locale of allowedLocales.filter((code) => code !== sourceDoc.source_locale)) {
+    const set = loadUiMessageTranslations(join(here, 'translations', `${locale}.json`), sourceDoc, allowedLocales);
+    const demo = new Map(set.records.filter((record) => demoIds.includes(record.id)).map((record) => [record.id, record]));
+    assert.equal(demo.size, demoIds.length, `${locale}: complete demo copy`);
+    for (const record of demo.values()) {
+      assert.equal(record.review.outcome, 'approved');
+      assert.ok(record.review.note?.length > 20, `${locale}/${record.id}: review reason`);
+      assert.doesNotMatch(record.review.note, /review with this PR/i);
+    }
+    if (locale === 'uk' || locale === 'cs') {
+      const term = locale === 'uk' ? /точ/iu : /zastavení/iu;
+      for (const id of [demoIds[0], demoIds[2], demoIds[3]]) {
+        assert.match(demo.get(id).value, term, `${locale}/${id}: glossary stop term`);
+      }
+    }
+  }
+});
+
+test('native Run map copy keeps the reviewed stop terminology', () => {
+  for (const [locale, term] of [['de', /station/iu], ['cs', /zastavení/iu]]) {
+    const set = loadUiMessageTranslations(join(here, 'translations', `${locale}.json`), sourceDoc, allowedLocales);
+    const records = new Map(set.records.map((record) => [record.id, record.value]));
+    for (const id of ['native.run.points', 'native.run.schematicNote']) {
+      assert.match(records.get(id), term, `${locale}/${id}: glossary stop term`);
+    }
+  }
+});
+
 test('glossary_anchor_unknown: an entry anchored outside the canonical source is rejected', () => {
   const doc = shippedGlossary();
   doc.entries[0].recordIds.push('native.chrome.notARecord');

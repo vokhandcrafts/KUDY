@@ -13,6 +13,12 @@ import { fileURLToPath } from 'node:url';
 
 import { be } from './lib/i18n/be.ts';
 import { en } from './lib/i18n/en.ts';
+import { uk } from './lib/i18n/uk.ts';
+import { de } from './lib/i18n/de.ts';
+import { es } from './lib/i18n/es.ts';
+import { fr } from './lib/i18n/fr.ts';
+import { cs } from './lib/i18n/cs.ts';
+import { sv } from './lib/i18n/sv.ts';
 
 const WEB_ROOT = path.dirname(fileURLToPath(import.meta.url));
 
@@ -23,16 +29,16 @@ const ROUTE_FILES = ['app/(be)/privacy/page.tsx', 'app/[locale]/privacy/page.tsx
 const REQUIRED_MARKERS: Record<string, string[]> = {
   be: [
     'не збірае акаўнтаў',
-    'не пакідаюць прыладу',
-    'не перадаюцца на сервер',
+    'не перадае дакладныя GPS-каардынаты на сервер KUDY',
+    'запыты раскрываюць правайдару вобласць карты',
     'толькі па яўнай згодзе',
     '14 месяцаў',
     'My KUDY',
   ],
   en: [
     'collects no accounts',
-    'never leave the device',
-    'not sent to the server',
+    'does not send precise GPS coordinates to the KUDY server',
+    'tile requests reveal the viewed map area',
     'only with explicit consent',
     '14 months',
     'My KUDY',
@@ -82,5 +88,13 @@ test('required privacy statements are present in both locales', () => {
     for (const marker of REQUIRED_MARKERS[locale]) {
       assert.ok(text.includes(marker), `${locale} privacy text must contain "${marker}"`);
     }
+    assert.match(strings.privacyLocation, /OpenFreeMap/);
+    assert.doesNotMatch(strings.privacyLocation, /не пакідаюць прыладу|never leave the device/);
+  }
+});
+
+test('every shipped privacy page discloses the online tile provider', () => {
+  for (const [locale, strings] of Object.entries({ be, en, uk, de, es, fr, cs, sv })) {
+    assert.match(strings.privacyLocation, /OpenFreeMap/, `${locale}: map provider disclosure`);
   }
 });

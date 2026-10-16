@@ -2,7 +2,7 @@
 // founder decision — OpenFreeMap, 2026-09-21, docs/agent-tasks/results/
 // G10.01.b.md — is the only tile source the web may reference. Reverting the
 // config to any other host, or hardcoding a tile URL outside
-// lib/map-config.ts, fails here (acceptance 4: tiles from the recorded
+// contracts/map-provider.ts, fails here (acceptance 4: tiles from the recorded
 // provider only).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -13,6 +13,7 @@ import { mapProvider } from './map-config.ts';
 import { sourceFiles } from './source-walk.ts';
 
 const WEB_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const REPO_ROOT = path.resolve(WEB_ROOT, '..');
 
 const TILE_HOSTS =
   /tiles\.openfreemap\.org|maptiler|tile\.openstreetmap\.org|basemaps\.cartocdn\.com|tiles\.stadiamaps\.com/i;
@@ -23,23 +24,24 @@ test('the recorded provider is OpenFreeMap and the attribution target is the OSM
   assert.equal(mapProvider.osmCopyrightUrl, 'https://www.openstreetmap.org/copyright');
 });
 
-test('tile hosts appear only in lib/map-config.ts, nowhere else in the web sources', () => {
-  let configSeen = false;
+test('tile hosts appear only in contracts/map-provider.ts across web and native sources', () => {
+  const config = fs.readFileSync(path.join(REPO_ROOT, 'contracts', 'map-provider.ts'), 'utf8');
+  assert.match(config, TILE_HOSTS, 'the shared config must still record the provider');
   for (const dir of ['app', 'components', 'lib', 'scripts']) {
     for (const { real, rel } of sourceFiles(WEB_ROOT, dir)) {
       // The guard scans production sources; this and other test files name
       // the hosts only inside their own regexes.
       if (rel.endsWith('.test.ts')) continue;
       const source = fs.readFileSync(real, 'utf8');
-      if (rel === 'lib/map-config.ts') {
-        configSeen = true;
-        assert.match(source, TILE_HOSTS, 'the config must still record the provider');
-        continue;
-      }
-      assert.doesNotMatch(source, TILE_HOSTS, `tile URLs must live only in lib/map-config.ts, found in ${rel}`);
+      assert.doesNotMatch(source, TILE_HOSTS, `tile URLs must live only in contracts/map-provider.ts, found in ${rel}`);
     }
   }
-  assert.ok(configSeen, 'lib/map-config.ts must be present and record the provider');
+  for (const dir of ['app', 'components']) {
+    for (const { real, rel } of sourceFiles(REPO_ROOT, dir)) {
+      if (rel.endsWith('.test.ts') || rel.endsWith('.test.tsx')) continue;
+      assert.doesNotMatch(fs.readFileSync(real, 'utf8'), TILE_HOSTS, `tile URLs must live only in contracts/map-provider.ts, found in ${rel}`);
+    }
+  }
 });
 
 test('the map page renders the server-side ODbL attribution bound to the config', () => {

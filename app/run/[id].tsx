@@ -1,6 +1,7 @@
 // G06.02 (issue #278) + G06.03 (issue #279) — the Run surface (11 §6): the
-// route's points on an honest schematic map — no tile engine exists until
-// the map decision (ADR G00.02) is accepted — with the five marker states
+// route's points on a native map with an honest schematic fallback while
+// tiles load or fail; the offline map decision (ADR G00.02) remains open.
+// The five marker states
 // computed by the engine (ADR G01.01 §4.5), the POI points visually distinct
 // from the audio points, and the ODbL attribution visible and tappable.
 // G06.03 adds the history panel (11 §2): one bottom sheet over the map with
@@ -34,6 +35,7 @@ import {
 } from "../../components/modal-dialog";
 import { ScaledText } from "../../components/scaled-text";
 import { WalkProgress } from "../../components/walk-progress";
+import { RunNativeMap } from "../../components/run-native-map";
 import { useServices, useUiLocale } from "../_layout";
 
 const OSM_ATTRIBUTION_URL = "https://www.openstreetmap.org/copyright";
@@ -75,6 +77,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flex: 1,
     overflow: "hidden",
+  },
+  demoRoad: {
+    backgroundColor: "#fffdf7",
+    height: 22,
+    position: "absolute",
+    width: "135%",
+  },
+  demoMapLabel: {
+    backgroundColor: "#fffdf7",
+    borderRadius: 9,
+    color: tokens.colorInk,
+    fontSize: 13,
+    fontWeight: tokens.fontWeightStrong,
+    left: 13,
+    overflow: "hidden",
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    position: "absolute",
+    top: 13,
   },
   note: {
     color: tokens.colorMuted,
@@ -425,6 +446,7 @@ export default function Run() {
   // surface-side gate (a hook, before the early returns); the controller's
   // end() stays the only session write and runs only on the confirmation.
   const [endConfirm, setEndConfirm] = useState(false);
+  const [nativeMapReadyRouteId, setNativeMapReadyRouteId] = useState<string | null>(null);
   // G06.05 (AC3): the card's story-layer switch bookkeeping — the switch
   // belongs to one card, another opened card starts back on the base story.
   const [layerByStop, setLayerByStop] = useState<{ stopId: string | null; layer: "base" | "extended" }>({
@@ -727,7 +749,31 @@ export default function Run() {
         </View>
       ) : null}
       {view.markers.length > 0 ? (
-        <View style={styles.map} testID="run-map">
+        <RunNativeMap
+          key={routeId}
+          nativeDisabled={process.env.EXPO_PUBLIC_DEMO_MODE === "1"}
+          view={view}
+          stops={surface.stops}
+          places={surface.places}
+          onMapPosition={surface.onMapPosition}
+          onOpenStop={(stopId) => run.openCard(stopId)}
+          onReadyChange={(ready) => setNativeMapReadyRouteId(ready ? routeId : null)}
+          recenterLabel={strings.recenter}
+          pointsLabel={strings.points}
+          retryLabel={uiStrings(locale).retry}
+          markerHint={strings.markerHint}
+          statusWords={strings.status}
+          statusColors={STATUS_COLOR}
+          poiWords={strings.poiKind}
+          fallback={<View style={styles.map} testID="run-map-schematic">
+          {process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? (
+            <>
+              <View style={[styles.demoRoad, { left: "-15%", top: "23%", transform: [{ rotate: "-16deg" }] }]} />
+              <View style={[styles.demoRoad, { left: "-8%", top: "57%", transform: [{ rotate: "12deg" }] }]} />
+              <View style={[styles.demoRoad, { left: "-16%", top: "83%", transform: [{ rotate: "-9deg" }] }]} />
+              <ScaledText style={styles.demoMapLabel}>{uiStrings(locale).demoRunMapLabel}</ScaledText>
+            </>
+          ) : null}
           {view.pois.map((poi) => {
             // UX 05 (issue #351): the label goes through the run strings'
             // kind dictionary — a kind without an entry renders no label,
@@ -736,7 +782,7 @@ export default function Run() {
             return (
               <View
                 key={poi.placeId}
-                style={[styles.marker, { left: `${poi.nx * 100}%`, top: `${poi.ny * 100}%`, transform: [{ translateX: -60 }, { translateY: -9 }] }]}
+                style={[styles.marker, { left: `${(process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? 0.2 + poi.nx * 0.6 : poi.nx) * 100}%`, top: `${(process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? 0.18 + poi.ny * 0.62 : poi.ny) * 100}%`, transform: [{ translateX: -60 }, { translateY: -9 }] }]}
                 testID={`run-poi-${poi.placeId}`}
               >
                 <View style={styles.poi} />
@@ -755,7 +801,7 @@ export default function Run() {
                 styles.marker,
                 // UX 04 (issue #350): the dot centers on the point whatever
                 // the canon markerSize — the label hangs below it.
-                { left: `${marker.nx * 100}%`, top: `${marker.ny * 100}%`, transform: [{ translateX: -60 }, { translateY: -(tokens.markerSize / 2) }] },
+                { left: `${(process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? 0.2 + marker.nx * 0.6 : marker.nx) * 100}%`, top: `${(process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? 0.18 + marker.ny * 0.62 : marker.ny) * 100}%`, transform: [{ translateX: -60 }, { translateY: -(tokens.markerSize / 2) }] },
               ]}
               testID={`run-marker-${marker.stopId}`}
             >
@@ -765,9 +811,10 @@ export default function Run() {
               </ScaledText>
             </Pressable>
           ))}
-        </View>
+          </View>}
+        />
       ) : null}
-      <ScaledText style={styles.note}>{strings.schematicNote}</ScaledText>
+      {nativeMapReadyRouteId !== routeId ? <ScaledText style={styles.note}>{strings.schematicNote}</ScaledText> : null}
       {/* UX 04 (issue #350, AC3): the in-flow spot only when the peek bar is
           down — the bar's own copy replaces it while the bar covers the flow. */}
       {peekBarOpen ? null : attribution}

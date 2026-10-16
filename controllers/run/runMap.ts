@@ -2,12 +2,14 @@
 // five marker states come verbatim from the engine's computed stopStatus
 // (ADR G01.01 §4.5 — one spelling, no second contract), the geometry from
 // the pinned package's places, and the projection is a plain equirectangular
-// fit over the shown points. There is no tile engine and no line: the map
-// decision (ADR G00.02) is not accepted, so the surface renders an honest
-// schematic — markers at their relative positions, the ODbL attribution
+// fit over the shown points. This is the fallback for the native tile map;
+// the offline map decision (ADR G00.02) is not accepted. The schematic
+// keeps markers at their relative positions, the ODbL attribution
 // visible (11 §6), and no mandatory next/deviated line (the route line is
 // optional and the bundle carries no line geometry).
 import { stopStatus, stopStatusTable, type RunState, type StopStatus } from '../../core/engine/state.ts';
+import { acceptFix } from '../../core/pipeline/pipeline.ts';
+import type { FixInput, PipelineCandidate, PipelineState } from '../../core/pipeline/types.ts';
 import type { RunPlaceFact, RunStopFact } from '../../services/contentRepo/runMapFacts.ts';
 import type { RunStop } from './runOrchestrator.ts';
 import { RUN_MAP_STRINGS_DATA } from './runMap-strings.generated.ts';
@@ -34,6 +36,22 @@ export interface RunMapPoi {
 export interface RunMapView {
   readonly markers: ReadonlyArray<RunMapMarker>;
   readonly pois: ReadonlyArray<RunMapPoi>;
+}
+
+// The visual camera reads the walk's existing raw-fix observer. Reuse the
+// canonical walking pipeline's accuracy, spike and three-fix smoothing gates
+// with no route candidates: the camera applies the same validation rules
+// without triggering a stop or owning another GPS subscription.
+const NO_CAMERA_CANDIDATES: ReadonlyMap<string, PipelineCandidate> = new Map();
+
+export function runMapCameraFix(previous: PipelineState, fix: FixInput, now: number): {
+  state: PipelineState;
+  center: [number, number] | null;
+} {
+  const result = acceptFix(previous, fix, NO_CAMERA_CANDIDATES, now, { dwellMs: 0 });
+  return result.accepted
+    ? { state: result.state, center: [result.fix.lng, result.fix.lat] }
+    : { state: previous, center: null };
 }
 
 // The localized label of a stop: the first locale of the walk's preference
@@ -150,6 +168,8 @@ export interface RunMapStrings {
   readonly loading: string;
   readonly unavailableTitle: string;
   readonly schematicNote: string;
+  readonly recenter: string;
+  readonly points: string;
   readonly attribution: string;
   readonly markerHint: string;
   // The history panel's words (G06.03, 11 §2/§3.2): the Peek bar's idle

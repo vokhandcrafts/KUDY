@@ -23,13 +23,15 @@ import { createExpoSqliteDriver } from '../services/db/expo/expo-sqlite-driver.t
 import { catalogOriginFrom, createDeviceServicePorts } from './deviceServices.ts';
 
 export function createDeviceServiceSet(): ReturnType<typeof createDeviceServicePorts> | null {
-  const origin = catalogOriginFrom(process.env);
+  const demo = process.env.EXPO_PUBLIC_DEMO_MODE === '1';
+  const origin = demo ? 'demo://embedded' : catalogOriginFrom(process.env);
   if (origin === null) return null;
   const db: SQLiteDatabase = openDatabaseSync('kudy.db');
   const bundlesRoot: FsDirectory = new Directory(Paths.document, 'bundles');
   const extra = (Constants.expoConfig?.extra ?? {}) as {
     locationExplanations?: { foreground: string; background: string };
   };
+  const demoSource = demo ? require('./demoCatalog.ts') as typeof import('./demoCatalog.ts') : null;
   return createDeviceServicePorts({
     driver: createExpoSqliteDriver(db),
     sha256: createDeviceSha256({
@@ -47,5 +49,9 @@ export function createDeviceServiceSet(): ReturnType<typeof createDeviceServiceP
     fileSystem: { File, Directory, freeBytes: () => Paths.availableDiskSpace },
     bundlesRoot,
     origin,
+    ...(demoSource ? {
+      // The published demo bytes are read by the same catalog/download flow.
+      demoSource: { loadText: demoSource.loadDemoText, loadBytes: demoSource.loadDemoBytes },
+    } : {}),
   });
 }

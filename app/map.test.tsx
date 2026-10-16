@@ -90,6 +90,23 @@ afterEach(() => {
 });
 
 describe("Nearby surface (G07.01)", () => {
+  test("only the demo build shows the illustrative map", async () => {
+    const previous = process.env.EXPO_PUBLIC_DEMO_MODE;
+    try {
+      process.env.EXPO_PUBLIC_DEMO_MODE = "1";
+      const demo = renderRouter(withMapRoutes(createServices({})), { initialUrl: "/map" });
+      expect(await screen.findByTestId("nearby-demo-map")).toBeTruthy();
+      demo.unmount();
+
+      process.env.EXPO_PUBLIC_DEMO_MODE = "0";
+      renderRouter(withMapRoutes(createServices({})), { initialUrl: "/map" });
+      expect(await screen.findByTestId("screen-Map")).toBeTruthy();
+      expect(screen.queryByTestId("nearby-demo-map")).toBeNull();
+    } finally {
+      if (previous === undefined) delete process.env.EXPO_PUBLIC_DEMO_MODE;
+      else process.env.EXPO_PUBLIC_DEMO_MODE = previous;
+    }
+  });
   // G21.17 (issue #551, AC1/AC5): the Nearby list shows only the offers whose
   // published text covers the selected UI language; a filtered-empty list is
   // the language explanation, never a service failure, and the switch back
@@ -123,7 +140,7 @@ describe("Nearby surface (G07.01)", () => {
     renderRouter(withMapRoutes(services), { initialUrl: "/map" });
     await screen.findByTestId("nearby-mode");
     // The uk catalogue is complete — the explanation renders in uk.
-    expect(screen.getByTestId("nearby-message").props.children).toBe("Гідів з текстом цією мовою ще немає.");
+    expect(within(screen.getByTestId("nearby-message")).getByText("Гідів з текстом цією мовою ще немає.")).toBeTruthy();
     expect(screen.queryByTestId(/^nearby-card-/)).toBeNull();
   });
 
@@ -247,7 +264,7 @@ describe("Nearby surface (G07.01)", () => {
     });
     expect(await screen.findByTestId("nearby-degraded")).toBeTruthy();
     expect(screen.getByText("Індэкс прапаноў часова недаступны")).toBeTruthy();
-    expect(screen.getByTestId("nearby-message").props.children).toBe("Прапановы пакуль не апублікаваны");
+    expect(within(screen.getByTestId("nearby-message")).getByText("Прапановы пакуль не апублікаваны")).toBeTruthy();
     expect(screen.queryByTestId(/^nearby-card-/)).toBeNull();
   });
 
@@ -257,7 +274,7 @@ describe("Nearby surface (G07.01)", () => {
       initialUrl: "/map",
     });
     await screen.findByTestId("nearby-mode");
-    expect(screen.getByTestId("nearby-message").props.children).toBe("Прапановы пакуль не апублікаваны");
+    expect(within(screen.getByTestId("nearby-message")).getByText("Прапановы пакуль не апублікаваны")).toBeTruthy();
     expect(screen.queryByTestId("nearby-degraded")).toBeNull();
   });
 

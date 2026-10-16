@@ -124,6 +124,51 @@
       }
     },
     {
+      "id": "native.chrome.demoNearbyMapAccessibility",
+      "value": "Beispielhafte Skizze mit drei Stationen",
+      "reviewedSourceHash": "0e0f487df8a6cdd6b102b55fad23fd34872990e187a2f2ff8045950fbfa6b419",
+      "review": {
+        "outcome": "approved",
+        "note": "Пазнака чытача экрана называе ілюстратыўную схему трох кропак; тэрмін маршруту de «Station» узгоднены з глосарыем stop."
+      }
+    },
+    {
+      "id": "native.chrome.demoNearbyMapLabel",
+      "value": "Rundgangskizze · Demo",
+      "reviewedSourceHash": "1829b6458dc887619cb8377e2ac100758f5cad90061438a550be0a620fa1e833",
+      "review": {
+        "outcome": "approved",
+        "note": "Кароткі подпіс называе схему прагулкі і адкрыта пазначае дэма; назва прагулкі de «Rundgang» узгоднена з глосарыем walk."
+      }
+    },
+    {
+      "id": "native.chrome.demoNoticeDetail",
+      "value": "Geschichten, Stationen und Klänge sind Beispiele. Diese Route ist nicht zur Navigation geeignet.",
+      "reviewedSourceHash": "25cbc93df0b908ae3ae7b81353ad38253b44c79bc3fd50fedebf5e9391b819e8",
+      "review": {
+        "outcome": "approved",
+        "note": "Паведамленне называе гісторыі, кропкі і гукі прыкладамі і захоўвае прамую забарону выкарыстоўваць маршрут для навігацыі; тэрмін de «Station» узгоднены з глосарыем stop."
+      }
+    },
+    {
+      "id": "native.chrome.demoRunMapLabel",
+      "value": "Stationsskizze · Demo",
+      "reviewedSourceHash": "2b2cf7128548b97eb8fdc8ed19819669c87c9b8afa19d11ac8a9f77706552f4b",
+      "review": {
+        "outcome": "approved",
+        "note": "Подпіс схемы кропак пазначае дэма; тэрмін de «Station» узгоднены з глосарыем stop."
+      }
+    },
+    {
+      "id": "native.chrome.demoVersion",
+      "value": "Demoversion",
+      "reviewedSourceHash": "0840fd5f0145a4f2d62a33cc2c765c6d5d478fc0b5591a3fc165311437e3d25d",
+      "review": {
+        "outcome": "approved",
+        "note": "Загаловак дакладна называе версію дэманстрацыйнай і не абяцае сапраўдны кантэнт або навігацыю."
+      }
+    },
+    {
       "id": "native.chrome.differenceText.duration_unknown",
       "value": "Dauer nicht bewertet",
       "reviewedSourceHash": "aa5a112078a2bbce5d31cfb2eaf8e7ffc469607accdc26f9e44e18b8d6dbe659",
@@ -1777,6 +1822,24 @@
       }
     },
     {
+      "id": "native.run.points",
+      "value": "Routenstationen",
+      "reviewedSourceHash": "7f8f19103a112298d7480abecc5107770297f14d6af636c8330fa5847c4c6d52",
+      "review": {
+        "outcome": "approved",
+        "note": "Accessible list button for native map stops; checked against the Belarusian source in this change."
+      }
+    },
+    {
+      "id": "native.run.recenter",
+      "value": "Zu meinem Standort",
+      "reviewedSourceHash": "7c9707a52b4598b4df1427e7609582b876d93d53e78eefc086b2ea6e9d0574cc",
+      "review": {
+        "outcome": "approved",
+        "note": "New accessibility label for the map recenter button; checked against the Belarusian source in this change."
+      }
+    },
+    {
       "id": "native.run.resume",
       "value": "Fortsetzen",
       "reviewedSourceHash": "eebc12f1f868df6992e266f4de878022ad7ba731a55d869b203f5e44b2562286",
@@ -1787,8 +1850,8 @@
     },
     {
       "id": "native.run.schematicNote",
-      "value": "Schema der Routenstationen — die Stadtkarte erscheint nach der Entscheidung über Kartenkacheln",
-      "reviewedSourceHash": "7202049786e88c0cfb035a2fcf10a56d78f72c8911d0a3a06810d076909d7939",
+      "value": "Karte wird geladen oder ist nicht verfügbar — Routenstationen werden schematisch angezeigt",
+      "reviewedSourceHash": "2dd5575beeb4e2eceddcb133bd66d0755c8731a769f657860033a6605224b3f7",
       "review": {
         "outcome": "approved",
         "note": "сэнс адпавядае арыгіналу; du-форма; UI-рэгістр правераны"
@@ -2209,11 +2272,11 @@
     },
     {
       "id": "web.ui.privacyLocation",
-      "value": "Der Standort wird nur in der App und nur während eines aktiven Rundgangs verwendet: Die Standortbestimmung im Hintergrund läuft, solange der Rundgang geht, und endet mit ihm. Koordinaten verlassen das Gerät nicht — sie werden nicht an den Server übertragen und landen nicht im Ereignisprotokoll. Im Web-Kanal wird die Position gar nicht ermittelt.",
-      "reviewedSourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58",
+      "value": "Der Standort wird in der App während eines aktiven Rundgangs verwendet: Die Standortbestimmung im Hintergrund läuft während des Rundgangs und endet mit ihm. Die App sendet keine genauen GPS-Koordinaten an den KUDY-Server und speichert sie nicht im Ereignisprotokoll. Die Online-Karte lädt Kacheln von OpenFreeMap; diese Anfragen zeigen dem Anbieter den betrachteten Kartenausschnitt, bei aktivierter Kartenverfolgung auch den Bereich um den aktuellen Standort. Im Web-Kanal wird der Standort der Besucher nicht ermittelt.",
+      "reviewedSourceHash": "5c86b06615ae7aa3da7eb2585ba4d46a4e77d5828b159601ca6748a411e476fc",
       "review": {
         "outcome": "approved",
-        "note": "адмаўленне захаванае даслоўна; сэнс правераны супраць арыгіналу"
+        "note": "Map tile requests disclose the viewed area to OpenFreeMap; precise GPS coordinates are not sent to the KUDY server or event log."
       }
     },
     {

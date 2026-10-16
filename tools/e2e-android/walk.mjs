@@ -27,19 +27,6 @@ function requireId(nodes, id) {
   return node;
 }
 
-async function waitForId(driver, id, predicate, slug, timeoutMs = SHORT_MS) {
-  const deadline = Date.now() + timeoutMs;
-  let lastPath = '';
-  for (;;) {
-    const dump = await driver.dump(`dump-walk-${slug}.xml`);
-    lastPath = dump.localPath;
-    const node = findNode(parseDump(dump.xml), { testID: id });
-    if (node && predicate(node)) return node;
-    if (Date.now() >= deadline) throw new Error(`timeout waiting for testID ${id} (${slug}); last dump: ${lastPath}`);
-    await delay();
-  }
-}
-
 export async function assertNoReadyStart(driver, originLogPath, timeoutMs = DOWNLOAD_MS) {
   const deadline = Date.now() + timeoutMs;
   const started = `E2E stall start: ${HELD_FILE}`;
@@ -94,23 +81,33 @@ async function waitForAudioActive(driver, expected) {
   }
 }
 
-async function waitForRun(driver, slug) {
+export async function waitForRun(driver, slug, allowLocationSettings = true) {
   const deadline = Date.now() + 45000;
   for (;;) {
     const nodes = parseDump((await driver.dump(`dump-walk-${slug}.xml`)).xml);
     if (findNode(nodes, { testID: 'screen-Run' }) && findNode(nodes, { testID: 'run-map' })) return;
     const accuracyPrompt = findNode(nodes, { text: 'No thanks' });
-    if (accuracyPrompt) await driver.tapNode(accuracyPrompt);
+    if (accuracyPrompt) {
+      // Declining rejects Expo's pending watch with LocationSettingsUnsatisfiedException.
+      const accept = allowLocationSettings
+        ? findNode(nodes, { testID: 'android:id/button1' }) : accuracyPrompt;
+      assert.ok(accept, 'location accuracy prompt has no positive button');
+      await driver.tapNode(accept);
+    }
     if (Date.now() >= deadline) throw new Error(`timeout waiting for Run map (${slug})`);
     await delay();
   }
 }
 
-async function locationListeners(driver) {
+export async function locationListeners(driver) {
   const { stdout } = await driver.exec(['shell', 'dumpsys', 'location']);
   const providerState = stdout.split('  Historical Aggregate Location Provider Data:')[0];
   assert.ok(providerState.includes('Location Providers:'), 'dumpsys location has no provider section');
-  return providerState.split(/\r?\n/).filter((line) => line.includes('by.kudy.app'));
+  const direct = providerState.split(/\r?\n/).filter((line) => line.includes('by.kudy.app'));
+  if (direct.length > 0) return direct;
+  // Play Services owns the OS listener; AppOps attributes its active access to our app.
+  const access = await driver.exec(['shell', 'cmd', 'appops', 'get', 'by.kudy.app', 'MONITOR_LOCATION']);
+  return access.stdout.split(/\r?\n/).filter((line) => /\(running\)/.test(line));
 }
 
 async function waitForLocationListeners(driver, present) {
@@ -139,17 +136,74 @@ function sessionRow(nodes) {
   return rows[0].resourceId;
 }
 
-async function tapMarkerAboveBar(driver, id) {
-  const nodes = await nodesOn(driver, 'screen-Run', 'marker-above-bar');
-  const marker = requireId(nodes, id);
-  const bar = requireId(nodes, 'run-panel-bar');
-  const markerBounds = /^\[(\d+),(\d+)\]\[(\d+),(\d+)\]$/.exec(marker.bounds);
-  const barBounds = /^\[(\d+),(\d+)\]/.exec(bar.bounds);
-  assert.ok(markerBounds && barBounds && marker.center, 'marker and bar must have screen bounds');
-  const visibleBottom = Math.min(Number(markerBounds[4]), Number(barBounds[2]));
-  const top = Number(markerBounds[2]);
-  assert.ok(visibleBottom > top + 16, `${id} is covered by the audio bar`);
-  await driver.tapNode({ ...marker, center: { x: marker.center.x, y: Math.floor((top + visibleBottom) / 2) } });
+// MapLibre draws marker children into its Android surface. The points list
+// exposes the same stop-card action to accessibility and uiautomator.
+async function mapPointPath(driver, stopId) {
+  const deadline = Date.now() + SHORT_MS;
+  for (;;) {
+    const nodes = parseDump((await driver.dump('dump-map-point.xml')).xml);
+    if (findNode(nodes, { testID: 'run-map-points' })) return 'native';
+    if (findNode(nodes, { testID: `run-marker-${stopId}` })) return 'schematic';
+    if (Date.now() >= deadline) throw new Error(`map point ${stopId} unavailable in native and schematic views`);
+    await delay();
+  }
+}
+
+export async function tapMapPoint(driver, stopId) {
+  const path = await mapPointPath(driver, stopId);
+  console.log(`walk map point ${stopId}: ${path}`);
+  if (path === 'native') await driver.tapSelector({ testID: 'run-map-points' });
+  await driver.tapSelector({ testID: path === 'native' ? `run-point-${stopId}` : `run-marker-${stopId}` });
+}
+
+export async function visiblePointStatus(driver, stopId, predicate, slug, timeoutMs = SHORT_MS) {
+  const deadline = Date.now() + timeoutMs;
+  let pointsListOpened = false;
+  let lastPath = '';
+  for (;;) {
+    const dump = await driver.dump(`dump-walk-${slug}.xml`);
+    lastPath = dump.localPath;
+    const nodes = parseDump(dump.xml);
+    const pointsButton = findNode(nodes, { testID: 'run-map-points' });
+    const nativeStatus = findNode(nodes, { testID: `run-point-status-${stopId}` });
+    const schematicStatus = findNode(nodes, { testID: `run-status-${stopId}` });
+    const status = nativeStatus ?? schematicStatus;
+    if (status && predicate(status)) {
+      if (pointsListOpened && pointsButton) await driver.tapSelector({ testID: 'run-map-points' });
+      return status;
+    }
+    // The native map can finish loading after the first accessibility dump.
+    // Re-evaluate the rendered path on every poll instead of latching onto the
+    // schematic marker IDs from an earlier screen.
+    if (pointsButton && !pointsListOpened) {
+      await driver.tapSelector({ testID: 'run-map-points' });
+      pointsListOpened = true;
+      continue;
+    }
+    if (Date.now() >= deadline) throw new Error(`timeout waiting for stop ${stopId} status (${slug}); last dump: ${lastPath}`);
+    await delay();
+  }
+}
+
+export async function startWalkAtLocation(driver, latitude, longitude) {
+  // Seed before the watcher starts so a fresh AVD cannot supply a distant
+  // default fix that makes the next fix look like an impossible GPS jump.
+  await driver.geoFix(latitude, longitude);
+  await driver.tapSelector({ testID: 'btn-start', enabled: true });
+}
+
+export async function waitForManualStart(driver) {
+  const deadline = Date.now() + SHORT_MS;
+  for (;;) {
+    const nodes = parseDump((await driver.dump('dump-manual-start.xml')).xml);
+    if (findNode(nodes, { text: 'No location access' })) {
+      const close = findNode(nodes, { testID: 'android:id/button2', text: 'Close' });
+      assert.ok(close, 'location-disabled notice has no Close button');
+      await driver.tapNode(close);
+    } else if (findNode(nodes, { testID: 'btn-start', enabled: true })) return;
+    if (Date.now() >= deadline) throw new Error('timeout waiting for manual Start with location disabled');
+    await delay();
+  }
 }
 
 export async function runWalkSuite({ driver, url, runCase, coldStart, originLogPath }) {
@@ -190,15 +244,15 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
   });
 
   await runCase('walk: GPS starts stop 1 and stop 3 out of order; pause and Back preserve the session', 'walk-run', driver, async () => {
-    await driver.tapSelector({ testID: 'btn-start', enabled: true });
+    await startWalkAtLocation(driver, 53.9, 27.56);
     await waitForRun(driver, 'run-entry');
     await waitForLocationListeners(driver, true);
     await driver.geoFix(53.9, 27.56);
-    await waitForId(driver, 'run-status-e2e-stop-1', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
+    await visiblePointStatus(driver, 'e2e-stop-1', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
       'stop-1-played', DOWNLOAD_MS);
     // Replay the already heard stop 1 so stop 2 remains unheard for End.
     // Pause still exercises active audio rather than an idle session.
-    await tapMarkerAboveBar(driver, 'run-marker-e2e-stop-1');
+    await tapMapPoint(driver, 'e2e-stop-1');
     await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: 'btn-card-play' });
     await waitForAudioActive(driver, true);
@@ -215,9 +269,9 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     // Dismiss it before checking the out-of-order marker by testID.
     const resumedNodes = await nodesOn(driver, 'screen-Run', 'resumed');
     if (findNode(resumedNodes, { testID: 'btn-panel-close' })) await driver.tapSelector({ testID: 'btn-panel-close' });
-    await driver.waitFor({ testID: 'run-marker-e2e-stop-3' }, { timeoutMs: SHORT_MS });
+    await mapPointPath(driver, 'e2e-stop-3');
     await driver.geoFix(53.902, 27.562);
-    await waitForId(driver, 'run-status-e2e-stop-3', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
+    await visiblePointStatus(driver, 'e2e-stop-3', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
       'stop-3-played', DOWNLOAD_MS);
     const nodes = await nodesOn(driver, 'screen-Run', 'before-back');
     assert.equal(findNode(nodes, { testID: 'run-ended' }), undefined);
@@ -259,11 +313,11 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     await driver.exec(['shell', 'cmd', 'location', 'set-location-enabled', 'false']);
     try {
       await driver.launchDeepLink(`kudy:///route/${FREE}`);
-      await driver.waitFor({ testID: 'btn-start', enabled: true }, { timeoutMs: SHORT_MS });
+      await waitForManualStart(driver);
       await driver.tapSelector({ testID: 'btn-start', enabled: true });
-      await waitForRun(driver, 'no-location-entry');
+      await waitForRun(driver, 'no-location-entry', false);
       await assertNoPlaying(driver, 2500, 'no-fresh-position');
-      await driver.tapSelector({ testID: 'run-marker-e2e-stop-2' });
+      await tapMapPoint(driver, 'e2e-stop-2');
       await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
       await driver.tapSelector({ testID: 'btn-card-play' });
       await waitForAudioActive(driver, true);

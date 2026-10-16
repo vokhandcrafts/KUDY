@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="220" fill="#1D6B4F"/>
+  <circle cx="512" cy="410" r="232" fill="none" stroke="#FAF7F2" stroke-width="18" opacity="0.8"/>
+  <path d="M512 205L558 364L720 410L558 456L512 615L466 456L304 410L466 364Z" fill="#FAF7F2"/>
+  <circle cx="512" cy="410" r="31" fill="#1D6B4F"/>
+  <text x="512" y="765" text-anchor="middle" font-family="sans-serif" font-size="118" font-weight="700" fill="#FAF7F2" letter-spacing="5">KUDY</text>
+  <rect x="353" y="807" width="318" height="81" rx="40" fill="#FAF7F2"/>
+  <text x="512" y="862" text-anchor="middle" font-family="sans-serif" font-size="43" font-weight="700" fill="#1D6B4F" letter-spacing="6">DEMO</text>
+</svg>
