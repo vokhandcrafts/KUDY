@@ -354,6 +354,10 @@ export class E2eDriver {
     for (;;) {
       const remainingMs = deadline - Date.now();
       if (remainingMs <= 0) break;
+      if (remainingMs < DUMP_MIN_COMMAND_WINDOW_MS) {
+        await pollDelay(remainingMs);
+        break;
+      }
       let dump;
       try {
         dump = await this.dump(dumpBasename, { timeoutMs: Math.min(DUMP_TIMEOUT_MS, remainingMs) });
@@ -369,7 +373,12 @@ export class E2eDriver {
       }
       const remainingAfterDump = deadline - Date.now();
       if (remainingAfterDump <= 0) break;
-      await pollDelay(Math.min(POLL_INTERVAL_MS, remainingAfterDump));
+      const delayMs = Math.min(POLL_INTERVAL_MS, remainingAfterDump);
+      if (remainingAfterDump - delayMs < DUMP_MIN_COMMAND_WINDOW_MS) {
+        await pollDelay(remainingAfterDump);
+        break;
+      }
+      await pollDelay(delayMs);
     }
     const lastDump = lastDumpPath ?? '(no successful dump)';
     const dumpError = lastDumpError ? `; last dump error: ${lastDumpError.message}` : '';
