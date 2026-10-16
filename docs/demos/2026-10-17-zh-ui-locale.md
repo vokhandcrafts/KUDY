@@ -1,7 +1,7 @@
 # G21.46 (issue #670): дзявяты UI-код zh — рэестр, поўны каталог, пікер
 
-*2026-10-16T23:18:02Z by Showboat 0.6.1*
-<!-- showboat-id: 0f3f6a88-12c8-4d2a-83d7-35c15d0e7963 -->
+*2026-10-16T23:52:38Z by Showboat 0.6.1*
+<!-- showboat-id: e0e94a06-ee6c-4428-9e8b-f633aadb7c97 -->
 
 Showboat-дэма задачы #670. Кантракт: `zh` — поўны UI-лакаль (рэестр-запіс і
 каталог разам, канон G21.09), генератар застаецца адзінай крыніцай праекцый,
@@ -70,7 +70,7 @@ node --no-warnings --experimental-strip-types --test --test-reporter=tap test/ui
 # fail 0
 ```
 
-Праверка на байтах (крытэрый 7): правіла gitguard (Han/Kana/Hangul/CJK-пунктуацыя) па ўсім дрэве — 0 файлаў, а ўсе файлы гэтай задачы (каталог, рэестр, глосарый, генераваныя праекцыі, вэб-каталог) не маюць і поўнашырыннага CJK (U+FF00–FFEF):
+Праверка на байтах (крытэрый 7): правіла gitguard (Han/Kana/Hangul/CJK-пунктуацыя) па ўсім дрэве — 0 файлаў, а ўсе файлы гэтай задачы (каталог, рэестр, глосарый, генераваныя праекцыі, вэб-каталог) не маюць і поўнашырыннага CJK (U+FF00–FFEF). Лік прасканаваных файлаў ідзе за дрэвам рэпо: калі дрэва вырасце, гэты блок трэба перазапісаць — `uvx showboat==0.6.1 verify` пакажа рознасць:
 
 ```sh
 python3 - <<'PY'
@@ -112,7 +112,7 @@ PY
 ```
 
 ```output
-tracked text files scanned: 2526
+tracked text files scanned: 2532
 gitguard rule hits (Han/Kana/Hangul/CJK punctuation): 0 []
 fullwidth forms (U+FF00-FFEF, outside the hook rule): 3 ['docs/reports/chinese/frontend.md', 'docs/reports/chinese/language-and-dictionaries.md', 'docs/reports/chinese/translation-voice-evidence.json']
 task-owned zh files with any CJK or fullwidth byte: 0

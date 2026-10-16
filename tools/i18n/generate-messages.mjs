@@ -200,14 +200,17 @@ export function escapeTemplate(text) {
 
 // G21.46 (issue #670, criterion 7): repo bytes stay CJK-free. Every Han,
 // CJK-punctuation, kana or fullwidth codepoint in generated static text is
-// written as a \uXXXX escape, so the committed generated catalogues carry
-// ASCII bytes while the runtime decodes the real glyphs. Cyrillic and
-// Latin-1/Latin-Extended stay literal — the shipped be/uk/de/es/fr/cs/sv
-// words are byte-identical to before. Applied after escapeTemplate or
-// JSON.stringify (both produce literal source text, and the escape is a
-// no-op for every non-CJK codepoint, so it cannot alter those languages).
+// written as a \uXXXX escape (\u{...} above the BMP), so the committed
+// generated catalogues carry ASCII bytes while the runtime decodes the real
+// glyphs. The Han coverage is the BMP blocks plus the CJK extension planes
+// (U+20000–U+3FFFF: extensions B through H) — no Han codepoint lives outside
+// them. Cyrillic and Latin-1/Latin-Extended stay literal: the shipped
+// be/en/uk/de/es/fr/cs/sv words are byte-identical to before. Applied after
+// escapeTemplate or JSON.stringify (both produce literal source text, and the
+// escape is a no-op for every non-CJK codepoint, so it cannot alter those
+// languages).
 const CJK_PATTERN =
-  /[\u2E80-\u2FFF\u3000-\u303F\u3040-\u30FF\u3100-\u312F\u3190-\u31BF\u3200-\u33FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFE10-\uFE4F\uFF00-\uFFEF]|[\u{20000}-\u{2FFFF}]/gu;
+  /[\u2E80-\u2FFF\u3000-\u303F\u3040-\u30FF\u3100-\u312F\u3190-\u31BF\u3200-\u33FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFE10-\uFE4F\uFF00-\uFFEF]|[\u{20000}-\u{3FFFF}]/gu;
 
 export function escapeRepoBytes(text) {
   return text.replace(CJK_PATTERN, (character) => {
