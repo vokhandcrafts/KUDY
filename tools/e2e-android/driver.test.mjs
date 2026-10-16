@@ -104,6 +104,45 @@ test('waitFor resolves through the production lookup on a recorded dump', async 
   assert.ok(node.center.x > 0);
 });
 
+test('waitFor retries a transient UI dump failure within its deadline', async () => {
+  const driver = testDriver();
+  let dumps = 0;
+  driver.dump = async (_basename, options) => {
+    dumps += 1;
+    assert.ok(options.timeoutMs > 0 && options.timeoutMs <= 1200);
+    if (dumps === 1) throw new DriverError('simulated transient uiautomator timeout');
+    return { localPath: '/tmp/recovered.xml', xml: readFixture('dump-explore.xml') };
+  };
+
+  const node = await driver.waitFor({ testID: 'screen-Explore' }, { timeoutMs: 1200 });
+  assert.ok(node.center.x > 0);
+  assert.equal(dumps, 2, 'waitFor should continue after a transient dump failure');
+});
+
+test('waitFor bounds dump attempts by its deadline and reports the last dump error', async () => {
+  const driver = testDriver();
+  let dumps = 0;
+  let dumpTimeoutMs = 0;
+  driver.dump = async (_basename, options) => {
+    dumps += 1;
+    dumpTimeoutMs = options.timeoutMs;
+    throw new DriverError('simulated uiautomator unavailable');
+  };
+
+  await assert.rejects(
+    () => driver.waitFor({ testID: 'screen-Missing' }, { timeoutMs: 250 }),
+    (error) => {
+      assert.ok(error instanceof DriverError);
+      assert.match(error.message, /timeout after 250 ms waiting for testID "screen-Missing"/);
+      assert.match(error.message, /last dump error: simulated uiautomator unavailable/);
+      assert.match(error.message, /no successful dump/);
+      return true;
+    },
+  );
+  assert.equal(dumps, 1, 'waitFor must not begin another dump after the deadline');
+  assert.ok(dumpTimeoutMs > 0 && dumpTimeoutMs <= 250);
+});
+
 test('dump retries transiently missing device files before giving up', async () => {
   const driver = testDriver();
   let pulls = 0;

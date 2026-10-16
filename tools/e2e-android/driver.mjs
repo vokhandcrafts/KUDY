@@ -348,22 +348,36 @@ export class E2eDriver {
   // deadline passes. The rolling dump file always holds the LAST observed
   // screen, so a timeout names the selector and where to look.
   async waitFor(selector, { timeoutMs = 30000, dumpBasename = 'last-wait-dump.xml' } = {}) {
-    const startedAt = Date.now();
+    const deadline = Date.now() + timeoutMs;
     let lastDumpPath = null;
+    let lastDumpError = null;
     for (;;) {
-      const dump = await this.dump(dumpBasename, { timeoutMs: DUMP_TIMEOUT_MS });
-      lastDumpPath = dump.localPath;
-      const node = findNode(parseDump(dump.xml), selector);
-      if (node) return node;
-      if (Date.now() - startedAt >= timeoutMs) {
-        throw new DriverError(
-          `timeout after ${timeoutMs} ms waiting for ${describeSelector(selector)}; ` +
-            `last UI dump: ${lastDumpPath} (screenshot with .screenshot() for the same moment)`,
-          { selector: describeSelector(selector), dump: lastDumpPath },
-        );
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) break;
+      let dump;
+      try {
+        dump = await this.dump(dumpBasename, { timeoutMs: Math.min(DUMP_TIMEOUT_MS, remainingMs) });
+      } catch (error) {
+        lastDumpPath = null;
+        lastDumpError = error;
       }
-      await pollDelay();
+      if (dump) {
+        lastDumpPath = dump.localPath;
+        lastDumpError = null;
+        const node = findNode(parseDump(dump.xml), selector);
+        if (node) return node;
+      }
+      const remainingAfterDump = deadline - Date.now();
+      if (remainingAfterDump <= 0) break;
+      await pollDelay(Math.min(POLL_INTERVAL_MS, remainingAfterDump));
     }
+    const lastDump = lastDumpPath ?? '(no successful dump)';
+    const dumpError = lastDumpError ? `; last dump error: ${lastDumpError.message}` : '';
+    throw new DriverError(
+      `timeout after ${timeoutMs} ms waiting for ${describeSelector(selector)}; ` +
+        `last UI dump: ${lastDump}${dumpError} (screenshot with .screenshot() for the same moment)`,
+      { selector: describeSelector(selector), dump: lastDumpPath },
+    );
   }
 
   async tapNode(node) {

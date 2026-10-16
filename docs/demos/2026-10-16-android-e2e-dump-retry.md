@@ -21,3 +21,21 @@ node --test --test-name-pattern='dump (retries|clears|preserves)' tools/e2e-andr
 ℹ skipped 0
 ℹ todo 0
 ```
+
+waitFor таксама паўтарае часовы збой атрымання экрана ў межах бюджэту сцэнара. Праверка адначасова пацвярджае аднаўленне і дыягностыку, калі да заканчэння тэрміну экран не атрыманы.
+
+```bash
+node --test --test-name-pattern='waitFor retries a transient UI dump failure|waitFor bounds dump attempts' tools/e2e-android/driver.test.mjs 2>&1 | sed -E -e 's/ \([0-9.]+ms\)//g' -e '/^ℹ duration_ms /d'
+```
+
+```output
+✔ waitFor retries a transient UI dump failure within its deadline
+✔ waitFor bounds dump attempts by its deadline and reports the last dump error
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+```
