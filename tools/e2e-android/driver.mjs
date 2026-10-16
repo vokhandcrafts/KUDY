@@ -21,6 +21,7 @@ const INSTALL_TIMEOUT_MS = 300000;
 const DUMP_TIMEOUT_MS = 15000;
 const DUMP_ATTEMPTS = 5;
 const DUMP_RETRY_DELAY_MS = 400;
+const DUMP_MIN_COMMAND_WINDOW_MS = 100;
 const DUMP_DEVICE_PATH = '/sdcard/kudy-e2e-ui.xml';
 const POLL_INTERVAL_MS = 500;
 const ARTIFACT_BASENAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
@@ -294,6 +295,7 @@ export class E2eDriver {
     for (let attempt = 1; attempt <= DUMP_ATTEMPTS; attempt += 1) {
       const remainingMs = deadline - Date.now();
       if (remainingMs <= 0) break;
+      if (remainingMs < DUMP_MIN_COMMAND_WINDOW_MS) break;
       try {
         fs.rmSync(localPath, { force: true });
         await this.exec(
@@ -305,14 +307,14 @@ export class E2eDriver {
           fs.appendFileSync(this.artifactPath('driver.log'), `rm before dump attempt ${attempt}: ${error.message}\n`);
         });
         const dumpTimeoutMs = deadline - Date.now();
-        if (dumpTimeoutMs <= 0) {
-          lastError = new DriverError(`dump deadline reached before uiautomator on attempt ${attempt}`);
+        if (dumpTimeoutMs < DUMP_MIN_COMMAND_WINDOW_MS) {
+          lastError ??= new DriverError(`dump deadline left no useful window before uiautomator on attempt ${attempt}`);
           break;
         }
         await this.exec(['shell', 'uiautomator', 'dump', DUMP_DEVICE_PATH], { timeoutMs: dumpTimeoutMs });
         const pullTimeoutMs = deadline - Date.now();
-        if (pullTimeoutMs <= 0) {
-          lastError = new DriverError(`dump deadline reached after uiautomator on attempt ${attempt}`);
+        if (pullTimeoutMs < DUMP_MIN_COMMAND_WINDOW_MS) {
+          lastError ??= new DriverError(`dump deadline left no useful window before pull on attempt ${attempt}`);
           break;
         }
         await this.exec(['pull', DUMP_DEVICE_PATH, localPath], { timeoutMs: pullTimeoutMs });
@@ -323,7 +325,9 @@ export class E2eDriver {
         lastError = error;
       }
       if (attempt < DUMP_ATTEMPTS) {
-        const delayMs = Math.min(DUMP_RETRY_DELAY_MS * attempt, deadline - Date.now());
+        const remainingMs = deadline - Date.now();
+        const delayMs = Math.min(DUMP_RETRY_DELAY_MS * attempt, remainingMs);
+        if (remainingMs - delayMs < DUMP_MIN_COMMAND_WINDOW_MS) break;
         if (delayMs > 0) await pollDelay(delayMs);
       }
     }

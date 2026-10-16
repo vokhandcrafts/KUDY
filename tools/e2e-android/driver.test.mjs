@@ -148,7 +148,7 @@ test('dump clears the device file before each retry instead of pulling an older 
   assert.equal(dumps, 2, 'the second attempt must not reuse the first attempt’s device file');
 });
 
-test('dump stops at its deadline without starting a pull with a 1 ms timeout', async () => {
+test('dump preserves the last error when backoff leaves no useful retry window', async () => {
   const driver = testDriver();
   let dumps = 0;
   let pulls = 0;
@@ -164,12 +164,12 @@ test('dump stops at its deadline without starting a pull with a 1 ms timeout', a
   };
 
   await assert.rejects(
-    () => driver.dump('dump-budget.xml', { timeoutMs: 100 }),
-    /uiautomator dump failed within 100 ms:/,
+    () => driver.dump('dump-budget.xml', { timeoutMs: 250 }),
+    /uiautomator dump failed within 250 ms: simulated uiautomator timeout/,
   );
-  assert.equal(dumps, 1, 'the exhausted budget must stop further dump attempts');
-  assert.equal(pulls, 0, 'no pull should start after the budget expires');
-  assert.ok(dumpTimeoutMs > 0 && dumpTimeoutMs <= 100);
+  assert.equal(dumps, 1, 'the driver must not start a retry without a useful time window');
+  assert.equal(pulls, 0, 'no pull should start after the dump attempt fails');
+  assert.ok(dumpTimeoutMs >= 100 && dumpTimeoutMs <= 250);
 });
 
 test('waitFor ignores a disabled Start until the device reports it enabled', async () => {

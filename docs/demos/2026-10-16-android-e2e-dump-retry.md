@@ -6,13 +6,13 @@
 Праверкі мадэлююць часова адсутны dump, памылку pull паміж спробамі і вычарпаны тэрмін. Новы dump не можа падхапіць старэйшы файл; усе спробы застаюцца ў межах агульнага бюджэту.
 
 ```bash
-node --test --test-name-pattern='dump (retries|clears|stops)' tools/e2e-android/driver.test.mjs 2>&1 | sed -E -e 's/ \([0-9.]+ms\)//g' -e '/^ℹ duration_ms /d'
+node --test --test-name-pattern='dump (retries|clears|preserves)' tools/e2e-android/driver.test.mjs 2>&1 | sed -E -e 's/ \([0-9.]+ms\)//g' -e '/^ℹ duration_ms /d'
 ```
 
 ```output
 ✔ dump retries transiently missing device files before giving up
 ✔ dump clears the device file before each retry instead of pulling an older screen
-✔ dump stops at its deadline without starting a pull with a 1 ms timeout
+✔ dump preserves the last error when backoff leaves no useful retry window
 ℹ tests 3
 ℹ suites 0
 ℹ pass 3
