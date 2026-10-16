@@ -285,25 +285,37 @@ export class E2eDriver {
     await this.exec(['emu', 'geo', 'fix', String(longitude), String(latitude)]);
   }
 
-  // Dump the current UI hierarchy to a local file. The device-side file is
-  // removed first and the local one never pre-exists, so a dump can only be
-  // this screen's (G21.36 protocol).
+  // Dump the current UI hierarchy to a local file. Both copies are cleared
+  // before every attempt so a retry cannot pull an earlier screen (G21.36).
   async dump(basename, { timeoutMs = DUMP_TIMEOUT_MS } = {}) {
     const localPath = this.artifactPath(basename);
     const deadline = Date.now() + timeoutMs;
-    fs.rmSync(localPath, { force: true });
-    await this.exec(['shell', 'rm', '-f', DUMP_DEVICE_PATH], { timeoutMs: 5000 }).catch((error) => {
-      // A missing file makes rm fail on some images; the dump below still
-      // decides. Surface the reason instead of swallowing it.
-      fs.appendFileSync(this.artifactPath('driver.log'), `rm before dump: ${error.message}\n`);
-    });
     let lastError = null;
     for (let attempt = 1; attempt <= DUMP_ATTEMPTS; attempt += 1) {
       const remainingMs = deadline - Date.now();
       if (remainingMs <= 0) break;
       try {
-        await this.exec(['shell', 'uiautomator', 'dump', DUMP_DEVICE_PATH], { timeoutMs: remainingMs });
-        await this.exec(['pull', DUMP_DEVICE_PATH, localPath], { timeoutMs: Math.max(1, deadline - Date.now()) });
+        fs.rmSync(localPath, { force: true });
+        await this.exec(
+          ['shell', 'rm', '-f', DUMP_DEVICE_PATH],
+          { timeoutMs: Math.min(5000, remainingMs) },
+        ).catch((error) => {
+          // A missing file makes rm fail on some images; the dump below still
+          // decides. Surface the reason instead of swallowing it.
+          fs.appendFileSync(this.artifactPath('driver.log'), `rm before dump attempt ${attempt}: ${error.message}\n`);
+        });
+        const dumpTimeoutMs = deadline - Date.now();
+        if (dumpTimeoutMs <= 0) {
+          lastError = new DriverError(`dump deadline reached before uiautomator on attempt ${attempt}`);
+          break;
+        }
+        await this.exec(['shell', 'uiautomator', 'dump', DUMP_DEVICE_PATH], { timeoutMs: dumpTimeoutMs });
+        const pullTimeoutMs = deadline - Date.now();
+        if (pullTimeoutMs <= 0) {
+          lastError = new DriverError(`dump deadline reached after uiautomator on attempt ${attempt}`);
+          break;
+        }
+        await this.exec(['pull', DUMP_DEVICE_PATH, localPath], { timeoutMs: pullTimeoutMs });
         const xml = fs.readFileSync(localPath, 'utf8');
         if (xml.includes('<node')) return { localPath, xml };
         lastError = new DriverError(`dump at ${localPath} has no <node> content (${xml.length} bytes)`);

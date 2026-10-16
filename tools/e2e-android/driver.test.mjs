@@ -121,6 +121,57 @@ test('dump retries transiently missing device files before giving up', async () 
   assert.match(dump.xml, /screen-Explore/);
 });
 
+test('dump clears the device file before each retry instead of pulling an older screen', async () => {
+  const driver = testDriver();
+  let deviceFileExists = false;
+  let dumps = 0;
+  let pulls = 0;
+  driver.exec = async (args) => {
+    if (args[0] === 'shell' && args[1] === 'rm') deviceFileExists = false;
+    if (args[0] === 'shell' && args[1] === 'uiautomator') {
+      dumps += 1;
+      if (dumps === 1) deviceFileExists = true;
+    }
+    if (args[0] === 'pull') {
+      pulls += 1;
+      if (pulls === 1) throw new DriverError('simulated pull failure after a dump');
+      if (!deviceFileExists) throw new DriverError('remote UI dump file is missing');
+      fs.writeFileSync(args[2], '<hierarchy><node resource-id="old-screen"/></hierarchy>');
+    }
+    return { stdout: '', stderr: '' };
+  };
+
+  await assert.rejects(
+    () => driver.dump('dump-no-stale-retry.xml', { timeoutMs: 1000 }),
+    /remote UI dump file is missing/,
+  );
+  assert.equal(dumps, 2, 'the second attempt must not reuse the first attempt’s device file');
+});
+
+test('dump stops at its deadline without starting a pull with a 1 ms timeout', async () => {
+  const driver = testDriver();
+  let dumps = 0;
+  let pulls = 0;
+  let dumpTimeoutMs = 0;
+  driver.exec = async (args, options = {}) => {
+    if (args[0] === 'shell' && args[1] === 'uiautomator') {
+      dumps += 1;
+      dumpTimeoutMs = options.timeoutMs;
+      throw new DriverError('simulated uiautomator timeout');
+    }
+    if (args[0] === 'pull') pulls += 1;
+    return { stdout: '', stderr: '' };
+  };
+
+  await assert.rejects(
+    () => driver.dump('dump-budget.xml', { timeoutMs: 100 }),
+    /failed within 100 ms: simulated uiautomator timeout/,
+  );
+  assert.equal(dumps, 1, 'the exhausted budget must stop further dump attempts');
+  assert.equal(pulls, 0, 'no pull should start after the budget expires');
+  assert.ok(dumpTimeoutMs > 0 && dumpTimeoutMs <= 100);
+});
+
 test('waitFor ignores a disabled Start until the device reports it enabled', async () => {
   const driver = testDriver();
   let dumps = 0;
