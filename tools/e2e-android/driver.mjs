@@ -19,7 +19,8 @@ import path from 'node:path';
 const ADB_TIMEOUT_MS = 15000;
 const INSTALL_TIMEOUT_MS = 300000;
 const DUMP_TIMEOUT_MS = 15000;
-const DUMP_ATTEMPTS = 3;
+const DUMP_ATTEMPTS = 5;
+const DUMP_RETRY_DELAY_MS = 400;
 const DUMP_DEVICE_PATH = '/sdcard/kudy-e2e-ui.xml';
 const POLL_INTERVAL_MS = 500;
 const ARTIFACT_BASENAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
@@ -289,6 +290,7 @@ export class E2eDriver {
   // this screen's (G21.36 protocol).
   async dump(basename, { timeoutMs = DUMP_TIMEOUT_MS } = {}) {
     const localPath = this.artifactPath(basename);
+    const deadline = Date.now() + timeoutMs;
     fs.rmSync(localPath, { force: true });
     await this.exec(['shell', 'rm', '-f', DUMP_DEVICE_PATH], { timeoutMs: 5000 }).catch((error) => {
       // A missing file makes rm fail on some images; the dump below still
@@ -297,17 +299,23 @@ export class E2eDriver {
     });
     let lastError = null;
     for (let attempt = 1; attempt <= DUMP_ATTEMPTS; attempt += 1) {
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) break;
       try {
-        await this.exec(['shell', 'uiautomator', 'dump', DUMP_DEVICE_PATH], { timeoutMs });
-        await this.exec(['pull', DUMP_DEVICE_PATH, localPath], { timeoutMs });
+        await this.exec(['shell', 'uiautomator', 'dump', DUMP_DEVICE_PATH], { timeoutMs: remainingMs });
+        await this.exec(['pull', DUMP_DEVICE_PATH, localPath], { timeoutMs: Math.max(1, deadline - Date.now()) });
         const xml = fs.readFileSync(localPath, 'utf8');
         if (xml.includes('<node')) return { localPath, xml };
         lastError = new DriverError(`dump at ${localPath} has no <node> content (${xml.length} bytes)`);
       } catch (error) {
         lastError = error;
       }
+      if (attempt < DUMP_ATTEMPTS) {
+        const delayMs = Math.min(DUMP_RETRY_DELAY_MS * attempt, deadline - Date.now());
+        if (delayMs > 0) await pollDelay(delayMs);
+      }
     }
-    throw new DriverError(`uiautomator dump failed after ${DUMP_ATTEMPTS} attempts: ${lastError?.message ?? 'unknown'}`);
+    throw new DriverError(`uiautomator dump failed within ${timeoutMs} ms: ${lastError?.message ?? 'unknown'}`);
   }
 
   async screenshot(basename) {
@@ -355,8 +363,8 @@ export class E2eDriver {
   }
 }
 
-async function pollDelay() {
+async function pollDelay(intervalMs = POLL_INTERVAL_MS) {
   await new Promise((resolve) => {
-    setTimeout(resolve, POLL_INTERVAL_MS);
+    setTimeout(resolve, intervalMs);
   });
 }

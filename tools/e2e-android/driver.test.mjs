@@ -104,6 +104,23 @@ test('waitFor resolves through the production lookup on a recorded dump', async 
   assert.ok(node.center.x > 0);
 });
 
+test('dump retries transiently missing device files before giving up', async () => {
+  const driver = testDriver();
+  let pulls = 0;
+  driver.exec = async (args) => {
+    if (args[0] === 'pull') {
+      pulls += 1;
+      if (pulls < 4) throw new DriverError('device UI dump file is not ready yet');
+      fs.writeFileSync(args[2], '<hierarchy><node resource-id="screen-Explore"/></hierarchy>');
+    }
+    return { stdout: '', stderr: '' };
+  };
+
+  const dump = await driver.dump('dump-retry.xml');
+  assert.equal(pulls, 4, 'a transiently missing file should be retried');
+  assert.match(dump.xml, /screen-Explore/);
+});
+
 test('waitFor ignores a disabled Start until the device reports it enabled', async () => {
   const driver = testDriver();
   let dumps = 0;
