@@ -760,6 +760,8 @@ export default function Run() {
           onReadyChange={(ready) => setNativeMapReadyRouteId(ready ? routeId : null)}
           recenterLabel={strings.recenter}
           pointsLabel={strings.points}
+          retryLabel={uiStrings(locale).retry}
+          markerHint={strings.markerHint}
           statusWords={strings.status}
           statusColors={STATUS_COLOR}
           poiWords={strings.poiKind}

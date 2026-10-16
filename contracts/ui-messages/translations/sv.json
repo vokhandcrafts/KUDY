@@ -2080,11 +2080,11 @@
     },
     {
       "id": "web.ui.privacyLocation",
-      "value": "Positionen används bara i appen och bara under en aktiv promenad: bakgrundspositionering fungerar medan promenaden pågår och stannar tillsammans med den. Koordinaterna lämnar aldrig enheten — de skickas inte till servern och hamnar inte i händelseloggen. På webbkanalen fastställs besökarens position inte alls.",
-      "reviewedSourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58",
+      "value": "Positionen används i appen under en aktiv promenad: bakgrundspositionering pågår medan promenaden är aktiv och slutar med den. Appen skickar inte exakta GPS-koordinater till KUDY-servern och sparar dem inte i händelseloggen. Onlinekartan hämtar kartplattor från OpenFreeMap; förfrågningarna visar leverantören det visade kartområdet, även området kring den aktuella positionen när kartföljning är aktiv. Webbversionen fastställer inte besökarens position.",
+      "reviewedSourceHash": "5c86b06615ae7aa3da7eb2585ba4d46a4e77d5828b159601ca6748a411e476fc",
       "review": {
         "outcome": "approved",
-        "note": "прыватнасць: лакацыя толькі ў дадатку падчас прагулкі; «не пакідаюць прыладу» → lämnar aldrig enheten"
+        "note": "Map tile requests disclose the viewed area to OpenFreeMap; precise GPS coordinates are not sent to the KUDY server or event log."
       }
     },
     {

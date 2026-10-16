@@ -151,16 +151,38 @@ function sessionRow(nodes) {
 
 // MapLibre draws marker children into its Android surface. The points list
 // exposes the same stop-card action to accessibility and uiautomator.
-async function tapMapPoint(driver, stopId) {
-  await driver.tapSelector({ testID: 'run-map-points' });
-  await driver.tapSelector({ testID: `run-point-${stopId}` });
+async function mapPointPath(driver, stopId) {
+  const deadline = Date.now() + SHORT_MS;
+  for (;;) {
+    const nodes = parseDump((await driver.dump('dump-map-point.xml')).xml);
+    if (findNode(nodes, { testID: 'run-map-points' })) return 'native';
+    if (findNode(nodes, { testID: `run-marker-${stopId}` })) return 'schematic';
+    if (Date.now() >= deadline) throw new Error(`map point ${stopId} unavailable in native and schematic views`);
+    await delay();
+  }
 }
 
-async function visiblePointStatus(driver, stopId, predicate, slug, timeoutMs = SHORT_MS) {
-  await driver.tapSelector({ testID: 'run-map-points' });
-  const result = await waitForId(driver, `run-point-status-${stopId}`, predicate, slug, timeoutMs);
-  await driver.tapSelector({ testID: 'run-map-points' });
+export async function tapMapPoint(driver, stopId) {
+  const path = await mapPointPath(driver, stopId);
+  console.log(`walk map point ${stopId}: ${path}`);
+  if (path === 'native') await driver.tapSelector({ testID: 'run-map-points' });
+  await driver.tapSelector({ testID: path === 'native' ? `run-point-${stopId}` : `run-marker-${stopId}` });
+}
+
+export async function visiblePointStatus(driver, stopId, predicate, slug, timeoutMs = SHORT_MS) {
+  const path = await mapPointPath(driver, stopId);
+  console.log(`walk map status ${stopId}: ${path}`);
+  if (path === 'native') await driver.tapSelector({ testID: 'run-map-points' });
+  const result = await waitForId(driver, path === 'native' ? `run-point-status-${stopId}` : `run-status-${stopId}`, predicate, slug, timeoutMs);
+  if (path === 'native') await driver.tapSelector({ testID: 'run-map-points' });
   return result;
+}
+
+export async function startWalkAtLocation(driver, latitude, longitude) {
+  // Seed before the watcher starts so a fresh AVD cannot supply a distant
+  // default fix that makes the next fix look like an impossible GPS jump.
+  await driver.geoFix(latitude, longitude);
+  await driver.tapSelector({ testID: 'btn-start', enabled: true });
 }
 
 export async function waitForManualStart(driver) {
@@ -215,7 +237,7 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
   });
 
   await runCase('walk: GPS starts stop 1 and stop 3 out of order; pause and Back preserve the session', 'walk-run', driver, async () => {
-    await driver.tapSelector({ testID: 'btn-start', enabled: true });
+    await startWalkAtLocation(driver, 53.9, 27.56);
     await waitForRun(driver, 'run-entry');
     await waitForLocationListeners(driver, true);
     await driver.geoFix(53.9, 27.56);
@@ -240,7 +262,7 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     // Dismiss it before checking the out-of-order marker by testID.
     const resumedNodes = await nodesOn(driver, 'screen-Run', 'resumed');
     if (findNode(resumedNodes, { testID: 'btn-panel-close' })) await driver.tapSelector({ testID: 'btn-panel-close' });
-    await driver.waitFor({ testID: 'run-map-points' }, { timeoutMs: SHORT_MS });
+    await mapPointPath(driver, 'e2e-stop-3');
     await driver.geoFix(53.902, 27.562);
     await visiblePointStatus(driver, 'e2e-stop-3', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
       'stop-3-played', DOWNLOAD_MS);

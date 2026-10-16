@@ -11714,19 +11714,19 @@
    "id": "web.ui.privacyLocation",
    "locale": "be",
    "args": null,
-   "out": "Лакацыя выкарыстоўваецца толькі ў дадатку і толькі падчас актыўнай прагулкі: фонавае вызначэнне месца працуе, пакуль ідзе прагулка, і спыняецца разам з ёй. Каардынаты не пакідаюць прыладу — яны не перадаюцца на сервер і не трапляюць у лог падзей. На вэб-канале пазіцыя наведвальніка не вызначаецца зусім."
+   "out": "Лакацыя выкарыстоўваецца толькі ў дадатку і толькі падчас актыўнай прагулкі: фонавае вызначэнне месца працуе, пакуль ідзе прагулка, і спыняецца разам з ёй. Дадатак не перадае дакладныя GPS-каардынаты на сервер KUDY і не запісвае іх у лог падзей. Анлайн-карта загружае тайлы з OpenFreeMap: запыты раскрываюць правайдару вобласць карты, у тым ліку вакол бягучай пазіцыі, калі ўключана сачэнне. На вэб-канале пазіцыя наведвальніка не вызначаецца."
   },
   {
    "id": "web.ui.privacyLocation",
    "locale": "en",
    "args": null,
-   "out": "Location is used only in the app and only during an active walk: background location works while the walk is on and stops with it. Coordinates never leave the device — they are not sent to the server and do not enter the event log. On the web channel the visitor’s position is never detected at all."
+   "out": "Location is used in the app during an active walk: background location runs while the walk is active and stops with it. The app does not send precise GPS coordinates to the KUDY server or record them in the event log. The online map loads tiles from OpenFreeMap; tile requests reveal the viewed map area to that provider, including the area around your current position while map following is on. The web channel does not detect the visitor’s position."
   },
   {
    "id": "web.ui.privacyLocation",
    "locale": "uk",
    "args": null,
-   "out": "Локація використовується лише в додатку і лише під час активної прогулянки: фонове визначення місця працює, поки йде прогулянка, і зупиняється разом з нею. Координати не залишають пристрій — вони не передаються на сервер і не потрапляють у лог подій. На веб-каналі позиція відвідувача не визначається взагалі."
+   "out": "Локація використовується в додатку під час активної прогулянки: фонове визначення місця працює, поки триває прогулянка, і зупиняється разом з нею. Додаток не передає точні GPS-координати на сервер KUDY і не записує їх у журнал подій. Онлайн-карта завантажує тайли з OpenFreeMap; запити показують цьому провайдеру область карти, зокрема навколо поточної позиції, коли ввімкнене стеження. На веб-каналі позиція відвідувача не визначається."
   },
   {
    "id": "web.ui.privacyPurchases",

@@ -82,6 +82,16 @@ test('demo map copy uses the reviewed stop terminology and records review reason
   }
 });
 
+test('native Run map copy keeps the reviewed stop terminology', () => {
+  for (const [locale, term] of [['de', /station/iu], ['cs', /zastavení/iu]]) {
+    const set = loadUiMessageTranslations(join(here, 'translations', `${locale}.json`), sourceDoc, allowedLocales);
+    const records = new Map(set.records.map((record) => [record.id, record.value]));
+    for (const id of ['native.run.points', 'native.run.schematicNote']) {
+      assert.match(records.get(id), term, `${locale}/${id}: glossary stop term`);
+    }
+  }
+});
+
 test('glossary_anchor_unknown: an entry anchored outside the canonical source is rejected', () => {
   const doc = shippedGlossary();
   doc.entries[0].recordIds.push('native.chrome.notARecord');

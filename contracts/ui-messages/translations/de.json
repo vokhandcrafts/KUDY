@@ -1823,7 +1823,7 @@
     },
     {
       "id": "native.run.points",
-      "value": "Routenpunkte",
+      "value": "Routenstationen",
       "reviewedSourceHash": "7f8f19103a112298d7480abecc5107770297f14d6af636c8330fa5847c4c6d52",
       "review": {
         "outcome": "approved",
@@ -1850,7 +1850,7 @@
     },
     {
       "id": "native.run.schematicNote",
-      "value": "Karte wird geladen oder ist nicht verfügbar — Routenpunkte werden schematisch angezeigt",
+      "value": "Karte wird geladen oder ist nicht verfügbar — Routenstationen werden schematisch angezeigt",
       "reviewedSourceHash": "2dd5575beeb4e2eceddcb133bd66d0755c8731a769f657860033a6605224b3f7",
       "review": {
         "outcome": "approved",
@@ -2272,11 +2272,11 @@
     },
     {
       "id": "web.ui.privacyLocation",
-      "value": "Der Standort wird nur in der App und nur während eines aktiven Rundgangs verwendet: Die Standortbestimmung im Hintergrund läuft, solange der Rundgang geht, und endet mit ihm. Koordinaten verlassen das Gerät nicht — sie werden nicht an den Server übertragen und landen nicht im Ereignisprotokoll. Im Web-Kanal wird die Position gar nicht ermittelt.",
-      "reviewedSourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58",
+      "value": "Der Standort wird in der App während eines aktiven Rundgangs verwendet: Die Standortbestimmung im Hintergrund läuft während des Rundgangs und endet mit ihm. Die App sendet keine genauen GPS-Koordinaten an den KUDY-Server und speichert sie nicht im Ereignisprotokoll. Die Online-Karte lädt Kacheln von OpenFreeMap; diese Anfragen zeigen dem Anbieter den betrachteten Kartenausschnitt, bei aktivierter Kartenverfolgung auch den Bereich um den aktuellen Standort. Im Web-Kanal wird der Standort der Besucher nicht ermittelt.",
+      "reviewedSourceHash": "5c86b06615ae7aa3da7eb2585ba4d46a4e77d5828b159601ca6748a411e476fc",
       "review": {
         "outcome": "approved",
-        "note": "адмаўленне захаванае даслоўна; сэнс правераны супраць арыгіналу"
+        "note": "Map tile requests disclose the viewed area to OpenFreeMap; precise GPS coordinates are not sent to the KUDY server or event log."
       }
     },
     {

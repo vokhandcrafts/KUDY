@@ -9,8 +9,8 @@ import type { RunStop } from '../controllers/run/runOrchestrator.ts';
 import type { RunPlaceFact } from '../services/contentRepo/runMapFacts.ts';
 import { tokens } from './design-tokens.ts';
 import { ScaledText } from './scaled-text.tsx';
+import { mapProvider } from '../contracts/map-provider.ts';
 
-const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const FOLLOW_ZOOM = 16;
 const CAMERA_DURATION_MS = 650;
 
@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     maxHeight: 240, position: 'absolute', right: tokens.spaceM, top: 64,
   },
   pointsRow: { minHeight: 48, justifyContent: 'center', paddingHorizontal: tokens.spaceM },
+  retry: { alignSelf: 'center', backgroundColor: tokens.colorPaper, borderRadius: tokens.radiusBase, bottom: tokens.spaceM, minHeight: 48, justifyContent: 'center', paddingHorizontal: tokens.spaceM, position: 'absolute' },
 });
 
 export function RunNativeMap({
@@ -87,6 +88,8 @@ export function RunNativeMap({
   nativeDisabled = false,
   recenterLabel,
   pointsLabel,
+  retryLabel,
+  markerHint,
   statusWords,
   statusColors,
   poiWords,
@@ -101,6 +104,8 @@ export function RunNativeMap({
   nativeDisabled?: boolean;
   recenterLabel: string;
   pointsLabel: string;
+  retryLabel: string;
+  markerHint: string;
   statusWords: Record<string, string>;
   statusColors: Record<string, string>;
   poiWords: Record<string, string>;
@@ -111,6 +116,7 @@ export function RunNativeMap({
   const loadedRef = useRef(false);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const [showRecenter, setShowRecenter] = useState(false);
   const [showPoints, setShowPoints] = useState(false);
   const [position, setPosition] = useState<[number, number] | null>(null);
@@ -121,16 +127,15 @@ export function RunNativeMap({
   // silently drop that status marker.
   const mapRenderable = !nativeDisabled && stops.length > 0 && view.markers.every((marker) => stopCoordinates.has(marker.stopId));
   const initialViewState = useMemo(() => {
-    const positions = stops.length > 0 ? stops : places;
-    if (positions.length === 0) return { center: [0, 0] as [number, number], zoom: FOLLOW_ZOOM };
-    const west = Math.min(...positions.map((point) => point.lng));
-    const east = Math.max(...positions.map((point) => point.lng));
-    const south = Math.min(...positions.map((point) => point.lat));
-    const north = Math.max(...positions.map((point) => point.lat));
+    if (stops.length === 0) return undefined;
+    const west = Math.min(...stops.map((point) => point.lng));
+    const east = Math.max(...stops.map((point) => point.lng));
+    const south = Math.min(...stops.map((point) => point.lat));
+    const north = Math.max(...stops.map((point) => point.lat));
     return west === east && south === north
       ? { center: [west, south] as [number, number], zoom: FOLLOW_ZOOM }
       : { bounds: [west, south, east, north] as [number, number, number, number], padding: { top: 40, right: 40, bottom: 40, left: 40 } };
-  }, [stops, places]);
+  }, [stops]);
 
   useEffect(() => {
     if (!mapRenderable) {
@@ -160,7 +165,8 @@ export function RunNativeMap({
     <View style={styles.frame} testID="run-map">
       {!failed && mapRenderable ? (
         <Map
-          mapStyle={MAP_STYLE}
+          key={retryKey}
+          mapStyle={mapProvider.styleUrl}
           style={styles.map}
           attribution
           onDidFinishLoadingMap={() => {
@@ -208,6 +214,7 @@ export function RunNativeMap({
                   onPress={() => onOpenStop(marker.stopId)}
                   accessibilityRole="button"
                   accessibilityLabel={`${marker.name}, ${statusWords[marker.status]}`}
+                  accessibilityHint={markerHint}
                   testID={`run-marker-${marker.stopId}`}
                 >
                   <View style={[styles.dot, { backgroundColor: statusColors[marker.status] }]} />
@@ -220,7 +227,16 @@ export function RunNativeMap({
           }) : null}
         </Map>
       ) : null}
-      {!loaded || !mapRenderable ? <View style={styles.fallback}>{fallback}</View> : null}
+      {!loaded || !mapRenderable ? <View style={styles.fallback}>
+        {fallback}
+        {failed && mapRenderable ? <Pressable
+          style={styles.retry}
+          accessibilityRole="button"
+          accessibilityLabel={retryLabel}
+          onPress={() => { setFailed(false); setRetryKey((key) => key + 1); }}
+          testID="run-map-retry"
+        ><ScaledText>{retryLabel}</ScaledText></Pressable> : null}
+      </View> : null}
       {loaded && showRecenter && smoothed.current ? (
         <Pressable
           style={styles.recenter}
@@ -253,6 +269,7 @@ export function RunNativeMap({
               onPress={() => { setShowPoints(false); onOpenStop(marker.stopId); }}
               accessibilityRole="button"
               accessibilityLabel={`${marker.name}, ${statusWords[marker.status]}`}
+              accessibilityHint={markerHint}
               testID={`run-point-${marker.stopId}`}
             >
               <ScaledText testID={`run-point-status-${marker.stopId}`}>
@@ -260,6 +277,13 @@ export function RunNativeMap({
               </ScaledText>
             </Pressable>
           ))}
+          {view.pois.length > 0 ? <View testID="run-poi-points-group">
+            {view.pois.map((poi) => poiWords[poi.kind] ? (
+              <View key={poi.placeId} style={styles.pointsRow} accessible accessibilityLabel={poiWords[poi.kind]} testID={`run-poi-point-${poi.placeId}`}>
+                <ScaledText>{poiWords[poi.kind]}</ScaledText>
+              </View>
+            ) : null)}
+          </View> : null}
         </ScrollView>
       ) : null}
     </View>

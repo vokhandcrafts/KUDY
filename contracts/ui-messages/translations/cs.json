@@ -1639,7 +1639,7 @@
     },
     {
       "id": "native.run.points",
-      "value": "Body trasy",
+      "value": "Zastavení trasy",
       "reviewedSourceHash": "7f8f19103a112298d7480abecc5107770297f14d6af636c8330fa5847c4c6d52",
       "review": {
         "outcome": "approved",
@@ -2080,11 +2080,11 @@
     },
     {
       "id": "web.ui.privacyLocation",
-      "value": "Poloha se používá jen v aplikaci a jen během aktivní procházky: zjišťování polohy na pozadí funguje, dokud procházka probíhá, a zastavuje se s ní. Souřadnice neopouštějí zařízení — neposílají se na server a nedostávají se do logu událostí. Na webovém kanálu se poloha návštěvníka nezjišťuje vůbec.",
-      "reviewedSourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58",
+      "value": "Poloha se používá v aplikaci během aktivní procházky: zjišťování polohy na pozadí funguje po dobu procházky a končí s ní. Aplikace neposílá přesné GPS souřadnice na server KUDY ani je neukládá do záznamu událostí. Online mapa načítá dlaždice od OpenFreeMap; tyto požadavky poskytovateli odhalují zobrazenou oblast mapy, včetně okolí aktuální polohy při zapnutém sledování. Webová verze polohu návštěvníka nezjišťuje.",
+      "reviewedSourceHash": "5c86b06615ae7aa3da7eb2585ba4d46a4e77d5828b159601ca6748a411e476fc",
       "review": {
         "outcome": "approved",
-        "note": "трымае тры адмаўленні арыгіналу: толькі ў дадатку, каардынаты не пакідаюць прыладу, на вэбе зусім не вызначаецца"
+        "note": "Map tile requests disclose the viewed area to OpenFreeMap; precise GPS coordinates are not sent to the KUDY server or event log."
       }
     },
     {

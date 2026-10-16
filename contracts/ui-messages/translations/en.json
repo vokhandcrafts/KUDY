@@ -1884,10 +1884,11 @@
     },
     {
       "id": "web.ui.privacyLocation",
-      "value": "Location is used only in the app and only during an active walk: background location works while the walk is on and stops with it. Coordinates never leave the device — they are not sent to the server and do not enter the event log. On the web channel the visitor’s position is never detected at all.",
-      "reviewedSourceHash": "fd138f89c74d1ca040a062909e787f18c7d78c3c6f77dce283297d244246dc58",
+      "value": "Location is used in the app during an active walk: background location runs while the walk is active and stops with it. The app does not send precise GPS coordinates to the KUDY server or record them in the event log. The online map loads tiles from OpenFreeMap; tile requests reveal the viewed map area to that provider, including the area around your current position while map following is on. The web channel does not detect the visitor’s position.",
+      "reviewedSourceHash": "5c86b06615ae7aa3da7eb2585ba4d46a4e77d5828b159601ca6748a411e476fc",
       "review": {
-        "outcome": "approved"
+        "outcome": "approved",
+        "note": "Map tile requests disclose the viewed area to OpenFreeMap; precise GPS coordinates are not sent to the KUDY server or event log."
       }
     },
     {

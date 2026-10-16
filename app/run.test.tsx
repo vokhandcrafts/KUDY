@@ -304,6 +304,19 @@ describe("run map surface", () => {
     await waitFor(() => expect(textOf("run-status-stop-2")).toBe("Порт — даступна"));
   });
 
+  test("Run hides the schematic note when native tiles load and restores it on failure", async () => {
+    const { session } = makeRunSession();
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    const map = await screen.findByTestId("run-native-map");
+    expect(screen.getByText("Карта загружаецца або недаступная — паказана схема кропак маршруту")).toBeTruthy();
+    act(() => fireEvent(map, "onDidFinishLoadingMap"));
+    expect(screen.queryByText("Карта загружаецца або недаступная — паказана схема кропак маршруту")).toBeNull();
+    act(() => fireEvent(map, "onDidFailLoadingMap"));
+    expect(screen.getByText("Карта загружаецца або недаступная — паказана схема кропак маршруту")).toBeTruthy();
+    expect(screen.getByTestId("run-map-retry")).toBeTruthy();
+  });
+
   test("AC3: a marker tap opens the point card on the panel and starts nothing", async () => {
     const { session, audioPort } = await mountedRunBe();
     expect(audioPort.commands).toEqual([]);
