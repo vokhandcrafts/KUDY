@@ -165,7 +165,7 @@ test('dump stops at its deadline without starting a pull with a 1 ms timeout', a
 
   await assert.rejects(
     () => driver.dump('dump-budget.xml', { timeoutMs: 100 }),
-    /failed within 100 ms: simulated uiautomator timeout/,
+    /uiautomator dump failed within 100 ms:/,
   );
   assert.equal(dumps, 1, 'the exhausted budget must stop further dump attempts');
   assert.equal(pulls, 0, 'no pull should start after the budget expires');
