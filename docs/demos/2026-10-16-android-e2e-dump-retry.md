@@ -39,3 +39,20 @@ node --test --test-name-pattern='waitFor retries a transient UI dump failure|wai
 ℹ skipped 0
 ℹ todo 0
 ```
+
+Праверка walk таксама перачытвае фактычную карту на кожным кроку: калі native-карта загрузілася пасля пачатковай схемы, статус кропкі шукаецца ў native-спісе. Сам статус застаецца абавязковай умовай.
+
+```bash
+node --test --test-name-pattern='walk status polling follows the native map' tools/e2e-android/walk.test.mjs 2>&1 | sed -E -e 's/ \([0-9.]+ms\)//g' -e '/^ℹ duration_ms /d'
+```
+
+```output
+✔ walk status polling follows the native map when it loads after the schematic
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+```

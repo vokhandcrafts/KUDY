@@ -27,19 +27,6 @@ function requireId(nodes, id) {
   return node;
 }
 
-async function waitForId(driver, id, predicate, slug, timeoutMs = SHORT_MS) {
-  const deadline = Date.now() + timeoutMs;
-  let lastPath = '';
-  for (;;) {
-    const dump = await driver.dump(`dump-walk-${slug}.xml`);
-    lastPath = dump.localPath;
-    const node = findNode(parseDump(dump.xml), { testID: id });
-    if (node && predicate(node)) return node;
-    if (Date.now() >= deadline) throw new Error(`timeout waiting for testID ${id} (${slug}); last dump: ${lastPath}`);
-    await delay();
-  }
-}
-
 export async function assertNoReadyStart(driver, originLogPath, timeoutMs = DOWNLOAD_MS) {
   const deadline = Date.now() + timeoutMs;
   const started = `E2E stall start: ${HELD_FILE}`;
@@ -170,12 +157,32 @@ export async function tapMapPoint(driver, stopId) {
 }
 
 export async function visiblePointStatus(driver, stopId, predicate, slug, timeoutMs = SHORT_MS) {
-  const path = await mapPointPath(driver, stopId);
-  console.log(`walk map status ${stopId}: ${path}`);
-  if (path === 'native') await driver.tapSelector({ testID: 'run-map-points' });
-  const result = await waitForId(driver, path === 'native' ? `run-point-status-${stopId}` : `run-status-${stopId}`, predicate, slug, timeoutMs);
-  if (path === 'native') await driver.tapSelector({ testID: 'run-map-points' });
-  return result;
+  const deadline = Date.now() + timeoutMs;
+  let pointsListOpened = false;
+  let lastPath = '';
+  for (;;) {
+    const dump = await driver.dump(`dump-walk-${slug}.xml`);
+    lastPath = dump.localPath;
+    const nodes = parseDump(dump.xml);
+    const pointsButton = findNode(nodes, { testID: 'run-map-points' });
+    const nativeStatus = findNode(nodes, { testID: `run-point-status-${stopId}` });
+    const schematicStatus = findNode(nodes, { testID: `run-status-${stopId}` });
+    const status = nativeStatus ?? schematicStatus;
+    if (status && predicate(status)) {
+      if (pointsListOpened && pointsButton) await driver.tapSelector({ testID: 'run-map-points' });
+      return status;
+    }
+    // The native map can finish loading after the first accessibility dump.
+    // Re-evaluate the rendered path on every poll instead of latching onto the
+    // schematic marker IDs from an earlier screen.
+    if (pointsButton && !pointsListOpened) {
+      await driver.tapSelector({ testID: 'run-map-points' });
+      pointsListOpened = true;
+      continue;
+    }
+    if (Date.now() >= deadline) throw new Error(`timeout waiting for stop ${stopId} status (${slug}); last dump: ${lastPath}`);
+    await delay();
+  }
 }
 
 export async function startWalkAtLocation(driver, latitude, longitude) {
