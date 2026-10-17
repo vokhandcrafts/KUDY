@@ -31,8 +31,9 @@ unfinished issue without requiring `agent:ready`. Before doing any work, it
 must atomically replace the issue's current status label with `agent:running`.
 The `agent:running` label is a claim: another executor must not take the issue
 while it is present. Zcode must not take an issue that already has
-`agent:running`, and must not take an `epic` or an issue with an open
-`Blocked-by` prerequisite.
+`agent:running`, and must not take an `epic`, an issue labeled `needs:owner`, or an issue with an
+open `Blocked-by` prerequisite. A `needs:owner` issue runs only in a live session
+with the owner present.
 
 On hand-back, `agent:running` is replaced with `agent:ready`; on a blocking
 condition it is replaced with `agent:blocked`. The existing `agent:approved`
@@ -41,7 +42,7 @@ ownership rule remains unchanged.
 ## 2. Before you claim — all must hold for non-Zcode executors
 
 1. The issue is **open** and labeled `agent:ready`.
-2. It is not an `epic`, and its `Blocked-by: #NN` prerequisites are all **closed**.
+2. It is not an `epic`, it has no `needs:owner` label, and its `Blocked-by: #NN` prerequisites are all **closed**.
 3. It has numbered, observable acceptance criteria (the issue template guarantees
    the shape; older issues may not). No criteria → do not start; see §6.
 4. Dependencies from `docs/agent-tasks/README.md` hold: G01.01 → G01.02 → G01.03
