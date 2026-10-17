@@ -3,7 +3,9 @@
 // may advertise (criterion 4), and the per-locale native catalogue
 // completeness (criterion 5). Deleting a registry entry, a complete code or a
 // catalogue family fails here through the standard runner; the store's
-// unknown-input semantics are asserted unchanged.
+// unknown-input semantics are asserted unchanged. G21.46 (issue #670) adds the
+// ninth code zh with its catalogue — complete and still closed until the
+// G21.50 release flag opens it.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -25,8 +27,8 @@ import { placeDetailStrings } from '../controllers/place/placeDetailController.t
 import { nearbyStrings } from '../controllers/nearby/nearbySurfaceController.ts';
 import { offerStrings } from '../controllers/commerce/commerceController.ts';
 
-// Issue #542 criterion 1 verbatim: the eight requested UI codes and native
-// names.
+// Issue #542 criterion 1: the eight requested UI codes and native names,
+// plus the G21.46 ninth code (zh) — the registry table owns all nine rows.
 const EIGHT = [
   { code: 'be', nativeName: 'Беларуская' },
   { code: 'en', nativeName: 'English' },
@@ -38,17 +40,24 @@ const EIGHT = [
   { code: 'sv', nativeName: 'Svenska' },
 ];
 
-test('the registry defines the eight requested UI codes and native names once (criterion 1)', () => {
-  assert.deepEqual([...UI_LOCALES], EIGHT);
-  for (const { code, nativeName } of EIGHT) {
+// G21.46 (issue #670): the ninth registered code. The native name is stored
+// as \uXXXX escapes in the registry (repo bytes stay CJK-free) and decodes to
+// the real glyphs — the assertion below proves both halves.
+const ZH = { code: 'zh', nativeName: '\u7B80\u4F53\u4E2D\u6587' };
+const NINE = [...EIGHT, ZH];
+const FROZEN_OPEN = ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv'];
+
+test('the registry defines the eight requested UI codes and the ninth zh, with native names, once (criterion 1)', () => {
+  assert.deepEqual([...UI_LOCALES], NINE);
+  for (const { code, nativeName } of NINE) {
     assert.equal(uiLocaleNativeName(code), nativeName);
   }
   assert.throws(() => uiLocaleNativeName('ru'), /ui-locale-unregistered/);
 });
 
-test('the complete set is be/en/uk/de/es/fr/cs/sv — all eight requested codes are complete (criterion 4)', () => {
-  assert.deepEqual([...COMPLETE_UI_LOCALES], ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']);
-  for (const { code } of EIGHT) {
+test('the complete set is be/en/uk/de/es/fr/cs/sv/zh — the eight requested codes plus the Chinese release (criterion 4)', () => {
+  assert.deepEqual([...COMPLETE_UI_LOCALES], ['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv', 'zh']);
+  for (const { code } of NINE) {
     assert.equal(isUiLocaleCode(code), true, `${code} is registered`);
   }
   for (const code of COMPLETE_UI_LOCALES) {
@@ -104,35 +113,52 @@ test('the store derives its vocabulary from the registry and keeps unknown-input
   assert.equal(store.current(), 'sv');
   store.set('be');
   assert.equal(store.current(), 'be');
+  // G21.46/G21.50: zh is registered complete but closed by the release gate —
+  // the switch refuses it with its own named rule (not the unknown one) and
+  // keeps the current locale. The openLocales seam (the tests' one) accepts
+  // it, because the code's catalogue is complete.
+  assert.throws(
+    () => store.set('zh'),
+    (error) => error instanceof UiLocaleError && error.rule === 'ui-locale-closed',
+  );
+  assert.equal(store.current(), 'be');
+  const openStore = createUiLocaleStore(undefined, COMPLETE_UI_LOCALES);
+  openStore.set('zh');
+  assert.equal(openStore.current(), 'zh');
 });
 
 // G21.50 (issue #711): the open subset is a separate fact from the complete
-// set. The synthetic ninth code plays the first gated consumer (zh lands
-// with #669/#670): a code can be complete and still closed, only the flag
-// opens it, and the frozen eight stay open under every flag state. Removing
-// the resolver's union or its complete-set check turns these red.
-const NINE = [...COMPLETE_UI_LOCALES, 'zz'];
+// set. zh is the first real gated consumer (it lands with #670 and stays
+// closed): a code can be complete and still closed, only the flag opens it,
+// and the frozen eight stay open under every flag state. Removing the
+// resolver's union or its complete-set check turns these red.
+const TEN = [...COMPLETE_UI_LOCALES, 'zz'];
 
 test('the release resolver keeps the frozen eight open when the flag is absent, empty or corrupt (criterion 1)', () => {
   for (const flag of [undefined, null, '', '   ', ',', ' , , ', 'bogus', 'ru', 'bogus, ,ru']) {
     assert.deepEqual(
-      [...releaseOpenUiLocales(flag, NINE)],
-      [...COMPLETE_UI_LOCALES],
+      [...releaseOpenUiLocales(flag, TEN)],
+      FROZEN_OPEN,
       `flag ${JSON.stringify(flag)} opens nothing beyond the frozen default`,
     );
   }
   // Production binding: the default `complete` is the real registry, where
-  // no gated code exists yet — even a flag naming `zh` opens nothing today.
-  assert.deepEqual([...releaseOpenUiLocales('zh')], [...COMPLETE_UI_LOCALES]);
-  assert.deepEqual([...OPEN_UI_LOCALES], [...COMPLETE_UI_LOCALES]);
+  // zh is a registered complete code — an absent flag still leaves it closed.
+  assert.deepEqual([...releaseOpenUiLocales(undefined)], FROZEN_OPEN);
+  assert.deepEqual([...OPEN_UI_LOCALES], FROZEN_OPEN);
   assert.equal(RELEASE_FLAG_ENV, 'EXPO_PUBLIC_OPEN_UI_LOCALES');
 });
 
 test('the release resolver opens a registered complete code only when the flag names it, additively (criterion 1)', () => {
-  assert.deepEqual([...releaseOpenUiLocales('zz', NINE)], NINE);
-  assert.deepEqual([...releaseOpenUiLocales('  zz ,bogus,ru\t', NINE)], NINE);
+  // The real gated code: naming zh opens exactly one more code.
+  assert.deepEqual([...releaseOpenUiLocales('zh')], COMPLETE_UI_LOCALES);
+  assert.deepEqual([...releaseOpenUiLocales('  zh ,bogus,ru\t')], COMPLETE_UI_LOCALES);
+  // A synthetic tenth code keeps the generic additive proof independent of
+  // which codes exist today: naming zz opens exactly zz (zh stays closed).
+  assert.deepEqual([...releaseOpenUiLocales('zz', TEN)], [...FROZEN_OPEN, 'zz']);
+  assert.deepEqual([...releaseOpenUiLocales('  zz ,bogus,ru\t', TEN)], [...FROZEN_OPEN, 'zz']);
   // Additive only: naming an already-open code neither duplicates it nor
   // removes any of the frozen eight (hiding sv is out of scope, #711).
-  assert.deepEqual([...releaseOpenUiLocales('be, en', NINE)], [...COMPLETE_UI_LOCALES]);
-  assert.deepEqual([...releaseOpenUiLocales('sv, zz', NINE)], NINE);
+  assert.deepEqual([...releaseOpenUiLocales('be, en', TEN)], FROZEN_OPEN);
+  assert.deepEqual([...releaseOpenUiLocales('sv, zh, zz', TEN)], TEN);
 });

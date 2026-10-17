@@ -98,4 +98,15 @@ export const OFFER_STRINGS_DATA = {
     "purchasedPending": "Köpt · väntar på nedladdning",
     "tryAgain": "Prova igen",
   },
+  "zh": {
+    "buy": "\u8D2D\u4E70",
+    "continueFree": "\u7EE7\u7EED\u514D\u8D39",
+    "dismiss": "\u4EE5\u540E\u518D\u8BF4",
+    "errorBody": "\u53EF\u4EE5\u91CD\u8BD5\uFF0C\u6216\u7EE7\u7EED\u514D\u8D39\u4F7F\u7528\u3002",
+    "errorTitle": "\u8D2D\u4E70\u672A\u5B8C\u6210",
+    "offerBody": "\u4E00\u6B21\u8D2D\u4E70\u5373\u53EF\u89E3\u9501\u672C\u5BFC\u89C8\u7684\u5168\u90E8\u6545\u4E8B\u3002",
+    "offerTitle": "\u5BFC\u89C8\u7684\u5168\u90E8\u6545\u4E8B",
+    "purchasedPending": "\u5DF2\u8D2D\u4E70 · \u9700\u8981\u4E0B\u8F7D",
+    "tryAgain": "\u91CD\u8BD5",
+  },
 };
