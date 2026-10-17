@@ -18,7 +18,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 ## Што трэба зрабіць
 
 ### 2026-10-17 — узгадні налады KUDY і правер backlog G27
-Што зрабіць: праглядзі светлы і цёмны макеты ды канцэпцыю ў PR #790 і запішы ў [#781](https://github.com/vokhandcrafts/KUDY/issues/781), якія часткі прынятыя або адкладзеныя. Правер, што #780–#789 бачныя ў backlog GitHub Project; токен гэтай сесіі не мае `read:project`.
+Што зрабіць: праглядзі светлы і цёмны макеты ды канцэпцыю ў PR #790 і запішы ў [#781](https://github.com/vokhandcrafts/KUDY/issues/781), якія часткі прынятыя або адкладзеныя. Правер, што #780–#789 і #798 бачныя ў backlog GitHub Project; токен гэтай сесіі не мае `read:project`.
 PR: https://github.com/vokhandcrafts/KUDY/pull/790 · Issue: [#781](https://github.com/vokhandcrafts/KUDY/issues/781)
 
 ### 2026-10-15 — усталюй дэманстрацыйную версію KUDY
