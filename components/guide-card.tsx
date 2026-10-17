@@ -8,7 +8,7 @@
 // from the other zones).
 import { Link } from "expo-router";
 import type { ReactNode } from "react";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import type { CatalogGuideCard, CatalogSurfaceState } from "../controllers/catalog/catalogController.ts";
 import type { Services } from "../controllers/createServices.ts";
@@ -93,13 +93,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: tokens.spaceS,
   },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+  list: { flex: 1 },
+  listContent: { paddingHorizontal: tokens.spaceL, paddingBottom: tokens.spaceL },
+  row: { marginBottom: tokens.spaceM },
+  columns: {
     justifyContent: "space-between",
   },
   gridColumn: {
-    flexBasis: "48.5%",
+    width: "48.5%",
   },
   badge: {
     alignSelf: "flex-start",
@@ -145,18 +146,18 @@ const styles = StyleSheet.create({
 // a new look (новы выгляд — допіс у канон, не мясцовая стылізацыя).
 export const cardStyle = styles.card;
 
-// The city surfaces' shared body (G06.05): the walk-mode button, the city
-// title, the caller's middle slot (the «Побач» link on Explore, nothing on
-// the Guides rubric) and the catalog state with the named retry — one copy
-// for both screens (implementation-rules 8: the sibling clone the copy-paste
-// gate caught became this component). `middle` stays a prop, not a flag:
-// the surfaces keep deciding their own chains.
+// The city surfaces' shared body (G06.05): one FlatList owns scrolling on
+// both screens. Its header holds the caller's leading slot (brand or Back),
+// walk-mode button, city title, middle slot and catalog state with retry.
+// The list rows keep NAV9's preview source: city or rubric by variant.
+// `middle` stays a prop, not a flag; callers decide their own link chains.
 export function CityCatalogBody({
   walk,
   catalog,
   onRetry,
   variant,
   locale,
+  leading = null,
   middle = null,
 }: {
   walk?: Services["walk"];
@@ -164,15 +165,38 @@ export function CityCatalogBody({
   onRetry?: () => void;
   variant: "city" | "rubric";
   locale: string;
+  leading?: ReactNode;
   middle?: ReactNode;
 }) {
+  const wide = isWide(useWindowDimensions().width);
+  const guides = catalogGuides(catalog, locale);
+  const from = variant === "rubric" ? "rubric" : "city";
   return (
-    <>
-      <WalkButton walk={walk} locale={locale} />
-      <ScaledText style={styles.cityTitle}>{CITY_TITLE}</ScaledText>
-      {middle}
-      <CatalogStateView state={catalog} variant={variant} locale={locale} onRetry={onRetry} />
-    </>
+    <FlatList
+      key={`${variant}-${wide ? 2 : 1}`}
+      testID={`scroll-${variant === "city" ? "explore" : "guides"}`}
+      style={styles.list}
+      contentContainerStyle={styles.listContent}
+      data={guides}
+      numColumns={wide ? 2 : 1}
+      columnWrapperStyle={wide ? styles.columns : undefined}
+      keyExtractor={(card) => card.routeId}
+      initialNumToRender={12}
+      renderItem={({ item }) => (
+        <View style={[styles.row, wide ? styles.gridColumn : null]}>
+          <GuideCard card={item} from={from} locale={locale} />
+        </View>
+      )}
+      ListHeaderComponent={
+        <>
+          {leading}
+          <WalkButton walk={walk} locale={locale} />
+          <ScaledText style={styles.cityTitle}>{CITY_TITLE}</ScaledText>
+          {middle}
+          <CatalogStateView state={catalog} variant={variant} locale={locale} onRetry={onRetry} />
+        </>
+      }
+    />
   );
 }
 
@@ -305,44 +329,18 @@ export function StateBanner({
   );
 }
 
-// The rubric section a surface renders for its guides; empty rubrics never
-// render (NAV2) — callers check `guides.length > 0` first. One column below
-// 821 px, two above (the scheme's responsive split).
-function GuideCardsList({
-  guides,
-  variant,
-  locale,
-}: {
-  guides: readonly CatalogGuideCard[];
-  variant: "city" | "rubric";
-  locale: string;
-}) {
-  const wide = isWide(useWindowDimensions().width);
-  // The NAV9 source surface follows the variant: the city card and the
-  // rubric are the MVP's two preview sources (11 §16.2).
-  const from = variant === "rubric" ? "rubric" : "city";
-  const cards = guides.map((card) => (
-    <View key={card.routeId} style={wide ? styles.gridColumn : null}>
-      <GuideCard card={card} from={from} locale={locale} />
-    </View>
-  ));
-  if (variant === "rubric") {
-    return <View style={wide ? styles.grid : null}>{cards}</View>;
-  }
+function GuidesLink({ locale }: { locale: string }) {
   return (
-    <View>
-      <Link href={`/city/${ACTIVE_CITY_ID}/guides`} asChild>
-        <PressableSurface
-          accessibilityRole="link"
-          accessibilityLabel={uiStrings(locale).guidesLink}
-          hitSlop={12}
-          testID="link-guides"
-        >
-          <ScaledText style={styles.cardTitle}>{uiStrings(locale).guidesLink}</ScaledText>
-        </PressableSurface>
-      </Link>
-      <View style={wide ? styles.grid : null}>{cards}</View>
-    </View>
+    <Link href={`/city/${ACTIVE_CITY_ID}/guides`} asChild>
+      <PressableSurface
+        accessibilityRole="link"
+        accessibilityLabel={uiStrings(locale).guidesLink}
+        hitSlop={12}
+        testID="link-guides"
+      >
+        <ScaledText style={styles.cardTitle}>{uiStrings(locale).guidesLink}</ScaledText>
+      </PressableSurface>
+    </Link>
   );
 }
 
@@ -417,7 +415,7 @@ export function CatalogStateView({
           if (visible.length === 0) {
             return <CityMessage text={state.guides.length === 0 ? strings.notPublished : strings.textLocaleEmpty} />;
           }
-          return <GuideCardsList guides={visible} variant={variant} locale={locale} />;
+          return variant === "city" ? <GuidesLink locale={locale} /> : null;
         })()}
       </View>
     );
@@ -430,7 +428,11 @@ export function CatalogStateView({
   if (visible.length === 0) {
     return <CityMessage text={state.guides.length === 0 ? strings.notPublished : strings.textLocaleEmpty} />;
   }
-  return <GuideCardsList guides={visible} variant={variant} locale={locale} />;
+  return variant === "city" ? <GuidesLink locale={locale} /> : null;
+}
+
+function catalogGuides(state: CatalogSurfaceState | null, locale: string): readonly CatalogGuideCard[] {
+  return state?.kind === "ready" || state?.kind === "offline" ? visibleGuides(state.guides, locale) : [];
 }
 
 // The G21.17 projection filter of one city-catalog state: only the guides
