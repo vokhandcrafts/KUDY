@@ -9,7 +9,7 @@
 | ID | Тып | Вынік | Issue | Уваход |
 | --- | --- | --- | --- | --- |
 | APR-01 | выпраўленне / праверка | Production AAB: target API, ABI і 16 KB па фактычным артэфакце | [#806](https://github.com/vokhandcrafts/KUDY/issues/806) | няма |
-| APR-02 | выпраўленне | Зліты release-маніфест мае толькі патрэбныя дазволы | [#807](https://github.com/vokhandcrafts/KUDY/issues/807) | няма |
+| APR-02 | выпраўленне | Зліты release-маніфест мае толькі патрэбныя дазволы | [#807](https://github.com/vokhandcrafts/KUDY/issues/807) | улічыць #792 |
 | APR-03 | выпраўленне | Палітыка прыватнасці адкрываецца з Android-дадатку па дзейным URL | [#808](https://github.com/vokhandcrafts/KUDY/issues/808) | #320 |
 | APR-04 | выпраўленне / праверка | Дасяжнасць, подпісы і кантраст асноўных экранаў правераны на Android | [#809](https://github.com/vokhandcrafts/KUDY/issues/809) | няма |
 | APR-05 | выпраўленне / праверка | Edge-to-edge не хавае дзеянні пад сістэмнымі панэлямі | [#810](https://github.com/vokhandcrafts/KUDY/issues/810) | няма |
@@ -26,7 +26,7 @@
 | GP-01, GP-03, GP-04 | APR-01; фактычны Play-выпуск паўторна правярае #299 |
 | GP-02 | #299 і чалавечая перадумова #330; APR-01 дае AAB, але не сцвярджае Play App Signing |
 | GP-05 | APR-02 |
-| GP-06, GP-07, GP-08 | APR-06 → наступны fix пасля рашэння; дэкларацыі — APR-08 і #299; тэхнічны GPS-fix ужо ў #792 |
+| GP-06, GP-07, GP-08 | APR-06 → наступны fix пасля рашэння; mediaPlayback/microphone: інвентар і мінімізацыя — APR-02, дэкларацыі ўсіх выкарыстаных тыпаў — APR-08 і #299; тэхнічны GPS-fix ужо ў #792 |
 | GP-09, AN-01 | ужо маюць вузкі кодавы доказ у матрыцы; новае issue не патрэбнае |
 | GP-10 | APR-03; публікацыя сайта — #320; поле Play listing — #299 |
 | GP-11 | APR-08 → #299 для ўнясення і праверкі формы ў Play Console |
