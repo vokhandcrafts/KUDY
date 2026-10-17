@@ -10,12 +10,21 @@ import type { FetchPort } from './types.ts';
 
 export function createOriginByteSource(origin: string, waitLimitMs: number = NETWORK_WAIT_LIMITS.bundleBytesMs): FetchPort {
   return async (path: string) => {
-    const response: Response = await withWaitLimit('wait-bundle-bytes', waitLimitMs, (signal) =>
-      fetch(`${origin}/${path}`, { signal }),
-    );
-    if (response.status !== 200) {
-      throw new Error(`bundle-bytes#status-${response.status}`);
-    }
-    return new Uint8Array(await response.arrayBuffer());
+    return withWaitLimit('wait-bundle-bytes', waitLimitMs, async (signal) => {
+      let response: Response;
+      try {
+        response = await fetch(`${origin}/${path}`, { signal });
+      } catch {
+        throw new Error('bundle-bytes#fetch-failed');
+      }
+      if (response.status !== 200) {
+        throw new Error(`bundle-bytes#status-${response.status}`);
+      }
+      try {
+        return new Uint8Array(await response.arrayBuffer());
+      } catch {
+        throw new Error('bundle-bytes#body-failed');
+      }
+    });
   };
 }
