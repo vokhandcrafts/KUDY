@@ -19,7 +19,6 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: tokens.colorPaper,
     flex: 1,
-    padding: tokens.spaceL,
   },
 });
 
@@ -36,17 +35,14 @@ export default function Guides() {
   // the failed load's named retry.
   const strings = uiStrings(locale);
   return (
-    <View
-      style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]}
-      testID="screen-Guides"
-    >
-      <BackButton label={strings.backToCity} testID="btn-guides-back" />
+    <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Guides">
       <CityCatalogBody
         walk={services.walk}
         catalog={controller?.surface ?? null}
         onRetry={controller ? () => void controller.refresh() : undefined}
         variant="rubric"
         locale={locale}
+        leading={<BackButton label={strings.backToCity} testID="btn-guides-back" />}
       />
     </View>
   );

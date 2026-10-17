@@ -92,9 +92,16 @@ class FakeDirectory extends Entry {
       if (dir === this.path || dir.startsWith(`${this.path}/`)) this.fs.dirs.delete(dir);
     }
   }
+  // Expo move semantics (FileSystemPath.getMoveOrCopyPath, expo-file-system
+  // 19.0.24 Android): a directory moved to an existing destination directory
+  // lands inside it — `mv a b` → `b/a`; only an absent destination is the
+  // whole rename. A Node-rename stand-in (always replace) would mask the
+  // caller-missed-directory class of defect (G20.31 / #793).
   move(destination: FakeFile | FakeDirectory): void {
     if (!this.fs.dirs.has(this.path)) throw new Error(`noent ${this.path}`);
-    const target = destination.path;
+    const target = this.fs.dirs.has(destination.path)
+      ? `${destination.path}/${this.name}`
+      : destination.path;
     for (const key of [...this.fs.files.keys()]) {
       if (key.startsWith(`${this.path}/`)) {
         this.fs.files.set(`${target}${key.slice(this.path.length)}`, this.fs.files.get(key)!);
