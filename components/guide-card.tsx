@@ -146,12 +146,11 @@ const styles = StyleSheet.create({
 // a new look (новы выгляд — допіс у канон, не мясцовая стылізацыя).
 export const cardStyle = styles.card;
 
-// The city surfaces' shared body (G06.05): the walk-mode button, the city
-// title, the caller's middle slot (the «Побач» link on Explore, nothing on
-// the Guides rubric) and the catalog state with the named retry — one copy
-// for both screens (implementation-rules 8: the sibling clone the copy-paste
-// gate caught became this component). `middle` stays a prop, not a flag:
-// the surfaces keep deciding their own chains.
+// The city surfaces' shared body (G06.05): one FlatList owns scrolling on
+// both screens. Its header holds the caller's leading slot (brand or Back),
+// walk-mode button, city title, middle slot and catalog state with retry.
+// The list rows keep NAV9's preview source: city or rubric by variant.
+// `middle` stays a prop, not a flag; callers decide their own link chains.
 export function CityCatalogBody({
   walk,
   catalog,
