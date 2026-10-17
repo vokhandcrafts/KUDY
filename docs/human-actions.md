@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-17 — узгадні налады KUDY і правер backlog G27
+Што зрабіць: праглядзі светлы і цёмны макеты ды канцэпцыю ў PR #790 і запішы ў [#781](https://github.com/vokhandcrafts/KUDY/issues/781), якія часткі прынятыя або адкладзеныя. Правер, што #780–#789 і #798 бачныя ў backlog GitHub Project; токен гэтай сесіі не мае `read:project`.
+PR: https://github.com/vokhandcrafts/KUDY/pull/790 · Issue: [#781](https://github.com/vokhandcrafts/KUDY/issues/781)
+
 ### 2026-10-17 — змержы PR #763 пасля кітайскага рэвью (#670)
 Што зрабіць: прачытай вынікі незалежнага кітайскамоўнага рэвью (мадэль GLM-5.3-Flash Free; 23 знаходкі, усе закрытыя, 24 запісы змененыя — [вынік G21.46](agent-tasks/results/G21.46.md), раздзел «Мовазнаўчае рэвью») і змержы PR. Калі захочаш яшчэ і чалавека-носьбіта як трэці праход — гэта асобнае рашэнне; PR ад яго не залежыць.
 PR: https://github.com/vokhandcrafts/KUDY/pull/763 · Issue: [#670](https://github.com/vokhandcrafts/KUDY/issues/670)
