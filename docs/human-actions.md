@@ -19,7 +19,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ### 2026-10-17 — правер Android-задачы і выпуск
 Што зрабіць: правер у GitHub Project, што #804–#813 бачныя ў backlog без запуску выканаўцаў; токен гэтай сесіі не мае `read:project`. Звяры дэкларацыі фонавай лакацыі, усіх выкарыстаных тыпаў foreground service і Data safety з [матрыцай аўдыту](audits/android-google-guidelines.md). Перадай вынік праверкі production AAB і Play Console, каб закрыць пункты доказамі.
-PR: https://github.com/vokhandcrafts/KUDY/pull/803 · [Індэкс задач](agent-tasks/android-play-readiness/README.md)
+PR: https://github.com/vokhandcrafts/KUDY/pull/803 · [Індэкс задач](agent-tasks/android-play-readiness/README.md) · Issues: [#804](https://github.com/vokhandcrafts/KUDY/issues/804), [#805](https://github.com/vokhandcrafts/KUDY/issues/805), [#806](https://github.com/vokhandcrafts/KUDY/issues/806), [#807](https://github.com/vokhandcrafts/KUDY/issues/807), [#808](https://github.com/vokhandcrafts/KUDY/issues/808), [#809](https://github.com/vokhandcrafts/KUDY/issues/809), [#810](https://github.com/vokhandcrafts/KUDY/issues/810), [#811](https://github.com/vokhandcrafts/KUDY/issues/811), [#812](https://github.com/vokhandcrafts/KUDY/issues/812), [#813](https://github.com/vokhandcrafts/KUDY/issues/813)
 
 ### 2026-10-17 — узгадні налады KUDY і правер backlog G27
 Што зрабіць: праглядзі светлы і цёмны макеты ды канцэпцыю ў PR #790 і запішы ў [#781](https://github.com/vokhandcrafts/KUDY/issues/781), якія часткі прынятыя або адкладзеныя. Правер, што #780–#789 і #798 бачныя ў backlog GitHub Project; токен гэтай сесіі не мае `read:project`.
