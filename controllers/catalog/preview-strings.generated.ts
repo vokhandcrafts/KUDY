@@ -155,7 +155,7 @@ export const PREVIEW_STRINGS_DATA = {
     "storageFullDetail": (mb: number) => `det saknas utrymme: ytterligare ${mb} MB krävs`,
   },
   "zh": {
-    "detail": (detail: { readonly kind: string; readonly count?: number }) => detail.kind === "damaged" ? `\u5B89\u88C5\u5305\u5DF2\u635F\u574F\uFF1A\u9700\u8981\u91CD\u65B0\u4E0B\u8F7D` : detail.kind === "missing-files" ? `\u7F3A\u5C11\u6587\u4EF6\uFF1A${detail.count}` : detail.kind === "stale" ? `\u6709\u53EF\u7528\u66F4\u65B0` : `\u5B89\u88C5\u5305\u4E0D\u5B8C\u6574`,
+    "detail": (detail: { readonly kind: string; readonly count?: number }) => detail.kind === "damaged" ? `\u5185\u5BB9\u5305\u5DF2\u635F\u574F\uFF1A\u9700\u8981\u91CD\u65B0\u4E0B\u8F7D` : detail.kind === "missing-files" ? `\u7F3A\u5C11\u6587\u4EF6\uFF1A${detail.count}` : detail.kind === "stale" ? `\u6709\u53EF\u7528\u66F4\u65B0` : `\u5185\u5BB9\u5305\u4E0D\u5B8C\u6574`,
     "downloadFailed": "\u4E0B\u8F7D\u5931\u8D25\u3002",
     "label": {
       "download": "\u4E0B\u8F7D",

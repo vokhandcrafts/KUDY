@@ -180,7 +180,7 @@ export const NEARBY_STRINGS_DATA = {
     "loading": "\u52A0\u8F7D\u4E2D…",
     "mapNote": "\u57CE\u5E02\u5730\u56FE\u5C06\u5728\u786E\u5B9A\u74E6\u7247\u65B9\u6848\u540E\u4E0A\u7EBF",
     "noteAcquiring": "\u6B63\u5728\u83B7\u53D6\u4F4D\u7F6E…",
-    "noteDenied": "\u672A\u6388\u6743\u4F4D\u7F6E——\u624B\u52A8\u6D4F\u89C8",
+    "noteDenied": "\u4F4D\u7F6E\u6743\u9650\u672A\u6388\u6743——\u624B\u52A8\u6D4F\u89C8",
     "noteHeldByWalk": "\u6563\u6B65\u6B63\u5728\u4F7F\u7528\u4F4D\u7F6E——\u624B\u52A8\u6D4F\u89C8",
     "noteUnstable": "\u4F4D\u7F6E\u4E0D\u7A33\u5B9A",
     "placeLabel": "\u5730\u70B9",

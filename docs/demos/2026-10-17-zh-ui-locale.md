@@ -1,7 +1,7 @@
 # G21.46 (issue #670): дзявяты UI-код zh — рэестр, поўны каталог, пікер
 
-*2026-10-16T23:52:38Z by Showboat 0.6.1*
-<!-- showboat-id: e0e94a06-ee6c-4428-9e8b-f633aadb7c97 -->
+*2026-10-17T00:40:33Z by Showboat 0.6.1*
+<!-- showboat-id: 92e5190d-b416-4d40-b932-88ff67853a37 -->
 
 Showboat-дэма задачы #670. Кантракт: `zh` — поўны UI-лакаль (рэестр-запіс і
 каталог разам, канон G21.09), генератар застаецца адзінай крыніцай праекцый,
@@ -48,7 +48,7 @@ console.log('native.chrome.catalogUnavailable:', JSON.stringify(byId.get('native
 ```
 
 ```output
-records: 295 | raw Han bytes: 0 | escaped code points: 2844
+records: 295 | raw Han bytes: 0 | escaped code points: 3185
 terminology traces: 18
 native.chrome.back: "\u4E0A\u4E00\u6B65"
 native.chrome.walk: "\u6563\u6B65"

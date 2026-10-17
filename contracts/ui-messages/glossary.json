@@ -496,7 +496,7 @@
             "kind": "reviewed-terminology",
             "term": "\u4E0D\u53EF\u7528",
             "locator": "translations/zh.json#native.chrome.catalogUnavailable",
-            "reason": "unavailable → \u4E0D\u53EF\u7528 у радках стану (\u76EE\u5F55\u4E0D\u53EF\u7528, \u7CBE\u9009\u4E0D\u53EF\u7528, \u5730\u70B9\u8BE6\u60C5\u4E0D\u53EF\u7528); слоўнікавы прабел закрыты корпусам AOSP zh-rCN, не слоўнікамі",
+            "reason": "unavailable → \u4E0D\u53EF\u7528 у радках стану (\u76EE\u5F55\u4E0D\u53EF\u7528, \u7CBE\u9009\u5185\u5BB9\u4E0D\u53EF\u7528, \u5730\u70B9\u8BE6\u60C5\u4E0D\u53EF\u7528); слоўнікавы прабел закрыты корпусам AOSP zh-rCN, не слоўнікамі",
             "date": "2026-10-17"
           }
         }

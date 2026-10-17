@@ -54,10 +54,10 @@ test('the Chinese discrete forms render over the selector arguments', () => {
 
 test('the Chinese preview detail renders the named kind forms', () => {
   const { preview, previewReasonText } = localeFamilies('zh');
-  assert.equal(preview.detail({ kind: 'damaged' }), '\u5B89\u88C5\u5305\u5DF2\u635F\u574F\uFF1A\u9700\u8981\u91CD\u65B0\u4E0B\u8F7D');
+  assert.equal(preview.detail({ kind: 'damaged' }), '\u5185\u5BB9\u5305\u5DF2\u635F\u574F\uFF1A\u9700\u8981\u91CD\u65B0\u4E0B\u8F7D');
   assert.equal(preview.detail({ kind: 'missing-files', count: 2 }), '\u7F3A\u5C11\u6587\u4EF6\uFF1A2');
   assert.equal(preview.detail({ kind: 'stale' }), '\u6709\u53EF\u7528\u66F4\u65B0');
-  assert.equal(preview.detail({ kind: 'other' }), '\u5B89\u88C5\u5305\u4E0D\u5B8C\u6574');
+  assert.equal(preview.detail({ kind: 'other' }), '\u5185\u5BB9\u5305\u4E0D\u5B8C\u6574');
   assert.equal(previewReasonText('preview#purchase-required', preview), '\u9700\u8981\u8D2D\u4E70\u3002');
   // An unknown diagnostic renders as-is (the honest runMapReason idiom).
   assert.equal(previewReasonText('preview#unknown', preview), 'preview#unknown');

@@ -238,7 +238,7 @@ export const PLACE_DETAIL_STRINGS_DATA = {
     "noFacts": "\u8BE5\u5730\u70B9\u5C1A\u672A\u5728\u76EE\u5F55\u4E2D\u53D1\u5E03",
     "nowPlaying": "\u6B63\u5728\u64AD\u653E",
     "paused": "\u5DF2\u6682\u505C",
-    "playFailed": "\u58F0\u97F3\u6CA1\u6709\u5F00\u59CB\u3002",
+    "playFailed": "\u97F3\u9891\u672A\u5F00\u59CB\u64AD\u653E\u3002",
     "playFailedHint": "\u8BF7\u518D\u8BD5\u4E00\u6B21\u3002",
     "playHint": "\u901A\u8FC7\u552F\u4E00\u64AD\u653E\u5668\u663E\u5F0F\u64AD\u653E\u8BD5\u542C\u3002",
     "playLabel": "\u8BD5\u542C",
