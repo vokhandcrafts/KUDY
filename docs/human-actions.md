@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-17 — правер бачнасць Android-задач у backlog
+Што зрабіць: правер у GitHub Project, што #804–#813 з'явіліся ў backlog без запуску выканаўцаў. Токен гэтай сесіі не мае `read:project`; рашэнні па фонавай лакацыі, выдаленні, backup і адаптыўнасці абмяркоўваюцца ў #804, #805, #812 і #813 перад асобнымі fix-задачамі.
+PR: https://github.com/vokhandcrafts/KUDY/pull/803 · Issues: [#804](https://github.com/vokhandcrafts/KUDY/issues/804), [#805](https://github.com/vokhandcrafts/KUDY/issues/805), [#806](https://github.com/vokhandcrafts/KUDY/issues/806), [#807](https://github.com/vokhandcrafts/KUDY/issues/807), [#808](https://github.com/vokhandcrafts/KUDY/issues/808), [#809](https://github.com/vokhandcrafts/KUDY/issues/809), [#810](https://github.com/vokhandcrafts/KUDY/issues/810), [#811](https://github.com/vokhandcrafts/KUDY/issues/811), [#812](https://github.com/vokhandcrafts/KUDY/issues/812), [#813](https://github.com/vokhandcrafts/KUDY/issues/813)
+
 ### 2026-10-17 — правер Android выпуск у Play Console
 Што зрабіць: звяры дэкларацыі фонавай лакацыі, foreground service і Data safety з [матрыцай аўдыту](audits/android-google-guidelines.md). Перадай вынік праверкі production AAB і Play Console, каб адкрытыя пункты можна было закрыць доказамі.
 PR: https://github.com/vokhandcrafts/KUDY/pull/803
