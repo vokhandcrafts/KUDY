@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-17 — правер Android выпуск у Play Console
+Што зрабіць: звяры дэкларацыі фонавай лакацыі, foreground service і Data safety з [матрыцай аўдыту](audits/android-google-guidelines.md). Перадай вынік праверкі production AAB і Play Console, каб адкрытыя пункты можна было закрыць доказамі.
+PR: https://github.com/vokhandcrafts/KUDY/pull/803
+
 ### 2026-10-17 — узгадні налады KUDY і правер backlog G27
 Што зрабіць: праглядзі светлы і цёмны макеты ды канцэпцыю ў PR #790 і запішы ў [#781](https://github.com/vokhandcrafts/KUDY/issues/781), якія часткі прынятыя або адкладзеныя. Правер, што #780–#789 і #798 бачныя ў backlog GitHub Project; токен гэтай сесіі не мае `read:project`.
 PR: https://github.com/vokhandcrafts/KUDY/pull/790 · Issue: [#781](https://github.com/vokhandcrafts/KUDY/issues/781)
