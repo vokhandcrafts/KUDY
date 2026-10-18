@@ -50,7 +50,7 @@ export function checkExportedDocumentLanguage({ outDir }: { outDir: string }): D
     if (actual === expected) continue;
     violations.push({
       code: actual === null ? 'missing-document-language' : 'wrong-document-language',
-      path: rel,
+      path: rel.replaceAll('\\', '/'),
       expected,
       actual,
     });

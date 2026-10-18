@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { collectOutputs, DOMAINS, escapeRepoBytes, escapeTemplate, parseTemplate, renderTemplateRecord, run } from './generate-messages.mjs';
 
@@ -111,11 +111,11 @@ test('message_rendering_safe: escaped static text round-trips through real gener
   assert.ok(fnSource.includes("\\`"), 'the backtick is escaped in the emitted source');
   assert.ok(fnSource.includes('\\n'), 'the newline is escaped in the emitted source');
   const module = `export const f = ${fnSource};\n`;
-  const fake = mkdtempSync(join(tmpdir(), 'kudy-g2125-safe-'));
+  const fake = mkdtempSync(join(tmpdir(), 'kudy-g2125-safe #%-'));
   try {
     const file = join(fake, 'safe-probe.ts');
     writeFileSync(file, module, 'utf8');
-    const rendered = (await import(file)).f('X');
+    const rendered = (await import(pathToFileURL(file).href)).f('X');
     assert.equal(rendered, 'адказ: X\nрадок `з коскаю` і "цытата" + \'апостраф\' + \\ таб\tканец');
   } finally {
     rmSync(fake, { recursive: true, force: true });

@@ -56,7 +56,7 @@ test('a copy of the guard inputs stays green while the Windows android-build ste
 test('removing the windows android-build step turns the required-checks guard red', (t) => {
   const dir = fixture(t);
   const file = path.join(dir, workflowRel);
-  const original = fs.readFileSync(file, 'utf8');
+  const original = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
   const removed = original.replace(`\n        ${stepLine}\n`, '\n');
   assert.notEqual(removed, original);
   fs.writeFileSync(file, removed);
