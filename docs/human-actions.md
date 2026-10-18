@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-17 — змержы follow-up PR #814: праўкі рэв'ю G20.31
+Што зрабіць: прачытай раздзелы «Код-рэвю» і «Суддзя» у [выніку G20.31](agent-tasks/results/G20.31.md) (2 low-праўкі рэв'ю; суддзя ✅ APPROVED) і змержы PR — гэта дадатак да #799, бо #799 быў змержаны раней, чым праўкі рэв'ю трапілі ў main.
+PR: https://github.com/vokhandcrafts/KUDY/pull/814
+
 ### 2026-10-17 — правер Android-задачы і выпуск
 Што зрабіць: правер у GitHub Project, што #804–#813 бачныя ў backlog без запуску выканаўцаў; токен гэтай сесіі не мае `read:project`. Звяры дэкларацыі фонавай лакацыі, усіх выкарыстаных тыпаў foreground service і Data safety з [матрыцай аўдыту](audits/android-google-guidelines.md). Перадай вынік праверкі production AAB і Play Console, каб закрыць пункты доказамі.
 PR: https://github.com/vokhandcrafts/KUDY/pull/803 · [Індэкс задач](agent-tasks/android-play-readiness/README.md) · Issues: [#804](https://github.com/vokhandcrafts/KUDY/issues/804), [#805](https://github.com/vokhandcrafts/KUDY/issues/805), [#806](https://github.com/vokhandcrafts/KUDY/issues/806), [#807](https://github.com/vokhandcrafts/KUDY/issues/807), [#808](https://github.com/vokhandcrafts/KUDY/issues/808), [#809](https://github.com/vokhandcrafts/KUDY/issues/809), [#810](https://github.com/vokhandcrafts/KUDY/issues/810), [#811](https://github.com/vokhandcrafts/KUDY/issues/811), [#812](https://github.com/vokhandcrafts/KUDY/issues/812), [#813](https://github.com/vokhandcrafts/KUDY/issues/813)

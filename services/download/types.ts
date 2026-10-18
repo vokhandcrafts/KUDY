@@ -35,6 +35,8 @@ export interface DownloadStore {
   writeFile(rel: string, bytes: Uint8Array): Promise<void>;
   rename(fromRel: string, toRel: string): Promise<void>;
   remove(rel: string): Promise<void>;
+  // Answers for files and directories alike (stat semantics), false when
+  // nothing is there — a file-only answer misclassifies directories.
   exists(rel: string): Promise<boolean>;
   readFile(rel: string): Promise<Uint8Array | null>;
   statSize(rel: string): Promise<number | null>;
