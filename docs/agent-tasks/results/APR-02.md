@@ -2,8 +2,8 @@
 
 Issue: [#807](https://github.com/vokhandcrafts/KUDY/issues/807). Дата: 2026-10-18.
 PR: [#828](https://github.com/vokhandcrafts/KUDY/pull/828).
-База: `79abba9`. Стан: **рэалізацыя і Android-прыёмка завершаныя**;
-PR чакае рэв'ю і зліцця.
+База: `79abba9`. Стан: **рэалізацыя і Android-прыёмка завершаныя**.
+Стан зліцця — на старонцы PR.
 
 ## Змены і паходжанне дазволаў
 
