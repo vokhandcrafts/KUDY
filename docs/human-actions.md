@@ -18,8 +18,8 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 ## Што трэба зрабіць
 
 ### 2026-10-18 — змержы выпраўленні праверак Windows і Linux
-Што зрабіць: прачытай PR задачы #816 і змержы яго пасля неабходных праверак і рэвью.
-Issue: https://github.com/vokhandcrafts/KUDY/issues/816
+Што зрабіць: прачытай PR #827 і змержы яго пасля неабходных праверак і рэвью.
+PR: https://github.com/vokhandcrafts/KUDY/pull/827 · Issue: https://github.com/vokhandcrafts/KUDY/issues/816
 
 ### 2026-10-17 — правер Android-задачы і выпуск
 Што зрабіць: правер у GitHub Project, што #804–#813 бачныя ў backlog без запуску выканаўцаў; токен гэтай сесіі не мае `read:project`. Звяры дэкларацыі фонавай лакацыі, усіх выкарыстаных тыпаў foreground service і Data safety з [матрыцай аўдыту](audits/android-google-guidelines.md). Перадай вынік праверкі production AAB і Play Console, каб закрыць пункты доказамі.
