@@ -6,7 +6,7 @@
 Доказ на ўзроўні RN-render: мэты націску не меншыя за 48 dp, а фільтры, спасылкі, выбар аўдыё і Run атрымалі падпісы, ролі і стан. Гэта не заменіць TalkBack ці Accessibility Scanner на Android-прыладзе.
 
 ```bash
-output=$(npm exec -- jest --runInBand --silent components/pressable-surface.test.tsx components/back-button.test.tsx components/run-native-map.test.tsx app/discovery.test.tsx app/preview.test.tsx app/run.test.tsx 2>&1); code=$?; if [ "$code" -ne 0 ]; then printf "%s\n" "$output" | tail -60; exit "$code"; fi; printf "%s\n" "$output" | grep "^PASS " | sort; printf "%s\n" "$output" | grep -E "^(Test Suites:|Tests:)"
+output=$(npm exec -- jest --runInBand --silent components/pressable-surface.test.tsx components/back-button.test.tsx components/run-native-map.test.tsx app/discovery.test.tsx app/preview.test.tsx app/run.test.tsx 2>&1); code=$?; if [ "$code" -ne 0 ]; then printf "%s\n" "$output" | tail -60; exit "$code"; fi; printf "%s\n" "$output" | grep "^PASS " | awk '{print $1, $2}' | LC_ALL=C sort; printf "%s\n" "$output" | grep -E "^(Test Suites:|Tests:)"
 ```
 
 ```output
