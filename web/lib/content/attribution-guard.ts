@@ -22,11 +22,11 @@ export function checkExportedAttribution({ outDir }: { outDir: string }): Attrib
       !(segments.length === 2 || (segments.length === 4 && segments[2] === 'stops' && segments[3]))) continue;
     const html = fs.readFileSync(abs, 'utf8');
     if (!html.includes('data-content-attribution="true"')) {
-      violations.push({ path: rel, code: 'missing-content-attribution' });
+      violations.push({ path: rel.replaceAll('\\', '/'), code: 'missing-content-attribution' });
     }
     const usageHref = localePath(toUiLocale(expectedDocumentLocale(rel)), '/usage-rules');
     if (!html.includes(`href="${usageHref}"`)) {
-      violations.push({ path: rel, code: 'missing-usage-rules-link' });
+      violations.push({ path: rel.replaceAll('\\', '/'), code: 'missing-usage-rules-link' });
     }
   }
   return violations.sort((a, b) => a.path.localeCompare(b.path) || a.code.localeCompare(b.code));

@@ -85,7 +85,7 @@ function prepareCopy(entry, { revert = false } = {}) {
   }
   if (revert) {
     const adapterFile = revertAdapterPath(entry, scratch);
-    const source = fs.readFileSync(adapterFile, 'utf8');
+    const source = fs.readFileSync(adapterFile, 'utf8').replace(/\r\n/g, '\n');
     const occurrences = source.split(entry.revertLine).length - 1;
     assert.equal(
       occurrences,
