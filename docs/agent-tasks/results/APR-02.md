@@ -1,6 +1,7 @@
 # APR-02 — мінімізацыя дазволаў Android
 
 Issue: [#807](https://github.com/vokhandcrafts/KUDY/issues/807). Дата: 2026-10-18.
+Draft PR: [#828](https://github.com/vokhandcrafts/KUDY/pull/828).
 База: `79abba9`. Стан: **blocked-external**; праўка падрыхтаваная, яўная адмова
 ў дазволе на лакацыю яшчэ не правераная. PR застаецца чарнавіком.
 
@@ -37,6 +38,7 @@ Issue: [#807](https://github.com/vokhandcrafts/KUDY/issues/807). Дата: 2026-
 Бягучы адаптар не выклікае `setActiveForLockScreen`: гэты сэрвіс абвешчаны, але яго
 актывацыя і lock-screen controls не пацверджаныя. APR-02 іх не дадае; інвентар
 перадаецца ў [#811](https://github.com/vokhandcrafts/KUDY/issues/811).
+Фактычная перадача: [каментар з інвентаром](https://github.com/vokhandcrafts/KUDY/issues/811#issuecomment-6248274897).
 
 Выдаленне біяметрычных дазволаў не ўключае і не выключае шыфраванне: існы
 [адаптар SecureStore](../../../services/device-secure-store.ts) карыстаецца
