@@ -284,6 +284,7 @@ export default function Map() {
         flex: 1,
         padding: tokens.spaceL,
         paddingTop: insets.top + tokens.spaceL,
+        paddingBottom: insets.bottom + tokens.spaceL,
       }}
       testID="screen-Map"
     >

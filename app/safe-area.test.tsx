@@ -3,10 +3,11 @@
 // the top inset is the screen's own padding (AC4). The hook is pinned to a
 // known fake inset; each screen's root must add it on top of the base
 // spacing (50 + 16 = 66). Dropping a screen's inset padding turns its row
-// red. The Run panels' bottom inset is pinned by the same fake through
-// app/run.test.tsx (the panels exist only on a live-session surface).
-import { describe, expect, jest, test } from "@jest/globals";
+// red. APR-05 pins the bottom frame at a narrow width; the Run panels'
+// bottom inset is pinned through app/run.test.tsx (live session only).
+import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { renderRouter, screen } from "expo-router/testing-library";
+import { Dimensions } from "react-native";
 
 jest.mock("react-native-safe-area-context", () => ({
   ...(jest.requireActual("react-native-safe-area-context") as Record<string, unknown>),
@@ -14,6 +15,10 @@ jest.mock("react-native-safe-area-context", () => ({
 }));
 
 import { flatStyle, frameRoutes } from "../test/render-helpers";
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 test.each([
   ["explore", "/explore", "screen-Explore"],
@@ -27,4 +32,22 @@ test.each([
 ])("the %s screen starts its content below the pinned top inset (AC4)", async (_name, url, screenId) => {
   renderRouter(frameRoutes(), { initialUrl: url });
   expect(flatStyle(await screen.findByTestId(screenId)).paddingTop).toBe(66);
+});
+
+test.each([
+  ["explore", "/explore", "screen-Explore", 34],
+  ["guides", "/city/gdansk/guides", "screen-Guides", 34],
+  ["preview", "/route/r1", "screen-Route preview", 50],
+  ["map", "/map", "screen-Map", 50],
+  ["my", "/my", "screen-KUDY", 50],
+])("the %s scroll frame clears the bottom system bar at 320dp", async (_name, url, screenId, bottom) => {
+  jest.spyOn(Dimensions, "get").mockReturnValue({
+    width: 320,
+    height: 640,
+    scale: 2,
+    fontScale: 1,
+  });
+  renderRouter(frameRoutes(), { initialUrl: url });
+  const frame = await screen.findByTestId(screenId);
+  expect(flatStyle(frame).paddingBottom).toBe(bottom);
 });

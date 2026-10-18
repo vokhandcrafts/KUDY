@@ -192,7 +192,13 @@ export default function My() {
   return (
     // G06.10.e (issue #405): the calm surface's paper — the shared wrapper
     // layers the canon grain over the unchanged paper token.
-    <PaperSurface style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-KUDY">
+    <PaperSurface
+      style={[styles.screen, {
+        paddingTop: insets.top + tokens.spaceL,
+        paddingBottom: insets.bottom + tokens.spaceL,
+      }]}
+      testID="screen-KUDY"
+    >
       {/* UX 02 (issue #348): the surface's one back element (AC2), fixed
           above the scrolling history so it stays reachable. */}
       <BackButton label={strings.back} testID="btn-my-back" />

@@ -35,7 +35,10 @@ export default function Guides() {
   // the failed load's named retry.
   const strings = uiStrings(locale);
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Guides">
+    <View
+      style={[styles.screen, { paddingTop: insets.top + tokens.spaceL, paddingBottom: insets.bottom }]}
+      testID="screen-Guides"
+    >
       <CityCatalogBody
         walk={services.walk}
         catalog={controller?.surface ?? null}
