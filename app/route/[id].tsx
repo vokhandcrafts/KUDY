@@ -364,6 +364,9 @@ export default function RoutePreview() {
                   return (
                     <PressableSurface
                       key={audioLocale}
+                      accessibilityRole="button"
+                      accessibilityLabel={audioLocale}
+                      accessibilityState={{ selected }}
                       onPress={() => controller.selectAudio(audioLocale)}
                       style={[styles.audioChip, selected ? styles.audioChipSelected : null]}
                       testID={`audio-chip-${audioLocale}`}

@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-18 — падключы Android для канчатковай праверкі #809
+Што зрабіць: падключы Android-прыладу або эмулятар з TalkBack і Accessibility Scanner, правядзі матрыцу Explore / preview / Run / My KUDY / purchase-restore / permissions з памылкамі і пустымі станамі. Зафіксуй вынікі і скрыншоты без асабістых даных у [APR-04](agent-tasks/results/APR-04.md), выпраў рэшткавыя дэфекты і толькі пасля поўнай прыёмкі мержы PR.
+Issue: https://github.com/vokhandcrafts/KUDY/issues/809
+
 ### 2026-10-17 — змержы follow-up PR #814: праўкі рэв'ю G20.31
 Што зрабіць: прачытай раздзелы «Код-рэвю» і «Суддзя» у [выніку G20.31](agent-tasks/results/G20.31.md) (2 low-праўкі рэв'ю; суддзя ✅ APPROVED) і змержы PR — гэта дадатак да #799, бо #799 быў змержаны раней, чым праўкі рэв'ю трапілі ў main.
 PR: https://github.com/vokhandcrafts/KUDY/pull/814

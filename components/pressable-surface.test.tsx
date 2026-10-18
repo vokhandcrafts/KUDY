@@ -65,6 +65,26 @@ describe("PressableSurface (UX 03, issue #349)", () => {
     expect(screen.getByRole("button")).toBeTruthy();
   });
 
+  test("APR-04: compact and disabled actions keep a 48×48dp physical target", () => {
+    render(
+      <PressableSurface
+        accessibilityRole="button"
+        accessibilityLabel="Паўтарыць"
+        accessibilityState={{ disabled: true }}
+        disabled
+        style={{ height: 22, width: 24 }}
+        testID="surface"
+      >
+        <Text>Паўтарыць</Text>
+      </PressableSurface>,
+    );
+    expect(screen.getByRole("button").props.accessibilityLabel).toBe("Паўтарыць");
+    expect(screen.getByRole("button").props.accessibilityState).toEqual({ disabled: true });
+    // Render the production wrapper style — a caller's compact layout must
+    // not override its minimum physical area.
+    expect(mergedStyle()).toMatchObject({ minHeight: 48, minWidth: 48 });
+  });
+
   test("the pressed state dims the surface by ≥10%", () => {
     // testOnly_pressed is Pressable's own test seam: it renders the surface
     // in its pressed state deterministically — the pressed branch of the

@@ -150,6 +150,14 @@ describe("guide preview surface (G06.01.b)", () => {
     expect(screen.getByTestId("badge-access-paid")).toBeTruthy();
     expect(screen.getByText("Платна")).toBeTruthy();
     expect(screen.getByText("Тэкст: be, en, uk; аўдыё: be, en")).toBeTruthy();
+    // APR-04: a choice chip must expose its own locale and selection,
+    // not make TalkBack infer the state from the accent border.
+    const audioBe = screen.getByTestId("audio-chip-be");
+    expect(audioBe.props.accessibilityRole).toBe("button");
+    expect(audioBe.props.accessibilityLabel).toBe("be");
+    expect(audioBe.props.accessibilityState).toEqual({ selected: true });
+    expect(screen.getByTestId("audio-chip-en").props.accessibilityLabel).toBe("en");
+    expect(screen.getByTestId("audio-chip-en").props.accessibilityState).toEqual({ selected: false });
     // The offer's estimated_duration range wins over the route document's
     // duration_min when both are published (AC1).
     expect(screen.getByText("Час: ад 45 да 75 хв")).toBeTruthy();

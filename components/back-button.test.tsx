@@ -33,11 +33,11 @@ test("the one back image is the Lucide arrow beside the word (issue #432)", () =
   expect(within(back).getByText("Назад")).toBeTruthy();
 });
 
-test("the touch target is at least 44×44dp, hitSlop adds forgiveness", () => {
+test("APR-04: the back target itself is at least 48×48dp without hitSlop", () => {
   renderRouter({ index: () => <BackButton label="Назад" testID="btn-test-back" /> }, { initialUrl: "/" });
   const back = screen.getByTestId("btn-test-back");
-  expect(back.props.style.minHeight).toBeGreaterThanOrEqual(44);
-  expect(back.props.style.minWidth).toBeGreaterThanOrEqual(44);
+  expect(back.props.style.minHeight).toBeGreaterThanOrEqual(48);
+  expect(back.props.style.minWidth).toBeGreaterThanOrEqual(48);
   expect(back.props.hitSlop).toEqual({ bottom: 8, left: 8, right: 8, top: 8 });
 });
 

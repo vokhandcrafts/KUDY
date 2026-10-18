@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
 
 function Chip({ label, active, onPress, testID }: { label: string; active: boolean; onPress: () => void; testID: string }) {
   return (
-    <PressableSurface onPress={onPress} style={[styles.chip, active ? styles.chipActive : null]} testID={testID}>
+    <PressableSurface accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: active }} onPress={onPress} style={[styles.chip, active ? styles.chipActive : null]} testID={testID}>
       <Text style={styles.chipText}>{label}</Text>
     </PressableSurface>
   );
@@ -99,7 +99,7 @@ function OfferCard({
         : { pathname: `/collection/${offer.ref.collection_id}`, params: { from } };
   return (
     <Link href={href} asChild onPress={() => onOpen(offer)}>
-      <PressableSurface style={cardStyle} testID={`offer-card-${offer.offer_id}`}>
+      <PressableSurface accessibilityRole="link" accessibilityLabel={title ?? undefined} style={cardStyle} testID={`offer-card-${offer.offer_id}`}>
         <Text style={styles.sectionTitle}>{title}</Text>
         {summary ? <Text style={styles.facts}>{summary}</Text> : null}
         <AccessBadge access={offer.access} locale={locale} />
@@ -231,7 +231,7 @@ function DiscoveryBody({
         </Text>
       ) : null}
       {resolve(result.alternatives).length > 0 && result.exact.length > 0 && !alternativesVisible ? (
-        <PressableSurface onPress={() => state.showAlternatives()} testID="btn-alternatives">
+        <PressableSurface accessibilityRole="button" accessibilityLabel={strings.discoveryAlternatives} onPress={() => state.showAlternatives()} testID="btn-alternatives">
           <Text style={styles.disclosure}>{strings.discoveryAlternatives}</Text>
         </PressableSurface>
       ) : null}

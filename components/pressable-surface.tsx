@@ -36,6 +36,10 @@ const SHELF_HEIGHT = 4;
 const DIP_TRANSLATE = 2;
 
 const styles = StyleSheet.create({
+  // APR-04: minimum physical area on every shared action, even when
+  // its caption is short (locale chips, retry, dismissal). This comes after
+  // the caller's style so a compact visual style cannot shrink the target.
+  touchTarget: { minHeight: 48, minWidth: 48 },
   pressed: {
     // The ≥10% dim of criterion 1 on every path; Android adds the ripple
     // on top of it.
@@ -77,7 +81,7 @@ export const PressableSurface = forwardRef<ComponentRef<typeof Pressable>, Surfa
         android_ripple={{ color: RIPPLE_COLOR }}
         style={(state) => {
           const base = typeof style === "function" ? style(state) : style;
-          const layers: StyleProp<ViewStyle>[] = [base];
+          const layers: StyleProp<ViewStyle>[] = [base, styles.touchTarget];
           if (shelf) layers.push(shelfStyles[shelf]);
           if (state.pressed) layers.push(styles.pressed);
           // The dip is the enabled press's move: a disabled pressable keeps

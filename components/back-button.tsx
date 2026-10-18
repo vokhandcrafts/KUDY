@@ -6,7 +6,7 @@
 // token-resolved color/size and the §9 label contract hold. The label lives
 // in a <Text> child — a bare string in Pressable renders invisible and
 // throws the LogBox «Text strings must be rendered» warning (the #344
-// class) — and the touch target is ≥44×44dp, hitSlop adds forgiveness.
+// class) — and the touch target is ≥48×48dp, hitSlop adds forgiveness.
 // Navigation only (screens-and-transitions: Back — навігацыя, не каманда).
 // Lives in components/, not app/: expo-router treats every app/ file as a
 // route (issue #339) — the WalkButton precedent.
@@ -24,8 +24,8 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     justifyContent: "center",
     marginBottom: tokens.spaceM,
-    minHeight: 44,
-    minWidth: 44,
+    minHeight: 48,
+    minWidth: 48,
   },
   row: {
     alignItems: "center",

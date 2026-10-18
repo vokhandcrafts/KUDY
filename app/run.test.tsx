@@ -661,7 +661,9 @@ describe("run map surface", () => {
     // The bar's control is the launch's: Паўза stops the sound, Граць
     // resumes it through the controller's rebuilt token — and a card tap
     // in between commands nothing (the AC3 duty).
-    fireEvent.press(screen.getByTestId("btn-bar-playpause"));
+    const barControl = screen.getByTestId("btn-bar-playpause");
+    expect(flatStyle(barControl).minHeight).toBeGreaterThanOrEqual(48);
+    fireEvent.press(barControl);
     await waitFor(() => expect(screen.queryByText("Паўза")).toBeNull());
     expect(screen.getByText("Граць")).toBeTruthy();
     fireEvent.press(screen.getByTestId("run-marker-stop-1"));
@@ -730,17 +732,19 @@ describe("run map surface", () => {
     await mountedRunBe();
     expect(within(screen.getByTestId("run-panel-bar")).getByTestId("map-attribution")).toBeTruthy();
     expect(screen.getByTestId("map-attribution").props.accessibilityRole).toBe("link");
+    expect(screen.getByTestId("map-attribution").props.accessibilityLabel).toEqual(expect.any(String));
+    expect(screen.getByTestId("map-attribution").props.accessibilityLabel.length).toBeGreaterThan(0);
     // One attribution on the screen — the in-flow copy yields to the bar's.
     expect(screen.getAllByTestId("map-attribution")).toHaveLength(1);
   });
 
-  // UX 04 (issue #350, AC4/AC5): the marker block keeps the 44dp touch-target
-  // floor and the marker/POI labels stay at the readable 12dp minimum.
-  test("UX 04: the marker's touch target is ≥44dp and the map labels are ≥12dp (AC4/AC5)", async () => {
+  // APR-04: marker targets are a physical 48dp even without hitSlop;
+  // the earlier UX-04 text-size requirement still applies.
+  test("APR-04: the marker's touch target is ≥48dp and the map labels are ≥12dp", async () => {
     await mountedRunBe();
     const marker = flatStyle(screen.getByTestId("run-marker-stop-1"));
     expect(marker.width).toBe(120);
-    expect(marker.minHeight).toBeGreaterThanOrEqual(44);
+    expect(marker.minHeight).toBeGreaterThanOrEqual(48);
     expect(flatStyle(screen.getByTestId("run-status-stop-1")).fontSize).toBeGreaterThanOrEqual(12);
     // UX 05 (issue #351): the POI label is the localized kind word, not the
     // raw id — the 12dp floor applies to it the same way.
