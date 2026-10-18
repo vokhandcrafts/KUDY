@@ -50,3 +50,15 @@
 Самаправерка кода: Summary: 0 critical · 0 high · 0 medium · 0 low. Verdict: needs rework — не з-за вядомага дэфекту кода, а з-за незавершанай абавязковай прыладавай прыёмкі. Незалежнае рэвью і праверка суддзі не праводзіліся.
 
 **Не закрываць #809 як выкананую, пакуль прыладавыя крытэрыі не правераны.**
+
+
+## 2026-10-18 — заўвагі код-рэвью PR #830
+
+Рэвью [#830](https://github.com/vokhandcrafts/KUDY/pull/830#issuecomment-6254769747) выявіла дзве праблемы:
+
+1. `stale-demo-recorded-output` (Medium) — выпраўлена. `docs/demos/2026-10-18-apr04-android-accessibility.md` пакідае ў радках Jest `PASS` толькі першыя два палі (`awk '{print $1, $2}'`) і сартуе іх з `LC_ALL=C`. Час выканання больш не трапляе ў зафіксаваны вывад. Двойчы паспяхова выканана `uvx showboat==0.6.1 verify docs/demos/2026-10-18-apr04-android-accessibility.md`. Дададзены `test/apr04-showboat-output.test.mjs`; яго адкатная праверка адхіляе выдаленне нармалізацыі.
+2. `android-device-acceptance` (High) — **застаецца адкрытай**. Пасля першапачатковага правалу пошуку прылады атрымалася запусціць лакальны AVD `kudy-apr05-api35` (Android API 35): `adb devices -l` паказаў `emulator-5554 device`, `adb shell getprop sys.boot_completed` вярнуў `1`. На эмулятары ўсталяваны `com.google.android.marvin.talkback`, але Accessibility Scanner не знойдзены ў спісе пакетаў. Запуск сапраўднай матрыцы Scanner/TalkBack з датаванымі вынікамі і скрыншотамі не выкананы. Гатовыя раней Jest-тэсты гэтага не замяняюць.
+
+Падчас другога этапу распачатая генерацыя native Android-праекта і зборка APK з галіны PR, але вынік зборкі і рэальная праца інтэрфейсу пакуль не пацверджаныя; не лічыць гэта Android-прыёмкай. Новыя праверкі TypeScript, `arch:check` і `jscpd` прайшлі; поўны `npm test` пасля дадання guard быў запушчаны, вынік на момант запісу не пацверджаны.
+
+**Рашэнне:** PR застаецца draft, issue — з адкрытым блокерам. Перад merge патрабуюцца Accessibility Scanner, TalkBack на ўсіх названых станах, redacted screenshots і незалежнае рэвью.
