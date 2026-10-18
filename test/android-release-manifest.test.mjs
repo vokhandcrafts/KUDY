@@ -37,7 +37,7 @@ const permissions = manifest['uses-permission'];
 for (const permission of [
   'RECORD_AUDIO', 'READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE',
   'SYSTEM_ALERT_WINDOW', 'FOREGROUND_SERVICE_MICROPHONE',
-  'VIBRATE', 'USE_BIOMETRIC', 'USE_FINGERPRINT',
+  'VIBRATE', 'USE_BIOMETRIC', 'USE_FINGERPRINT', 'ACCESS_WIFI_STATE',
 ]) {
   test(`Android generation blocks ${permission} from dependency manifests`, () => {
     const entries = permissions.filter((entry) => entry.$['android:name'] === `android.permission.${permission}`);

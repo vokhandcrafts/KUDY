@@ -17,8 +17,8 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
-### 2026-10-18 — завершы Android-прыёмку дазволаў APR-02
-Што зрабіць: правер GPS і яўную адмову ў location permission на Android з Google Play Services паводле [выніку APR-02](agent-tasks/results/APR-02.md). Запішы доказ у #807 перад пераводам PR з чарнавіка: паўторны запуск эмулятара і тэставых сервераў у сесіі быў заблакаваны аўтаправеркай дазволу (`blocked by policy`, без тлумачэння прычыны).
+### 2026-10-18 — прымі PR #828: дазволы Android APR-02
+Што зрабіць: прагледзь PR і [вынік APR-02](agent-tasks/results/APR-02.md), затым змержы прынятыя змены. Android-прыёмка GPS, аўдыё і яўнай адмовы ў лакацыі завершаная; доказы далучаныя да PR.
 PR: https://github.com/vokhandcrafts/KUDY/pull/828 · Issue: https://github.com/vokhandcrafts/KUDY/issues/807
 
 ### 2026-10-17 — змержы follow-up PR #814: праўкі рэв'ю G20.31

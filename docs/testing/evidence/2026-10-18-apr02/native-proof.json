@@ -1,0 +1,58 @@
+{
+  "captured_at": "2026-10-18T12:23:04.811535+00:00",
+  "package": "by.kudy.app.demo",
+  "android_release": "16",
+  "android_sdk": "36",
+  "system_image": "system-images;android-36;google_apis;x86_64 (revision 7)",
+  "apk_sha256": "4b83189e2833b32788de7d3129322efc46b5f84fd339e5da2aa0102a75c2c6d7",
+  "production_package": "by.kudy.app",
+  "production_permissions": [
+    "android.permission.ACCESS_BACKGROUND_LOCATION",
+    "android.permission.ACCESS_COARSE_LOCATION",
+    "android.permission.ACCESS_FINE_LOCATION",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_LOCATION",
+    "android.permission.INTERNET",
+    "android.permission.MODIFY_AUDIO_SETTINGS",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+    "com.android.vending.BILLING",
+    "by.kudy.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  ],
+  "blocked_permissions_absent": [
+    "android.permission.RECORD_AUDIO",
+    "android.permission.READ_EXTERNAL_STORAGE",
+    "android.permission.WRITE_EXTERNAL_STORAGE",
+    "android.permission.SYSTEM_ALERT_WINDOW",
+    "android.permission.FOREGROUND_SERVICE_MICROPHONE",
+    "android.permission.VIBRATE",
+    "android.permission.USE_BIOMETRIC",
+    "android.permission.USE_FINGERPRINT",
+    "android.permission.ACCESS_WIFI_STATE"
+  ],
+  "demo_and_production_permissions_match_except_package_receiver": true,
+  "download": "btn-download changed to enabled btn-start; fixture package verified by the production download path",
+  "gps_start_ui": "Пачатак гісторыі — гучыць",
+  "gps_completed": {
+    "date": "2026-10-18T12:19:17.880Z",
+    "pkg": "by.kudy.app.demo",
+    "status": "Пачатак гісторыі — праслухана",
+    "appops": "MONITOR_LOCATION: allow; time=+8s819ms ago (running)"
+  },
+  "pause_location": "MONITOR_LOCATION: allow; time=+14s655ms ago; duration=+11s829ms",
+  "resume_location": "MONITOR_LOCATION: allow; time=+2s797ms ago (running)",
+  "end_location": "MONITOR_LOCATION: allow; time=+13s626ms ago; duration=+10s556ms",
+  "explicit_denial": "Android Settings > App info > Permissions > Location > Don’t allow; app relaunched; new Start; manual Play",
+  "denied_permissions": "android.permission.ACCESS_FINE_LOCATION: granted=false, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]\n        android.permission.ACCESS_COARSE_LOCATION: granted=false, flags=[ USER_SET|REVOKED_COMPAT|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]\n        android.permission.ACCESS_BACKGROUND_LOCATION: granted=false, flags=[ USER_SET|USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]",
+  "denied_location_access": "MONITOR_LOCATION: allow; time=+1m33s106ms ago; duration=+10s556ms",
+  "manual_audio_after_denial": {
+    "date": "2026-10-18T12:21:26.480Z",
+    "pkg": "by.kudy.app.demo",
+    "pid": "7852",
+    "players": [
+      "  AudioPlaybackConfiguration piid:479 deviceIds:[2] type:android.media.AudioTrack u/pid:10216/7852 state:started attr:AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_UNKNOWN flags=0xA00 tags= bundle=null sessionId:497 mutedState:none  FormatInfo{isSpatialized=false, channelMask=0x1, sampleRate=96000}"
+    ]
+  },
+  "denial_banner_verified": false,
+  "scope": "Existing offline demo catalog; production location/audio/filesystem adapters. Native MapLibre view disabled by the pre-existing demo mode. Not a Play Console verification."
+}

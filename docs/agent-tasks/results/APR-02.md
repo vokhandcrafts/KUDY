@@ -1,9 +1,9 @@
 # APR-02 — мінімізацыя дазволаў Android
 
 Issue: [#807](https://github.com/vokhandcrafts/KUDY/issues/807). Дата: 2026-10-18.
-Draft PR: [#828](https://github.com/vokhandcrafts/KUDY/pull/828).
-База: `79abba9`. Стан: **blocked-external**; праўка падрыхтаваная, яўная адмова
-ў дазволе на лакацыю яшчэ не правераная. PR застаецца чарнавіком.
+PR: [#828](https://github.com/vokhandcrafts/KUDY/pull/828).
+База: `79abba9`. Стан: **рэалізацыя і Android-прыёмка завершаныя**;
+PR чакае рэв'ю і зліцця.
 
 ## Змены і паходжанне дазволаў
 
@@ -23,11 +23,11 @@ Draft PR: [#828](https://github.com/vokhandcrafts/KUDY/pull/828).
 | `VIBRATE` | шаблон Expo | забаронены; выклікаў вібрацыі няма |
 | `USE_BIOMETRIC`, `USE_FINGERPRINT` | `androidx.biometric:biometric:1.1.0`, праз SecureStore | забаронены; адаптар не ўключае `requireAuthentication` |
 | `ACCESS_BACKGROUND_LOCATION`, `FOREGROUND_SERVICE_LOCATION` | налады KUDY | захаваныя для фонавай прагулкі |
-| `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION` | налады KUDY, MapLibre `13.2.0` | захаваныя для пазіцыі і карты |
+| `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION` | налады KUDY, MapLibre `13.2.0`, `expo-location:19.0.8` | захаваныя для пазіцыі і карты |
 | `FOREGROUND_SERVICE`, `MODIFY_AUDIO_SETTINGS` | налады KUDY, `expo-audio:1.1.1` | захаваныя для лакацыі і аўдыё |
-| `INTERNET` | шаблон Expo, MapLibre | захаваны для загрузак і сеткавых сэрвісаў |
-| `ACCESS_NETWORK_STATE` | MapLibre, Media3 `1.8.0` | захаваны для сеткавай карты і плэера |
-| `ACCESS_WIFI_STATE` | MapLibre `13.2.0` | захаваны з SDK карты; асобная неабходнасць у бягучым сцэнарыі яшчэ не пацверджаная |
+| `INTERNET` | шаблон Expo, MapLibre, `expo-file-system:19.0.24`, RevenueCat `10.20.0`, Google transport CCT `3.1.8` | захаваны для загрузак, карты і праверкі пакупак |
+| `ACCESS_NETWORK_STATE` | MapLibre, Media3 `1.8.0`, RevenueCat `10.20.0`, Google transport CCT/runtime `3.1.8` | захаваны для сеткавай карты, плэера і пакупак |
+| `ACCESS_WIFI_STATE` | MapLibre `13.2.0` | забаронены; Java-класы і натыўныя бібліятэкі SDK не выклікаюць WiFi API; стан сеткі чытае `ConnectivityManager` |
 | `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | `expo-audio:1.1.1` | захаваны для прынятага фонавага прайгравання |
 | `com.android.vending.BILLING` | Billing Client `8.3.0` | захаваны для пакупак і аднаўлення доступу |
 | `by.kudy.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` | AndroidX Core `1.15.0` | захаваны для абароны дынамічных receiver |
@@ -44,7 +44,48 @@ Draft PR: [#828](https://github.com/vokhandcrafts/KUDY/pull/828).
 [адаптар SecureStore](../../../services/device-secure-store.ts) карыстаецца
 звычайным Android Keystore без біяметрычнай аўтэнтыфікацыі.
 
-## Натыўны доказ
+## Завяршальная Android-праверка — 2026-10-18
+
+Першапачатковы блокер ніжэй зняты: выкарыстаны асобны эмулятар
+`KUDY_APR02_GOOGLE_API36`, Android 16 / API 36, Google APIs revision 7,
+Google Play Services `25.26.35`. Каталог існай аўтаномнай дэма-зборкі дазволіў
+выканаць прыёмку без заблакаваных тэставых сервераў.
+Location, audio і filesystem — звычайныя натыўныя адаптары з
+`controllers/deviceRoot.ts`; дэма замяняе крыніцу кантэнту і выключае натыўную
+карту MapLibre. Гэта не праверка загрузкі тайлаў або Play Console.
+
+`:app:assembleRelease` — `BUILD SUCCESSFUL in 5m 30s`, уключна з Android lint.
+Гэта лакальны дэма-APK з debug-подпісам, `by.kudy.app.demo`.
+SHA-256: `4b83189e2833b32788de7d3129322efc46b5f84fd339e5da2aa0102a75c2c6d7`.
+Пасля пераключэння package стары `autolinking.json` яшчэ спасылаўся на
+`by.kudy.app.BuildConfig`; выдалены толькі гэты згенераваны файл і зборка паўтораная.
+Версіі залежнасцяў і налады праекта для гэтага не мяняліся.
+
+| Сцэнар | Фактычны вынік |
+|---|---|
+| Загрузка і Start | правераны пакет загружаны; `btn-download` змяніўся на даступны `btn-start`; адкрыўся Run |
+| GPS і аўтазапуск | тэставая пазіцыя `54.3480, 18.6530` запусціла першую гісторыю без ручнога Play; статус змяніўся з «гучыць» на «праслухана» |
+| Паўза / Працягнуць / Завяршыць | Паўза і Завяршыць вызваляюць доступ да лакацыі; Працягнуць зноў дае `(running)` у Android AppOps; `run-ended` паказаны |
+| Яўная адмова ў лакацыі | у Android Settings выбрана `Don’t allow`; усе тры location permissions маюць `granted=false` і `USER_SET`; пасля перазапуску новы Start адкрывае Run |
+| Аўдыё пасля адмовы | ручны Play запускае натыўны `AudioTrack`, `state:started`; доступ да лакацыі не мае `(running)` |
+
+У сцэнарыі адмовы банер `run-gps-denied` не з'явіўся; яго UX тут не пазначаны
+як правераны. Новы permission UX застаецца ў [#804](https://github.com/vokhandcrafts/KUDY/issues/804).
+
+[Доказы і паўтор праверкі](../../testing/evidence/2026-10-18-apr02/README.md):
+сістэмная адмова, экраны, вынікі AppOps і стан натыўнага плэера.
+Затым Expo prebuild вернуты да звычайнага `by.kudy.app`;
+`:app:processReleaseMainManifest` — `BUILD SUCCESSFUL in 42s`.
+[Канчатковы production-маніфест](../../testing/evidence/2026-10-18-apr02/AndroidManifest.xml)
+і [вытрымка merger report](../../testing/evidence/2026-10-18-apr02/manifest-merger-permissions.txt)
+уваходзяць у PR. У ім няма ўсіх дзевяці забароненых дазволаў і сэрвісу запісу.
+Дазволы дэма і production супадаюць, апроч package-прэфікса абароненага receiver.
+
+## Першая натыўная праверка — гісторыя
+
+2026-10-18: GPS і яўная адмова правераныя паўторна ў
+[PR #828](https://github.com/vokhandcrafts/KUDY/pull/828); актуальныя вынікі вышэй.
+Наступны запіс захоўвае першы няўдалы прагон, а не бягучы стан прыёмкі.
 
 Хост: Windows, Node `v24.13.0`, JDK `17.0.20.1`, Gradle `8.14.3`, Android API 36,
 эмулятар `KUDY_API36`, `emulator-5568`, Android 16. Тэставы кантэнт сінтэтычны.
@@ -69,7 +110,7 @@ SHA-256 злітага release-маніфеста:
 Gradle выкарыстоўваў лакальны Maven-каталог і `--offline`. Версіі праекта
 і рэпазіторыі залежнасцяў у кодзе не мяняліся.
 
-## Прагон Android
+### Першы прагон Android
 
 Каманда:
 
@@ -104,8 +145,8 @@ node tools/e2e-android/run-e2e.mjs --suite walk --serial emulator-5568 --metro-p
 
 | Каманда | Вынік |
 |---|---|
-| `node --test test/android-release-manifest.test.mjs` | 10 passed, 0 failed |
-| `npm test` | Node: 2562 passed, 0 failed, 72 skipped; Jest: 31 suites, 261 passed; exit 0 |
+| `node --test test/android-release-manifest.test.mjs` | 11 passed, 0 failed |
+| `npm test` | Node: 2635 tests, 2563 passed, 0 failed, 72 skipped; Jest: 31 suites, 261 passed; exit 0 |
 | `npm run typecheck` | exit 0 |
 | `npm run arch:check` | 632 modules, 0 violations |
 | `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .` | 0 clones |
@@ -116,8 +157,8 @@ node tools/e2e-android/run-e2e.mjs --suite walk --serial emulator-5568 --metro-p
 генератар узяць чысты шаблон; старыя файлы ў `android/` не маскіруюць адкат.
 Няма мокаў генератара або пошуку радкоў у зыходным кодзе.
 
-Паасобнае выдаленне кожнага з васьмі blockedPermissions і падключэння
-плагіна запісу дае адну няўдалую праверку. Усе дзевяць адмоўных эксперыментаў
+Паасобнае выдаленне кожнага з дзевяці blockedPermissions і падключэння
+плагіна запісу дае адну няўдалую праверку. Усе дзесяць адмоўных эксперыментаў
 выкананыя, пасля кожнага зыходныя байты адноўленыя.
 
 Showboat: [выканальны доказ генерацыі](../../demos/2026-10-18-apr02-android-permissions.md).
@@ -128,7 +169,7 @@ Showboat: [выканальны доказ генерацыі](../../demos/2026-
 1. Release-маніфест і merger report атрыманыя; інвентар запісаны вышэй.
 2. Непатрэбныя дазволы і сэрвіс запісу выключаныя; location/playback declarations захаваныя.
 3. Камітны тэст генерацыі і адмоўныя эксперыменты гатовыя.
-4. **Не завершана:** яўная адмова ў location permission; поўны GPS-прагон патрабуе прыдатнага эмулятара або прылады.
+4. Android: загрузка, Start, GPS-аўтазапуск, ручное аўдыё пасля яўнай адмовы, Паўза / Працягнуць / Завяршыць правераныя; доказы ў PR.
 5. Абодва аўдыёсэрвісы і іх дазволы правераныя ў маніфесце; playback пакінуты з дакладна названым прабелам актывацыі.
 
 Незалежнае рэв'ю кода і паўторнае рэв'ю тэста: 0 critical, 0 high, 0 medium,

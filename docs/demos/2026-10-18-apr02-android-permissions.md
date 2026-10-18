@@ -7,6 +7,8 @@
 
 Таксама забаронены непатрэбныя VIBRATE, USE_BIOMETRIC і USE_FINGERPRINT. KUDY не выклікае вібрацыю і не ўключае requireAuthentication у SecureStore; шыфраванае сховішча не патрабуе гэтых дазволаў.
 
+ACCESS_WIFI_STATE таксама выключаны: MapLibre 13.2.0 карыстаецца ConnectivityManager, а WiFi API ў яго Java-класах і натыўных бібліятэках не выклікаецца. INTERNET і ACCESS_NETWORK_STATE захаваныя.
+
 ```powershell
 $result = node --test --test-reporter=tap test/android-release-manifest.test.mjs
 $code = $LASTEXITCODE
@@ -16,8 +18,8 @@ exit $code
 ```
 
 ```output
-# tests 10
-# pass 10
+# tests 11
+# pass 11
 # fail 0
 # skipped 0
 ```
