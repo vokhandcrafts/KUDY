@@ -25,6 +25,9 @@ test.each([
   ["guides", "/city/gdansk/guides", "screen-Guides"],
   ["preview", "/route/r1", "screen-Route preview"],
   ["place", "/place/p1", "screen-Place detail"],
+  ["collection", "/collection/c1", "screen-Collection"],
+  ["discovery", "/discovery", "screen-Discovery"],
+  ["feedback", "/feedback", "screen-Feedback"],
   ["run", "/run/r1", "screen-Run"],
   ["map", "/map", "screen-Map"],
   ["my", "/my", "screen-KUDY"],
@@ -40,6 +43,10 @@ test.each([
   ["preview", "/route/r1", "screen-Route preview", 50],
   ["map", "/map", "screen-Map", 50],
   ["my", "/my", "screen-KUDY", 50],
+  ["place", "/place/p1", "screen-Place detail", 50],
+  ["collection", "/collection/c1", "screen-Collection", 50],
+  ["discovery", "/discovery", "screen-Discovery", 50],
+  ["feedback", "/feedback", "screen-Feedback", 50],
 ])("the %s scroll frame clears the bottom system bar at 320dp", async (_name, url, screenId, bottom) => {
   jest.spyOn(Dimensions, "get").mockReturnValue({
     width: 320,

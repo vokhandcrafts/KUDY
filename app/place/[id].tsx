@@ -270,7 +270,7 @@ export default function PlaceDetail() {
     facts.content_version !== null &&
     facts.content_locale !== null;
   return (
-    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Place detail">
+    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL, paddingBottom: insets.bottom + tokens.spaceL }]} testID="screen-Place detail">
       {/* UX 02 (issue #348): the back sits in the frame above the scroll —
           reachable while the moment cards are scrolled (AC2). */}
       <BackButton label={back} testID="btn-place-back" />

@@ -164,7 +164,7 @@ export default function Collection() {
   return (
     // The detail surfaces' frame (screen-styles, UX 02) — the paper wrapper
     // stays Explore's and My KUDY's (the allowed-places contract).
-    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Collection">
+    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL, paddingBottom: insets.bottom + tokens.spaceL }]} testID="screen-Collection">
       {/* UX 02: the back sits in the frame above the scroll (AC2); UX 01:
           the member cards scroll — the last one is reachable (issue #347). */}
       <BackButton label={strings.back} testID="btn-collection-back" />

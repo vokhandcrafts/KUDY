@@ -279,7 +279,7 @@ export default function Discovery() {
   return (
     // The detail surfaces' frame (screen-styles, UX 02) — the paper wrapper
     // stays Explore's and My KUDY's (the allowed-places contract).
-    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Discovery">
+    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL, paddingBottom: insets.bottom + tokens.spaceL }]} testID="screen-Discovery">
       {/* UX 02: the back sits in the frame above the scroll — reachable while
           the offer cards are scrolled (AC2). UX 01 (issue #347): the result
           scrolls — the last card is reachable beyond the fold. */}
