@@ -1,15 +1,13 @@
-"""Render a proposed native launch frame and pre-route Explore frame at 390 × 844."""
+"""Render branded in-app loading concepts and pre-route Explore at 390 × 844."""
 
-from io import BytesIO
 from pathlib import Path
 
-import cairosvg
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFont
 
 HERE = Path(__file__).resolve().parent
 BRAND = HERE.parents[1]
 FONTS = BRAND / "outputs" / "G25.01" / "fonts"
-FIGURINE = BRAND / "references" / "a1.png"
+CITY_ART = BRAND / "outputs" / "mobile-welcome-2026-10-19" / "art" / "07-found-object.jpg"
 SCALE = 3
 PAPER = "#FAF7F2"
 GREEN = "#1D6B4F"
@@ -30,23 +28,56 @@ def text(draw, xy, value, *, size, color=INK, face="GolosText_400Regular.ttf"):
     draw.text(box(xy), value, fill=color, font=font(face, size))
 
 
-def svg_image(path, width, height):
-    payload = cairosvg.svg2png(url=str(path), output_width=width * SCALE, output_height=height * SCALE)
-    return Image.open(BytesIO(payload)).convert("RGBA")
+def city_art(width, height):
+    art = Image.open(CITY_ART).convert("RGB").crop((0, 80, 1024, 644))
+    return art.resize((width * SCALE, height * SCALE), Image.Resampling.LANCZOS)
 
 
 def save(image, name):
     image.resize((390, 844), Image.Resampling.LANCZOS).save(HERE / name, optimize=True)
 
 
-def launch():
+def launch_atlas():
+    image = Image.new("RGB", (390 * SCALE, 844 * SCALE), PAPER)
+    draw = ImageDraw.Draw(image)
+    draw.line(box((37, 173, 37, 222)), fill=GREEN, width=8)
+    text(draw, (57, 164), "KUDY", size=61, color=GREEN, face="GolosText_600SemiBold.ttf")
+    draw.line(box((37, 255, 353, 255)), fill="#9CB4A6", width=3)
+
+    draw.rounded_rectangle(box((23, 321, 367, 622)), radius=17 * SCALE, fill="#E7E2D7")
+    draw.rounded_rectangle(box((31, 312, 359, 611)), radius=14 * SCALE, fill="#FFFCF7", outline="#C4BDB0", width=2)
+    art = city_art(302, 172)
+    image.paste(art, box((44, 331)))
+    draw = ImageDraw.Draw(image)
+    draw.line(box((44, 525, 195, 542, 346, 525)), fill="#8DA99C", width=4)
+    draw.line(box((195, 542, 195, 591)), fill="#C4BDB0", width=2)
+    draw.line(box((60, 555, 173, 564)), fill="#B7C9BE", width=3)
+    draw.line(box((217, 564, 330, 555)), fill="#B7C9BE", width=3)
+    draw.line(box((59, 580, 171, 587)), fill="#D3DDD5", width=3)
+    draw.line(box((219, 587, 331, 580)), fill="#D3DDD5", width=3)
+    save(image, "01-atlas-opening.png")
+    return image
+
+
+def launch_threshold():
     image = Image.new("RGB", (390 * SCALE, 844 * SCALE), GREEN)
-    source = Image.open(FIGURINE).convert("RGBA")
-    silhouette = Image.new("RGBA", source.size, PAPER)
-    silhouette.putalpha(source.getchannel("A"))
-    mark = ImageOps.contain(silhouette, (184 * SCALE, 184 * SCALE), Image.Resampling.LANCZOS)
-    image.paste(mark, ((image.width - mark.width) // 2, (image.height - mark.height) // 2), mark)
-    save(image, "01-loading.png")
+    draw = ImageDraw.Draw(image)
+    text(draw, (54, 143), "KUDY", size=61, color=PAPER, face="GolosText_600SemiBold.ttf")
+    draw.line(box((55, 225, 335, 225)), fill="#B8D0C1", width=3)
+    draw.ellipse(box((46, 305, 344, 603)), fill="#143F31")
+    draw.rectangle(box((46, 454, 344, 672)), fill="#143F31")
+    draw.ellipse(box((58, 317, 332, 591)), fill=PAPER)
+    draw.rectangle(box((58, 454, 332, 660)), fill=PAPER)
+    art = Image.open(CITY_ART).convert("RGB").crop((279, 0, 745, 564))
+    art = art.resize((274 * SCALE, 343 * SCALE), Image.Resampling.LANCZOS)
+    mask = Image.new("L", image.size, 0)
+    mask_draw = ImageDraw.Draw(mask)
+    mask_draw.ellipse(box((58, 317, 332, 591)), fill=255)
+    mask_draw.rectangle(box((58, 454, 332, 660)), fill=255)
+    image.paste(art, box((58, 317)), mask.crop(box((58, 317, 332, 660))))
+    draw = ImageDraw.Draw(image)
+    draw.line(box((58, 660, 332, 660)), fill="#B8D0C1", width=4)
+    save(image, "01-city-threshold.png")
     return image
 
 
@@ -82,13 +113,13 @@ def explore():
     draw.rounded_rectangle(box((244, 53, 368, 97)), radius=10 * SCALE, fill="#FFFFFF", outline=LINE, width=2)
     text(draw, (257, 65), "Гданьск", size=14, face="GolosText_600SemiBold.ttf")
     draw.line(box((344, 72, 350, 78, 356, 72)), fill=INK, width=3)
-    text(draw, (22, 123), "Куды сёння?", size=34, face="Alegreya_600SemiBold.ttf")
+    text(draw, (22, 126), "Куды сёння?", size=30, face="GolosText_600SemiBold.ttf")
     text(draw, (23, 172), "Абяры, што цікава табе ў горадзе.", size=14, color=MUTED)
 
-    art = svg_image(HERE / "city-vignette.svg", 346, 190)
-    image.paste(art, box((22, 216)), art)
+    art = city_art(346, 190)
+    image.paste(art, box((22, 216)))
     draw = ImageDraw.Draw(image)
-    text(draw, (23, 425), "АДКРЫВАЙ ПА-СВОЙМУ", size=11, color=GREEN, face="GolosText_600SemiBold.ttf")
+    text(draw, (23, 425), "АБЯРЫ НАПРАМАК", size=11, color=GREEN, face="GolosText_600SemiBold.ttf")
     card(draw, 451, "Гіды", "Аўтарскія гісторыі горада", "book")
     card(draw, 535, "Побач", "Месцы і падказкі вакол", "nearby")
     card(draw, 619, "Чым заняцца", "Падборкі і гарадскія ідэі", "spark")
@@ -103,15 +134,24 @@ def explore():
 
 
 def main():
-    first = launch().resize((390, 844), Image.Resampling.LANCZOS)
+    atlas = launch_atlas().resize((390, 844), Image.Resampling.LANCZOS)
+    threshold = launch_threshold().resize((390, 844), Image.Resampling.LANCZOS)
     second = explore().resize((390, 844), Image.Resampling.LANCZOS)
     sheet = Image.new("RGB", (844, 906), "#E8E5DF")
-    sheet.paste(first, (20, 20))
+    sheet.paste(threshold, (20, 20))
     sheet.paste(second, (434, 20))
     draw = ImageDraw.Draw(sheet)
-    draw.text((20, 869), "01  ·  Пакуль праграма запускаецца", fill=INK, font=ImageFont.truetype(str(FONTS / "GolosText_600SemiBold.ttf"), 14))
+    draw.text((20, 869), "01  ·  Горад адкрываецца", fill=INK, font=ImageFont.truetype(str(FONTS / "GolosText_600SemiBold.ttf"), 14))
     draw.text((434, 869), "02  ·  Пасля запуску, да выбару гіда", fill=INK, font=ImageFont.truetype(str(FONTS / "GolosText_600SemiBold.ttf"), 14))
     sheet.save(HERE / "entry-pair.png", optimize=True)
+    options = Image.new("RGB", (1258, 906), "#E8E5DF")
+    for x, frame in ((20, atlas), (434, threshold), (848, second)):
+        options.paste(frame, (x, 20))
+    labels = ((20, "A · Атлас адкрываецца"), (434, "Б · Парог горада"), (848, "Пасля запуску · Explore"))
+    draw = ImageDraw.Draw(options)
+    for x, label in labels:
+        draw.text((x, 869), label, fill=INK, font=ImageFont.truetype(str(FONTS / "GolosText_600SemiBold.ttf"), 14))
+    options.save(HERE / "entry-options.png", optimize=True)
 
 
 if __name__ == "__main__":
