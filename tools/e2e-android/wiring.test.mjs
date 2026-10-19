@@ -10,6 +10,7 @@ import path from 'node:path';
 import test from 'node:test';
 
 import { repoRoot } from '../validate/tools-check.mjs';
+import { coldStart } from './run-e2e.mjs';
 
 const packageJson = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
 
@@ -48,6 +49,35 @@ test('the discovery command reaches device checks instead of rejecting the suite
   });
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /SKIP e2e:android discovery/);
+});
+
+test('cold start retries a transient uiautomator failure before Explore', async () => {
+  let dumps = 0;
+  const calls = [];
+  const driver = {
+    forceStop: async () => { calls.push('stop'); },
+    launchDeepLink: async () => { calls.push('launch'); },
+    dump: async () => {
+      dumps += 1;
+      if (dumps === 1) throw new Error('adb timed out during uiautomator dump');
+      return { localPath: '/tmp/fresh-dump.xml', xml: '<node resource-id="screen-Explore" bounds="[0,0][10,10]"/>' };
+    },
+  };
+  await coldStart(driver, 'kudy://expo-development-client/', { timeoutMs: 2_000, caseSlug: 'retry' });
+  assert.deepEqual(calls, ['stop', 'launch']);
+  assert.equal(dumps, 2);
+});
+
+test('cold start reports a persistent dump failure at its deadline', async () => {
+  const driver = {
+    forceStop: async () => {},
+    launchDeepLink: async () => {},
+    dump: async () => { throw new Error('adb still unavailable'); },
+  };
+  await assert.rejects(
+    coldStart(driver, 'kudy://expo-development-client/', { timeoutMs: 20, caseSlug: 'failure' }),
+    /timeout after 20 ms waiting for screen-Explore.*adb still unavailable/,
+  );
 });
 
 test('the Android origin stays on loopback and is reached through adb reverse', () => {

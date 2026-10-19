@@ -260,25 +260,39 @@ async function startOriginServer({ port, logPath, outDir, fault, packages }) {
 const devClientUrl = (metroPort) =>
   `kudy://expo-development-client/?url=${encodeURIComponent(`http://localhost:${metroPort}`)}`;
 
-async function coldStart(driver, url, { timeoutMs, caseSlug }) {
+export async function coldStart(driver, url, { timeoutMs, caseSlug }) {
   await driver.forceStop(APP_PACKAGE);
   await driver.launchDeepLink(url);
   // Condition wait over fresh dumps. The dev client's one-time onboarding
   // sheet ("This is the developer menu … Continue") is its own focused
   // window and hides the app's tree, so while it is up the wait presses
   // Back to dismiss it; "Continue" is the sheet's own button caption.
-  const startedAt = Date.now();
+  const deadline = Date.now() + timeoutMs;
+  let lastDumpPath = null;
+  let lastDumpError = null;
   for (;;) {
-    const dump = await driver.dump(`dump-${caseSlug}.xml`);
-    const nodes = parseDump(dump.xml);
-    if (findNode(nodes, { testID: 'screen-Explore' })) return;
-    if (findNode(nodes, { text: 'Continue' })) await driver.back();
-    if (Date.now() - startedAt >= timeoutMs) {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) {
       throw new DriverError(
-        `timeout after ${timeoutMs} ms waiting for screen-Explore on cold start; last UI dump: ${dump.localPath}`,
+        `timeout after ${timeoutMs} ms waiting for screen-Explore on cold start; ` +
+        `last UI dump: ${lastDumpPath ?? '(no successful dump)'}` +
+        (lastDumpError ? `; last dump error: ${lastDumpError.message}` : ''),
       );
     }
-    await sleep(500);
+    let dump;
+    try {
+      dump = await driver.dump(`dump-${caseSlug}.xml`, { timeoutMs: Math.min(15_000, remainingMs) });
+      lastDumpPath = dump.localPath;
+      lastDumpError = null;
+    } catch (error) {
+      lastDumpError = error instanceof Error ? error : new Error(String(error));
+    }
+    if (dump) {
+      const nodes = parseDump(dump.xml);
+      if (findNode(nodes, { testID: 'screen-Explore' })) return;
+      if (findNode(nodes, { text: 'Continue' })) await driver.back();
+    }
+    await sleep(Math.min(500, Math.max(0, deadline - Date.now())));
   }
 }
 
