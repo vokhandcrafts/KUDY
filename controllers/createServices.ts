@@ -187,6 +187,7 @@ export interface ServicePorts {
   readonly feedback?: {
     readonly driver: SqlDriver;
     readonly sync: FeedbackSync;
+    readonly onSyncSettled?: (listener: () => void) => () => void;
     readonly makeMutationId?: () => string;
   };
 }
@@ -478,6 +479,7 @@ export function createServices(ports: ServicePorts): Services {
     ? createFeedbackController({
         driver: ports.feedback.driver,
         sync: ports.feedback.sync,
+        ...(ports.feedback.onSyncSettled ? { onSyncSettled: ports.feedback.onSyncSettled } : {}),
         repository: feedbackRepository,
         ...(ports.feedback.makeMutationId ? { makeMutationId: ports.feedback.makeMutationId } : {}),
         ...(now ? { now } : {}),

@@ -31,12 +31,14 @@ locked Moment manifest and device reader: PASS
 
 Паўторная кампазіцыя аднаўляе кропкі падказак з праверанага пакета. Адно
 вяртанне ў foreground перад тэрмінам паўтору водгуку ставіць таймер на
-`next_attempt_at` і адпраўляе той самы mutation ID.
+`next_attempt_at` і адпраўляе той самы mutation ID. Першая offline-адпраўка
+без рэгістрацыі таксама атрымлівае таймер; пасля аднаўлення сеткі адкрытая
+форма паказвае пацверджаны стан без пераходу ў background.
 
 ```bash
-node --test controllers/deviceServices.integration.test.ts controllers/useNearbyController.test.ts >/dev/null && echo "restart hints and one-return feedback retry: PASS"
+node --test controllers/deviceServices.integration.test.ts controllers/useNearbyController.test.ts >/dev/null && echo "restart hints, offline registration retry and live feedback state: PASS"
 ```
 
 ```output
-restart hints and one-return feedback retry: PASS
+restart hints, offline registration retry and live feedback state: PASS
 ```

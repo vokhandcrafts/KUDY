@@ -298,15 +298,13 @@ test('feedback uses the device identity and the real queue through composition',
   if (form.kind === 'open') assert.equal(form.delivery.kind, 'sent');
 });
 
-test('one foreground return before the due time schedules the queued feedback retry', async () => {
-  const driver = nodeSqliteDriver();
-  let foreground: () => void = () => { throw new Error('foreground listener was not registered'); };
-  let stopped = false;
+function manualFeedbackClock() {
   let now = 1_000_000;
   let timer: { at: number; fire: () => void } | null = null;
-  const pendingTimer = () => timer;
-  const feedbackClock = {
+  return {
     now: () => now,
+    advanceTo: (value: number) => { now = value; },
+    pendingTimer: () => timer,
     schedule: (delayMs: number, fire: () => void) => {
       const scheduled = { at: now + delayMs, fire: () => {
         if (timer === scheduled) timer = null;
@@ -316,6 +314,26 @@ test('one foreground return before the due time schedules the queued feedback re
       return () => { if (timer === scheduled) timer = null; };
     },
   };
+}
+
+const registrationOk = () => ({ status: 201, body: {
+  device_id: '11111111-1111-4111-8111-111111111111',
+  device_secret: 'synthetic-device-secret',
+} });
+
+function openGuideFeedback(device: ReturnType<typeof createDeviceServicePorts>) {
+  const controller = createServices(device.ports).feedback?.controller;
+  assert.ok(controller);
+  controller.getState().openForm({ kind: 'guide', id: 'route-491', version: '1', locale: 'be' });
+  controller.getState().setScore(4);
+  return controller;
+}
+
+test('one foreground return before the due time schedules the queued feedback retry', async () => {
+  const driver = nodeSqliteDriver();
+  let foreground: () => void = () => { throw new Error('foreground listener was not registered'); };
+  let stopped = false;
+  const feedbackClock = manualFeedbackClock();
   const transport = scriptedTransport(({ index }) => index === 1 ? okPut(1) : err503());
   const device = createDeviceServicePorts({
     ...facilities(driver),
@@ -329,27 +347,21 @@ test('one foreground return before the due time schedules the queued feedback re
       baseUrl: 'https://functions.example.invalid/functions/v1',
       secretStore: secretBox(null),
       transport,
-      registrationTransport: { register: async () => ({ status: 201, body: {
-        device_id: '11111111-1111-4111-8111-111111111111',
-        device_secret: 'synthetic-device-secret',
-      } }) },
+      registrationTransport: { register: async () => registrationOk() },
     },
   });
-  const controller = createServices(device.ports).feedback?.controller;
-  assert.ok(controller);
-  controller.getState().openForm({ kind: 'guide', id: 'route-491', version: '1', locale: 'be' });
-  controller.getState().setScore(4);
+  const controller = openGuideFeedback(device);
   await controller.getState().send();
   assert.equal(rawOutbox(driver).length, 1);
   const mutation = rawOutbox(driver)[0].mutation_id;
   const due = Number(rawOutbox(driver)[0].next_attempt_at);
-  assert.ok(due > now);
+  assert.ok(due > feedbackClock.now());
   foreground();
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(transport.calls.length, 1, 'the foreground event before due does not resend early');
-  const retry = pendingTimer();
+  const retry = feedbackClock.pendingTimer();
   assert.ok(retry && retry.at === due, 'the same foreground return arms the due-time retry');
-  now = due;
+  feedbackClock.advanceTo(due);
   retry.fire();
   for (let i = 0; i < 30 && rawOutbox(driver).length > 0; i += 1) {
     await new Promise((resolve) => setTimeout(resolve, 10));
@@ -358,12 +370,61 @@ test('one foreground return before the due time schedules the queued feedback re
   assert.equal(transport.calls.length, 2);
   assert.equal((transport.calls[0].body as { mutation_id: string }).mutation_id, mutation);
   assert.equal((transport.calls[1].body as { mutation_id: string }).mutation_id, mutation);
+  const afterRetry = controller.getState().form;
+  assert.equal(afterRetry.kind, 'open');
+  if (afterRetry.kind === 'open') assert.equal(afterRetry.delivery.kind, 'sent', 'the still-open form reflects the timed sync');
   controller.getState().setScore(5);
   await controller.getState().send();
-  assert.ok(pendingTimer(), 'a new transient failure arms another retry');
+  assert.ok(feedbackClock.pendingTimer(), 'a new transient failure arms another retry');
   device.teardown();
   assert.equal(stopped, true);
-  assert.equal(pendingTimer(), null, 'teardown cancels any pending retry');
+  assert.equal(feedbackClock.pendingTimer(), null, 'teardown cancels any pending retry');
+});
+
+test('an offline first send retries registration after network recovery without backgrounding', async () => {
+  const driver = nodeSqliteDriver();
+  const feedbackClock = manualFeedbackClock();
+  let online = false;
+  let registrations = 0;
+  const transport = scriptedTransport(() => okPut(1));
+  const device = createDeviceServicePorts({
+    ...facilities(driver),
+    foreground: () => true,
+    feedbackClock,
+    feedback: {
+      baseUrl: 'https://functions.example.invalid/functions/v1',
+      secretStore: secretBox(null),
+      transport,
+      registrationTransport: { register: async () => {
+        registrations += 1;
+        if (!online) throw new Error('offline');
+        return registrationOk();
+      } },
+    },
+  });
+  const controller = openGuideFeedback(device);
+  await controller.getState().send();
+  assert.equal(rawOutbox(driver).length, 1);
+  assert.equal(rawOutbox(driver)[0].next_attempt_at, null);
+  assert.equal(transport.calls.length, 0);
+  const retry = feedbackClock.pendingTimer();
+  assert.ok(retry && retry.at === feedbackClock.now() + 30_000);
+  online = true;
+  feedbackClock.advanceTo(retry.at);
+  retry.fire();
+  for (let i = 0; i < 30 && rawOutbox(driver).length > 0; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  assert.equal(registrations, 2);
+  assert.equal(rawOutbox(driver).length, 0);
+  assert.equal(transport.calls.length, 1);
+  const form = controller.getState().form;
+  assert.equal(form.kind, 'open');
+  if (form.kind === 'open') {
+    assert.equal(form.delivery.kind, 'sent');
+    assert.equal(form.error, null);
+  }
+  device.teardown();
 });
 
 test('G20.20: without a catalog origin the gate answers null and the root passes the empty port set', async () => {

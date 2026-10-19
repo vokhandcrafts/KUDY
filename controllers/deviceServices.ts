@@ -242,13 +242,14 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
   });
   let stopFeedbackTimer: (() => void) | null = null;
   let feedbackDisposed = false;
+  const feedbackListeners = new Set<() => void>();
   const scheduleFeedbackRetry = (minimumDelayMs = 1_000): void => {
     stopFeedbackTimer?.();
     stopFeedbackTimer = null;
     if (feedbackDisposed) return;
     const row = driver.prepare(
-      "SELECT MIN(next_attempt_at) AS due FROM feedback_outbox WHERE transport_state = 'pending' AND next_attempt_at IS NOT NULL",
-    ).get();
+      "SELECT MIN(COALESCE(next_attempt_at, ?)) AS due FROM feedback_outbox WHERE transport_state = 'pending'",
+    ).get(feedbackClock.now() + minimumDelayMs);
     const due = row?.due;
     if (typeof due !== 'number' || !Number.isFinite(due)) return;
     const delay = Math.min(2_147_483_647, Math.max(minimumDelayMs, due - feedbackClock.now()));
@@ -276,10 +277,19 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
         throw error;
       } finally {
         scheduleFeedbackRetry(failed ? 30_000 : 1_000);
+        if (!feedbackDisposed) {
+          for (const listener of feedbackListeners) {
+            try { listener(); }
+            catch (error) {
+              console.warn('feedback UI refresh failed', error instanceof Error ? error.name : 'unknown');
+            }
+          }
+        }
       }
     },
     resolveConflict: (target: Parameters<typeof feedbackSync.resolveConflict>[0]) => feedbackSync.resolveConflict(target),
   } : null;
+  if (deviceFeedbackSync) scheduleFeedbackRetry();
   const stopFeedbackResume = deviceFeedbackSync && facilities.onForeground
     ? facilities.onForeground(() => {
       void deviceFeedbackSync.flush().catch((error: unknown) => {
@@ -317,6 +327,10 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
         driver,
         makeMutationId: newSessionId,
         sync: deviceFeedbackSync,
+        onSyncSettled: (listener) => {
+          feedbackListeners.add(listener);
+          return () => feedbackListeners.delete(listener);
+        },
       },
     } : {}),
     bundlesStore,
@@ -353,6 +367,7 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
     teardown: () => {
       feedbackDisposed = true;
       stopFeedbackTimer?.();
+      feedbackListeners.clear();
       stopFeedbackResume?.();
       wakelock.release();
     },

@@ -206,6 +206,7 @@ function visibleItems(items: readonly FeedbackStateView[]): FeedbackStateView[] 
 export function createFeedbackController(deps: {
   driver: SqlDriver;
   sync: FeedbackSync;
+  onSyncSettled?: (listener: () => void) => () => void;
   repository: FeedbackRepositoryPort;
   now?: () => number;
   // Deterministic mutation ids for the tests; the default mints UUIDs (the
@@ -383,8 +384,13 @@ export function createFeedbackController(deps: {
   const refreshFormDelivery = (): void => {
     const current = store.getState().form;
     if (current.kind !== 'open') return;
-    store.setState({ form: { ...current, delivery: deliveryOf(deps.repository.getFeedbackState(deps.driver, current.target)) } });
+    const delivery = deliveryOf(deps.repository.getFeedbackState(deps.driver, current.target));
+    store.setState({ form: { ...current, delivery, error: delivery.kind === 'sent' ? null : current.error } });
   };
+  deps.onSyncSettled?.(() => {
+    refreshFormDelivery();
+    store.setState({ items: visibleItems(deps.repository.listFeedbackStates(deps.driver)) });
+  });
 
   // One delivery round at a time: the repository writes land, the queued
   // truth renders immediately (a queued delete is the delete-pending state

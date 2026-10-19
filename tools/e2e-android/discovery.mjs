@@ -66,14 +66,10 @@ async function scrollTo(driver, id, slug) {
 
 async function waitForFeedbackRetry(driver) {
   const deadline = Date.now() + 45_000;
-  await driver.background();
-  await driver.foregroundApp('by.kudy.app');
-  await driver.launchDeepLink(`kudy:///run/${FREE}`);
-  await driver.launchDeepLink(`kudy:///feedback?kind=guide&id=${FREE}&version=1&locale=be`);
   for (;;) {
     const delivery = findNode(await nodesOn(driver, 'feedback-retry'), { testID: 'feedback-delivery' });
     if (delivery && /Адпраўлена|Sent/i.test(delivery.text)) return;
-    if (Date.now() >= deadline) throw new Error('queued feedback was not sent after the origin recovered');
+    if (Date.now() >= deadline) throw new Error('the open feedback form did not show the scheduled delivery');
     await delay();
   }
 }
