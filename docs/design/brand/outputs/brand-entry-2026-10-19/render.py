@@ -46,12 +46,11 @@ def base(with_header=True):
     return image
 
 
-def page_card(draw, y, number, title, subline):
+def page_card(draw, y, title, subline):
     draw.rounded_rectangle(at(22, y, 368, y + 91), radius=12 * S, fill=WHITE, outline=HAIRLINE, width=2)
     draw.rounded_rectangle(at(22, y + 12, 27, y + 79), radius=2 * S, fill=GREEN)
-    put(draw, (43, y + 21), number, 13, GREEN, strong=True)
-    put(draw, (91, y + 16), title, 20, strong=True)
-    put(draw, (91, y + 52), subline, 12, MUTED)
+    put(draw, (43, y + 16), title, 20, strong=True)
+    put(draw, (43, y + 52), subline, 12, MUTED)
     draw.line(at(340, y + 43, 348, y + 50, 340, y + 57), fill=GREEN, width=4)
 
 
@@ -79,7 +78,7 @@ def screen(ready):
         width = draw.textbbox((0, 0), word, font=word_font)[2]
         draw.text(((image.width - width) // 2 - 16 * S, 333 * S), word, font=word_font, fill=GREEN)
         draw.line(at(167, 416, 230, 416), fill=GREEN, width=5)
-        put(draw, (115, 553), "Загружаем матэрыялы…", 13, MUTED)
+        put(draw, (115, 553), "Рыхтуем матэрыялы…", 13, MUTED)
     else:
         draw.rounded_rectangle(at(254, 124, 368, 168), radius=10 * S, fill=WHITE, outline=HAIRLINE, width=2)
         put(draw, (268, 136), "Гданьск", 13, strong=True)
@@ -87,9 +86,9 @@ def screen(ready):
         put(draw, (22, 131), "Куды сёння?", 30, display=True)
         put(draw, (23, 192), "Абяры, што цікава табе ў горадзе.", 14, MUTED)
         put(draw, (23, 238), "АДКРЫВАЙ ПА-СВОЙМУ", 11, GREEN, strong=True)
-        page_card(draw, 267, "01", "Гіды", "Аўтарскія гісторыі")
-        page_card(draw, 371, "02", "Побач", "Месцы і моманты вакол")
-        page_card(draw, 475, "03", "Чым заняцца", "Гарадскія падборкі і парады")
+        page_card(draw, 267, "Гіды", "Аўтарскія гісторыі")
+        page_card(draw, 371, "Побач", "Месцы і моманты вакол")
+        page_card(draw, 475, "Чым заняцца", "Гарадскія падборкі і парады")
         put(draw, (23, 617), "Можна пачаць з любой тэмы.", 13, MUTED)
         nav(draw)
     result = image.resize((390, 844), Image.Resampling.LANCZOS)
