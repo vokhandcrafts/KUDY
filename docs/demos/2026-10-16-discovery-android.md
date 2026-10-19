@@ -28,3 +28,15 @@ node --test tools/build-bundle/build-bundle.test.mjs services/contentRepo/moment
 ```output
 locked Moment manifest and device reader: PASS
 ```
+
+Паўторная кампазіцыя аднаўляе кропкі падказак з праверанага пакета. Адно
+вяртанне ў foreground перад тэрмінам паўтору водгуку ставіць таймер на
+`next_attempt_at` і адпраўляе той самы mutation ID.
+
+```bash
+node --test controllers/deviceServices.integration.test.ts controllers/useNearbyController.test.ts >/dev/null && echo "restart hints and one-return feedback retry: PASS"
+```
+
+```output
+restart hints and one-return feedback retry: PASS
+```

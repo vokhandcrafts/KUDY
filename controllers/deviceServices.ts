@@ -19,6 +19,8 @@ import { createOriginByteSource } from '../services/download/origin-bytes.ts';
 import { createExpoDownloadStore } from '../services/download/expo/expo-download-store.ts';
 import { discoverySnapshotOver } from '../services/contentRepo/discoverySnapshot.ts';
 import { readRunMapFacts } from '../services/contentRepo/runMapFacts.ts';
+import { checkPresence } from '../services/contentRepo/presence.ts';
+import { isSafeSegment } from '../services/safe-path.ts';
 import { ensureDeviceIdentity, type DeviceRegistrationTransport, type SecureSecretStore } from '../services/device.ts';
 import { createFeedbackSync, type FeedbackTransport } from '../services/feedbackSync.ts';
 import {
@@ -91,6 +93,11 @@ export interface DeviceFacilities {
   guideHintValues?: GuideHintValues;
   foreground?: () => boolean;
   onForeground?: (listener: () => void) => () => void;
+  /** The feedback retry clock; production uses the app process timers. */
+  feedbackClock?: {
+    now: () => number;
+    schedule: (delayMs: number, callback: () => void) => () => void;
+  };
   /** Optional authenticated Functions endpoint; absent leaves feedback unavailable. */
   feedback?: {
     baseUrl: string;
@@ -129,6 +136,46 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
   openDatabase(driver);
   const bundlesStore = createExpoBundlesStore(fileSystem, bundlesRoot);
   const guideHintPoints = new Map<string, readonly GuideHintPoint[]>();
+  const pointsFromMap = (routeId: string, map: Extract<Awaited<ReturnType<typeof readRunMapFacts>>, { ok: true }>): GuideHintPoint[] => {
+    const places = new Map(map.places.map((place) => [place.placeId, place]));
+    return map.stops.flatMap((stop) => {
+      const place = places.get(stop.placeId);
+      return place ? [{ guideId: routeId, lat: place.lat, lng: place.lng }] : [];
+    });
+  };
+  // Rebuild the derived projection from installed base layers. A restart
+  // checks the lock and JSON at the same metadata level as package presence;
+  // it never reads or hashes the audio body.
+  const guideHintPointsReady = (async () => {
+    if (!facilities.guideHintValues) return;
+    const routeIds = await bundlesStore.listDir('bundles');
+    for (const routeId of routeIds ?? []) {
+      if (!isSafeSegment(routeId) || routeId === 'staging') continue;
+      if (guideHintPoints.has(routeId)) continue;
+      try {
+        const versions = await bundlesStore.listDir(`bundles/${routeId}`);
+        for (const version of (versions ?? [])
+          .filter((value) => isSafeSegment(value) && /^[0-9]+$/.test(value))
+          .sort((a, b) => BigInt(a) === BigInt(b) ? 0 : BigInt(a) > BigInt(b) ? -1 : 1)) {
+          const locales = await bundlesStore.listDir(`bundles/${routeId}/${version}`);
+          const preferred = preferredLocales();
+          const ordered = [...(locales ?? [])].filter(isSafeSegment).sort((a, b) =>
+            (preferred.indexOf(a) < 0 ? preferred.length : preferred.indexOf(a)) -
+            (preferred.indexOf(b) < 0 ? preferred.length : preferred.indexOf(b)));
+          for (const locale of ordered) {
+            const layer = { routeId, version, locale, tier: 'base' as const };
+            const [presence] = await checkPresence(bundlesStore, { layers: [layer], trigger: 'restart', sha256 });
+            if (presence?.status !== 'verified') continue;
+            const map = await readRunMapFacts(bundlesStore, `bundles/${routeId}/${version}/${locale}/base`, layer);
+            if (!map.ok) continue;
+            if (!guideHintPoints.has(routeId)) guideHintPoints.set(routeId, pointsFromMap(routeId, map));
+            break;
+          }
+          if (guideHintPoints.has(routeId)) break;
+        }
+      } catch { /* a damaged route must not hide other installed guides */ }
+    }
+  })().catch(() => { /* damaged storage contributes no public points */ });
   const teaserAudioProbe = createExpoTeaserAudioProbe(fileSystem, bundlesRoot);
   const audioUriFor = createExpoAudioUriResolver(fileSystem, bundlesRoot);
   const downloadStore = createExpoDownloadStore(fileSystem, bundlesRoot);
@@ -168,11 +215,7 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
       if (key.tier === 'base') {
         const map = await readRunMapFacts(bundlesStore, deviceLayer, key);
         if (map.ok) {
-          const places = new Map(map.places.map((place) => [place.placeId, place]));
-          guideHintPoints.set(key.routeId, map.stops.flatMap((stop) => {
-            const place = places.get(stop.placeId);
-            return place ? [{ guideId: key.routeId, lat: place.lat, lng: place.lng }] : [];
-          }));
+          guideHintPoints.set(key.routeId, pointsFromMap(key.routeId, map));
         }
       }
     }
@@ -182,22 +225,58 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
   // controller's contract (services cannot import controllers for it).
   const commerce: CommercePort = createUnavailableCommercePort();
   const feedback = facilities.feedback;
+  const feedbackClock = facilities.feedbackClock ?? {
+    now: Date.now,
+    schedule: (delayMs: number, callback: () => void) => {
+      const timer = setTimeout(callback, delayMs);
+      return () => clearTimeout(timer);
+    },
+  };
   const feedbackSync = feedback && createFeedbackSync({
     driver,
     secretStore: feedback.secretStore,
     baseUrl: feedback.baseUrl,
     makeMutationId: newSessionId,
+    now: feedbackClock.now,
     ...(feedback.transport ? { transport: feedback.transport } : {}),
   });
+  let stopFeedbackTimer: (() => void) | null = null;
+  let feedbackDisposed = false;
+  const scheduleFeedbackRetry = (minimumDelayMs = 1_000): void => {
+    stopFeedbackTimer?.();
+    stopFeedbackTimer = null;
+    if (feedbackDisposed) return;
+    const row = driver.prepare(
+      "SELECT MIN(next_attempt_at) AS due FROM feedback_outbox WHERE transport_state = 'pending' AND next_attempt_at IS NOT NULL",
+    ).get();
+    const due = row?.due;
+    if (typeof due !== 'number' || !Number.isFinite(due)) return;
+    const delay = Math.min(2_147_483_647, Math.max(minimumDelayMs, due - feedbackClock.now()));
+    stopFeedbackTimer = feedbackClock.schedule(delay, () => {
+      stopFeedbackTimer = null;
+      if (facilities.foreground?.() === false) return;
+      void deviceFeedbackSync?.flush().catch((error: unknown) => {
+        console.warn('feedback scheduled retry failed', error instanceof Error ? error.name : 'unknown');
+      });
+    });
+  };
   const deviceFeedbackSync = feedback && feedbackSync ? {
     flush: async () => {
-      await ensureDeviceIdentity({
-        driver,
-        secretStore: feedback.secretStore,
-        baseUrl: feedback.baseUrl,
-        ...(feedback.registrationTransport ? { transport: feedback.registrationTransport } : {}),
-      });
-      return feedbackSync.flush();
+      let failed = false;
+      try {
+        await ensureDeviceIdentity({
+          driver,
+          secretStore: feedback.secretStore,
+          baseUrl: feedback.baseUrl,
+          ...(feedback.registrationTransport ? { transport: feedback.registrationTransport } : {}),
+        });
+        return await feedbackSync.flush();
+      } catch (error) {
+        failed = true;
+        throw error;
+      } finally {
+        scheduleFeedbackRetry(failed ? 30_000 : 1_000);
+      }
     },
     resolveConflict: (target: Parameters<typeof feedbackSync.resolveConflict>[0]) => feedbackSync.resolveConflict(target),
   } : null;
@@ -229,6 +308,7 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
         store: hintStoreOver(driver),
         values: facilities.guideHintValues,
         points: () => [...guideHintPoints.values()].flat(),
+        pointsReady: guideHintPointsReady,
         ...(facilities.foreground ? { foreground: facilities.foreground } : {}),
       },
     } : {}),
@@ -271,6 +351,8 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
   return {
     ports,
     teardown: () => {
+      feedbackDisposed = true;
+      stopFeedbackTimer?.();
       stopFeedbackResume?.();
       wakelock.release();
     },

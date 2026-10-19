@@ -175,6 +175,7 @@ export interface ServicePorts {
     readonly store: GuideHintStore;
     readonly values: GuideHintValues;
     readonly points: () => readonly GuideHintPoint[];
+    readonly pointsReady?: Promise<void>;
     readonly foreground?: () => boolean;
     readonly telemetry?: GuideHintTelemetryPort;
   };
@@ -462,6 +463,7 @@ export function createServices(ports: ServicePorts): Services {
           catalog: catalogService,
           store: guideHints.store,
           points: guideHints.points,
+          ...(guideHints.pointsReady ? { pointsReady: guideHints.pointsReady } : {}),
           values: guideHints.values,
           liveRun: liveRunSource,
           ...(guideHints.foreground ? { foreground: guideHints.foreground } : {}),

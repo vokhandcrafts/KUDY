@@ -119,6 +119,7 @@ interface World {
 function makeWorld(options?: {
   offers?: ReturnType<typeof offer>[];
   points?: GuideHintPoint[];
+  pointsReady?: Promise<void>;
   run?: RunState;
   foreground?: boolean;
   store?: GuideHintStore;
@@ -169,6 +170,7 @@ function makeWorld(options?: {
     catalog,
     store: options?.store ?? dbHintStore(driver),
     points: () => points,
+    ...(options?.pointsReady ? { pointsReady: options.pointsReady } : {}),
     values: VALUES,
     liveRun: () => runSource,
     foreground: () => foregroundRef.current,
@@ -204,6 +206,20 @@ function makeWorld(options?: {
     points,
   };
 }
+
+test('a restored point projection reconsiders the latest fix after asynchronous hydration', async () => {
+  let finish: () => void = () => {};
+  const pointsReady = new Promise<void>((resolve) => { finish = resolve; });
+  const world = makeWorld({ points: [], offers: [offer('route-near')], pointsReady });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  world.emitFix(NEAR.lat, NEAR.lng);
+  assert.deepEqual(world.storeState(), { kind: 'hidden', reason: 'no-candidates' });
+  world.points.push({ guideId: 'route-near', lat: NEAR.lat, lng: NEAR.lng });
+  finish();
+  await pointsReady;
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(world.storeState(), { kind: 'hidden', reason: 'dwell' });
+});
 
 // The db-backed GuideHintStore over the public API — the same wiring the
 // app build's composition implements (test/session-store.ts owns the shared

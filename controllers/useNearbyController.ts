@@ -127,6 +127,7 @@ export interface NearbyHintDeps {
   // The durable limit store (zone B) and the public points projection.
   readonly store: GuideHintStore;
   readonly points: () => readonly GuideHintPoint[];
+  readonly pointsReady?: Promise<void>;
   // The accepted contract numbers (ADR G07.04 §3).
   readonly values: GuideHintValues;
   // The one live run surface's store, or null without a live walk — the
@@ -434,6 +435,7 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
     decide();
   });
   deps.audio.onEvent(() => decide());
+  void deps.pointsReady?.then(() => decide(), () => {});
 
   const currentSessionId = (): string | null => {
     const run = deps.liveRun()?.run;

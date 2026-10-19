@@ -216,8 +216,11 @@ test('G20.20: the free synthetic package walks the whole production composition'
   // 5. Restart: a new composition over the SAME driver and disk (the row and
   //    the files survive, the in-memory caches do not) recovers the paused
   //    walk through the recovery port.
-  const secondFacilities = facilities(sharedDriver);
+  const secondFacilities = { ...facilities(sharedDriver), guideHintValues: loadGuideHintValues(), foreground: () => true };
   const second = createDeviceServicePorts(secondFacilities);
+  await second.ports.guideHints?.pointsReady;
+  assert.deepEqual(second.ports.guideHints?.points(), [{ guideId: 'route-491', lat: 54.352, lng: 18.648 }],
+    'a new composition restores public points from the installed base layer');
   const restarted = createServices(second.ports);
   const reopenedStore = restarted.run?.create('route-491');
   if (!reopenedStore) throw new Error('the restarted root constructed no run member');
@@ -295,13 +298,29 @@ test('feedback uses the device identity and the real queue through composition',
   if (form.kind === 'open') assert.equal(form.delivery.kind, 'sent');
 });
 
-test('a foreground retry delivers the original queued feedback after origin recovery', async () => {
+test('one foreground return before the due time schedules the queued feedback retry', async () => {
   const driver = nodeSqliteDriver();
   let foreground: () => void = () => { throw new Error('foreground listener was not registered'); };
   let stopped = false;
-  const transport = scriptedTransport(({ index }) => index === 0 ? err503() : okPut(1));
+  let now = 1_000_000;
+  let timer: { at: number; fire: () => void } | null = null;
+  const pendingTimer = () => timer;
+  const feedbackClock = {
+    now: () => now,
+    schedule: (delayMs: number, fire: () => void) => {
+      const scheduled = { at: now + delayMs, fire: () => {
+        if (timer === scheduled) timer = null;
+        fire();
+      } };
+      timer = scheduled;
+      return () => { if (timer === scheduled) timer = null; };
+    },
+  };
+  const transport = scriptedTransport(({ index }) => index === 1 ? okPut(1) : err503());
   const device = createDeviceServicePorts({
     ...facilities(driver),
+    foreground: () => true,
+    feedbackClock,
     onForeground: (listener) => {
       foreground = listener;
       return () => { stopped = true; };
@@ -323,8 +342,15 @@ test('a foreground retry delivers the original queued feedback after origin reco
   await controller.getState().send();
   assert.equal(rawOutbox(driver).length, 1);
   const mutation = rawOutbox(driver)[0].mutation_id;
-  driver.prepare('UPDATE feedback_outbox SET next_attempt_at = 0').run();
+  const due = Number(rawOutbox(driver)[0].next_attempt_at);
+  assert.ok(due > now);
   foreground();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(transport.calls.length, 1, 'the foreground event before due does not resend early');
+  const retry = pendingTimer();
+  assert.ok(retry && retry.at === due, 'the same foreground return arms the due-time retry');
+  now = due;
+  retry.fire();
   for (let i = 0; i < 30 && rawOutbox(driver).length > 0; i += 1) {
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
@@ -332,8 +358,12 @@ test('a foreground retry delivers the original queued feedback after origin reco
   assert.equal(transport.calls.length, 2);
   assert.equal((transport.calls[0].body as { mutation_id: string }).mutation_id, mutation);
   assert.equal((transport.calls[1].body as { mutation_id: string }).mutation_id, mutation);
+  controller.getState().setScore(5);
+  await controller.getState().send();
+  assert.ok(pendingTimer(), 'a new transient failure arms another retry');
   device.teardown();
   assert.equal(stopped, true);
+  assert.equal(pendingTimer(), null, 'teardown cancels any pending retry');
 });
 
 test('G20.20: without a catalog origin the gate answers null and the root passes the empty port set', async () => {
