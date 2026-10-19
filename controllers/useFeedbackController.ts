@@ -139,8 +139,8 @@ export interface FeedbackInvitation {
 export type FeedbackUiState = {
   readonly form: FeedbackFormState;
   readonly invitation: FeedbackInvitation | null;
-  // The own ratings (My KUDY): every target with a local row, the store's
-  // own order (21 §2: the own list is visible to the person).
+  // The own ratings (My KUDY): active local values, excluding acknowledged
+  // delete tombstones retained by the repository for revision tracking.
   readonly items: readonly FeedbackStateView[];
 
   // Only local guide use invites (20 §7: one story is also experience; zero
@@ -194,9 +194,13 @@ function deliveryOf(view: FeedbackStateView | null): FeedbackDelivery {
   if (view.state === 'draft') return { kind: 'draft' };
   if (view.state === 'pending' || view.state === 'sending')
     return { kind: 'pending', deletePending: view.inFlight?.value.op === 'delete' };
-  if (view.state === 'sent') return { kind: 'sent', score: view.score };
+  if (view.state === 'sent') return view.score === null ? { kind: 'none' } : { kind: 'sent', score: view.score };
   if (view.state === 'conflict') return { kind: 'conflict' };
   return { kind: 'action_required' };
+}
+
+function visibleItems(items: readonly FeedbackStateView[]): FeedbackStateView[] {
+  return items.filter((item) => deliveryOf(item).kind !== 'none');
 }
 
 export function createFeedbackController(deps: {
@@ -237,7 +241,7 @@ export function createFeedbackController(deps: {
   const store = createControllerStore<FeedbackUiState>((set, get) => ({
     form: { kind: 'closed' },
     invitation: null,
-    items: deps.repository.listFeedbackStates(deps.driver),
+    items: visibleItems(deps.repository.listFeedbackStates(deps.driver)),
 
     // Only local guide use invites (20 §7: one story is also experience;
     // zero heard stories is no use to rate) and only once per session.
@@ -346,6 +350,8 @@ export function createFeedbackController(deps: {
       const target = form.target;
       return runMutation(() => {
         const outcome = deps.repository.deleteFeedback(deps.driver, target, { now: now(), mutationId: makeMutationId() });
+        const current = get().form;
+        if (current.kind === 'open') set({ form: { ...current, score: null, reasons: [] } });
         // The rating is gone locally and nothing is owed to the server —
         // the form has nothing left to render.
         if (outcome.outcome === 'cleared' || outcome.outcome === 'nothing') {
@@ -366,7 +372,7 @@ export function createFeedbackController(deps: {
     },
 
     refreshItems(): void {
-      set({ items: deps.repository.listFeedbackStates(deps.driver) });
+      set({ items: visibleItems(deps.repository.listFeedbackStates(deps.driver)) });
     },
 
     parseTarget,
@@ -397,7 +403,7 @@ export function createFeedbackController(deps: {
       if (current.kind === 'open') store.setState({ form: { ...current, error: rule } });
     } finally {
       refreshFormDelivery();
-      store.setState({ items: deps.repository.listFeedbackStates(deps.driver) });
+      store.setState({ items: visibleItems(deps.repository.listFeedbackStates(deps.driver)) });
       const settled = store.getState().form;
       if (settled.kind === 'open') store.setState({ form: { ...settled, busy: false } });
     }

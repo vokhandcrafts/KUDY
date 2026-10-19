@@ -114,9 +114,14 @@ export class ExpoLocationOsPort implements LocationOsPort {
     // text from the manifest strings the expo-location plugin writes.
     void explanation;
     const ask = ++this.permissionAsk;
+    // Recheck an existing foreground grant without opening another OS
+    // permission activity. Repeated dialogs can bounce Nearby through
+    // AppState background/active and re-arm the city subscription in a loop.
     void (scope === 'background'
       ? Location.requestBackgroundPermissionsAsync()
-      : Location.requestForegroundPermissionsAsync()
+      : this.permissionState === 'granted'
+        ? Location.getForegroundPermissionsAsync()
+        : Location.requestForegroundPermissionsAsync()
     )
       .then((response) => this.applyAnswer(scope, response, ask))
       .catch((error: unknown) => console.warn(`location adapter: permission request failed: ${String(error)}`));

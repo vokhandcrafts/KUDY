@@ -169,6 +169,14 @@ describe("Place detail surface (G07.02)", () => {
     fireEvent.press(screen.getByTestId("place-moment-play-m-a1"));
     await waitFor(() => expect(screen.queryByTestId("place-moment-live-m-a1")).toBeNull());
     expect(audioPort.commands).toEqual([`play 1:${MOMENT_PATH}`, "stop"]);
+  }, 10000);
+
+  test("the card shows a physical playback start that arrives after the Play render", async () => {
+    const { audioPort } = await openPlace();
+    fireEvent.press(screen.getByTestId("place-moment-play-m-a1"));
+    expect(screen.queryByTestId("place-moment-live-m-a1")).toBeNull();
+    audioPort.snapshotValue = { state: "playing", positionMs: 0, durationMs: 60000 };
+    await waitFor(() => expect(screen.getByTestId("place-moment-live-m-a1")).toBeTruthy());
   });
 
   test("the guide link opens the guide's PREVIEW, never Start (criterion 2)", async () => {

@@ -17,10 +17,6 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
-### 2026-10-19 — дай бяспечнае асяроддзе для Android E2E #664
-Што зрабіць: вызвалі дастаткова памяці для аднаго эмулятара Android або дай асобны тэставы хост. Лакальны прагон спынены пасля росту swap нават пры ліміце 5 ГіБ; перад merge PR патрэбны поўны `--suite discovery` без няўдач.
-PR: https://github.com/vokhandcrafts/KUDY/pull/832 · Issue: [#664](https://github.com/vokhandcrafts/KUDY/issues/664)
-
 ### 2026-10-17 — змержы follow-up PR #814: праўкі рэв'ю G20.31
 Што зрабіць: прачытай раздзелы «Код-рэвю» і «Суддзя» у [выніку G20.31](agent-tasks/results/G20.31.md) (2 low-праўкі рэв'ю; суддзя ✅ APPROVED) і змержы PR — гэта дадатак да #799, бо #799 быў змержаны раней, чым праўкі рэв'ю трапілі ў main.
 PR: https://github.com/vokhandcrafts/KUDY/pull/814
@@ -40,10 +36,6 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/763 · Issue: [#670](https://gith
 ### 2026-10-15 — усталюй дэманстрацыйную версію KUDY
 Што зрабіць: збяры дэма-APK паводле [інструкцыі](demo-preview.md), затым усталюй `android/app/build/outputs/apk/release/app-release.apk` на Android-прыладу. Гэта асобны пакет `by.kudy.app.demo` з прыкладным кантэнтам; не выкарыстоўвай яго маршрут для навігацыі.
 PR: https://github.com/vokhandcrafts/KUDY/pull/760
-
-### 2026-10-14 — вырашы перадумовы для Android E2E #664
-Што зрабіць: прачытай [блокер у #664](https://github.com/vokhandcrafts/KUDY/issues/664#issuecomment-6175820694) і вырашы, ці вылучыць асобныя задачы на падключэнне Discovery, падказак гідаў і водгукаў у Android, а таксама на тэставы сервер водгукаў, ці пашырыць абсяг #664. Пасля гатоўнасці неабходных інтэграцый вярні #664 у чаргу.
-PR: https://github.com/vokhandcrafts/KUDY/pull/756 · Issue: [#664](https://github.com/vokhandcrafts/KUDY/issues/664)
 
 ### 2026-10-14 — правер бачнасць #751 і #752 на дошцы
 Што зрабіць: адкрый GitHub Project і правер, што #751 бачны ў backlog, а #752 — у працы. Калі картак няма, дадай іх у адпаведныя калонкі, не змяняючы статусных пазнак issues. CLI-токен выканаўцы не мае `read:project`, а публічны прагляд не паказвае дошку.

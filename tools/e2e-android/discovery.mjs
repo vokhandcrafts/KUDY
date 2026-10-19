@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 
 import { findNode, parseDump } from './driver.mjs';
-import { startWalkAtLocation, waitForRun } from './walk.mjs';
+import { startWalkAtLocation, tapMapPoint, visiblePointStatus, waitForRun } from './walk.mjs';
 
 const SHORT_MS = 30_000;
 const DOWNLOAD_MS = 120_000;
@@ -183,6 +183,13 @@ export async function runDiscoverySuite({ driver, url, runCase, coldStart, stopO
       await waitForRun(driver, 'hint-return');
       assert.equal(findNode(await nodesOn(driver, 'hint-return-live'), { testID: 'run-ended' }), undefined,
         'preview navigation ended the active session');
+      // End invites feedback only after a guide story was heard. A Moment
+      // takeover alone does not credit the guide's heard list.
+      await tapMapPoint(driver, 'e2e-stop-1');
+      await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
+      await driver.tapSelector({ testID: 'btn-card-play' });
+      await visiblePointStatus(driver, 'e2e-stop-1', (node) => /[Пп]раслух|[Пп]райгран|[Pp]layed/.test(node.text),
+        'discovery-story-heard', DOWNLOAD_MS);
     });
 
   await runCase('discovery: feedback queues offline, retries, edits and deletes without a public list',
@@ -202,7 +209,24 @@ export async function runDiscoverySuite({ driver, url, runCase, coldStart, stopO
       await driver.tapSelector({ testID: 'feedback-star-5' });
       await driver.tapSelector({ testID: 'btn-feedback-send' });
       await waitForText(driver, 'feedback-delivery', /Адпраўлена|Sent/i, 'feedback-edited');
-      await driver.tapSelector({ testID: 'btn-feedback-delete' });
+      await driver.waitFor({ testID: 'btn-feedback-delete', enabled: true }, { timeoutMs: SHORT_MS });
+      // The long disclosure can leave Delete against the bottom edge while
+      // the edited delivery line settles. Bring it into the scroll viewport
+      // before tapping; an offscreen accessibility node is still findable.
+      await driver.exec(['shell', 'input', 'swipe', '540', '1780', '540', '700', '450']);
+      let deleteStarted = false;
+      for (let attempt = 0; attempt < 2 && !deleteStarted; attempt += 1) {
+        await driver.tapSelector({ testID: 'btn-feedback-delete', enabled: true });
+        for (let poll = 0; poll < 4; poll += 1) {
+          const delivery = findNode(await nodesOn(driver, 'delete-started'), { testID: 'feedback-delivery' });
+          if (!delivery || !/Адпраўлена|Sent/i.test(delivery.text)) {
+            deleteStarted = true;
+            break;
+          }
+          await delay();
+        }
+      }
+      assert.ok(deleteStarted, 'Delete tap left the sent feedback unchanged');
       await waitForGone(driver, 'feedback-delivery', 'feedback-deleted');
       await driver.tapSelector({ testID: 'btn-feedback-back' });
       await driver.launchDeepLink('kudy:///discovery');
