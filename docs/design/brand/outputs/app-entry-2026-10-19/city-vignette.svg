@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 690 380" role="img" aria-label="Умоўны від на гданьскія камяніцы і ваду">
+  <rect width="690" height="380" rx="22" fill="#ECE7DD"/>
+  <path d="M0 263Q171 250 349 267T690 255V380H0Z" fill="#C9D8D4"/>
+  <path d="M0 283Q184 269 336 282T690 275" fill="none" stroke="#6E9E95" stroke-width="3" opacity=".72"/>
+  <path d="M0 321Q155 305 322 322T690 316M20 349Q215 333 382 344T680 338" fill="none" stroke="#FAF7F2" stroke-width="4" opacity=".8"/>
+  <circle cx="546" cy="64" r="31" fill="#E8CF9F" opacity=".65"/>
+  <path d="M35 268V116L86 93L142 116V268Z" fill="#D6B6A2" stroke="#66594E" stroke-width="3"/>
+  <path d="M35 116L53 116L53 90L63 90L63 72L75 72L75 56L88 56L88 72L101 72L101 90L119 90L119 116Z" fill="#C8957D" stroke="#66594E" stroke-width="3"/>
+  <path d="M142 269V104L187 71L230 104V269Z" fill="#E5D7BD" stroke="#66594E" stroke-width="3"/>
+  <path d="M154 106L187 82L218 106" fill="none" stroke="#66594E" stroke-width="2"/>
+  <path d="M230 269V136L267 105L304 136V269Z" fill="#9DAFA0" stroke="#66594E" stroke-width="3"/>
+  <path d="M304 269V88L344 57L386 88V269Z" fill="#C77F62" stroke="#66594E" stroke-width="3"/>
+  <path d="M308 88L324 88L324 72L335 72L335 52L346 52L346 72L366 72L366 88Z" fill="#B56950" stroke="#66594E" stroke-width="3"/>
+  <path d="M386 269V126L423 95L462 126V269Z" fill="#D7C6A7" stroke="#66594E" stroke-width="3"/>
+  <path d="M462 269V138L505 109L549 138V269Z" fill="#AAB9AC" stroke="#66594E" stroke-width="3"/>
+  <path d="M549 269V115L601 83L652 115V269Z" fill="#DDBBA9" stroke="#66594E" stroke-width="3"/>
+  <path d="M560 115L560 97L577 97L577 79L592 79L592 61L607 61L607 79L626 79L626 97L640 97L640 115" fill="#CA987F" stroke="#66594E" stroke-width="3"/>
+  <g fill="#FAF7F2" stroke="#70665B" stroke-width="2">
+    <rect x="58" y="144" width="19" height="28" rx="8"/><rect x="98" y="144" width="19" height="28" rx="8"/>
+    <rect x="58" y="190" width="19" height="29" rx="8"/><rect x="98" y="190" width="19" height="29" rx="8"/>
+    <rect x="170" y="127" width="18" height="26" rx="8"/><rect x="197" y="127" width="18" height="26" rx="8"/>
+    <rect x="170" y="179" width="18" height="26" rx="8"/><rect x="197" y="179" width="18" height="26" rx="8"/>
+    <rect x="252" y="160" width="17" height="27" rx="8"/><rect x="276" y="160" width="17" height="27" rx="8"/>
+    <rect x="322" y="109" width="17" height="27" rx="8"/><rect x="351" y="109" width="17" height="27" rx="8"/>
+    <rect x="322" y="162" width="17" height="27" rx="8"/><rect x="351" y="162" width="17" height="27" rx="8"/>
+    <rect x="410" y="154" width="17" height="27" rx="8"/><rect x="435" y="154" width="17" height="27" rx="8"/>
+    <rect x="482" y="158" width="17" height="27" rx="8"/><rect x="513" y="158" width="17" height="27" rx="8"/>
+    <rect x="572" y="142" width="18" height="27" rx="8"/><rect x="613" y="142" width="18" height="27" rx="8"/>
+    <rect x="572" y="191" width="18" height="27" rx="8"/><rect x="613" y="191" width="18" height="27" rx="8"/>
+  </g>
+  <path d="M35 268H652" stroke="#66594E" stroke-width="4"/>
+  <path d="M0 274Q209 271 690 274" stroke="#1D6B4F" stroke-width="3" opacity=".7"/>
+</svg>
