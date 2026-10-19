@@ -175,8 +175,8 @@ export default function My() {
       feedbackController?.getState().refreshItems();
     }, [historyStore, feedbackController]),
   );
-  // UX 02 (issue #348): the frame's top inset — the content starts below the
-  // status bar and the notch with the native header off (AC4).
+  // UX 02 (issue #348): the top inset clears the status bar and notch with
+  // the native header off (AC4). APR-05 (#810): the bottom inset clears the navigation bar.
   const insets = useSafeAreaInsets();
   // G06.05 (issue #280, AC1): the surface's words come from the shared
   // catalog in the display locale.

@@ -243,9 +243,9 @@ export default function RoutePreview() {
     controller?.recordSource(typeof from === "string" ? from : null);
   }, [controller, from]);
 
-  // UX 02 (issue #348): the frame's top inset — the content starts below the
-  // status bar and the notch with the native header off (AC4). A hook —
-  // before the early returns.
+  // UX 02 (issue #348): the top inset clears the status bar and notch with
+  // the native header off (AC4). APR-05 (#810): the bottom inset clears the
+  // navigation bar. Keep the hook before the early returns.
   const insets = useSafeAreaInsets();
   const frameStyle = [screenStyles.screen, {
     paddingTop: insets.top + tokens.spaceL,

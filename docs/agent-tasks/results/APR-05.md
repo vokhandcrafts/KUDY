@@ -1,6 +1,6 @@
 # APR-05 — edge-to-edge на Android 15 і 16
 
-Дата: 2026-10-18. Задача: [#810](https://github.com/vokhandcrafts/KUDY/issues/810). Вынік: дзевяць экранаў атрымалі ніжні сістэмны inset. Пяць асноўных экранаў правераны на эмулятарах Android 15 і 16; для яшчэ чатырох дададзены render-тэсты, а перасабраны release APK правераны на Android 16 у вузкім акне.
+Дата: 2026-10-18. Задача: [#810](https://github.com/vokhandcrafts/KUDY/issues/810). Вынік: дзевяць экранаў атрымалі ніжні сістэмны inset. З іх Explore, preview, карта і My KUDY маюць здымкі з эмулятараў Android 15 і 16; Guides, Place, Feedback, Collection і Discovery правераны render-тэстамі без асобных прыладавых здымкаў. Run, дыялог і экран памылкі таксама ёсць у прыладавай матрыцы; перасабраны release APK правераны на Android 16 у вузкім акне.
 
 ## Артэфакт і асяроддзе
 
