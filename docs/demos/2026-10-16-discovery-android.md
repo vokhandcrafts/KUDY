@@ -1,0 +1,30 @@
+# G23.06 Android discovery seams
+
+*2026-10-16T20:50:35Z by Showboat 0.6.1*
+<!-- showboat-id: a4dc9dce-ac80-4d3c-92b8-436c7c986a98 -->
+
+Synthetic fixtures exercise the published Discovery index, a private feedback endpoint, and Android runner wiring. The commands below require no emulator; the installed-app result is recorded in docs/agent-tasks/results/G23.06.md.
+
+```bash
+node --test tools/e2e-origin/e2e-origin.test.mjs tools/e2e-android/wiring.test.mjs >/dev/null && echo "synthetic origin and Android wiring: PASS"
+```
+
+```output
+synthetic origin and Android wiring: PASS
+```
+
+```bash
+node --test services/contentRepo/discoverySnapshot.test.ts controllers/deviceServices.integration.test.ts controllers/moment/momentPlayController.test.ts >/dev/null && echo "device persistence, composition and Moment takeover: PASS"
+```
+
+```output
+device persistence, composition and Moment takeover: PASS
+```
+
+```bash
+node --test tools/build-bundle/build-bundle.test.mjs services/contentRepo/momentFacts.test.ts >/dev/null && echo "locked Moment manifest and device reader: PASS"
+```
+
+```output
+locked Moment manifest and device reader: PASS
+```

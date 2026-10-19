@@ -77,6 +77,39 @@ test('the idle play mints a moment token and drives the one player; finish relea
   assert.deepEqual(controller.store.getState(), { kind: 'idle' });
 });
 
+test('device teaser Play resolves a file URI before touching the player', () => {
+  const port = new FakeAudioPlayerPort();
+  const audio = new AudioService({ createPort: () => port });
+  const controller = createMomentPlayController({
+    audio,
+    nextSeq: sharedCounter().next,
+    now: () => 0,
+    audioUriFor: (path) => path === MOMENT_PATH ? 'file:///synthetic/teaser.m4a' : null,
+  });
+  assert.deepEqual(controller.play({ momentId: 'm-1', storyId: 's-1', path: MOMENT_PATH }), { outcome: 'started' });
+  assert.deepEqual(port.commands, ['play 1:file:///synthetic/teaser.m4a']);
+  const before = controller.store.getState();
+  assert.deepEqual(controller.play({ momentId: 'm-2', storyId: 's-2', path: 'missing' }), { refused: 'moment#audio-file-missing' });
+  assert.deepEqual(controller.store.getState(), before);
+  assert.deepEqual(port.commands, ['play 1:file:///synthetic/teaser.m4a']);
+});
+
+test('an active walk routes explicit Moment Play through its engine between guide files', () => {
+  const port = new FakeAudioPlayerPort();
+  const audio = new AudioService({ createPort: () => port });
+  let routed = 0;
+  const controller = createMomentPlayController({
+    audio,
+    nextSeq: sharedCounter().next,
+    now: () => 0,
+    hasLiveSession: () => true,
+    sessionMoment: { playMoment: () => { routed += 1; return true; } },
+  });
+  assert.deepEqual(controller.play({ momentId: 'm-1', storyId: 's-1', path: MOMENT_PATH }), { outcome: 'routed' });
+  assert.equal(routed, 1);
+  assert.deepEqual(port.commands, []);
+});
+
 test('a failed launch is a visible failed state; foreign tokens are ignored entirely (§3.5)', () => {
   const clock = new ManualClock();
   const port = new FakeAudioPlayerPort();

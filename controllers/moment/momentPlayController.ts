@@ -59,6 +59,8 @@ export type MomentPlayOutcome =
 
 export interface MomentPlayDeps {
   readonly audio: AudioService;
+  /** Resolves a store-relative teaser to the device player URI. */
+  readonly audioUriFor?: (path: string) => string | null;
   // ADR G01.02 §3.2: ONE process-wide counter over every moment launch. The
   // composition root mints it once and hands the same source to the run
   // session ports (RunSessionPorts.nextMomentSeq) — two counters could mint
@@ -78,6 +80,8 @@ export interface MomentPlayDeps {
     readonly stopMoment?: () => boolean;
     readonly resumeMoment?: () => boolean;
   };
+  /** A live walk owns Moment takeovers even between guide audio files. */
+  readonly hasLiveSession?: () => boolean;
   // §3.7: the threshold is measured from the physical FocusLoss fact — one
   // clock, injected; the controller never reads a clock of its own.
   readonly now: () => number;
@@ -155,7 +159,7 @@ export function createMomentPlayController(deps: MomentPlayDeps): MomentPlayBind
       (physical.kind === 'playing' || physical.kind === 'paused') &&
       physical.token !== null &&
       (ownToken === null || !tokensEqual(ownToken, physical.token));
-    if (foreign) {
+    if (foreign || deps.hasLiveSession?.()) {
       // A session-owned launch (a guide token, or a moment token this
       // controller did not mint): the takeover is the engine's own
       // transition (§3.4) — routed through the live session or refused.
@@ -170,6 +174,8 @@ export function createMomentPlayController(deps: MomentPlayDeps): MomentPlayBind
       store.setState({ kind: 'idle' }, true);
       return { outcome: 'routed' };
     }
+    const playerPath = deps.audioUriFor ? deps.audioUriFor(input.path) : input.path;
+    if (playerPath === null) return { refused: 'moment#audio-file-missing' };
     if (own.kind === 'playing') {
       // A repeat of the controller's own launch: stopped by command, never
       // finished (§3.4) — the next listen is the new launch below.
@@ -178,7 +184,7 @@ export function createMomentPlayController(deps: MomentPlayDeps): MomentPlayBind
     const token: PlayToken = { kind: 'moment', ref: input.momentId, seq: deps.nextSeq() };
     focusLostAt = null;
     store.setState({ kind: 'playing', momentId: input.momentId, storyId: input.storyId, token, paused: false }, true);
-    void deps.audio.play({ token, path: input.path });
+    void deps.audio.play({ token, path: playerPath });
     return { outcome: 'started' };
   }
 

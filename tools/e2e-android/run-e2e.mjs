@@ -36,6 +36,7 @@ import { DriverError, E2eDriver, findNode, listBootedDevices, parseDump, resolve
 import { UI_LOCALES } from '../../contracts/ui-locales.ts';
 import { runLocalesSuite } from './locales.mjs';
 import { runWalkSuite } from './walk.mjs';
+import { runDiscoverySuite } from './discovery.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const ORIGIN_TOOL = path.join(REPO_ROOT, 'tools', 'e2e-origin', 'serve-e2e-origin.mjs');
@@ -238,9 +239,9 @@ async function startMetro({ port, env, logPath }) {
   throw new DriverError('Metro start: unreachable state');
 }
 
-async function startOriginServer({ port, logPath, outDir, fault }) {
+async function startOriginServer({ port, logPath, outDir, fault, packages }) {
   const child = startGroupProcess(process.execPath, [ORIGIN_TOOL, '--port', String(port), ...(outDir ? ['--out', outDir] : []),
-    ...(fault ? ['--fault', fault] : [])], {
+    ...(fault ? ['--fault', fault] : []), ...(packages ? ['--packages', packages] : [])], {
     cwd: REPO_ROOT,
     env: { ...process.env, EXPO_NO_TELEMETRY: '1' },
     logPath,
@@ -398,8 +399,8 @@ async function main() {
     return index === -1 ? null : argv[index + 1];
   };
   const suite = argValue('--suite') ?? 'smoke';
-  if (!['smoke', 'locales', 'walk'].includes(suite)) {
-    console.error(`unknown suite: ${suite} (known suites: smoke, locales, walk)`);
+  if (!['smoke', 'locales', 'walk', 'discovery'].includes(suite)) {
+    console.error(`unknown suite: ${suite} (known suites: smoke, locales, walk, discovery)`);
     process.exit(2);
   }
   const only = argValue('--only');
@@ -421,7 +422,7 @@ async function main() {
     process.exit(0);
   }
   const { adbPath, serial, apkPath, skipInstall } = target;
-  if ((suite === 'locales' || suite === 'walk') && !/^emulator-\d+$/.test(serial)) {
+  if ((suite === 'locales' || suite === 'walk' || suite === 'discovery') && !/^emulator-\d+$/.test(serial)) {
     console.log(`SKIP e2e:android ${suite} — serial ${serial} is not an emulator`);
     process.exit(0);
   }
@@ -432,7 +433,7 @@ async function main() {
   // The locale and walk suites download synthetic guides. A prior run can leave a
   // package directory in the emulator, making the next download fail before
   // any locale assertion. This runner accepts emulator serials only.
-  if ((suite === 'locales' || suite === 'walk') && await driver.isPackageInstalled(APP_PACKAGE)) {
+  if ((suite === 'locales' || suite === 'walk' || suite === 'discovery') && await driver.isPackageInstalled(APP_PACKAGE)) {
     info(`clearing ${APP_PACKAGE} test data on ${serial} before ${suite} cases`);
     const cleared = await driver.exec(['shell', 'pm', 'clear', APP_PACKAGE]);
     if (cleared.stdout.trim() !== 'Success') throw new Error(`pm clear ${APP_PACKAGE} failed: ${cleared.stdout.trim()}`);
@@ -453,16 +454,33 @@ async function main() {
   let metro = null;
   let origin = null;
   try {
-    if (suite === 'locales' || suite === 'walk') {
+    if (suite === 'locales' || suite === 'walk' || suite === 'discovery') {
       if (only !== null) info(`running only locale case: ${only}`);
       const originLogPath = path.join(runDir, `origin-${suite}.log`);
       origin = await startOriginServer({ port: originPort, logPath: originLogPath, outDir: path.join(runDir, 'origin'),
-        ...(suite === 'walk' ? { fault: 'stall:bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a' } : {}) });
+        ...(suite === 'walk' ? { fault: 'stall:bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a' } : {}),
+        ...(suite === 'discovery' ? { packages: 'paid-guide,nearby-guide,free-guide' } : {}) });
+      await driver.exec(['reverse', `tcp:${originPort}`, `tcp:${originPort}`]);
       metro = await startMetro({ port: metroPort,
-        env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://10.0.2.2:${originPort}` }, logPath: path.join(runDir, `metro-${suite}.log`) });
+        env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://localhost:${originPort}`,
+          ...(suite === 'discovery' ? { EXPO_PUBLIC_E2E_FEEDBACK: '1' } : {}) },
+        logPath: path.join(runDir, `metro-${suite}.log`) });
       await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
       if (suite === 'locales') await runLocalesSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, only });
-      else await runWalkSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, originLogPath });
+      else if (suite === 'walk') await runWalkSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, originLogPath });
+      else await runDiscoverySuite({
+        driver, url: devClientUrl(metroPort), runCase, coldStart,
+        stopOrigin: async () => {
+          if (origin !== null) await stopGroupProcess(origin, originPort, 'origin');
+          origin = null;
+        },
+        startOrigin: async () => {
+          origin = await startOriginServer({
+            port: originPort, logPath: originLogPath, outDir: path.join(runDir, 'origin'),
+            packages: 'paid-guide,nearby-guide,free-guide',
+          });
+        },
+      });
     } else {
       info('phase A: no catalog origin — starting Metro');
       metro = await startMetro({ port: metroPort, env: {}, logPath: path.join(runDir, 'metro-a.log') });
@@ -474,10 +492,11 @@ async function main() {
 
       info('phase B: G23.01 origin — starting origin and Metro with EXPO_PUBLIC_CATALOG_ORIGIN');
       origin = await startOriginServer({ port: originPort, logPath: path.join(runDir, 'origin-b.log') });
+      await driver.exec(['reverse', `tcp:${originPort}`, `tcp:${originPort}`]);
       await stopGroupProcess(metro, metroPort, 'metro-a');
       metro = await startMetro({
         port: metroPort,
-        env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://10.0.2.2:${originPort}` },
+        env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://localhost:${originPort}` },
         logPath: path.join(runDir, 'metro-b.log'),
       });
       await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
@@ -498,6 +517,7 @@ async function main() {
     await driver.exec(['reverse', '--remove', `tcp:${metroPort}`]).catch((error) => {
       fs.appendFileSync(path.join(runDir, 'runner.log'), `reverse remove: ${error.message}\n`);
     });
+    await driver.exec(['reverse', '--remove', `tcp:${originPort}`]).catch(() => {});
   }
 
   console.log(`\n${suite}: ${passCount} passed, ${failCount} failed (artifacts: ${runDir})`);

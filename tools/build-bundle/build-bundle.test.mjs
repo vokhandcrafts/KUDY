@@ -173,6 +173,15 @@ test('AC1: lock hashes equal the committed LF blob, not a CRLF working copy', as
   assert.equal(stopsEntry.sha256, sha256Hex(blob));
 });
 
+test('a public Moment manifest rides the verified base layer for installed Nearby', async () => {
+  const out = await buildDemoFixture();
+  const root = await fsp.readFile(path.join(out, 'public/bundle/demo-route-a1/1/moments.json'));
+  const layer = await fsp.readFile(path.join(out, 'public/bundle/demo-route-a1/1/be/base/moments.json'));
+  const lock = readJson(out, 'public/bundle/demo-route-a1/1/be/base/lock.json');
+  assert.deepEqual(layer, root);
+  assert.equal(lock.find((entry) => entry.path === 'moments.json')?.sha256, sha256Hex(layer));
+});
+
 // ------------------------------------------------------------- AC2: previews
 
 test('AC2: base layer carries the serialized preview of locked stops, allowed fields only', async () => {

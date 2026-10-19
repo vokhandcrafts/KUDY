@@ -7,9 +7,9 @@
 // flow needs. Deliberately absent (honest unavailable, spec V5): the
 // single-store packageStore member (no route context — the preview rides
 // evaluateLayer), the live-walk runSession/walk fact (needs the route-title
-// join from the catalog projection), the discovery snapshot/analytics and
-// the guide-hint seams (no values document on device), and the feedback
-// seams (the functions origin env is a G16/G20.21 prerequisite).
+// join from the catalog projection), and discovery analytics (no sender).
+// Discovery's replaceable snapshot, Nearby/guide hints and feedback are
+// composed below; feedback stays absent without a Functions endpoint.
 // react-native-purchases is never imported here: purchase/restore stays the
 // explicitly-unavailable port until G20.21 wires and verifies the live path.
 import { activate } from '../services/download/download.ts';
@@ -17,6 +17,10 @@ import { createAccessPort } from '../services/download/access.ts';
 import { createDeletionGate } from '../services/download/delete.ts';
 import { createOriginByteSource } from '../services/download/origin-bytes.ts';
 import { createExpoDownloadStore } from '../services/download/expo/expo-download-store.ts';
+import { discoverySnapshotOver } from '../services/contentRepo/discoverySnapshot.ts';
+import { readRunMapFacts } from '../services/contentRepo/runMapFacts.ts';
+import { ensureDeviceIdentity, type DeviceRegistrationTransport, type SecureSecretStore } from '../services/device.ts';
+import { createFeedbackSync, type FeedbackTransport } from '../services/feedbackSync.ts';
 import {
   createExpoBundlesStore,
   createExpoAudioUriResolver,
@@ -41,9 +45,12 @@ import {
   createRunRecoveryPort,
   createSessionHistoryPort,
   createUiLocalePersistence,
+  hintStoreOver,
   sessionStoreOver,
 } from './sessionPorts.ts';
 import { defaultEngineConfig } from '../core/engine/reducer.ts';
+import type { GuideHintValues } from '../services/config.ts';
+import type { GuideHintPoint } from './useNearbyController.ts';
 
 // The configured public catalog origin, or null when absent — the app root's
 // fail-closed gate: no origin, no composition call, the surfaces keep their
@@ -81,6 +88,16 @@ export interface DeviceFacilities {
   };
   /** The content-locale preference for fresh-walk pin picks; the composition default. */
   preferredLocales?: () => readonly string[];
+  guideHintValues?: GuideHintValues;
+  foreground?: () => boolean;
+  onForeground?: (listener: () => void) => () => void;
+  /** Optional authenticated Functions endpoint; absent leaves feedback unavailable. */
+  feedback?: {
+    baseUrl: string;
+    secretStore: SecureSecretStore;
+    transport?: FeedbackTransport;
+    registrationTransport?: DeviceRegistrationTransport;
+  };
 }
 
 export interface DeviceServiceSet {
@@ -111,6 +128,7 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
   // zones survive a restart, the derived ones rebuild here.
   openDatabase(driver);
   const bundlesStore = createExpoBundlesStore(fileSystem, bundlesRoot);
+  const guideHintPoints = new Map<string, readonly GuideHintPoint[]>();
   const teaserAudioProbe = createExpoTeaserAudioProbe(fileSystem, bundlesRoot);
   const audioUriFor = createExpoAudioUriResolver(fileSystem, bundlesRoot);
   const downloadStore = createExpoDownloadStore(fileSystem, bundlesRoot);
@@ -147,25 +165,80 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
     // verify against the same document the activation used.
     if (result.status === 'complete') {
       await downloadStore.writeFile(`${deviceLayer}/lock.json`, lockBytes);
+      if (key.tier === 'base') {
+        const map = await readRunMapFacts(bundlesStore, deviceLayer, key);
+        if (map.ok) {
+          const places = new Map(map.places.map((place) => [place.placeId, place]));
+          guideHintPoints.set(key.routeId, map.stops.flatMap((stop) => {
+            const place = places.get(stop.placeId);
+            return place ? [{ guideId: key.routeId, lat: place.lat, lng: place.lng }] : [];
+          }));
+        }
+      }
     }
     return result;
   };
   // The compile-time structural check of the unavailable port against the
   // controller's contract (services cannot import controllers for it).
   const commerce: CommercePort = createUnavailableCommercePort();
+  const feedback = facilities.feedback;
+  const feedbackSync = feedback && createFeedbackSync({
+    driver,
+    secretStore: feedback.secretStore,
+    baseUrl: feedback.baseUrl,
+    makeMutationId: newSessionId,
+    ...(feedback.transport ? { transport: feedback.transport } : {}),
+  });
+  const deviceFeedbackSync = feedback && feedbackSync ? {
+    flush: async () => {
+      await ensureDeviceIdentity({
+        driver,
+        secretStore: feedback.secretStore,
+        baseUrl: feedback.baseUrl,
+        ...(feedback.registrationTransport ? { transport: feedback.registrationTransport } : {}),
+      });
+      return feedbackSync.flush();
+    },
+    resolveConflict: (target: Parameters<typeof feedbackSync.resolveConflict>[0]) => feedbackSync.resolveConflict(target),
+  } : null;
+  const stopFeedbackResume = deviceFeedbackSync && facilities.onForeground
+    ? facilities.onForeground(() => {
+      void deviceFeedbackSync.flush().catch((error: unknown) => {
+        console.warn('feedback foreground retry failed', error instanceof Error ? error.name : 'unknown');
+      });
+    })
+    : null;
   // A demo catalog is immutable and already bundled. The selector still goes
   // through its verified snapshot contract; this cache is rebuildable on boot.
   let demoSnapshot: Uint8Array | null = null;
   const ports: ServicePorts = {
     catalogOrigin: origin,
     ...(facilities.demoSource ? { catalogLoader: facilities.demoSource.loadText } : {}),
-    ...(facilities.demoSource ? {
-      discoverySnapshot: {
+    discoverySnapshot: facilities.demoSource
+      ? {
         read: async () => demoSnapshot?.slice() ?? null,
         write: async (bytes: Uint8Array) => { demoSnapshot = bytes.slice(); },
+      }
+      : discoverySnapshotOver(driver),
+    catalogSha256: sha256,
+    location,
+    audio,
+    momentAudioUriFor: audioUriFor,
+    ...(facilities.guideHintValues ? {
+      guideHints: {
+        store: hintStoreOver(driver),
+        values: facilities.guideHintValues,
+        points: () => [...guideHintPoints.values()].flat(),
+        ...(facilities.foreground ? { foreground: facilities.foreground } : {}),
       },
     } : {}),
-    catalogSha256: sha256,
+    ...(deviceFeedbackSync ? {
+      feedback: {
+        driver,
+        makeMutationId: newSessionId,
+        sync: deviceFeedbackSync,
+      },
+    } : {}),
     bundlesStore,
     teaserAudioProbe,
     downloadLayer,
@@ -197,6 +270,9 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
   };
   return {
     ports,
-    teardown: () => wakelock.release(),
+    teardown: () => {
+      stopFeedbackResume?.();
+      wakelock.release();
+    },
   };
 }

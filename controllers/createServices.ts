@@ -124,6 +124,7 @@ export interface ServicePorts {
   // controller receive the same instance; absent until the G05.03.b adapter
   // lands, in which case the place detail renders its honest no-Play state.
   readonly audio?: AudioService;
+  readonly momentAudioUriFor?: (path: string) => string | null;
   // G07.02 — the live session's moment entry (the PreviewRunSessionPort
   // idiom): true iff the live session's engine accepted the moment launch.
   // G07.03 extends it with the routed manual stop and the live-pause resume
@@ -185,6 +186,7 @@ export interface ServicePorts {
   readonly feedback?: {
     readonly driver: SqlDriver;
     readonly sync: FeedbackSync;
+    readonly makeMutationId?: () => string;
   };
 }
 
@@ -419,8 +421,10 @@ export function createServices(ports: ServicePorts): Services {
   const momentPlay = audio
     ? createMomentPlayController({
         audio,
+        ...(ports.momentAudioUriFor ? { audioUriFor: ports.momentAudioUriFor } : {}),
         nextSeq: rootNextMomentSeq,
         sessionMoment: sessionMoment ?? rootSessionMoment,
+        hasLiveSession: () => liveSurfaceController() !== null,
         now: now ?? (() => Date.now()),
       })
     : undefined;
@@ -473,6 +477,7 @@ export function createServices(ports: ServicePorts): Services {
         driver: ports.feedback.driver,
         sync: ports.feedback.sync,
         repository: feedbackRepository,
+        ...(ports.feedback.makeMutationId ? { makeMutationId: ports.feedback.makeMutationId } : {}),
         ...(now ? { now } : {}),
       })
     : undefined;

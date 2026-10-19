@@ -21,6 +21,8 @@ import { loadDemoBytes, loadDemoText } from './demoCatalog.ts';
 import { UI_LOCALE_KEY } from './sessionPorts.ts';
 import { nodeSqliteDriver, nodeSqliteFileDriver } from '../services/db/test-fixture.ts';
 import { getLiveSession, setSetting } from '../services/db/db.ts';
+import { secretBox, scriptedTransport, okPut, err503, rawOutbox } from '../tests/feedback/queue-fixture.ts';
+import { loadGuideHintValues } from '../services/config.ts';
 import { makeFakeFs, makeFakeFsModule } from '../services/contentRepo/expo/fs-test-fixture.ts';
 import { FakeLocationOsPort } from '../services/location/fake-port.ts';
 import { FakeAudioPlayerPort } from '../services/audio/fake-port.ts';
@@ -154,9 +156,13 @@ const phaseBecomes = async (controller: { getState(): { run: { phase: string } }
 
 test('G20.20: the free synthetic package walks the whole production composition', async () => {
   const sharedDriver = nodeSqliteDriver();
-  const firstFacilities = facilities(sharedDriver);
+  const firstFacilities = { ...facilities(sharedDriver), guideHintValues: loadGuideHintValues(), foreground: () => true };
   const first = createDeviceServicePorts(firstFacilities);
   const services = createServices(first.ports);
+  assert.ok(services.discovery, 'the published index must reach the installed composition');
+  assert.ok(services.nearby, 'Nearby must consume the device location service');
+  assert.ok(services.moment, 'Moment Play must consume the device audio service');
+  assert.ok(services.hints, 'the accepted values and durable store must reach the hint controller');
 
   // 1. Catalog → preview: the served catalog makes the route previewable;
   //    the disk truth says not_downloaded, so the button offers the download.
@@ -182,6 +188,7 @@ test('G20.20: the free synthetic package walks the whole production composition'
   assert.ok(afterDownload.button.enabled, JSON.stringify(afterDownload.button));
   assert.ok(fs.files.has('/root/bundles/route-491/1/be/base/lock.json'), 'the layer lock lands on the device');
   assert.ok(fs.files.has('/root/bundles/route-491/1/be/base/audio/story-1.m4a'));
+  assert.deepEqual(first.ports.guideHints?.points(), [{ guideId: 'route-491', lat: 54.352, lng: 18.648 }]);
 
   // 3. Start: the per-route readiness gate evaluates the downloaded layer,
   //    the walk opens Active on the production session store.
@@ -252,6 +259,81 @@ test('offline demo supplies the verified discovery surface through device compos
   await services.discovery.controller.getState().refresh();
   assert.equal(services.discovery.controller.getState().surface.kind, 'ready');
   device.teardown();
+});
+
+test('feedback uses the device identity and the real queue through composition', async () => {
+  const secretStore = secretBox(null);
+  let registrations = 0;
+  const transport = scriptedTransport(() => okPut(1));
+  const device = createDeviceServicePorts({
+    ...facilities(),
+    feedback: {
+      baseUrl: 'https://functions.example.invalid/functions/v1',
+      secretStore,
+      transport,
+      registrationTransport: {
+        register: async () => {
+          registrations += 1;
+          return { status: 201, body: {
+            device_id: '11111111-1111-4111-8111-111111111111',
+            device_secret: 'synthetic-device-secret',
+          } };
+        },
+      },
+    },
+  });
+  const controller = createServices(device.ports).feedback?.controller;
+  assert.ok(controller, 'the configured Functions endpoint must make feedback available');
+  controller.getState().openForm({ kind: 'guide', id: 'route-491', version: '1', locale: 'be' });
+  controller.getState().setScore(4);
+  await controller.getState().send();
+  assert.equal(registrations, 1);
+  assert.equal(secretStore.saved, 1);
+  assert.equal(transport.calls.length, 1);
+  const form = controller.getState().form;
+  assert.equal(form.kind, 'open');
+  if (form.kind === 'open') assert.equal(form.delivery.kind, 'sent');
+});
+
+test('a foreground retry delivers the original queued feedback after origin recovery', async () => {
+  const driver = nodeSqliteDriver();
+  let foreground: () => void = () => { throw new Error('foreground listener was not registered'); };
+  let stopped = false;
+  const transport = scriptedTransport(({ index }) => index === 0 ? err503() : okPut(1));
+  const device = createDeviceServicePorts({
+    ...facilities(driver),
+    onForeground: (listener) => {
+      foreground = listener;
+      return () => { stopped = true; };
+    },
+    feedback: {
+      baseUrl: 'https://functions.example.invalid/functions/v1',
+      secretStore: secretBox(null),
+      transport,
+      registrationTransport: { register: async () => ({ status: 201, body: {
+        device_id: '11111111-1111-4111-8111-111111111111',
+        device_secret: 'synthetic-device-secret',
+      } }) },
+    },
+  });
+  const controller = createServices(device.ports).feedback?.controller;
+  assert.ok(controller);
+  controller.getState().openForm({ kind: 'guide', id: 'route-491', version: '1', locale: 'be' });
+  controller.getState().setScore(4);
+  await controller.getState().send();
+  assert.equal(rawOutbox(driver).length, 1);
+  const mutation = rawOutbox(driver)[0].mutation_id;
+  driver.prepare('UPDATE feedback_outbox SET next_attempt_at = 0').run();
+  foreground();
+  for (let i = 0; i < 30 && rawOutbox(driver).length > 0; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  assert.equal(rawOutbox(driver).length, 0);
+  assert.equal(transport.calls.length, 2);
+  assert.equal((transport.calls[0].body as { mutation_id: string }).mutation_id, mutation);
+  assert.equal((transport.calls[1].body as { mutation_id: string }).mutation_id, mutation);
+  device.teardown();
+  assert.equal(stopped, true);
 });
 
 test('G20.20: without a catalog origin the gate answers null and the root passes the empty port set', async () => {

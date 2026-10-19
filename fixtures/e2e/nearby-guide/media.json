@@ -1,0 +1,22 @@
+[
+  {
+    "media_id": "media-story-nearby-1-be",
+    "sha256": "8321de282749f803360100ac9b62fe347fbb73a943ca2bdfd00229880bffe1e3",
+    "bytes": 51646,
+    "mime": "audio/mp4",
+    "locale": "be",
+    "voice_id": "voice-be-1",
+    "license": "CC0 1.0, сінтэтычны тан аўтара KUDY",
+    "credit": "Сінтэтычны E2E-тан, афлайн-генерацыя ffmpeg, 2026"
+  },
+  {
+    "media_id": "media-story-nearby-1-en",
+    "sha256": "eaf5a91b5dc830ea2ef9a1a2e49179919cffa09981eb4e9f1304fe289646b06f",
+    "bytes": 51681,
+    "mime": "audio/mp4",
+    "locale": "en",
+    "voice_id": "voice-en-1",
+    "license": "CC0 1.0, synthetic tone by the KUDY author",
+    "credit": "Synthetic E2E tone, offline ffmpeg generation, 2026"
+  }
+]

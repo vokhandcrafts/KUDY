@@ -40,6 +40,24 @@ test('the walk command reaches device checks instead of rejecting the suite', ()
   assert.doesNotMatch(result.stdout, /PASS /);
 });
 
+test('the discovery command reaches device checks instead of rejecting the suite', () => {
+  const source = fs.readFileSync(path.join(repoRoot, 'tools/e2e-android/run-e2e.mjs'), 'utf8');
+  assert.match(source, /await runDiscoverySuite\(\{[\s\S]*?driver, url: devClientUrl\(metroPort\), runCase, coldStart,/);
+  const result = spawnSync(process.execPath, ['tools/e2e-android/run-e2e.mjs', '--suite', 'discovery', '--serial', 'missing-emulator'], {
+    cwd: repoRoot, encoding: 'utf8', timeout: 15000,
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /SKIP e2e:android discovery/);
+});
+
+test('the Android origin stays on loopback and is reached through adb reverse', () => {
+  const runner = fs.readFileSync(path.join(repoRoot, 'tools/e2e-android/run-e2e.mjs'), 'utf8');
+  const origin = fs.readFileSync(path.join(repoRoot, 'tools/e2e-origin/serve-e2e-origin.mjs'), 'utf8');
+  assert.match(origin, /server\.listen\(args\.port, '127\.0\.0\.1', resolve\)/);
+  assert.match(runner, /await driver\.exec\(\['reverse', `tcp:\$\{originPort\}`, `tcp:\$\{originPort\}`\]\)/);
+  assert.match(runner, /EXPO_PUBLIC_CATALOG_ORIGIN: `http:\/\/localhost:\$\{originPort\}`/);
+});
+
 test('the driver artifacts folder is git-ignored', () => {
   const artifacts = path.join(repoRoot, 'tools', 'e2e-android', 'artifacts');
   fs.mkdirSync(artifacts, { recursive: true });

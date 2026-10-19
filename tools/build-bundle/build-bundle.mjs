@@ -551,6 +551,15 @@ export async function buildBundle({ inDir, outDir }) {
         );
       }
       if (tier === 'base') {
+        // Installed guides fetch one verified layer at a time. Keep the
+        // public Moment manifest in that layer's lock so Nearby can read
+        // teasers offline after a base download, without a second fetch.
+        const moments = publicFiles.get(`${bundleRoot}/moments.json`);
+        if (moments) {
+          const relOut = `${bundleRoot}/${locale}/base/moments.json`;
+          publicFiles.set(relOut, moments);
+          kinds.set(`public/${relOut}`, 'public_bundle');
+        }
         if (files.some((rel) => rel === `${locale}/base/stops.json`)) textLocales.push(locale);
         if (files.some((rel) => rel.startsWith(`${locale}/base/audio/`) && rel.endsWith('.m4a'))) {
           audioLocales.push(locale);

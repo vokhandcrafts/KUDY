@@ -617,6 +617,17 @@ export default function Run() {
         <View style={styles.pausedBanner} testID="run-autoplay-suspended" accessibilityLiveRegion="polite">
           <ScaledText style={styles.pausedText}>{strings.autoplaySuspendedTitle}</ScaledText>
           <ScaledText style={styles.bannerDetailText}>{strings.manualPlayHint}</ScaledText>
+          {session.playing?.owner !== "moment" ? (
+            <PressableSurface
+              accessibilityRole="button"
+              accessibilityLabel={strings.resume}
+              onPress={() => run.guideResume()}
+              style={styles.resumeButton}
+              testID="btn-run-continue-guide"
+            >
+              <ScaledText style={styles.resumeLabel}>{strings.resume}</ScaledText>
+            </PressableSurface>
+          ) : null}
         </View>
       ) : null}
       {locationStatus.state === "permission-denied" ? (
