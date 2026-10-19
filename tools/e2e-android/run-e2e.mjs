@@ -10,6 +10,7 @@
 //   npm run e2e:android                            # smoke: phases A + B
 //   npm run e2e:android -- --suite locales         # G23.07
 //   npm run e2e:android -- --suite walk            # G23.04
+//   npm run e2e:android -- --suite recovery        # G23.05
 //   node tools/e2e-android/run-e2e.mjs --serial emulator-5558
 //   node tools/e2e-android/run-e2e.mjs --apk <path> --metro-port 8083
 //
@@ -35,6 +36,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { DriverError, E2eDriver, findNode, listBootedDevices, parseDump, resolveAdb } from './driver.mjs';
 import { UI_LOCALES } from '../../contracts/ui-locales.ts';
 import { runLocalesSuite } from './locales.mjs';
+import { runRecoverySuite } from './recovery.mjs';
 import { runWalkSuite } from './walk.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -398,8 +400,8 @@ async function main() {
     return index === -1 ? null : argv[index + 1];
   };
   const suite = argValue('--suite') ?? 'smoke';
-  if (!['smoke', 'locales', 'walk'].includes(suite)) {
-    console.error(`unknown suite: ${suite} (known suites: smoke, locales, walk)`);
+  if (!['smoke', 'locales', 'walk', 'recovery'].includes(suite)) {
+    console.error(`unknown suite: ${suite} (known suites: smoke, locales, walk, recovery)`);
     process.exit(2);
   }
   const only = argValue('--only');
@@ -421,7 +423,7 @@ async function main() {
     process.exit(0);
   }
   const { adbPath, serial, apkPath, skipInstall } = target;
-  if ((suite === 'locales' || suite === 'walk') && !/^emulator-\d+$/.test(serial)) {
+  if ((suite === 'locales' || suite === 'walk' || suite === 'recovery') && !/^emulator-\d+$/.test(serial)) {
     console.log(`SKIP e2e:android ${suite} — serial ${serial} is not an emulator`);
     process.exit(0);
   }
@@ -432,7 +434,7 @@ async function main() {
   // The locale and walk suites download synthetic guides. A prior run can leave a
   // package directory in the emulator, making the next download fail before
   // any locale assertion. This runner accepts emulator serials only.
-  if ((suite === 'locales' || suite === 'walk') && await driver.isPackageInstalled(APP_PACKAGE)) {
+  if ((suite === 'locales' || suite === 'walk' || suite === 'recovery') && await driver.isPackageInstalled(APP_PACKAGE)) {
     info(`clearing ${APP_PACKAGE} test data on ${serial} before ${suite} cases`);
     const cleared = await driver.exec(['shell', 'pm', 'clear', APP_PACKAGE]);
     if (cleared.stdout.trim() !== 'Success') throw new Error(`pm clear ${APP_PACKAGE} failed: ${cleared.stdout.trim()}`);
@@ -453,16 +455,25 @@ async function main() {
   let metro = null;
   let origin = null;
   try {
-    if (suite === 'locales' || suite === 'walk') {
+    if (suite === 'locales' || suite === 'walk' || suite === 'recovery') {
       if (only !== null) info(`running only locale case: ${only}`);
       const originLogPath = path.join(runDir, `origin-${suite}.log`);
       origin = await startOriginServer({ port: originPort, logPath: originLogPath, outDir: path.join(runDir, 'origin'),
-        ...(suite === 'walk' ? { fault: 'stall:bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a' } : {}) });
+        ...(suite === 'walk' ? { fault: 'stall:bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a' } : {}),
+        ...(suite === 'recovery' ? { fault: '500:bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a' } : {}) });
       metro = await startMetro({ port: metroPort,
         env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://10.0.2.2:${originPort}` }, logPath: path.join(runDir, `metro-${suite}.log`) });
       await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
       if (suite === 'locales') await runLocalesSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, only });
-      else await runWalkSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, originLogPath });
+      else if (suite === 'walk') await runWalkSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, originLogPath });
+      else await runRecoverySuite({
+        driver, url: devClientUrl(metroPort), runCase, coldStart, appPackage: APP_PACKAGE,
+        clearOriginFault: async () => {
+          await stopGroupProcess(origin, originPort, 'origin-recovery-fault');
+          origin = await startOriginServer({ port: originPort, logPath: originLogPath,
+            outDir: path.join(runDir, 'origin') });
+        },
+      });
     } else {
       info('phase A: no catalog origin — starting Metro');
       metro = await startMetro({ port: metroPort, env: {}, logPath: path.join(runDir, 'metro-a.log') });

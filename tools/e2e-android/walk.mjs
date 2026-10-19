@@ -16,12 +16,12 @@ const HELD_FILE = 'bundle/e2e-free-guide/1/be/base/audio/story-free-3.m4a';
 
 const delay = () => new Promise((resolve) => setTimeout(resolve, POLL_MS));
 
-async function nodesOn(driver, screenId, slug) {
+export async function nodesOn(driver, screenId, slug) {
   await driver.waitFor({ testID: screenId }, { timeoutMs: SHORT_MS, dumpBasename: `dump-walk-${slug}-screen.xml` });
   return parseDump((await driver.dump(`dump-walk-${slug}.xml`)).xml);
 }
 
-function requireId(nodes, id) {
+export function requireId(nodes, id) {
   const node = findNode(nodes, { testID: id });
   assert.ok(node, `missing testID ${id}`);
   return node;
@@ -120,7 +120,7 @@ async function waitForLocationListeners(driver, present) {
   }
 }
 
-async function backToExplore(driver) {
+export async function backToExplore(driver) {
   for (let i = 0; i < 4; i += 1) {
     const nodes = parseDump((await driver.dump('dump-walk-back.xml')).xml);
     if (findNode(nodes, { testID: 'screen-Explore' })) return;

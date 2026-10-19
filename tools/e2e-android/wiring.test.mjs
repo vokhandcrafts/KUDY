@@ -40,6 +40,21 @@ test('the walk command reaches device checks instead of rejecting the suite', ()
   assert.doesNotMatch(result.stdout, /PASS /);
 });
 
+test('the recovery command is wired and skips visibly without a device', () => {
+  const runner = path.join(repoRoot, 'tools/e2e-android/run-e2e.mjs');
+  const source = fs.readFileSync(runner, 'utf8');
+  assert.match(source, /await runRecoverySuite\(\{/,
+    'the recovery CLI must execute the recovery suite after device checks');
+  const result = spawnSync(process.execPath, [runner, '--suite', 'recovery', '--serial', 'emulator-missing'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    timeout: 15000,
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /SKIP e2e:android recovery/);
+  assert.doesNotMatch(result.stdout, /PASS /);
+});
+
 test('the driver artifacts folder is git-ignored', () => {
   const artifacts = path.join(repoRoot, 'tools', 'e2e-android', 'artifacts');
   fs.mkdirSync(artifacts, { recursive: true });

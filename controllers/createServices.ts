@@ -599,6 +599,17 @@ export function createServices(ports: ServicePorts): Services {
   if (catalogController) {
     uiLocale.subscribe(() => void catalogController.getState().refresh());
   }
+  const titledRunSession = runSession && {
+    liveSession: () => {
+      const live = runSession.liveSession();
+      if (live === null) return null;
+      const surface = catalogController?.getState().surface;
+      const title = surface && (surface.kind === 'ready' || surface.kind === 'offline')
+        ? surface.guides.find((guide) => guide.routeId === live.routeId)?.title ?? live.title
+        : live.title;
+      return { routeId: live.routeId, title };
+    },
+  };
   const discoveryController = discoveryService
     ? createDiscoveryController({
         service: discoveryService,
@@ -636,7 +647,7 @@ export function createServices(ports: ServicePorts): Services {
             inventory: inventoryPort,
             evaluate: evaluateLayer ? { evaluate: evaluateLayer } : undefined,
             download: downloadLayer ? { activate: downloadLayer } : undefined,
-            runSession,
+            runSession: titledRunSession,
             // G21.17 (issue #551): the preview's display order reads the
             // switched UI language first — evaluated per route open.
             localePreference: [uiLocale.current(), ...localePreference],
@@ -691,8 +702,8 @@ export function createServices(ports: ServicePorts): Services {
         return store;
       },
     },
-    walk: runSession && {
-      liveSession: () => runSession.liveSession(),
+    walk: titledRunSession && {
+      liveSession: () => titledRunSession.liveSession(),
     },
     history: sessionHistory && {
       controller: createMyKudyController(sessionHistory),

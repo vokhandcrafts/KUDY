@@ -6,8 +6,7 @@
 // and the explicit teardown, and serves every ServicePorts member the free
 // flow needs. Deliberately absent (honest unavailable, spec V5): the
 // single-store packageStore member (no route context — the preview rides
-// evaluateLayer), the live-walk runSession/walk fact (needs the route-title
-// join from the catalog projection), the discovery snapshot/analytics and
+// evaluateLayer), the discovery snapshot/analytics and
 // the guide-hint seams (no values document on device), and the feedback
 // seams (the functions origin env is a G16/G20.21 prerequisite).
 // react-native-purchases is never imported here: purchase/restore stays the
@@ -22,7 +21,7 @@ import {
   createExpoAudioUriResolver,
   createExpoTeaserAudioProbe,
 } from '../services/contentRepo/expo/expo-package-store.ts';
-import { openDatabase } from '../services/db/db.ts';
+import { getLiveSession, openDatabase } from '../services/db/db.ts';
 import type { SqlDriver } from '../services/db/types.ts';
 import type { Sha256, Tier } from '../services/contentRepo/types.ts';
 import { createDeviceWakelock, type DeviceWakelock, type KeepAwakeFacility } from '../services/device-wakelock.ts';
@@ -173,6 +172,15 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
     // button derives a real evaluate verdict, never verify-unavailable on a
     // downloaded layer.
     evaluateLayer: createEvaluateLayer({ bundlesStore }),
+    // The one-live-row read is the preview's switch confirmation gate. The
+    // root resolves its display title from the catalog projection; the raw
+    // route id remains the honest fallback when that catalog is unavailable.
+    runSession: {
+      liveSession: () => {
+        const live = getLiveSession(driver);
+        return live ? { routeId: live.routeId, title: live.routeId } : null;
+      },
+    },
     commerce,
     sessionHistory: createSessionHistoryPort(driver),
     uiLocalePersistence: createUiLocalePersistence(driver),

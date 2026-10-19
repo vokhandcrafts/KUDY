@@ -427,6 +427,11 @@ export default function Run() {
   const surface = useRunSurface(services.run, routeId, confirmedSwitch === "1", audioParam);
   const ready = surface?.status === "ready" ? surface : null;
   const run = useRunState(ready?.controller ?? null);
+  const [, setLocationRevision] = useState(0);
+  useEffect(() => {
+    if (ready === null) return;
+    return ready.onLocationStatusChange(() => setLocationRevision((revision) => revision + 1));
+  }, [ready]);
   // Issue #524: without a ready session the words follow the UI-locale
   // choice (the #305 store) — the fixed "be" fallback kept Belarusian on
   // screen after choosing English or Українська. A ready session keeps its

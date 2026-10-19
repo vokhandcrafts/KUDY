@@ -193,6 +193,9 @@ test('G20.20: the free synthetic package walks the whole production composition'
   if (surface.status !== 'ready') return;
   const controller = surface.controller;
   assert.equal(controller.getState().run.phase, 'Active');
+  assert.deepEqual(services.walk?.liveSession(), {
+    routeId: 'route-491', title: afterDownload.surface.preview.title,
+  });
   // The engine state is a union; the Active branch carries the seeded stops.
   const activeStops = (controller.getState().run as { stops?: ReadonlyArray<{ stopId: string }> }).stops ?? [];
   assert.deepEqual(
@@ -240,6 +243,30 @@ test('G20.20: the free synthetic package walks the whole production composition'
   if (!commerce) throw new Error('the root constructed no commerce member');
   assert.equal(commerce.stateOf('route_491_extended'), 'not-owned');
   assert.deepEqual(await commerce.purchase('route_491_extended'), { kind: 'unavailable' });
+});
+
+test('G23.05: the installed composition asks before replacing a different live guide', async () => {
+  const driver = nodeSqliteDriver();
+  const device = createDeviceServicePorts(facilities(driver));
+  const services = createServices(device.ports);
+  const preview = services.preview?.create('route-491');
+  const sessions = device.ports.run?.session.sessionStore;
+  if (!preview || !sessions) throw new Error('the production preview or session port is absent');
+  await settledPreview(preview);
+  await preview.getState().download();
+  await preview.getState().refresh();
+  assert.equal(preview.getState().button.action, 'start');
+  assert.equal(preview.getState().button.enabled, true);
+
+  assert.deepEqual(sessions.start({
+    sessionId: 'existing-663', routeId: 'another-guide', version: '1', locale: 'be', startedAt: 1,
+  }), { ok: true });
+  assert.equal(services.walk?.liveSession()?.routeId, 'another-guide');
+  assert.equal(await preview.getState().start(), 'confirm');
+  assert.equal(preview.getState().confirm?.liveTitle, 'another-guide');
+  preview.getState().cancelConfirm();
+  assert.equal(preview.getState().confirm, null);
+  assert.equal(getLiveSession(driver)?.sessionId, 'existing-663');
 });
 
 test('offline demo supplies the verified discovery surface through device composition', async () => {

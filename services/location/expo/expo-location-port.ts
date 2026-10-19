@@ -114,11 +114,23 @@ export class ExpoLocationOsPort implements LocationOsPort {
     // text from the manifest strings the expo-location plugin writes.
     void explanation;
     const ask = ++this.permissionAsk;
+    // A cold active-guide restore can supersede the constructor's read with
+    // this background ask. Resolve foreground capability independently: the
+    // background OS question may remain pending while Run is already visible.
+    if (scope === 'background' && this.permissionState === 'undetermined') {
+      void Location.getForegroundPermissionsAsync()
+        .then((response) => {
+          if (this.permissionState === 'undetermined') this.applyAnswer('foreground', response, ask);
+        })
+        .catch((error: unknown) => console.warn(`location adapter: foreground permission check failed: ${String(error)}`));
+    }
     void (scope === 'background'
       ? Location.requestBackgroundPermissionsAsync()
       : Location.requestForegroundPermissionsAsync()
     )
-      .then((response) => this.applyAnswer(scope, response, ask))
+      .then((response) => {
+        this.applyAnswer(scope, response, ask);
+      })
       .catch((error: unknown) => console.warn(`location adapter: permission request failed: ${String(error)}`));
   }
 

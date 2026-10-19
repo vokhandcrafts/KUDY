@@ -392,6 +392,27 @@ test('criterion 4: a mid-session revocation releases everything — no stale liv
   h.assertClean();
 });
 
+test('G23.05: a visible run learns about permission revocation and release stops updates', () => {
+  const h = makeService();
+  h.arm();
+  const updates: LocationStatus[] = [];
+  const release = h.service.onStatusChange(() => updates.push(h.service.status()));
+  h.port.reportPermission('denied');
+  assert.deepEqual(updates, [{ state: 'permission-denied', reason: 'revoked-mid-session' }]);
+  release();
+  h.port.reportPermission('granted');
+  assert.equal(updates.length, 1);
+});
+
+test('G23.05: a stalled GPS stream also updates the visible run', () => {
+  const h = makeService();
+  const updates: string[] = [];
+  h.service.onStatusChange(() => updates.push(h.service.status().state));
+  h.arm();
+  h.clock.advance(WATCHDOG_GAP_MS + 15000);
+  assert.equal(updates.at(-1), 'stalled');
+});
+
 test('criterion 4: a revocation while disarmed is a status value, not a crash', () => {
   const h = makeService();
   h.service.setMode('idle');

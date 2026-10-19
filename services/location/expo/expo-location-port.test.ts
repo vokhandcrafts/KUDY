@@ -250,6 +250,29 @@ test('all_permissions_denied: neither watcher starts and the visible permission 
   assert.ok(!updatesAsked());
 });
 
+test('G23.05: cold Run restore resolves foreground denial after the background answer', async () => {
+  const { port, service } = setup();
+  service.setMode('active-guide');
+  backgroundAsks[0].resolve({ status: 'denied' });
+  await flush();
+  assert.equal(port.permission(), 'undetermined');
+  foregroundRead.resolve({ status: 'denied' });
+  await flush();
+  assert.equal(port.permission(), 'denied');
+  assert.deepEqual(service.status(), { state: 'permission-denied', reason: 'denied' });
+  assert.equal(watches.length, 0);
+});
+
+test('G23.05: a pending background question cannot hide a foreground denial', async () => {
+  const { port, service } = setup();
+  service.setMode('active-guide');
+  foregroundRead.resolve({ status: 'denied' });
+  await flush();
+  assert.equal(port.permission(), 'denied');
+  assert.deepEqual(service.status(), { state: 'permission-denied', reason: 'denied' });
+  assert.equal(watches.length, 0);
+});
+
 test('stale_permission_reply: a superseded ask cannot overwrite a newer capability decision', async () => {
   const { port, service, fixes } = setup();
   // Out-of-order asks: the foreground ask goes out with the city surface,

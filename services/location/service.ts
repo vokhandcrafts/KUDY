@@ -71,6 +71,7 @@ export class LocationService {
   // They receive the same forwarded fixes the sink gets and may issue no
   // location commands; arming stays setMode's alone.
   private readonly fixObservers = new Set<(fix: FixInput) => void>();
+  private readonly statusObservers = new Set<() => void>();
 
   constructor(deps: LocationServiceDeps) {
     this.port = deps.port;
@@ -92,6 +93,7 @@ export class LocationService {
   // asked it.
   setMode(mode: LocationMode): void {
     if (mode === this.mode) return;
+    const previous = this.status();
     const wasArmed = isArmed(this.mode);
     this.mode = mode;
     if (wasArmed && !isArmed(mode)) {
@@ -105,6 +107,7 @@ export class LocationService {
       this.requestPermissionFor(mode);
     }
     // disarmed → disarmed (paused ↔ idle): nothing is held, nothing is asked.
+    this.notifyIfStatusChanged(previous);
   }
 
   // 19 §3.3: the controller's selected (eligible) stop set. Recomputes the
@@ -149,6 +152,22 @@ export class LocationService {
     }
     if (!isArmed(this.mode)) return { state: 'idle' };
     return { state: this.watchdog };
+  }
+
+  onStatusChange(handler: () => void): () => void {
+    this.statusObservers.add(handler);
+    return () => this.statusObservers.delete(handler);
+  }
+
+  private notifyStatusChange(): void {
+    for (const observer of this.statusObservers) observer();
+  }
+
+  private notifyIfStatusChanged(previous: LocationStatus): void {
+    const current = this.status();
+    if (current.state !== previous.state ||
+        (current.state === 'permission-denied' && previous.state === 'permission-denied' &&
+          current.reason !== previous.reason)) this.notifyStatusChange();
   }
 
   // G07.01 (issue #281) — the read-only mode a guard consumer needs: a city
@@ -224,6 +243,7 @@ export class LocationService {
       return;
     }
     if (event.sub !== this.currentSub) return;
+    const previous = this.status();
     const now = this.clock.now();
     this.lastFix = event.fix;
     this.lastFixAt = now;
@@ -236,14 +256,17 @@ export class LocationService {
     this.fixSlot?.sink(event.fix);
     for (const observer of this.fixObservers) observer(event.fix);
     this.recomputeWindow();
+    this.notifyIfStatusChanged(previous);
   }
 
   private onPermission(state: 'granted' | 'denied'): void {
+    const previous = this.status();
     this.permission = state;
     if (state === 'denied') {
       this.permissionReason = this.currentSub !== null ? 'revoked-mid-session' : 'denied';
       this.log(`permission ${this.permissionReason} — releasing the subscription and the window`);
       this.disarm();
+      this.notifyIfStatusChanged(previous);
       return;
     }
     if (isArmed(this.mode) && this.currentSub === null) {
@@ -252,6 +275,7 @@ export class LocationService {
       this.startSubscription();
       this.scheduleGapWatch();
     }
+    this.notifyIfStatusChanged(previous);
   }
 
   // 09 §6.3: fixes stopping to arrive is its own failure; the gap watch is
@@ -266,9 +290,11 @@ export class LocationService {
     this.tickCancel = null;
     const sinceFix = this.lastFixAt === null ? Number.POSITIVE_INFINITY : this.clock.now() - this.lastFixAt;
     if (sinceFix < WATCHDOG_GAP_MS) return;
+    const previous = this.status();
     this.watchdog = 'recovering';
     this.recoveryAttempts = 0;
     this.recoveryStep();
+    this.notifyIfStatusChanged(previous);
   }
 
   // Bounded backoff (09 §6.3): each step resubscribes with a fresh
@@ -278,8 +304,10 @@ export class LocationService {
   // service to live (onPortEvent).
   private recoveryStep(): void {
     if (this.recoveryAttempts >= RESUBSCRIBE_DELAYS_MS.length) {
+      const previous = this.status();
       this.watchdog = 'stalled';
       this.log(`watchdog stalled after ${String(this.recoveryAttempts)} resubscribe attempts`);
+      this.notifyIfStatusChanged(previous);
       return;
     }
     this.recoveryAttempts++;
