@@ -51,7 +51,7 @@ jobs:
           npx expo prebuild --platform android --no-install 2>&1 | tee android-e2e-logs/prebuild.log
           (cd android && ./gradlew assembleDebug --no-daemon --console=plain) 2>&1 | tee android-e2e-logs/gradle.log
           test -s android/app/build/outputs/apk/debug/app-debug.apk
-      - name: boot emulator and run smoke and walk
+      - name: boot emulator and run smoke, walk, and recovery
         run: |
           set -euo pipefail
           emulator_args=()
@@ -75,7 +75,7 @@ jobs:
           done
           test "$booted" -eq 1
           export KUDY_ADB="$ANDROID_HOME/platform-tools/adb"
-          for suite in smoke walk; do
+          for suite in smoke walk recovery; do
             npm run e2e:android -- --suite "$suite" 2>&1 | tee "android-e2e-logs/$suite.log"
             if grep -q '^SKIP e2e:android' "android-e2e-logs/$suite.log"; then
               echo "Android $suite suite skipped in CI" >&2
