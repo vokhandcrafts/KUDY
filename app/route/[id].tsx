@@ -243,10 +243,14 @@ export default function RoutePreview() {
     controller?.recordSource(typeof from === "string" ? from : null);
   }, [controller, from]);
 
-  // UX 02 (issue #348): the frame's top inset — the content starts below the
-  // status bar and the notch with the native header off (AC4). A hook —
-  // before the early returns.
+  // UX 02 (issue #348): the top inset clears the status bar and notch with
+  // the native header off (AC4). APR-05 (#810): the bottom inset clears the
+  // navigation bar. Keep the hook before the early returns.
   const insets = useSafeAreaInsets();
+  const frameStyle = [screenStyles.screen, {
+    paddingTop: insets.top + tokens.spaceL,
+    paddingBottom: insets.bottom + tokens.spaceL,
+  }];
   // G06.05 (issue #280, AC1): the surface and the button's words in the
   // display locale (the button's codes live in the controller).
   const strings = uiStrings(locale);
@@ -272,7 +276,7 @@ export default function RoutePreview() {
   if (!controller) {
     return (
       <View
-        style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]}
+        style={frameStyle}
         testID="screen-Route preview"
       >
         {/* UX 02 (issue #348): even the unavailable state keeps the frame —
@@ -304,7 +308,7 @@ export default function RoutePreview() {
   // busy); the ghost pair and the dropped shelf read it, nothing else.
   const mainDisabled = !state.button.enabled || state.busy;
   return (
-    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Route preview">
+    <View style={frameStyle} testID="screen-Route preview">
       {/* UX 02 (issue #348): the back sits in the frame above the scroll —
           reachable while the stops list is scrolled (AC2). */}
       <BackButton label={strings.back} testID="btn-preview-back" />

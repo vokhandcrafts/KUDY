@@ -73,7 +73,10 @@ export default function Explore() {
   return (
     // G06.10.e (issue #405): the calm surface's paper — the shared wrapper
     // layers the canon grain over the unchanged paper token.
-    <PaperSurface style={{ paddingTop: insets.top + tokens.spaceL }} testID="screen-Explore">
+    <PaperSurface
+      style={{ paddingTop: insets.top + tokens.spaceL, paddingBottom: insets.bottom }}
+      testID="screen-Explore"
+    >
       <CityCatalogBody
         walk={services.walk}
         catalog={controller?.surface ?? null}

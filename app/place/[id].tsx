@@ -250,8 +250,8 @@ export default function PlaceDetail() {
   // G16.03 (issue #74): the place rating words — the action, the visit
   // confirmation and its accept.
   const feedbackWords = feedbackStrings(locale);
-  // UX 02 (issue #348): the frame's top inset — the content starts below the
-  // status bar and the notch with the native header off (AC4).
+  // UX 02 (issue #348): the top inset clears the status bar and notch with
+  // the native header off (AC4). APR-05 (#810): the bottom inset clears the navigation bar.
   const insets = useSafeAreaInsets();
   // G16.03 (issue #74): the self-reported visit confirmation — the dialog is
   // a surface-side gate (the finish confirmation's pattern); the confirm
@@ -270,7 +270,7 @@ export default function PlaceDetail() {
     facts.content_version !== null &&
     facts.content_locale !== null;
   return (
-    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Place detail">
+    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL, paddingBottom: insets.bottom + tokens.spaceL }]} testID="screen-Place detail">
       {/* UX 02 (issue #348): the back sits in the frame above the scroll —
           reachable while the moment cards are scrolled (AC2). */}
       <BackButton label={back} testID="btn-place-back" />
