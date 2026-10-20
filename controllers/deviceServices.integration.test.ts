@@ -265,6 +265,28 @@ test('offline demo supplies the verified discovery surface through device compos
   device.teardown();
 });
 
+test('closing the service root releases device hint observers', () => {
+  const deviceFacilities = { ...facilities(), guideHintValues: loadGuideHintValues(), foreground: () => true };
+  const released = { fixes: 0, audio: 0 };
+  const onFix = deviceFacilities.location.onRawFix.bind(deviceFacilities.location);
+  deviceFacilities.location.onRawFix = (handler) => {
+    const stop = onFix(handler);
+    return () => { released.fixes += 1; stop(); };
+  };
+  const onAudio = deviceFacilities.audio.onEvent.bind(deviceFacilities.audio);
+  deviceFacilities.audio.onEvent = (handler) => {
+    const stop = onAudio(handler);
+    return () => { released.audio += 1; stop(); };
+  };
+  const device = createDeviceServicePorts(deviceFacilities);
+  const services = createServices(device.ports);
+  assert.ok(services.hints);
+  services.dispose();
+  services.dispose();
+  assert.deepEqual(released, { fixes: 1, audio: 1 });
+  device.teardown();
+});
+
 test('feedback uses the device identity and the real queue through composition', async () => {
   const secretStore = secretBox(null);
   let registrations = 0;

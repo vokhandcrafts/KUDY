@@ -105,7 +105,7 @@ Place playback focus: PASS
 ```
 
 Сінтэтычнае чытанне водгуку сканчаецца ў агульны тэрмін і пры завіслым
-HTTP-адказе. Origin адказвае 413 на цела больш за 16 KiB і прымае наступны
+HTTP-адказе. Origin адказвае 413 на цела больш за 8 KiB і прымае наступны
 сапраўдны запыт.
 
 ```bash
@@ -114,4 +114,16 @@ node --test tools/e2e-android/wiring.test.mjs tools/e2e-origin/e2e-origin.test.m
 
 ```output
 feedback HTTP deadlines and body limit: PASS
+```
+
+Пасля dispose кантролер Nearby вызваляе падпіскі на GPS, аўдыя і Run;
+стары кантролер больш не апрацоўвае іх падзеі. Сінтэтычны endpoint адхіляе
+8193 байты з 413 паводле кантракта §5.3.
+
+```bash
+node --test --experimental-strip-types --experimental-test-module-mocks controllers/useNearbyController.test.ts controllers/deviceServices.integration.test.ts >/dev/null && node --test tools/e2e-origin/e2e-origin.test.mjs >/dev/null && echo "Nearby teardown and 8 KiB feedback limit: PASS"
+```
+
+```output
+Nearby teardown and 8 KiB feedback limit: PASS
 ```

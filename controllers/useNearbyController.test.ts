@@ -104,6 +104,7 @@ interface World {
   events: GuideHintEventRecord[];
   runRef: { current: RunState };
   runListeners: Array<() => void>;
+  released: { fixes: number; audio: number };
   foregroundRef: { current: boolean };
   clock: { nowMs: number };
   subscription: number;
@@ -139,6 +140,17 @@ function makeWorld(options?: {
   location.setMode('city-surface');
   const audioPort = new FakeAudioPlayerPort();
   const audio = new AudioService({ createPort: () => audioPort });
+  const released = { fixes: 0, audio: 0 };
+  const registerFix = location.onRawFix.bind(location);
+  location.onRawFix = (handler) => {
+    const stop = registerFix(handler);
+    return () => { released.fixes += 1; stop(); };
+  };
+  const registerAudio = audio.onEvent.bind(audio);
+  audio.onEvent = (handler) => {
+    const stop = registerAudio(handler);
+    return () => { released.audio += 1; stop(); };
+  };
   const driver = nodeSqliteDriver();
   openDatabase(driver);
   const events: GuideHintEventRecord[] = [];
@@ -195,6 +207,7 @@ function makeWorld(options?: {
     events,
     runRef,
     runListeners,
+    released,
     foregroundRef,
     clock,
     subscription,
@@ -207,6 +220,26 @@ function makeWorld(options?: {
     points,
   };
 }
+
+test('disposing the hint composition releases fix, audio and run observers', async () => {
+  const world = makeWorld();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const ready = dwellToReady(world);
+  assert.equal(world.runListeners.length, 1);
+
+  world.binding.dispose();
+  world.binding.dispose();
+  assert.deepEqual(world.released, { fixes: 1, audio: 1 }, 'each observer releases exactly once');
+  assert.equal(world.runListeners.length, 0);
+  world.clock.nowMs += 60_000;
+  world.emitFix(FAR.lat, FAR.lng);
+  assert.deepEqual(world.storeState(), ready, 'a released raw-fix tap cannot change the old card');
+
+  await world.audio.play({ token: { kind: 'moment', ref: 'm1', seq: 1 }, path: 'bundles/x/audio/story.m4a' });
+  world.audioPort.snapshotValue = { state: 'playing', positionMs: 0, durationMs: 1000 };
+  world.audioPort.focusLoss();
+  assert.deepEqual(world.storeState(), ready, 'a released audio listener cannot change the old card');
+});
 
 test('a restored point projection reconsiders the latest fix after asynchronous hydration', async () => {
   let finish: () => void = () => {};

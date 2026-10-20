@@ -193,6 +193,7 @@ export interface ServicePorts {
 }
 
 export interface Services {
+  readonly dispose: () => void;
   // G06.05 (issue #280): the display locale the string catalogs render in —
   // G14.04.d (issue #305) reads it through the ui-locale store below: the
   // value the switch holds, changing without a services rebuild.
@@ -619,6 +620,7 @@ export function createServices(ports: ServicePorts): Services {
     uiLocale.subscribe(() => discoveryController.getState().setCriteriaLocale(uiLocale.current()));
   }
   return {
+    dispose: () => hints?.dispose(),
     // G14.04.d — the display locale reads through the ui-locale store (the
     // L02 switch): a getter, so the screens' per-render uiStrings(...) sees
     // the switched value without a services rebuild.

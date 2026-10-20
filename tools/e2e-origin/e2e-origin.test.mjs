@@ -214,7 +214,7 @@ test('synthetic feedback endpoint rejects corrupt bodies and remains usable', as
       assert.equal(wrongMethod.status, 404, `${method} ${endpoint} must match the production method contract`);
       assert.deepEqual(await wrongMethod.json(), { error: 'not_found' });
     }
-    const oversized = await fetch(url, { method: 'PUT', headers, body: 'x'.repeat(16_385) });
+    const oversized = await fetch(url, { method: 'PUT', headers, body: 'x'.repeat(8 * 1024 + 1) });
     assert.equal(oversized.status, 413);
     assert.deepEqual(await oversized.json(), { error: 'body_too_large' });
     const healthy = await fetch(`${url}/read`, {

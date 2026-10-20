@@ -154,6 +154,7 @@ export interface NearbyHintDeps {
 
 export interface NearbyHintBinding {
   readonly store: ControllerStore<NearbyHintState>;
+  readonly dispose: () => void;
   // The X action: records the dismissal per presented guide_id (R07) and
   // hides the card; the limits keep re-entry from repeating it.
   readonly dismiss: () => void;
@@ -171,6 +172,7 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
   let seqCounter = 0;
   const nextSeq = deps.nextSuggestionSeq ?? (() => ++seqCounter);
   const store = createControllerStore<NearbyHintState>(() => ({ kind: 'absent' }));
+  let disposed = false;
 
   // The guide offers loaded once per controller (the app-run surface idiom of
   // G07.01): a failed load is the honest no-previews state, not a retry loop.
@@ -180,6 +182,7 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
   void deps.catalog
     .loadNearby(null)
     .then((loaded) => {
+      if (disposed) return;
       if (loaded.kind !== 'ready' && loaded.kind !== 'offline') return;
       guideOffers = new Map(
         loaded.offers
@@ -309,6 +312,7 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
   };
 
   const decide = (): void => {
+    if (disposed) return;
     const at = now();
     const runStore = deps.liveRun();
     if (runStore !== subscribedRun) {
@@ -440,12 +444,13 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
 
   // The raw-fix tap and the audio events are the re-decision triggers; the
   // live run store's own notifications join through the subscription above.
-  deps.location.onRawFix((fix) => {
+  const stopFixes = deps.location.onRawFix((fix) => {
+    if (disposed) return;
     lastFix = fix;
     bookkeep(fix, now());
     decide();
   });
-  deps.audio.onEvent(() => decide());
+  const stopAudio = deps.audio.onEvent(() => decide());
   void deps.pointsReady?.then(() => decide(), () => {});
 
   const currentSessionId = (): string | null => {
@@ -455,7 +460,17 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
 
   return {
     store,
+    dispose: () => {
+      if (disposed) return;
+      disposed = true;
+      stopFixes();
+      stopAudio();
+      unsubscribeRun?.();
+      unsubscribeRun = null;
+      subscribedRun = null;
+    },
     dismiss: () => {
+      if (disposed) return;
       const state = store.getState();
       if (state.kind !== 'ready') return;
       const ids = state.guides.map((guide) => guide.routeId);
@@ -485,6 +500,7 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
       decide();
     },
     openPreview: () => {
+      if (disposed) return;
       const state = store.getState();
       if (state.kind !== 'ready') return;
       const sessionId = state.context === 'active' ? currentSessionId() : null;

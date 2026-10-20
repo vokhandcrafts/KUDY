@@ -7,6 +7,8 @@ const METHODS = new Map([
   ['/functions/v1/feedback/read', 'POST'],
 ]);
 const SECRET = 'Bearer kudy-synthetic-feedback-secret';
+// 21 §5.3: the synthetic endpoint enforces the production feedback body cap.
+const MAX_BODY_BYTES = 8 * 1024;
 
 export function createFeedbackHandler() {
   const ratings = new Map();
@@ -39,14 +41,14 @@ export function createFeedbackHandler() {
     let size = 0;
     const chunks = [];
     request.on('data', (chunk) => {
-      if (size > 16_384) return;
+      if (size > MAX_BODY_BYTES) return;
       size += chunk.length;
-      if (size > 16_384) {
+      if (size > MAX_BODY_BYTES) {
         reply(response, 413, { error: 'body_too_large' });
       } else chunks.push(chunk);
     });
     request.on('end', () => {
-      if (size > 16_384) return;
+      if (size > MAX_BODY_BYTES) return;
       let body;
       try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
       catch { reply(response, 422, { error: 'invalid_request' }); return; }
