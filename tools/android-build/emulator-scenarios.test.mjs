@@ -137,6 +137,23 @@ test('Test-PortOwnedBy: a listener counts as ours only inside the given process 
   assert.equal(result.stdout.trim(), 'True False False', result.stderr);
 });
 
+// Windows keeps a child's ParentProcessId after the parent exits, and the id can be handed to a
+// newer process. Process 200 here is such a newer process: it must not count as 100's ancestor.
+test('Test-ProcessDescendant: a reused parent id (parent newer than the child) is not an ancestor', { skip }, () => {
+  const command = `. ${psQuote(guards)}
+$table = @{
+  100 = [pscustomobject]@{ ProcessId = 100; ParentProcessId = 200; CreationDate = [datetime]'2026-01-01T10:00:00' }
+  200 = [pscustomobject]@{ ProcessId = 200; ParentProcessId = 1; CreationDate = [datetime]'2026-01-01T10:05:00' }
+  300 = [pscustomobject]@{ ProcessId = 300; ParentProcessId = 0; CreationDate = [datetime]'2026-01-01T09:00:00' }
+  101 = [pscustomobject]@{ ProcessId = 101; ParentProcessId = 300; CreationDate = [datetime]'2026-01-01T10:10:00' }
+}
+function Get-CimInstance { [CmdletBinding()] param([Parameter(Position = 0)] $ClassName, $Filter)
+  $table[[int]($Filter -replace '\\D', '')] }
+"$(Test-ProcessDescendant 100 200) $(Test-ProcessDescendant 101 300) $(Test-ProcessDescendant 300 300)"`;
+  const result = powershell(['-Command', command]);
+  assert.equal(result.stdout.trim(), 'False True True', result.stderr);
+});
+
 test('Get-ScenarioVerdict: exit 0 only for a complete, all-passed run with an empty crash buffer', { skip }, () => {
   const command = `. ${psQuote(guards)}
 $ok = 1..26 | ForEach-Object { [pscustomobject]@{ name = "c$_"; status = 'passed' } }
