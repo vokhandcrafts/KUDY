@@ -215,7 +215,7 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     await driver.waitFor({ testID: 'screen-Guides' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: `guide-card-${PAID}` });
     let nodes = await nodesOn(driver, 'screen-Route preview', 'paid-preview');
-    assert.equal(requireId(nodes, 'preview-locales').text, 'Мовы: be, en');
+    assert.equal(requireId(nodes, 'preview-locales').text, 'Тэкст: be, en; аўдыё: be, en');
     requireId(nodes, 'stop-e2e-stop-1');
     requireId(nodes, 'stop-e2e-stop-2');
     requireId(nodes, 'stop-locked-e2e-stop-1');

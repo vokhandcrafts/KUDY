@@ -181,6 +181,20 @@ test('criterion 5: discovery index — valid fixture passes schema and named rul
   assert.ok(rules.ok, JSON.stringify(rules.errors));
 });
 
+test('R07 preview geometry accepts guide stops and rejects corrupt or place-owned points', () => {
+  const index = readJson('fixtures/discovery-contract/index-valid.json');
+  const guide = index.offers.find((offer) => offer.ref.kind === 'guide');
+  const place = index.offers.find((offer) => offer.ref.kind === 'place');
+  guide.preview_points = [{ lat: 54.4, lng: 18.6 }];
+  assert.ok(schema('discovery-index.schema.json', index).ok);
+  assert.ok(checkIndexRules(index).ok);
+  guide.preview_points = [{ lat: 91, lng: 18.6 }];
+  assert.ok(!schema('discovery-index.schema.json', index).ok, 'out-of-range latitude is rejected');
+  guide.preview_points = [{ lat: 54.4, lng: 18.6 }];
+  place.preview_points = [{ lat: 54.4, lng: 18.6 }];
+  assert.ok(checkIndexRules(index).errors.some((error) => error.rule === 'preview-points-guide-only'));
+});
+
 test('criterion 5: index-invalid fixtures fail on their named rule', () => {
   // Named rules are checked by checkIndexRules (e.rule); schema-level pins are
   // keywords (e.keyword), because a schema error's `rule` holds the doc path.

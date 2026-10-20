@@ -171,6 +171,18 @@ function osFix(at: number): OsLocationObject {
 const TASK = 'KUDY/location-updates';
 const updatesAsked = () => locationCalls.some((call) => call.startsWith('startUpdates'));
 
+test('a granted foreground permission is rechecked without reopening the OS dialog', async () => {
+  const { port } = setup();
+  foregroundRead.resolve({ status: 'granted' });
+  await flush();
+  assert.equal(port.permission(), 'granted');
+
+  port.requestPermission('foreground', 'fg-why');
+  await flush();
+  assert.equal(locationCalls.filter((call) => call === 'readForeground').length, 2);
+  assert.equal(locationCalls.includes('askForeground'), false);
+});
+
 test('foreground_granted_background_denied: a background denial keeps the granted foreground session running', async () => {
   const { port, service, fixes } = setup();
   service.setMode('city-surface');

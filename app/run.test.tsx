@@ -862,6 +862,8 @@ describe("G06.05 accessibility and honest failures (issue #280)", () => {
     expect(screen.getByText("Кожная гісторыя запускаецца рукамі з карткі кропкі")).toBeTruthy();
     // The label set stays complete: the same surface still reads in EN (AC1).
     expect(screen.getByTestId("btn-run-end").props.accessibilityRole).toBe("button");
+    fireEvent.press(screen.getByTestId("btn-run-continue-guide"));
+    await waitFor(() => expect(screen.queryByTestId("run-autoplay-suspended")).toBeNull());
   });
 
   test("AC4: the restored walk announces itself and names the lost tier", async () => {

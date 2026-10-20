@@ -37,10 +37,6 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/763 · Issue: [#670](https://gith
 Што зрабіць: збяры дэма-APK паводле [інструкцыі](demo-preview.md), затым усталюй `android/app/build/outputs/apk/release/app-release.apk` на Android-прыладу. Гэта асобны пакет `by.kudy.app.demo` з прыкладным кантэнтам; не выкарыстоўвай яго маршрут для навігацыі.
 PR: https://github.com/vokhandcrafts/KUDY/pull/760
 
-### 2026-10-14 — вырашы перадумовы для Android E2E #664
-Што зрабіць: прачытай [блокер у #664](https://github.com/vokhandcrafts/KUDY/issues/664#issuecomment-6175820694) і вырашы, ці вылучыць асобныя задачы на падключэнне Discovery, падказак гідаў і водгукаў у Android, а таксама на тэставы сервер водгукаў, ці пашырыць абсяг #664. Пасля гатоўнасці неабходных інтэграцый вярні #664 у чаргу.
-PR: https://github.com/vokhandcrafts/KUDY/pull/756 · Issue: [#664](https://github.com/vokhandcrafts/KUDY/issues/664)
-
 ### 2026-10-14 — правер бачнасць #751 і #752 на дошцы
 Што зрабіць: адкрый GitHub Project і правер, што #751 бачны ў backlog, а #752 — у працы. Калі картак няма, дадай іх у адпаведныя калонкі, не змяняючы статусных пазнак issues. CLI-токен выканаўцы не мае `read:project`, а публічны прагляд не паказвае дошку.
 PR: https://github.com/vokhandcrafts/KUDY/pull/753 · Issues: [#751](https://github.com/vokhandcrafts/KUDY/issues/751), [#752](https://github.com/vokhandcrafts/KUDY/issues/752)

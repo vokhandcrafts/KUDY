@@ -1,0 +1,19 @@
+{
+  "route_id": "e2e-nearby-guide",
+  "version": "1",
+  "city_id": "e2e-city",
+  "access": "free_base",
+  "distance_m": 250,
+  "duration_min": 12,
+  "free_stop_count": 1,
+  "published": true,
+  "stops": [
+    {
+      "id": "e2e-stop-1",
+      "position": 0,
+      "place_id": "e2e-place-4",
+      "access_tier": "base",
+      "story_base_id": "story-nearby-1"
+    }
+  ]
+}
