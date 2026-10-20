@@ -45,6 +45,9 @@ const STOPS_JSON = JSON.stringify([
     sources: ['крыніца'],
   },
 ]);
+const MOMENTS_JSON = JSON.stringify([
+  { id: 'moment-1', place_id: 'place-1', story_id: 'story-1', kind: 'teaser', cooldown_min: 0 },
+]);
 const AUDIO = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
 const ORIGIN = 'https://catalog-491.example.invalid';
 const ORIGIN_LAYER = 'bundle/route-491/1/be/base';
@@ -53,6 +56,7 @@ const layerFiles: Record<string, Uint8Array> = {
   'route.json': enc(ROUTE_JSON),
   'places.json': enc(PLACES_JSON),
   'stops.json': enc(STOPS_JSON),
+  'moments.json': enc(MOMENTS_JSON),
   'audio/story-1.m4a': AUDIO,
 };
 const lockEntries = Object.entries(layerFiles)
@@ -251,6 +255,76 @@ test('G20.20: the free synthetic package walks the whole production composition'
   if (!commerce) throw new Error('the root constructed no commerce member');
   assert.equal(commerce.stateOf('route_491_extended'), 'not-owned');
   assert.deepEqual(await commerce.purchase('route_491_extended'), { kind: 'unavailable' });
+});
+
+// #664: a force-stop loses the Run surface cache, not the SQLite live row.
+// The person can reopen a Place card directly, before opening Run again.
+async function installedActiveWalk(): Promise<ReturnType<typeof nodeSqliteDriver>> {
+  const driver = nodeSqliteDriver();
+  const device = createDeviceServicePorts(facilities(driver));
+  const services = createServices(device.ports);
+  const preview = services.preview?.create('route-491');
+  if (!preview) throw new Error('the fixture has no preview');
+  await settledPreview(preview);
+  await preview.getState().download();
+  const run = services.run?.create('route-491');
+  if (!run) throw new Error('the fixture has no run');
+  await settledRun(run);
+  assert.equal(run.getState().status, 'ready');
+  assert.equal(getLiveSession(driver)?.state, 'active');
+  services.dispose();
+  device.teardown();
+  return driver;
+}
+
+test('G23.06: Moment Play from Place after restart routes into the persisted Active walk before Run opens', async () => {
+  const driver = await installedActiveWalk();
+  const device = createDeviceServicePorts(facilities(driver));
+  const services = createServices(device.ports);
+  const place = services.place?.create('place-1');
+  if (!place) throw new Error('the restarted root has no Place');
+  for (let tries = 0; tries < 200 && place.store.getState().kind === 'loading'; tries += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  const detail = place.store.getState();
+  assert.equal(detail.kind, 'ready');
+  if (detail.kind !== 'ready') return;
+  assert.equal(detail.moments.length, 1, 'the verified package supplies the Place teaser');
+  const teaser = detail.moments[0];
+  assert.ok(teaser.audioPath);
+  const outcome = services.moment?.play({ momentId: teaser.momentId, storyId: teaser.storyId, path: teaser.audioPath });
+  assert.deepEqual(outcome, { outcome: 'routed' });
+  const run = services.run?.create('route-491');
+  if (!run) throw new Error('the restarted root has no Run');
+  await settledRun(run);
+  const surface = run.getState();
+  assert.equal(surface.status, 'ready');
+  if (surface.status !== 'ready') return;
+  const live = surface.controller.getState().run;
+  assert.equal(live.phase, 'Active');
+  if (live.phase !== 'Active') return;
+  assert.equal(live.playing?.owner, 'moment');
+  assert.equal(live.autoplaySuspended, true, 'the engine suspends guide automation');
+  assert.equal(getLiveSession(driver)?.sessionId, live.sessionId);
+  services.dispose();
+  device.teardown();
+});
+
+test('G23.06: pending cold-start recovery cannot start standalone Moment audio', async () => {
+  const driver = await installedActiveWalk();
+  const device = createDeviceServicePorts(facilities(driver));
+  const services = createServices(device.ports);
+  // Play in the same turn as root construction, before an async recovery
+  // can complete. A refusal is safe; an engine-routed launch is also safe.
+  const result = services.moment?.play({
+    momentId: 'moment-1',
+    storyId: 'story-1',
+    path: 'bundles/route-491/1/be/base/audio/story-1.m4a',
+  });
+  assert.notDeepEqual(result, { outcome: 'started' }, 'a persisted live walk cannot be bypassed during recovery');
+  assert.notEqual(services.moment?.store.getState().kind, 'playing');
+  services.dispose();
+  device.teardown();
 });
 
 test('offline demo supplies the verified discovery surface through device composition', async () => {
