@@ -35,7 +35,7 @@ test('criterion 2: the root with a fake port drives the sample controller end to
 test('criterion 2: without the port the root constructs no contentRepo (the app build today)', () => {
   const services = createServices({});
   // The root constructs a member only when its port is provided; with no
-  // ports at all every member stays undefined (the catalog joined as the
+  // ports at all every port-backed member stays undefined (the catalog joined as the
   // second member with G06.01.a, the preview factory as the third with
   // G06.01.b, the run surface factory as the fourth with G06.02, the
   // city-mode walk fact and the My KUDY history as the fifth and sixth
@@ -48,12 +48,14 @@ test('criterion 2: without the port the root constructs no contentRepo (the app 
   // chrome state over an optional persistence seam, constructed without
   // ports, with the display locale reading through it; the one feedback
   // controller as the fifteenth with G16.03 — the voluntary rating member,
-  // constructed only with its driver+sync ports).
+  // constructed only with its driver+sync ports). The root also exposes a
+  // disposal method even when no optional ports are present.
   assert.deepEqual(Object.keys(services).sort(), [
     'catalog',
     'commerce',
     'contentRepo',
     'discovery',
+    'dispose',
     'feedback',
     'hints',
     'history',
@@ -84,6 +86,8 @@ test('criterion 2: without the port the root constructs no contentRepo (the app 
   }
   assert.equal(services.locale, 'be');
   assert.equal(services.uiLocale.current(), 'be');
+  assert.equal(typeof services.dispose, 'function');
+  services.dispose();
 });
 
 test('criterion 2: a failing port surfaces as a readiness card, not a crash', async () => {
