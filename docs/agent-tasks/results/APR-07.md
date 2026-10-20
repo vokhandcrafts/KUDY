@@ -1,6 +1,6 @@
 # APR-07 — рашэнне пра выдаленне даных прылады
 
-Дата: 2026-10-20. Задача: [#805](https://github.com/vokhandcrafts/KUDY/issues/805).
+Дата: 2026-10-20. Задача: [#805](https://github.com/vokhandcrafts/KUDY/issues/805). PR: [#837](https://github.com/vokhandcrafts/KUDY/pull/837).
 Правераная база: `02d5180`. Галінка: `805-apr-07-device-data-deletion-decision`.
 Вынік: [запіс рашэння](../../architecture/decisions/APR-07-device-data-deletion.md), апублікаваныя наступныя задачы; runtime не змяняўся. Закрыццё #805 — пасля merge PR, GP-12 застаецца адкрытым.
 
