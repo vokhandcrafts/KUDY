@@ -40,6 +40,7 @@ import {
   type NearbyHintState,
 } from './useNearbyController.ts';
 import type { RunState } from '../core/engine/state.ts';
+import type { NearbyOfferFacts } from '../services/catalog/types.ts';
 
 // The values the app actually ships — the loader reads the canonical file
 // and validates it through the contract checker before any test sees a number.
@@ -53,7 +54,7 @@ const BASE = { lat: 54.4, lng: 18.6 };
 const NEAR = { lat: BASE.lat + 0.002, lng: BASE.lng };
 const FAR = { lat: BASE.lat + 0.006, lng: BASE.lng };
 
-const offer = (routeId: string, access: 'free' | 'paid' | 'mixed' = 'free') => ({
+const offer = (routeId: string, access: 'free' | 'paid' | 'mixed' = 'free'): NearbyOfferFacts => ({
   offer_id: `offer-${routeId}`,
   kind: 'guide' as const,
   route_id: routeId,
@@ -219,6 +220,17 @@ test('a restored point projection reconsiders the latest fix after asynchronous 
   await pointsReady;
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(world.storeState(), { kind: 'hidden', reason: 'dwell' });
+});
+
+test('a public preview point suggests a guide before its package is installed', async () => {
+  const world = makeWorld({
+    points: [],
+    offers: [{ ...offer('route-near'), preview_points: [{ lat: BASE.lat, lng: BASE.lng }] }],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const ready = dwellToReady(world);
+  assert.deepEqual(ready.guides.map((guide) => guide.routeId), ['route-near']);
+  assert.deepEqual(world.points, [], 'the guide has no installed base projection');
 });
 
 // The db-backed GuideHintStore over the public API — the same wiring the

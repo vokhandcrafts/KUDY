@@ -147,11 +147,10 @@ export async function runDiscoverySuite({ driver, url, runCase, coldStart, stopO
 
   await runCase('discovery: active walk Moment suspends guide automation; nearby guide opens only a preview',
     'discovery-active', driver, async () => {
-      // The second free route's installed base supplies points for the hint.
+      // The other guide is previewable but remains uninstalled: R07 uses
+      // published preview geometry, not an installed base package.
       await driver.launchDeepLink(`kudy:///route/${OTHER}`);
-      await scrollTo(driver, 'btn-download', 'nearby-download');
-      await driver.tapSelector({ testID: 'btn-download' });
-      await driver.waitFor({ testID: 'btn-start', enabled: true }, { timeoutMs: DOWNLOAD_MS });
+      await driver.waitFor({ testID: 'btn-download' }, { timeoutMs: SHORT_MS });
       await driver.launchDeepLink(`kudy:///route/${FREE}`);
       await driver.waitFor({ testID: 'btn-start', enabled: true }, { timeoutMs: SHORT_MS });
       await startWalkAtLocation(driver, 53.9, 27.56);

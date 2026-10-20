@@ -42,3 +42,15 @@ node --test controllers/deviceServices.integration.test.ts controllers/useNearby
 ```output
 restart hints, offline registration retry and live feedback state: PASS
 ```
+
+Публічны індэкс цяпер змяшчае кропкі гіда, вылічаныя пры зборцы з
+`route.json` і `places.json`. Падказка знаходзіць другі гід праз гэты індэкс,
+нават калі яго пакет яшчэ не ўсталяваны.
+
+```bash
+node --test --experimental-strip-types --experimental-test-module-mocks --test-concurrency=1 contracts/contracts.test.mjs controllers/useNearbyController.test.ts services/catalog/catalogService.test.ts tools/build-bundle/build-bundle.test.mjs tools/e2e-origin/e2e-origin.test.mjs >/dev/null && echo "uninstalled guide preview hint: PASS"
+```
+
+```output
+uninstalled guide preview hint: PASS
+```

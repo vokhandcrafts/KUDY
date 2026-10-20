@@ -98,7 +98,7 @@ test('the production publishing path lays a valid two-route catalog (criterion 2
   await fsp.rm(out, { recursive: true, force: true });
 });
 
-test('the Android city includes a second downloadable free guide for a live nearby hint', async () => {
+test('the Android city publishes an uninstalled guide\'s hint points', async () => {
   const out = tmpDir('kudy-e2e-nearby-');
   const build = await buildE2EOrigin({ outDir: out, packages: ['paid-guide,nearby-guide,free-guide'] });
   const catalog = JSON.parse(await fsp.readFile(path.join(build.target, 'catalog.json'), 'utf8'));
@@ -107,7 +107,9 @@ test('the Android city includes a second downloadable free guide for a live near
   assert.equal(catalog.discovery_index.revision, 'r-e2e-city-3');
   const index = JSON.parse(await fsp.readFile(path.join(build.target, catalog.discovery_index.path), 'utf8'));
   assert.equal(validateDiscoveryIndex(index).ok, true);
-  assert.ok(index.offers.some((offer) => offer.offer_id === 'offer-guide-e2e-nearby'));
+  const nearby = index.offers.find((offer) => offer.offer_id === 'offer-guide-e2e-nearby');
+  assert.ok(nearby);
+  assert.ok(nearby.preview_points.some((point) => point.lat === 53.903 && point.lng === 27.563));
   await fsp.rm(out, { recursive: true, force: true });
 });
 

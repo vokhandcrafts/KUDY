@@ -175,6 +175,8 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
   // The guide offers loaded once per controller (the app-run surface idiom of
   // G07.01): a failed load is the honest no-previews state, not a retry loop.
   let guideOffers: ReadonlyMap<string, NearbyOfferFacts> = new Map();
+  let publicPoints: readonly GuideHintPoint[] = [];
+  let routesWithPublicPoints: ReadonlySet<string> = new Set();
   void deps.catalog
     .loadNearby(null)
     .then((loaded) => {
@@ -186,6 +188,9 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
           )
           .map((offer) => [offer.route_id, offer]),
       );
+      publicPoints = [...guideOffers].flatMap(([guideId, offer]) =>
+        (offer.preview_points ?? []).map(({ lat, lng }) => ({ guideId, lat, lng })));
+      routesWithPublicPoints = new Set(publicPoints.map((point) => point.guideId));
       decide();
     })
     .catch(() => {
@@ -386,16 +391,22 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
     }
     const blocked = new Set<string>([...cooldown, ...sessionRows]);
     const inRadius = new Map<string, boolean>();
-    for (const point of deps.points()) {
+    // The pinned public index can propose an undownloaded guide. Verified
+    // installed base geometry remains a fallback for older index revisions.
+    const considerPoint = (point: GuideHintPoint): void => {
       if (
         !Number.isFinite(point.lat) ||
         !Number.isFinite(point.lng) ||
         inRadius.has(point.guideId) ||
         haversineMeters(fix.lat, fix.lng, point.lat, point.lng) > deps.values.proximity_radius_m
       ) {
-        continue;
+        return;
       }
       inRadius.set(point.guideId, true);
+    };
+    for (const point of publicPoints) considerPoint(point);
+    for (const point of deps.points()) {
+      if (!routesWithPublicPoints.has(point.guideId)) considerPoint(point);
     }
     const candidates: NearbyHintGuide[] = [];
     for (const guideId of inRadius.keys()) {

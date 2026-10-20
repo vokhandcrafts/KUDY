@@ -355,6 +355,9 @@ export function assembleIndex(authoring, ctx) {
       ...(offer.suggested_start_place_id !== undefined
         ? { suggested_start_place_id: offer.suggested_start_place_id }
         : {}),
+      ...(ref.kind === 'guide' && ctx.guidePreviewPoints
+        ? { preview_points: ctx.guidePreviewPoints(ref) }
+        : {}),
       season_recommendations: offer.season_recommendations ?? [],
       availability: resolved.availability,
       access: resolved.access,
@@ -683,6 +686,12 @@ export async function buildBundle({ inDir, outDir }) {
       };
     },
     routeDuration: (routeId) => (routeId === route.route_id ? route.duration_min ?? null : null),
+    guidePreviewPoints: (ref) => ref.route_id === route.route_id
+      ? route.stops.flatMap((stop) => {
+        const place = placeById.get(stop.place_id);
+        return place ? [{ lat: place.lat, lng: place.lng }] : [];
+      })
+      : [],
     publicPathMeta: (rel) => publicPathMeta.get(rel) ?? { ok: false },
   };
 
