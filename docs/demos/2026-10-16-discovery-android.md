@@ -103,3 +103,15 @@ npx jest --config jest.config.js --runInBand --runTestsByPath app/place/place.te
 ```output
 Place playback focus: PASS
 ```
+
+Сінтэтычнае чытанне водгуку сканчаецца ў агульны тэрмін і пры завіслым
+HTTP-адказе. Origin адказвае 413 на цела больш за 16 KiB і прымае наступны
+сапраўдны запыт.
+
+```bash
+node --test tools/e2e-android/wiring.test.mjs tools/e2e-origin/e2e-origin.test.mjs >/dev/null && echo "feedback HTTP deadlines and body limit: PASS"
+```
+
+```output
+feedback HTTP deadlines and body limit: PASS
+```

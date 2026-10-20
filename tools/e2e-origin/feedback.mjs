@@ -39,10 +39,10 @@ export function createFeedbackHandler() {
     let size = 0;
     const chunks = [];
     request.on('data', (chunk) => {
+      if (size > 16_384) return;
       size += chunk.length;
       if (size > 16_384) {
         reply(response, 413, { error: 'body_too_large' });
-        request.destroy();
       } else chunks.push(chunk);
     });
     request.on('end', () => {

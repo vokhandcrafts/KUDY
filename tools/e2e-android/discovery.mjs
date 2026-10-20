@@ -77,21 +77,30 @@ async function waitForFeedbackRetry(driver) {
 export async function waitForServerFeedback(feedbackBaseUrl, expected, timeoutMs = SHORT_MS) {
   const deadline = Date.now() + timeoutMs;
   const target = { kind: 'guide', route_id: FREE, version: '1', locale: 'be' };
+  const overdue = () => new Error(`feedback server did not reach revision ${expected.revision}, score ${expected.score}, deleted ${expected.deleted}`);
   for (;;) {
-    const response = await fetch(`${feedbackBaseUrl}/read`, {
-      method: 'POST',
-      headers: {
-        authorization: 'Bearer kudy-synthetic-feedback-secret',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({ target }),
-    });
-    assert.equal(response.status, 200, 'synthetic feedback read failed');
-    const state = await response.json();
-    if (state.revision === expected.revision && state.score === expected.score && state.deleted === expected.deleted) return;
-    if (Date.now() >= deadline) {
-      throw new Error(`feedback server did not reach revision ${expected.revision}, score ${expected.score}, deleted ${expected.deleted}`);
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) throw overdue();
+    const signal = AbortSignal.timeout(remaining);
+    let state;
+    try {
+      const response = await fetch(`${feedbackBaseUrl}/read`, {
+        method: 'POST',
+        headers: {
+          authorization: 'Bearer kudy-synthetic-feedback-secret',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ target }),
+        signal,
+      });
+      assert.equal(response.status, 200, 'synthetic feedback read failed');
+      state = await response.json();
+    } catch (error) {
+      if (signal.aborted) throw overdue();
+      throw error;
     }
+    if (state.revision === expected.revision && state.score === expected.score && state.deleted === expected.deleted) return;
+    if (Date.now() >= deadline) throw overdue();
     await delay();
   }
 }

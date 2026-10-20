@@ -6,6 +6,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import { createServer } from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -79,6 +80,29 @@ test('the Android feedback assertion reads the changed server revision', async (
   } finally {
     await new Promise((resolve) => server.close(resolve));
     fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('the Android feedback read times out when the server stalls mid-response', async () => {
+  const server = createServer((request, response) => {
+    request.resume();
+    request.on('end', () => {
+      response.writeHead(200, { 'content-type': 'application/json' });
+      response.write('{"revision":');
+    });
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}/functions/v1/feedback`;
+  try {
+    const started = Date.now();
+    await assert.rejects(
+      waitForServerFeedback(base, { revision: 2, score: 5, deleted: false }, 80),
+      /did not reach revision 2/,
+    );
+    assert.ok(Date.now() - started < 1_000, 'the stalled read must respect the suite deadline');
+  } finally {
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
   }
 });
 
