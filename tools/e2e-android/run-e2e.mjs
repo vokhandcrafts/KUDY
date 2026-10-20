@@ -484,6 +484,7 @@ async function main() {
       else if (suite === 'walk') await runWalkSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, originLogPath });
       else await runDiscoverySuite({
         driver, url: devClientUrl(metroPort), runCase, coldStart,
+        feedbackBaseUrl: `http://127.0.0.1:${originPort}/functions/v1/feedback`,
         stopOrigin: async () => {
           if (origin !== null) await stopGroupProcess(origin, originPort, 'origin');
           origin = null;

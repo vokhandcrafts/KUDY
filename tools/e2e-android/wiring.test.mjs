@@ -6,10 +6,13 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
 import { repoRoot } from '../validate/tools-check.mjs';
+import { createE2EOriginServer } from '../e2e-origin/serve-e2e-origin.mjs';
+import { waitForServerFeedback } from './discovery.mjs';
 import { coldStart } from './run-e2e.mjs';
 
 const packageJson = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
@@ -44,11 +47,39 @@ test('the walk command reaches device checks instead of rejecting the suite', ()
 test('the discovery command reaches device checks instead of rejecting the suite', () => {
   const source = fs.readFileSync(path.join(repoRoot, 'tools/e2e-android/run-e2e.mjs'), 'utf8');
   assert.match(source, /await runDiscoverySuite\(\{[\s\S]*?driver, url: devClientUrl\(metroPort\), runCase, coldStart,/);
+  assert.match(source, /feedbackBaseUrl: `http:\/\/127\.0\.0\.1:\$\{originPort\}\/functions\/v1\/feedback`/);
+  const discovery = fs.readFileSync(path.join(repoRoot, 'tools/e2e-android/discovery.mjs'), 'utf8');
+  assert.match(discovery, /waitForServerFeedback\(feedbackBaseUrl, \{ revision: 2, score: 5, deleted: false \}\)/,
+    'the edit must prove a new server revision and score');
   const result = spawnSync(process.execPath, ['tools/e2e-android/run-e2e.mjs', '--suite', 'discovery', '--serial', 'missing-emulator'], {
     cwd: repoRoot, encoding: 'utf8', timeout: 15000,
   });
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /SKIP e2e:android discovery/);
+});
+
+test('the Android feedback assertion reads the changed server revision', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-android-feedback-'));
+  const server = createE2EOriginServer({ root });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}/functions/v1/feedback`;
+  const target = { kind: 'guide', route_id: 'e2e-free-guide', version: '1', locale: 'be' };
+  const put = (revision, score) => fetch(base, {
+    method: 'PUT',
+    headers: { authorization: 'Bearer kudy-synthetic-feedback-secret', 'content-type': 'application/json' },
+    body: JSON.stringify({ mutation_id: `00000000-0000-4000-8000-${String(revision).padStart(12, '0')}`,
+      target, expected_revision: revision - 1, score, reason_codes: [], disclosure_version: 'feedback-disclosure-1' }),
+  });
+  try {
+    assert.equal((await put(1, 4)).status, 200);
+    await assert.rejects(waitForServerFeedback(base, { revision: 2, score: 5, deleted: false }, 1),
+      /did not reach revision 2/);
+    assert.equal((await put(2, 5)).status, 200);
+    await waitForServerFeedback(base, { revision: 2, score: 5, deleted: false });
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test('cold start retries a transient uiautomator failure before Explore', async () => {

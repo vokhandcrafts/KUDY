@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-20 — уключы discovery у Android CI для #664
+Што зрабіць: у галіне PR #832 дадай `discovery` да спісу сюіт у `.github/workflows/android-e2e.yml` і правер, што CI запускае ўсе чатыры сцэнары. Правіла `docs/agent-rules/issue-workflow.md` забараняе агенту рэдагаваць `.github/` workflows і required checks; пасля твайго каміта я пераправеру CI і рэв’ю.
+PR: https://github.com/vokhandcrafts/KUDY/pull/832 · issue https://github.com/vokhandcrafts/KUDY/issues/664
+
 ### 2026-10-17 — змержы follow-up PR #814: праўкі рэв'ю G20.31
 Што зрабіць: прачытай раздзелы «Код-рэвю» і «Суддзя» у [выніку G20.31](agent-tasks/results/G20.31.md) (2 low-праўкі рэв'ю; суддзя ✅ APPROVED) і змержы PR — гэта дадатак да #799, бо #799 быў змержаны раней, чым праўкі рэв'ю трапілі ў main.
 PR: https://github.com/vokhandcrafts/KUDY/pull/814

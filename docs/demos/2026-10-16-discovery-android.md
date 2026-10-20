@@ -66,3 +66,15 @@ node --test --experimental-strip-types --experimental-test-module-mocks controll
 ```output
 feedback crash recovery and published demo bytes: PASS
 ```
+
+Android-сцэнар пасля рэдагавання водгуку цяпер чытае прыватны сінтэтычны
+endpoint і чакае новай рэвізіі з ацэнкай 5. Рэгрэсійны тэст правярае, што
+ранейшы адказ з ацэнкай 4 не лічыцца поспехам.
+
+```bash
+node --test tools/e2e-android/wiring.test.mjs tools/e2e-origin/e2e-origin.test.mjs >/dev/null && echo "feedback revision assertion: PASS"
+```
+
+```output
+feedback revision assertion: PASS
+```

@@ -74,7 +74,29 @@ async function waitForFeedbackRetry(driver) {
   }
 }
 
-export async function runDiscoverySuite({ driver, url, runCase, coldStart, stopOrigin, startOrigin }) {
+export async function waitForServerFeedback(feedbackBaseUrl, expected, timeoutMs = SHORT_MS) {
+  const deadline = Date.now() + timeoutMs;
+  const target = { kind: 'guide', route_id: FREE, version: '1', locale: 'be' };
+  for (;;) {
+    const response = await fetch(`${feedbackBaseUrl}/read`, {
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer kudy-synthetic-feedback-secret',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ target }),
+    });
+    assert.equal(response.status, 200, 'synthetic feedback read failed');
+    const state = await response.json();
+    if (state.revision === expected.revision && state.score === expected.score && state.deleted === expected.deleted) return;
+    if (Date.now() >= deadline) {
+      throw new Error(`feedback server did not reach revision ${expected.revision}, score ${expected.score}, deleted ${expected.deleted}`);
+    }
+    await delay();
+  }
+}
+
+export async function runDiscoverySuite({ driver, url, runCase, coldStart, stopOrigin, startOrigin, feedbackBaseUrl }) {
   await runCase('discovery: city offers, filters and previews', 'discovery-offers', driver, async () => {
     await coldStart(driver, url, { timeoutMs: 420_000, caseSlug: 'discovery-explore' });
     await driver.tapSelector({ testID: 'link-discovery' });
@@ -201,8 +223,10 @@ export async function runDiscoverySuite({ driver, url, runCase, coldStart, stopO
       await waitForText(driver, 'feedback-delivery', /пры сетцы|pending/i, 'feedback-queued', 45_000);
       await startOrigin();
       await waitForFeedbackRetry(driver);
+      await waitForServerFeedback(feedbackBaseUrl, { revision: 1, score: 4, deleted: false });
       await driver.tapSelector({ testID: 'feedback-star-5' });
       await driver.tapSelector({ testID: 'btn-feedback-send' });
+      await waitForServerFeedback(feedbackBaseUrl, { revision: 2, score: 5, deleted: false });
       await waitForText(driver, 'feedback-delivery', /Адпраўлена|Sent/i, 'feedback-edited');
       await driver.waitFor({ testID: 'btn-feedback-delete', enabled: true }, { timeoutMs: SHORT_MS });
       // The long disclosure can leave Delete against the bottom edge while
@@ -223,6 +247,7 @@ export async function runDiscoverySuite({ driver, url, runCase, coldStart, stopO
       }
       assert.ok(deleteStarted, 'Delete tap left the sent feedback unchanged');
       await waitForGone(driver, 'feedback-delivery', 'feedback-deleted');
+      await waitForServerFeedback(feedbackBaseUrl, { revision: 3, score: null, deleted: true });
       await driver.tapSelector({ testID: 'btn-feedback-back' });
       await driver.launchDeepLink('kudy:///discovery');
       await driver.waitFor({ testID: 'screen-Discovery' }, { timeoutMs: SHORT_MS });
