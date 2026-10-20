@@ -201,6 +201,8 @@ export type ResolveOutcome =
 export interface FeedbackSync {
   /** One dispatch round: every due mutation at most once per call. */
   flush(): Promise<FlushReport>;
+  /** Stop expired pending mutations before a device identity is available. */
+  stopExpiredPending(): number;
   /** The own-state read that resolves a conflicted target (21 §5.3). */
   resolveConflict(target: FeedbackTarget): Promise<ResolveOutcome>;
 }
@@ -223,6 +225,26 @@ export function createFeedbackSync(deps: {
   const now = deps.now ?? Date.now;
   const makeMutationId = deps.makeMutationId ?? (() => crypto.randomUUID());
   const transport = deps.transport ?? defaultTransport(deps.baseUrl, limits, () => deps.secretStore.getSecret());
+
+  function stopExpiredPending(): number {
+    // Seven-day stop (`21` §6): explicit reconfirmation via sendNow resets
+    // created_at and starts a new window, even without a device identity.
+    const staleCut = now() - limits.reconfirmAfterS * 1000;
+    let stopped = 0;
+    for (const stale of deps.driver
+      .prepare(`${OUTBOX_SELECT} WHERE transport_state = 'pending' AND created_at < ? ORDER BY created_at, mutation_id`)
+      .all(staleCut)) {
+      const row = stale as OutboxRow;
+      inTransaction(deps.driver, () => {
+        deps.driver
+          .prepare("UPDATE feedback_outbox SET transport_state = 'action_required' WHERE mutation_id = ? AND transport_state = 'pending'")
+          .run(row.mutation_id);
+        deps.driver.prepare("UPDATE feedback_local SET state = 'action_required' WHERE target = ?").run(row.target);
+      });
+      stopped += 1;
+    }
+    return stopped;
+  }
 
   function claimMutation(mutationId: string): boolean {
     return inTransaction(deps.driver, () => {
@@ -407,6 +429,9 @@ export function createFeedbackSync(deps: {
       lateAcksDropped: 0,
       stoppedStale: 0,
     };
+    // The age limit is local state. It applies even when registration has
+    // never succeeded and there is no device identity to send with.
+    report.stoppedStale = stopExpiredPending();
     const secret = await deps.secretStore.getSecret();
     if (secret === null || getDeviceId(deps.driver) === null) {
       // No identity, no queue: registration belongs to ensureDeviceIdentity
@@ -421,22 +446,6 @@ export function createFeedbackSync(deps: {
       deps.driver.execSql("UPDATE feedback_outbox SET transport_state = 'pending' WHERE transport_state = 'sending'");
       deps.driver.execSql("UPDATE feedback_local SET state = 'pending' WHERE state = 'sending'");
     });
-    // Seven-day stop (`21` §6): mutations older than the window leave the
-    // auto-retry; the explicit reconfirmation (sendNow) re-arms them and
-    // restarts their window.
-    const staleCut = now() - limits.reconfirmAfterS * 1000;
-    for (const stale of deps.driver
-      .prepare(`${OUTBOX_SELECT} WHERE transport_state = 'pending' AND created_at < ? ORDER BY created_at, mutation_id`)
-      .all(staleCut)) {
-      const row = stale as OutboxRow;
-      inTransaction(deps.driver, () => {
-        deps.driver
-          .prepare("UPDATE feedback_outbox SET transport_state = 'action_required' WHERE mutation_id = ? AND transport_state = 'pending'")
-          .run(row.mutation_id);
-        deps.driver.prepare("UPDATE feedback_local SET state = 'action_required' WHERE target = ?").run(row.target);
-      });
-      report.stoppedStale++;
-    }
     // One dispatch round, in queue order; a requeued mutation waits for its
     // schedule and is picked up by a later flush.
     const attempted = new Set<string>();
@@ -456,6 +465,7 @@ export function createFeedbackSync(deps: {
   }
 
   return {
+    stopExpiredPending,
     flush(): Promise<FlushReport> {
       const running = inflightFlush.get(deps.driver);
       if (running) return running;

@@ -22,6 +22,7 @@ import { UI_LOCALE_KEY } from './sessionPorts.ts';
 import { nodeSqliteDriver, nodeSqliteFileDriver } from '../services/db/test-fixture.ts';
 import { getLiveSession, setSetting } from '../services/db/db.ts';
 import { secretBox, scriptedTransport, okPut, err503, rawOutbox } from '../tests/feedback/queue-fixture.ts';
+import { FEEDBACK_SYNC_LIMITS } from '../services/feedbackSync.ts';
 import { loadGuideHintValues } from '../services/config.ts';
 import { makeFakeFs, makeFakeFsModule } from '../services/contentRepo/expo/fs-test-fixture.ts';
 import { FakeLocationOsPort } from '../services/location/fake-port.ts';
@@ -321,8 +322,8 @@ const registrationOk = () => ({ status: 201, body: {
   device_secret: 'synthetic-device-secret',
 } });
 
-function openGuideFeedback(device: ReturnType<typeof createDeviceServicePorts>) {
-  const controller = createServices(device.ports).feedback?.controller;
+function openGuideFeedback(device: ReturnType<typeof createDeviceServicePorts>, now?: () => number) {
+  const controller = createServices(now ? { ...device.ports, now } : device.ports).feedback?.controller;
   assert.ok(controller);
   controller.getState().openForm({ kind: 'guide', id: 'route-491', version: '1', locale: 'be' });
   controller.getState().setScore(4);
@@ -424,6 +425,45 @@ test('an offline first send retries registration after network recovery without 
     assert.equal(form.delivery.kind, 'sent');
     assert.equal(form.error, null);
   }
+  device.teardown();
+});
+
+test('unregistered feedback stops retrying after seven days offline', async () => {
+  const driver = nodeSqliteDriver();
+  const feedbackClock = manualFeedbackClock();
+  let registrations = 0;
+  const device = createDeviceServicePorts({
+    ...facilities(driver),
+    foreground: () => true,
+    feedbackClock,
+    feedback: {
+      baseUrl: 'https://functions.example.invalid/functions/v1',
+      secretStore: secretBox(null),
+      registrationTransport: { register: async () => {
+        registrations += 1;
+        throw new Error('offline');
+      } },
+    },
+  });
+  const controller = openGuideFeedback(device, feedbackClock.now);
+  await controller.getState().send();
+  assert.equal(registrations, 1);
+  assert.equal(rawOutbox(driver)[0].created_at, feedbackClock.now());
+  const retry = feedbackClock.pendingTimer();
+  assert.ok(retry);
+  feedbackClock.advanceTo(feedbackClock.now() + FEEDBACK_SYNC_LIMITS.reconfirmAfterS * 1000 + 1);
+  retry.fire();
+  for (let i = 0; i < 30; i += 1) {
+    const form = controller.getState().form;
+    if (form.kind === 'open' && form.delivery.kind === 'action_required') break;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  assert.equal(registrations, 1, 'expiry is applied before another registration request');
+  assert.equal(rawOutbox(driver)[0].transport_state, 'action_required');
+  assert.equal(feedbackClock.pendingTimer(), null, 'expired feedback has no automatic timer');
+  const form = controller.getState().form;
+  assert.equal(form.kind, 'open');
+  if (form.kind === 'open') assert.equal(form.delivery.kind, 'action_required');
   device.teardown();
 });
 

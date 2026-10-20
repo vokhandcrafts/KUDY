@@ -262,9 +262,15 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
     });
   };
   const deviceFeedbackSync = feedback && feedbackSync ? {
+    stopExpiredPending: () => feedbackSync.stopExpiredPending(),
     flush: async () => {
       let failed = false;
       try {
+        feedbackSync.stopExpiredPending();
+        const hasWork = driver.prepare(
+          "SELECT 1 AS present FROM feedback_outbox WHERE transport_state IN ('pending', 'sending') LIMIT 1",
+        ).get();
+        if (!hasWork) return await feedbackSync.flush();
         await ensureDeviceIdentity({
           driver,
           secretStore: feedback.secretStore,

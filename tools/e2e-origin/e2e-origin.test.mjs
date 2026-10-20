@@ -183,6 +183,37 @@ test('synthetic feedback endpoint authenticates and keeps revisions private per 
   }
 });
 
+test('synthetic feedback endpoint rejects corrupt bodies and remains usable', async () => {
+  const root = tmpDir('kudy-e2e-feedback-invalid-');
+  const server = createE2EOriginServer({ root });
+  const port = await listen(server);
+  const url = `http://127.0.0.1:${port}/functions/v1/feedback`;
+  const headers = {
+    authorization: 'Bearer kudy-synthetic-feedback-secret',
+    'content-type': 'application/json',
+  };
+  try {
+    const broken = await fetch(url, { method: 'PUT', headers, body: '{"target":' });
+    assert.equal(broken.status, 422);
+    assert.deepEqual(await broken.json(), { error: 'invalid_request' });
+    const invalidTarget = await fetch(`${url}/read`, {
+      method: 'POST', headers,
+      body: JSON.stringify({ target: { kind: 'guide', route_id: 7, version: '1', locale: 'be' } }),
+    });
+    assert.equal(invalidTarget.status, 422);
+    assert.deepEqual(await invalidTarget.json(), { error: 'invalid_target' });
+    const healthy = await fetch(`${url}/read`, {
+      method: 'POST', headers,
+      body: JSON.stringify({ target: { kind: 'guide', route_id: 'e2e-free-guide', version: '1', locale: 'be' } }),
+    });
+    assert.equal(healthy.status, 200, 'a rejected request does not break the next operation');
+    assert.deepEqual(await healthy.json(), { revision: 0, score: null, reason_codes: [], deleted: true });
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await fsp.rm(root, { recursive: true, force: true });
+  }
+});
+
 test('the fault switch answers 404/500/stall for named files (criterion 5)', async () => {
   const build = await buildE2EOrigin({ outDir: tmpDir('kudy-e2e-fault-') });
   const faults = parseFaultSpec([
