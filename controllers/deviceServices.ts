@@ -248,8 +248,8 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
     stopFeedbackTimer = null;
     if (feedbackDisposed) return;
     const row = driver.prepare(
-      "SELECT MIN(COALESCE(next_attempt_at, ?)) AS due FROM feedback_outbox WHERE transport_state = 'pending'",
-    ).get(feedbackClock.now() + minimumDelayMs);
+      "SELECT MIN(CASE WHEN transport_state = 'sending' THEN ? ELSE COALESCE(next_attempt_at, ?) END) AS due FROM feedback_outbox WHERE transport_state IN ('pending', 'sending')",
+    ).get(feedbackClock.now() + minimumDelayMs, feedbackClock.now() + minimumDelayMs);
     const due = row?.due;
     if (typeof due !== 'number' || !Number.isFinite(due)) return;
     const delay = Math.min(2_147_483_647, Math.max(minimumDelayMs, due - feedbackClock.now()));

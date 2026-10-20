@@ -54,3 +54,15 @@ node --test --experimental-strip-types --experimental-test-module-mocks --test-c
 ```output
 uninstalled guide preview hint: PASS
 ```
+
+Пасля аварыйнага закрыцця падчас адпраўкі водгук у стане `sending`
+плануецца на паўтор пры наступным запуску кампазіцыі. Праверка таксама
+супастаўляе ўбудаваны demo catalog з вынікам публікатара пасля змены індэкса.
+
+```bash
+node --test --experimental-strip-types --experimental-test-module-mocks controllers/deviceServices.integration.test.ts test/demo-catalog.test.mjs >/dev/null && echo "feedback crash recovery and published demo bytes: PASS"
+```
+
+```output
+feedback crash recovery and published demo bytes: PASS
+```

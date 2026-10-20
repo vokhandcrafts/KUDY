@@ -382,6 +382,46 @@ test('one foreground return before the due time schedules the queued feedback re
   assert.equal(feedbackClock.pendingTimer(), null, 'teardown cancels any pending retry');
 });
 
+test('a sending feedback mutation left by a crash retries after composition restart', async () => {
+  const driver = nodeSqliteDriver();
+  const feedbackClock = manualFeedbackClock();
+  const secretStore = secretBox(null);
+  const transport = scriptedTransport(({ index }) => index === 0 ? err503() : okPut(1));
+  const feedback = {
+    baseUrl: 'https://functions.example.invalid/functions/v1',
+    secretStore,
+    transport,
+    registrationTransport: { register: async () => registrationOk() },
+  };
+  const first = createDeviceServicePorts({ ...facilities(driver), foreground: () => true, feedbackClock, feedback });
+  const controller = openGuideFeedback(first);
+  await controller.getState().send();
+  const queued = rawOutbox(driver)[0];
+  assert.ok(queued);
+  const mutation = String(queued.mutation_id);
+  const target = String(queued.target);
+  assert.ok(Number(queued.next_attempt_at) > feedbackClock.now());
+  first.teardown();
+
+  // The process died after claiming this mutation, before the transport
+  // response could update it. There is no foreground transition on relaunch.
+  feedbackClock.advanceTo(Number(queued.next_attempt_at));
+  driver.prepare("UPDATE feedback_outbox SET transport_state = 'sending' WHERE mutation_id = ?").run(mutation);
+  driver.prepare("UPDATE feedback_local SET state = 'sending' WHERE target = ?").run(target);
+  const second = createDeviceServicePorts({ ...facilities(driver), foreground: () => true, feedbackClock, feedback });
+  const retry = feedbackClock.pendingTimer();
+  assert.ok(retry && retry.at === feedbackClock.now() + 1_000, 'boot schedules stranded sending work now');
+  feedbackClock.advanceTo(retry.at);
+  retry.fire();
+  for (let i = 0; i < 30 && rawOutbox(driver).length > 0; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  assert.equal(rawOutbox(driver).length, 0);
+  assert.equal(transport.calls.length, 2);
+  assert.equal((transport.calls[1].body as { mutation_id: string }).mutation_id, mutation);
+  second.teardown();
+});
+
 test('an offline first send retries registration after network recovery without backgrounding', async () => {
   const driver = nodeSqliteDriver();
   const feedbackClock = manualFeedbackClock();
