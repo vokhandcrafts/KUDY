@@ -131,7 +131,7 @@ export async function runRecoverySuite({ driver, url, runCase, coldStart, appPac
       }
     });
 
-  await runCase('recovery: cancelling a second-guide start retains the first session',
+  await runCase('recovery: cancelling a second-guide start retains the active and paused session',
     'recovery-switch-cancel', driver, async () => {
       assert.ok(originalSessionId, 'the first session was not captured');
       const before = oneLive(await sessionRows(driver, appPackage));
@@ -149,6 +149,22 @@ export async function runRecoverySuite({ driver, url, runCase, coldStart, appPac
       const live = oneLive(await sessionRows(driver, appPackage));
       assert.equal(live.session_id, originalSessionId);
       assert.equal(live.heard, before.heard);
+
+      await driver.launchDeepLink(`kudy:///run/${FREE}`);
+      await waitForRun(driver, 'recovery-before-paused-switch');
+      await driver.tapSelector({ testID: 'btn-run-pause' });
+      await driver.waitFor({ testID: 'run-paused' }, { timeoutMs: SHORT_MS });
+      const pausedBefore = oneLive(await sessionRows(driver, appPackage));
+      assert.equal(pausedBefore.state, 'paused');
+      assert.equal(pausedBefore.session_id, originalSessionId);
+      await openPreview(driver, PAID);
+      await driver.tapSelector({ testID: 'btn-start', enabled: true });
+      await driver.waitFor({ testID: 'confirm-dialog' }, { timeoutMs: SHORT_MS });
+      await driver.tapSelector({ testID: 'btn-confirm-cancel' });
+      const pausedAfter = oneLive(await sessionRows(driver, appPackage));
+      assert.equal(pausedAfter.session_id, originalSessionId);
+      assert.equal(pausedAfter.state, 'paused');
+      assert.equal(pausedAfter.heard, pausedBefore.heard);
     });
 
   await runCase('recovery: End stays finished and a new pass creates a new session',
