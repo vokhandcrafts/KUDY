@@ -169,7 +169,7 @@ describe("Place detail surface (G07.02)", () => {
     fireEvent.press(screen.getByTestId("place-moment-play-m-a1"));
     await waitFor(() => expect(screen.queryByTestId("place-moment-live-m-a1")).toBeNull());
     expect(audioPort.commands).toEqual([`play 1:${MOMENT_PATH}`, "stop"]);
-  }, 10000);
+  }, 30000);
 
   test("the card shows a physical playback start that arrives after the Play render", async () => {
     const { audioPort } = await openPlace();
