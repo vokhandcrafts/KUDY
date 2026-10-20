@@ -21,7 +21,7 @@
 | APR-07 | рашэнне | Палітыка выдалення і UI абяцаюць аднолькавае; выбраны наступны fix | [#805](https://github.com/vokhandcrafts/KUDY/issues/805) | улічыць #288 |
 | APR-08 | рашэнне / дасье | Інвентар патокаў даных і чарнавікі Data safety, location/FGS declarations | [#811](https://github.com/vokhandcrafts/KUDY/issues/811) | #804, #805 |
 | APR-09 | рашэнне | [Прыняты варыянт C](../../architecture/decisions/APR-09-android-backup.md): захоўваць прагрэс без пераносу ідэнтычнасці і чэргаў | [#812](https://github.com/vokhandcrafts/KUDY/issues/812) | улічыць #288 |
-| APR-09.a | дызайн / рэалізацыя / праверка | Бяспечнае аднаўленне Android-прагрэсу; правілы backup і доказ restore | [#833](https://github.com/vokhandcrafts/KUDY/issues/833) | #812; backlog, запуск не дазволены |
+| APR-09.a | дызайн / рэалізацыя / праверка | Бяспечнае аднаўленне Android-прагрэсу; правілы backup і доказ restore | [#833](https://github.com/vokhandcrafts/KUDY/issues/833) | #812 закрытае, ADR апублікаваны ў PR #834; backlog, запуск не дазволены |
 | APR-10 | рашэнне | Вызначаны межы шрыфту, арыентацыі і падтрымкі вялікіх экранаў | [#813](https://github.com/vokhandcrafts/KUDY/issues/813) | улічыць #719, #718, #436 |
 
 ## Пакрыццё радкоў матрыцы
