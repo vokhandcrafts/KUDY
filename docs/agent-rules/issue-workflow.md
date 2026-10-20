@@ -18,6 +18,7 @@ done), `dispatcher-loop.md` (writer boundaries), `documentation-language.md`.
 | `agent:blocked` | Stopped; a human must act before work continues. | The blocked agent |
 | `agent:approved` | The dispatcher's review gate passed. | The dispatcher only — never you |
 | `epic` | A parent issue with subtasks. Never claim it, never work it. | Operator only |
+| `needs:owner` | Runs only in a live session with the owner present; no unattended pickup by the dispatcher or Zcode. | Operator only |
 | `prio:N` | Ordering hint for the operator (`prio:1` first). | Operator only |
 
 Status labels (`agent:ready`, `agent:running`, `agent:blocked`) are
