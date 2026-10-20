@@ -204,9 +204,19 @@ test('synthetic feedback endpoint rejects corrupt bodies and remains usable', as
     });
     assert.equal(invalidTarget.status, 422);
     assert.deepEqual(await invalidTarget.json(), { error: 'invalid_target' });
+    const target = { kind: 'guide', route_id: 'e2e-free-guide', version: '1', locale: 'be' };
+    for (const [endpoint, method] of [[url, 'POST'], [`${url}/read`, 'PUT'], [`${url}/delete`, 'PUT']]) {
+      const wrongMethod = await fetch(endpoint, {
+        method, headers,
+        body: JSON.stringify({ target, mutation_id: '00000000-0000-4000-8000-000000000001',
+          expected_revision: 0, score: 4, reason_codes: [], disclosure_version: 'feedback-disclosure-1' }),
+      });
+      assert.equal(wrongMethod.status, 404, `${method} ${endpoint} must match the production method contract`);
+      assert.deepEqual(await wrongMethod.json(), { error: 'not_found' });
+    }
     const healthy = await fetch(`${url}/read`, {
       method: 'POST', headers,
-      body: JSON.stringify({ target: { kind: 'guide', route_id: 'e2e-free-guide', version: '1', locale: 'be' } }),
+      body: JSON.stringify({ target }),
     });
     assert.equal(healthy.status, 200, 'a rejected request does not break the next operation');
     assert.deepEqual(await healthy.json(), { revision: 0, score: null, reason_codes: [], deleted: true });

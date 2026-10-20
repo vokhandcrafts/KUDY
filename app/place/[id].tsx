@@ -9,7 +9,7 @@
 // State rendering only: every decision lives in the controllers (19 §4.2);
 // the physical playback fact arrives through the binding's read (09 §6.3,
 // the run surface's `playback` idiom), never a services import.
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { Link, useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -230,6 +230,7 @@ export default function PlaceDetail() {
   const locale = useUiLocale();
   const params = useLocalSearchParams<{ id: string }>();
   const placeId = typeof params.id === "string" ? params.id : "";
+  const pathname = usePathname();
   // One binding per open (the Nearby surface's pattern); the moment play
   // binding is the app-level singleton — the playback survives navigation.
   const binding = useMemo(
@@ -246,6 +247,7 @@ export default function PlaceDetail() {
   const playFailure = momentState !== null && momentState.kind === "failed" ? momentState : null;
   const [playback, setPlayback] = useState<VisibleMoment>(null);
   useEffect(() => {
+    if (pathname !== `/place/${placeId}`) return;
     if (momentPlay === null) {
       setPlayback(null);
       return;
@@ -258,10 +260,11 @@ export default function PlaceDetail() {
     read();
     // expo-audio reports the physical start after the controller's Play
     // update. Read its status while this screen is open; store events alone
-    // cannot make the card show that later transition.
+    // cannot make the card show that later transition. A covered Place stays
+    // mounted in the Stack, so blur must stop this physical-status poll.
     const timer = setInterval(read, 250);
     return () => clearInterval(timer);
-  }, [momentPlay]);
+  }, [momentPlay, pathname, placeId]);
   // G06.05 (issue #280, AC1): the display locale, not a hard-code.
   const strings = placeDetailStrings(locale);
   // G06.10 (issue #432): the back word is the shared chrome catalog's — the

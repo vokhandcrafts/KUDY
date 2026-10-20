@@ -9,6 +9,8 @@
 // (criterion 3), and Back returns with the playback context alive
 // (criterion 4).
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { act, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
 
 import PlaceDetail from "./[id]";
@@ -189,6 +191,30 @@ describe("Place detail surface (G07.02)", () => {
     expect(link.props.href).toBe("/route/route-a1");
     fireEvent.press(link);
     expect(await screen.findByTestId("screen-Route preview")).toBeTruthy();
+  });
+
+  test("a covered Place stops polling Moment playback until it is focused again", async () => {
+    // The test router unmounts covered screens; production Stack can retain
+    // them. Pin the route guard as well as the navigation cleanup below.
+    const source = readFileSync(path.join(process.cwd(), "app/place/[id].tsx"), "utf8");
+    expect(source).toMatch(/if \(pathname !== `\/place\/\$\{placeId\}`\) return;/);
+    const { services } = placeServices(new FakeAudioPlayerPort());
+    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
+    renderRouter(withPlaceRoutes(services), { initialUrl: "/map" });
+    fireEvent.press(await screen.findByTestId("nearby-card-offer-a1-place"));
+    await screen.findByTestId("place-moment-m-a1");
+    fireEvent.press(screen.getByTestId("place-moment-guide-m-a1"));
+    await screen.findByTestId("screen-Route preview");
+    const startPolling = jest.spyOn(global, "setInterval");
+    const stopPolling = jest.spyOn(global, "clearInterval");
+    fireEvent.press(screen.getByTestId("btn-preview-back"));
+    await screen.findByTestId("place-moment-m-a1");
+    await waitFor(() => expect(startPolling.mock.calls.some((call) => call[1] === 250)).toBe(true));
+    const pollIndex = startPolling.mock.calls.findIndex((call) => call[1] === 250);
+    const timer = startPolling.mock.results[pollIndex].value;
+    fireEvent.press(screen.getByTestId("place-moment-guide-m-a1"));
+    await screen.findByTestId("screen-Route preview");
+    await waitFor(() => expect(stopPolling).toHaveBeenCalledWith(timer));
   });
 
   test("a play over a session-owned player renders the named refusal — no second player", async () => {

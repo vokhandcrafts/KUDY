@@ -78,3 +78,27 @@ node --test tools/e2e-android/wiring.test.mjs tools/e2e-origin/e2e-origin.test.m
 ```output
 feedback revision assertion: PASS
 ```
+
+Пасля крашу сямідзённы тэрмін дзейнічае і для запісу `sending`:
+пратэрмінаваны водгук патрабуе пацвярджэння перад сеткавай спробай.
+Сінтэтычны endpoint адхіляе няправільны HTTP-метад для кожнай аперацыі.
+
+```bash
+node --test --experimental-strip-types --experimental-test-module-mocks tests/feedback/queue-sync.test.ts tools/e2e-origin/e2e-origin.test.mjs >/dev/null && echo "expired sending and feedback methods: PASS"
+```
+
+```output
+expired sending and feedback methods: PASS
+```
+
+Калі Place перакрыты прэв’ю гіда, апытанне фізічнага Moment спыняецца;
+вяртанне на Place аднаўляе апытанне. Тэст правярае навігацыю і ахову
+маршруту для Stack, які захоўвае схаваныя экраны.
+
+```bash
+npx jest --config jest.config.js --runInBand --runTestsByPath app/place/place.test.tsx --silent >/dev/null 2>&1 && echo "Place playback focus: PASS"
+```
+
+```output
+Place playback focus: PASS
+```

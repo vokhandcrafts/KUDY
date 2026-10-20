@@ -232,12 +232,12 @@ export function createFeedbackSync(deps: {
     const staleCut = now() - limits.reconfirmAfterS * 1000;
     let stopped = 0;
     for (const stale of deps.driver
-      .prepare(`${OUTBOX_SELECT} WHERE transport_state = 'pending' AND created_at < ? ORDER BY created_at, mutation_id`)
+      .prepare(`${OUTBOX_SELECT} WHERE transport_state IN ('pending', 'sending') AND created_at < ? ORDER BY created_at, mutation_id`)
       .all(staleCut)) {
       const row = stale as OutboxRow;
       inTransaction(deps.driver, () => {
         deps.driver
-          .prepare("UPDATE feedback_outbox SET transport_state = 'action_required' WHERE mutation_id = ? AND transport_state = 'pending'")
+          .prepare("UPDATE feedback_outbox SET transport_state = 'action_required' WHERE mutation_id = ? AND transport_state IN ('pending', 'sending')")
           .run(row.mutation_id);
         deps.driver.prepare("UPDATE feedback_local SET state = 'action_required' WHERE target = ?").run(row.target);
       });

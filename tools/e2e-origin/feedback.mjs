@@ -1,7 +1,11 @@
 // Stateful synthetic feedback endpoint for the Android journey. It accepts
 // only the fixture bearer and the three existing client wire operations.
 // No rating list is exposed: the app can read only its own target state.
-const PATHS = new Set(['/functions/v1/feedback', '/functions/v1/feedback/delete', '/functions/v1/feedback/read']);
+const METHODS = new Map([
+  ['/functions/v1/feedback', 'PUT'],
+  ['/functions/v1/feedback/delete', 'POST'],
+  ['/functions/v1/feedback/read', 'POST'],
+]);
 const SECRET = 'Bearer kudy-synthetic-feedback-secret';
 
 export function createFeedbackHandler() {
@@ -23,7 +27,11 @@ export function createFeedbackHandler() {
     return null;
   };
   return (request, response, path) => {
-    if (!PATHS.has(path)) return false;
+    if (!METHODS.has(path)) return false;
+    if (request.method !== METHODS.get(path)) {
+      reply(response, 404, { error: 'not_found' });
+      return true;
+    }
     if (request.headers.authorization !== SECRET) {
       reply(response, 401, { error: 'unknown_device' });
       return true;
