@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-20 — апублікуй рашэнне APR-09 пра захаванне прагрэсу
+Што зрабіць: правер і змержы [PR #834](https://github.com/vokhandcrafts/KUDY/pull/834) з рашэннем APR-09. Пакінь [#833](https://github.com/vokhandcrafts/KUDY/issues/833) у backlog да асобнага дазволу на рэалізацыю бяспечнага аднаўлення; прынятае рашэнне яшчэ не закрывае аўдыт GP-14.
+PR: https://github.com/vokhandcrafts/KUDY/pull/834 · Задача: https://github.com/vokhandcrafts/KUDY/issues/812
+
 ### 2026-10-17 — змержы follow-up PR #814: праўкі рэв'ю G20.31
 Што зрабіць: прачытай раздзелы «Код-рэвю» і «Суддзя» у [выніку G20.31](agent-tasks/results/G20.31.md) (2 low-праўкі рэв'ю; суддзя ✅ APPROVED) і змержы PR — гэта дадатак да #799, бо #799 быў змержаны раней, чым праўкі рэв'ю трапілі ў main.
 PR: https://github.com/vokhandcrafts/KUDY/pull/814
