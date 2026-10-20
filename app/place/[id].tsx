@@ -10,7 +10,7 @@
 // the physical playback fact arrives through the binding's read (09 §6.3,
 // the run surface's `playback` idiom), never a services import.
 import { Link, useLocalSearchParams, usePathname, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -36,6 +36,7 @@ import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
 import { screenStyles } from "../../components/screen-styles";
 import { tokens } from "../../components/design-tokens";
+import { useVisibleMomentPlayback, type VisibleMoment } from "../../components/use-visible-moment-playback";
 
 const styles = StyleSheet.create({
   // G06.10.b: the interface text renders the UI family (canon §3, Golos
@@ -125,20 +126,6 @@ const styles = StyleSheet.create({
     marginBottom: tokens.spaceM,
   },
 });
-
-// The card's live state from the ONE player's computed fact (09 §6.3): any
-// owner counts — the controller's own launch, a routed takeover or a
-// session-mirrored moment of the same moment_id.
-type VisibleMoment = { kind: "playing" | "paused"; momentId: string } | null;
-
-function visibleMoment(binding: MomentPlayBinding): VisibleMoment {
-  const playback = binding.playback();
-  if (playback.kind !== "playing" && playback.kind !== "paused") return null;
-  const token = playback.token;
-  return token !== null && token.kind === "moment"
-    ? { kind: playback.kind, momentId: token.ref }
-    : null;
-}
 
 function MomentCard({
   moment,
@@ -245,26 +232,7 @@ export default function PlaceDetail() {
   // renders beside the cards, not a silent revert to idle.
   const momentState = useStoreState(momentPlay?.store);
   const playFailure = momentState !== null && momentState.kind === "failed" ? momentState : null;
-  const [playback, setPlayback] = useState<VisibleMoment>(null);
-  useEffect(() => {
-    if (pathname !== `/place/${placeId}`) return;
-    if (momentPlay === null) {
-      setPlayback(null);
-      return;
-    }
-    const read = () => {
-      const next = visibleMoment(momentPlay);
-      setPlayback((current) => current?.kind === next?.kind && current?.momentId === next?.momentId
-        ? current : next);
-    };
-    read();
-    // expo-audio reports the physical start after the controller's Play
-    // update. Read its status while this screen is open; store events alone
-    // cannot make the card show that later transition. A covered Place stays
-    // mounted in the Stack, so blur must stop this physical-status poll.
-    const timer = setInterval(read, 250);
-    return () => clearInterval(timer);
-  }, [momentPlay, pathname, placeId]);
+  const playback = useVisibleMomentPlayback(momentPlay, pathname, placeId);
   // G06.05 (issue #280, AC1): the display locale, not a hard-code.
   const strings = placeDetailStrings(locale);
   // G06.10 (issue #432): the back word is the shared chrome catalog's — the

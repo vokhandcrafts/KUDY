@@ -92,8 +92,9 @@ expired sending and feedback methods: PASS
 ```
 
 Калі Place перакрыты прэв’ю гіда, апытанне фізічнага Moment спыняецца;
-вяртанне на Place аднаўляе апытанне. Тэст правярае навігацыю і ахову
-маршруту для Stack, які захоўвае схаваныя экраны.
+вяртанне на Place аднаўляе апытанне. Тэст пакідае кампанент змантаваным,
+мяняе pathname і правярае лік рэальных чытанняў playback да пераходу,
+падчас прэв’ю і пасля вяртання.
 
 ```bash
 npx jest --config jest.config.js --runInBand --runTestsByPath app/place/place.test.tsx --silent >/dev/null 2>&1 && echo "Place playback focus: PASS"

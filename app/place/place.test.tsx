@@ -9,9 +9,8 @@
 // (criterion 3), and Back returns with the playback context alive
 // (criterion 4).
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import { act, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
+import { renderHook } from "@testing-library/react-native";
 
 import PlaceDetail from "./[id]";
 import FeedbackForm from "../feedback";
@@ -27,6 +26,7 @@ import { fixtureText, flatStyle, layoutWith, serve, sha256 } from "../../test/re
 import { tokens } from "../../components/design-tokens";
 import { AudioService } from "../../services/audio/service";
 import { FakeAudioPlayerPort } from "../../services/audio/fake-port";
+import { useVisibleMomentPlayback } from "../../components/use-visible-moment-playback";
 import type { BundlesStore, FileFacts, TeaserAudioProbe } from "../../services/contentRepo/types";
 
 const CATALOG_TEXT = fixtureText("catalog-with-discovery.json");
@@ -143,6 +143,7 @@ async function openPlace(): Promise<{ audioPort: FakeAudioPlayerPort }> {
 
 afterEach(() => {
   jest.restoreAllMocks();
+  jest.useRealTimers();
 });
 
 describe("Place detail surface (G07.02)", () => {
@@ -194,10 +195,8 @@ describe("Place detail surface (G07.02)", () => {
   });
 
   test("a covered Place stops polling Moment playback until it is focused again", async () => {
-    // The test router unmounts covered screens; production Stack can retain
-    // them. Pin the route guard as well as the navigation cleanup below.
-    const source = readFileSync(path.join(process.cwd(), "app/place/[id].tsx"), "utf8");
-    expect(source).toMatch(/if \(pathname !== `\/place\/\$\{placeId\}`\) return;/);
+    // The test router unmounts covered screens. Keep its navigation check
+    // below and exercise retained-screen behavior in a mounted hook separately.
     const { services } = placeServices(new FakeAudioPlayerPort());
     serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
     renderRouter(withPlaceRoutes(services), { initialUrl: "/map" });
@@ -215,6 +214,33 @@ describe("Place detail surface (G07.02)", () => {
     fireEvent.press(screen.getByTestId("place-moment-guide-m-a1"));
     await screen.findByTestId("screen-Route preview");
     await waitFor(() => expect(stopPolling).toHaveBeenCalledWith(timer));
+  });
+
+  test("a retained Place stops physical playback reads on route change and resumes on return", () => {
+    jest.useFakeTimers();
+    const { services } = placeServices(new FakeAudioPlayerPort());
+    const momentPlay = services.moment ?? null;
+    expect(momentPlay).not.toBeNull();
+    const playbackRead = jest.spyOn(momentPlay!, "playback");
+    const { rerender, unmount } = renderHook<ReturnType<typeof useVisibleMomentPlayback>, { pathname: string }>(
+      ({ pathname }) => useVisibleMomentPlayback(momentPlay, pathname, "place-a1"),
+      { initialProps: { pathname: "/place/place-a1" } },
+    );
+    expect(playbackRead).toHaveBeenCalledTimes(1);
+    act(() => jest.advanceTimersByTime(500));
+    expect(playbackRead).toHaveBeenCalledTimes(3);
+
+    rerender({ pathname: "/route/route-a1" });
+    act(() => jest.advanceTimersByTime(750));
+    expect(playbackRead).toHaveBeenCalledTimes(3);
+
+    rerender({ pathname: "/place/place-a1" });
+    expect(playbackRead).toHaveBeenCalledTimes(4);
+    act(() => jest.advanceTimersByTime(250));
+    expect(playbackRead).toHaveBeenCalledTimes(5);
+    unmount();
+    act(() => jest.advanceTimersByTime(500));
+    expect(playbackRead).toHaveBeenCalledTimes(5);
   });
 
   test("a play over a session-owned player renders the named refusal — no second player", async () => {
