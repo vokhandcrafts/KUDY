@@ -1,0 +1,58 @@
+{
+  "revision": "r-e2e-nearby-1",
+  "city_id": "e2e-city",
+  "themes": [
+    {
+      "id": "theme-e2e-walk",
+      "labels": {
+        "be": "E2E-прагулка",
+        "en": "E2E walk"
+      }
+    }
+  ],
+  "offers": [
+    {
+      "offer_id": "offer-guide-e2e-nearby",
+      "ref": {
+        "kind": "guide",
+        "route_id": "e2e-nearby-guide",
+        "version": "1"
+      },
+      "city_id": "e2e-city",
+      "editorial_order": 5,
+      "themes": [
+        "theme-e2e-walk"
+      ],
+      "localized": {
+        "title": {
+          "be": "E2E-гід каля вежы",
+          "en": "E2E guide by the tower"
+        },
+        "summary": {
+          "be": "Кароткі сінтэтычны свабодны гід для праверкі падказкі побач.",
+          "en": "A short synthetic free guide for the nearby hint test."
+        },
+        "why_recommended": {
+          "be": "Побач з маршрутам E2E; адна свабодная кропка.",
+          "en": "Near the E2E route; one free stop."
+        },
+        "conditions": {
+          "be": "роўны сінтэтычны грунт, без пераходаў",
+          "en": "flat synthetic ground, no crossings"
+        }
+      },
+      "estimated_duration": {
+        "min_minutes": 10,
+        "max_minutes": 15,
+        "basis": "author_estimate"
+      },
+      "distance_m": 250,
+      "suggested_start_place_id": "e2e-place-4",
+      "season_recommendations": [],
+      "detail_ref": {
+        "kind": "guide_preview"
+      }
+    }
+  ],
+  "collections": []
+}
