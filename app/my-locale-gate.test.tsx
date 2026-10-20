@@ -1,12 +1,15 @@
-// G21.50 (issue #711) — the picker gate at the surface. The real registry
-// has no gated code yet (zh lands with #669/#670), so this suite replaces
-// two exports of the registry module around its real implementation: a
-// synthetic ninth code `zz` is registered-complete in both scenarios and
-// closed in the first, flag-opened in the second. The factory hands out
-// mutable arrays and the tests mutate them IN PLACE — jest snapshots the
-// factory result once, so reassignment never reaches the consumers. A picker
-// reading COMPLETE_UI_LOCALES again (the revert) renders the closed code in
-// the first scenario and turns this file red.
+// G21.50 (issue #711) — the picker gate at the surface. zh is now the real
+// gated code (it landed complete-but-closed with G21.46/#670), but this suite
+// keeps its synthetic ninth code `zz`: registering it as the only complete
+// code besides the eight lets the two scenarios (closed, flag-opened) run
+// without touching the real Chinese release state, which the flag and the
+// G21.46 suites own. This suite replaces two exports of the registry module
+// around its real implementation: `zz` is registered-complete in both
+// scenarios and closed in the first, flag-opened in the second. The factory
+// hands out mutable arrays and the tests mutate them IN PLACE — jest
+// snapshots the factory result once, so reassignment never reaches the
+// consumers. A picker reading COMPLETE_UI_LOCALES again (the revert) renders
+// the closed code in the first scenario and turns this file red.
 import { describe, expect, jest, test } from "@jest/globals";
 import { fireEvent, renderRouter, screen } from "expo-router/testing-library";
 

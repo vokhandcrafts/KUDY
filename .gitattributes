@@ -41,3 +41,8 @@ tools/simulate/traces/*.json eol=lf
 # G21.06 (#539): the committed review reports are regenerated and compared
 # byte-wise against the renderer output, which writes LF.
 authoring/**/review/*.review.md eol=lf
+
+# G20.36: the message generator byte-compares every output against LF text.
+components/*-strings.generated.ts eol=lf
+controllers/**/*-strings.generated.ts eol=lf
+web/lib/i18n/??.ts eol=lf

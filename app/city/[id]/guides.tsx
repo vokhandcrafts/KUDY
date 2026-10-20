@@ -19,7 +19,6 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: tokens.colorPaper,
     flex: 1,
-    padding: tokens.spaceL,
   },
 });
 
@@ -29,24 +28,24 @@ export default function Guides() {
   // a switch re-renders them in place, no restart.
   const locale = useUiLocale();
   const controller = useCatalogController(services.catalog?.controller);
-  // UX 02 (issue #348): the frame's top inset — the content starts below the
-  // status bar and the notch with the native header off (AC4).
+  // UX 02 (issue #348): the top inset clears the status bar and notch with
+  // the native header off (AC4). APR-05 (#810): the bottom inset clears the navigation bar.
   const insets = useSafeAreaInsets();
   // G06.05 (issue #280, AC1/AC4): the shared words in the display locale and
   // the failed load's named retry.
   const strings = uiStrings(locale);
   return (
     <View
-      style={[styles.screen, { paddingTop: insets.top + tokens.spaceL }]}
+      style={[styles.screen, { paddingTop: insets.top + tokens.spaceL, paddingBottom: insets.bottom }]}
       testID="screen-Guides"
     >
-      <BackButton label={strings.backToCity} testID="btn-guides-back" />
       <CityCatalogBody
         walk={services.walk}
         catalog={controller?.surface ?? null}
         onRetry={controller ? () => void controller.refresh() : undefined}
         variant="rubric"
         locale={locale}
+        leading={<BackButton label={strings.backToCity} testID="btn-guides-back" />}
       />
     </View>
   );

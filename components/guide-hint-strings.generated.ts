@@ -6,11 +6,11 @@
 // G21.25 (issue #558): the catalogues are generated projections — edit the
 // source/translation data, never this file; the generator's --check mode
 // fails on any hand edit.
-// the nearby guide-hint card's words (G07.05 #284); uk keeps the documented be fallback (uk-release-scope §6.4) until its words are authored, de renders its own catalogue (G21.10 #544), es too (G21.11 #545), fr too (G21.12 #546), cs too (G21.13 #547), sv too (G21.14 #548)
+// the nearby guide-hint card's words (G07.05 #284); uk keeps the documented be fallback (uk-release-scope §6.4) until its words are authored, de renders its own catalogue (G21.10 #544), es too (G21.11 #545), fr too (G21.12 #546), cs too (G21.13 #547), sv too (G21.14 #548), zh too (G21.46 #670)
 
 import type { GuideHintStrings } from "../contracts/ui-message-types.ts";
 
-export const GUIDE_HINT_STRINGS: Record<"be" | "en" | "de" | "es" | "fr" | "cs" | "sv", GuideHintStrings> = {
+export const GUIDE_HINT_STRINGS: Record<"be" | "en" | "de" | "es" | "fr" | "cs" | "sv" | "zh", GuideHintStrings> = {
   "be": {
     "dismiss": "Схаваць",
     "heading": "Побач ёсць гід…",
@@ -52,5 +52,11 @@ export const GUIDE_HINT_STRINGS: Record<"be" | "en" | "de" | "es" | "fr" | "cs" 
     "heading": "Det finns en guide i närheten…",
     "openHint": "Öppna guidebeskrivningen",
     "paid": "betald",
+  },
+  "zh": {
+    "dismiss": "\u9690\u85CF",
+    "heading": "\u9644\u8FD1\u6709\u5BFC\u89C8…",
+    "openHint": "\u6253\u5F00\u5BFC\u89C8\u8BF4\u660E",
+    "paid": "\u4ED8\u8D39",
   },
 };

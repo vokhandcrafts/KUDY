@@ -74,19 +74,16 @@ export default function Explore() {
     // G06.10.e (issue #405): the calm surface's paper — the shared wrapper
     // layers the canon grain over the unchanged paper token.
     <PaperSurface
-      style={{
-        padding: tokens.spaceL,
-        paddingTop: insets.top + tokens.spaceL,
-      }}
+      style={{ paddingTop: insets.top + tokens.spaceL, paddingBottom: insets.bottom }}
       testID="screen-Explore"
     >
-      <ScaledText style={styles.brand}>{strings.kudyLink.replace(/\s*→$/, "")}</ScaledText>
       <CityCatalogBody
         walk={services.walk}
         catalog={controller?.surface ?? null}
         onRetry={controller ? () => void controller.refresh() : undefined}
         variant="city"
         locale={locale}
+        leading={<ScaledText style={styles.brand}>{strings.kudyLink.replace(/\s*→$/, "")}</ScaledText>}
         middle={
           <>
             {process.env.EXPO_PUBLIC_DEMO_MODE === "1" ? (

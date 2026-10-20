@@ -10,9 +10,9 @@ import assert from 'node:assert/strict';
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { collectOutputs, DOMAINS, escapeTemplate, parseTemplate, renderTemplateRecord, run } from './generate-messages.mjs';
+import { collectOutputs, DOMAINS, escapeRepoBytes, escapeTemplate, parseTemplate, renderTemplateRecord, run } from './generate-messages.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
@@ -111,11 +111,11 @@ test('message_rendering_safe: escaped static text round-trips through real gener
   assert.ok(fnSource.includes("\\`"), 'the backtick is escaped in the emitted source');
   assert.ok(fnSource.includes('\\n'), 'the newline is escaped in the emitted source');
   const module = `export const f = ${fnSource};\n`;
-  const fake = mkdtempSync(join(tmpdir(), 'kudy-g2125-safe-'));
+  const fake = mkdtempSync(join(tmpdir(), 'kudy-g2125-safe #%-'));
   try {
     const file = join(fake, 'safe-probe.ts');
     writeFileSync(file, module, 'utf8');
-    const rendered = (await import(file)).f('X');
+    const rendered = (await import(pathToFileURL(file).href)).f('X');
     assert.equal(rendered, 'адказ: X\nрадок `з коскаю` і "цытата" + \'апостраф\' + \\ таб\tканец');
   } finally {
     rmSync(fake, { recursive: true, force: true });
@@ -154,4 +154,20 @@ test('parseTemplate and escapeTemplate answer deterministically', () => {
   );
   assert.deepEqual(parseTemplate('проста тэкст'), [{ text: 'проста тэкст' }]);
   assert.equal(escapeTemplate('а`б\\в${г}\nд'), 'а\\`б\\\\в\\${г}\\nд');
+});
+
+test('escapeRepoBytes keeps committed catalogue bytes ASCII and the glyphs decodable', () => {
+  // G21.46 (issue #670, criterion 7). The input below is written as escapes
+  // too, so this file itself stays ASCII: it decodes to Han, CJK punctuation,
+  // kana, a fullwidth letter and one Han character from each CJK extension
+  // plane the pattern covers (U+20000 Extension B, U+30011 Extension G).
+  const input = '\u4E2D\u6587\u3002\u304B\u306A\uFF21\u{20000}\u{30011}';
+  const escaped = escapeRepoBytes(input);
+  assert.equal(escaped, '\\u4E2D\\u6587\\u3002\\u304B\\u306A\\uFF21\\u{20000}\\u{30011}');
+  assert.doesNotMatch(escaped, /[^\x20-\x7E]/);
+  // Cyrillic, em dash and Latin-1 are not CJK: the shipped be/uk/de/es/fr/cs/sv
+  // words stay byte-identical, and one pass over an escaped string is a no-op.
+  const literal = 'Беларуская — Привіт ã';
+  assert.equal(escapeRepoBytes(literal), literal);
+  assert.equal(escapeRepoBytes(escaped), escaped);
 });

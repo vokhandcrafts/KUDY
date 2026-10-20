@@ -67,7 +67,15 @@ export function createExpoDownloadStore(fs: DownloadFileSystem, root: Directory)
     async exists(rel: string): Promise<boolean> {
       const segments = segmentsOf(rel);
       if (segments === null) return false;
-      return new File(root, ...segments).exists;
+      // Expo 19 File.exists is isFile on Android: a directory reads false
+      // there, so the directory answer must come from Directory. The
+      // activation tail's deletion gate (download.ts: exists(finalLayer) →
+      // move the damaged layer to trash) depends on the directory case —
+      // without it the staging move lands inside the existing directory
+      // (FileSystemPath.getMoveOrCopyPath nests into it) and the damaged
+      // bytes stay at the final path. The port contract (DownloadStore)
+      // matches the node adapter, whose stat() answers both kinds.
+      return new File(root, ...segments).exists || new Directory(root, ...segments).exists;
     },
     async readFile(rel: string): Promise<Uint8Array | null> {
       const segments = segmentsOf(rel);

@@ -487,10 +487,24 @@ test('G21.45: the 8→9 move is the only count-limit change; the residual mirror
     ['tools/build-bundle/build-bundle.mjs', "['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']", 'LOCALE_ALLOWLIST'],
     ['tools/validate/validate-authoring.mjs', "['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']", 'LOCALES'],
     ['tools/validate/validate-package.mjs', "['be', 'en', 'uk', 'de', 'es', 'fr', 'cs', 'sv']", 'MEDIA_LOCALES'],
-    ['contracts/ui-locales.ts', '["be", "en", "uk", "de", "es", "fr", "cs", "sv"]', 'COMPLETE_UI_LOCALES'],
+    // G21.46 (#670): the UI registry's COMPLETE set moved to nine, so the
+    // residual eight in that file is now the frozen release default (the
+    // label names the line the literal actually matches). The nine is pinned
+    // just below at the source and by the registry suite at runtime.
+    ['contracts/ui-locales.ts', '["be", "en", "uk", "de", "es", "fr", "cs", "sv"]', 'RELEASE_DEFAULT_OPEN'],
   ];
   for (const [file, eight, label] of residualSources) {
     const text = fs.readFileSync(path.join(REPO, file), 'utf8');
     assert.ok(text.includes(eight), `${file} ${label} must stay at the residual eight until a zh task extends it`);
   }
+  // G21.46 (#670): the one owner that DID move — the UI registry's complete
+  // set — is pinned at the source too, so a silent revert to eight fails here
+  // in the same place the residual pins catch drift in the other direction.
+  const registry = fs.readFileSync(path.join(REPO, 'contracts/ui-locales.ts'), 'utf8');
+  assert.ok(
+    registry.includes(
+      'COMPLETE_UI_LOCALES: readonly CompleteUiLocaleCode[] = ["be", "en", "uk", "de", "es", "fr", "cs", "sv", "zh"]',
+    ),
+    'contracts/ui-locales.ts COMPLETE_UI_LOCALES must carry the G21.46 nine',
+  );
 });
