@@ -124,13 +124,16 @@ export class ExpoLocationOsPort implements LocationOsPort {
         })
         .catch((error: unknown) => console.warn(`location adapter: foreground permission check failed: ${String(error)}`));
     }
+    // Recheck an existing foreground grant without opening another OS
+    // permission activity. Repeated dialogs can bounce Nearby through
+    // AppState background/active and re-arm the city subscription in a loop.
     void (scope === 'background'
       ? Location.requestBackgroundPermissionsAsync()
-      : Location.requestForegroundPermissionsAsync()
+      : this.permissionState === 'granted'
+        ? Location.getForegroundPermissionsAsync()
+        : Location.requestForegroundPermissionsAsync()
     )
-      .then((response) => {
-        this.applyAnswer(scope, response, ask);
-      })
+      .then((response) => this.applyAnswer(scope, response, ask))
       .catch((error: unknown) => console.warn(`location adapter: permission request failed: ${String(error)}`));
   }
 
@@ -152,7 +155,7 @@ export class ExpoLocationOsPort implements LocationOsPort {
           });
         } catch (error) {
           console.warn(`location adapter: background updates refused (${String(error)})`);
-          if (this.currentSub === sub) void this.startForegroundWatch(sub);
+          if (this.currentSub === sub) void this.startForegroundWatch(sub, true);
         }
       }).catch((error: unknown) => console.warn(`location adapter: background setup failed: ${String(error)}`));
       return;
@@ -196,23 +199,36 @@ export class ExpoLocationOsPort implements LocationOsPort {
       foreground: this.permissionState,
       background: this.backgroundState,
     });
+    const hadBackgroundGrant = this.backgroundState === 'granted';
+    const activeSub = this.currentSub;
     this.backgroundState = scoped.background;
-    if (scoped.foreground === this.permissionState) return;
-    this.permissionState = scoped.foreground;
-    if (this.permissionState !== 'undetermined') {
-      this.handler?.({ type: 'permission', state: this.permissionState });
+    if (scoped.foreground !== this.permissionState) {
+      this.permissionState = scoped.foreground;
+      if (this.permissionState !== 'undetermined') {
+        this.handler?.({ type: 'permission', state: this.permissionState });
+      }
+    }
+    // A foreground grant can start a watch while the background OS answer is
+    // pending. When that answer grants the background scope, move the existing
+    // subscription to the task; a second foreground permission event would be
+    // false because foreground capability has not changed.
+    if (scope === 'background' && !hadBackgroundGrant && this.backgroundState === 'granted'
+        && activeSub !== null && this.currentSub === activeSub && this.backgroundIntent) {
+      this.removeWatch?.();
+      this.removeWatch = null;
+      this.startFixes(activeSub);
     }
   }
 
-  private async startForegroundWatch(sub: number): Promise<void> {
+  private async startForegroundWatch(sub: number, afterBackgroundFailure = false): Promise<void> {
     try {
       const watch = await Location.watchPositionAsync(
         { accuracy: OS_ACCURACY },
         (location) => this.emitFix(location, sub),
         (error: unknown) => console.warn(`location adapter: watch error ${String(error)}`),
       );
-      if (this.currentSub !== sub) {
-        watch.remove(); // stopped before the watch resolved — no orphan stream
+      if (this.currentSub !== sub || (!afterBackgroundFailure && this.backgroundIntent && this.backgroundState === 'granted')) {
+        watch.remove(); // stopped or superseded before the watch resolved
         return;
       }
       this.removeWatch = () => watch.remove();

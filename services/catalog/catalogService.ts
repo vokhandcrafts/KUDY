@@ -168,6 +168,16 @@ function projectNearbyOffer(value: unknown, preference: readonly string[]): Near
   if (!core) return null;
   if (core.ref.kind === 'guide') {
     if (typeof core.ref.route_id !== 'string' || core.ref.route_id.length === 0) return null;
+    const rawPoints = (value as Record<string, unknown>).preview_points;
+    const previewPoints = Array.isArray(rawPoints) && rawPoints.length <= 200
+      ? rawPoints.flatMap((point: unknown) => {
+        if (!point || typeof point !== 'object' || Array.isArray(point)) return [];
+        const { lat, lng } = point as Record<string, unknown>;
+        return typeof lat === 'number' && Number.isFinite(lat) && lat >= -90 && lat <= 90 &&
+          typeof lng === 'number' && Number.isFinite(lng) && lng >= -180 && lng <= 180
+          ? [{ lat, lng }] : [];
+      })
+      : [];
     return {
       offer_id: core.offer_id,
       kind: 'guide',
@@ -181,6 +191,7 @@ function projectNearbyOffer(value: unknown, preference: readonly string[]): Near
       audio_locales: core.audio_locales,
       access: core.access,
       estimated_duration: core.estimated_duration,
+      ...(previewPoints.length > 0 ? { preview_points: previewPoints } : {}),
       // The guide's rating target is the ended session's own pinned
       // version/locale (G16.03); the card's facts never stand in for it.
       content_version: null,

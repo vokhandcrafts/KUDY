@@ -40,6 +40,7 @@ import {
   type NearbyHintState,
 } from './useNearbyController.ts';
 import type { RunState } from '../core/engine/state.ts';
+import type { NearbyOfferFacts } from '../services/catalog/types.ts';
 
 // The values the app actually ships — the loader reads the canonical file
 // and validates it through the contract checker before any test sees a number.
@@ -53,7 +54,7 @@ const BASE = { lat: 54.4, lng: 18.6 };
 const NEAR = { lat: BASE.lat + 0.002, lng: BASE.lng };
 const FAR = { lat: BASE.lat + 0.006, lng: BASE.lng };
 
-const offer = (routeId: string, access: 'free' | 'paid' | 'mixed' = 'free') => ({
+const offer = (routeId: string, access: 'free' | 'paid' | 'mixed' = 'free'): NearbyOfferFacts => ({
   offer_id: `offer-${routeId}`,
   kind: 'guide' as const,
   route_id: routeId,
@@ -103,6 +104,7 @@ interface World {
   events: GuideHintEventRecord[];
   runRef: { current: RunState };
   runListeners: Array<() => void>;
+  released: { fixes: number; audio: number };
   foregroundRef: { current: boolean };
   clock: { nowMs: number };
   subscription: number;
@@ -119,12 +121,14 @@ interface World {
 function makeWorld(options?: {
   offers?: ReturnType<typeof offer>[];
   points?: GuideHintPoint[];
+  pointsReady?: Promise<void>;
   run?: RunState;
   foreground?: boolean;
   store?: GuideHintStore;
   telemetry?: GuideHintTelemetryPort | null;
   permission?: 'granted' | 'denied';
   commercialDialogUp?: () => boolean;
+  liveRunPending?: () => boolean;
 }): World {
   const clock = { nowMs: 10_000 };
   const locationPort = new FakeLocationOsPort();
@@ -137,6 +141,17 @@ function makeWorld(options?: {
   location.setMode('city-surface');
   const audioPort = new FakeAudioPlayerPort();
   const audio = new AudioService({ createPort: () => audioPort });
+  const released = { fixes: 0, audio: 0 };
+  const registerFix = location.onRawFix.bind(location);
+  location.onRawFix = (handler) => {
+    const stop = registerFix(handler);
+    return () => { released.fixes += 1; stop(); };
+  };
+  const registerAudio = audio.onEvent.bind(audio);
+  audio.onEvent = (handler) => {
+    const stop = registerAudio(handler);
+    return () => { released.audio += 1; stop(); };
+  };
   const driver = nodeSqliteDriver();
   openDatabase(driver);
   const events: GuideHintEventRecord[] = [];
@@ -169,8 +184,10 @@ function makeWorld(options?: {
     catalog,
     store: options?.store ?? dbHintStore(driver),
     points: () => points,
+    ...(options?.pointsReady ? { pointsReady: options.pointsReady } : {}),
     values: VALUES,
     liveRun: () => runSource,
+    liveRunPending: options?.liveRunPending,
     foreground: () => foregroundRef.current,
     commercialDialogUp: options?.commercialDialogUp,
     telemetry: options?.telemetry === null ? undefined : { record: (event) => events.push(event) },
@@ -192,6 +209,7 @@ function makeWorld(options?: {
     events,
     runRef,
     runListeners,
+    released,
     foregroundRef,
     clock,
     subscription,
@@ -204,6 +222,64 @@ function makeWorld(options?: {
     points,
   };
 }
+
+test('disposing the hint composition releases fix, audio and run observers', async () => {
+  const world = makeWorld();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const ready = dwellToReady(world);
+  assert.equal(world.runListeners.length, 1);
+
+  world.binding.dispose();
+  world.binding.dispose();
+  assert.deepEqual(world.released, { fixes: 1, audio: 1 }, 'each observer releases exactly once');
+  assert.equal(world.runListeners.length, 0);
+  world.clock.nowMs += 60_000;
+  world.emitFix(FAR.lat, FAR.lng);
+  assert.deepEqual(world.storeState(), ready, 'a released raw-fix tap cannot change the old card');
+
+  await world.audio.play({ token: { kind: 'moment', ref: 'm1', seq: 1 }, path: 'bundles/x/audio/story.m4a' });
+  world.audioPort.snapshotValue = { state: 'playing', positionMs: 0, durationMs: 1000 };
+  world.audioPort.focusLoss();
+  assert.deepEqual(world.storeState(), ready, 'a released audio listener cannot change the old card');
+});
+
+test('a restored point projection reconsiders the latest fix after asynchronous hydration', async () => {
+  let finish: () => void = () => {};
+  const pointsReady = new Promise<void>((resolve) => { finish = resolve; });
+  const world = makeWorld({ points: [], offers: [offer('route-near')], pointsReady });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  world.emitFix(NEAR.lat, NEAR.lng);
+  assert.deepEqual(world.storeState(), { kind: 'hidden', reason: 'no-candidates' });
+  world.points.push({ guideId: 'route-near', lat: NEAR.lat, lng: NEAR.lng });
+  finish();
+  await pointsReady;
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(world.storeState(), { kind: 'hidden', reason: 'dwell' });
+});
+
+test('a persisted live walk awaiting recovery never presents an idle hint', async () => {
+  let pending = true;
+  const world = makeWorld({ liveRunPending: () => pending, offers: [offer('route-near')] });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  world.emitFix(NEAR.lat, NEAR.lng);
+  world.clock.nowMs += 21_000;
+  world.emitFix(NEAR.lat, NEAR.lng);
+  assert.deepEqual(world.storeState(), { kind: 'hidden', reason: 'quiet' });
+  pending = false;
+  world.emitFix(NEAR.lat, NEAR.lng);
+  assert.equal(world.storeState().kind, 'ready');
+});
+
+test('a public preview point suggests a guide before its package is installed', async () => {
+  const world = makeWorld({
+    points: [],
+    offers: [{ ...offer('route-near'), preview_points: [{ lat: BASE.lat, lng: BASE.lng }] }],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const ready = dwellToReady(world);
+  assert.deepEqual(ready.guides.map((guide) => guide.routeId), ['route-near']);
+  assert.deepEqual(world.points, [], 'the guide has no installed base projection');
+});
 
 // The db-backed GuideHintStore over the public API — the same wiring the
 // app build's composition implements (test/session-store.ts owns the shared

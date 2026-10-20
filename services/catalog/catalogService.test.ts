@@ -838,6 +838,20 @@ describe('loadNearby — the Nearby offer projection (G07.01)', () => {
     },
   ];
 
+  it('projects only valid public guide points from a pinned index', async () => {
+    const guide = {
+      ...nearbyOffer('guide-points', { kind: 'guide', route_id: 'route-near', version: '1' }, 1, 'Гід побач'),
+      preview_points: [{ lat: 54.4, lng: 18.6 }, { lat: 1000, lng: 18.6 }, null],
+    };
+    const loader = serveIndexPair(
+      [{ route_id: 'route-near', version: '1', locales: ['be'], layers: ['base'] }],
+      { offers: [guide] },
+    );
+    const state = await loadNearby({ loader, sha256 }, opts, null);
+    assert.ok(state.kind === 'ready');
+    assert.deepEqual(state.offers[0]?.preview_points, [{ lat: 54.4, lng: 18.6 }]);
+  });
+
   it('projects guide and place offers, drops the collection kind (G07.02)', async () => {
     const state = await loadNearby({ loader: fixtureLoader, sha256 }, opts, null);
     assert.equal(state.kind, 'ready');

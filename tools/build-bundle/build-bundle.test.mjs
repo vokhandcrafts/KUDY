@@ -173,6 +173,15 @@ test('AC1: lock hashes equal the committed LF blob, not a CRLF working copy', as
   assert.equal(stopsEntry.sha256, sha256Hex(blob));
 });
 
+test('a public Moment manifest rides the verified base layer for installed Nearby', async () => {
+  const out = await buildDemoFixture();
+  const root = await fsp.readFile(path.join(out, 'public/bundle/demo-route-a1/1/moments.json'));
+  const layer = await fsp.readFile(path.join(out, 'public/bundle/demo-route-a1/1/be/base/moments.json'));
+  const lock = readJson(out, 'public/bundle/demo-route-a1/1/be/base/lock.json');
+  assert.deepEqual(layer, root);
+  assert.equal(lock.find((entry) => entry.path === 'moments.json')?.sha256, sha256Hex(layer));
+});
+
 // ------------------------------------------------------------- AC2: previews
 
 test('AC2: base layer carries the serialized preview of locked stops, allowed fields only', async () => {
@@ -275,7 +284,12 @@ test('AC4: index computes availability from published content; uk stays text-onl
   const guide = index.offers.find((offer) => offer.offer_id === 'offer-guide-demo');
   assert.deepEqual(guide.availability, { text_locales: ['be', 'en', 'uk'], audio_locales: ['be', 'en'] });
   assert.equal(guide.access, 'paid');
+  assert.deepEqual(guide.preview_points, [
+    { lat: 54.3487, lng: 18.6534 },
+    { lat: 54.3512, lng: 18.652 },
+  ], 'the public index includes every stop without paid narrative');
   const place = index.offers.find((offer) => offer.offer_id === 'offer-place-1');
+  assert.equal(place.preview_points, undefined, 'only guide offers carry hint geometry');
   assert.deepEqual(place.availability, { text_locales: ['be', 'en', 'uk'], audio_locales: [] });
   assert.equal(place.access, 'free');
   const collection = index.offers.find((offer) => offer.offer_id === 'offer-collection-demo');

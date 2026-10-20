@@ -251,10 +251,13 @@ export class E2eDriver {
     return result.stdout.split(/\r?\n/).includes(`package:${pkg}`);
   }
 
-  // Deep-link launch. The URL is passed to the device shell as one
-  // single-quoted word — adb shell re-parses the command line on the device.
+  // Target this test app explicitly. Other installed builds can register the
+  // same scheme and otherwise leave Android's resolver over the test screen.
+  // The device shell re-parses the command line, so quote both arguments.
   async launchDeepLink(url) {
-    const result = await this.exec(['shell', `am start -a android.intent.action.VIEW -d ${quoteShell(url)}`]);
+    const result = await this.exec([
+      'shell', `am start -a android.intent.action.VIEW -d ${quoteShell(url)} -p ${quoteShell(this.pkg)}`,
+    ]);
     const out = result.stdout.trim();
     if (/^(Error|Security exception|Exception)/m.test(out)) {
       throw new DriverError(`launch failed for ${url}: ${out.split(/\r?\n/)[0]}`);

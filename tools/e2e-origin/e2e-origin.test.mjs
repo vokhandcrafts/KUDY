@@ -12,7 +12,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 import { readCatalogDoc } from '../../contracts/reader.mjs';
-import { validatePackage } from '../validate/validate-package.mjs';
+import { validatePackage, validateDiscoveryIndex } from '../validate/validate-package.mjs';
 import {
   E2EOriginError,
   buildE2EOrigin,
@@ -89,10 +89,27 @@ test('the production publishing path lays a valid two-route catalog (criterion 2
   for (const route of routes.values()) {
     assert.deepEqual(route.locales, ['be', 'en']);
   }
-  // the discovery pointer comes from the free-guide package (last publish)
-  assert.equal(catalog.discovery_index.path, 'discovery/e2e-city/r-e2e-free-1/index.json');
+  // The full synthetic city joins the two independently published indexes.
+  assert.equal(catalog.discovery_index.path, 'discovery/e2e-city/r-e2e-city-1/index.json');
   const indexBytes = await fsp.readFile(path.join(build.target, catalog.discovery_index.path));
   assert.equal(createHash('sha256').update(indexBytes).digest('hex'), catalog.discovery_index.sha256);
+  const index = JSON.parse(indexBytes.toString('utf8'));
+  assert.ok(index.offers.some((offer) => offer.offer_id === 'offer-guide-e2e-paid'));
+  await fsp.rm(out, { recursive: true, force: true });
+});
+
+test('the Android city publishes an uninstalled guide\'s hint points', async () => {
+  const out = tmpDir('kudy-e2e-nearby-');
+  const build = await buildE2EOrigin({ outDir: out, packages: ['paid-guide,nearby-guide,free-guide'] });
+  const catalog = JSON.parse(await fsp.readFile(path.join(build.target, 'catalog.json'), 'utf8'));
+  assert.deepEqual(catalog.routes.map((route) => route.route_id).sort(),
+    ['e2e-free-guide', 'e2e-nearby-guide', 'e2e-paid-guide']);
+  assert.equal(catalog.discovery_index.revision, 'r-e2e-city-3');
+  const index = JSON.parse(await fsp.readFile(path.join(build.target, catalog.discovery_index.path), 'utf8'));
+  assert.equal(validateDiscoveryIndex(index).ok, true);
+  const nearby = index.offers.find((offer) => offer.offer_id === 'offer-guide-e2e-nearby');
+  assert.ok(nearby);
+  assert.ok(nearby.preview_points.some((point) => point.lat === 53.903 && point.lng === 27.563));
   await fsp.rm(out, { recursive: true, force: true });
 });
 
@@ -138,6 +155,79 @@ async function listen(server) {
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   return server.address().port;
 }
+
+test('synthetic feedback endpoint authenticates and keeps revisions private per target', async () => {
+  const server = createE2EOriginServer({ root: tmpDir('kudy-e2e-feedback-') });
+  const port = await listen(server);
+  const base = `http://127.0.0.1:${port}/functions/v1/feedback`;
+  const target = { kind: 'guide', route_id: 'e2e-free-guide', version: '1', locale: 'be' };
+  const send = (path, body, secret = 'kudy-synthetic-feedback-secret') => fetch(`${base}${path}`, {
+    method: path === '' ? 'PUT' : 'POST',
+    headers: { authorization: `Bearer ${secret}`, 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  try {
+    assert.equal((await send('/read', { target }, 'wrong')).status, 401);
+    const first = { mutation_id: '00000000-0000-4000-8000-000000000001', target,
+      expected_revision: 0, score: 4, reason_codes: [], disclosure_version: 'feedback-disclosure-1' };
+    assert.deepEqual(await (await send('', first)).json(), { revision: 1, saved: true });
+    assert.deepEqual(await (await send('', first)).json(), { revision: 1, saved: true });
+    assert.deepEqual(await (await send('/read', { target })).json(),
+      { revision: 1, score: 4, reason_codes: [], deleted: false });
+    assert.equal((await send('', { ...first, mutation_id: '00000000-0000-4000-8000-000000000002' })).status, 409);
+    const remove = { mutation_id: '00000000-0000-4000-8000-000000000003', target, expected_revision: 1 };
+    assert.deepEqual(await (await send('/delete', remove)).json(), { revision: 2, deleted: true });
+    assert.deepEqual(await (await send('/read', { target })).json(),
+      { revision: 2, score: null, reason_codes: [], deleted: true });
+    assert.equal((await fetch(`http://127.0.0.1:${port}/functions/v1/feedback/list`)).status, 404);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test('synthetic feedback endpoint rejects corrupt bodies and remains usable', async () => {
+  const root = tmpDir('kudy-e2e-feedback-invalid-');
+  const server = createE2EOriginServer({ root });
+  const port = await listen(server);
+  const url = `http://127.0.0.1:${port}/functions/v1/feedback`;
+  const headers = {
+    authorization: 'Bearer kudy-synthetic-feedback-secret',
+    'content-type': 'application/json',
+  };
+  try {
+    const broken = await fetch(url, { method: 'PUT', headers, body: '{"target":' });
+    assert.equal(broken.status, 422);
+    assert.deepEqual(await broken.json(), { error: 'invalid_request' });
+    const invalidTarget = await fetch(`${url}/read`, {
+      method: 'POST', headers,
+      body: JSON.stringify({ target: { kind: 'guide', route_id: 7, version: '1', locale: 'be' } }),
+    });
+    assert.equal(invalidTarget.status, 422);
+    assert.deepEqual(await invalidTarget.json(), { error: 'invalid_target' });
+    const target = { kind: 'guide', route_id: 'e2e-free-guide', version: '1', locale: 'be' };
+    for (const [endpoint, method] of [[url, 'POST'], [`${url}/read`, 'PUT'], [`${url}/delete`, 'PUT']]) {
+      const wrongMethod = await fetch(endpoint, {
+        method, headers,
+        body: JSON.stringify({ target, mutation_id: '00000000-0000-4000-8000-000000000001',
+          expected_revision: 0, score: 4, reason_codes: [], disclosure_version: 'feedback-disclosure-1' }),
+      });
+      assert.equal(wrongMethod.status, 404, `${method} ${endpoint} must match the production method contract`);
+      assert.deepEqual(await wrongMethod.json(), { error: 'not_found' });
+    }
+    const oversized = await fetch(url, { method: 'PUT', headers, body: 'x'.repeat(8 * 1024 + 1) });
+    assert.equal(oversized.status, 413);
+    assert.deepEqual(await oversized.json(), { error: 'body_too_large' });
+    const healthy = await fetch(`${url}/read`, {
+      method: 'POST', headers,
+      body: JSON.stringify({ target }),
+    });
+    assert.equal(healthy.status, 200, 'a rejected request does not break the next operation');
+    assert.deepEqual(await healthy.json(), { revision: 0, score: null, reason_codes: [], deleted: true });
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await fsp.rm(root, { recursive: true, force: true });
+  }
+});
 
 test('the fault switch answers 404/500/stall for named files (criterion 5)', async () => {
   const build = await buildE2EOrigin({ outDir: tmpDir('kudy-e2e-fault-') });
@@ -225,6 +315,7 @@ test('parsePackageSet narrows the build and answers bad input with named diagnos
   assert.deepEqual(parsePackageSet(undefined), ['paid-guide', 'free-guide'], 'the default stays the full city');
   assert.deepEqual(parsePackageSet(['paid-guide']), ['paid-guide']);
   assert.deepEqual(parsePackageSet(['free-guide,paid-guide']), ['paid-guide', 'free-guide'], 'pinned order wins');
+  assert.deepEqual(parsePackageSet(['free-guide,nearby-guide']), ['nearby-guide', 'free-guide']);
   assert.deepEqual(parsePackageSet(['paid-guide', 'paid-guide']), ['paid-guide'], 'duplicates collapse');
   for (const [bad, code] of [
     [['paid-guide,'], 'packages-empty-entry'],

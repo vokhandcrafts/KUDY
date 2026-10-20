@@ -105,6 +105,10 @@ export interface ServicePorts {
   // filesystem/db), the run surfaces show their honest unavailable state —
   // the same rule the catalog member follows.
   readonly run?: { readonly session: RunSessionPorts };
+  // The read-only durable live-row fact. The device adapter reads the same
+  // session table that Run recovery uses; an empty in-memory surface cache
+  // after process restart must not be mistaken for an idle app.
+  readonly liveRunSession?: () => { readonly routeId: string } | null;
   // G20.20 (issue #491) — the per-route Start gate: RunSessionPorts.readiness
   // has no route argument, so the composition root binds the route at
   // surface-create time. When present, run.create overrides the session's
@@ -124,6 +128,7 @@ export interface ServicePorts {
   // controller receive the same instance; absent until the G05.03.b adapter
   // lands, in which case the place detail renders its honest no-Play state.
   readonly audio?: AudioService;
+  readonly momentAudioUriFor?: (path: string) => string | null;
   // G07.02 — the live session's moment entry (the PreviewRunSessionPort
   // idiom): true iff the live session's engine accepted the moment launch.
   // G07.03 extends it with the routed manual stop and the live-pause resume
@@ -174,6 +179,7 @@ export interface ServicePorts {
     readonly store: GuideHintStore;
     readonly values: GuideHintValues;
     readonly points: () => readonly GuideHintPoint[];
+    readonly pointsReady?: Promise<void>;
     readonly foreground?: () => boolean;
     readonly telemetry?: GuideHintTelemetryPort;
   };
@@ -185,10 +191,13 @@ export interface ServicePorts {
   readonly feedback?: {
     readonly driver: SqlDriver;
     readonly sync: FeedbackSync;
+    readonly onSyncSettled?: (listener: () => void) => () => void;
+    readonly makeMutationId?: () => string;
   };
 }
 
 export interface Services {
+  readonly dispose: () => void;
   // G06.05 (issue #280): the display locale the string catalogs render in —
   // G14.04.d (issue #305) reads it through the ui-locale store below: the
   // value the switch holds, changing without a services rebuild.
@@ -332,6 +341,7 @@ export function createServices(ports: ServicePorts): Services {
     guideHints,
     uiLocalePersistence,
     readinessFor,
+    liveRunSession,
   } = ports;
   const catalogLoader = ports.catalogLoader ?? (catalogOrigin ? createOriginCatalogLoader(catalogOrigin) : undefined);
   // MVP display-locale order: Belarusian first (21 §3.2 allowlist; G14.04.d's
@@ -376,11 +386,9 @@ export function createServices(ports: ServicePorts): Services {
   // one audio instance. Both live only with the audio port.
   let momentSeqCounter = 0;
   const rootNextMomentSeq = nextMomentSeq ?? (() => ++momentSeqCounter);
-  // G07.03 — the root's own session routing (ADR G01.02 §3.4/§3.8): the
-  // one-live-session rule (ADR G01.03 §3.1) means the cached surfaces hold
-  // at most one live walk, so the resolver finds it per call — no registry
-  // to keep in step with the engine, no second token mint. A moment token
-  // the idle controller did not mint belongs to this session's engine.
+  // G07.03 — the root's own session routing (ADR G01.02 §3.4/§3.8): a
+  // recovered surface owns the engine. Before that async recovery settles,
+  // the durable live-row fact blocks a standalone Moment launch.
   const liveSurfaceController = (): ControllerStore<RunControllerState> | null => {
     for (const surfaceStore of runSurfaces.values()) {
       const surface = surfaceStore.getState();
@@ -419,8 +427,10 @@ export function createServices(ports: ServicePorts): Services {
   const momentPlay = audio
     ? createMomentPlayController({
         audio,
+        ...(ports.momentAudioUriFor ? { audioUriFor: ports.momentAudioUriFor } : {}),
         nextSeq: rootNextMomentSeq,
         sessionMoment: sessionMoment ?? rootSessionMoment,
+        hasLiveSession: () => liveSurfaceController() !== null || (liveRunSession?.() ?? null) !== null,
         now: now ?? (() => Date.now()),
       })
     : undefined;
@@ -428,9 +438,24 @@ export function createServices(ports: ServicePorts): Services {
   // structural run source, memoized per resolved store: the controller
   // re-attaches its change subscription only when the live surface changes.
   let liveRunWrapper: { readonly store: ControllerStore<RunControllerState>; readonly source: NearbyHintRunSource } | null = null;
+  let pendingRunWrapper: { readonly store: ControllerStore<RunSurfaceState>; readonly source: NearbyHintRunSource } | null = null;
   const liveRunSource = (): NearbyHintRunSource | null => {
     const store = liveSurfaceController();
-    if (store === null) return null;
+    if (store === null) {
+      const routeId = liveRunSession?.()?.routeId;
+      const pending = routeId ? runSurfaces.get(routeId) : undefined;
+      if (pending?.getState().status !== 'loading') return null;
+      if (pendingRunWrapper === null || pendingRunWrapper.store !== pending) {
+        pendingRunWrapper = {
+          store: pending,
+          source: {
+            run: { phase: 'Idle' },
+            subscribe: (listener) => pending.subscribe(listener),
+          },
+        };
+      }
+      return pendingRunWrapper.source;
+    }
     if (liveRunWrapper === null || liveRunWrapper.store !== store) {
       liveRunWrapper = {
         store,
@@ -458,8 +483,10 @@ export function createServices(ports: ServicePorts): Services {
           catalog: catalogService,
           store: guideHints.store,
           points: guideHints.points,
+          ...(guideHints.pointsReady ? { pointsReady: guideHints.pointsReady } : {}),
           values: guideHints.values,
           liveRun: liveRunSource,
+          liveRunPending: () => liveSurfaceController() === null && (liveRunSession?.() ?? null) !== null,
           ...(guideHints.foreground ? { foreground: guideHints.foreground } : {}),
           ...(guideHints.telemetry ? { telemetry: guideHints.telemetry } : {}),
           ...(now ? { now } : {}),
@@ -472,7 +499,9 @@ export function createServices(ports: ServicePorts): Services {
     ? createFeedbackController({
         driver: ports.feedback.driver,
         sync: ports.feedback.sync,
+        ...(ports.feedback.onSyncSettled ? { onSyncSettled: ports.feedback.onSyncSettled } : {}),
         repository: feedbackRepository,
+        ...(ports.feedback.makeMutationId ? { makeMutationId: ports.feedback.makeMutationId } : {}),
         ...(now ? { now } : {}),
       })
     : undefined;
@@ -620,7 +649,8 @@ export function createServices(ports: ServicePorts): Services {
   if (discoveryController) {
     uiLocale.subscribe(() => discoveryController.getState().setCriteriaLocale(uiLocale.current()));
   }
-  return {
+  const services: Services = {
+    dispose: () => hints?.dispose(),
     // G14.04.d — the display locale reads through the ui-locale store (the
     // L02 switch): a getter, so the screens' per-render uiStrings(...) sees
     // the switched value without a services rebuild.
@@ -748,4 +778,10 @@ export function createServices(ports: ServicePorts): Services {
       controller: discoveryController,
     },
   };
+  // Root startup begins recovery even when navigation opens Place first.
+  // The durable fact above refuses Moment takeover until this async surface
+  // becomes ready; Run re-entry receives the same cached surface.
+  const live = liveRunSession?.();
+  if (live) services.run?.create(live.routeId);
+  return services;
 }

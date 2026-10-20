@@ -847,6 +847,14 @@ describe("G06.05 accessibility and honest failures (issue #280)", () => {
     );
   });
 
+  test("G23.05: a live location revocation redraws Run without another run-state event", async () => {
+    const env = await mountedRunBe();
+    expect(screen.queryByTestId("run-gps-denied")).toBeNull();
+    act(() => env.locationPort.reportPermission("denied"));
+    await screen.findByTestId("run-gps-denied");
+    expect(screen.getByText("Кожная гісторыя запускаецца рукамі з карткі кропкі")).toBeTruthy();
+  });
+
   test("AC5: a failed story play is announced — the suspended banner names the manual path", async () => {
     const world = makeRunSession();
     await mountedRunSoundingStop2(world);
@@ -862,6 +870,8 @@ describe("G06.05 accessibility and honest failures (issue #280)", () => {
     expect(screen.getByText("Кожная гісторыя запускаецца рукамі з карткі кропкі")).toBeTruthy();
     // The label set stays complete: the same surface still reads in EN (AC1).
     expect(screen.getByTestId("btn-run-end").props.accessibilityRole).toBe("button");
+    fireEvent.press(screen.getByTestId("btn-run-continue-guide"));
+    await waitFor(() => expect(screen.queryByTestId("run-autoplay-suspended")).toBeNull());
   });
 
   test("AC4: the restored walk announces itself and names the lost tier", async () => {

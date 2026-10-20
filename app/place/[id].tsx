@@ -9,7 +9,7 @@
 // State rendering only: every decision lives in the controllers (19 §4.2);
 // the physical playback fact arrives through the binding's read (09 §6.3,
 // the run surface's `playback` idiom), never a services import.
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { Link, useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -36,6 +36,7 @@ import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
 import { screenStyles } from "../../components/screen-styles";
 import { tokens } from "../../components/design-tokens";
+import { useVisibleMomentPlayback, type VisibleMoment } from "../../components/use-visible-moment-playback";
 
 const styles = StyleSheet.create({
   // G06.10.b: the interface text renders the UI family (canon §3, Golos
@@ -126,33 +127,21 @@ const styles = StyleSheet.create({
   },
 });
 
-// The card's live state from the ONE player's computed fact (09 §6.3): any
-// owner counts — the controller's own launch, a routed takeover or a
-// session-mirrored moment of the same moment_id.
-function momentLiveState(
-  playback: ReturnType<MomentPlayBinding["playback"]> | null,
-  momentId: string,
-): "playing" | "paused" | null {
-  if (playback === null) return null;
-  if (playback.kind !== "playing" && playback.kind !== "paused") return null;
-  const token = playback.token;
-  if (token === null || token.kind !== "moment" || token.ref !== momentId) return null;
-  return playback.kind;
-}
-
 function MomentCard({
   moment,
   momentPlay,
+  playback,
   strings,
 }: {
   moment: MomentFact;
   momentPlay: MomentPlayBinding;
+  playback: VisibleMoment;
   strings: ReturnType<typeof placeDetailStrings>;
 }) {
   // The refusal note is this card's local UI state: the outcome's named
   // reason, never a second copy of the player's truth.
   const [refusal, setRefusal] = useState<string | null>(null);
-  const live = momentLiveState(momentPlay.playback(), moment.momentId);
+  const live = playback?.momentId === moment.momentId ? playback.kind : null;
   return (
     <View style={styles.card} testID={`place-moment-${moment.momentId}`}>
       <ScaledText style={styles.cardLabel}>{strings.teaserLabel}</ScaledText>
@@ -228,6 +217,7 @@ export default function PlaceDetail() {
   const locale = useUiLocale();
   const params = useLocalSearchParams<{ id: string }>();
   const placeId = typeof params.id === "string" ? params.id : "";
+  const pathname = usePathname();
   // One binding per open (the Nearby surface's pattern); the moment play
   // binding is the app-level singleton — the playback survives navigation.
   const binding = useMemo(
@@ -242,6 +232,7 @@ export default function PlaceDetail() {
   // renders beside the cards, not a silent revert to idle.
   const momentState = useStoreState(momentPlay?.store);
   const playFailure = momentState !== null && momentState.kind === "failed" ? momentState : null;
+  const playback = useVisibleMomentPlayback(momentPlay, pathname, placeId);
   // G06.05 (issue #280, AC1): the display locale, not a hard-code.
   const strings = placeDetailStrings(locale);
   // G06.10 (issue #432): the back word is the shared chrome catalog's — the
@@ -365,7 +356,8 @@ export default function PlaceDetail() {
               </ScaledText>
             ) : (
               state.moments.map((moment) => (
-                <MomentCard key={moment.momentId} moment={moment} momentPlay={momentPlay} strings={strings} />
+                <MomentCard key={moment.momentId} moment={moment} momentPlay={momentPlay}
+                  playback={playback} strings={strings} />
               ))
             )}
           </>
