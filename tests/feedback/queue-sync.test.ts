@@ -272,6 +272,22 @@ test('mutations older than seven days stop auto-retry until explicit reconfirmat
   assert.equal((transport.calls[0].body as { mutation_id: string }).mutation_id, M1);
 });
 
+test('a crash-recovered sending mutation older than seven days requires reconfirmation before transport', async () => {
+  const driver = openIdentifiedStore();
+  queueOne(driver, NOW - 8 * 24 * 3600 * 1000);
+  driver.prepare("UPDATE feedback_outbox SET transport_state = 'sending' WHERE mutation_id = ?").run(M1);
+  driver.prepare("UPDATE feedback_local SET state = 'sending' WHERE target = ?").run(formatTargetKey(GUIDE_TARGET));
+  const transport = scriptedTransport(() => {
+    throw new Error('expired sending work must not reach transport');
+  });
+  const report = await makeSync(driver, secretBox(SECRET), transport).flush();
+  assert.equal(report.stoppedStale, 1);
+  assert.equal(report.dispatched, 0);
+  assert.equal(transport.calls.length, 0);
+  assert.equal(rawOutbox(driver)[0].transport_state, 'action_required');
+  assert.equal(rawLocal(driver, GUIDE_TARGET)!.state, 'action_required');
+});
+
 test('a corrupt stored payload answers action-required instead of crashing the flush', async () => {
   const driver = openIdentifiedStore();
   queueOne(driver);

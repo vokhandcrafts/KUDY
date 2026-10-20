@@ -102,6 +102,10 @@ class FakeDirectory extends Entry {
     const target = this.fs.dirs.has(destination.path)
       ? `${destination.path}/${this.name}`
       : destination.path;
+    // The native `moveTo` runs without REPLACE_EXISTING (FileSystemPath.kt:158):
+    // an existing target — the nested `b/a` included — throws instead of
+    // merging its old bytes under the moved tree.
+    if (this.fs.dirs.has(target) || this.fs.files.has(target)) throw new Error(`exists ${target}`);
     for (const key of [...this.fs.files.keys()]) {
       if (key.startsWith(`${this.path}/`)) {
         this.fs.files.set(`${target}${key.slice(this.path.length)}`, this.fs.files.get(key)!);

@@ -94,6 +94,15 @@ test('criterion 3: the stand-in keeps Expo semantics — File.exists is isFile, 
   new Directory('/root/b/x').move(new Directory('/root/b/y'));
   assert.deepEqual([...fs.files.get('/root/b/y/stops.json')!], [...utf8('x-bytes')]);
   assert.equal(new Directory('/root/b/x').exists, false);
+
+  // Neither does it merge into an existing nested target: the native move
+  // runs without REPLACE_EXISTING and refuses (`c/y` already there).
+  fs.dirs.add('/root/c');
+  fs.dirs.add('/root/c/y');
+  fs.files.set('/root/c/y/stale.json', utf8('stale'));
+  assert.throws(() => new Directory('/root/b/y').move(new Directory('/root/c')), /exists/);
+  assert.deepEqual([...fs.files.get('/root/b/y/stops.json')!], [...utf8('x-bytes')], 'a refused move leaves the source in place');
+  assert.deepEqual([...fs.files.get('/root/c/y/stale.json')!], [...utf8('stale')], 'the existing target keeps its bytes');
 });
 
 test('criterion 2: reactivating a corrupted layer replaces it at the final path, never nests', async () => {

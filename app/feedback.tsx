@@ -165,7 +165,7 @@ export default function FeedbackForm() {
   const insets = useSafeAreaInsets();
   const open = feedback !== null && target !== null && form.kind === "open" ? form : null;
   return (
-    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL }]} testID="screen-Feedback">
+    <View style={[screenStyles.screen, { paddingTop: insets.top + tokens.spaceL, paddingBottom: insets.bottom + tokens.spaceL }]} testID="screen-Feedback">
       <BackButton label={chrome.back} testID="btn-feedback-back" />
       {feedback === null ? (
         <ScaledText style={styles.hint} testID="feedback-unavailable">

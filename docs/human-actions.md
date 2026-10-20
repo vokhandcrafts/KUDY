@@ -21,6 +21,14 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 Што зрабіць: параўнай [дзесяць мабільных напрамкаў](design/brand/outputs/brand-splash-directions-2026-10-19/all-ten.png) і [іх тлумачэнні](design/brand/outputs/brand-splash-directions-2026-10-19/README.md) у PR #802. Назаві адзін або некалькі для развіцця ў пару «чаканне → Explore»; асобна вызначы іконку B05 і тэксты B06. Ранейшыя заставы з асобным драконам і мясцовай панарамай адхіленыя.
 PR: https://github.com/vokhandcrafts/KUDY/pull/802
 
+### 2026-10-17 — змержы follow-up PR #814: праўкі рэв'ю G20.31
+Што зрабіць: прачытай раздзелы «Код-рэвю» і «Суддзя» у [выніку G20.31](agent-tasks/results/G20.31.md) (2 low-праўкі рэв'ю; суддзя ✅ APPROVED) і змержы PR — гэта дадатак да #799, бо #799 быў змержаны раней, чым праўкі рэв'ю трапілі ў main.
+PR: https://github.com/vokhandcrafts/KUDY/pull/814
+
+### 2026-10-17 — правер Android-задачы і выпуск
+Што зрабіць: правер у GitHub Project, што #804–#813 бачныя ў backlog без запуску выканаўцаў; токен гэтай сесіі не мае `read:project`. Звяры дэкларацыі фонавай лакацыі, усіх выкарыстаных тыпаў foreground service і Data safety з [матрыцай аўдыту](audits/android-google-guidelines.md). Перадай вынік праверкі production AAB і Play Console, каб закрыць пункты доказамі.
+PR: https://github.com/vokhandcrafts/KUDY/pull/803 · [Індэкс задач](agent-tasks/android-play-readiness/README.md) · Issues: [#804](https://github.com/vokhandcrafts/KUDY/issues/804), [#805](https://github.com/vokhandcrafts/KUDY/issues/805), [#806](https://github.com/vokhandcrafts/KUDY/issues/806), [#807](https://github.com/vokhandcrafts/KUDY/issues/807), [#808](https://github.com/vokhandcrafts/KUDY/issues/808), [#809](https://github.com/vokhandcrafts/KUDY/issues/809), [#810](https://github.com/vokhandcrafts/KUDY/issues/810), [#811](https://github.com/vokhandcrafts/KUDY/issues/811), [#812](https://github.com/vokhandcrafts/KUDY/issues/812), [#813](https://github.com/vokhandcrafts/KUDY/issues/813)
+
 ### 2026-10-17 — узгадні налады KUDY і правер backlog G27
 Што зрабіць: праглядзі светлы і цёмны макеты ды канцэпцыю ў PR #790 і запішы ў [#781](https://github.com/vokhandcrafts/KUDY/issues/781), якія часткі прынятыя або адкладзеныя. Правер, што #780–#789 і #798 бачныя ў backlog GitHub Project; токен гэтай сесіі не мае `read:project`.
 PR: https://github.com/vokhandcrafts/KUDY/pull/790 · Issue: [#781](https://github.com/vokhandcrafts/KUDY/issues/781)
@@ -32,10 +40,6 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/763 · Issue: [#670](https://gith
 ### 2026-10-15 — усталюй дэманстрацыйную версію KUDY
 Што зрабіць: збяры дэма-APK паводле [інструкцыі](demo-preview.md), затым усталюй `android/app/build/outputs/apk/release/app-release.apk` на Android-прыладу. Гэта асобны пакет `by.kudy.app.demo` з прыкладным кантэнтам; не выкарыстоўвай яго маршрут для навігацыі.
 PR: https://github.com/vokhandcrafts/KUDY/pull/760
-
-### 2026-10-14 — вырашы перадумовы для Android E2E #664
-Што зрабіць: прачытай [блокер у #664](https://github.com/vokhandcrafts/KUDY/issues/664#issuecomment-6175820694) і вырашы, ці вылучыць асобныя задачы на падключэнне Discovery, падказак гідаў і водгукаў у Android, а таксама на тэставы сервер водгукаў, ці пашырыць абсяг #664. Пасля гатоўнасці неабходных інтэграцый вярні #664 у чаргу.
-PR: https://github.com/vokhandcrafts/KUDY/pull/756 · Issue: [#664](https://github.com/vokhandcrafts/KUDY/issues/664)
 
 ### 2026-10-14 — правер бачнасць #751 і #752 на дошцы
 Што зрабіць: адкрый GitHub Project і правер, што #751 бачны ў backlog, а #752 — у працы. Калі картак няма, дадай іх у адпаведныя калонкі, не змяняючы статусных пазнак issues. CLI-токен выканаўцы не мае `read:project`, а публічны прагляд не паказвае дошку.

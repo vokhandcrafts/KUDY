@@ -1,0 +1,171 @@
+uses-permission#android.permission.ACCESS_BACKGROUND_LOCATION
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:2:3-82
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:2:20-80
+uses-permission#android.permission.ACCESS_COARSE_LOCATION
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:3:3-78
+MERGED from [:maplibre_maplibre-react-native] <checkout>\node_modules\@maplibre\maplibre-react-native\android\build\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:8:5-81
+MERGED from [:maplibre_maplibre-react-native] <checkout>\node_modules\@maplibre\maplibre-react-native\android\build\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:8:5-81
+MERGED from [org.maplibre.gl:android-sdk-opengl:13.2.0] <gradle-cache>\caches\8.14.3\transforms\301bbfa7120f5a24e8573c3810338ef1\transformed\android-sdk-opengl-13.2.0\AndroidManifest.xml:14:5-81
+MERGED from [org.maplibre.gl:android-sdk-opengl:13.2.0] <gradle-cache>\caches\8.14.3\transforms\301bbfa7120f5a24e8573c3810338ef1\transformed\android-sdk-opengl-13.2.0\AndroidManifest.xml:14:5-81
+MERGED from [host.exp.exponent:expo.modules.location:19.0.8] <gradle-cache>\caches\8.14.3\transforms\8f5115a44fdf7b9e9c03e76553a51ca7\transformed\expo.modules.location-19.0.8\AndroidManifest.xml:7:5-81
+MERGED from [host.exp.exponent:expo.modules.location:19.0.8] <gradle-cache>\caches\8.14.3\transforms\8f5115a44fdf7b9e9c03e76553a51ca7\transformed\expo.modules.location-19.0.8\AndroidManifest.xml:7:5-81
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:3:20-76
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:4:3-76
+MERGED from [:maplibre_maplibre-react-native] <checkout>\node_modules\@maplibre\maplibre-react-native\android\build\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:9:5-79
+MERGED from [:maplibre_maplibre-react-native] <checkout>\node_modules\@maplibre\maplibre-react-native\android\build\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:9:5-79
+MERGED from [org.maplibre.gl:android-sdk-opengl:13.2.0] <gradle-cache>\caches\8.14.3\transforms\301bbfa7120f5a24e8573c3810338ef1\transformed\android-sdk-opengl-13.2.0\AndroidManifest.xml:15:5-79
+MERGED from [org.maplibre.gl:android-sdk-opengl:13.2.0] <gradle-cache>\caches\8.14.3\transforms\301bbfa7120f5a24e8573c3810338ef1\transformed\android-sdk-opengl-13.2.0\AndroidManifest.xml:15:5-79
+MERGED from [host.exp.exponent:expo.modules.location:19.0.8] <gradle-cache>\caches\8.14.3\transforms\8f5115a44fdf7b9e9c03e76553a51ca7\transformed\expo.modules.location-19.0.8\AndroidManifest.xml:8:5-79
+MERGED from [host.exp.exponent:expo.modules.location:19.0.8] <gradle-cache>\caches\8.14.3\transforms\8f5115a44fdf7b9e9c03e76553a51ca7\transformed\expo.modules.location-19.0.8\AndroidManifest.xml:8:5-79
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:4:20-74
+uses-permission#android.permission.ACCESS_WIFI_STATE
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:5:3-93
+REJECTED from [org.maplibre.gl:android-sdk-opengl:13.2.0] <gradle-cache>\caches\8.14.3\transforms\301bbfa7120f5a24e8573c3810338ef1\transformed\android-sdk-opengl-13.2.0\AndroidManifest.xml:13:5-76
+	tools:node
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:5:72-91
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:5:20-71
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:6:3-74
+MERGED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:9:5-77
+MERGED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:9:5-77
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:6:20-72
+uses-permission#android.permission.FOREGROUND_SERVICE_LOCATION
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:7:3-83
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:7:20-81
+uses-permission#android.permission.FOREGROUND_SERVICE_MICROPHONE
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:8:3-105
+	tools:node
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:8:84-103
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:8:20-83
+uses-permission#android.permission.INTERNET
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:9:3-64
+MERGED from [:maplibre_maplibre-react-native] <checkout>\node_modules\@maplibre\maplibre-react-native\android\build\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:7:5-67
+MERGED from [:maplibre_maplibre-react-native] <checkout>\node_modules\@maplibre\maplibre-react-native\android\build\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:7:5-67
+MERGED from [org.maplibre.gl:android-sdk-opengl:13.2.0] <gradle-cache>\caches\8.14.3\transforms\301bbfa7120f5a24e8573c3810338ef1\transformed\android-sdk-opengl-13.2.0\AndroidManifest.xml:11:5-67
+MERGED from [org.maplibre.gl:android-sdk-opengl:13.2.0] <gradle-cache>\caches\8.14.3\transforms\301bbfa7120f5a24e8573c3810338ef1\transformed\android-sdk-opengl-13.2.0\AndroidManifest.xml:11:5-67
+MERGED from [host.exp.exponent:expo.modules.filesystem:19.0.24] <gradle-cache>\caches\8.14.3\transforms\357e51694f8c992b5fe81a5a59ab0269\transformed\expo.modules.filesystem-19.0.24\AndroidManifest.xml:8:5-67
+MERGED from [host.exp.exponent:expo.modules.filesystem:19.0.24] <gradle-cache>\caches\8.14.3\transforms\357e51694f8c992b5fe81a5a59ab0269\transformed\expo.modules.filesystem-19.0.24\AndroidManifest.xml:8:5-67
+MERGED from [com.revenuecat.purchases:purchases:10.20.0] <gradle-cache>\caches\8.14.3\transforms\609b5e38cee881eeed2546fc0cae5199\transformed\purchases-10.20.0\AndroidManifest.xml:7:5-67
+MERGED from [com.revenuecat.purchases:purchases:10.20.0] <gradle-cache>\caches\8.14.3\transforms\609b5e38cee881eeed2546fc0cae5199\transformed\purchases-10.20.0\AndroidManifest.xml:7:5-67
+MERGED from [com.google.android.datatransport:transport-backend-cct:3.1.8] <gradle-cache>\caches\8.14.3\transforms\8aae4bde6a46c337344d1cc4aa181d27\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:25:5-67
+MERGED from [com.google.android.datatransport:transport-backend-cct:3.1.8] <gradle-cache>\caches\8.14.3\transforms\8aae4bde6a46c337344d1cc4aa181d27\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:25:5-67
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:9:20-62
+uses-permission#android.permission.MODIFY_AUDIO_SETTINGS
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:10:3-77
+MERGED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:8:5-80
+MERGED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:8:5-80
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:10:20-75
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:11:3-97
+REJECTED from [host.exp.exponent:expo.modules.filesystem:19.0.24] <gradle-cache>\caches\8.14.3\transforms\357e51694f8c992b5fe81a5a59ab0269\transformed\expo.modules.filesystem-19.0.24\AndroidManifest.xml:10:5-80
+	tools:node
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:11:76-95
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:11:20-75
+uses-permission#android.permission.RECORD_AUDIO
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:12:3-88
+REJECTED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:7:5-71
+	tools:node
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:12:67-86
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:12:20-66
+uses-permission#android.permission.SYSTEM_ALERT_WINDOW
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:13:3-95
+	tools:node
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:13:74-93
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:13:20-73
+uses-permission#android.permission.USE_BIOMETRIC
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:14:3-89
+REJECTED from [androidx.biometric:biometric:1.1.0] <gradle-cache>\caches\8.14.3\transforms\f3a936658a7ee53bcf23bf0a991d2afe\transformed\biometric-1.1.0\AndroidManifest.xml:24:5-72
+	tools:node
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:14:68-87
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:14:20-67
+uses-permission#android.permission.USE_FINGERPRINT
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:15:3-91
+REJECTED from [androidx.biometric:biometric:1.1.0] <gradle-cache>\caches\8.14.3\transforms\f3a936658a7ee53bcf23bf0a991d2afe\transformed\biometric-1.1.0\AndroidManifest.xml:27:5-74
+	tools:node
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:15:70-89
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:15:20-69
+uses-permission#android.permission.VIBRATE
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:16:3-83
+	tools:node
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:16:62-81
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:16:20-61
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:17:3-98
+REJECTED from [host.exp.exponent:expo.modules.filesystem:19.0.24] <gradle-cache>\caches\8.14.3\transforms\357e51694f8c992b5fe81a5a59ab0269\transformed\expo.modules.filesystem-19.0.24\AndroidManifest.xml:9:5-81
+	tools:node
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:17:77-96
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:17:20-76
+service#expo.modules.audio.service.AudioRecordingService
+ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:29:5-99
+REJECTED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:21:9-24:58
+	tools:node
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:29:78-97
+	android:name
+		ADDED from <checkout>\android\app\src\main\AndroidManifest.xml:29:14-77
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from [org.maplibre.gl:android-sdk-opengl:13.2.0] <gradle-cache>\caches\8.14.3\transforms\301bbfa7120f5a24e8573c3810338ef1\transformed\android-sdk-opengl-13.2.0\AndroidManifest.xml:12:5-79
+MERGED from [androidx.media3:media3-exoplayer:1.8.0] <gradle-cache>\caches\8.14.3\transforms\20f69c4684fdd820249c54c63d219927\transformed\media3-exoplayer-1.8.0\AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-exoplayer:1.8.0] <gradle-cache>\caches\8.14.3\transforms\20f69c4684fdd820249c54c63d219927\transformed\media3-exoplayer-1.8.0\AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-common:1.8.0] <gradle-cache>\caches\8.14.3\transforms\653ce7b45c5f666b6664599dffd73539\transformed\media3-common-1.8.0\AndroidManifest.xml:22:5-79
+MERGED from [androidx.media3:media3-common:1.8.0] <gradle-cache>\caches\8.14.3\transforms\653ce7b45c5f666b6664599dffd73539\transformed\media3-common-1.8.0\AndroidManifest.xml:22:5-79
+MERGED from [com.revenuecat.purchases:purchases:10.20.0] <gradle-cache>\caches\8.14.3\transforms\609b5e38cee881eeed2546fc0cae5199\transformed\purchases-10.20.0\AndroidManifest.xml:8:5-79
+MERGED from [com.revenuecat.purchases:purchases:10.20.0] <gradle-cache>\caches\8.14.3\transforms\609b5e38cee881eeed2546fc0cae5199\transformed\purchases-10.20.0\AndroidManifest.xml:8:5-79
+MERGED from [com.google.android.datatransport:transport-backend-cct:3.1.8] <gradle-cache>\caches\8.14.3\transforms\8aae4bde6a46c337344d1cc4aa181d27\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:24:5-79
+MERGED from [com.google.android.datatransport:transport-backend-cct:3.1.8] <gradle-cache>\caches\8.14.3\transforms\8aae4bde6a46c337344d1cc4aa181d27\transformed\transport-backend-cct-3.1.8\AndroidManifest.xml:24:5-79
+MERGED from [com.google.android.datatransport:transport-runtime:3.1.8] <gradle-cache>\caches\8.14.3\transforms\7f62e1e8ca06e8a8a9bb26c1be353861\transformed\transport-runtime-3.1.8\AndroidManifest.xml:22:5-79
+MERGED from [com.google.android.datatransport:transport-runtime:3.1.8] <gradle-cache>\caches\8.14.3\transforms\7f62e1e8ca06e8a8a9bb26c1be353861\transformed\transport-runtime-3.1.8\AndroidManifest.xml:22:5-79
+	android:name
+		ADDED from [org.maplibre.gl:android-sdk-opengl:13.2.0] <gradle-cache>\caches\8.14.3\transforms\301bbfa7120f5a24e8573c3810338ef1\transformed\android-sdk-opengl-13.2.0\AndroidManifest.xml:12:22-76
+uses-permission#android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK
+ADDED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:10:5-92
+	android:name
+		ADDED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:10:22-89
+service#expo.modules.audio.service.AudioControlsService
+ADDED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:13:9-20:19
+	android:exported
+		ADDED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:15:13-37
+	android:foregroundServiceType
+		ADDED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:16:13-58
+	android:name
+		ADDED from [expo.modules.audio:expo.modules.audio:1.1.1] <gradle-cache>\caches\8.14.3\transforms\960b0838e47578d191b5be729fe16307\transformed\expo.modules.audio-1.1.1\AndroidManifest.xml:14:13-75
+uses-permission#com.android.vending.BILLING
+ADDED from [com.android.billingclient:billing:8.3.0] <gradle-cache>\caches\8.14.3\transforms\a5187bd6cc9409e003a8c28b8e958cc3\transformed\billing-8.3.0\AndroidManifest.xml:10:5-67
+	android:name
+		ADDED from [com.android.billingclient:billing:8.3.0] <gradle-cache>\caches\8.14.3\transforms\a5187bd6cc9409e003a8c28b8e958cc3\transformed\billing-8.3.0\AndroidManifest.xml:10:22-64
+permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.15.0] <gradle-cache>\caches\8.14.3\transforms\392415e7990c98e6748787eaede74a2c\transformed\core-1.15.0\AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.15.0] <gradle-cache>\caches\8.14.3\transforms\392415e7990c98e6748787eaede74a2c\transformed\core-1.15.0\AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.15.0] <gradle-cache>\caches\8.14.3\transforms\392415e7990c98e6748787eaede74a2c\transformed\core-1.15.0\AndroidManifest.xml:23:9-81
+permission#by.kudy.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.15.0] <gradle-cache>\caches\8.14.3\transforms\392415e7990c98e6748787eaede74a2c\transformed\core-1.15.0\AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.15.0] <gradle-cache>\caches\8.14.3\transforms\392415e7990c98e6748787eaede74a2c\transformed\core-1.15.0\AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.15.0] <gradle-cache>\caches\8.14.3\transforms\392415e7990c98e6748787eaede74a2c\transformed\core-1.15.0\AndroidManifest.xml:23:9-81
+uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.15.0] <gradle-cache>\caches\8.14.3\transforms\392415e7990c98e6748787eaede74a2c\transformed\core-1.15.0\AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.15.0] <gradle-cache>\caches\8.14.3\transforms\392415e7990c98e6748787eaede74a2c\transformed\core-1.15.0\AndroidManifest.xml:26:22-94
+uses-permission#by.kudy.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.15.0] <gradle-cache>\caches\8.14.3\transforms\392415e7990c98e6748787eaede74a2c\transformed\core-1.15.0\AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.15.0] <gradle-cache>\caches\8.14.3\transforms\392415e7990c98e6748787eaede74a2c\transformed\core-1.15.0\AndroidManifest.xml:26:22-94

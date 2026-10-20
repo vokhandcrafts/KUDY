@@ -249,6 +249,9 @@ export function checkIndexRules(index) {
     if (offer.city_id !== index.city_id) errors.push({ rule: 'foreign-city', path: offer.offer_id });
     const d = offer.estimated_duration;
     if (d && d.min_minutes > d.max_minutes) errors.push({ rule: 'estimated_duration_range', path: offer.offer_id });
+    if (offer.preview_points !== undefined && offer.ref?.kind !== 'guide') {
+      errors.push({ rule: 'preview-points-guide-only', path: offer.offer_id });
+    }
   }
   const offerByRef = new Map((index.offers ?? []).map((o) => [JSON.stringify(o.ref), o]));
   for (const collection of index.collections ?? []) {

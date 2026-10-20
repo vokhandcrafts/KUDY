@@ -44,7 +44,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { buildBundle, canonicalJson, sha256Hex } from '../build-bundle/build-bundle.mjs';
 import { publishCatalog } from '../publish-catalog/publish-catalog.mjs';
 import { readCatalogDoc } from '../../contracts/reader.mjs';
+import { validateDiscoveryIndex } from '../validate/validate-package.mjs';
 import { resolveStaticFile } from '../serve-static.mjs';
+import { createFeedbackHandler } from './feedback.mjs';
 
 export class E2EOriginError extends Error {
   constructor(code, ids = {}) {
@@ -60,11 +62,11 @@ const fail = (code, ids) => {
 };
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const FIXTURE_PACKAGES = ['paid-guide', 'free-guide'];
+const FIXTURE_PACKAGES = ['paid-guide', 'nearby-guide', 'free-guide'];
+const DEFAULT_PACKAGES = ['paid-guide', 'free-guide'];
 // Publish order matters: catalog.json merges routes across publishes and the
-// discovery pointer comes from the LAST publish — the free-guide package
-// owns the city offers (guide, place with the Moment, collection) that the
-// Explore journeys in G23.04–G23.06 walk through.
+// discovery pointer comes from the LAST publish. For the full two-package
+// Android city, the test origin joins the two published indexes below.
 const PINNED_NOW = '2026-10-07T00:00:00.000Z';
 
 const FAULT_KINDS = new Set(['404', '500', 'stall']);
@@ -79,7 +81,7 @@ const FAULT_PATH = /^[A-Za-z0-9._/-]+$/;
 // discovery revision and a one-package city keeps that coherent. Names must
 // be known fixture packages; the pinned publish order is preserved.
 export function parsePackageSet(values, repoRoot = REPO_ROOT) {
-  if (values === undefined || values.length === 0) return [...FIXTURE_PACKAGES];
+  if (values === undefined || values.length === 0) return [...DEFAULT_PACKAGES];
   const names = new Set();
   for (const value of values) {
     for (const entry of String(value).split(',')) {
@@ -123,7 +125,8 @@ export async function buildE2EOrigin({ outDir = 'tools/e2e-origin/build', now = 
   const outAbs = path.resolve(repoRoot, outDir);
   await fsp.mkdir(outAbs, { recursive: true });
   let last;
-  for (const pkg of parsePackageSet(packages, repoRoot)) {
+  const selected = parsePackageSet(packages, repoRoot);
+  for (const pkg of selected) {
     const staging = path.join(outAbs, 'staging', pkg);
     fs.rmSync(staging, { recursive: true, force: true });
     await buildBundle({ inDir: path.join(repoRoot, 'fixtures', 'e2e', pkg), outDir: staging });
@@ -133,7 +136,49 @@ export async function buildE2EOrigin({ outDir = 'tools/e2e-origin/build', now = 
       now,
     });
   }
-  const catalogBytes = await fsp.readFile(path.join(outAbs, 'origin', 'catalog.json'));
+  const originRoot = path.join(outAbs, 'origin');
+  if (selected.length >= 2) {
+    // The package builder deliberately checks each route's own discovery
+    // references. Assemble the synthetic city only after both packages have
+    // passed that production build and publish path; the combined pointer is
+    // pinned exactly like any other catalog index.
+    const catalogPath = path.join(originRoot, 'catalog.json');
+    const catalog = JSON.parse(await fsp.readFile(catalogPath, 'utf8'));
+    const index = async (revision) => JSON.parse(await fsp.readFile(
+      path.join(originRoot, 'discovery', 'e2e-city', revision, 'index.json'), 'utf8'));
+    const revisions = {
+      'paid-guide': 'r-e2e-paid-1',
+      'nearby-guide': 'r-e2e-nearby-1',
+      'free-guide': 'r-e2e-free-1',
+    };
+    const indexes = await Promise.all(selected.map((pkg) => index(revisions[pkg])));
+    const base = indexes[selected.indexOf('free-guide') >= 0 ? selected.indexOf('free-guide') : 0];
+    const themes = new Map(indexes.flatMap((entry) => entry.themes).map((theme) => [theme.id, theme]));
+    const revision = selected.length === 2 ? 'r-e2e-city-1' : 'r-e2e-city-3';
+    const combined = {
+      ...base,
+      revision,
+      themes: [...themes.values()],
+      offers: [base, ...indexes.filter((entry) => entry !== base)].flatMap((entry) => entry.offers),
+      collections: indexes.flatMap((entry) => entry.collections),
+    };
+    const report = validateDiscoveryIndex(combined);
+    if (!report.ok) fail('discovery-invalid', { errors: report.errors.map((error) => error.rule).join(',') });
+    const bytes = Buffer.from(`${JSON.stringify(combined, null, 2)}\n`, 'utf8');
+    const rel = `discovery/e2e-city/${revision}/index.json`;
+    const target = path.join(originRoot, rel);
+    await fsp.mkdir(path.dirname(target), { recursive: true });
+    await fsp.writeFile(target, bytes);
+    catalog.discovery_index = {
+      ...catalog.discovery_index,
+      path: rel,
+      revision,
+      bytes: bytes.length,
+      sha256: sha256Hex(bytes),
+    };
+    await fsp.writeFile(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`);
+  }
+  const catalogBytes = await fsp.readFile(path.join(originRoot, 'catalog.json'));
   const read = readCatalogDoc(JSON.parse(catalogBytes.toString('utf8')));
   if (read.status !== 'v1' || !read.ok) {
     fail('catalog-invalid', { errors: (read.errors ?? []).map((e) => e.rule).join(',') });
@@ -148,6 +193,7 @@ export async function buildE2EOrigin({ outDir = 'tools/e2e-origin/build', now = 
 
 export function createE2EOriginServer({ root, faults = new Map(), stallMs = 15000, onStall = () => {} }) {
   if (!Number.isInteger(stallMs) || stallMs < 0) fail('invalid-stall-ms', { stall_ms: stallMs });
+  const feedback = createFeedbackHandler();
   return createServer((request, response) => {
     // request.url is the origin-form request target; parse it directly — the
     // URL constructor would read a leading '//' as a protocol-relative
@@ -175,6 +221,7 @@ export function createE2EOriginServer({ root, faults = new Map(), stallMs = 1500
       response.end(canonicalJson({ fault: '500', path: faultTarget }).trimEnd());
       return;
     }
+    if (feedback(request, response, rawPath)) return;
     const serve = () => {
       // resolveStaticFile carries the platform-safe containment idiom
       // (AR-2): anything outside root answers 404, never a disk read.
@@ -266,8 +313,8 @@ async function main() {
     stallMs: args['stall-ms'],
     onStall: (target, phase) => console.log(`E2E stall ${phase}: ${target}`),
   });
-  // Loopback only: the Android emulator reaches the host through 10.0.2.2,
-  // which is an alias for the host loopback — no LAN exposure is needed.
+  // Android suites use adb reverse for this local synthetic origin. Keep the
+  // fixture and feedback endpoints on host loopback only.
   await new Promise((resolve) => server.listen(args.port, '127.0.0.1', resolve));
   console.log(formatOriginSummary({ port: args.port, build, faults, stallMs: args['stall-ms'] }));
   const shutdown = () => {
