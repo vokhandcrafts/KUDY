@@ -128,6 +128,7 @@ function makeWorld(options?: {
   telemetry?: GuideHintTelemetryPort | null;
   permission?: 'granted' | 'denied';
   commercialDialogUp?: () => boolean;
+  liveRunPending?: () => boolean;
 }): World {
   const clock = { nowMs: 10_000 };
   const locationPort = new FakeLocationOsPort();
@@ -186,6 +187,7 @@ function makeWorld(options?: {
     ...(options?.pointsReady ? { pointsReady: options.pointsReady } : {}),
     values: VALUES,
     liveRun: () => runSource,
+    liveRunPending: options?.liveRunPending,
     foreground: () => foregroundRef.current,
     commercialDialogUp: options?.commercialDialogUp,
     telemetry: options?.telemetry === null ? undefined : { record: (event) => events.push(event) },
@@ -253,6 +255,19 @@ test('a restored point projection reconsiders the latest fix after asynchronous 
   await pointsReady;
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(world.storeState(), { kind: 'hidden', reason: 'dwell' });
+});
+
+test('a persisted live walk awaiting recovery never presents an idle hint', async () => {
+  let pending = true;
+  const world = makeWorld({ liveRunPending: () => pending, offers: [offer('route-near')] });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  world.emitFix(NEAR.lat, NEAR.lng);
+  world.clock.nowMs += 21_000;
+  world.emitFix(NEAR.lat, NEAR.lng);
+  assert.deepEqual(world.storeState(), { kind: 'hidden', reason: 'quiet' });
+  pending = false;
+  world.emitFix(NEAR.lat, NEAR.lng);
+  assert.equal(world.storeState().kind, 'ready');
 });
 
 test('a public preview point suggests a guide before its package is installed', async () => {

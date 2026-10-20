@@ -28,7 +28,7 @@ import {
   createExpoAudioUriResolver,
   createExpoTeaserAudioProbe,
 } from '../services/contentRepo/expo/expo-package-store.ts';
-import { openDatabase } from '../services/db/db.ts';
+import { getLiveSession, openDatabase } from '../services/db/db.ts';
 import type { SqlDriver } from '../services/db/types.ts';
 import type { Sha256, Tier } from '../services/contentRepo/types.ts';
 import { createDeviceWakelock, type DeviceWakelock, type KeepAwakeFacility } from '../services/device-wakelock.ts';
@@ -350,6 +350,10 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
     sessionHistory: createSessionHistoryPort(driver),
     uiLocalePersistence: createUiLocalePersistence(driver),
     readinessFor: createRunReadinessFor({ driver, bundlesStore, preferredLocales }),
+    liveRunSession: () => {
+      const row = getLiveSession(driver);
+      return row ? { routeId: row.routeId } : null;
+    },
     run: {
       session: {
         location,

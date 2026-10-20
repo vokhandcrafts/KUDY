@@ -134,6 +134,9 @@ export interface NearbyHintDeps {
   // root's runSurfaces resolver. Read-only: the controller starts, stops and
   // switches nothing (19 §2.2).
   readonly liveRun: () => NearbyHintRunSource | null;
+  // A durable live row may still be loading into its Run surface after a
+  // cold start. Hints stay quiet until that session's context is available.
+  readonly liveRunPending?: () => boolean;
   // The app-foreground fact; absent, nothing is ever shown — fail closed,
   // the idiom of every optional port (AC3: hints never render in background).
   readonly foreground?: () => boolean;
@@ -319,6 +322,10 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
       unsubscribeRun?.();
       subscribedRun = runStore;
       unsubscribeRun = runStore ? runStore.subscribe(() => decide()) : null;
+    }
+    if (deps.liveRunPending?.()) {
+      hidden('quiet');
+      return;
     }
     const run: RunState = runStore ? runStore.run : { phase: 'Idle' };
     const sessionId = run.phase === 'Active' || run.phase === 'Paused' ? run.sessionId : null;
