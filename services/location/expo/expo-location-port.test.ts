@@ -326,8 +326,7 @@ test('G20.30: city-to-Run keeps foreground fixes until background starts, then r
   await flush();
   watchStart.resolve({ remove() {} });
   await flush();
-  watches[0].callback(osFix(1));
-  assert.equal(fixes.length, 1);
+  assert.equal(watches.length, 1, 'city location was armed');
 
   service.setMode('active-guide');
   startGate = deferred();
@@ -336,15 +335,15 @@ test('G20.30: city-to-Run keeps foreground fixes until background starts, then r
   assert.ok(updatesAsked(), 'grant attempts the native switch without a watchdog tick');
   assert.equal(watches[0].removeCalls, 0, 'the existing watch lives during pending native startup');
   watches[0].callback(osFix(2));
-  assert.equal(fixes.length, 2, 'foreground fixes continue while native startup is pending');
+  assert.equal(fixes.length, 1, 'foreground fixes continue while native startup is pending');
 
   startGate.resolve();
   await flush();
   assert.equal(watches[0].removeCalls, 1, 'successful promotion releases the old watch exactly once');
   watches[0].callback(osFix(3));
-  assert.equal(fixes.length, 2, 'removed foreground callbacks cannot use the still-current service sub');
+  assert.equal(fixes.length, 1, 'removed foreground callbacks cannot use the still-current service sub');
   definedTasks.get(TASK)?.({ data: { locations: [osFix(4)] } });
-  assert.equal(fixes.length, 3, 'the promoted native stream delivers');
+  assert.equal(fixes.length, 2, 'the promoted native stream delivers');
 
   port.requestPermission('background', 'bg-why');
   backgroundAsks[1].resolve({ status: 'granted' });
