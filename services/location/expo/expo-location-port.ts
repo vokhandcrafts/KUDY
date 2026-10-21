@@ -76,6 +76,10 @@ export class ExpoLocationOsPort implements LocationOsPort {
   private currentSub: number | null = null;
   private backgroundIntent = false;
   private removeWatch: (() => void) | null = null;
+  // A foreground watch has its own lifetime even when the service's
+  // subscription generation stays the same during background promotion.
+  private watchEpoch = 0;
+  private pendingWatchEpoch: number | null = null;
   private backgroundSink: ((location: OsLocationObject) => void) | null = null;
   private regions: ReadonlyArray<GeofenceStop> = [];
   // G20.07 (runtime.md R4) — the two OS scopes are tracked separately.
@@ -153,9 +157,14 @@ export class ExpoLocationOsPort implements LocationOsPort {
               notificationBody: this.extras.locationForegroundService.notificationBody,
             },
           });
+          // The old watch remains usable while native startup is pending.
+          // Release it only after the replacement is actually running.
+          if (this.currentSub === sub && this.backgroundIntent && this.backgroundState === 'granted') {
+            this.releaseForegroundWatch();
+          }
         } catch (error) {
           console.warn(`location adapter: background updates refused (${String(error)})`);
-          if (this.currentSub === sub) void this.startForegroundWatch(sub, true);
+          if (this.currentSub === sub) void this.startForegroundWatch(sub);
         }
       }).catch((error: unknown) => console.warn(`location adapter: background setup failed: ${String(error)}`));
       return;
@@ -169,8 +178,7 @@ export class ExpoLocationOsPort implements LocationOsPort {
   stopFixes(sub: number): void {
     if (this.currentSub !== sub) return;
     this.currentSub = null;
-    this.removeWatch?.();
-    this.removeWatch = null;
+    this.releaseForegroundWatch();
     backgroundWork = backgroundWork.then(async () => {
       const replacedByBackground = () => this.currentSub !== null
         && this.backgroundIntent && this.backgroundState === 'granted';
@@ -214,26 +222,42 @@ export class ExpoLocationOsPort implements LocationOsPort {
     // false because foreground capability has not changed.
     if (scope === 'background' && !hadBackgroundGrant && this.backgroundState === 'granted'
         && activeSub !== null && this.currentSub === activeSub && this.backgroundIntent) {
-      this.removeWatch?.();
-      this.removeWatch = null;
       this.startFixes(activeSub);
     }
   }
 
-  private async startForegroundWatch(sub: number, afterBackgroundFailure = false): Promise<void> {
+  private releaseForegroundWatch(): void {
+    // Invalidate callbacks immediately, including those from a native watch
+    // whose promise has not resolved yet. Its late handle removes itself.
+    this.watchEpoch += 1;
+    this.pendingWatchEpoch = null;
+    this.removeWatch?.();
+    this.removeWatch = null;
+  }
+
+  private async startForegroundWatch(sub: number): Promise<void> {
+    // A background-start rejection must keep an existing/pending foreground
+    // watch, not create a second one with the same service subscription.
+    if (this.removeWatch !== null || this.pendingWatchEpoch !== null) return;
+    const epoch = ++this.watchEpoch;
+    this.pendingWatchEpoch = epoch;
     try {
       const watch = await Location.watchPositionAsync(
         { accuracy: OS_ACCURACY },
-        (location) => this.emitFix(location, sub),
+        (location) => {
+          if (this.watchEpoch === epoch) this.emitFix(location, sub);
+        },
         (error: unknown) => console.warn(`location adapter: watch error ${String(error)}`),
       );
-      if (this.currentSub !== sub || (!afterBackgroundFailure && this.backgroundIntent && this.backgroundState === 'granted')) {
-        watch.remove(); // stopped or superseded before the watch resolved
+      if (this.currentSub !== sub || this.watchEpoch !== epoch) {
+        watch.remove(); // stopped or promoted before the watch resolved
         return;
       }
       this.removeWatch = () => watch.remove();
     } catch (error) {
       console.warn(`location adapter: the foreground watch failed to start: ${String(error)}`);
+    } finally {
+      if (this.pendingWatchEpoch === epoch) this.pendingWatchEpoch = null;
     }
   }
 
