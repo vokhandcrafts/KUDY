@@ -175,6 +175,11 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
     evaluateLayer: createEvaluateLayer({ bundlesStore }),
     commerce,
     sessionHistory: createSessionHistoryPort(driver),
+    // G07.01 (issue #809 device pass): the top-level port is the ONE
+    // instance the run session and the Nearby surface share (19 §3.3).
+    // Without it the surface's arming guard never fires — no permission
+    // question, no proximity view, the review list only.
+    location,
     uiLocalePersistence: createUiLocalePersistence(driver),
     readinessFor: createRunReadinessFor({ driver, bundlesStore, preferredLocales }),
     run: {

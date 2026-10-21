@@ -254,6 +254,22 @@ test('offline demo supplies the verified discovery surface through device compos
   device.teardown();
 });
 
+test('G07.01 #809: the composition hands the ONE location service to the Nearby surface', () => {
+  const device = createDeviceServicePorts(facilities());
+  const services = createServices(device.ports);
+  // The instance the run session carries is the same instance the Nearby
+  // binding receives (19 §3.3 — the top-level port is the only path to the
+  // surface's arming guard and its permission question). #809 device pass:
+  // without the top-level field the Nearby view never arms (no OS dialog,
+  // no location note, the manual review list only) — the assertion fails
+  // on the dropped-port revert.
+  const binding = services.nearby?.create();
+  assert.ok(binding?.location, 'the Nearby binding carries no location service');
+  assert.ok(device.ports.run, 'the composition carries no run session ports');
+  assert.equal(binding?.location, device.ports.run?.session.location);
+  device.teardown();
+});
+
 test('G20.20: without a catalog origin the gate answers null and the root passes the empty port set', async () => {
   const { catalogOriginFrom } = await import('./deviceServices.ts');
   // The same pure gate app/_layout.tsx uses (the wiring guard pins the

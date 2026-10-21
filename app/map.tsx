@@ -154,7 +154,10 @@ function NearbyCard({
   locale: string;
 }) {
   const title = offer.title ?? offer.route_id ?? offer.place_id ?? offer.offer_id;
-  const label = `${title}, ${offer.access}`;
+  // G07.01 #809 device pass: the spoken label localizes the access word —
+  // the raw access token ('free') leaked into the screen-reader label while
+  // the visible badge said «Бясплатна».
+  const label = `${title}, ${uiStrings(locale).access[offer.access]}`;
   // UX 09 (issue #434): the offer kind is readable at a glance — a route
   // marker names the guide (a multi-stop walk), map-pin names the one place.
   // The type word rides the marker element for the screen reader (canon §9);
