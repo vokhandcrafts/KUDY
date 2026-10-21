@@ -17,10 +17,21 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-20 — дадай recovery у Android CI для G23.05
+Што зрабіць: дадай `recovery` у цыкл сюіт `.github/workflows/android-e2e.yml`, каб сем сцэнарыяў аднаўлення запускаліся на кожным PR. Правер, што новы крок праходзіць на GitHub runner.
+PR: https://github.com/vokhandcrafts/KUDY/pull/831 · Issue: [#663](https://github.com/vokhandcrafts/KUDY/issues/663)
+
+### 2026-10-20 — праводзь праверкі брэнда G26
+Што зрабіць: калі ёсць час засяродзіцца, бяры па адной задачы з ⚠️ (#765–#773, #776) і праводзь яе разам з агентам у жывой сесіі: агент рыхтуе матэрыял, рашэнне — тваё.
+PR: https://github.com/vokhandcrafts/KUDY/pull/779 · Issue: [#764](https://github.com/vokhandcrafts/KUDY/issues/764)
+
 ### 2026-10-20 — прымі рашэнне APR-07 і правер наступныя задачы
 Што зрабіць: праглядзі рашэнне пра выдаленне даных прылады і змержы PR #837 пасля рэвью. Правер у GitHub Project бачнасць #835 і #836 у backlog: токен гэтай сесіі не мае `read:project`; не запускай іх да закрыцця пазначаных залежнасцяў.
 PR: https://github.com/vokhandcrafts/KUDY/pull/837 · Issue: https://github.com/vokhandcrafts/KUDY/issues/805 · [Рашэнне](architecture/decisions/APR-07-device-data-deletion.md) · [#835](https://github.com/vokhandcrafts/KUDY/issues/835), [#836](https://github.com/vokhandcrafts/KUDY/issues/836)
 
+### 2026-10-19 — выберы напрамак заставы KUDY
+Што зрабіць: параўнай [дзесяць мабільных напрамкаў](design/brand/outputs/brand-splash-directions-2026-10-19/all-ten.png) і [іх тлумачэнні](design/brand/outputs/brand-splash-directions-2026-10-19/README.md) у PR #802. Назаві адзін або некалькі для развіцця ў пару «чаканне → Explore»; асобна вызначы іконку B05 і тэксты B06. Ранейшыя заставы з асобным драконам і мясцовай панарамай адхіленыя.
+PR: https://github.com/vokhandcrafts/KUDY/pull/802
 ### 2026-10-17 — змержы follow-up PR #814: праўкі рэв'ю G20.31
 Што зрабіць: прачытай раздзелы «Код-рэвю» і «Суддзя» у [выніку G20.31](agent-tasks/results/G20.31.md) (2 low-праўкі рэв'ю; суддзя ✅ APPROVED) і змержы PR — гэта дадатак да #799, бо #799 быў змержаны раней, чым праўкі рэв'ю трапілі ў main.
 PR: https://github.com/vokhandcrafts/KUDY/pull/814
@@ -40,10 +51,6 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/763 · Issue: [#670](https://gith
 ### 2026-10-15 — усталюй дэманстрацыйную версію KUDY
 Што зрабіць: збяры дэма-APK паводле [інструкцыі](demo-preview.md), затым усталюй `android/app/build/outputs/apk/release/app-release.apk` на Android-прыладу. Гэта асобны пакет `by.kudy.app.demo` з прыкладным кантэнтам; не выкарыстоўвай яго маршрут для навігацыі.
 PR: https://github.com/vokhandcrafts/KUDY/pull/760
-
-### 2026-10-14 — вырашы перадумовы для Android E2E #664
-Што зрабіць: прачытай [блокер у #664](https://github.com/vokhandcrafts/KUDY/issues/664#issuecomment-6175820694) і вырашы, ці вылучыць асобныя задачы на падключэнне Discovery, падказак гідаў і водгукаў у Android, а таксама на тэставы сервер водгукаў, ці пашырыць абсяг #664. Пасля гатоўнасці неабходных інтэграцый вярні #664 у чаргу.
-PR: https://github.com/vokhandcrafts/KUDY/pull/756 · Issue: [#664](https://github.com/vokhandcrafts/KUDY/issues/664)
 
 ### 2026-10-14 — правер бачнасць #751 і #752 на дошцы
 Што зрабіць: адкрый GitHub Project і правер, што #751 бачны ў backlog, а #752 — у працы. Калі картак няма, дадай іх у адпаведныя калонкі, не змяняючы статусных пазнак issues. CLI-токен выканаўцы не мае `read:project`, а публічны прагляд не паказвае дошку.

@@ -8,6 +8,13 @@
         "be": "E2E-прагулка",
         "en": "E2E walk"
       }
+    },
+    {
+      "id": "theme-e2e-day",
+      "labels": {
+        "be": "E2E-дзень",
+        "en": "E2E day"
+      }
     }
   ],
   "offers": [
@@ -99,7 +106,7 @@
       "city_id": "e2e-city",
       "editorial_order": 3,
       "themes": [
-        "theme-e2e-walk"
+        "theme-e2e-day"
       ],
       "localized": {
         "title": {
@@ -120,8 +127,8 @@
         }
       },
       "estimated_duration": {
-        "min_minutes": 40,
-        "max_minutes": 60,
+        "min_minutes": 90,
+        "max_minutes": 120,
         "basis": "author_estimate"
       },
       "suggested_start_place_id": "e2e-place-1",

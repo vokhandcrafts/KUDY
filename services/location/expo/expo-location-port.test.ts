@@ -171,6 +171,18 @@ function osFix(at: number): OsLocationObject {
 const TASK = 'KUDY/location-updates';
 const updatesAsked = () => locationCalls.some((call) => call.startsWith('startUpdates'));
 
+test('a granted foreground permission is rechecked without reopening the OS dialog', async () => {
+  const { port } = setup();
+  foregroundRead.resolve({ status: 'granted' });
+  await flush();
+  assert.equal(port.permission(), 'granted');
+
+  port.requestPermission('foreground', 'fg-why');
+  await flush();
+  assert.equal(locationCalls.filter((call) => call === 'readForeground').length, 2);
+  assert.equal(locationCalls.includes('askForeground'), false);
+});
+
 test('foreground_granted_background_denied: a background denial keeps the granted foreground session running', async () => {
   const { port, service, fixes } = setup();
   service.setMode('city-surface');
@@ -248,6 +260,62 @@ test('all_permissions_denied: neither watcher starts and the visible permission 
   assert.deepEqual(service.status(), { state: 'permission-denied', reason: 'denied' });
   assert.equal(watches.length, 0);
   assert.ok(!updatesAsked());
+});
+
+test('G23.05: cold Run restore resolves foreground denial after the background answer', async () => {
+  const { port, service } = setup();
+  service.setMode('active-guide');
+  backgroundAsks[0].resolve({ status: 'denied' });
+  await flush();
+  assert.equal(port.permission(), 'undetermined');
+  foregroundRead.resolve({ status: 'denied' });
+  await flush();
+  assert.equal(port.permission(), 'denied');
+  assert.deepEqual(service.status(), { state: 'permission-denied', reason: 'denied' });
+  assert.equal(watches.length, 0);
+});
+
+test('G23.05: a pending background question cannot hide a foreground denial', async () => {
+  const { port, service } = setup();
+  service.setMode('active-guide');
+  foregroundRead.resolve({ status: 'denied' });
+  await flush();
+  assert.equal(port.permission(), 'denied');
+  assert.deepEqual(service.status(), { state: 'permission-denied', reason: 'denied' });
+  assert.equal(watches.length, 0);
+});
+
+test('G23.05: a background grant replaces the foreground watch started during cold restore', async () => {
+  const { service, fixes } = setup();
+  service.setMode('active-guide');
+  foregroundRead.resolve({ status: 'granted' });
+  await flush();
+  watchStart.resolve({ remove() {} });
+  await flush();
+  assert.equal(watches.length, 1);
+  assert.equal(updatesAsked(), false);
+
+  backgroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  assert.ok(updatesAsked(), 'a later background grant must start background updates');
+  assert.equal(watches[0].removeCalls, 1, 'the superseded foreground watch is removed');
+  definedTasks.get(TASK)?.({ data: { locations: [osFix(1)] } });
+  assert.equal(fixes.length, 1, 'background fixes reach the active guide');
+});
+
+test('G23.05: a pending foreground watch cannot survive the background grant', async () => {
+  const { service } = setup();
+  service.setMode('active-guide');
+  foregroundRead.resolve({ status: 'granted' });
+  await flush();
+  assert.equal(watches.length, 1);
+
+  backgroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  assert.ok(updatesAsked(), 'background updates start while the foreground watch is pending');
+  watchStart.resolve({ remove() {} });
+  await flush();
+  assert.equal(watches[0].removeCalls, 1, 'the late foreground watch is discarded');
 });
 
 test('stale_permission_reply: a superseded ask cannot overwrite a newer capability decision', async () => {

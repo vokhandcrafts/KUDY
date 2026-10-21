@@ -84,6 +84,17 @@ test('the manifest of a downloaded package resolves the teaser facts and the bas
   assert.deepEqual(result.diagnostics, []);
 });
 
+test('the installed locale/base manifest resolves a Moment when the bundle-root copy is absent', async () => {
+  const files = demoFiles();
+  files.delete('bundles/route-a/1/moments.json');
+  files.set('bundles/route-a/1/be/base/moments.json', bytes(moment()));
+  const result = await readMomentFacts(new FakeStore(demoDirs(), files), {
+    locales: ['be', 'en'], audioProbe: probeFor(files), placeId: 'place-1',
+  });
+  assert.equal(result.ok, true);
+  if (result.ok) assert.equal(result.moments[0]?.momentId, 'm-1');
+});
+
 test('the staging tree is never a package and a staging entry is never a version (the inventory skip)', async () => {
   const result = await readMomentFacts(demoStore(), { locales: ['be', 'en'], audioProbe: probeFor(demoFiles()) });
   assert.ok(result.ok);

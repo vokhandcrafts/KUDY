@@ -127,12 +127,16 @@ export interface NearbyHintDeps {
   // The durable limit store (zone B) and the public points projection.
   readonly store: GuideHintStore;
   readonly points: () => readonly GuideHintPoint[];
+  readonly pointsReady?: Promise<void>;
   // The accepted contract numbers (ADR G07.04 §3).
   readonly values: GuideHintValues;
   // The one live run surface's store, or null without a live walk — the
   // root's runSurfaces resolver. Read-only: the controller starts, stops and
   // switches nothing (19 §2.2).
   readonly liveRun: () => NearbyHintRunSource | null;
+  // A durable live row may still be loading into its Run surface after a
+  // cold start. Hints stay quiet until that session's context is available.
+  readonly liveRunPending?: () => boolean;
   // The app-foreground fact; absent, nothing is ever shown — fail closed,
   // the idiom of every optional port (AC3: hints never render in background).
   readonly foreground?: () => boolean;
@@ -153,6 +157,7 @@ export interface NearbyHintDeps {
 
 export interface NearbyHintBinding {
   readonly store: ControllerStore<NearbyHintState>;
+  readonly dispose: () => void;
   // The X action: records the dismissal per presented guide_id (R07) and
   // hides the card; the limits keep re-entry from repeating it.
   readonly dismiss: () => void;
@@ -170,13 +175,17 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
   let seqCounter = 0;
   const nextSeq = deps.nextSuggestionSeq ?? (() => ++seqCounter);
   const store = createControllerStore<NearbyHintState>(() => ({ kind: 'absent' }));
+  let disposed = false;
 
   // The guide offers loaded once per controller (the app-run surface idiom of
   // G07.01): a failed load is the honest no-previews state, not a retry loop.
   let guideOffers: ReadonlyMap<string, NearbyOfferFacts> = new Map();
+  let publicPoints: readonly GuideHintPoint[] = [];
+  let routesWithPublicPoints: ReadonlySet<string> = new Set();
   void deps.catalog
     .loadNearby(null)
     .then((loaded) => {
+      if (disposed) return;
       if (loaded.kind !== 'ready' && loaded.kind !== 'offline') return;
       guideOffers = new Map(
         loaded.offers
@@ -185,6 +194,9 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
           )
           .map((offer) => [offer.route_id, offer]),
       );
+      publicPoints = [...guideOffers].flatMap(([guideId, offer]) =>
+        (offer.preview_points ?? []).map(({ lat, lng }) => ({ guideId, lat, lng })));
+      routesWithPublicPoints = new Set(publicPoints.map((point) => point.guideId));
       decide();
     })
     .catch(() => {
@@ -303,12 +315,17 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
   };
 
   const decide = (): void => {
+    if (disposed) return;
     const at = now();
     const runStore = deps.liveRun();
     if (runStore !== subscribedRun) {
       unsubscribeRun?.();
       subscribedRun = runStore;
       unsubscribeRun = runStore ? runStore.subscribe(() => decide()) : null;
+    }
+    if (deps.liveRunPending?.()) {
+      hidden('quiet');
+      return;
     }
     const run: RunState = runStore ? runStore.run : { phase: 'Idle' };
     const sessionId = run.phase === 'Active' || run.phase === 'Paused' ? run.sessionId : null;
@@ -385,16 +402,22 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
     }
     const blocked = new Set<string>([...cooldown, ...sessionRows]);
     const inRadius = new Map<string, boolean>();
-    for (const point of deps.points()) {
+    // The pinned public index can propose an undownloaded guide. Verified
+    // installed base geometry remains a fallback for older index revisions.
+    const considerPoint = (point: GuideHintPoint): void => {
       if (
         !Number.isFinite(point.lat) ||
         !Number.isFinite(point.lng) ||
         inRadius.has(point.guideId) ||
         haversineMeters(fix.lat, fix.lng, point.lat, point.lng) > deps.values.proximity_radius_m
       ) {
-        continue;
+        return;
       }
       inRadius.set(point.guideId, true);
+    };
+    for (const point of publicPoints) considerPoint(point);
+    for (const point of deps.points()) {
+      if (!routesWithPublicPoints.has(point.guideId)) considerPoint(point);
     }
     const candidates: NearbyHintGuide[] = [];
     for (const guideId of inRadius.keys()) {
@@ -428,12 +451,14 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
 
   // The raw-fix tap and the audio events are the re-decision triggers; the
   // live run store's own notifications join through the subscription above.
-  deps.location.onRawFix((fix) => {
+  const stopFixes = deps.location.onRawFix((fix) => {
+    if (disposed) return;
     lastFix = fix;
     bookkeep(fix, now());
     decide();
   });
-  deps.audio.onEvent(() => decide());
+  const stopAudio = deps.audio.onEvent(() => decide());
+  void deps.pointsReady?.then(() => decide(), () => {});
 
   const currentSessionId = (): string | null => {
     const run = deps.liveRun()?.run;
@@ -442,7 +467,17 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
 
   return {
     store,
+    dispose: () => {
+      if (disposed) return;
+      disposed = true;
+      stopFixes();
+      stopAudio();
+      unsubscribeRun?.();
+      unsubscribeRun = null;
+      subscribedRun = null;
+    },
     dismiss: () => {
+      if (disposed) return;
       const state = store.getState();
       if (state.kind !== 'ready') return;
       const ids = state.guides.map((guide) => guide.routeId);
@@ -472,6 +507,7 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
       decide();
     },
     openPreview: () => {
+      if (disposed) return;
       const state = store.getState();
       if (state.kind !== 'ready') return;
       const sessionId = state.context === 'active' ? currentSessionId() : null;
