@@ -4,7 +4,27 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { assertNoReadyStart, waitForRun, locationListeners, waitForManualStart, tapMapPoint, visiblePointStatus, startWalkAtLocation } from './walk.mjs';
+import { assertNoReadyStart, waitForRun, locationListeners, waitForManualStart, tapMapPoint, visiblePointStatus, startWalkAtLocation, previewNodesWith } from './walk.mjs';
+
+test('walk scrolls clipped preview lock badges into the UIAutomator viewport', async () => {
+  let position = 0;
+  const swipes = [];
+  const viewport = '<node resource-id="scroll-preview" bounds="[44,345][1036,2230]"/>';
+  const driver = {
+    dump: async () => ({ xml: viewport + (position === 0
+      ? '<node resource-id="stop-e2e-stop-2"/>'
+      : '<node resource-id="stop-e2e-stop-2"/><node resource-id="stop-locked-e2e-stop-2"/><node resource-id="btn-download"/>') }),
+    exec: async (args) => {
+      swipes.push(args);
+      position += 1;
+    },
+  };
+  const nodes = await previewNodesWith(driver, 'stop-locked-e2e-stop-2', 'paid-lock');
+  assert.equal(nodes.some((node) => node.resourceId === 'stop-locked-e2e-stop-2'), true);
+  assert.deepEqual(swipes, [['shell', 'input', 'swipe', '540', '1853', '540', '722', '350']]);
+  await previewNodesWith(driver, 'btn-download', 'free-download');
+  assert.equal(swipes.length, 1, 'a visible control must not trigger another scroll');
+});
 
 test('walk seeds the emulator position before starting its location watcher', async () => {
   const calls = [];
