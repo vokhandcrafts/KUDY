@@ -1,0 +1,1 @@
+  mCurrentFocus=Window{2128ae5 u0 com.google.android.marvin.talkback/com.google.android.accessibility.talkback.trainingcommon.TrainingActivity}

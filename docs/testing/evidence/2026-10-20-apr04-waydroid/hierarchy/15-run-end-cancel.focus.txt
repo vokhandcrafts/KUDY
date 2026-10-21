@@ -1,0 +1,1 @@
+  mCurrentFocus=Window{c7ad863 u0 by.kudy.app.demo/by.kudy.app.demo.MainActivity}

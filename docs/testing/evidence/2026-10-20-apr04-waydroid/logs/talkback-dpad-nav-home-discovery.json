@@ -1,0 +1,28 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[977,846][1585,1190]",
+   "desc": "Тры гісторыі старога горада · дэма, Бясплатна",
+   "text": "",
+   "id": "guide-card-e2e-free-guide",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 5
+ },
+ {
+  "step": 2,
+  "focused": {
+   "bounds": "[977,846][1585,1190]",
+   "desc": "Тры гісторыі старога горада · дэма, Бясплатна",
+   "text": "",
+   "id": "guide-card-e2e-free-guide",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 10
+ }
+]

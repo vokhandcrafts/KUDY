@@ -17,6 +17,11 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-21 — даштурхай Android-прыёмку #809 да поўнай
+Што зрабіць: Waydroid-эвідэнцыя абноўлена (screens 36–38, гл. `docs/testing/evidence/2026-10-20-apr04-waydroid/`): дыялог дазволу з чыстага стану пацверджаны пасля выпраўленай кампазіцыі (`controllers/deviceServices.ts`), грант захоўваецца. На рэальнай прыладзе праверы тое, што ў кантэйнеры недасяжнае: (1) Accessibility Scanner — усталюй яго з уваходам у Play Store і прагані матрыцу экранаў. (2) Жывы GPS-стан — нататку «Шукаем пазіцыю…» і запіс запыту ў `dumpsys location`. (3) Шлях адмаўлення — нататку «Пазіцыя не дазволена — ручны агляд». (4) purchase/restore. (5) Пусты вынік фільтра. (6) Кантраст на рэальным экране — у пікеры моваў 4.42:1 (межавае падзенне), перавер пары і вырашы па дызайн-токену. (7) Мова аголошвання TalkBack — у кантэйнеры толькі eng-USA, галасоў be-BY няма. Пасля поўнай прыёмкі мержы PR.
+PR: https://github.com/vokhandcrafts/KUDY/pull/830
+Issue: https://github.com/vokhandcrafts/KUDY/issues/809
+
 ### 2026-10-20 — дадай recovery у Android CI для G23.05
 Што зрабіць: дадай `recovery` у цыкл сюіт `.github/workflows/android-e2e.yml`, каб сем сцэнарыяў аднаўлення запускаліся на кожным PR. Правер, што новы крок праходзіць на GitHub runner.
 PR: https://github.com/vokhandcrafts/KUDY/pull/831 · Issue: [#663](https://github.com/vokhandcrafts/KUDY/issues/663)
@@ -32,6 +37,7 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/837 · Issue: https://github.com/
 ### 2026-10-19 — выберы напрамак заставы KUDY
 Што зрабіць: параўнай [дзесяць мабільных напрамкаў](design/brand/outputs/brand-splash-directions-2026-10-19/all-ten.png) і [іх тлумачэнні](design/brand/outputs/brand-splash-directions-2026-10-19/README.md) у PR #802. Назаві адзін або некалькі для развіцця ў пару «чаканне → Explore»; асобна вызначы іконку B05 і тэксты B06. Ранейшыя заставы з асобным драконам і мясцовай панарамай адхіленыя.
 PR: https://github.com/vokhandcrafts/KUDY/pull/802
+
 ### 2026-10-17 — змержы follow-up PR #814: праўкі рэв'ю G20.31
 Што зрабіць: прачытай раздзелы «Код-рэвю» і «Суддзя» у [выніку G20.31](agent-tasks/results/G20.31.md) (2 low-праўкі рэв'ю; суддзя ✅ APPROVED) і змержы PR — гэта дадатак да #799, бо #799 быў змержаны раней, чым праўкі рэв'ю трапілі ў main.
 PR: https://github.com/vokhandcrafts/KUDY/pull/814

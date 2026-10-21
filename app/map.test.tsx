@@ -225,8 +225,11 @@ describe("Nearby surface (G07.01)", () => {
     await openNearby();
     const place = await screen.findByTestId("nearby-card-offer-a1-place");
     // Criterion 5: the screen-reader label carries the card's facts and the
-    // honest no-audio hint.
-    expect(place.props.accessibilityLabel).toBe("Двор сукнараў, free");
+    // honest no-audio hint. The access word is the LOCALIZED badge word
+    // (#809 device pass: the raw token 'free' leaked into the spoken label
+    // while the visible badge said «Бясплатна» — the assertion fails on the
+    // raw-token revert).
+    expect(place.props.accessibilityLabel).toBe("Двор сукнараў, Бясплатна");
     expect(place.props.accessibilityHint).toBe("Картка прапановы. Аўдыё не запускаецца.");
     // The facts line: an empty audio list renders the honest «—» — the
     // assertion fails on the dangling-label revert (implementation-rules 1).

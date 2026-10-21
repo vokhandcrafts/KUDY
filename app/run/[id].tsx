@@ -104,10 +104,8 @@ const styles = StyleSheet.create({
   },
   marker: {
     alignItems: "center",
-    // UX 04 (issue #350, AC4): the marker's touch target keeps the 44dp
-    // floor whatever the label wraps into — the dot plus label normally
-    // exceeds it already.
-    minHeight: 44,
+    // APR-04: keep a 48dp marker touch target even if the caption is short.
+    minHeight: 48,
     position: "absolute",
     width: 120,
   },
@@ -297,6 +295,8 @@ const styles = StyleSheet.create({
     gap: tokens.spaceS,
   },
   barControl: {
+    minHeight: 48,
+    justifyContent: "center",
     borderColor: tokens.colorLine,
     borderRadius: tokens.radiusBase,
     borderWidth: 1,
@@ -314,6 +314,8 @@ const styles = StyleSheet.create({
     marginTop: tokens.spaceS,
   },
   nowPlayingRow: {
+    minHeight: 48,
+    justifyContent: "center",
     borderColor: tokens.colorNoticeBorder,
     borderRadius: tokens.radiusBase,
     borderWidth: 1,
@@ -576,6 +578,7 @@ export default function Run() {
   const attribution = (
     <PressableSurface
       accessibilityRole="link"
+      accessibilityLabel={strings.attribution}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       onPress={() => {
         // A failed external open has no in-app surface — the failure is

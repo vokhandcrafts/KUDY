@@ -1,0 +1,15 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[1163,797][1399,901]",
+   "desc": "На шляху, чакае",
+   "text": "",
+   "id": "run-marker-e2e-stop-2",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 6
+ }
+]

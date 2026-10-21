@@ -1,0 +1,5 @@
+[1010,535][1553,578] click=false sel=false chk=false focusable=false focused=false | '' | 'Завяршыць прагулку?' | 
+[1010,602][1551,696] click=true sel=false chk=false focusable=true focused=true | 'Завяршыць' | '' | btn-end-confirm-accept
+[1192,625][1369,668] click=false sel=false chk=false focusable=false focused=false | '' | 'Завяршыць' | 
+[1010,712][1551,806] click=true sel=false chk=false focusable=true focused=false | 'Скасаваць' | '' | btn-end-confirm-cancel
+[1200,737][1360,780] click=false sel=false chk=false focusable=false focused=false | '' | 'Скасаваць' | 

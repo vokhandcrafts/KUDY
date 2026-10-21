@@ -1,0 +1,27 @@
+[977,87][1585,181] click=true sel=false chk=false focusable=true focused=false | 'Назад' | '' | btn-my-back
+[977,119][1008,151] click=false sel=false chk=false focusable=true focused=false | 'Назад' | '' | 
+[1024,113][1116,156] click=false sel=false chk=false focusable=false focused=false | '' | 'Назад' | 
+[977,205][1585,254] click=false sel=false chk=false focusable=false focused=false | '' | 'KUDY' | 
+[977,301][1585,344] click=false sel=false chk=false focusable=false focused=false | '' | 'Мова' | 
+[977,360][1204,454] click=true sel=true chk=false focusable=true focused=false | 'Беларуская' | '' | btn-ui-locale-be
+[1002,377][1178,420] click=false sel=false chk=false focusable=false focused=false | '' | 'Беларуская' | 
+[1220,360][1377,454] click=true sel=false chk=false focusable=true focused=false | 'English' | '' | btn-ui-locale-en
+[1245,377][1350,420] click=false sel=false chk=false focusable=false focused=false | '' | 'English' | 
+[977,470][1193,564] click=true sel=false chk=false focusable=true focused=false | 'Українська' | '' | btn-ui-locale-uk
+[1002,487][1167,530] click=false sel=false chk=false focusable=false focused=false | '' | 'Українська' | 
+[1209,470][1379,564] click=true sel=false chk=false focusable=true focused=false | 'Deutsch' | '' | btn-ui-locale-de
+[1234,487][1352,530] click=false sel=false chk=false focusable=false focused=false | '' | 'Deutsch' | 
+[1394,470][1560,564] click=true sel=false chk=false focusable=true focused=false | 'Español' | '' | btn-ui-locale-es
+[1419,487][1533,530] click=false sel=false chk=false focusable=false focused=false | '' | 'Español' | 
+[977,581][1150,676] click=true sel=false chk=false focusable=true focused=false | 'Français' | '' | btn-ui-locale-fr
+[1002,598][1124,641] click=false sel=false chk=false focusable=false focused=false | '' | 'Français' | 
+[1166,581][1326,676] click=true sel=false chk=false focusable=true focused=false | 'Čeština' | '' | btn-ui-locale-cs
+[1191,598][1299,641] click=false sel=false chk=false focusable=false focused=false | '' | 'Čeština' | 
+[1341,581][1513,676] click=true sel=false chk=false focusable=true focused=false | 'Svenska' | '' | btn-ui-locale-sv
+[1366,598][1486,641] click=false sel=false chk=false focusable=false focused=false | '' | 'Svenska' | 
+[977,698][1585,741] click=false sel=false chk=false focusable=false focused=false | '' | 'Бягучая прагулка' | my-live-section
+[977,745][1585,778] click=false sel=false chk=false focusable=false focused=false | '' | 'Бягучай прагулкі няма' | 
+[977,802][1585,845] click=false sel=false chk=false focusable=false focused=false | '' | 'Папярэднія праходы' | my-history-section
+[1002,870][1559,913] click=false sel=false chk=false focusable=false focused=false | '' | 'Тры гісторыі старога горада · дэма' | 
+[1002,917][1559,950] click=false sel=false chk=false focusable=false focused=false | '' | '2026-10-21 — 2026-10-21 — праслышана: 1' | my-history-state-a483b2aa-756c-4257-87d6-596a773ce453
+[1002,954][1559,987] click=false sel=false chk=false focusable=false focused=false | '' | 'Беларуская' | my-session-locale-a483b2aa-756c-4257-87d6-596a773ce453

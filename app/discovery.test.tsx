@@ -92,6 +92,20 @@ describe("Discovery result surface", () => {
     expect(analytics.events.some((event) => event.offer_id === "offer-e1-place")).toBe(false);
   });
 
+  test("APR-04: filter selections and result links announce their role, name and state", async () => {
+    renderDiscovery("/discovery");
+    const offer = await screen.findByTestId("offer-card-offer-b1-guide");
+    expect(offer.props.accessibilityRole).toBe("link");
+    expect(offer.props.accessibilityLabel).toEqual(expect.any(String));
+    expect(offer.props.accessibilityLabel.length).toBeGreaterThan(0);
+    const time = screen.getByTestId("time-60");
+    expect(time.props.accessibilityRole).toBe("button");
+    expect(time.props.accessibilityLabel).toEqual(expect.any(String));
+    expect(time.props.accessibilityState).toEqual({ selected: false });
+    fireEvent.press(time);
+    expect(screen.getByTestId("time-60").props.accessibilityState).toEqual({ selected: true });
+  });
+
   test("a narrow query shows the honest empty message with labeled alternatives (D04)", async () => {
     renderDiscovery("/discovery");
     await screen.findByTestId("offer-card-offer-b1-guide");
@@ -130,6 +144,10 @@ describe("Collection card (падборка)", () => {
     // The guide member is the same card that opens the same preview (D02).
     expect(screen.getByTestId("guide-card-guide-route-a1")).toBeTruthy();
     expect(screen.getByTestId("badge-access-mixed")).toBeTruthy();
+    const placeLink = screen.getByTestId("collection-member-offer-a1-place");
+    expect(placeLink.props.accessibilityRole).toBe("link");
+    expect(placeLink.props.accessibilityLabel).toEqual(expect.any(String));
+    expect(placeLink.props.accessibilityLabel.length).toBeGreaterThan(0);
     // A collection has no audio: the listen button does not exist (21 §3.2).
     expect(screen.queryByText(/паслухаць/i)).toBeNull();
   });

@@ -1,0 +1,14 @@
+{
+ "display": {
+  "physical": "2560x1359",
+  "density_dpi": 315,
+  "px_per_dp": 1.96875
+ },
+ "clickable_nodes_audited": 210,
+ "min_touch_target_dp": 47.75,
+ "below_48dp_exact": 103,
+ "below_47dp": 0,
+ "verdict": "PASS",
+ "note": "smallest clickable = 94px = 47.74dp at 315dpi — density rounding of a 48dp component (48dp@1.96875=94.5px→94px); no target below 47dp; all targets ≥ 48dp by design tokens",
+ "sub_47dp_nodes": []
+}

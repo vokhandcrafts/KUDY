@@ -1,0 +1,496 @@
+[
+ {
+  "step": 1,
+  "green_bbox": [
+   1220,
+   360,
+   1376,
+   453
+  ],
+  "focused": {
+   "bounds": "[977,205][1585,1328]",
+   "desc": "",
+   "text": "",
+   "id": "scroll-my",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.ScrollView"
+  },
+  "synth_count": 5
+ },
+ {
+  "step": 2,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 12
+ },
+ {
+  "step": 3,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 19
+ },
+ {
+  "step": 4,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 26
+ },
+ {
+  "step": 5,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 33
+ },
+ {
+  "step": 6,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 40
+ },
+ {
+  "step": 7,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 47
+ },
+ {
+  "step": 8,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 54
+ },
+ {
+  "step": 9,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 61
+ },
+ {
+  "step": 10,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 68
+ },
+ {
+  "step": 11,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 75
+ },
+ {
+  "step": 12,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 82
+ },
+ {
+  "step": 13,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 89
+ },
+ {
+  "step": 14,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 96
+ },
+ {
+  "step": 15,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 103
+ },
+ {
+  "step": 16,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 110
+ },
+ {
+  "step": 17,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 117
+ },
+ {
+  "step": 18,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 124
+ },
+ {
+  "step": 19,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 131
+ },
+ {
+  "step": 20,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 138
+ },
+ {
+  "step": 21,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 145
+ },
+ {
+  "step": 22,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 152
+ },
+ {
+  "step": 23,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 159
+ },
+ {
+  "step": 24,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 166
+ },
+ {
+  "step": 25,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 173
+ },
+ {
+  "step": 26,
+  "green_bbox": [
+   977,
+   87,
+   1584,
+   180
+  ],
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-my-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 180
+ }
+]

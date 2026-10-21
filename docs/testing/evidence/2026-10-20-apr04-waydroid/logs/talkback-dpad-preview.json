@@ -1,0 +1,67 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[977,465][1129,506]",
+   "desc": "Бясплатна",
+   "text": "",
+   "id": "badge-access-free",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.ViewGroup"
+  },
+  "synth_count": 7
+ },
+ {
+  "step": 2,
+  "focused": {
+   "bounds": "[977,581][1071,676]",
+   "desc": "be",
+   "text": "",
+   "id": "audio-chip-be",
+   "selected": "true",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 12
+ },
+ {
+  "step": 3,
+  "focused": {
+   "bounds": "[977,695][1008,726]",
+   "desc": "Працягласць",
+   "text": "",
+   "id": "",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.ViewGroup"
+  },
+  "synth_count": 17
+ },
+ {
+  "step": 4,
+  "focused": {
+   "bounds": "[977,1234][1585,1328]",
+   "desc": "Пачаць",
+   "text": "",
+   "id": "btn-start",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 23
+ },
+ {
+  "step": 5,
+  "focused": {
+   "bounds": "[977,1234][1585,1328]",
+   "desc": "Пачаць",
+   "text": "",
+   "id": "btn-start",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 29
+ }
+]

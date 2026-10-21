@@ -1,0 +1,31 @@
+[977,87][1585,181] click=true sel=false chk=false focusable=true focused=true | 'Горад' | '' | btn-discovery-back
+[977,119][1008,151] click=false sel=false chk=false focusable=true focused=false | 'Горад' | '' | 
+[1024,113][1112,156] click=false sel=false chk=false focusable=false focused=false | '' | 'Горад' | 
+[977,205][1585,250] click=false sel=false chk=false focusable=false focused=false | '' | 'Чым заняцца' | 
+[977,266][1214,361] click=true sel=true chk=false focusable=true focused=false | 'Без абмежавання' | '' | time-none
+[994,275][1196,308] click=false sel=false chk=false focusable=false focused=false | '' | 'Без абмежавання' | 
+[1230,266][1390,361] click=true sel=false chk=false focusable=true focused=false | 'Да гадзіны' | '' | time-60
+[1247,275][1372,308] click=false sel=false chk=false focusable=false focused=false | '' | 'Да гадзіны' | 
+[977,376][1196,470] click=true sel=false chk=false focusable=true focused=false | 'Да дзвюх гадзін' | '' | time-120
+[994,385][1178,418] click=false sel=false chk=false focusable=false focused=false | '' | 'Да дзвюх гадзін' | 
+[1212,376][1362,470] click=true sel=false chk=false focusable=true focused=false | 'На паўдня' | '' | time-240
+[1229,385][1344,418] click=false sel=false chk=false focusable=false focused=false | '' | 'На паўдня' | 
+[977,526][1585,861] click=true sel=false chk=false focusable=true focused=false | 'Тры гісторыі старога горада · дэма' | '' | offer-card-offer-guide-e2e-free
+[1002,551][1559,594] click=false sel=false chk=false focusable=false focused=false | '' | 'Тры гісторыі старога горада · дэма' | 
+[1002,626][1559,687] click=false sel=false chk=false focusable=false focused=false | '' | 'Кароткая дэманстрацыйная прагулка з трыма кропкамі, тэкстам і прыкладным аўдыё.' | 
+[1003,687][1156,728] click=false sel=false chk=false focusable=true focused=false | 'Бясплатна' | '' | badge-access-free
+[1018,690][1139,723] click=false sel=false chk=false focusable=false focused=false | '' | 'Бясплатна' | 
+[1002,743][1559,786] click=false sel=false chk=false focusable=false focused=false | '' | 'Тэкст: be, en; аўдыё: be, en' | 
+[1002,802][1559,835] click=false sel=false chk=false focusable=false focused=false | '' | 'рэдакцыйны выбар' | 
+[977,861][1585,1196] click=true sel=false chk=false focusable=true focused=false | 'Першая кропка · дэма' | '' | offer-card-offer-place-e2e-1
+[1002,886][1559,929] click=false sel=false chk=false focusable=false focused=false | '' | 'Першая кропка · дэма' | 
+[1002,961][1559,1022] click=false sel=false chk=false focusable=false focused=false | '' | 'Прыклад карткі месца і кароткай гукавой гісторыі.' | 
+[1003,1022][1156,1063] click=false sel=false chk=false focusable=true focused=false | 'Бясплатна' | '' | badge-access-free
+[1018,1025][1139,1058] click=false sel=false chk=false focusable=false focused=false | '' | 'Бясплатна' | 
+[1002,1078][1559,1121] click=false sel=false chk=false focusable=false focused=false | '' | 'Тэкст: be, en' | 
+[1002,1137][1559,1170] click=false sel=false chk=false focusable=false focused=false | '' | 'рэдакцыйны выбар' | 
+[977,1196][1585,1328] click=true sel=false chk=false focusable=true focused=false | 'Маленькая падборка · дэма' | '' | offer-card-offer-collection-e2e-day
+[1002,1221][1559,1264] click=false sel=false chk=false focusable=false focused=false | '' | 'Маленькая падборка · дэма' | 
+[1002,1296][1559,1328] click=false sel=false chk=false focusable=false focused=false | '' | 'Прыклад таго, як месца і гід могуць быць разам.' | 
+[1003,1329][1156,1328] click=false sel=false chk=false focusable=true focused=false | 'Бясплатна' | '' | badge-access-free
+[1018,1332][1139,1328] click=false sel=false chk=false focusable=false focused=false | '' | 'Бясплатна' | 

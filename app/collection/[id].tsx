@@ -108,7 +108,7 @@ function CollectionBody({
         ) : offer.ref.kind === "place" ? (
           <View key={offer.offer_id} style={styles.memberGap}>
             <Link href={{ pathname: `/place/${offer.ref.place_id}`, params: { from: "collection" } }} asChild>
-              <PressableSurface style={cardStyle} testID={`collection-member-${offer.offer_id}`}>
+              <PressableSurface accessibilityRole="link" accessibilityLabel={localizedPick(offer.localized.title, DISPLAY_LOCALES) ?? offer.offer_id} style={cardStyle} testID={`collection-member-${offer.offer_id}`}>
                 <Text style={styles.description}>{localizedPick(offer.localized.title, DISPLAY_LOCALES)}</Text>
                 <AccessBadge access={offer.access} />
               </PressableSurface>

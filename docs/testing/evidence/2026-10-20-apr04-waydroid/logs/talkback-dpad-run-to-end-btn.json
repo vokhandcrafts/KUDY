@@ -1,0 +1,28 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[969,1146][1475,1240]",
+   "desc": "Дадзеныя © удзельнікі OpenStreetMap, ODbL",
+   "text": "",
+   "id": "map-attribution",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 4
+ },
+ {
+  "step": 2,
+  "focused": {
+   "bounds": "[969,1146][1475,1240]",
+   "desc": "Дадзеныя © удзельнікі OpenStreetMap, ODbL",
+   "text": "",
+   "id": "map-attribution",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 9
+ }
+]

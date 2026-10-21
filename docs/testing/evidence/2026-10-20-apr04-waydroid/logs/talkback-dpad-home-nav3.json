@@ -1,0 +1,41 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[977,416][1585,513]",
+   "desc": "Побач →",
+   "text": "",
+   "id": "link-nearby",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 5
+ },
+ {
+  "step": 2,
+  "focused": {
+   "bounds": "[977,528][1585,624]",
+   "desc": "Чым заняцца →",
+   "text": "",
+   "id": "link-discovery",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 10
+ },
+ {
+  "step": 3,
+  "focused": {
+   "bounds": "[977,640][1585,736]",
+   "desc": "KUDY →",
+   "text": "",
+   "id": "link-kudy",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 15
+ }
+]

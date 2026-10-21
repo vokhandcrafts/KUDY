@@ -40,6 +40,7 @@ test('loaded native map uses geographic markers and the walk GPS observer', () =
   expect(screen.getByTestId('mock-map-marker-stop-1').props.lngLat).toEqual([18.65, 54.35]);
   expect(screen.getByTestId('run-marker-stop-1')).toBeTruthy();
   expect(screen.getByTestId('run-marker-stop-1').props.accessibilityHint).toBe(props.markerHint);
+  expect(screen.getByTestId('run-marker-stop-1').props.style.minHeight).toBeGreaterThanOrEqual(48);
   fireEvent.press(screen.getByTestId('run-map-points'));
   expect(screen.getByTestId('run-point-status-stop-1').props.children).toBe('Мытня — даступна');
   expect(screen.getByTestId('run-point-stop-1').props.accessibilityHint).toBe(props.markerHint);

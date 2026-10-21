@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
   map: { ...StyleSheet.absoluteFillObject },
   fallback: { ...StyleSheet.absoluteFillObject },
-  marker: { alignItems: 'center', minHeight: 44, width: 120 },
+  marker: { alignItems: 'center', minHeight: 48, width: 120 },
   dot: {
     borderColor: tokens.colorAccentInk,
     borderRadius: 999,

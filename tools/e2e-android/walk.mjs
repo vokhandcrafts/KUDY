@@ -27,6 +27,30 @@ export function requireId(nodes, id) {
   return node;
 }
 
+/**
+ * UIAutomator reports only the visible part of a React Native ScrollView.
+ * A stop row may appear even when its lock badge is below the fold.
+ */
+export async function previewNodesWith(driver, testID, slug) {
+  for (let attempt = 0; attempt <= 6; attempt += 1) {
+    const nodes = parseDump((await driver.dump(`dump-walk-${slug}-${attempt}.xml`)).xml);
+    if (findNode(nodes, { testID })) return nodes;
+    if (attempt === 6) break;
+    const viewport = requireId(nodes, 'scroll-preview');
+    const bounds = /^\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]$/.exec(viewport.bounds);
+    assert.ok(bounds, `invalid scroll-preview bounds: ${viewport.bounds}`);
+    const [, left, top, right, bottom] = bounds.map(Number);
+    const x = Math.round((left + right) / 2);
+    const height = bottom - top;
+    assert.ok(height > 0, 'scroll-preview has no positive height');
+    const startY = Math.round(top + height * 0.8);
+    const endY = Math.round(top + height * 0.2);
+    await driver.exec(['shell', 'input', 'swipe', String(x), String(startY), String(x), String(endY), '350']);
+    await delay();
+  }
+  throw new Error(`missing testID ${testID} after scrolling the preview (last dump: dump-walk-${slug}-6.xml)`);
+}
+
 export async function assertNoReadyStart(driver, originLogPath, timeoutMs = DOWNLOAD_MS) {
   const deadline = Date.now() + timeoutMs;
   const started = `E2E stall start: ${HELD_FILE}`;
@@ -217,21 +241,22 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     let nodes = await nodesOn(driver, 'screen-Route preview', 'paid-preview');
     assert.equal(requireId(nodes, 'preview-locales').text, 'Тэкст: be, en; аўдыё: be, en');
     requireId(nodes, 'stop-e2e-stop-1');
-    requireId(nodes, 'stop-e2e-stop-2');
     requireId(nodes, 'stop-locked-e2e-stop-1');
-    requireId(nodes, 'stop-locked-e2e-stop-2');
+    // The upsell pushes stop 2's lock below the viewport.
+    nodes = await previewNodesWith(driver, 'stop-locked-e2e-stop-2', 'paid-lock');
+    requireId(nodes, 'stop-e2e-stop-2');
     await driver.tapSelector({ testID: 'btn-preview-back' });
     await driver.waitFor({ testID: 'screen-Guides' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: `guide-card-${FREE}` });
     await driver.waitFor({ testID: 'preview-theme' }, { timeoutMs: SHORT_MS });
-    await driver.waitFor({ testID: 'btn-download' }, { timeoutMs: SHORT_MS });
     nodes = await nodesOn(driver, 'screen-Route preview', 'free-preview');
     assert.equal(requireId(nodes, 'preview-theme').text, 'E2E-прагулка');
     assert.equal(requireId(nodes, 'preview-locales').text, 'Тэкст: be, en; аўдыё: be, en');
     for (const stop of [1, 2, 3]) {
-      requireId(nodes, `stop-e2e-stop-${stop}`);
+      nodes = await previewNodesWith(driver, `stop-e2e-stop-${stop}`, `free-stop-${stop}`);
       assert.equal(findNode(nodes, { testID: `stop-locked-e2e-stop-${stop}` }), undefined);
     }
+    nodes = await previewNodesWith(driver, 'btn-download', 'free-download');
     requireId(nodes, 'btn-download');
   });
 

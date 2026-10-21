@@ -55,13 +55,36 @@ async function waitForGone(driver, id, slug) {
   }
 }
 
-async function scrollTo(driver, id, slug) {
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const node = findNode(await nodesOn(driver, slug), { testID: id });
-    if (node) return node;
-    await driver.exec(['shell', 'input', 'swipe', '540', '1780', '540', '560', '450']);
+// A UIAutomator dump contains the visible portion of a ScrollView, not
+// every rendered offer. Use the real viewport bounds and scroll in the
+// requested direction until the control is on screen and tappable.
+export async function scrollTo(driver, id, slug, { scrollID = 'scroll-discovery', direction = 'down' } = {}) {
+  assert.ok(direction === 'up' || direction === 'down', 'scroll direction must be up or down');
+  for (let attempt = 0; attempt <= 7; attempt += 1) {
+    const nodes = await nodesOn(driver, `${slug}-${attempt}`);
+    const viewport = requireId(nodes, scrollID);
+    const bounds = /^\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]$/.exec(viewport.bounds);
+    assert.ok(bounds, `invalid ${scrollID} bounds: ${viewport.bounds}`);
+    const [, left, top, right, bottom] = bounds.map(Number);
+    const target = findNode(nodes, { testID: id });
+    const targetBounds = target && /^\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]$/.exec(target.bounds);
+    if (targetBounds) {
+      const [, x1, y1, x2, y2] = targetBounds.map(Number);
+      if (x2 > x1 && y2 > y1 && (x1 + x2) / 2 >= left && (x1 + x2) / 2 <= right &&
+        (y1 + y2) / 2 > top && (y1 + y2) / 2 < bottom) return target;
+    }
+    if (attempt === 7) break;
+    const height = bottom - top;
+    assert.ok(height > 0, `${scrollID} has no positive height`);
+    const x = Math.round((left + right) / 2);
+    const upper = Math.round(top + height * 0.2);
+    const lower = Math.round(top + height * 0.8);
+    const from = direction === 'down' ? lower : upper;
+    const to = direction === 'down' ? upper : lower;
+    await driver.exec(['shell', 'input', 'swipe', String(x), String(from), String(x), String(to), '350']);
+    await delay();
   }
-  throw new Error(`${id} did not become visible after scrolling`);
+  throw new Error(`testID ${id} not visible in ${scrollID} after scrolling ${direction} (last dump: dump-discovery-${slug}-7.xml)`);
 }
 
 async function waitForFeedbackRetry(driver) {
@@ -111,12 +134,17 @@ export async function runDiscoverySuite({ driver, url, runCase, coldStart, stopO
     await driver.tapSelector({ testID: 'link-discovery' });
     await driver.waitFor({ testID: 'screen-Discovery' }, { timeoutMs: SHORT_MS });
     let nodes = await nodesOn(driver, 'offers');
-    requireId(nodes, 'offer-card-offer-guide-e2e-free');
-    assert.match(requireId(nodes, 'offer-card-offer-guide-e2e-paid').contentDesc, /Платна|Paid/i);
-    requireId(nodes, 'offer-card-offer-place-e2e-1');
-    requireId(nodes, 'offer-card-offer-collection-e2e-day');
     requireId(nodes, 'time-60');
     requireId(nodes, 'theme-theme-e2e-day');
+    // Five published offers overflow the first Android viewport. Verify
+    // each card where it is actually visible instead of one clipped dump.
+    for (const offer of ['offer-guide-e2e-free', 'offer-place-e2e-1',
+      'offer-collection-e2e-day', 'offer-guide-e2e-paid']) {
+      await scrollTo(driver, `offer-card-${offer}`, `offer-${offer}`);
+    }
+    const paidBadge = await scrollTo(driver, 'badge-access-paid', 'paid-badge');
+    assert.match(paidBadge.contentDesc, /Платна|Paid/i);
+    await scrollTo(driver, 'time-60', 'time-control', { direction: 'up' });
     await driver.tapSelector({ testID: 'time-60' });
     nodes = await nodesOn(driver, 'time');
     requireId(nodes, 'offer-card-offer-guide-e2e-free');
@@ -126,18 +154,22 @@ export async function runDiscoverySuite({ driver, url, runCase, coldStart, stopO
     requireId(nodes, 'discovery-alternatives');
     await driver.tapSelector({ testID: 'theme-theme-e2e-day' });
     await driver.tapSelector({ testID: 'time-none' });
+    await scrollTo(driver, 'offer-card-offer-collection-e2e-day', 'collection-link');
     await driver.tapSelector({ testID: 'offer-card-offer-collection-e2e-day' });
     await driver.waitFor({ testID: 'screen-Collection' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: 'btn-collection-back' });
     await driver.waitFor({ testID: 'screen-Discovery' }, { timeoutMs: SHORT_MS });
+    await scrollTo(driver, 'offer-card-offer-place-e2e-1', 'place-link', { direction: 'up' });
     await driver.tapSelector({ testID: 'offer-card-offer-place-e2e-1' });
     await driver.waitFor({ testID: 'screen-Place detail' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: 'btn-place-back' });
     await driver.waitFor({ testID: 'screen-Discovery' }, { timeoutMs: SHORT_MS });
+    await scrollTo(driver, 'offer-card-offer-guide-e2e-free', 'free-link', { direction: 'up' });
     await driver.tapSelector({ testID: 'offer-card-offer-guide-e2e-free' });
     await driver.waitFor({ testID: 'screen-Route preview' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: 'btn-preview-back' });
     await driver.waitFor({ testID: 'screen-Discovery' }, { timeoutMs: SHORT_MS });
+    await scrollTo(driver, 'offer-card-offer-guide-e2e-paid', 'paid-link');
     await driver.tapSelector({ testID: 'offer-card-offer-guide-e2e-paid' });
     await driver.waitFor({ testID: 'screen-Route preview' }, { timeoutMs: SHORT_MS });
     await driver.waitFor({ testID: 'preview-free-stop-count' }, { timeoutMs: SHORT_MS });
@@ -155,7 +187,7 @@ export async function runDiscoverySuite({ driver, url, runCase, coldStart, stopO
     await driver.tapSelector({ testID: 'link-discovery' });
     await driver.waitFor({ testID: 'offer-card-offer-guide-e2e-free' }, { timeoutMs: SHORT_MS });
     await driver.tapSelector({ testID: 'offer-card-offer-guide-e2e-free' });
-    await scrollTo(driver, 'btn-download', 'free-download');
+    await scrollTo(driver, 'btn-download', 'free-download', { scrollID: 'scroll-preview' });
     await driver.tapSelector({ testID: 'btn-download' });
     await driver.waitFor({ testID: 'btn-start', enabled: true }, { timeoutMs: DOWNLOAD_MS });
     await driver.tapSelector({ testID: 'btn-preview-back' });
