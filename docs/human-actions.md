@@ -17,8 +17,9 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
-### 2026-10-18 — падключы Android для канчатковай праверкі #809
-Што зрабіць: падключы Android-прыладу або эмулятар з TalkBack і Accessibility Scanner, правядзі матрыцу Explore / preview / Run / My KUDY / purchase-restore / permissions з памылкамі і пустымі станамі. Зафіксуй вынікі і скрыншоты без асабістых даных у [APR-04](agent-tasks/results/APR-04.md), выпраў рэшткавыя дэфекты і толькі пасля поўнай прыёмкі мержы PR.
+### 2026-10-21 — даштурхай Android-прыёмку #809 да поўнай
+Што зрабіць: Waydroid-эвідэнцыя ўжо ёсць (TalkBack-абходы з доказамі маўлення, аўдыт 48dp — гл. `docs/testing/evidence/2026-10-20-apr04-waydroid/`). Даштурхай рэшткі: усталюй Accessibility Scanner (уваход у Play Store) або правядзі яго на рэальнай прыладзе, прайдзі GPS-залежныя станы, purchase/restore і пусты вынік фільтра; пасля поўнай прыёмкі мержы PR.
+PR: https://github.com/vokhandcrafts/KUDY/pull/830
 Issue: https://github.com/vokhandcrafts/KUDY/issues/809
 
 ### 2026-10-17 — змержы follow-up PR #814: праўкі рэв'ю G20.31
