@@ -499,7 +499,7 @@ export async function loadCatalog(
 ): Promise<CatalogLoadState> {
   const cached = () => readCachedGuides(deps.snapshot, options.localePreference);
   const offline = (reason: string): CatalogLoadState => {
-    if (previous !== null) return { kind: 'offline', guides: previous, reason };
+    if (previous && previous.length > 0) return { kind: 'offline', guides: previous, reason };
     const snapshot = cached();
     if (snapshot.kind === 'ready') return { kind: 'offline', guides: snapshot.value, reason };
     return { kind: 'error', reason: snapshot.kind === 'corrupt' ? 'catalog-cache-corrupt' : reason };
@@ -517,7 +517,7 @@ export async function loadCatalog(
   // validated catalog. The first load may still show honest route-only cards.
   if (offers === null && read.envelope.discovery_index !== null) {
     const snapshot = cached();
-    if (previous !== null || snapshot.kind === 'ready') return offline('index-unavailable');
+    if ((previous && previous.length > 0) || snapshot.kind === 'ready') return offline('index-unavailable');
     return {
       kind: 'ready',
       guides: projectGuides(read.envelope, []),
