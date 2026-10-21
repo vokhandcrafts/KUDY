@@ -1,0 +1,67 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[977,416][1585,513]",
+   "desc": "Побач →",
+   "text": "",
+   "id": "link-nearby",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 6
+ },
+ {
+  "step": 2,
+  "focused": {
+   "bounds": "[977,528][1585,624]",
+   "desc": "Чым заняцца →",
+   "text": "",
+   "id": "link-discovery",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 11
+ },
+ {
+  "step": 3,
+  "focused": {
+   "bounds": "[977,640][1585,736]",
+   "desc": "KUDY →",
+   "text": "",
+   "id": "link-kudy",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 16
+ },
+ {
+  "step": 4,
+  "focused": {
+   "bounds": "[977,846][1585,1190]",
+   "desc": "Тры гісторыі старога горада · дэма, Бясплатна",
+   "text": "",
+   "id": "guide-card-e2e-free-guide",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 22
+ },
+ {
+  "step": 5,
+  "focused": {
+   "bounds": "[977,846][1585,1190]",
+   "desc": "Тры гісторыі старога горада · дэма, Бясплатна",
+   "text": "",
+   "id": "guide-card-e2e-free-guide",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 27
+ }
+]

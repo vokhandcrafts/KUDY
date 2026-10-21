@@ -1,0 +1,18 @@
+[977,87][1585,125] click=false sel=false chk=false focusable=false focused=false | '' | 'KUDY' | 
+[977,148][1585,197] click=false sel=false chk=false focusable=false focused=false | '' | 'Гданьск' | 
+[1002,246][1559,289] click=false sel=false chk=false focusable=false focused=false | '' | 'Дэманстрацыйная версія' | 
+[1002,305][1559,366] click=false sel=false chk=false focusable=false focused=false | '' | 'Гісторыі, кропкі і гукі тут прыкладныя. Гэта не гатовы маршрут для навігацыі.' | 
+[977,416][1585,513] click=true sel=false chk=false focusable=true focused=false | 'Побач →' | '' | link-nearby
+[1002,441][1559,486] click=false sel=false chk=false focusable=false focused=false | '' | 'Побач →' | 
+[977,528][1585,624] click=true sel=false chk=false focusable=true focused=false | 'Чым заняцца →' | '' | link-discovery
+[1002,553][1559,598] click=false sel=false chk=false focusable=false focused=false | '' | 'Чым заняцца →' | 
+[977,640][1585,736] click=true sel=false chk=false focusable=true focused=false | 'KUDY →' | '' | link-kudy
+[1002,665][1559,710] click=false sel=false chk=false focusable=false focused=false | '' | 'KUDY →' | 
+[977,752][1585,846] click=true sel=false chk=false focusable=true focused=false | 'Гіды →' | '' | link-guides
+[977,752][1585,797] click=false sel=false chk=false focusable=false focused=false | '' | 'Гіды →' | 
+[977,846][1585,1190] click=true sel=false chk=false focusable=true focused=false | 'Тры гісторыі старога горада · дэма, Бясплатна' | '' | guide-card-e2e-free-guide
+[1002,871][1559,914] click=false sel=false chk=false focusable=false focused=false | '' | 'Тры гісторыі старога горада · дэма' | 
+[1002,930][1559,1049] click=false sel=false chk=false focusable=false focused=false | '' | 'Кароткая дэманстрацыйная прагулка з трыма кропкамі, тэкстам і прыкладным аўдыё.' | 
+[1003,1065][1156,1106] click=false sel=false chk=false focusable=true focused=false | 'Бясплатна' | '' | badge-access-free
+[1018,1068][1139,1101] click=false sel=false chk=false focusable=false focused=false | '' | 'Бясплатна' | 
+[1002,1121][1559,1164] click=false sel=false chk=false focusable=false focused=false | '' | 'Тэкст: be, en; аўдыё: be, en' | 

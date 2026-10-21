@@ -1,0 +1,54 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[1220,360][1377,454]",
+   "desc": "English",
+   "text": "",
+   "id": "btn-ui-locale-en",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 7
+ },
+ {
+  "step": 2,
+  "focused": {
+   "bounds": "[1209,470][1379,564]",
+   "desc": "Deutsch",
+   "text": "",
+   "id": "btn-ui-locale-de",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 12
+ },
+ {
+  "step": 3,
+  "focused": {
+   "bounds": "[1166,581][1326,676]",
+   "desc": "Čeština",
+   "text": "",
+   "id": "btn-ui-locale-cs",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 17
+ },
+ {
+  "step": 4,
+  "focused": {
+   "bounds": "[1166,581][1326,676]",
+   "desc": "Čeština",
+   "text": "",
+   "id": "btn-ui-locale-cs",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 23
+ }
+]

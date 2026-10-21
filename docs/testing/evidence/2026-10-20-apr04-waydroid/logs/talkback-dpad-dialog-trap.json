@@ -1,0 +1,41 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[1010,602][1551,696]",
+   "desc": "Завяршыць",
+   "text": "",
+   "id": "btn-end-confirm-accept",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 5
+ },
+ {
+  "step": 2,
+  "focused": {
+   "bounds": "[1010,712][1551,806]",
+   "desc": "Скасаваць",
+   "text": "",
+   "id": "btn-end-confirm-cancel",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 10
+ },
+ {
+  "step": 3,
+  "focused": {
+   "bounds": "[1010,712][1551,806]",
+   "desc": "Скасаваць",
+   "text": "",
+   "id": "btn-end-confirm-cancel",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 15
+ }
+]

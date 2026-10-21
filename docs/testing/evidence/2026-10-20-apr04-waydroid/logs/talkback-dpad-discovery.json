@@ -1,0 +1,41 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[1230,266][1390,361]",
+   "desc": "Да гадзіны",
+   "text": "",
+   "id": "time-60",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 6
+ },
+ {
+  "step": 2,
+  "focused": {
+   "bounds": "[1212,376][1362,470]",
+   "desc": "На паўдня",
+   "text": "",
+   "id": "time-240",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 11
+ },
+ {
+  "step": 3,
+  "focused": {
+   "bounds": "[977,526][1585,861]",
+   "desc": "Тры гісторыі старога горада · дэма",
+   "text": "",
+   "id": "offer-card-offer-guide-e2e-free",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 16
+ }
+]

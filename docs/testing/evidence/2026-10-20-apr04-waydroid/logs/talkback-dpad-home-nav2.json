@@ -1,0 +1,54 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[977,87][1585,181]",
+   "desc": "Назад",
+   "text": "",
+   "id": "btn-preview-back",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 6
+ },
+ {
+  "step": 2,
+  "focused": {
+   "bounds": "[977,205][1129,246]",
+   "desc": "Бясплатна",
+   "text": "",
+   "id": "badge-access-free",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.ViewGroup"
+  },
+  "synth_count": 11
+ },
+ {
+  "step": 3,
+  "focused": {
+   "bounds": "[977,321][1071,416]",
+   "desc": "be",
+   "text": "",
+   "id": "audio-chip-be",
+   "selected": "true",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 16
+ },
+ {
+  "step": 4,
+  "focused": {
+   "bounds": "[977,491][1008,523]",
+   "desc": "Кропкі",
+   "text": "",
+   "id": "",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.ViewGroup"
+  },
+  "synth_count": 22
+ }
+]

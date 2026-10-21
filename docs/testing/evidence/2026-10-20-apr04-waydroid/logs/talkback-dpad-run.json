@@ -1,0 +1,80 @@
+[
+ {
+  "step": 1,
+  "focused": {
+   "bounds": "[977,205][1323,299]",
+   "desc": "Прыпыніць прагулку",
+   "text": "",
+   "id": "btn-run-pause",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 6
+ },
+ {
+  "step": 2,
+  "focused": {
+   "bounds": "[977,315][1329,409]",
+   "desc": "Завяршыць прагулку",
+   "text": "",
+   "id": "btn-run-end",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 11
+ },
+ {
+  "step": 3,
+  "focused": {
+   "bounds": "[1314,584][1550,716]",
+   "desc": "Апошняя кропка, чакае",
+   "text": "",
+   "id": "run-marker-e2e-stop-3",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 16
+ },
+ {
+  "step": 4,
+  "focused": {
+   "bounds": "[1012,1010][1249,1142]",
+   "desc": "Пачатак гісторыі, чакае",
+   "text": "",
+   "id": "run-marker-e2e-stop-1",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.widget.Button"
+  },
+  "synth_count": 22
+ },
+ {
+  "step": 5,
+  "focused": {
+   "bounds": "[969,1146][1475,1240]",
+   "desc": "Дадзеныя © удзельнікі OpenStreetMap, ODbL",
+   "text": "",
+   "id": "map-attribution",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 27
+ },
+ {
+  "step": 6,
+  "focused": {
+   "bounds": "[969,1146][1475,1240]",
+   "desc": "Дадзеныя © удзельнікі OpenStreetMap, ODbL",
+   "text": "",
+   "id": "map-attribution",
+   "selected": "false",
+   "enabled": "true",
+   "class": "android.view.View"
+  },
+  "synth_count": 32
+ }
+]

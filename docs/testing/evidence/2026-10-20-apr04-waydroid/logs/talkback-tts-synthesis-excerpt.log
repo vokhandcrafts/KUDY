@@ -1,0 +1,96 @@
+10-21 12:16:07.191  8361 12877 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:07.192  8361 12877 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:07.220  8361 12877 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:07.221  8361 12877 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:07.241  8361 12877 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:07.242  8361 12877 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:08.557  8361 12877 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:08.557  8361 12877 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:08.557  8361 12877 I GoogleTTSServiceImpl: Did not cache synthesis request.
+10-21 12:16:08.558   310   555 I MediaFocusControl: requestAudioFocus() from uid/pid 10145/8335 AA=USAGE_ASSISTANCE_ACCESSIBILITY/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager:obj-redacted callingPack=com.google.android.marvin.talkback req=3 flags=0x0 sdk=35
+10-21 12:16:08.559  8361 12877 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:08.559  8361 12877 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:09.699  8361 12877 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:09.699  8361 12877 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:09.699  8361 12877 I GoogleTTSServiceImpl: Did not cache synthesis request.
+10-21 12:16:09.700  8361 12877 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:09.700  8361 12877 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:09.701  8361 12877 I GoogleTTSServiceImpl: Did not cache synthesis request.
+10-21 12:16:09.765  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:09.765  8361  8418 I GoogleTTSServiceImpl: For default lang en-us is name en-US-language (en-us-x-iog-server)
+10-21 12:16:10.170  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:10.170  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:10.171  8361  8418 I GoogleTTSServiceImpl: For default lang en-us is name en-US-language (en-us-x-iog-server)
+10-21 12:16:10.171  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:10.195   310   555 I MediaFocusControl: requestAudioFocus() from uid/pid 10145/8335 AA=USAGE_ASSISTANCE_ACCESSIBILITY/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager:obj-redacted callingPack=com.google.android.marvin.talkback req=3 flags=0x0 sdk=35
+10-21 12:16:10.569  8361 12954 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:10.570  8361 12954 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:11.803  8361 12954 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:11.804  8361 12954 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:11.804  8361 12954 I GoogleTTSServiceImpl: Did not cache synthesis request.
+10-21 12:16:11.806   310   689 I MediaFocusControl: requestAudioFocus() from uid/pid 10145/8335 AA=USAGE_ASSISTANCE_ACCESSIBILITY/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager:obj-redacted callingPack=com.google.android.marvin.talkback req=3 flags=0x0 sdk=35
+10-21 12:16:11.807  8361 12954 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:11.807  8361 12954 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:13.049  8361 12954 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:13.050  8361 12954 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:13.050  8361 12954 I GoogleTTSServiceImpl: Did not cache synthesis request.
+10-21 12:16:13.051  8361 12954 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:13.051  8361 12954 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:13.116  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:13.116  8361  8418 I GoogleTTSServiceImpl: For default lang en-us is name en-US-language (en-us-x-iog-server)
+10-21 12:16:13.517  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:13.518  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:13.518  8361  8418 I GoogleTTSServiceImpl: For default lang en-us is name en-US-language (en-us-x-iog-server)
+10-21 12:16:13.518  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:13.543   310  7588 I MediaFocusControl: requestAudioFocus() from uid/pid 10145/8335 AA=USAGE_ASSISTANCE_ACCESSIBILITY/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager:obj-redacted callingPack=com.google.android.marvin.talkback req=3 flags=0x0 sdk=35
+10-21 12:16:13.886  8361 13003 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:13.886  8361 13003 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:15.050  8361 13003 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:15.051  8361 13003 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:15.051  8361 13003 I GoogleTTSServiceImpl: Did not cache synthesis request.
+10-21 12:16:15.053   310   555 I MediaFocusControl: requestAudioFocus() from uid/pid 10145/8335 AA=USAGE_ASSISTANCE_ACCESSIBILITY/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager:obj-redacted callingPack=com.google.android.marvin.talkback req=3 flags=0x0 sdk=35
+10-21 12:16:15.053  8361 13003 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:15.054  8361 13003 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:16.163  8361 13003 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:16.163  8361 13003 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:16.163  8361 13003 I GoogleTTSServiceImpl: Did not cache synthesis request.
+10-21 12:16:16.164  8361 13003 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:16.164  8361 13003 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:16.231  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:16.232  8361  8418 I GoogleTTSServiceImpl: For default lang en-us is name en-US-language (en-us-x-iog-server)
+10-21 12:16:16.638  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:16.639  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:16.639  8361  8418 I GoogleTTSServiceImpl: For default lang en-us is name en-US-language (en-us-x-iog-server)
+10-21 12:16:16.639  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:16.664   310   555 I MediaFocusControl: requestAudioFocus() from uid/pid 10145/8335 AA=USAGE_ASSISTANCE_ACCESSIBILITY/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager:obj-redacted callingPack=com.google.android.marvin.talkback req=3 flags=0x0 sdk=35
+10-21 12:16:16.994  8361 13052 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:16.994  8361 13052 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:18.445  8361 13052 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:18.446  8361 13052 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:18.743  8361 13052 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:18.743   310  7588 I MediaFocusControl: requestAudioFocus() from uid/pid 10145/8335 AA=USAGE_ASSISTANCE_ACCESSIBILITY/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager:obj-redacted callingPack=com.google.android.marvin.talkback req=3 flags=0x0 sdk=35
+10-21 12:16:18.743  8361 13052 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:18.743  8361 13052 I GoogleTTSServiceImpl: Did not cache synthesis request.
+10-21 12:16:18.743  8361 13052 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:18.744  8361 13052 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:19.854  8361 13052 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:19.854  8361 13052 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:19.855  8361 13052 I GoogleTTSServiceImpl: Did not cache synthesis request.
+10-21 12:16:19.856  8361 13052 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:19.856  8361 13052 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:19.856  8361 13052 I GoogleTTSServiceImpl: Did not cache synthesis request.
+10-21 12:16:19.921  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:19.921  8361  8418 I GoogleTTSServiceImpl: For default lang en-us is name en-US-language (en-us-x-iog-server)
+10-21 12:16:20.342  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:20.343  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:20.343  8361  8418 I GoogleTTSServiceImpl: For default lang en-us is name en-US-language (en-us-x-iog-server)
+10-21 12:16:20.343  8361  8418 I GoogleTTSServiceImpl: currentLocale = en-US
+10-21 12:16:20.371   310   555 I MediaFocusControl: requestAudioFocus() from uid/pid 10145/8335 AA=USAGE_ASSISTANCE_ACCESSIBILITY/CONTENT_TYPE_SPEECH clientId=android.media.AudioManager:obj-redacted callingPack=com.google.android.marvin.talkback req=3 flags=0x0 sdk=35
+10-21 12:16:20.715  8361 13108 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:20.716  8361 13108 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:22.179  8361 13108 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:22.180  8361 13108 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:23.959  8361 13108 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:23.959  8361 13108 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded
+10-21 12:16:25.315  8361 13108 I GoogleTTSServiceImpl: Synthesis request for locale eng-USA and name en-US-language
+10-21 12:16:25.315  8361 13108 I GoogleTTSServiceImpl: TTS dispatch: en-us-x-iog-lstm-embedded

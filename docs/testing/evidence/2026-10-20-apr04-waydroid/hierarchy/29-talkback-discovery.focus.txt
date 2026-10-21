@@ -1,0 +1,26 @@
+[977,87][1585,181] click=true sel=false chk=false focusable=true focused=true | 'Назад' | '' | btn-preview-back
+[977,119][1008,151] click=false sel=false chk=false focusable=true focused=false | 'Назад' | '' | 
+[1024,113][1116,156] click=false sel=false chk=false focusable=false focused=false | '' | 'Назад' | 
+[977,205][1585,255] click=false sel=false chk=false focusable=false focused=false | '' | 'Тры гісторыі старога горада · дэма' | 
+[977,270][1585,385] click=false sel=false chk=false focusable=false focused=false | '' | 'Кароткая дэманстрацыйная прагулка з трыма кропкамі, тэкстам і прыкладным аўдыё.' | 
+[977,409][1585,449] click=false sel=false chk=false focusable=false focused=false | '' | 'Першая прагулка' | preview-theme
+[977,465][1129,506] click=false sel=false chk=false focusable=true focused=false | 'Бясплатна' | '' | badge-access-free
+[992,468][1113,501] click=false sel=false chk=false focusable=false focused=false | '' | 'Бясплатна' | 
+[977,521][1585,564] click=false sel=false chk=false focusable=false focused=false | '' | 'Тэкст: be, en; аўдыё: be, en' | preview-locales
+[977,581][1071,676] click=true sel=true chk=false focusable=true focused=false | 'be' | '' | audio-chip-be
+[1002,590][1046,620] click=false sel=false chk=false focusable=false focused=false | '' | 'be' | 
+[1087,581][1181,676] click=true sel=false chk=false focusable=true focused=false | 'en' | '' | audio-chip-en
+[1112,590][1156,620] click=false sel=false chk=false focusable=false focused=false | '' | 'en' | 
+[977,691][1585,731] click=false sel=false chk=false focusable=true focused=false | 'Час: ад 10 да 15 хв' | '' | preview-duration
+[977,695][1008,726] click=false sel=false chk=false focusable=true focused=false | 'Працягласць' | '' | 
+[1024,691][1312,731] click=false sel=false chk=false focusable=false focused=false | '' | 'Час: ад 10 да 15 хв' | preview-duration-text
+[977,747][1585,787] click=false sel=false chk=false focusable=true focused=false | 'Кропкі: 3' | '' | preview-counts
+[977,751][1008,783] click=false sel=false chk=false focusable=true focused=false | 'Кропкі' | '' | 
+[1024,747][1168,787] click=false sel=false chk=false focusable=false focused=false | '' | 'Кропкі: 3' | preview-counts-text
+[977,802][1585,842] click=false sel=false chk=false focusable=false focused=false | '' | 'Памер: 1 МБ' | preview-size
+[1002,891][1559,931] click=false sel=false chk=false focusable=false focused=false | '' | 'Пачатак гісторыі' | 
+[1002,935][1559,965] click=false sel=false chk=false focusable=false focused=false | '' | 'Першая кропка · дэма' | 
+[1002,981][1559,1058] click=false sel=false chk=false focusable=false focused=false | '' | 'Знаёмства з дэманстрацыйным маршрутам' | 
+[1002,1125][1559,1165] click=false sel=false chk=false focusable=false focused=false | '' | 'На шляху' | 
+[1002,1181][1559,1258] click=false sel=false chk=false focusable=false focused=false | '' | 'Другая частка прыкладнай прагулкі' | 
+[1002,1324][1559,1328] click=false sel=false chk=false focusable=false focused=false | '' | 'Апошняя кропка' | 

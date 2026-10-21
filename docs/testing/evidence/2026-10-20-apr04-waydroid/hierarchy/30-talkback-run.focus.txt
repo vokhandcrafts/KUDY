@@ -1,0 +1,18 @@
+[977,87][1585,181] click=true sel=false chk=false focusable=true focused=true | 'Назад' | '' | btn-run-back
+[977,119][1008,151] click=false sel=false chk=false focusable=true focused=false | 'Назад' | '' | 
+[1024,113][1116,156] click=false sel=false chk=false focusable=false focused=false | '' | 'Назад' | 
+[977,205][1323,299] click=true sel=false chk=false focusable=true focused=false | 'Прыпыніць прагулку' | '' | btn-run-pause
+[994,222][1305,265] click=false sel=false chk=false focusable=false focused=false | '' | 'Прыпыніць прагулку' | 
+[977,315][1329,409] click=true sel=false chk=false focusable=true focused=false | 'Завяршыць прагулку' | '' | btn-run-end
+[994,332][1311,375] click=false sel=false chk=false focusable=false focused=false | '' | 'Завяршыць прагулку' | 
+[969,1088][1182,1131] click=false sel=false chk=false focusable=false focused=false | '' | 'Нічога не грае' | run-bar-title
+[969,1146][1475,1240] click=true sel=false chk=false focusable=true focused=false | 'Дадзеныя © удзельнікі OpenStreetMap, ODbL' | '' | map-attribution
+[969,1146][1475,1179] click=false sel=false chk=false focusable=false focused=false | '' | 'Дадзеныя © удзельнікі OpenStreetMap, ODbL' | 
+[1006,454][1299,515] click=false sel=false chk=false focusable=false focused=false | '' | 'Схема кропак · дэма' | 
+[1314,584][1550,716] click=true sel=false chk=false focusable=true focused=false | 'Апошняя кропка, чакае' | '' | run-marker-e2e-stop-3
+[1314,654][1550,715] click=false sel=false chk=false focusable=false focused=false | '' | 'Апошняя кропка — чакае' | run-status-e2e-stop-3
+[1163,797][1399,901] click=true sel=false chk=false focusable=true focused=false | 'На шляху, чакае' | '' | run-marker-e2e-stop-2
+[1180,867][1381,900] click=false sel=false chk=false focusable=false focused=false | '' | 'На шляху — чакае' | run-status-e2e-stop-2
+[1012,1010][1249,1142] click=true sel=false chk=false focusable=true focused=false | 'Пачатак гісторыі, чакае' | '' | run-marker-e2e-stop-1
+[1012,1080][1248,1141] click=false sel=false chk=false focusable=false focused=false | '' | 'Пачатак гісторыі — чакае' | run-status-e2e-stop-1
+[976,1266][1584,1327] click=false sel=false chk=false focusable=false focused=false | '' | 'Карта загружаецца або недаступная — паказана схема кропак маршруту' | 
