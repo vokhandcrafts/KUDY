@@ -257,6 +257,41 @@ test('G20.20: the free synthetic package walks the whole production composition'
   assert.deepEqual(await commerce.purchase('route_491_extended'), { kind: 'unavailable' });
 });
 
+test('G23.05: the installed composition asks before replacing an active or paused guide', async () => {
+  const driver = nodeSqliteDriver();
+  const device = createDeviceServicePorts(facilities(driver));
+  const services = createServices(device.ports);
+  const preview = services.preview?.create('route-491');
+  const sessions = device.ports.run?.session.sessionStore;
+  if (!preview || !sessions) throw new Error('the production preview or session port is absent');
+  await settledPreview(preview);
+  await preview.getState().download();
+  await preview.getState().refresh();
+  assert.equal(preview.getState().button.action, 'start');
+  assert.equal(preview.getState().button.enabled, true);
+
+  assert.deepEqual(sessions.start({
+    sessionId: 'existing-663', routeId: 'another-guide', version: '1', locale: 'be', startedAt: 1,
+  }), { ok: true });
+  assert.equal(services.walk?.liveSession()?.routeId, 'another-guide');
+  assert.equal(await preview.getState().start(), 'confirm');
+  assert.equal(preview.getState().confirm?.liveTitle, 'another-guide');
+  preview.getState().cancelConfirm();
+  assert.equal(preview.getState().confirm, null);
+  assert.equal(getLiveSession(driver)?.sessionId, 'existing-663');
+
+  sessions.pause('existing-663', { heard: ['story-1'] });
+  assert.equal(getLiveSession(driver)?.state, 'paused');
+  assert.equal(await preview.getState().start(), 'confirm');
+  preview.getState().cancelConfirm();
+  assert.equal(preview.getState().confirm, null);
+  const paused = getLiveSession(driver);
+  assert.ok(paused, 'the paused session remains live');
+  assert.equal(paused.sessionId, 'existing-663');
+  assert.equal(paused.state, 'paused');
+  assert.deepEqual(paused.heard, ['story-1']);
+});
+
 // #664: a force-stop loses the Run surface cache, not the SQLite live row.
 // The person can reopen a Place card directly, before opening Run again.
 async function installedActiveWalk(): Promise<ReturnType<typeof nodeSqliteDriver>> {

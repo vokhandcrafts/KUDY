@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-20 — дадай recovery у Android CI для G23.05
+Што зрабіць: дадай `recovery` у цыкл сюіт `.github/workflows/android-e2e.yml`, каб сем сцэнарыяў аднаўлення запускаліся на кожным PR. Правер, што новы крок праходзіць на GitHub runner.
+PR: https://github.com/vokhandcrafts/KUDY/pull/831 · Issue: [#663](https://github.com/vokhandcrafts/KUDY/issues/663)
+
 ### 2026-10-20 — праводзь праверкі брэнда G26
 Што зрабіць: калі ёсць час засяродзіцца, бяры па адной задачы з ⚠️ (#765–#773, #776) і праводзь яе разам з агентам у жывой сесіі: агент рыхтуе матэрыял, рашэнне — тваё.
 PR: https://github.com/vokhandcrafts/KUDY/pull/779 · Issue: [#764](https://github.com/vokhandcrafts/KUDY/issues/764)

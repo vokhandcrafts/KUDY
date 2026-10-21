@@ -6,10 +6,10 @@
 // and the explicit teardown, and serves every ServicePorts member the free
 // flow needs. Deliberately absent (honest unavailable, spec V5): the
 // single-store packageStore member (no route context — the preview rides
-// evaluateLayer), the live-walk runSession/walk fact (needs the route-title
-// join from the catalog projection), and discovery analytics (no sender).
-// Discovery's replaceable snapshot, Nearby/guide hints and feedback are
-// composed below; feedback stays absent without a Functions endpoint.
+// evaluateLayer) and discovery analytics (no sender). Discovery's replaceable
+// snapshot, Nearby/guide hints and feedback are composed below; feedback
+// stays absent without a Functions endpoint. The live-session port reads
+// SQLite, and createServices joins its route ID to the catalog title.
 // react-native-purchases is never imported here: purchase/restore stays the
 // explicitly-unavailable port until G20.21 wires and verifies the live path.
 import { activate } from '../services/download/download.ts';
@@ -346,6 +346,15 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
     // button derives a real evaluate verdict, never verify-unavailable on a
     // downloaded layer.
     evaluateLayer: createEvaluateLayer({ bundlesStore }),
+    // The one-live-row read is the preview's switch confirmation gate. The
+    // root resolves its display title from the catalog projection; the raw
+    // route id remains the honest fallback when that catalog is unavailable.
+    runSession: {
+      liveSession: () => {
+        const live = getLiveSession(driver);
+        return live ? { routeId: live.routeId, title: live.routeId } : null;
+      },
+    },
     commerce,
     sessionHistory: createSessionHistoryPort(driver),
     uiLocalePersistence: createUiLocalePersistence(driver),
