@@ -19,7 +19,7 @@
 //   and creates a fresh one (re-creation, never reset); `stop`/`dispose`
 //   remove the player, so its late statuses cannot fire.
 // - the speech audio mode is requested through the once-guarded
-//   `configureSpeechAudioMode()`; the app start awaits it before the first
+//   `configureSpeechAudioMode()`; AudioService awaits it before the first
 //   play (ducking and focus itself are left to the OS, `09` §6.3).
 import {
   createAudioPlayer,
@@ -36,8 +36,8 @@ import type {
 import { createStatusMapper, type MappedEvent } from './status-mapping.ts';
 import { createSpeechModeSetter, SPEECH_AUDIO_MODE } from './speech-mode.ts';
 
-// Set once per process (AC3). The app start awaits this before the first
-// play; the rejection propagates to that caller — nothing swallows it.
+// Set once per process (AC3). The device AudioService awaits this before
+// physical play and maps rejection to its existing failed-event path.
 export const configureSpeechAudioMode = createSpeechModeSetter(setAudioModeAsync, SPEECH_AUDIO_MODE);
 
 export interface ExpoAudioPlayerPortOptions {
