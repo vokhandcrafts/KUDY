@@ -25,6 +25,10 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/831 · Issue: [#663](https://gith
 Што зрабіць: калі ёсць час засяродзіцца, бяры па адной задачы з ⚠️ (#765–#773, #776) і праводзь яе разам з агентам у жывой сесіі: агент рыхтуе матэрыял, рашэнне — тваё.
 PR: https://github.com/vokhandcrafts/KUDY/pull/779 · Issue: [#764](https://github.com/vokhandcrafts/KUDY/issues/764)
 
+### 2026-10-20 — прымі рашэнне APR-07 і правер наступныя задачы
+Што зрабіць: праглядзі рашэнне пра выдаленне даных прылады і змержы PR #837 пасля рэвью. Правер у GitHub Project бачнасць #835 і #836 у backlog: токен гэтай сесіі не мае `read:project`; не запускай іх да закрыцця пазначаных залежнасцяў.
+PR: https://github.com/vokhandcrafts/KUDY/pull/837 · Issue: https://github.com/vokhandcrafts/KUDY/issues/805 · [Рашэнне](architecture/decisions/APR-07-device-data-deletion.md) · [#835](https://github.com/vokhandcrafts/KUDY/issues/835), [#836](https://github.com/vokhandcrafts/KUDY/issues/836)
+
 ### 2026-10-19 — выберы напрамак заставы KUDY
 Што зрабіць: параўнай [дзесяць мабільных напрамкаў](design/brand/outputs/brand-splash-directions-2026-10-19/all-ten.png) і [іх тлумачэнні](design/brand/outputs/brand-splash-directions-2026-10-19/README.md) у PR #802. Назаві адзін або некалькі для развіцця ў пару «чаканне → Explore»; асобна вызначы іконку B05 і тэксты B06. Ранейшыя заставы з асобным драконам і мясцовай панарамай адхіленыя.
 PR: https://github.com/vokhandcrafts/KUDY/pull/802
