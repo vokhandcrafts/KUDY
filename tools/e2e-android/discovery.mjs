@@ -63,11 +63,11 @@ export async function scrollTo(driver, id, slug, { scrollID = 'scroll-discovery'
   for (let attempt = 0; attempt <= 7; attempt += 1) {
     const nodes = await nodesOn(driver, `${slug}-${attempt}`);
     const viewport = requireId(nodes, scrollID);
-    const bounds = /^\\[(-?\\d+),(-?\\d+)\\]\\[(-?\\d+),(-?\\d+)\\]$/.exec(viewport.bounds);
+    const bounds = /^\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]$/.exec(viewport.bounds);
     assert.ok(bounds, `invalid ${scrollID} bounds: ${viewport.bounds}`);
     const [, left, top, right, bottom] = bounds.map(Number);
     const target = findNode(nodes, { testID: id });
-    const targetBounds = target && /^\\[(-?\\d+),(-?\\d+)\\]\\[(-?\\d+),(-?\\d+)\\]$/.exec(target.bounds);
+    const targetBounds = target && /^\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]$/.exec(target.bounds);
     if (targetBounds) {
       const [, x1, y1, x2, y2] = targetBounds.map(Number);
       if (x2 > x1 && y2 > y1 && (x1 + x2) / 2 >= left && (x1 + x2) / 2 <= right &&
