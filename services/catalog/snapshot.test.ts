@@ -11,6 +11,7 @@ import { createServices } from '../../controllers/createServices.ts';
 import { checkpointProgress, getSession, openDatabase, rebuildDerived, startSession } from '../db/db.ts';
 import { nodeSqliteDriver, nodeSqliteFileDriver } from '../db/test-fixture.ts';
 import type { SqlDriver } from '../db/types.ts';
+import type { BundlesStore } from '../contentRepo/types.ts';
 import { catalogSnapshotOver } from './snapshot.ts';
 import type { CatalogPathLoader } from './types.ts';
 
@@ -29,11 +30,34 @@ const loadPublished: CatalogPathLoader = async (relative) => {
 const noNetwork: CatalogPathLoader = async () => { throw new Error('network-offline'); };
 const sha256 = async (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
 
-function root(driver: SqlDriver, loader: CatalogPathLoader) {
+// Installed-layer metadata is supplied by the same BundlesStore port that
+// production's readLayerFacts reader probes. The test does not mock the
+// inventory reader or the preview-button derivation.
+const lock = new TextEncoder().encode(JSON.stringify([
+  { path: 'stops.json', bytes: 3, sha256: 'a'.repeat(64) },
+]));
+const installed: BundlesStore = {
+  listDir: async (relative) => relative === 'bundles/guide-route-b1' ? ['3'] : [],
+  readFile: async (relative) => relative === 'bundles/guide-route-b1/3/be/base/lock.json'
+    ? { kind: 'present', bytes: lock }
+    : { kind: 'absent' },
+  statSize: async (relative) => relative === 'bundles/guide-route-b1/3/be/base/stops.json' ? 3 : null,
+};
+function root(driver: SqlDriver, loader: CatalogPathLoader, downloaded = false) {
   return createServices({
     catalogLoader: loader,
     catalogSha256: sha256,
     catalogSnapshot: catalogSnapshotOver(driver),
+    ...(downloaded ? {
+      bundlesStore: installed,
+      evaluateLayer: async (input: { routeId: string; version: string; locale: string; tier: 'base' | 'extended' }) => ({
+        status: 'ready' as const,
+        routeId: input.routeId,
+        version: input.version,
+        tier: input.tier,
+        tierAvailable: ['base' as const],
+      }),
+    } : {}),
   });
 }
 async function list(services: ReturnType<typeof root>) {
@@ -63,7 +87,7 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     let sqlite = nodeSqliteFileDriver(file);
     try {
       openDatabase(sqlite.driver);
-      const online = root(sqlite.driver, loadPublished);
+      const online = root(sqlite.driver, loadPublished, true);
       const initial = await list(online);
       assert.equal(initial.kind, 'ready');
       assert.ok(initial.kind === 'ready');
@@ -74,8 +98,8 @@ describe('G20.32 catalog snapshot across production controllers', () => {
       assert.equal(opened.surface.preview.routeAccess, 'free_base');
       assert.equal(opened.surface.preview.stops?.[0]?.name, 'Стары порт');
       assert.equal(opened.surface.preview.stops?.[1]?.locked, true);
-      assert.equal(opened.button.enabled, false);
-      assert.equal(opened.button.reason, 'preview#storage-unknown', 'no inventory port must not invent Start');
+      assert.equal(opened.button.action, 'start');
+      assert.equal(opened.button.enabled, true, 'Start still derives from verified installed-layer facts');
 
       const before = cacheRows(sqlite.driver);
       assert.equal(before.length, 2, 'one list and one free preview snapshot');
@@ -85,7 +109,7 @@ describe('G20.32 catalog snapshot across production controllers', () => {
 
       sqlite = nodeSqliteFileDriver(file);
       openDatabase(sqlite.driver);
-      const offline = root(sqlite.driver, noNetwork);
+      const offline = root(sqlite.driver, noNetwork, true);
       const fromDisk = await list(offline);
       assert.equal(fromDisk.kind, 'offline', 'offline banner survives an actual reopened SQLite database');
       assert.ok(fromDisk.kind === 'offline');
@@ -95,7 +119,7 @@ describe('G20.32 catalog snapshot across production controllers', () => {
       assert.ok(reopened.surface.kind === 'ready');
       assert.equal(reopened.surface.degraded, 'network-offline');
       assert.deepEqual(reopened.surface.preview, opened.surface.preview);
-      assert.deepEqual(reopened.button, opened.button, 'download/Start readiness still comes from disk inventory');
+      assert.deepEqual(reopened.button, opened.button, 'Start readiness still comes from disk inventory');
       offline.dispose();
     } finally {
       sqlite.close();
