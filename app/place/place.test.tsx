@@ -10,6 +10,7 @@
 // (criterion 4).
 import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import { act, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
+import { renderHook } from "@testing-library/react-native";
 
 import PlaceDetail from "./[id]";
 import FeedbackForm from "../feedback";
@@ -25,6 +26,7 @@ import { fixtureText, flatStyle, layoutWith, serve, sha256 } from "../../test/re
 import { tokens } from "../../components/design-tokens";
 import { AudioService } from "../../services/audio/service";
 import { FakeAudioPlayerPort } from "../../services/audio/fake-port";
+import { useVisibleMomentPlayback } from "../../components/use-visible-moment-playback";
 import type { BundlesStore, FileFacts, TeaserAudioProbe } from "../../services/contentRepo/types";
 
 const CATALOG_TEXT = fixtureText("catalog-with-discovery.json");
@@ -141,6 +143,7 @@ async function openPlace(): Promise<{ audioPort: FakeAudioPlayerPort }> {
 
 afterEach(() => {
   jest.restoreAllMocks();
+  jest.useRealTimers();
 });
 
 describe("Place detail surface (G07.02)", () => {
@@ -169,6 +172,14 @@ describe("Place detail surface (G07.02)", () => {
     fireEvent.press(screen.getByTestId("place-moment-play-m-a1"));
     await waitFor(() => expect(screen.queryByTestId("place-moment-live-m-a1")).toBeNull());
     expect(audioPort.commands).toEqual([`play 1:${MOMENT_PATH}`, "stop"]);
+  }, 30000);
+
+  test("the card shows a physical playback start that arrives after the Play render", async () => {
+    const { audioPort } = await openPlace();
+    fireEvent.press(screen.getByTestId("place-moment-play-m-a1"));
+    expect(screen.queryByTestId("place-moment-live-m-a1")).toBeNull();
+    audioPort.snapshotValue = { state: "playing", positionMs: 0, durationMs: 60000 };
+    await waitFor(() => expect(screen.getByTestId("place-moment-live-m-a1")).toBeTruthy());
   });
 
   test("the guide link opens the guide's PREVIEW, never Start (criterion 2)", async () => {
@@ -181,6 +192,55 @@ describe("Place detail surface (G07.02)", () => {
     expect(link.props.href).toBe("/route/route-a1");
     fireEvent.press(link);
     expect(await screen.findByTestId("screen-Route preview")).toBeTruthy();
+  });
+
+  test("a covered Place stops polling Moment playback until it is focused again", async () => {
+    // The test router unmounts covered screens. Keep its navigation check
+    // below and exercise retained-screen behavior in a mounted hook separately.
+    const { services } = placeServices(new FakeAudioPlayerPort());
+    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
+    renderRouter(withPlaceRoutes(services), { initialUrl: "/map" });
+    fireEvent.press(await screen.findByTestId("nearby-card-offer-a1-place"));
+    await screen.findByTestId("place-moment-m-a1");
+    fireEvent.press(screen.getByTestId("place-moment-guide-m-a1"));
+    await screen.findByTestId("screen-Route preview");
+    const startPolling = jest.spyOn(global, "setInterval");
+    const stopPolling = jest.spyOn(global, "clearInterval");
+    fireEvent.press(screen.getByTestId("btn-preview-back"));
+    await screen.findByTestId("place-moment-m-a1");
+    await waitFor(() => expect(startPolling.mock.calls.some((call) => call[1] === 250)).toBe(true));
+    const pollIndex = startPolling.mock.calls.findIndex((call) => call[1] === 250);
+    const timer = startPolling.mock.results[pollIndex].value;
+    fireEvent.press(screen.getByTestId("place-moment-guide-m-a1"));
+    await screen.findByTestId("screen-Route preview");
+    await waitFor(() => expect(stopPolling).toHaveBeenCalledWith(timer));
+  });
+
+  test("a retained Place stops physical playback reads on route change and resumes on return", () => {
+    jest.useFakeTimers();
+    const { services } = placeServices(new FakeAudioPlayerPort());
+    const momentPlay = services.moment ?? null;
+    expect(momentPlay).not.toBeNull();
+    const playbackRead = jest.spyOn(momentPlay!, "playback");
+    const { rerender, unmount } = renderHook<ReturnType<typeof useVisibleMomentPlayback>, { pathname: string }>(
+      ({ pathname }) => useVisibleMomentPlayback(momentPlay, pathname, "place-a1"),
+      { initialProps: { pathname: "/place/place-a1" } },
+    );
+    expect(playbackRead).toHaveBeenCalledTimes(1);
+    act(() => jest.advanceTimersByTime(500));
+    expect(playbackRead).toHaveBeenCalledTimes(3);
+
+    rerender({ pathname: "/route/route-a1" });
+    act(() => jest.advanceTimersByTime(750));
+    expect(playbackRead).toHaveBeenCalledTimes(3);
+
+    rerender({ pathname: "/place/place-a1" });
+    expect(playbackRead).toHaveBeenCalledTimes(4);
+    act(() => jest.advanceTimersByTime(250));
+    expect(playbackRead).toHaveBeenCalledTimes(5);
+    unmount();
+    act(() => jest.advanceTimersByTime(500));
+    expect(playbackRead).toHaveBeenCalledTimes(5);
   });
 
   test("a play over a session-owned player renders the named refusal — no second player", async () => {

@@ -104,6 +104,20 @@ test('waitFor resolves through the production lookup on a recorded dump', async 
   assert.ok(node.center.x > 0);
 });
 
+test('deep links target the configured app when another build handles the same scheme', async () => {
+  const driver = testDriver();
+  let command;
+  driver.exec = async (args) => {
+    command = args;
+    return { stdout: 'Starting: Intent' };
+  };
+  await driver.launchDeepLink('kudy:///feedback?kind=guide&id=e2e-free-guide');
+  assert.deepEqual(command, [
+    'shell',
+    "am start -a android.intent.action.VIEW -d 'kudy:///feedback?kind=guide&id=e2e-free-guide' -p 'by.kudy.app'",
+  ]);
+});
+
 test('waitFor retries a transient UI dump failure within its deadline', async () => {
   const driver = testDriver();
   let dumps = 0;

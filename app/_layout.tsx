@@ -55,9 +55,11 @@ export default function RootLayout() {
     () => (device === null ? createServices({}) : createServices(device.ports)),
     [device],
   );
-  // The composition's explicit teardown rides the root's unmount (tests,
-  // hot reload): the wakelock lease is the one live OS resource it owns.
-  useEffect(() => (device === null ? undefined : device.teardown), [device]);
+  // Release controller observers before the device ports they watched.
+  useEffect(() => () => {
+    services.dispose();
+    device?.teardown();
+  }, [device, services]);
   // G06.10.b: the approved families load once here, ungated — surfaces render
   // their system-ui fallback while loading and never wait for the faces.
   useAppFonts();

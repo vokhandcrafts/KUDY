@@ -80,7 +80,7 @@ flowchart LR
 | `offers` | масіў `DiscoveryOffer`, унікальны `offer_id` |
 | `collections` | масіў рэдакцыйных груп; членамі могуць быць толькі place/guide, без укладзеных collections |
 
-`DiscoveryOffer` змяшчае: `offer_id`, `ref`, `city_id`, `editorial_order` (цэлы лік ≥ 0), `themes[]`, `localized` (загаловак, анонс, `why_recommended`, `conditions`), `estimated_duration?`, `distance_m?`, `suggested_start_place_id?`, `season_recommendations[]`, `availability`, `access`, `detail_ref`.
+`DiscoveryOffer` змяшчае: `offer_id`, `ref`, `city_id`, `editorial_order` (цэлы лік ≥ 0), `themes[]`, `localized` (загаловак, анонс, `why_recommended`, `conditions`), `estimated_duration?`, `distance_m?`, `suggested_start_place_id?`, `preview_points?` толькі для guide, `season_recommendations[]`, `availability`, `access`, `detail_ref`. `preview_points` — публічныя каардынаты ўсіх кропак гіда, вылічаныя з `route.json#stops` і `places.json` пры публікацыі; R07 выкарыстоўвае іх без спампоўвання пакета. Старэйшыя індэксы могуць не мець гэтага поля; поўныя платныя тэксты і медыя сюды не трапляюць.
 
 - `estimated_duration = {min_minutes, max_minutes, basis}`: цэлыя дадатныя хвіліны, min ≤ max; `basis = author_walk | author_estimate`. Гэта ўвесь прапанаваны досвед ад рэкамендаванага пачатку, уключаючы хаду, аўдыё і аўтарскі запас на прыпынкі. Не дарога да пачатку. Адсутнасць значыць unknown.
 - Існуючыя `Route.duration_min`/`distance_m` застаюцца ацэнкай неабавязковага рэкамендаванага шляху. Для guide-прапановы новы дыяпазон мусіць уключаць `duration_min`; builder не дазваляе супярэчлівыя лічбы. Няма `time_bucket` як другой крыніцы працягласці.

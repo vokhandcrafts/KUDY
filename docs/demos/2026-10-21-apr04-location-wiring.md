@@ -22,8 +22,8 @@ node --test --experimental-strip-types --test-reporter=spec --test-timeout=60000
 ```
 
 ```output
-ℹ pass 8
+ℹ pass 17
 ℹ fail 0
 ```
 
-Абодва рэгрэсійныя тэсты падаюць пры адкаце адпаведнае праўкі: праверка зробленая перад камітам (git stash: 1 failed у map.test.tsx; fail кампазіцыйнага тэсту). Полная аўтаматыка на гэтым HEAD: npm test — Node 2626 tests (2595 pass, 31 skipped, 0 fail) + Jest 31 наборы (263 pass); typecheck, arch:check (630 модуляў, 0 парушэнняў), jscpd 5.1.2 (0 clones), showboat verify — усе exit 0.
+Кампазіцыйны тэст ганяе і іншыя тэсты світу пасля мержу origin/main, таму лічыльнік большы за пачатковы. Абодва тэсты падаюць пры адкаце адпаведных правак — праверка зроблена перад камітам. Поўны прагон аўтаматыкі на гэтым HEAD зялёны; лікі — у APR-04.md; typecheck, arch:check, jscpd і showboat verify — exit 0.

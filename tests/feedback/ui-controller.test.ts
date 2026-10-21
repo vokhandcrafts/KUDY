@@ -286,9 +286,11 @@ describe('G16.03 — the explicit Send and the delivery states (task steps 3–4
     await settle();
     // The CAS-delete is in flight: the word state is «выдаленне чакае сеткі».
     assert.deepEqual(lastForm(controller).delivery, { kind: 'pending', deletePending: true });
+    assert.equal(lastForm(controller).score, null, 'delete clears the old choice from the form');
     deferredDelete.resolve(okDelete(2));
     await removing;
-    assert.deepEqual(lastForm(controller).delivery, { kind: 'sent', score: null }, 'the acknowledged tombstone: no score');
+    assert.deepEqual(lastForm(controller).delivery, { kind: 'none' }, 'the acknowledged tombstone is no longer a rating');
+    assert.equal(controller.getState().items.length, 0, 'the acknowledged tombstone is absent from My KUDY');
     assert.ok(transport.calls.some((call) => call.op === 'delete'), 'the tombstone reached the transport');
   });
 });

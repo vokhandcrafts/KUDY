@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="be">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KUDY · шэсць сем’яў іконак</title>
+<style>
+@font-face{font-family:Golos;src:url(../G25.01/fonts/GolosText_400Regular.ttf)}
+@font-face{font-family:Golos;src:url(../G25.01/fonts/GolosText_600SemiBold.ttf);font-weight:600}
+:root{--paper:#faf7f2;--ink:#22262b;--accent:#1d6b4f;--line:#d8d2c6;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 Golos,system-ui,sans-serif}
+main{max-width:1530px;margin:auto;padding:28px}h1{font-size:29px;line-height:1.15;margin:0 0 7px}p{margin:0}.lede{color:#4b5750;max-width:750px}
+.family{border-top:1px solid var(--line);padding:22px 0 26px;margin-top:24px}.family h2{font-size:19px;margin:0 0 4px}.family .detail{font-size:13px;color:#59615e;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:8px}.cell{background:var(--card);border:1px solid var(--line);border-radius:10px;min-height:104px;padding:13px;display:flex;flex-direction:column;align-items:flex-start;gap:9px}.cell img{width:34px;height:34px}.cell span{font-size:12px}.cell code{font-size:10px;color:#59615e}
+.sample{display:flex;align-items:center;gap:10px;margin-top:13px;font-size:13px}.sample .action{border:0;border-bottom:4px solid #154f3a;border-radius:10px;background:var(--accent);color:white;padding:9px 13px;font:600 14px Golos,system-ui,sans-serif;display:flex;align-items:center;gap:8px}.sample img{width:18px;height:18px;filter:brightness(0) invert(1)}
+@media(max-width:950px){.grid{grid-template-columns:repeat(4,minmax(120px,1fr))}}@media(max-width:600px){main{padding:16px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cell{min-height:95px}}
+</style>
+<main>
+  <h1>Шэсць візуальных сем’яў</h1>
+  <p class="lede">Адны і тыя ж дзеянні ў шасці рытмах. Кожны знак — асобны SVG 24 × 24 з <code>currentColor</code>; гэта дызайн-кандыдаты для выбару, пакуль не замена production Lucide.</p>
+  <div id="families"></div>
+</main>
+<script>
+const names=[['city','Горад'],['guides','Гіды'],['nearby','Побач'],['discover','Чым заняцца'],['my','KUDY'],['map','Карта'],['place','Месца'],['route','Прагулка'],['clock','Працягласць'],['play','Граць'],['pause','Паўза'],['download','Загрузіць'],['lock','Зачынена'],['back','Назад'],['menu','Меню'],['close','Закрыць'],['transcript','Тэкст гісторыі'],['bookmark','Захаваць']];
+const families=[
+ ['01-ink','1 · Чарнільная лінія','Лёгкая, без рамкі. Рэкамендацыя для асноўнага інтэрфейсу.'],
+ ['02-carved','2 · Разьба','Больш шчыльная і вуглаватая. Падыходзіць для вялікіх кнопак.'],
+ ['03-seal','3 · Пячатка','Круглы знак з матэрыяльным краем. Кандыдат для рубрык.'],
+ ['04-wayfinder','4 · Указальнік','Ромб як пазнака на аркушы. Кандыдат для карты і навігацыі.'],
+ ['05-tile','5 · Плітка','Прастакутная керамічная рамка. Кандыдат для кампактнага меню.'],
+ ['06-thread','6 · Нітка гісторыі','Малыя аўтарскія кропкі каля знака. Кандыдат для рэдакцыйных паверхняў.']
+];
+const host=document.getElementById('families');
+for(const [id,title,detail] of families){const section=document.createElement('section');section.className='family';const heading=document.createElement('h2');heading.textContent=title;const intro=document.createElement('p');intro.className='detail';intro.textContent=detail;const grid=document.createElement('div');grid.className='grid';for(const [name,label] of names){const cell=document.createElement('div');cell.className='cell';const img=document.createElement('img');img.src=`sets/${id}/${name}.svg`;img.alt=label;const text=document.createElement('span');text.textContent=label;const code=document.createElement('code');code.textContent=`${name}.svg`;cell.append(img,text,code);grid.append(cell)}const sample=document.createElement('div');sample.className='sample';const button=document.createElement('button');button.className='action';button.type='button';const img=document.createElement('img');img.src=`sets/${id}/guides.svg`;img.alt='';button.append(img,document.createTextNode('Гіды →'));sample.append(button,document.createTextNode('У кнопцы знак суправаджае слова.'));section.append(heading,intro,grid,sample);host.append(section)}
+</script>
+</html>

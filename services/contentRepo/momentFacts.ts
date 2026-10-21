@@ -125,7 +125,7 @@ export async function readMomentFacts(
     for (const version of versions) {
       if (version === 'staging') continue;
       const packageRoot = `bundles/${routeId}/${version}`;
-      const raw = await readManifest(store, packageRoot, diagnostics);
+      const raw = await readManifest(store, packageRoot, options.locales, diagnostics);
       // G22.05: the place scope filters the validated manifest entries
       // BEFORE any media resolution — non-matching moments cost a manifest
       // read only, never a probe call or a stops.json read.
@@ -144,9 +144,20 @@ export async function readMomentFacts(
 async function readManifest(
   store: BundlesStore,
   packageRoot: string,
+  locales: readonly string[],
   diagnostics: string[],
 ): Promise<ReadonlyArray<RawMoment>> {
-  const file = await store.readFile(`${packageRoot}/moments.json`);
+  let file = await store.readFile(`${packageRoot}/moments.json`);
+  // The installed-app download is a verified locale/base layer. The builder
+  // mirrors this public manifest into its lock, while older libraries may
+  // still have the bundle-root copy above.
+  if (file.kind === 'absent') {
+    for (const locale of locales) {
+      if (!isSafeSegment(locale)) continue;
+      file = await store.readFile(`${packageRoot}/${locale}/base/moments.json`);
+      if (file.kind !== 'absent') break;
+    }
+  }
   if (file.kind === 'absent') return [];
   if (file.kind === 'unreadable') {
     diagnostics.push(`moment-facts#manifest-unreadable:${packageRoot}`);

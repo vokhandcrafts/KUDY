@@ -123,9 +123,10 @@ export type RunSurfaceState =
       // render; the surface keeps no second copy.
       playback: () => PlaybackState;
       // G06.05 (issue #280, AC4): the location service's live status — the
-      // denied/stalled banners of 11 §7 read it per render (any engine or
-      // panel state change re-renders the screen and re-reads it).
+      // denied/stalled banners of 11 §7 read it per render; the observer
+      // below also refreshes the screen when only location state changes.
       locationStatus: () => LocationStatus;
+      onLocationStatusChange: (handler: () => void) => () => void;
       // A read-only observer of the walk's existing GPS subscription for the
       // map camera. It never arms a second location provider.
       onMapPosition: (handler: (center: [number, number]) => void) => () => void;
@@ -276,6 +277,7 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
     storiesExtended: pinned.storiesExtended,
     playback: () => deps.session.audio.playbackState(),
     locationStatus: () => deps.session.location.status(),
+    onLocationStatusChange: (handler) => deps.session.location.onStatusChange(handler),
     onMapPosition: (handler) => {
       let state = initialPipelineState;
       return deps.session.location.onRawFix((fix) => {

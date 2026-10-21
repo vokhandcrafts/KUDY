@@ -6,14 +6,19 @@ function Get-BusyPorts([int[]]$Ports) {
   @($Ports | Where-Object { @(Get-NetTCPConnection -State Listen -LocalPort $_ -ErrorAction SilentlyContinue).Count -gt 0 })
 }
 
-# True when process $ProcessId is $RootPid or one of its descendants.
+# True when process $ProcessId is $RootPid or one of its descendants. Windows keeps a child's
+# ParentProcessId after the parent exits and may reuse that id, so a "parent" created after its
+# child is a different process and ends the walk.
 function Test-ProcessDescendant([int]$ProcessId, [int]$RootPid) {
-  $current = $ProcessId
-  for ($depth = 0; $depth -lt 10 -and $current -gt 0; $depth++) {
-    if ($current -eq $RootPid) { return $true }
-    $proc = Get-CimInstance Win32_Process -Filter "ProcessId = $current" -ErrorAction SilentlyContinue
-    if (-not $proc) { return $false }
-    $current = [int]$proc.ParentProcessId
+  if ($ProcessId -eq $RootPid) { return $true }
+  $proc = Get-CimInstance Win32_Process -Filter "ProcessId = $ProcessId" -ErrorAction SilentlyContinue
+  for ($depth = 0; $depth -lt 10 -and $proc; $depth++) {
+    $parentId = [int]$proc.ParentProcessId
+    if ($parentId -le 0) { return $false }
+    $parent = Get-CimInstance Win32_Process -Filter "ProcessId = $parentId" -ErrorAction SilentlyContinue
+    if (-not $parent -or $parent.CreationDate -gt $proc.CreationDate) { return $false }
+    if ($parentId -eq $RootPid) { return $true }
+    $proc = $parent
   }
   return $false
 }
