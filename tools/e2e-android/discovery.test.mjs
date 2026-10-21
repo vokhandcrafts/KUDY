@@ -19,7 +19,7 @@ test('Discovery reaches an offscreen paid card and badge, then scrolls back to i
         item('offer-card-offer-guide-e2e-paid', '[44,2230][1036,2230]')) }),
     exec: async (args) => {
       swipes.push(args);
-      atBottom = args[3] === '1853';
+      atBottom = args[4] === '1853';
     },
   };
   assert.equal((await scrollTo(driver, 'offer-card-offer-guide-e2e-paid', 'paid')).resourceId,
