@@ -22,6 +22,9 @@ export interface AudioServiceDeps {
   // new player. The factory keeps that decision here instead of trusting a
   // caller to hand in a fresh port.
   createPort: () => AudioPlayerPort;
+  // The device root supplies the platform speech-mode setter. Portable
+  // service users have no OS audio session to initialize.
+  configureMode?: () => Promise<void>;
 }
 
 // Every subscriber receives every event: the run orchestrator and the moment
@@ -42,16 +45,21 @@ interface PortSession {
 
 export class AudioService {
   private readonly createPort: () => AudioPlayerPort;
+  private readonly configureMode: (() => Promise<void>) | undefined;
   private session: PortSession | null = null;
   // The current physical launch: the source key the port echoes and the
   // token of the play command that started it. Null after stop, after an
   // accepted finished/failed, and after dispose.
   private current: { key: number; token: PlayToken } | null = null;
   private nextKey = 0;
+  // A pending mode request has no player yet, but Stop, Dispose or a newer
+  // Play must still revoke its right to start one after the await.
+  private launchEpoch = 0;
   private readonly handlers = new Set<EventHandler>();
 
   constructor(deps: AudioServiceDeps) {
     this.createPort = deps.createPort;
+    this.configureMode = deps.configureMode;
   }
 
   onEvent(handler: EventHandler): () => void {
@@ -65,11 +73,28 @@ export class AudioService {
   // the service echoes it, never mints one. While a source is active it is
   // stopped by command first — one player, never two active sources.
   async play(command: { token: PlayToken; path: string }): Promise<void> {
-    const port = this.ensurePort();
+    const epoch = ++this.launchEpoch;
     if (this.current) {
-      port.stop();
+      this.livePort().stop();
       this.current = null;
     }
+    if (this.configureMode) {
+      try {
+        await this.configureMode();
+      } catch (error) {
+        if (epoch === this.launchEpoch) {
+          const message = error instanceof Error ? error.message : String(error);
+          this.emit({
+            type: 'story_play_failed',
+            token: command.token,
+            reason: `audio mode initialization failed: ${message}`,
+          });
+        }
+        return;
+      }
+    }
+    if (epoch !== this.launchEpoch) return;
+    const port = this.ensurePort();
     const key = ++this.nextKey;
     this.current = { key, token: command.token };
     port.play({ key, path: command.path });
@@ -79,6 +104,7 @@ export class AudioService {
   // produces no finished and no error: its late port events fall to the
   // key-mismatch rejection below.
   stop(): void {
+    ++this.launchEpoch;
     if (!this.current) return;
     this.livePort().stop();
     this.current = null;
@@ -121,6 +147,7 @@ export class AudioService {
   // The disposed port instance is dropped whole, never reset (09 §6.3);
   // the next play re-creates a player through the factory.
   dispose(): void {
+    ++this.launchEpoch;
     const session = this.session;
     if (!session) return;
     session.alive = false;

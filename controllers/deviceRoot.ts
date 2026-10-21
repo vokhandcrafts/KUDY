@@ -17,7 +17,7 @@ import { AppState } from 'react-native';
 import guideHintValues from '../contracts/hints/guide-hints.values.v1.json';
 
 import { AudioService } from '../services/audio/service.ts';
-import { createExpoAudioPlayerPort } from '../services/audio/expo/expo-audio-port.ts';
+import { configureSpeechAudioMode, createExpoAudioPlayerPort } from '../services/audio/expo/expo-audio-port.ts';
 import { LocationService, systemLocationClock } from '../services/location/service.ts';
 import { createExpoLocationOsPort } from '../services/location/expo/expo-location-port.ts';
 import { createDeviceSha256, newDeviceSessionId } from '../services/device-crypto.ts';
@@ -53,7 +53,10 @@ export function createDeviceServiceSet(): ReturnType<typeof createDeviceServiceP
       clock: systemLocationClock,
       permissions: extra.locationExplanations ?? { foreground: '', background: '' },
     }),
-    audio: new AudioService({ createPort: () => createExpoAudioPlayerPort() }),
+    audio: new AudioService({
+      createPort: () => createExpoAudioPlayerPort(),
+      configureMode: configureSpeechAudioMode,
+    }),
     fileSystem: { File, Directory, freeBytes: () => Paths.availableDiskSpace },
     bundlesRoot,
     origin,

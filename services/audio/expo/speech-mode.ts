@@ -1,9 +1,8 @@
 // G05.03.b — the once-guard for the speech audio mode (AC3: the mode is set
 // once for speech). Pure: the underlying setter is injected, so node --test
 // proves the guard without importing expo-audio. The adapter (expo-audio-port.ts)
-// binds it to expo-audio's setAudioModeAsync; the app start awaits the bound
-// function once before the first play (integration point recorded in
-// results/G05.03.b.md).
+// binds it to expo-audio's setAudioModeAsync; device AudioService awaits the
+// bound function before physical play (integration point: issue #791).
 
 // `09` §6.3 `audio` row: speech mode — ducking and focus are left to the OS;
 // background playback enabled. The same options the G00.01 spike verified
