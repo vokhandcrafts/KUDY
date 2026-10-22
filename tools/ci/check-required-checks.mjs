@@ -14,6 +14,7 @@ const file = '.github/workflows/required-checks.yml';
 // deleted (the delta review of G20.15 flagged the exposure).
 const text = fs
   .readFileSync(file, 'utf8')
+  .replace(/\r\n/g, '\n') // Windows checkout may use CRLF; match workflow steps identically.
   .split('\n')
   .filter((line) => !line.trim().startsWith('#'))
   .join('\n');
