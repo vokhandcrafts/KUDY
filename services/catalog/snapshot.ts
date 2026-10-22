@@ -125,21 +125,45 @@ function key(prefix: string, identity: string, localePreference: readonly string
   return JSON.stringify([prefix, identity, localePreference]);
 }
 
+// The empty preference identifies the latest verified *display projection*,
+// not a translation. If the UI language changes while offline, the last
+// published labels remain visible with the existing offline indication.
+// A locale-specific snapshot still wins whenever one exists. Both keys
+// live in rebuildable zone A and use the same strict public-only validator.
+function latestKey(prefix: string, identity: string): string {
+  return key(prefix, identity, []);
+}
+
 export function readGuides(store: CatalogSnapshotPort | undefined, localePreference: readonly string[]): SnapshotRead<readonly CatalogGuideCard[]> {
-  return read(store, key('guides:v1', '', localePreference),
-    (value): value is CatalogGuideCard[] => Array.isArray(value) && value.every(card));
+  const valid = (value: unknown): value is CatalogGuideCard[] =>
+    Array.isArray(value) && value.every(card);
+  const localized = read(store, key('guides:v1', '', localePreference), valid);
+  // Never hide corruption of the selected locale's snapshot behind another
+  // language. Only a genuinely missing locale projection may fall back.
+  return localized.kind === 'missing'
+    ? read(store, latestKey('guides:v1', ''), valid)
+    : localized;
 }
 
 export function readPreview(store: CatalogSnapshotPort | undefined, routeId: string, localePreference: readonly string[]): SnapshotRead<GuidePreview> {
-  const cached = read(store, key('preview:v1', routeId, localePreference), preview);
+  const localized = read(store, key('preview:v1', routeId, localePreference), preview);
+  const cached = localized.kind === 'missing'
+    ? read(store, latestKey('preview:v1', routeId), preview)
+    : localized;
   if (cached.kind !== 'ready') return cached;
+  // This identity check also covers the cross-locale fallback. The service
+  // separately pins cached.version to the currently published route version.
   return cached.value.routeId === routeId ? cached : { kind: 'corrupt' };
 }
 
 export function writeGuides(store: CatalogSnapshotPort | undefined, localePreference: readonly string[], guides: readonly CatalogGuideCard[]): void {
   if (!store) return;
+  const payload = JSON.stringify(guides);
   try {
-    store.write(key('guides:v1', '', localePreference), JSON.stringify(guides));
+    // Write the fallback first: if the second write fails, a new UI language
+    // can still read the latest verified projection after an offline restart.
+    store.write(latestKey('guides:v1', ''), payload);
+    store.write(key('guides:v1', '', localePreference), payload);
   } catch {
     // The online view remains usable; the next offline load reports missing
     // cache rather than claiming a durable snapshot was written.
@@ -147,8 +171,10 @@ export function writeGuides(store: CatalogSnapshotPort | undefined, localePrefer
 }
 export function writePreview(store: CatalogSnapshotPort | undefined, localePreference: readonly string[], value: GuidePreview): void {
   if (!store) return;
+  const payload = JSON.stringify(value);
   try {
-    store.write(key('preview:v1', value.routeId, localePreference), JSON.stringify(value));
+    store.write(latestKey('preview:v1', value.routeId), payload);
+    store.write(key('preview:v1', value.routeId, localePreference), payload);
   } catch {
     // A transient derived-cache write failure cannot affect downloads or walks.
   }
