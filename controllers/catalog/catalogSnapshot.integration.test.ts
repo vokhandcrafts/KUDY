@@ -185,6 +185,61 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     assert.deepEqual(restartedPreview.surface.preview, firstPreview.surface.preview);
     assert.deepEqual(cacheRows(driver), persisted, 'offline locale switches must not rewrite verified snapshots');
     restarted.dispose();
+
+    // A later successful online refresh in English publishes v4. Switching
+    // back to Belarusian while offline must not resurrect its older v3
+    // locale-specific snapshot in preference to the verified v4 publication.
+    const upgradedOrigin: CatalogPathLoader = async (relative) => {
+      if (relative === 'catalog.json') {
+        const catalog: { routes: Array<{ route_id: string; version: string }> } =
+          JSON.parse(await loadPublished(relative));
+        const route = catalog.routes.find((entry) => entry.route_id === 'guide-route-b1');
+        assert.ok(route);
+        route.version = '4';
+        return JSON.stringify(catalog);
+      }
+      if (relative === 'bundle/guide-route-b1/4/route.json') {
+        const doc: { version: string } = JSON.parse(await loadPublished('bundle/guide-route-b1/3/route.json'));
+        doc.version = '4';
+        return JSON.stringify(doc);
+      }
+      return loadPublished(relative);
+    };
+    const updatedOnline = root(driver, upgradedOrigin, false, uiLocalePersistence);
+    assert.equal(updatedOnline.uiLocale.current(), 'en');
+    const newerList = await list(updatedOnline);
+    assert.equal(newerList.kind, 'ready');
+    assert.ok(newerList.kind === 'ready');
+    assert.equal(newerList.guides.find((guide) => guide.routeId === 'guide-route-b1')?.version, '4');
+    const newerPreview = await detail(updatedOnline);
+    assert.equal(newerPreview.surface.kind, 'ready');
+    assert.ok(newerPreview.surface.kind === 'ready');
+    assert.equal(newerPreview.surface.preview.version, '4');
+    updatedOnline.dispose();
+
+    const backOffline = root(driver, noNetwork, false, uiLocalePersistence);
+    backOffline.uiLocale.set('be');
+    assert.equal(selected, 'be');
+    const latestList = await list(backOffline);
+    assert.equal(latestList.kind, 'offline');
+    assert.ok(latestList.kind === 'offline');
+    assert.equal(latestList.guides.find((guide) => guide.routeId === 'guide-route-b1')?.version, '4',
+      'old be catalog v3 must not downgrade the newer verified en catalog v4');
+    const latestPreview = await detail(backOffline);
+    assert.equal(latestPreview.surface.kind, 'ready');
+    assert.ok(latestPreview.surface.kind === 'ready');
+    assert.equal(latestPreview.surface.preview.version, '4',
+      'old be preview v3 must not downgrade the newer verified en preview v4');
+    assert.equal(latestPreview.surface.degraded, 'network-offline');
+    backOffline.dispose();
+
+    const backRestart = root(driver, noNetwork, false, uiLocalePersistence);
+    assert.equal(backRestart.uiLocale.current(), 'be');
+    const backPreview = await detail(backRestart);
+    assert.equal(backPreview.surface.kind, 'ready');
+    assert.ok(backPreview.surface.kind === 'ready');
+    assert.equal(backPreview.surface.preview.version, '4');
+    backRestart.dispose();
   });
 
   it('never persists paid previews or free previews with missing stop facts (review negative guard)', async () => {
