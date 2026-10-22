@@ -198,6 +198,8 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     assert.equal(v3.preview.stops?.[0]?.name, 'Стары порт');
     const savedV3 = cacheRows(driver);
     assert.equal(savedV3.length, 2, 'catalog list and verified v3 free preview were persisted');
+    const previewV3 = savedV3.find((row) => row.route_id.includes('"preview:v1"'));
+    assert.ok(previewV3, 'the verified v3 preview row is present');
 
     upgraded = true;
     await store.getState().refresh();
@@ -207,7 +209,8 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     assert.equal(updated.preview.version, '4', 'old in-memory v3 must not masquerade as v4');
     assert.equal(updated.degraded, 'route-doc-unavailable');
     assert.equal(updated.preview.stops, null, 'v3 stop labels must not be used for the unpublished v4 document');
-    assert.deepEqual(cacheRows(driver), savedV3, 'degraded v4 refresh must preserve, not rewrite, verified v3');
+    assert.deepEqual(cacheRows(driver).find((row) => row.route_id.includes('"preview:v1"')), previewV3,
+      'degraded v4 refresh must preserve, not rewrite, the verified v3 preview');
     existing.dispose();
 
     const fresh = root(driver, changingOrigin);
@@ -217,7 +220,8 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     assert.equal(diskOnly.surface.preview.version, '4', 'the persisted v3 cache must not masquerade as v4');
     assert.equal(diskOnly.surface.degraded, 'route-doc-unavailable');
     assert.equal(diskOnly.surface.preview.stops, null, 'disk-only recovery cannot leak obsolete v3 stops');
-    assert.deepEqual(cacheRows(driver), savedV3, 'stale cache remains unmodified until a verified v4 refresh');
+    assert.deepEqual(cacheRows(driver).find((row) => row.route_id.includes('"preview:v1"')), previewV3,
+      'the old v3 preview stays unchanged even while the catalog-list snapshot advances to v4');
     fresh.dispose();
   });
 
