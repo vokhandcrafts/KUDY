@@ -79,6 +79,15 @@ adb shell monkey -p by.kudy.app 1
 
 ## Блакіроўка і наступная фіксацыя
 
-У гэтай сесіі лакальны read-only MCP паспяхова прачытаў правілы і зыходнікі, але асобны камандны MCP для KUDY вяртае `UNAVAILABLE: McpServerError: Connection failed`. Ізаляванае асяроддзе адказу не мае Android SDK / ADB і не можа атрымаць GitHub па DNS. Таму **не запускаліся** EAS, Gradle, `bundletool`, `zipalign`, эмулятар, `npm test`, `npm run arch:check` або `jscpd`. Няма AAB ці справаздачы з вымеранымі вынікамі. Гэта знешняя блакіроўка, а не зялёная праверка.
+Пачатковая спроба: праектны камандны MCP `openai_mcp` вярнуў `UNAVAILABLE: McpServerError: Connection failed`; production AAB і эмулятар былі недасяжныя.
+
+**Паўтор 2026-10-23.** Іншы канектар `mcp-projects` дазваляе абмежаваныя каманды Node/npm без сеткі і без доступу да Android-хоста. У лакальным `/home/viktar/Projects/KUDY` ён паказаў checkout **`opencode/793-followup`** (не `codex/806`), у якім ёсць `android/app/build/outputs/apk` і `logs`, але няма `outputs/bundle`. Пошук `*.aab` у межах `/home/viktar/Projects` даў **0** вынікаў. `android/local.properties` адсутнічае. Такім чынам, няма файла production AAB з пацверджаным паходжаннем, а 16 KB эмулятар не даступны праз гэты sandbox.
+
+Дыягнастычныя, **не прыёмачныя** праверкі старонняга checkout `opencode/793-followup`:
+- `npm run arch:check` — exit 0, `626 modules cruised, 0 violation(s)`.
+- `npm run typecheck` — exit 2, `TS6053: File '/home/viktar/Projects/KUDY/spikes/G00.03-sandbox-grant/server/device-auth.mjs' not found`.
+Гэтыя вынікі **не** пацвярджаюць галіну `codex/806` і не замяняюць AC1–AC3. EAS/Gradle, `bundletool`, `zipalign`, Android SDK/ADB і 16 KB эмулятар не запускаліся; `npm test` і `jscpd` таксама не запускаліся. Падключаны GitHub API не адкрыў endpoint спіса Actions artifacts, таму яго наяўнасць не лічыцца доказам, што AAB існуе.
+
+Блакіроўка па-ранейшаму знешняя: патрэбны production AAB і Android-хост з правяральным 16 KB вобразам. Нельга пазначаць зыходныя крытэрыі зялёнымі паводле прагонаў іншай галіны.
 
 Калі камандны доступ да патрэбнага Android-хоста аднавіцца, унесці рэальныя каманды, toolchain, build ID, SHA-256, target API, вынікі па ўсіх `.so`, вывад 16 KB эмулятара і знойдзеныя дэфекты ў матрыцу вышэй. Толькі пасля гэтага вырашаць, ці патрэбныя кодавыя праўкі, рэгрэсійны тэст і Showboat паводле [правіла](../../agent-rules/showboat.md). Пакуль што не адзначаць GP-01/GP-03/GP-04 як закрытыя.
