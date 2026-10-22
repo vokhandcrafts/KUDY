@@ -717,10 +717,15 @@ export async function loadPreview(
   // Preserve the previously verified preview, including its public stop
   // titles, when an index or route document fails a later refresh.
   if (indexDegraded || doc.degraded !== null) {
+    const reason = indexDegraded ? 'index-unavailable' : doc.degraded ?? 'route-doc-unavailable';
+    if (previous && previous.version === entry.version) {
+      return { kind: 'ready', preview: previous, degraded: reason };
+    }
+    // Read the persisted projection only once on a degraded refresh. A
+    // different version cannot masquerade as the currently published route.
     const cached = readCachedPreview(deps.snapshot, routeId, options.localePreference);
-    if ((previous && previous.version === entry.version) ||
-        (cached.kind === 'ready' && cached.value.version === entry.version)) {
-      return recover(indexDegraded ? 'index-unavailable' : doc.degraded ?? 'route-doc-unavailable', entry.version);
+    if (cached.kind === 'ready' && cached.value.version === entry.version) {
+      return { kind: 'ready', preview: cached.value, degraded: reason };
     }
   }
   const degraded = [doc.degraded, indexDegraded ? 'index-unavailable' : null].find(
