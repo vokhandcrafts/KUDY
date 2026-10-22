@@ -135,3 +135,26 @@ test('G20.37: omitting any affected suite fails the independent guard', (t) => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, portableFailure);
 });
+
+test('G20.37: a CRLF checkout with both installs remains valid', (t) => {
+  const dir = fixture(t);
+  const file = path.join(dir, workflowRel);
+  const original = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+  fs.writeFileSync(file, original.replace(/\n/g, '\r\n'));
+  const result = runGuard(dir);
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+});
+
+test('G20.37: removing the root npm ci step fails the independent guard', (t) => {
+  const result = changePortableStep(t, (original) =>
+    original.replace('      - name: install (root for portable suites)\n        run: npm ci\n', ''));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /G20\.37: windows-portable misses root npm ci/);
+});
+
+test('G20.37: removing the web npm ci step fails the independent guard', (t) => {
+  const result = changePortableStep(t, (original) =>
+    original.replace('      - name: install (web for portable suites)\n        run: npm ci\n        working-directory: web\n', ''));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /G20\.37: windows-portable misses web npm ci/);
+});
