@@ -236,8 +236,9 @@ export class ExpoLocationOsPort implements LocationOsPort {
   }
 
   private async startForegroundWatch(sub: number): Promise<void> {
-    // A background-start rejection must keep an existing/pending foreground
-    // watch, not create a second one with the same service subscription.
+    // startFixes(newSub) is entered only after stopFixes(oldSub) has released
+    // the previous owner's watcher. Therefore an existing or pending watch
+    // belongs to this same sub; do not duplicate it if background start fails.
     if (this.removeWatch !== null || this.pendingWatchEpoch !== null) return;
     const epoch = ++this.watchEpoch;
     this.pendingWatchEpoch = epoch;
