@@ -167,6 +167,60 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     verified.dispose();
   });
 
+  it('rejects a stale v3 snapshot and in-memory preview when the catalog publishes v4 without its route document', async () => {
+    const driver = nodeSqliteDriver();
+    openDatabase(driver);
+    let upgraded = false;
+    const changingOrigin: CatalogPathLoader = async (relative) => {
+      if (!upgraded) return loadPublished(relative);
+      if (relative === 'catalog.json') {
+        const catalog: { routes: Array<{ route_id: string; version: string }> } =
+          JSON.parse(await loadPublished(relative));
+        const published = catalog.routes.find((route) => route.route_id === 'guide-route-b1');
+        assert.ok(published);
+        published.version = '4';
+        return JSON.stringify(catalog);
+      }
+      if (relative === 'bundle/guide-route-b1/4/route.json') {
+        throw new Error('v4 route not available');
+      }
+      return loadPublished(relative);
+    };
+
+    const existing = root(driver, changingOrigin);
+    const store = existing.preview?.create('guide-route-b1');
+    assert.ok(store, 'real preview controller is composed');
+    await store.getState().refresh();
+    const v3 = store.getState().surface;
+    assert.equal(v3.kind, 'ready');
+    assert.ok(v3.kind === 'ready');
+    assert.equal(v3.preview.version, '3');
+    assert.equal(v3.preview.stops?.[0]?.name, 'Стары порт');
+    const savedV3 = cacheRows(driver);
+    assert.equal(savedV3.length, 1, 'v3 verified free preview was persisted');
+
+    upgraded = true;
+    await store.getState().refresh();
+    const updated = store.getState().surface;
+    assert.equal(updated.kind, 'ready');
+    assert.ok(updated.kind === 'ready');
+    assert.equal(updated.preview.version, '4', 'old in-memory v3 must not masquerade as v4');
+    assert.equal(updated.degraded, 'route-doc-unavailable');
+    assert.equal(updated.preview.stops, null, 'v3 stop labels must not be used for the unpublished v4 document');
+    assert.deepEqual(cacheRows(driver), savedV3, 'degraded v4 refresh must preserve, not rewrite, verified v3');
+    existing.dispose();
+
+    const fresh = root(driver, changingOrigin);
+    const diskOnly = await detail(fresh);
+    assert.equal(diskOnly.surface.kind, 'ready');
+    assert.ok(diskOnly.surface.kind === 'ready');
+    assert.equal(diskOnly.surface.preview.version, '4', 'the persisted v3 cache must not masquerade as v4');
+    assert.equal(diskOnly.surface.degraded, 'route-doc-unavailable');
+    assert.equal(diskOnly.surface.preview.stops, null, 'disk-only recovery cannot leak obsolete v3 stops');
+    assert.deepEqual(cacheRows(driver), savedV3, 'stale cache remains unmodified until a verified v4 refresh');
+    fresh.dispose();
+  });
+
   it('malformed responses, failed index pins and missing route docs keep the last good stored projection', async () => {
     const driver = nodeSqliteDriver();
     openDatabase(driver);
