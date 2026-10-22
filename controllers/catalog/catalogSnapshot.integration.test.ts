@@ -197,7 +197,7 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     assert.equal(v3.preview.version, '3');
     assert.equal(v3.preview.stops?.[0]?.name, 'Стары порт');
     const savedV3 = cacheRows(driver);
-    assert.equal(savedV3.length, 1, 'v3 verified free preview was persisted');
+    assert.equal(savedV3.length, 2, 'catalog list and verified v3 free preview were persisted');
 
     upgraded = true;
     await store.getState().refresh();
