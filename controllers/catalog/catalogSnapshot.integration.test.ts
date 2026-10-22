@@ -8,6 +8,7 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 
 import { createServices } from '../createServices.ts';
+import type { UiLocalePersistence, UiLocaleSwitchCode } from '../uiLocaleStore.ts';
 import { checkpointProgress, getSession, openDatabase, rebuildDerived, startSession } from '../../services/db/db.ts';
 import { nodeSqliteDriver, nodeSqliteFileDriver } from '../../services/db/test-fixture.ts';
 import type { SqlDriver } from '../../services/db/types.ts';
@@ -43,11 +44,12 @@ const installed: BundlesStore = {
     : { kind: 'absent' },
   statSize: async (relative) => relative === 'bundles/guide-route-b1/3/be/base/stops.json' ? 3 : null,
 };
-function root(driver: SqlDriver, loader: CatalogPathLoader, downloaded = false) {
+function root(driver: SqlDriver, loader: CatalogPathLoader, downloaded = false, uiLocalePersistence?: UiLocalePersistence) {
   return createServices({
     catalogLoader: loader,
     catalogSha256: sha256,
     catalogSnapshot: catalogSnapshotOver(driver),
+    ...(uiLocalePersistence ? { uiLocalePersistence } : {}),
     ...(downloaded ? {
       bundlesStore: installed,
       evaluateLayer: async (input: { routeId: string; version: string; locale: string; tier: 'base' | 'extended' }) => ({
@@ -102,7 +104,7 @@ describe('G20.32 catalog snapshot across production controllers', () => {
       assert.equal(opened.button.enabled, true, 'Start still derives from verified installed-layer facts');
 
       const before = cacheRows(sqlite.driver);
-      assert.equal(before.length, 2, 'one list and one free preview snapshot');
+      assert.equal(before.length, 4, 'locale-specific and latest-verified copies of the list and free preview');
       assert.ok(before.every((row) => !row.payload.includes('https://') && !row.payload.includes('story_base_id')));
       online.dispose();
       sqlite.close();
@@ -127,13 +129,71 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     }
   });
 
+  it('restores the last verified catalog and free preview after a UI-language switch while offline and a fresh restart', async () => {
+    const driver = nodeSqliteDriver();
+    openDatabase(driver);
+    let selected: UiLocaleSwitchCode = 'be';
+    const uiLocalePersistence: UiLocalePersistence = {
+      read: () => selected,
+      write: (locale) => { selected = locale; },
+    };
+
+    const online = root(driver, loadPublished, false, uiLocalePersistence);
+    const firstList = await list(online);
+    assert.equal(firstList.kind, 'ready');
+    assert.ok(firstList.kind === 'ready');
+    const firstPreview = await detail(online);
+    assert.equal(firstPreview.surface.kind, 'ready');
+    assert.ok(firstPreview.surface.kind === 'ready');
+    assert.equal(firstPreview.surface.preview.stops?.[0]?.name, 'Стары порт');
+    const persisted = cacheRows(driver);
+    assert.equal(persisted.length, 4);
+    assert.ok(persisted.some((row) => row.route_id === JSON.stringify(['guides:v1', '', []])));
+    assert.ok(persisted.some((row) => row.route_id === JSON.stringify(['preview:v1', 'guide-route-b1', []])));
+    online.dispose();
+
+    // A real UI switch changes the production service's localePreference
+    // without a network refresh. The offline banner stays visible; the
+    // cached Belarusian labels are the last verified projection, not a
+    // fabricated English translation.
+    const switched = root(driver, noNetwork, false, uiLocalePersistence);
+    switched.uiLocale.set('en');
+    assert.equal(selected, 'en');
+    const switchedList = await list(switched);
+    assert.equal(switchedList.kind, 'offline');
+    assert.ok(switchedList.kind === 'offline');
+    assert.deepEqual(switchedList.guides, firstList.guides);
+    const switchedPreview = await detail(switched);
+    assert.equal(switchedPreview.surface.kind, 'ready');
+    assert.ok(switchedPreview.surface.kind === 'ready');
+    assert.equal(switchedPreview.surface.degraded, 'network-offline');
+    assert.deepEqual(switchedPreview.surface.preview, firstPreview.surface.preview);
+    switched.dispose();
+
+    // The new composition root reads the persisted UI locale and the same
+    // zone-A database; it cannot depend on any in-memory previous result.
+    const restarted = root(driver, noNetwork, false, uiLocalePersistence);
+    assert.equal(restarted.uiLocale.current(), 'en');
+    const restartedList = await list(restarted);
+    assert.equal(restartedList.kind, 'offline');
+    assert.ok(restartedList.kind === 'offline');
+    assert.deepEqual(restartedList.guides, firstList.guides);
+    const restartedPreview = await detail(restarted);
+    assert.equal(restartedPreview.surface.kind, 'ready');
+    assert.ok(restartedPreview.surface.kind === 'ready');
+    assert.equal(restartedPreview.surface.degraded, 'network-offline');
+    assert.deepEqual(restartedPreview.surface.preview, firstPreview.surface.preview);
+    assert.deepEqual(cacheRows(driver), persisted, 'offline locale switches must not rewrite verified snapshots');
+    restarted.dispose();
+  });
+
   it('never persists paid previews or free previews with missing stop facts (review negative guard)', async () => {
     const driver = nodeSqliteDriver();
     openDatabase(driver);
     const online = root(driver, loadPublished);
     assert.equal((await list(online)).kind, 'ready');
     const listOnly = cacheRows(driver);
-    assert.equal(listOnly.length, 1, 'one validated list projection');
+    assert.equal(listOnly.length, 2, 'one validated list projection plus cross-locale fallback');
 
     const paid = await detail(online, 'guide-route-a1');
     assert.equal(paid.surface.kind, 'ready');
@@ -163,7 +223,7 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     assert.equal(freeWithStops.surface.kind, 'ready');
     assert.ok(freeWithStops.surface.kind === 'ready');
     assert.equal(freeWithStops.surface.preview.stops?.[0]?.name, 'Стары порт');
-    assert.equal(cacheRows(driver).length, 2, 'only a verified free-base preview is now persisted');
+    assert.equal(cacheRows(driver).length, 4, 'only a verified free-base preview and its locale fallback are persisted');
     verified.dispose();
   });
 
@@ -197,7 +257,7 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     assert.equal(v3.preview.version, '3');
     assert.equal(v3.preview.stops?.[0]?.name, 'Стары порт');
     const savedV3 = cacheRows(driver);
-    assert.equal(savedV3.length, 2, 'catalog list and verified v3 free preview were persisted');
+    assert.equal(savedV3.length, 4, 'locale-specific and latest list and verified v3 free preview were persisted');
     const previewV3 = savedV3.find((row) => row.route_id.includes('"preview:v1"'));
     assert.ok(previewV3, 'the verified v3 preview row is present');
 
@@ -294,7 +354,7 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     const recovered = root(driver, loadPublished);
     assert.equal((await list(recovered)).kind, 'ready');
     assert.equal((await detail(recovered)).surface.kind, 'ready');
-    assert.equal(cacheRows(driver).length, 2);
+    assert.equal(cacheRows(driver).length, 4);
     const offlineAgain = root(driver, noNetwork);
     assert.equal((await list(offlineAgain)).kind, 'offline');
     assert.equal((await detail(offlineAgain)).surface.kind, 'ready');
@@ -317,7 +377,7 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     const before = root(driver, loadPublished);
     assert.equal((await list(before)).kind, 'ready');
     assert.equal((await detail(before)).surface.kind, 'ready');
-    assert.equal(cacheRows(driver).length, 2);
+    assert.equal(cacheRows(driver).length, 4);
     before.dispose();
 
     rebuildDerived(driver);
