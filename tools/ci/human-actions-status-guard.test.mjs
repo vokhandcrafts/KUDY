@@ -12,16 +12,21 @@ function mergeEntriesWithoutLabelCleanup(markdown) {
 
   for (const entry of entries) {
     const header = entry.split("\n", 1)[0];
-    const date = /^(\d{4}-\d{2}-\d{2}) — /.exec(header)?.[1];
-    if (!date || date < ENFORCED_FROM) continue;
+    const date = /^(\d{4}-\d{2}-\d{2})(?=\s|$)/u.exec(header)?.[1];
+    if (date && date < ENFORCED_FROM) continue;
 
     // A linked merge handoff must say how its running issue status is cleared.
     if (!/\bPR:/u.test(entry) || !/\bIssue:/u.test(entry)) continue;
     if (!/мерж/iu.test(entry)) continue;
 
-    const hasCleanup = entry.split("\n").some(
-      (line) => /(?:знімі|зняц|прыбяры)/iu.test(line) && /`agent:running`/u.test(line),
-    );
+    // A malformed header must not silently exclude a new linked merge handoff.
+    if (!/^\d{4}-\d{2}-\d{2} — \S/u.test(header)) {
+      missing.push(header);
+      continue;
+    }
+
+    const hasCleanup = /(?:знімі|зняць|прыбяры)/iu.test(entry)
+      && /`agent:running`/u.test(entry);
     if (!hasCleanup) missing.push(header);
   }
   return missing;
@@ -51,6 +56,34 @@ test("the guard accepts explicit cleanup and ignores historical completed entrie
     "Змержы PR і пасля мержу знімі `agent:running` са звязанага issue.",
   );
   assert.deepEqual(mergeEntriesWithoutLabelCleanup(withRemoval), []);
+  const wrappedRemoval = example(
+    "2026-10-23",
+    "Змержы PR і пасля мержу знімі\n`agent:running` са звязанага issue.",
+  );
+  assert.deepEqual(mergeEntriesWithoutLabelCleanup(wrappedRemoval), []);
+
+  const removeInfinitive = example(
+    "2026-10-23",
+    "Пасля мержу трэба зняць `agent:running` са звязанага issue.",
+  );
+  assert.deepEqual(mergeEntriesWithoutLabelCleanup(removeInfinitive), []);
+
+  const malformedHeader = example(
+    "2026-10-24",
+    "Правер CI і змержы PR.",
+  ).replace("2026-10-24 — ", "2026-10-24 ");
+  assert.deepEqual(
+    mergeEntriesWithoutLabelCleanup(malformedHeader),
+    ["2026-10-24 змержы PR"],
+  );
+
+  const missingPrMarker = example("2026-10-23", "Змержы PR.")
+    .replace("PR:", "URL:");
+  const missingIssueMarker = example("2026-10-23", "Змержы PR.")
+    .replace("Issue:", "Ticket:");
+  assert.deepEqual(mergeEntriesWithoutLabelCleanup(missingPrMarker), []);
+  assert.deepEqual(mergeEntriesWithoutLabelCleanup(missingIssueMarker), []);
+
   assert.deepEqual(
     mergeEntriesWithoutLabelCleanup(example("2026-10-20", "Змержы PR.")),
     [],
