@@ -128,28 +128,47 @@ function key(prefix: string, identity: string, localePreference: readonly string
 // The empty preference identifies the latest verified *display projection*,
 // not a translation. If the UI language changes while offline, the last
 // published labels remain visible with the existing offline indication.
-// A locale-specific snapshot still wins whenever one exists. Both keys
-// live in rebuildable zone A and use the same strict public-only validator.
+// A locale-specific snapshot wins when it describes the same route versions;
+// otherwise the latest verified publication wins. Both keys live in
+// rebuildable zone A and use the same strict public-only validator.
 function latestKey(prefix: string, identity: string): string {
   return key(prefix, identity, []);
+}
+
+// A previous locale may contain an older publication than the latest
+// verified snapshot. Reuse its localized labels only when the route/version
+// inventory still matches; never downgrade the offline catalog after an
+// online update in a different UI language.
+function sameRouteVersions(a: readonly CatalogGuideCard[], b: readonly CatalogGuideCard[]): boolean {
+  if (a.length !== b.length) return false;
+  const versions = new Map(a.map((guide) => [guide.routeId, guide.version]));
+  return b.every((guide) => versions.get(guide.routeId) === guide.version);
 }
 
 export function readGuides(store: CatalogSnapshotPort | undefined, localePreference: readonly string[]): SnapshotRead<readonly CatalogGuideCard[]> {
   const valid = (value: unknown): value is CatalogGuideCard[] =>
     Array.isArray(value) && value.every(card);
   const localized = read(store, key('guides:v1', '', localePreference), valid);
-  // Never hide corruption of the selected locale's snapshot behind another
-  // language. Only a genuinely missing locale projection may fall back.
-  return localized.kind === 'missing'
-    ? read(store, latestKey('guides:v1', ''), valid)
-    : localized;
+  // Corruption in the selected locale is a named error, not a silent fallback.
+  if (localized.kind === 'corrupt') return localized;
+  const latest = read(store, latestKey('guides:v1', ''), valid);
+  if (localized.kind === 'ready') {
+    return latest.kind === 'ready' && !sameRouteVersions(localized.value, latest.value)
+      ? latest
+      : localized;
+  }
+  return latest;
 }
 
 export function readPreview(store: CatalogSnapshotPort | undefined, routeId: string, localePreference: readonly string[]): SnapshotRead<GuidePreview> {
   const localized = read(store, key('preview:v1', routeId, localePreference), preview);
-  const cached = localized.kind === 'missing'
-    ? read(store, latestKey('preview:v1', routeId), preview)
-    : localized;
+  if (localized.kind === 'corrupt') return localized;
+  const latest = read(store, latestKey('preview:v1', routeId), preview);
+  const cached = localized.kind === 'ready'
+    ? latest.kind === 'ready' && latest.value.version !== localized.value.version
+      ? latest
+      : localized
+    : latest;
   if (cached.kind !== 'ready') return cached;
   // This identity check also covers the cross-locale fallback. The service
   // separately pins cached.version to the currently published route version.
