@@ -127,6 +127,46 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     }
   });
 
+  it('never persists paid previews or free previews with missing stop facts (review negative guard)', async () => {
+    const driver = nodeSqliteDriver();
+    openDatabase(driver);
+    const online = root(driver, loadPublished);
+    assert.equal((await list(online)).kind, 'ready');
+    const listOnly = cacheRows(driver);
+    assert.equal(listOnly.length, 1, 'one validated list projection');
+
+    const paid = await detail(online, 'guide-route-a1');
+    assert.equal(paid.surface.kind, 'ready');
+    assert.ok(paid.surface.kind === 'ready');
+    assert.equal(paid.surface.preview.routeAccess, 'paid', 'the published paid fixture reaches production');
+    assert.ok(paid.surface.preview.stops?.length, 'paid route has public preview rows');
+    assert.deepEqual(cacheRows(driver), listOnly, 'paid preview is not a durable snapshot');
+    online.dispose();
+
+    const noStops: CatalogPathLoader = async (relative) => {
+      if (relative !== 'bundle/guide-route-b1/3/route.json') return loadPublished(relative);
+      const doc: Record<string, unknown> = JSON.parse(await loadPublished(relative));
+      delete doc.stops;
+      return JSON.stringify(doc);
+    };
+    const incomplete = root(driver, noStops);
+    const freeWithoutStops = await detail(incomplete);
+    assert.equal(freeWithoutStops.surface.kind, 'ready');
+    assert.ok(freeWithoutStops.surface.kind === 'ready');
+    assert.equal(freeWithoutStops.surface.preview.routeAccess, 'free_base');
+    assert.equal(freeWithoutStops.surface.preview.stops, null);
+    assert.deepEqual(cacheRows(driver), listOnly, 'missing stop facts cannot overwrite the cache');
+    incomplete.dispose();
+
+    const verified = root(driver, loadPublished);
+    const freeWithStops = await detail(verified);
+    assert.equal(freeWithStops.surface.kind, 'ready');
+    assert.ok(freeWithStops.surface.kind === 'ready');
+    assert.equal(freeWithStops.surface.preview.stops?.[0]?.name, 'Стары порт');
+    assert.equal(cacheRows(driver).length, 2, 'only a verified free-base preview is now persisted');
+    verified.dispose();
+  });
+
   it('malformed responses, failed index pins and missing route docs keep the last good stored projection', async () => {
     const driver = nodeSqliteDriver();
     openDatabase(driver);
