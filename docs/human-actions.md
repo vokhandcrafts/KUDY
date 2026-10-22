@@ -18,7 +18,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 ## Што трэба зрабіць
 
 ### 2026-10-22 — правер фонавае GPS і PR #841
-Што зрабіць: запусці `uvx showboat==0.6.1 verify docs/demos/2026-10-22-g20-30-background-gps-promotion.md` на checkout PR і прыкладзі сапраўдны вынік; атрымай станоўчы verdict суддзі. На фізічным Android правер позні background-grant, адмову, паўторны grant і Pause/End; толькі пасля гэтага і зялёных CI змержы PR, а пасля мержу знімі `agent:running` (калі ён ёсць) са звязанага issue.
+Што зрабіць: запусці `uvx showboat==0.6.1 verify docs/demos/2026-10-22-g20-30-background-gps-promotion.md` на checkout PR і прыкладзі сапраўдны вынік; атрымай станоўчы verdict суддзі. На фізічным Android правер позні background-grant, адмову, паўторны grant і Pause/End; толькі пасля гэтага і зялёных CI змержы PR, а пасля мержу знімі са звязанага issue статусную пазнаку `agent:running` або `agent:blocked` (якая застанецца).
 PR: https://github.com/vokhandcrafts/KUDY/pull/841 · Issue: https://github.com/vokhandcrafts/KUDY/issues/792
 
 ### 2026-10-21 — даштурхай Android-прыёмку #809 да поўнай
