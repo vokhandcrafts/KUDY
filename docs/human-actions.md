@@ -18,7 +18,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 ## Што трэба зрабіць
 
 ### 2026-10-22 — правер фонавае GPS і PR #841
-Што зрабіць: пасля зялёнага CI і незалежнага рэв'ю правер на Android пераключэнне актыўнай прагулкі з foreground GPS на background GPS пры запозненым дазволе, а таксама адмову і Pause/End. Змержы PR толькі пасля пацверджання натыўных паводзін, рэв'ю і judge verdict.
+Што зрабіць: запусці `uvx showboat==0.6.1 verify docs/demos/2026-10-22-g20-30-background-gps-promotion.md` на checkout PR і прыкладзі сапраўдны вынік; атрымай станоўчы verdict суддзі. На фізічным Android правер позні background-grant, адмову, паўторны grant і Pause/End; толькі пасля гэтага і зялёных CI змержы PR, а пасля мержу знімі `agent:running` (калі ён ёсць) са звязанага issue.
 PR: https://github.com/vokhandcrafts/KUDY/pull/841 · Issue: https://github.com/vokhandcrafts/KUDY/issues/792
 
 ### 2026-10-21 — даштурхай Android-прыёмку #809 да поўнай

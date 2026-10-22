@@ -172,6 +172,27 @@
   Выпраўлена: test/ui-messages-inventory.test.mjs (каментар
   registryProjected) — issue #644.
 
+- key: missing-label-removal-note — калі запіс у `docs/human-actions.md`
+  просіць змержыць PR са звязаным issue, патрэбны відавочны крок зняцця
+  `agent:running` пасля мержу, калі такая пазнака ёсць. Само закрыццё
+  issue не здымае статусную пазнаку. Калі PR ужо змержаны, пакідай толькі
+  сапраўды незавершаныя дзеянні; пасля іх выканання выдаляй запіс.
+  Ахова новых запісаў: `tools/ci/human-actions-status-guard.test.mjs`.
+  Выпраўлена: `docs/human-actions.md`, PR #843 / issue #838 — issue #844.
+
+- key: rule-without-revert-test — дакументаванае правіла павінна
+  мець закамічаны negative/revert-тэст, які падае пры адкаце крыніцы
+  правіла; без такога тэсту рэгрэсія можа прайсці незаўважанай.
+  Выпраўлена: для гейта G25.08 → G26.14 (#778) тэст
+  `tools/ci/g25-handoff-guard.test.mjs` параўноўвае поўныя наборы
+  `Blocked-by` у картцы і G25-індэксе і правярае забарону ранняй
+  перадачы ва ўсіх трох крыніцах — issue #845.
+  Жывы стан GitHub issue #708 рэв'юер правярае асобна:
+  `gh issue view 708 --repo vokhandcrafts/KUDY --json body --jq .body`;
+  радок `Blocked-by` трэба параўнаць з
+  `docs/agent-tasks/brand-design/G25.08.md:30`. Лакальны `npm test`
+  не патрабуе сеткі.
+
 - key: missing-showboat-proof — змены геалакацыі або іншых паводзін, для якіх
   `docs/agent-rules/showboat.md` патрабуе Showboat, павінны дадаваць у PR
   правяральнае `docs/demos/<дата>-<задача>.md` з дэтэрмінаванымі камандамі
