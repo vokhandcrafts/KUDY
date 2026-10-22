@@ -17,6 +17,11 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-23 — правер production AAB і 16 KB для APR-01
+Што зрабіць: аднаві доступ да Android-хоста з EAS/bundletool/16 KB эмулятарам і выканай каманды з [выніку APR-01](agent-tasks/results/APR-01.md). Перадай AAB build ID, SHA, вывад target API / ELF / zipalign і эмулятара без сакрэтаў; не прымай задачу па debug-APK.
+Issue: https://github.com/vokhandcrafts/KUDY/issues/806 · [Пачатковы каміт](https://github.com/vokhandcrafts/KUDY/commit/05d6dc3295e843f4fd7d9a24854bf8dd6e62a29f)
+
+
 ### 2026-10-21 — даштурхай Android-прыёмку #809 да поўнай
 Што зрабіць: Waydroid-эвідэнцыя абноўлена (screens 36–38, гл. `docs/testing/evidence/2026-10-20-apr04-waydroid/`): дыялог дазволу з чыстага стану пацверджаны пасля выпраўленай кампазіцыі (`controllers/deviceServices.ts`), грант захоўваецца. На рэальнай прыладзе праверы тое, што ў кантэйнеры недасяжнае: (1) Accessibility Scanner — усталюй яго з уваходам у Play Store і прагані матрыцу экранаў. (2) Жывы GPS-стан — нататку «Шукаем пазіцыю…» і запіс запыту ў `dumpsys location`. (3) Шлях адмаўлення — нататку «Пазіцыя не дазволена — ручны агляд». (4) purchase/restore. (5) Пусты вынік фільтра. (6) Кантраст на рэальным экране — у пікеры моваў 4.42:1 (межавае падзенне), перавер пары і вырашы па дызайн-токену. (7) Мова аголошвання TalkBack — у кантэйнеры толькі eng-USA, галасоў be-BY няма. Пасля поўнай прыёмкі мержы PR.
 PR: https://github.com/vokhandcrafts/KUDY/pull/830
