@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-22 — завершы Play-дэкларацыі APR-08
+Што зрабіць: пераправер канкрэтны release AAB і сеткавыя патокі OpenFreeMap/RevenueCat, сапраўдны prominent disclosure, notification і mediaPlayback FGS на прыладзе; атрымай незалежныя рэв'ю/Judge і CI для PR #850. У Google Play Console звярце Data safety, location і ўсе фактычна выкарыстаныя FGS, прыкладзіце скрыншоты/відэа і зафіксуйце статус праверкі ў #299. Не адзначайце release-адпаведнасць па адным зыходным інвентары; праверце #835/#836 (выдаленне) і #849 (production retention).
+PR: https://github.com/vokhandcrafts/KUDY/pull/850 · Issue: https://github.com/vokhandcrafts/KUDY/issues/811
+
 ### 2026-10-22 — правер і змержы PR #846 па статусах задач
 Што зрабіць: правер CI і рэв'ю PR #846, пасля паспяховых праверак змержы яго. Пасля мержу знімі `agent:running` з issue #844; пасля выканання дзеяння выдалі гэты запіс.
 PR: https://github.com/vokhandcrafts/KUDY/pull/846 · Issue: https://github.com/vokhandcrafts/KUDY/issues/844
