@@ -137,6 +137,25 @@ if (!/run:\s*node --test "tools\/android-build\/\*\.test\.mjs"/.test(windowsJob)
   );
 }
 
+// #817: only an active run in windows-portable covers the six portable suites.
+const portableSuiteFiles = [
+  'tools/ci/adapter-revert-guard.test.mjs',
+  'tools/ci/windows-android-build-guard.test.mjs',
+  'tools/i18n/check-messages.test.mjs',
+  'tools/i18n/generate-messages.test.mjs',
+  'web/lib/content/attribution-guard.test.ts',
+  'web/lib/content/exported-language.test.ts',
+];
+const portableCommand = 'run: node --test --experimental-strip-types --experimental-test-module-mocks ' + portableSuiteFiles.join(' ');
+if (!windowsJob.split('\n').some((line) => line.trim() === portableCommand)) {
+  failures.push('G20.37: windows-portable does not execute all six portable regression suites');
+}
+if (!windowsJob.includes('name: install (root for portable suites)\n        run: npm ci')) {
+  failures.push('G20.37: windows-portable misses root npm ci');
+}
+if (!windowsJob.includes('name: install (web for portable suites)\n        run: npm ci\n        working-directory: web')) {
+  failures.push('G20.37: windows-portable misses web npm ci');
+}
 // G20.27 revert guard — supply-chain pins (spec V6, issue #500): every action
 // reference in every workflow must be a full 40-hex upstream commit SHA, the
 // tag staying only as a version annotation. The file list is enumerated from
