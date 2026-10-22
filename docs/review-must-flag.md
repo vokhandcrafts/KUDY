@@ -171,3 +171,11 @@
   старым пераліку і дапоўніць іх.
   Выпраўлена: test/ui-messages-inventory.test.mjs (каментар
   registryProjected) — issue #644.
+
+- key: missing-label-removal-note — калі запіс у `docs/human-actions.md`
+  просіць змержыць PR са звязаным issue, патрэбны відавочны крок зняцця
+  `agent:running` пасля мержу, калі такая пазнака ёсць. Само закрыццё
+  issue не здымае статусную пазнаку. Калі PR ужо змержаны, пакідай толькі
+  сапраўды незавершаныя дзеянні; пасля іх выканання выдаляй запіс.
+  Ахова новых запісаў: `tools/ci/human-actions-status-guard.test.mjs`.
+  Выпраўлена: `docs/human-actions.md`, PR #843 / issue #838 — issue #844.
