@@ -14,6 +14,7 @@ import type {
 import type { ActivationResult, LayerKey } from '../services/download/types.ts';
 import { createOriginCatalogLoader } from '../services/catalog/loader.ts';
 import { createCatalogService } from '../services/catalog/catalogService.ts';
+import type { CatalogSnapshotPort } from '../services/catalog/snapshot.ts';
 import { createCatalogController, type CatalogControllerState } from './catalog/catalogController.ts';
 import { loadDiscoveryIndex, type DiscoverySnapshotStore } from '../services/contentRepo/discoveryIndex.ts';
 import {
@@ -81,6 +82,8 @@ export interface ServicePorts {
   readonly catalogOrigin?: string;
   readonly catalogLoader?: (relPath: string) => Promise<string>;
   readonly catalogSha256?: Sha256;
+  // G20.32: rebuildable public catalog/preview snapshot over zone-A SQLite.
+  readonly catalogSnapshot?: CatalogSnapshotPort;
   // G06.01.b — the preview button's disk truth: the read-only bundles store
   // (09 §7 layout) the layer facts read; the verify verdict and the download
   // channel; the live-session read of §4.1. Each stays absent until its
@@ -361,7 +364,7 @@ export function createServices(ports: ServicePorts): Services {
   // re-projects the titles through the same refresh (the subscription below).
   const catalogService = catalogLoader &&
     catalogSha256 &&
-    createCatalogService({ loader: catalogLoader, sha256: catalogSha256 }, () => ({
+    createCatalogService({ loader: catalogLoader, sha256: catalogSha256, snapshot: ports.catalogSnapshot }, () => ({
       localePreference: [uiLocale.current(), ...localePreference],
     }));
   // G15.03 — the verified index service: the same origin loader and digest

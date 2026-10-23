@@ -11,6 +11,13 @@ import type { Sha256 } from '../contentRepo/types.ts';
 import { byEditorialOrder } from '../../core/discovery/selectDiscovery.ts';
 import { isSafeRel } from '../safe-path.ts';
 import { readCatalogEnvelope, type CatalogEnvelope } from './envelope.ts';
+import {
+  readGuides as readCachedGuides,
+  readPreview as readCachedPreview,
+  writeGuides,
+  writePreview,
+  type CatalogSnapshotPort,
+} from './snapshot.ts';
 import type {
   CatalogGuideCard,
   CatalogLoadState,
@@ -27,6 +34,7 @@ import type {
 export interface CatalogDeps {
   readonly loader: CatalogPathLoader;
   readonly sha256: Sha256;
+  readonly snapshot?: CatalogSnapshotPort;
 }
 
 // Display-locale preference for the localized labels; callers inject the UI
@@ -489,22 +497,37 @@ export async function loadCatalog(
   options: CatalogDisplayOptions,
   previous: readonly CatalogGuideCard[] | null,
 ): Promise<CatalogLoadState> {
+  const cached = () => readCachedGuides(deps.snapshot, options.localePreference);
+  const offline = (reason: string): CatalogLoadState => {
+    if (previous && previous.length > 0) return { kind: 'offline', guides: previous, reason };
+    const snapshot = cached();
+    if (snapshot.kind === 'ready') return { kind: 'offline', guides: snapshot.value, reason };
+    return { kind: 'error', reason: snapshot.kind === 'corrupt' ? 'catalog-cache-corrupt' : reason };
+  };
   const read = await readEnvelope(deps);
-  if (!read.ok) {
-    return previous && previous.length > 0
-      ? { kind: 'offline', guides: previous, reason: read.reason }
-      : { kind: 'error', reason: read.reason };
-  }
+  if (!read.ok) return offline(read.reason);
+
   let offers: CatalogOfferFacts[] | null = null;
   try {
     offers = await loadIndex(deps, options, read.envelope);
   } catch {
     offers = null;
   }
-  const guides = projectGuides(read.envelope, offers ?? []);
+  // A missing/malformed/hash-mismatched index cannot replace the last
+  // validated catalog. The first load may still show honest route-only cards.
   if (offers === null && read.envelope.discovery_index !== null) {
-    return { kind: 'ready', guides, degraded: 'index-unavailable' };
+    const snapshot = cached();
+    if ((previous && previous.length > 0) || snapshot.kind === 'ready') return offline('index-unavailable');
+    return {
+      kind: 'ready',
+      guides: projectGuides(read.envelope, []),
+      degraded: 'index-unavailable',
+    };
   }
+  const guides = projectGuides(read.envelope, offers ?? []);
+  // Only a complete, validated publication is durable. Signed grant/media
+  // URLs never enter this public projection.
+  writeGuides(deps.snapshot, options.localePreference, guides);
   return { kind: 'ready', guides, degraded: null };
 }
 
@@ -652,12 +675,18 @@ export async function loadPreview(
   routeId: string,
   previous: GuidePreview | null,
 ): Promise<PreviewLoadState> {
+  const recover = (reason: string, version?: string): PreviewLoadState => {
+    if (previous && (version === undefined || previous.version === version)) {
+      return { kind: 'ready', preview: previous, degraded: reason };
+    }
+    const cached = readCachedPreview(deps.snapshot, routeId, options.localePreference);
+    if (cached.kind === 'ready' && (version === undefined || cached.value.version === version)) {
+      return { kind: 'ready', preview: cached.value, degraded: reason };
+    }
+    return { kind: 'error', reason: cached.kind === 'corrupt' ? 'catalog-preview-cache-corrupt' : reason };
+  };
   const read = await readEnvelope(deps);
-  if (!read.ok) {
-    return previous
-      ? { kind: 'ready', preview: previous, degraded: read.reason }
-      : { kind: 'error', reason: read.reason };
-  }
+  if (!read.ok) return recover(read.reason);
   const entry = read.envelope.routes.find((route) => route.route_id === routeId);
   // The envelope read fine and names no such route — the honest unavailable
   // state, never a fabricated preview (11 §16.1: no invented cards).
@@ -685,10 +714,24 @@ export async function loadPreview(
     : routeOnlyCard(entry);
   const doc = await loadRouteDoc(deps, routeId, entry.version, options.localePreference, placeTitles);
   const indexDegraded = offers === null && read.envelope.discovery_index !== null;
+  // Preserve the previously verified preview, including its public stop
+  // titles, when an index or route document fails a later refresh.
+  if (indexDegraded || doc.degraded !== null) {
+    const reason = indexDegraded ? 'index-unavailable' : doc.degraded ?? 'route-doc-unavailable';
+    if (previous && previous.version === entry.version) {
+      return { kind: 'ready', preview: previous, degraded: reason };
+    }
+    // Read the persisted projection only once on a degraded refresh. A
+    // different version cannot masquerade as the currently published route.
+    const cached = readCachedPreview(deps.snapshot, routeId, options.localePreference);
+    if (cached.kind === 'ready' && cached.value.version === entry.version) {
+      return { kind: 'ready', preview: cached.value, degraded: reason };
+    }
+  }
   const degraded = [doc.degraded, indexDegraded ? 'index-unavailable' : null].find(
     (reason): reason is string => reason !== null,
   ) ?? null;
-  return {
+  const result: PreviewLoadState = {
     kind: 'ready',
     preview: {
       routeId: card.routeId,
@@ -716,6 +759,13 @@ export async function loadPreview(
     },
     degraded,
   };
+  // Cache public facts only; never a paid/private document, a missing route
+  // document or an unverified discovery index.
+  if (doc.degraded === null && !indexDegraded &&
+      result.preview.routeAccess === 'free_base' && result.preview.stops !== null) {
+    writePreview(deps.snapshot, options.localePreference, result.preview);
+  }
+  return result;
 }
 
 // The composition root constructs the service over its ports (the loader

@@ -47,7 +47,8 @@ export const ZONE_A_DDL: Record<ZoneATable, string> = {
   sha256 TEXT NOT NULL,
   PRIMARY KEY (route_id, version, locale, tier, path)
 )`,
-  // `09` §7: a copy of catalog.json for offline start, keyed by route_id.
+  // `09` §7: rebuildable catalog/offline-preview public projections in
+  // payload, keyed by catalog/route plus UI locale. No session state or URLs.
   catalog_cache: `CREATE TABLE catalog_cache (
   route_id TEXT PRIMARY KEY NOT NULL,
   payload TEXT NOT NULL
