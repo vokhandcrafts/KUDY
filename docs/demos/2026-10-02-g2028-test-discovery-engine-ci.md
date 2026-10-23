@@ -71,3 +71,9 @@ guard-required-checks: FAIL
 - missing_engine_workflow_step: required-checks.yml does not run `npm run engine:regressions`
 exit=1
 ```
+
+---
+
+## Гістарычны здымак — удакладненне 2026-10-22
+
+Вышэйшыя захопленыя радкі `ℹ tests 1913`, `ℹ pass 1906` і `ℹ fail 1` фіксуюць **гістарычны** стан дэманстрацыі G20.28 на 2026-10-02, а не актуальную колькасць тэстаў на HEAD пасля [PR #842](https://github.com/vokhandcrafts/KUDY/pull/842) (G20.32). Клон у захаванай камандзе бярэ бягучы checkout, таму гэты гістарычны output-блок **не прызначаны для `showboat verify` на новых камітах** без паўторнага захопу. Актуальную рэгрэсійную праверку новага офлайн-кэша забяспечвае `controllers/catalog/catalogSnapshot.integration.test.ts` і CI PR #842. Першапачатковыя назіранні G20.28 пакінуты нязменнымі дзеля аўдыту; не выдаваць іх за праверку новай версіі.

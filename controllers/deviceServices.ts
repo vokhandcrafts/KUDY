@@ -18,6 +18,7 @@ import { createDeletionGate } from '../services/download/delete.ts';
 import { createOriginByteSource } from '../services/download/origin-bytes.ts';
 import { createExpoDownloadStore } from '../services/download/expo/expo-download-store.ts';
 import { discoverySnapshotOver } from '../services/contentRepo/discoverySnapshot.ts';
+import { catalogSnapshotOver } from '../services/catalog/snapshot.ts';
 import { readRunMapFacts } from '../services/contentRepo/runMapFacts.ts';
 import { checkPresence } from '../services/contentRepo/presence.ts';
 import { isSafeSegment } from '../services/safe-path.ts';
@@ -316,6 +317,9 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
       }
       : discoverySnapshotOver(driver),
     catalogSha256: sha256,
+    // Only the remote catalog needs a durable, rebuildable snapshot. The
+    // explicitly bundled demo origin continues to use its immutable files.
+    ...(!facilities.demoSource ? { catalogSnapshot: catalogSnapshotOver(driver) } : {}),
     location,
     audio,
     momentAudioUriFor: audioUriFor,
