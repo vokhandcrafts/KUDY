@@ -21,6 +21,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 Што зрабіць: у поўным Git-checkout з даступным `uvx` запішы і правер Showboat-дэманстрацыю афлайн-каталога і прэв'ю (`uvx showboat==0.6.1 verify docs/demos/2026-10-23-offline-catalog-locale-restart.md`; файл трэба спачатку стварыць). Атрымаўшы зялёнае паўторнае код-рэв'ю і вердыкт суддзі, правер апошні CI і змержы PR, калі ўсе гейты выкананы. Пасля мерджу прыбяры `agent:running` (калі пазнака ёсць), знімі бягучы `agent:blocked` і закрый #794 з фінальным статусам; не рабі гэтага да паспяховага мерджу.
 PR: https://github.com/vokhandcrafts/KUDY/pull/842 · Issue: https://github.com/vokhandcrafts/KUDY/issues/794
 
+### 2026-10-22 — завершы Play-дэкларацыі APR-08
+Што зрабіць: пасля станоўчага code review/Judge і ўсіх required CI для актуальнага HEAD змержы PR #850 і прыбяры `agent:running` з #811 (пры аўтаматычным закрыцці правер статус). Перад Play submission правер production AAB, SDK network flows OpenFreeMap/RevenueCat, prominent disclosure і кожны выкарыстаны FGS з Android video; узгадні privacy ў #853, mediaPlayback у #854, device-delete ў #835/#836 і retention/orphan cleanup у #849. Занясі вынікі ў #299, не называй дакументальны інвентар production approval.
+PR: https://github.com/vokhandcrafts/KUDY/pull/850 · Issue: https://github.com/vokhandcrafts/KUDY/issues/811
+
 ### 2026-10-22 — правер фонавае GPS і PR #841
 Што зрабіць: запусці `uvx showboat==0.6.1 verify docs/demos/2026-10-22-g20-30-background-gps-promotion.md` на checkout PR і прыкладзі сапраўдны вынік; атрымай станоўчы verdict суддзі. На фізічным Android правер позні background-grant, адмову, паўторны grant і Pause/End; толькі пасля гэтага і зялёных CI змержы PR, а пасля мержу знімі са звязанага issue статусную пазнаку `agent:running` або `agent:blocked` (якая застанецца).
 PR: https://github.com/vokhandcrafts/KUDY/pull/841 · Issue: https://github.com/vokhandcrafts/KUDY/issues/792
