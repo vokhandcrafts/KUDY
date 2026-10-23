@@ -17,9 +17,9 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
-### 2026-10-23 — натыўная Android-прыёмка фонавага GPS (#792)
-Што зрабіць: на фізічнай Android-прыладзе праверы позні background-grant падчас Run (без страты GPS-фіксаў), адмову (foreground працягваецца), паўторны grant (без дублявання background-task) і Pause/End падчас чакання дазволу — сцэнары раздзела «Асобная натыўная прыёмка» ў `docs/demos/2026-10-22-g20-30-background-gps-promotion.md`. Вынік дашлю ў `docs/agent-tasks/results/G20.30.md`. Showboat-праверка і мержы PR #841/#857 ужо выкананыя, іх не паўтараць.
-PR: https://github.com/vokhandcrafts/KUDY/pull/857 · Issue: https://github.com/vokhandcrafts/KUDY/issues/792
+### 2026-10-23 — змержы human-actions PR і праверы натыўны фонавы GPS
+Што зрабіць: змержы дробны PR #858 (дакументацыйная правка без лічбаў; пасля мержу зняць `agent:running` не з чаго — звязаных адкрытых issues пры ім няма, #848 ужо закрыта). Далей на фізічнай Android-прыладзе праверы позні background-grant падчас Run (без страты GPS-фіксаў), адмову (foreground працягваецца), паўторны grant (без дублявання background-task) і Pause/End падчас чакання дазволу — сцэнары раздзела «Асобная натыўная прыёмка» ў `docs/demos/2026-10-22-g20-30-background-gps-promotion.md`; вынік дашлю ў `docs/agent-tasks/results/G20.30.md`. Showboat-праверка па #841/#857 ужо выкананая, яе не паўтараць.
+PR: https://github.com/vokhandcrafts/KUDY/pull/858 · Issue: https://github.com/vokhandcrafts/KUDY/issues/792
 
 ### 2026-10-23 — пацвердзі доказ і рэв'ю для G20.32
 Што зрабіць: у поўным Git-checkout з даступным `uvx` запішы і правер Showboat-дэманстрацыю афлайн-каталога і прэв'ю (`uvx showboat==0.6.1 verify docs/demos/2026-10-23-offline-catalog-locale-restart.md`; файл трэба спачатку стварыць). Атрымаўшы зялёнае паўторнае код-рэв'ю і вердыкт суддзі, правер апошні CI і змержы PR, калі ўсе гейты выкананы. Пасля мерджу прыбяры `agent:running` (калі пазнака ёсць), знімі бягучы `agent:blocked` і закрый #794 з фінальным статусам; не рабі гэтага да паспяховага мерджу.
