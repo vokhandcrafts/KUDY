@@ -318,6 +318,146 @@ test('G23.05: a pending foreground watch cannot survive the background grant', a
   assert.equal(watches[0].removeCalls, 1, 'the late foreground watch is discarded');
 });
 
+
+test('G20.30: city-to-Run keeps foreground fixes until background starts, then rejects late watch callbacks', async () => {
+  const { port, service, fixes } = setup();
+  service.setMode('city-surface');
+  foregroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  watchStart.resolve({ remove() {} });
+  await flush();
+  assert.equal(watches.length, 1, 'city location was armed');
+
+  service.setMode('active-guide');
+  startGate = deferred();
+  backgroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  assert.ok(updatesAsked(), 'grant attempts the native switch without a watchdog tick');
+  assert.equal(watches[0].removeCalls, 0, 'the existing watch lives during pending native startup');
+  watches[0].callback(osFix(2));
+  assert.equal(fixes.length, 1, 'foreground fixes continue while native startup is pending');
+
+  startGate.resolve();
+  await flush();
+  assert.equal(watches[0].removeCalls, 1, 'successful promotion releases the old watch exactly once');
+  watches[0].callback(osFix(3));
+  assert.equal(fixes.length, 1, 'removed foreground callbacks cannot use the still-current service sub');
+  definedTasks.get(TASK)?.({ data: { locations: [osFix(4)] } });
+  assert.equal(fixes.length, 2, 'the promoted native stream delivers');
+
+  port.requestPermission('background', 'bg-why');
+  backgroundAsks[1].resolve({ status: 'granted' });
+  await flush();
+  assert.equal(locationCalls.filter(call => call === 'startUpdates:' + TASK).length, 1, 'repeated grants never start a second native task');
+  service.setMode('paused');
+  await flush();
+  assert.equal(backgroundStarted, false);
+});
+
+test('G20.30: cold Run retains the original foreground watch when background startup fails', async () => {
+  const { service, fixes } = setup();
+  service.setMode('active-guide');
+  foregroundRead.resolve({ status: 'granted' });
+  await flush();
+  watchStart.resolve({ remove() {} });
+  await flush();
+  assert.equal(watches.length, 1);
+
+  startGate = deferred();
+  backgroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  assert.equal(watches[0].removeCalls, 0, 'no tracking gap while awaiting native start');
+  startGate.reject(new Error('background unavailable'));
+  await flush();
+  assert.equal(watches.length, 1, 'failed promotion must not duplicate the standing watch');
+  assert.equal(watches[0].removeCalls, 0);
+  watches[0].callback(osFix(1));
+  assert.equal(fixes.length, 1, 'the original foreground stream remains usable');
+  service.setMode('idle');
+  await flush();
+  assert.equal(watches[0].removeCalls, 1);
+});
+
+test('G20.30: failed promotion preserves a foreground watch whose native handle is still pending', async () => {
+  const { service, fixes } = setup();
+  service.setMode('active-guide');
+  foregroundRead.resolve({ status: 'granted' });
+  await flush();
+  assert.equal(watches.length, 1);
+
+  startGate = deferred();
+  backgroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  startGate.reject(new Error('native refused'));
+  await flush();
+  assert.equal(watches.length, 1, 'no parallel fallback while the original watch is unresolved');
+  watchStart.resolve({ remove() {} });
+  await flush();
+  assert.equal(watches[0].removeCalls, 0, 'the pending foreground watch is adopted after failure');
+  watches[0].callback(osFix(1));
+  assert.equal(fixes.length, 1);
+  service.setMode('paused');
+  await flush();
+  assert.equal(watches[0].removeCalls, 1);
+});
+
+test('G20.30: pause before a delayed background answer cannot re-arm tracking', async () => {
+  const { service, fixes } = setup();
+  service.setMode('active-guide');
+  foregroundRead.resolve({ status: 'granted' });
+  await flush();
+  watchStart.resolve({ remove() {} });
+  await flush();
+  service.setMode('paused');
+  backgroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  assert.equal(updatesAsked(), false);
+  assert.equal(watches[0].removeCalls, 1);
+  watches[0].callback(osFix(1));
+  assert.equal(fixes.length, 0);
+});
+
+test('G20.30: newer city permission decision supersedes the pending background answer', async () => {
+  const { service, fixes } = setup();
+  service.setMode('city-surface');
+  foregroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  watchStart.resolve({ remove() {} });
+  await flush();
+  service.setMode('active-guide');
+  service.setMode('city-surface');
+  backgroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  assert.equal(updatesAsked(), false, 'stale background permission cannot promote a city watch');
+  assert.equal(watches[0].removeCalls, 0);
+  watches[0].callback(osFix(1));
+  assert.equal(fixes.length, 1);
+  service.setMode('idle');
+  await flush();
+});
+
+test('G20.30: pause during native background startup drops both pending streams', async () => {
+  const { service, fixes } = setup();
+  service.setMode('city-surface');
+  foregroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  watchStart.resolve({ remove() {} });
+  await flush();
+  service.setMode('active-guide');
+  startGate = deferred();
+  backgroundAsks[0].resolve({ status: 'granted' });
+  await flush();
+  service.setMode('paused');
+  assert.equal(watches[0].removeCalls, 1);
+  watches[0].callback(osFix(1));
+  assert.equal(fixes.length, 0);
+  startGate.resolve();
+  await flush();
+  assert.equal(backgroundStarted, false, 'queued native cleanup releases the late task');
+  definedTasks.get(TASK)?.({ data: { locations: [osFix(2)] } });
+  assert.equal(fixes.length, 0, 'late native callbacks cannot resurrect the walk');
+});
+
 test('stale_permission_reply: a superseded ask cannot overwrite a newer capability decision', async () => {
   const { port, service, fixes } = setup();
   // Out-of-order asks: the foreground ask goes out with the city surface,

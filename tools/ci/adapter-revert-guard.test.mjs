@@ -46,7 +46,7 @@ const ADAPTER_SUITES = [
     // The G20.08 pending-start cleanup: a watch that resolves after its stop
     // removes itself. The plain `watch.remove()` substring also appears in
     // the removeWatch arrow, so the target carries its comment anchor.
-    revertLine: '        watch.remove(); // stopped or superseded before the watch resolved\n',
+    revertLine: '        watch.remove(); // stopped or promoted before the watch resolved\n',
   },
 ];
 
