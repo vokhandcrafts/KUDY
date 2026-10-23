@@ -1,6 +1,6 @@
 # APR-08 — дасье Data safety, location і foreground services
 
-Дата праверкі: **2026-10-22**. Задача: [#811](https://github.com/vokhandcrafts/KUDY/issues/811). Эпік: [#299](https://github.com/vokhandcrafts/KUDY/issues/299). Апошняя зафіксаваная база main: `1f448f00534838070fc6489660a5b65eb7c1278b` (злітая ў codex/811 камітам `34c88b34`); гэта не здымак будучага production release. Тып: агляд зыходнікаў і дакументальны чарнавік, **не Play Console submission**.
+Дата праверкі: **2026-10-22**. Задача: [#811](https://github.com/vokhandcrafts/KUDY/issues/811). Эпік: [#299](https://github.com/vokhandcrafts/KUDY/issues/299). База main на дату першапачатковай праверкі: `1f448f00534838070fc6489660a5b65eb7c1278b` (злітая ў codex/811 камітам `34c88b34`); пасля праверкі main сінхранізаваны да `4d6cacf757e5f0ad3eb3377f25c4997bc3a53961` (merge-base HEAD `4c6c19cf`), а сцвярджэнні дасье пераправераны code review на гэтым HEAD 2026-10-23; гэта не здымак будучага production release. Тып: агляд зыходнікаў і дакументальны чарнавік, **не Play Console submission**.
 
 ## Мяжа доказу
 
