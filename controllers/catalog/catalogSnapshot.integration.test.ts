@@ -242,6 +242,78 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     backRestart.dispose();
   });
 
+  it('an offline locale switch prefers the verified locale-specific snapshot when the latest copy describes the same versions', async () => {
+    const driver = nodeSqliteDriver();
+    openDatabase(driver);
+    let selected: UiLocaleSwitchCode = 'be';
+    const uiLocalePersistence: UiLocalePersistence = {
+      read: () => selected,
+      write: (locale) => { selected = locale; },
+    };
+
+    // Online refresh in Belarusian: the be projection lands in both the be
+    // locale key and the latest key.
+    const beOnline = root(driver, loadPublished, false, uiLocalePersistence);
+    const beList = await list(beOnline);
+    assert.equal(beList.kind, 'ready');
+    assert.ok(beList.kind === 'ready');
+    assert.equal(beList.guides[0]?.title, 'Гісторыі сукнараў: ад мытні да порта');
+    const beOpened = await detail(beOnline);
+    assert.equal(beOpened.surface.kind, 'ready');
+    assert.ok(beOpened.surface.kind === 'ready');
+    assert.equal(beOpened.surface.preview.stops?.[0]?.name, 'Стары порт');
+    beOnline.dispose();
+
+    // The same publication refreshed in English overwrites the latest key and
+    // adds the en locale key: identical route versions, different be/en
+    // signatures. createServices resolves the preference as
+    // [uiLocale, 'be', 'en'], so the locale keys below are verbatim.
+    selected = 'en';
+    const enOnline = root(driver, loadPublished, false, uiLocalePersistence);
+    const enList = await list(enOnline);
+    assert.equal(enList.kind, 'ready');
+    assert.ok(enList.kind === 'ready');
+    assert.equal(enList.guides[0]?.title, "Cloth Merchants' Stories: from the Customs House to the Port");
+    const enOpened = await detail(enOnline);
+    assert.equal(enOpened.surface.kind, 'ready');
+    assert.ok(enOpened.surface.kind === 'ready');
+    assert.equal(enOpened.surface.preview.stops?.[0]?.name, 'The Old Port');
+    enOnline.dispose();
+
+    const rows = cacheRows(driver);
+    assert.equal(rows.length, 6, 'latest, be and en copies of the list and the free preview');
+    const byKey = new Map(rows.map((row) => [row.route_id, row.payload]));
+    const beGuidePayload = byKey.get(JSON.stringify(['guides:v1', '', ['be', 'be', 'en']]));
+    const enGuidePayload = byKey.get(JSON.stringify(['guides:v1', '', ['en', 'be', 'en']]));
+    assert.ok(beGuidePayload, 'the be locale snapshot of the list exists');
+    assert.ok(enGuidePayload, 'the en locale snapshot of the list exists');
+    assert.notEqual(beGuidePayload, enGuidePayload, 'same route versions must not imply identical signatures');
+    const beGuideDoc = JSON.parse(beGuidePayload) as Array<{ routeId: string; version: string }>;
+    const enGuideDoc = JSON.parse(enGuidePayload) as Array<{ routeId: string; version: string }>;
+    const versionSignature = (doc: Array<{ routeId: string; version: string }>) =>
+      JSON.stringify(doc.map((card) => [card.routeId, card.version]));
+    assert.equal(versionSignature(beGuideDoc), versionSignature(enGuideDoc),
+      'the uncovered branch needs both copies to describe the same route versions');
+
+    // Offline in Belarusian: both keys describe route version 3, so the be
+    // locale snapshot wins over the English latest projection — never the
+    // other way around.
+    selected = 'be';
+    const offline = root(driver, noNetwork, false, uiLocalePersistence);
+    const offlineList = await list(offline);
+    assert.equal(offlineList.kind, 'offline');
+    assert.ok(offlineList.kind === 'offline');
+    assert.deepEqual(offlineList.guides, beList.guides,
+      'the verified be list projection wins over the en latest copy of the same versions');
+    const offlineOpened = await detail(offline);
+    assert.equal(offlineOpened.surface.kind, 'ready');
+    assert.ok(offlineOpened.surface.kind === 'ready');
+    assert.equal(offlineOpened.surface.degraded, 'network-offline');
+    assert.deepEqual(offlineOpened.surface.preview, beOpened.surface.preview,
+      'the verified be preview wins over the en latest copy of the same versions');
+    offline.dispose();
+  });
+
   it('never persists paid previews or free previews with missing stop facts (review negative guard)', async () => {
     const driver = nodeSqliteDriver();
     openDatabase(driver);
@@ -415,6 +487,46 @@ describe('G20.32 catalog snapshot across production controllers', () => {
     assert.equal((await detail(offlineAgain)).surface.kind, 'ready');
     recovered.dispose();
     offlineAgain.dispose();
+  });
+
+  it('corrupt locale-specific snapshots stay named errors while the latest copies remain intact', async () => {
+    const driver = nodeSqliteDriver();
+    openDatabase(driver);
+    let selected: UiLocaleSwitchCode = 'be';
+    const uiLocalePersistence: UiLocalePersistence = {
+      read: () => selected,
+      write: (locale) => { selected = locale; },
+    };
+
+    const online = root(driver, loadPublished, false, uiLocalePersistence);
+    assert.equal((await list(online)).kind, 'ready');
+    assert.equal((await detail(online)).surface.kind, 'ready');
+    online.dispose();
+
+    // Corrupt only the locale-specific copies; the latest-verified copies stay
+    // intact — the partial case the all-rows corruption above does not
+    // isolate. A silent fallback to the intact latest copy would hide the
+    // named error instead of surfacing it.
+    driver
+      .prepare('UPDATE catalog_cache SET payload = ? WHERE route_id IN (?, ?)')
+      .run('{"bad":true}', JSON.stringify(['guides:v1', '', ['be', 'be', 'en']]),
+        JSON.stringify(['preview:v1', 'guide-route-b1', ['be', 'be', 'en']]));
+    const intact = cacheRows(driver).filter((row) =>
+      row.route_id === JSON.stringify(['guides:v1', '', []]) ||
+      row.route_id === JSON.stringify(['preview:v1', 'guide-route-b1', []]));
+    assert.equal(intact.length, 2, 'the latest-verified copies survive the partial corruption');
+
+    const offline = root(driver, noNetwork, false, uiLocalePersistence);
+    const catalog = await list(offline);
+    assert.equal(catalog.kind, 'error');
+    assert.ok(catalog.kind === 'error');
+    assert.equal(catalog.reason, 'catalog-cache-corrupt',
+      'a corrupt locale snapshot is a named error, not a fallback to the intact latest copy');
+    const preview = await detail(offline);
+    assert.equal(preview.surface.kind, 'unavailable');
+    assert.ok(preview.surface.kind === 'unavailable');
+    assert.equal(preview.surface.reason, 'catalog-preview-cache-corrupt');
+    offline.dispose();
   });
 
   it('rebuildDerived deletes only zone-A cache and preserves the real durable walk history', async () => {
