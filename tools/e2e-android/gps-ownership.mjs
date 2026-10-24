@@ -4,12 +4,12 @@
 // and `cmd appops get by.kudy.app MONITOR_LOCATION` for the per-app running
 // op — never a fake counter and never the silent player UI. No raw
 // coordinates, personal or production data are captured: the geo seeds are
-// the suite's synthetic Gdańsk points and every snapshot holds listener
+// the suite's synthetic Minsk points and every snapshot holds listener
 // attribution lines only.
 //
-// The no-revival polls run longer than the service's whole recovery window
-// (the 15 s gap watch plus the 1/2/4/8 s backoff): a stale gap-watch tick
-// that survived Pause or End would resubscribe inside it.
+// The no-revival polls run 22 s, past the 15 s gap watch: a stale tick that
+// survived Pause or End fires (and resubscribes through the recovery step)
+// no later than 15 s after the disarm, so the polls would see it.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -224,8 +224,8 @@ export async function runGpsOwnershipSuite({ driver, url, runCase, coldStart }) 
         findNode(reentryNodes, { testID: 'run-ended' }) === undefined;
       console.log(`gps: deep-link re-entry after End auto-started a fresh walk: ${String(autoStarted)}`);
       assert.ok(autoStarted, 'expected the recorded auto-start (G20.42-F1); the re-entry rendered neither a live run nor run-ended');
-      assert.notEqual(await waitForOpCount(driver, 1).then((ops) => ops.length), 0);
-      console.log('gps: the ungated re-entry holds a location op — recorded as follow-up defect #862');
+      const reentryOps = await waitForOpCount(driver, 1);
+      console.log(`gps: the ungated re-entry holds ${String(reentryOps.length)} location op — recorded as follow-up defect #862`);
 
       // The ungated walk is not ours to keep: the same End path must release
       // it, which restores the no-walk precondition of the city-owner case.
