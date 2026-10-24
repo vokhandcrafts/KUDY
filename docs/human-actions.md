@@ -18,7 +18,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 ## Што трэба зрабіць
 
 ### 2026-10-23 — праверы натыўны фонавы GPS на прыладзе
-Што зрабіць: на фізічнай Android-прыладзе праверы позні background-grant падчас Run (без страты GPS-фіксаў), адмову (foreground працягваецца), паўторны grant (без дублявання background-task) і Pause/End падчас чакання дазволу — сцэнары раздзела «Асобная натыўная прыёмка» ў `docs/demos/2026-10-22-g20-30-background-gps-promotion.md`; вынік дашлю ў `docs/agent-tasks/results/G20.30.md`. Showboat-праверка па #841/#857 ужо выкананая, яе не паўтараць.
+Што зрабіць: на фізічнай Android-прыладзе праверы позні background-grant падчас Run (без страты GPS-фіксаў), адмову (foreground працягваецца), паўторны grant (без дублявання background-task) і Pause/End падчас чакання дазволу — сцэнары раздзела «Асобная натыўная прыёмка» ў `docs/demos/2026-10-22-g20-30-background-gps-promotion.md`; вынік дашлю ў `docs/agent-tasks/results/G20.30.md`. Адкладзена ўладаром 2026-10-24 — G20.30/#792 лічыцца ўмоўна выкананым, гэты крок нічога не блакуе ([рашэнне](https://github.com/vokhandcrafts/KUDY/issues/792#issuecomment-6378072568)); Showboat-праверка па #841/#857 ужо выкананая, яе не паўтараць.
 PR: https://github.com/vokhandcrafts/KUDY/pull/857 · Issue: https://github.com/vokhandcrafts/KUDY/issues/792
 
 ### 2026-10-22 — завершы Play-дэкларацыі APR-08
