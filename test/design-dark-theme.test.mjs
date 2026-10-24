@@ -4,8 +4,8 @@
 // (never both, never missing), every surface pair holds at the WCAG thresholds
 // in both themes with the repo contrast helper, the tier-2 cartography
 // candidates hold their thresholds, and the recorded behavior keeps the
-// system default flagged as pending owner confirmation. The suite itself
-// stays wired into npm test.
+// owner-confirmed system default (DT-3, 2026-10-24) on record. The suite
+// itself stays wired into npm test.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dirname, join } from 'node:path';
@@ -85,12 +85,12 @@ test('tier-2 dark cartography candidates hold the thresholds without entering pr
   }
 });
 
-test('behavior fixes the three choices and keeps the system default pending the owner', () => {
+test('behavior fixes the three choices and records the confirmed system default', () => {
   const behavior = spec.themeBehavior;
   assert.deepEqual(behavior.choices, ['system', 'light', 'dark']);
   assert.equal(behavior.default, 'system');
-  assert.equal(behavior.systemDefaultPendingOwner, true,
-    'system default stays a quiz recommendation until the owner confirms it (#860 criterion 4)');
+  assert.match(behavior.systemDefault, /2026-10-24/,
+    'the system default must carry the owner confirmation date (DT-3, #860 criterion 4)');
   for (const key of ['persistence', 'firstFrame', 'liveOsChange', 'runContinuity', 'statusBar', 'illustrations', 'webBoundary']) {
     assert.ok(typeof behavior[key] === 'string' && behavior[key].trim() !== '',
       `themeBehavior.${key} must be recorded`);
