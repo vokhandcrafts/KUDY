@@ -13,6 +13,7 @@ import { defaultEngineConfig } from '../../core/engine/reducer.ts';
 import { stopStatus, type RunSessionState } from '../../core/engine/state.ts';
 import type { FixInput } from '../../core/pipeline/types.ts';
 import { LocationService } from '../../services/location/service.ts';
+import { WATCHDOG_GAP_MS } from '../../services/location/types.ts';
 import { FakeLocationOsPort } from '../../services/location/fake-port.ts';
 import { AudioService } from '../../services/audio/service.ts';
 import { FakeAudioPlayerPort } from '../../services/audio/fake-port.ts';
@@ -53,14 +54,36 @@ const WALKED_OUT = 0.0009 + 0.00037;
 
 class ManualClock {
   private t = 0;
+  // G20.42 (#822): the gap-watch entries are real now — the walk-ownership
+  // tests read how many are pending and fire what is due. The older
+  // scenarios never fire and never cancel, so they keep their semantics.
+  private scheduled: { due: number; fn: () => void }[] = [];
   now(): number {
     return this.t;
   }
   set(ms: number): void {
     this.t = ms;
   }
-  schedule(): () => void {
-    return () => {}; // the location watchdog ticks are irrelevant to these scenarios
+  schedule(delayMs: number, fn: () => void): () => void {
+    const entry = { due: this.t + delayMs, fn };
+    this.scheduled.push(entry);
+    return () => {
+      this.scheduled = this.scheduled.filter((other) => other !== entry);
+    };
+  }
+  pending(): number {
+    return this.scheduled.length;
+  }
+  fire(afterMs: number): void {
+    const limit = this.t + afterMs;
+    for (;;) {
+      const due = this.scheduled.filter((entry) => entry.due <= limit).sort((a, b) => a.due - b.due)[0];
+      if (!due) break;
+      this.scheduled = this.scheduled.filter((other) => other !== due);
+      this.t = Math.max(this.t, due.due);
+      due.fn();
+    }
+    this.t = limit;
   }
 }
 
@@ -68,9 +91,9 @@ interface Harness {
   clock: ManualClock;
   locationPort: FakeLocationOsPort;
   audioPort: FakeAudioPlayerPort;
+  location: LocationService;
   orchestrator: RunOrchestrator;
 }
-
 function harness(options: { access?: DownloadAccessPort } = {}): Harness {
   const clock = new ManualClock();
   const { locationPort, audioPort, location, audio } = makeServices(clock);
@@ -85,7 +108,7 @@ function harness(options: { access?: DownloadAccessPort } = {}): Harness {
     access: options.access,
   });
   orchestrator.start('walk-1');
-  return { clock, locationPort, audioPort, orchestrator };
+  return { clock, locationPort, audioPort, location, orchestrator };
 }
 
 const liveOf = (orchestrator: RunOrchestrator): RunSessionState => {
@@ -630,4 +653,78 @@ test('G20.04: a moment finishing in the Ended window leaves no phantom playing i
   const afterTrigger = orchestrator.state;
   if (afterTrigger.phase === 'Idle') throw new Error('no session after Start');
   assert.equal(playingStopId(afterTrigger), 'b'); // the guide automation is alive
+});
+
+// --- G20.42 (#822): the walk owns exactly one GPS subscription and its timer --
+//
+// The matrix of the issue through the orchestrator's own session intents:
+// Pause releases the subscription WITH the pending gap watch (11 §4.2); Resume
+// re-arms exactly one of both; End releases everything (19 §4.3); a stale tick
+// of a released timer never resubscribes — the revival path would run
+// onGapWatch → recoveryStep → startSubscription after the disarm.
+
+const startCount = (port: FakeLocationOsPort): number =>
+  port.commands.filter((command) => command.startsWith('start ')).length;
+
+test('G20.42: Pause releases the subscription and the gap watch — no stale tick revives them', () => {
+  const h = harness();
+  deliver(h, 0, 0); // live: one subscription, one pending gap watch
+  assert.equal(h.locationPort.activeSubscriptions(), 1);
+  assert.equal(h.clock.pending(), 1);
+  assert.ok(h.orchestrator.pauseSession());
+  assert.equal(h.locationPort.activeSubscriptions(), 0); // 11 §4.2: the subscription goes
+  assert.equal(h.clock.pending(), 0); // …and the timer goes with it
+  assert.equal(h.location.currentMode(), 'paused');
+  const startsBefore = startCount(h.locationPort);
+  h.clock.fire(WATCHDOG_GAP_MS + 60_000); // the stale tick and the whole 1/2/4/8 s backoff fire here
+  assert.equal(startCount(h.locationPort), startsBefore, 'a stale gap-watch tick resubscribed after Pause');
+  deliver(h, 0, 0); // a fix of the pre-Pause generation reaches a stopped subscription
+  assert.equal(queuedStop(live(h)), null); // and never enters the engine
+  assert.deepEqual(h.locationPort.violations, []);
+});
+
+test('G20.42: Resume re-arms exactly one fresh subscription with its gap watch', () => {
+  const h = harness();
+  deliver(h, 0, 0);
+  h.orchestrator.pauseSession();
+  const startsBefore = startCount(h.locationPort);
+  const asksBefore = h.locationPort.permissionRequests.length;
+  assert.ok(h.orchestrator.resumeSession());
+  assert.equal(startCount(h.locationPort) - startsBefore, 1, 'Resume must hold exactly one subscription');
+  assert.equal(h.locationPort.activeSubscriptions(), 1);
+  assert.equal(h.clock.pending(), 1); // the gap watch is re-armed with the subscription
+  // 09 §9: every transition into an armed mode asks exactly one question —
+  // the walk's re-arm asks the background one.
+  assert.equal(h.locationPort.permissionRequests.length - asksBefore, 1);
+  assert.equal(h.locationPort.permissionRequests[h.locationPort.permissionRequests.length - 1]?.scope, 'background');
+  assert.deepEqual(h.locationPort.violations, []);
+});
+
+test('G20.42: End releases the subscription, the window and the gap watch — nothing revives them', () => {
+  const h = harness();
+  deliver(h, 0, 0);
+  assert.ok(h.orchestrator.end());
+  assert.equal(h.locationPort.activeSubscriptions(), 0); // 19 §4.3: End releases the subscription
+  assert.equal(h.clock.pending(), 0);
+  assert.equal(h.location.currentMode(), 'idle');
+  assert.deepEqual(h.locationPort.regions, []); // the window cleared with the walk
+  const startsBefore = startCount(h.locationPort);
+  h.clock.fire(WATCHDOG_GAP_MS + 60_000);
+  assert.equal(startCount(h.locationPort), startsBefore, 'a stale tick resubscribed after End');
+  deliver(h, 0, 0); // a fix of the stopped generation changes nothing in the engine
+  assert.equal(h.orchestrator.state.phase, 'Ended');
+  assert.equal(h.orchestrator.state.lastFix?.at, 0); // the mirror keeps the pre-End fix — no fresh one arrived
+  assert.deepEqual(h.locationPort.violations, []);
+});
+
+test('G20.42: a full Pause/Resume/End cycle never holds two subscriptions', () => {
+  const h = harness();
+  deliver(h, 0, 0);
+  h.orchestrator.pauseSession();
+  h.orchestrator.resumeSession();
+  deliver(h, 0.0004, 0);
+  h.orchestrator.end();
+  // The fake flags `start N while subscriptions M still active` — the cycle
+  // must run the one subscription down and up again without overlap.
+  assert.deepEqual(h.locationPort.violations, [], 'a second concurrent subscription appeared');
 });

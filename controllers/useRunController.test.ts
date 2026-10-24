@@ -1590,3 +1590,50 @@ test('G23.04-P2: ended rows preserve story order, exclude heard/locked and keep 
   ]);
   assert.deepEqual(missedStoryRows({ ...ended, heard: ['story-b', 'story-e', 'story-additional'] }), []);
 });
+
+// --- G20.42 (#822): the run surface's re-entry paths never disturb GPS ownership
+//
+// Back on the Run screen is pure navigation: the live walk keeps its
+// subscription and the re-entry path (recover()) on a controller that already
+// owns a session is a no-op. After End the same re-entry must restore nothing
+// and re-arm nothing — a finished row is history, not a revival source.
+
+test('G20.42: Back from a live walk keeps the subscription — recover() on the owning controller is a no-op', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  const sessionId = okStart(await w.store.getState().start());
+  fix(w, 0, 0); // the walk's own subscription is live
+  assert.equal(w.locationPort.activeSubscriptions(), 1);
+  const startsBefore = w.locationPort.commands.filter((command) => command.startsWith('start ')).length;
+  await w.store.getState().recover(); // the re-entry the run surface drives
+  assert.equal(live(w).sessionId, sessionId); // the same session, no churn
+  assert.equal(
+    w.locationPort.commands.filter((command) => command.startsWith('start ')).length,
+    startsBefore,
+    'the re-entry armed a second subscription',
+  );
+  assert.equal(w.locationPort.activeSubscriptions(), 1); // exactly the walk's one
+});
+
+test('G20.42: after End, recover() restores nothing and re-arms nothing', async (t) => {
+  const w = world();
+  t.after(w.discardPackage);
+  const sessionId = okStart(await w.store.getState().start());
+  fix(w, 0, 0);
+  w.store.getState().end();
+  assert.equal(w.locationPort.activeSubscriptions(), 0);
+  const startsBefore = w.locationPort.commands.filter((command) => command.startsWith('start ')).length;
+  await w.store.getState().recover(); // the Back-after-End re-entry
+  // The same controller keeps its honest Ended mirror; a fresh controller
+  // (the restart path) would find nothing live to restore — the finished row
+  // is history for both (criterion 4 of the restart recovery).
+  assert.equal(w.store.getState().run.phase, 'Ended');
+  assert.equal(row(w, sessionId)?.state, 'finished'); // the row stays history
+  assert.equal(
+    w.locationPort.commands.filter((command) => command.startsWith('start ')).length,
+    startsBefore,
+    'the re-entry after End armed the GPS again',
+  );
+  assert.equal(w.locationPort.activeSubscriptions(), 0);
+  assert.deepEqual(w.wakelockCalls.slice(-1), ['release']); // 11 §6: no wakelock revival
+});

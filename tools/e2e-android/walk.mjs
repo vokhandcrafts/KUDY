@@ -134,7 +134,7 @@ export async function locationListeners(driver) {
   return access.stdout.split(/\r?\n/).filter((line) => /\(running\)/.test(line));
 }
 
-async function waitForLocationListeners(driver, present) {
+export async function waitForLocationListeners(driver, present) {
   const deadline = Date.now() + SHORT_MS;
   for (;;) {
     const lines = await locationListeners(driver);
@@ -153,7 +153,7 @@ export async function backToExplore(driver) {
   await driver.waitFor({ testID: 'screen-Explore' }, { timeoutMs: SHORT_MS });
 }
 
-function sessionRow(nodes) {
+export function sessionRow(nodes) {
   const rows = nodes.filter((node) => node.resourceId.startsWith('my-session-') &&
     !node.resourceId.startsWith('my-session-locale-'));
   assert.equal(rows.length, 1, `expected one live/history row, found ${rows.length}`);

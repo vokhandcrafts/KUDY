@@ -65,6 +65,12 @@ class ManualClock {
     };
   }
 
+  // G20.42 (#822): the walk owns its timer with its subscription — the tests
+  // below read how many callbacks are still scheduled.
+  pending(): number {
+    return this.scheduled.length;
+  }
+
   advance(ms: number): void {
     const limit = this.nowMs + ms;
     for (;;) {
@@ -606,5 +612,50 @@ test('G20.04: a release of the same handler registered twice does not kill the l
   releaseFirst(); // the FIRST registration's release
   h.port.emitFix(h.currentSub(), FIRST_FIX);
   assert.deepEqual(fixes, [FIRST_FIX]); // the surviving registration still delivers
+  h.assertClean();
+});
+
+// --- G20.42 (#822): the walk owns its gap-watch timer with its subscription ---
+// The matrix of the issue: Pause leaves no walk-owned subscription AND no
+// walk-owned timer; Resume holds exactly one of both; End releases them; a
+// stale tick of a released timer must never resubscribe (the revival path
+// would run onGapWatch → recoveryStep → startSubscription after the disarm).
+
+test('G20.42: a disarm cancels the pending gap watch — a stale tick never resubscribes', () => {
+  const h = makeService();
+  h.arm();
+  h.port.emitFix(h.currentSub(), FIRST_FIX); // live: one subscription, one pending gap watch
+  assert.equal(h.clock.pending(), 1);
+  h.service.setMode('paused'); // the walk's Pause (11 §4.2) — the walk releases the timer too
+  assert.equal(h.port.activeSubscriptions(), 0);
+  assert.equal(h.clock.pending(), 0);
+  const startsBefore = h.port.commands.filter((command) => command.startsWith('start ')).length;
+  h.clock.advance(WATCHDOG_GAP_MS + 60_000); // the stale tick and the whole 1/2/4/8 s backoff fire here
+  assert.equal(
+    h.port.commands.filter((command) => command.startsWith('start ')).length,
+    startsBefore,
+    'a stale gap-watch tick resubscribed after the disarm',
+  );
+  assert.deepEqual(statusState(h.service.status()), 'idle');
+  h.assertClean();
+});
+
+test('G20.42: resume re-arms exactly one fresh subscription with its gap watch', () => {
+  const h = makeService();
+  h.arm();
+  h.port.emitFix(h.currentSub(), FIRST_FIX);
+  h.service.setMode('paused');
+  const startsBefore = h.port.commands.filter((command) => command.startsWith('start ')).length;
+  const asksBefore = h.port.permissionRequests.length;
+  h.service.setMode('active-guide'); // the walk's Resume
+  assert.equal(h.port.commands.filter((command) => command.startsWith('start ')).length - startsBefore, 1);
+  assert.equal(h.port.activeSubscriptions(), 1);
+  assert.equal(h.clock.pending(), 1);
+  // 09 §9: every transition into an armed mode asks exactly one permission
+  // question — a subscription inherited from no one starts here.
+  assert.equal(h.port.permissionRequests.length - asksBefore, 1);
+  assert.equal(h.port.permissionRequests[h.port.permissionRequests.length - 1]?.scope, 'background');
+  h.port.emitFix(h.currentSub(), SECOND_FIX); // the fresh generation feeds the service
+  assert.deepEqual(statusState(h.service.status()), 'live');
   h.assertClean();
 });
