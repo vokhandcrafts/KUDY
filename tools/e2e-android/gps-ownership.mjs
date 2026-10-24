@@ -31,7 +31,7 @@ const POLL_MS = 300;
 const FREE = 'e2e-free-guide';
 const RECOVERY_WINDOW_MS = 22000;
 
-// The synthetic walk origin of the walk suite (the same Gdańsk block).
+// The synthetic walk origin of the walk suite (the same Minsk block).
 const WALK_LAT = 53.9;
 const WALK_LNG = 27.56;
 
