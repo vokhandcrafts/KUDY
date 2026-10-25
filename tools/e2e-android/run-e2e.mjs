@@ -37,6 +37,7 @@ import { DriverError, E2eDriver, findNode, listBootedDevices, parseDump, resolve
 import { UI_LOCALES } from '../../contracts/ui-locales.ts';
 import { runLocalesSuite } from './locales.mjs';
 import { runWalkSuite } from './walk.mjs';
+import { runGpsOwnershipSuite } from './gps-ownership.mjs';
 import { runRecoverySuite } from './recovery.mjs';
 import { runDiscoverySuite } from './discovery.mjs';
 
@@ -415,8 +416,8 @@ async function main() {
     return index === -1 ? null : argv[index + 1];
   };
   const suite = argValue('--suite') ?? 'smoke';
-  if (!['smoke', 'locales', 'walk', 'recovery', 'discovery'].includes(suite)) {
-    console.error(`unknown suite: ${suite} (known suites: smoke, locales, walk, recovery, discovery)`);
+  if (!['smoke', 'locales', 'walk', 'recovery', 'discovery', 'gps'].includes(suite)) {
+    console.error(`unknown suite: ${suite} (known suites: smoke, locales, walk, recovery, discovery, gps)`);
     process.exit(2);
   }
   const only = argValue('--only');
@@ -438,7 +439,7 @@ async function main() {
     process.exit(0);
   }
   const { adbPath, serial, apkPath, skipInstall } = target;
-  if ((suite === 'locales' || suite === 'walk' || suite === 'recovery' || suite === 'discovery') && !/^emulator-\d+$/.test(serial)) {
+  if ((suite === 'locales' || suite === 'walk' || suite === 'recovery' || suite === 'discovery' || suite === 'gps') && !/^emulator-\d+$/.test(serial)) {
     console.log(`SKIP e2e:android ${suite} — serial ${serial} is not an emulator`);
     process.exit(0);
   }
@@ -449,7 +450,7 @@ async function main() {
   // The locale and walk suites download synthetic guides. A prior run can leave a
   // package directory in the emulator, making the next download fail before
   // any locale assertion. This runner accepts emulator serials only.
-  if ((suite === 'locales' || suite === 'walk' || suite === 'recovery' || suite === 'discovery') && await driver.isPackageInstalled(APP_PACKAGE)) {
+  if ((suite === 'locales' || suite === 'walk' || suite === 'recovery' || suite === 'discovery' || suite === 'gps') && await driver.isPackageInstalled(APP_PACKAGE)) {
     info(`clearing ${APP_PACKAGE} test data on ${serial} before ${suite} cases`);
     const cleared = await driver.exec(['shell', 'pm', 'clear', APP_PACKAGE]);
     if (cleared.stdout.trim() !== 'Success') throw new Error(`pm clear ${APP_PACKAGE} failed: ${cleared.stdout.trim()}`);
@@ -470,7 +471,7 @@ async function main() {
   let metro = null;
   let origin = null;
   try {
-    if (suite === 'locales' || suite === 'walk' || suite === 'recovery' || suite === 'discovery') {
+    if (suite === 'locales' || suite === 'walk' || suite === 'recovery' || suite === 'discovery' || suite === 'gps') {
       if (only !== null) info(`running only locale case: ${only}`);
       const originLogPath = path.join(runDir, `origin-${suite}.log`);
       origin = await startOriginServer({ port: originPort, logPath: originLogPath, outDir: path.join(runDir, 'origin'),
@@ -485,6 +486,7 @@ async function main() {
       await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
       if (suite === 'locales') await runLocalesSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, only });
       else if (suite === 'walk') await runWalkSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart, originLogPath });
+      else if (suite === 'gps') await runGpsOwnershipSuite({ driver, url: devClientUrl(metroPort), runCase, coldStart });
       else if (suite === 'recovery') await runRecoverySuite({
         driver, url: devClientUrl(metroPort), runCase, coldStart, appPackage: APP_PACKAGE,
         clearOriginFault: async () => {
