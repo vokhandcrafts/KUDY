@@ -30,7 +30,7 @@ production-экранаў G06.01+ і для прататыпа G06.08: асоб�
 ## 2. Колеры
 
 Адзіны акцэнт для ўсіх галоўных дзеянняў (кнопкі, націснутыя чыпы, фокус,
-прагрэс). Тэкст на акцэнце і на маркерных заливках —
+прагрэс). Тэкст на акцэнце і на маркерных заліўках —
 `color.accent-ink`; у светлай зоне картаграфіі цёмнай тэмы літара маркера
 бярэ светлае значэнне гэтага токена. Маркеры мапы фарбуюцца строга па
 стане кропкі; збоі
@@ -191,7 +191,7 @@ Peek/Half/Full (09 §6.5, `11` §3.2). Peek-бар: радок now-playing (ул
 ### Маркеры мапы і кропка пазіцыі
 
 Адзінка маркера — stop; станы і іх умовы — даслоўна ADR G01.01 §4.5:
-`locked` / `playing` / `played` / `available` / `pending`. Візуал: заливка
+`locked` / `playing` / `played` / `available` / `pending`. Візуал: заліўка
 па стане, белая літара першай літары стану, белы абвод 2px, цень. Стан чытаецца
 **не толькі па колеры**: літара, `aria-label` і `title` маркера нясуць назву
 стану. Тап па маркеры адкрывае прэв'ю, ніколі не гук. Кропка пазіцыі —
@@ -277,7 +277,7 @@ mascot-only (a11y-плашка `screens.md`).
     "color.ink":              { "value": "#22262b", "use": "асноўны тэкст" },
     "color.muted":            { "value": "#6b7280", "use": "другарадны тэкст і подпісы" },
     "color.accent":           { "value": "#1d6b4f", "use": "галоўныя дзеянні, націснутыя чыпы, фокус, запаўненне прагрэсу" },
-    "color.accent-ink":       { "value": "#ffffff", "use": "тэкст і гліфы на акцэнце і на маркерных заливках" },
+    "color.accent-ink":       { "value": "#ffffff", "use": "тэкст і гліфы на акцэнце і на маркерных заліўках" },
     "color.card":             { "value": "#ffffff", "use": "фон картак, кнопак, панэлі Run і верхняй стужкі" },
     "color.line":             { "value": "#d8d2c6", "use": "межы картак, падзяляльнікі табліц, трэк прагрэсу" },
     "color.shelf.accent":     { "value": "#154f3a", "use": "полка вылепленай primary-кнопкі — цяменшае нацяжэнне color.accent" },
@@ -439,10 +439,10 @@ mascot-only (a11y-плашка `screens.md`).
     "--kudy-muted":      { "token": "color.muted" },
     "--kudy-accent":     { "token": "color.accent" },
     "--kudy-accent-ink": { "token": "color.accent-ink" },
-    "--kudy-locked":     { "token": "color.marker.locked", "override": true, "draftValue": "#9aa2ab", "reason": "белая літара стану на маркеры (2.58:1) і заливка на вуліцы (2.05:1) ніжэй за плашкі → 5.03:1 і 3.98:1" },
+    "--kudy-locked":     { "token": "color.marker.locked", "override": true, "draftValue": "#9aa2ab", "reason": "белая літара стану на маркеры (2.58:1) і заліўка на вуліцы (2.05:1) ніжэй за плашкі → 5.03:1 і 3.98:1" },
     "--kudy-played":     { "token": "color.marker.played" },
-    "--kudy-available":  { "token": "color.marker.available", "override": true, "draftValue": "#b07d1f", "reason": "літара на маркеры (3.62:1) і заливка на вуліцы (2.87:1) ніжэй за плашкі → 5.53:1 і 4.38:1" },
-    "--kudy-pending":    { "token": "color.marker.pending", "override": true, "draftValue": "#7c8691", "reason": "літара на маркеры (3.70:1) і заливка на вуліцы (2.93:1) ніжэй за плашкі → 5.31:1 і 4.21:1" },
+    "--kudy-available":  { "token": "color.marker.available", "override": true, "draftValue": "#b07d1f", "reason": "літара на маркеры (3.62:1) і заліўка на вуліцы (2.87:1) ніжэй за плашкі → 5.53:1 і 4.38:1" },
+    "--kudy-pending":    { "token": "color.marker.pending", "override": true, "draftValue": "#7c8691", "reason": "літара на маркеры (3.70:1) і заліўка на вуліцы (2.93:1) ніжэй за плашкі → 5.31:1 і 4.21:1" },
     "--kudy-playing":    { "token": "color.marker.playing" },
     "--kudy-warn":       { "token": "color.warn" },
     "--kudy-line":       { "token": "color.line" },
