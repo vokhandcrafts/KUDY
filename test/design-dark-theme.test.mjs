@@ -107,7 +107,7 @@ test('the zone rule exists because partial theming breaks the marker letter', ()
     'if values change so it passes, the cartography zone rule can be revisited');
 });
 
-test('tier-2 dark cartography candidates hold the thresholds without entering production', () => {
+test('tier-2 dark cartography candidates hold the thresholds', () => {
   const tier2 = zone.tier2Proposal;
   assert.equal(Object.keys(tier2).length, zoneTokens.size + 1,
     'tier-2 lists a candidate per zone token plus the marker letter');

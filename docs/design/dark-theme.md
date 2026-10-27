@@ -321,7 +321,7 @@ playing #e5735a, available #dcaa4e, pending #9aa8b1, locked #8b99a2; літар�
 | Сцэнары 7–9 (прэв'ю, дыялогі, станы) у абедзвюх тэмах | required | Tier-2 | not-run |
 | Сцэнары 10–11 (вялікі шрыфт 1.25×, screen reader) | required | Tier-2 | not-run |
 | Сцэнары 12 (вэб-межа) | required | Tier-2 | not-run |
-| Кантрастны гард абедзвюх тэм (`npm test`) | CI | CI | уваходзіць у PR #860 |
+| Кантрастны гард абедзвюх тэм (`npm test`) | CI | CI | уваходзіць у PR #867 (#860) |
 | iOS: тэма, статус-бар, material-транзіцыі | Tier-2 | Tier-2 | not-run |
 
 Падтрыманыя платформы MVP: Android — required; iOS — Tier-2 да рашэння рэлізу
