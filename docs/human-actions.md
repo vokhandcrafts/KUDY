@@ -30,7 +30,7 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/850 · Issue: https://github.com/
 PR: https://github.com/vokhandcrafts/KUDY/pull/779 · Issue: [#764](https://github.com/vokhandcrafts/KUDY/issues/764)
 
 ### 2026-10-19 — выберы напрамак заставы KUDY
-Што зрабіць: параўнай [дзесяць мабільных напрамкаў](design/brand/outputs/brand-splash-directions-2026-10-19/all-ten.png) і [іх тлумачэнні](design/brand/outputs/brand-splash-directions-2026-10-19/README.md) у PR #802. Назаві адзін або некалькі для развіцця ў пару «чаканне → Explore»; асобна вызначы іконку B05 і тэксты B06. Ранейшыя заставы з асобным драконам і мясцовай панарамай адхіленыя.
+Што зрабіць: параўнай [дзесяць мабільных напрамкаў](design/brand/outputs/brand-splash-directions-2026-10-19/all-ten.png) і [іх тлумачэнні](design/brand/outputs/brand-splash-directions-2026-10-19/README.md) у PR #802. Назаві адзін або некалькі для развіцця ў пару «чаканне → Explore»; асобна вызначы тэксты B06. Ранейшыя заставы з асобным драконам і мясцовай панарамай адхіленыя.
 PR: https://github.com/vokhandcrafts/KUDY/pull/802
 
 ### 2026-10-17 — правер Android-задачы і выпуск
@@ -71,9 +71,6 @@ PR: https://github.com/vokhandcrafts/KUDY/pull/720 (issue #692)
 ### 2026-10-11 — дошкі: вырашы лёс старога клейма #695
 Што зрабіць: Codex узяў #695 (G24.04) 10.10, але ў issue і worktree бяз артэфактаў, PR і каментароў больш за 27 гадзін. Або знімі `agent:running` і верні задачу ў `agent:ready`, або дамовіся з Codex-сэсіяй пра працяг.
 Issue: https://github.com/vokhandcrafts/KUDY/issues/695
-### 2026-10-11 — G24.02: выберы варыянт іконкі і дай здымкі фігуркі
-Што зрабіць: паглядзі дошку параўнання ў выніку G24.02 і пакінь выбар каментаром (I1 узнятая галава — рэкамендацыя; I3 па-над колам; I3-к з кампаснымі дзелкамі; поўны сілуэт з крыламі). Затым зрабі 5 здымкаў фігуркі са спісу ў тым жа выніку і перадай іх для праверкі падабенства. Начистовой асет для #429 робіцца толькі пасля выбару і фота.
-PR: https://github.com/vokhandcrafts/KUDY/pull/731 — issue #693 (закрыты мержам)
 
 ### 2026-10-09 — G21.42: змержуй дэльту рашэння і ўнясі Blocked-by у #669 і #670
 Што зрабіць: змержуй PR — ён запісвае твой адказ на квіз #623 і закрывае issue. Потым унясі ў целы #669 і #670 радкі `Blocked-by: #711` для бачных частак; дакладны тэкст у `docs/agent-tasks/results/G21.42.md`. Токен сесіі атрымаў 403 на абнаўленне issue. Пасля мержу здымі з #623 пазнаку `agent:blocked`.
