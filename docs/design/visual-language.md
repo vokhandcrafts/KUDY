@@ -30,8 +30,10 @@ production-экранаў G06.01+ і для прататыпа G06.08: асоб�
 ## 2. Колеры
 
 Адзіны акцэнт для ўсіх галоўных дзеянняў (кнопкі, націснутыя чыпы, фокус,
-прагрэс). Тэкст на акцэнце і на маркерных заливках — заўсёды
-`color.accent-ink`. Маркеры мапы фарбуюцца строга па стане кропкі; збоі
+прагрэс). Тэкст на акцэнце і на маркерных заліўках —
+`color.accent-ink`; у светлай зоне картаграфіі цёмнай тэмы літара маркера
+бярэ светлае значэнне гэтага токена. Маркеры мапы фарбуюцца строга па
+стане кропкі; збоі
 маюць сваю пару фон/межа (notice — папярэджанне, error — збой). Пазнакі
 `paid/free/mixed/lock` адрозніваюцца фонам, тэкст пазнакі — асноўны
 `color.ink`.
@@ -47,12 +49,27 @@ production-экранаў G06.01+ і для прататыпа G06.08: асоб�
 нязменнай.
 
 Зярно паперы (`texture.paper-grain`) — згенераваны тайлавы асет
-непразрыстасцю 4–5% паверх `color.paper`; значэнне паперы не мяняецца,
-таму ўсе кантрастныя пары застаюцца вымеранымі. Дазволенае месца — фон
+непразрыстасцю 4–5% паверх `color.paper`; сам тайл не падмяняе токен
+паперы. У цёмнай тэме зярно светлае на цёмным фоне. Дазволенае месца — фон
 спакойных экранаў Explore і My KUDY. Забароненыя месцы: панэль Run,
 мапа і ўсякае размяшчэнне пад шчыльным тэкстам (спісы, табліцы,
 доўгія апісанні). Поўны спіс дазволенага і забароненага — у машынным
 блоку (`paperGrain`).
+
+### Цёмная тэма MVP — рашэнне ўладальніка 2026-10-27
+
+Уладальнік [прыняў цёмную палітру і кантрастныя пары](https://github.com/vokhandcrafts/KUDY/issues/860#issuecomment-6449790474)
+са [спецыфікацыі](dark-theme.md) §4–5. Светлыя значэнні застаюцца ў `tokens`,
+цёмныя — у `darkTheme.tokens` машыннага блока ніжэй. Уся зона картаграфіі
+(`darkTheme.lightCartographyTokens`) застаецца светлай у абедзвюх тэмах;
+літара маркера выкарыстоўвае светлае `color.accent-ink`. Пары
+`contrastPairs` правяраюцца ў абедзвюх тэмах, з гэтым выключэннем для мапы.
+Змена тэмы не змяняе кантэнтныя выявы і не перазапускае Run, GPS або аўдыё.
+
+Уладальнік тым жа рашэннем пакінуў светлую брэндавую заставу ў MVP нават
+пры цёмнай тэме (`darkTheme.splash = light`). Гэта свядомае абмежаванне,
+не падстава перафарбоўваць прыняты асет #429. Runtime-рэалізацыя і
+прыладавая прыёмка належаць #436; ручны выбар — #798.
 
 ## 3. Шрыфты і правы на выкарыстанне
 
@@ -174,7 +191,7 @@ Peek/Half/Full (09 §6.5, `11` §3.2). Peek-бар: радок now-playing (ул
 ### Маркеры мапы і кропка пазіцыі
 
 Адзінка маркера — stop; станы і іх умовы — даслоўна ADR G01.01 §4.5:
-`locked` / `playing` / `played` / `available` / `pending`. Візуал: заливка
+`locked` / `playing` / `played` / `available` / `pending`. Візуал: заліўка
 па стане, белая літара першай літары стану, белы абвод 2px, цень. Стан чытаецца
 **не толькі па колеры**: літара, `aria-label` і `title` маркера нясуць назву
 стану. Тап па маркеры адкрывае прэв'ю, ніколі не гук. Кропка пазіцыі —
@@ -260,7 +277,7 @@ mascot-only (a11y-плашка `screens.md`).
     "color.ink":              { "value": "#22262b", "use": "асноўны тэкст" },
     "color.muted":            { "value": "#6b7280", "use": "другарадны тэкст і подпісы" },
     "color.accent":           { "value": "#1d6b4f", "use": "галоўныя дзеянні, націснутыя чыпы, фокус, запаўненне прагрэсу" },
-    "color.accent-ink":       { "value": "#ffffff", "use": "тэкст і гліфы на акцэнце і на маркерных заливках" },
+    "color.accent-ink":       { "value": "#ffffff", "use": "тэкст і гліфы на акцэнце і на маркерных заліўках" },
     "color.card":             { "value": "#ffffff", "use": "фон картак, кнопак, панэлі Run і верхняй стужкі" },
     "color.line":             { "value": "#d8d2c6", "use": "межы картак, падзяляльнікі табліц, трэк прагрэсу" },
     "color.shelf.accent":     { "value": "#154f3a", "use": "полка вылепленай primary-кнопкі — цяменшае нацяжэнне color.accent" },
@@ -317,6 +334,48 @@ mascot-only (a11y-плашка `screens.md`).
     "texture.paper-grain":    { "value": "згенераваны тайлавы асет, непразрыстасць 4–5% паверх color.paper", "use": "фон спакойных экранаў (Explore, My KUDY); дазволеныя і забароненыя месцы — у paperGrain" },
     "dialog.max-width":       { "value": "400px", "use": "максімальная шырыня дыялога" }
   },
+  "darkTheme": {
+    "ownerDecision": "https://github.com/vokhandcrafts/KUDY/issues/860#issuecomment-6449790474",
+    "tokens": {
+      "color.paper": "#171d1c",
+      "color.card": "#232c29",
+      "color.ink": "#f2f1e9",
+      "color.muted": "#c4d0ca",
+      "color.line": "#45534c",
+      "color.accent": "#80d4ad",
+      "color.accent-ink": "#0d2a1e",
+      "color.shelf.accent": "#65cb9c",
+      "color.shelf.line": "#35403a",
+      "color.disabled-ink": "#9aa8a1",
+      "color.disabled-line": "#6d7c72",
+      "color.notice.bg": "#3a3119",
+      "color.notice.border": "#7d6b3a",
+      "color.error.bg": "#3a201b",
+      "color.error.border": "#8a4a42",
+      "color.hint.bg": "#1c2833",
+      "color.hint.border": "#3e5871",
+      "color.moment.bg": "#342a19",
+      "color.moment.border": "#6e5c36",
+      "color.badge.paid": "#493b23",
+      "color.badge.free": "#263b31",
+      "color.badge.mixed": "#332c47",
+      "color.badge.lock": "#2b343b",
+      "color.warn": "#ef8a72",
+      "color.note": "#33301d"
+    },
+    "lightCartographyTokens": [
+      "color.map",
+      "color.street",
+      "color.person",
+      "color.marker.played",
+      "color.marker.playing",
+      "color.marker.available",
+      "color.marker.pending",
+      "color.marker.locked"
+    ],
+    "lightMarkerLetterToken": "color.accent-ink",
+    "splash": "light"
+  },
   "cardKinds": ["base", "hint", "moment"],
   "markers": ["locked", "playing", "played", "available", "pending"],
   "stateFamilies": ["Пусты", "Offline", "Denied", "Error"],
@@ -365,7 +424,14 @@ mascot-only (a11y-плашка `screens.md`).
     { "fg": "color.disabled-ink", "bg": "color.paper", "min": 4.5 },
     { "fg": "color.disabled-ink", "bg": "color.card", "min": 4.5 },
     { "fg": "color.disabled-line", "bg": "color.paper", "min": 3 },
-    { "fg": "color.disabled-line", "bg": "color.card", "min": 3 }
+    { "fg": "color.disabled-line", "bg": "color.card", "min": 3 },
+    { "fg": "color.ink", "bg": "color.badge.paid", "min": 4.5 },
+    { "fg": "color.ink", "bg": "color.badge.free", "min": 4.5 },
+    { "fg": "color.ink", "bg": "color.badge.mixed", "min": 4.5 },
+    { "fg": "color.ink", "bg": "color.badge.lock", "min": 4.5 },
+    { "fg": "color.person", "bg": "color.street", "min": 3 },
+    { "fg": "color.warn", "bg": "color.paper", "min": 4.5 },
+    { "fg": "color.warn", "bg": "color.card", "min": 4.5 }
   ],
   "supersession": {
     "--kudy-paper":      { "token": "color.paper" },
@@ -373,10 +439,10 @@ mascot-only (a11y-плашка `screens.md`).
     "--kudy-muted":      { "token": "color.muted" },
     "--kudy-accent":     { "token": "color.accent" },
     "--kudy-accent-ink": { "token": "color.accent-ink" },
-    "--kudy-locked":     { "token": "color.marker.locked", "override": true, "draftValue": "#9aa2ab", "reason": "белая літара стану на маркеры (2.58:1) і заливка на вуліцы (2.05:1) ніжэй за плашкі → 5.03:1 і 3.98:1" },
+    "--kudy-locked":     { "token": "color.marker.locked", "override": true, "draftValue": "#9aa2ab", "reason": "белая літара стану на маркеры (2.58:1) і заліўка на вуліцы (2.05:1) ніжэй за плашкі → 5.03:1 і 3.98:1" },
     "--kudy-played":     { "token": "color.marker.played" },
-    "--kudy-available":  { "token": "color.marker.available", "override": true, "draftValue": "#b07d1f", "reason": "літара на маркеры (3.62:1) і заливка на вуліцы (2.87:1) ніжэй за плашкі → 5.53:1 і 4.38:1" },
-    "--kudy-pending":    { "token": "color.marker.pending", "override": true, "draftValue": "#7c8691", "reason": "літара на маркеры (3.70:1) і заливка на вуліцы (2.93:1) ніжэй за плашкі → 5.31:1 і 4.21:1" },
+    "--kudy-available":  { "token": "color.marker.available", "override": true, "draftValue": "#b07d1f", "reason": "літара на маркеры (3.62:1) і заліўка на вуліцы (2.87:1) ніжэй за плашкі → 5.53:1 і 4.38:1" },
+    "--kudy-pending":    { "token": "color.marker.pending", "override": true, "draftValue": "#7c8691", "reason": "літара на маркеры (3.70:1) і заліўка на вуліцы (2.93:1) ніжэй за плашкі → 5.31:1 і 4.21:1" },
     "--kudy-playing":    { "token": "color.marker.playing" },
     "--kudy-warn":       { "token": "color.warn" },
     "--kudy-line":       { "token": "color.line" },
