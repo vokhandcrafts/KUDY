@@ -46,3 +46,6 @@ authoring/**/review/*.review.md eol=lf
 components/*-strings.generated.ts eol=lf
 controllers/**/*-strings.generated.ts eol=lf
 web/lib/i18n/??.ts eol=lf
+
+# Issue 429: the brand icon bytes are checksummed against the owner package SHA256SUMS.
+assets/kudy-icon/** -text

@@ -55,4 +55,9 @@ test('demo build keeps its own icon and does not inherit the production adaptive
   assert.equal(demo.android.icon, './assets/demo-icon.png');
   assert.equal(demo.android.adaptiveIcon, undefined);
   assert.equal(demo.ios.icon, './assets/demo-icon.png');
+  assert.deepEqual(
+    demo.splash,
+    expo.splash,
+    'demo intentionally inherits the brand splash',
+  );
 });
