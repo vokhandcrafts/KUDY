@@ -23,7 +23,8 @@
           "audio",
           "location"
         ]
-      }
+      },
+      "icon": "./assets/kudy-icon/icon.png"
     },
     "android": {
       "package": "by.kudy.app",
@@ -44,7 +45,13 @@
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT",
         "android.permission.ACCESS_WIFI_STATE"
-      ]
+      ],
+      "icon": "./assets/kudy-icon/icon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/kudy-icon/android-adaptive-foreground.png",
+        "backgroundImage": "./assets/kudy-icon/android-adaptive-background.png",
+        "backgroundColor": "#F5EDDF"
+      }
     },
     "plugins": [
       [
@@ -68,6 +75,12 @@
       "expo-font",
       "expo-sqlite",
       "./tools/android-build/with-playback-only.cjs"
-    ]
+    ],
+    "icon": "./assets/kudy-icon/icon.png",
+    "splash": {
+      "image": "./assets/kudy-icon/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F5EDDF"
+    }
   }
 }

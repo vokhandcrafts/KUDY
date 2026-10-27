@@ -8,7 +8,7 @@ module.exports = {
     name: 'KUDY Demo',
     slug: 'kudy-demo',
     icon: './assets/demo-icon.png',
-    android: { ...expo.android, package: 'by.kudy.app.demo' },
-    ios: { ...expo.ios, bundleIdentifier: 'by.kudy.app.demo' },
+    android: { ...expo.android, package: 'by.kudy.app.demo', icon: './assets/demo-icon.png', adaptiveIcon: undefined },
+    ios: { ...expo.ios, bundleIdentifier: 'by.kudy.app.demo', icon: './assets/demo-icon.png' },
   } : expo,
 };
