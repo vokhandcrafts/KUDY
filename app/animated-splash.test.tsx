@@ -88,3 +88,19 @@ test("the side move happens during the blink; the mouth moves before KUDY appear
   expect(brandVisible()).toBe(true);
   expect(screen.queryByTestId("screen-Explore")).toBeNull();
 });
+
+// On the emulator the word read "KUD": the brand Text mounted with the
+// system fallback while GolosText was still loading, and when the face
+// arrived Android re-wrapped the wider word inside the stale one-line box —
+// the Y fell onto a second line the view clipped. The full-width centered
+// line cannot re-wrap; reverting the brand style to content sizing must
+// fail here.
+test("the KUDY word is a full-width centered line, not a content-sized box", () => {
+  jest.useFakeTimers();
+  renderColdStart();
+
+  advance(6_000);
+  const style = flatStyle(screen.getByTestId("splash-brand"));
+  expect(style.width).toBe("100%");
+  expect(style.textAlign).toBe("center");
+});
