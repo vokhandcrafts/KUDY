@@ -1,0 +1,90 @@
+// Accepted working splash (2026-10-28): the cold-start route presents the
+// vector dragon before Explore. The same scene shows arriving paws, a blink
+// combined with a quick side move, an animated mouth, then the KUDY word.
+// The font is provisional and deliberately not pinned here.
+import { afterEach, expect, jest, test } from "@jest/globals";
+import { act } from "@testing-library/react-native";
+import { renderRouter, screen } from "expo-router/testing-library";
+import { Path } from "react-native-svg";
+
+import Explore from "./(tabs)/explore";
+import Index from "./index";
+import { createServices } from "../controllers/createServices";
+import { flatStyle, layoutWith } from "../test/render-helpers";
+
+function renderColdStart() {
+  renderRouter(
+    {
+      _layout: layoutWith(createServices({})),
+      index: Index,
+      "(tabs)/explore": Explore,
+    },
+    { initialUrl: "/" },
+  );
+}
+
+function advance(ms: number) {
+  act(() => jest.advanceTimersByTime(ms));
+}
+
+function svgProp(id: string, name: "transform" | "opacity" | "d") {
+  return screen.getByTestId(id).props[name] as unknown;
+}
+
+function brandVisible() {
+  const brand = screen.queryByTestId("splash-brand", { includeHiddenElements: true });
+  if (!brand) return false;
+  const style = flatStyle(brand);
+  return style.display !== "none" && (typeof style.opacity !== "number" || style.opacity > 0);
+}
+
+afterEach(() => {
+  jest.useRealTimers();
+  jest.restoreAllMocks();
+});
+
+test("cold start shows a vector dragon with arriving paws, then opens Explore after the scene", () => {
+  jest.useFakeTimers();
+  renderColdStart();
+
+  expect(screen.getByTestId("splash-scene")).toBeTruthy();
+  expect(screen.queryByTestId("screen-Explore")).toBeNull();
+  expect(screen.getByTestId("splash-head").findAllByType(Path).length).toBeGreaterThan(0);
+  expect(screen.getByTestId("splash-paw-left").findAllByType(Path).length).toBeGreaterThan(0);
+  expect(screen.getByTestId("splash-paw-right").findAllByType(Path).length).toBeGreaterThan(0);
+  expect(brandVisible()).toBe(false);
+
+  const firstLeftPaw = svgProp("splash-paw-left", "transform");
+  const firstRightPaw = svgProp("splash-paw-right", "transform");
+  advance(1_200);
+  expect(svgProp("splash-paw-left", "transform")).not.toEqual(firstLeftPaw);
+  expect(svgProp("splash-paw-right", "transform")).not.toEqual(firstRightPaw);
+  expect(screen.queryByTestId("screen-Explore")).toBeNull();
+
+  advance(5_900);
+  expect(screen.getByTestId("screen-Explore")).toBeTruthy();
+});
+
+test("the side move happens during the blink; the mouth moves before KUDY appears", () => {
+  jest.useFakeTimers();
+  renderColdStart();
+
+  advance(3_300);
+  const headBefore = svgProp("splash-head", "transform");
+  const eyesBefore = svgProp("splash-eyes", "opacity");
+  advance(350);
+  expect(svgProp("splash-head", "transform")).not.toEqual(headBefore);
+  expect(svgProp("splash-eyes", "opacity")).not.toEqual(eyesBefore);
+  expect(brandVisible()).toBe(false);
+
+  advance(250);
+  const mouthBefore = svgProp("splash-mouth", "d");
+  advance(550);
+  expect(svgProp("splash-mouth", "d")).not.toEqual(mouthBefore);
+  advance(750);
+  expect(brandVisible()).toBe(false);
+  advance(900);
+  expect(screen.getByText("KUDY")).toBeTruthy();
+  expect(brandVisible()).toBe(true);
+  expect(screen.queryByTestId("screen-Explore")).toBeNull();
+});
