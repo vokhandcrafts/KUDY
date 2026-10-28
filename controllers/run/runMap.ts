@@ -225,6 +225,9 @@ export interface RunMapStrings {
 
 // The refusal's rendered word: the known map, else the raw reason itself.
 export function runMapReason(reason: string, strings: RunMapStrings): string {
+  // #862: no live walk is an intentional, non-error state on a direct Run link.
+  // Reuse the existing localized next-step text rather than exposing a code.
+  if (reason === 'run#start-requires-preview') return strings.reasonText['switch-no-live-session'];
   return strings.reasonText[reason as keyof RunMapStrings['reasonText']] ?? reason;
 }
 
