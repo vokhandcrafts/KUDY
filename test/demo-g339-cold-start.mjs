@@ -1,6 +1,6 @@
 // Deterministic demo driver for issue #339: the app/ router purity verdict
 // (the same shared classifier the guard suite runs —
-// test/app-router-classifier.mjs) and the index redirect wiring. No
+// test/app-router-classifier.mjs) and the index route wiring. No
 // emulator, no server — the output block in
 // docs/demos/2026-09-27-g339-cold-start.md is captured from this.
 import { readFileSync } from 'node:fs';
@@ -19,5 +19,6 @@ console.log(
 );
 
 const index = readFileSync(join(appDir, 'index.tsx'), 'utf8');
-console.log(`cold start: index ${/Redirect/.test(index) ? 'Redirect' : 'MISSING'} -> ${/href="\/explore"/.test(index) ? '/explore' : 'MISSING'}`);
-console.log('components/: design-tokens, guide-card, guide-card.test, placeholder, walk-button');
+const scene = /<AnimatedSplash\s+elapsedMs=/.test(index);
+const handoff = /router\.replace\("\/explore"\)/.test(index);
+console.log(`cold start: index ${scene ? 'AnimatedSplash' : 'MISSING'} -> ${handoff ? '/explore' : 'MISSING'}`);
