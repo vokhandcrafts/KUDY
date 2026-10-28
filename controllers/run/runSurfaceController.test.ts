@@ -997,6 +997,7 @@ test('G07.05: the fresh Start carries the foreground-window hint ids into sessio
     },
     session: world.session,
     carryGuideHints: () => ['guide-near', 'guide-gone'],
+    approvedStart: true,
   });
   const state = await settled(store);
   assert.equal(state.status, 'ready');
