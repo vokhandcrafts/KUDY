@@ -14,7 +14,7 @@ test('Expo config carries the accepted brand icon, adaptive layers and splash', 
   assert.equal(expo.android.icon, './assets/kudy-icon/icon.png');
   assert.equal(
     expo.android.adaptiveIcon.foregroundImage,
-    './assets/kudy-icon/android-adaptive-foreground.png',
+    './assets/kudy-icon/android-adaptive-square-foreground.png',
   );
   assert.equal(
     expo.android.adaptiveIcon.backgroundImage,
@@ -24,6 +24,7 @@ test('Expo config carries the accepted brand icon, adaptive layers and splash', 
   assert.equal(expo.splash.image, './assets/kudy-icon/icon.png');
   assert.equal(expo.splash.resizeMode, 'contain');
   assert.equal(expo.splash.backgroundColor, '#F5EDDF');
+  assert.ok(expo.plugins.includes('./tools/android-build/with-shape-aware-icons.cjs'));
 });
 
 test('every configured brand asset file exists in the repository', () => {
@@ -32,6 +33,7 @@ test('every configured brand asset file exists in the repository', () => {
     expo.ios.icon,
     expo.android.icon,
     expo.android.adaptiveIcon.foregroundImage,
+    './assets/kudy-icon/android-adaptive-foreground.png',
     expo.android.adaptiveIcon.backgroundImage,
     expo.splash.image,
   ];
