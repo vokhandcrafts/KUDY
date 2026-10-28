@@ -114,6 +114,14 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   brand: {
+    // Full-width line with centered ink, never a content-sized box: Yoga
+    // measures the word at mount with the system fallback, and when
+    // GolosText arrives later Android re-wraps the wider face inside the
+    // stale one-line box — the Y fell onto a clipped second line and the
+    // word read «KUD». A screen-wide line cannot re-wrap, so the late face
+    // swap only re-centers the ink (app/animated-splash.test.tsx guards it).
+    width: "100%",
+    textAlign: "center",
     marginTop: 14,
     color: face,
     fontFamily: tokens.fontFamilyUiStrong,
