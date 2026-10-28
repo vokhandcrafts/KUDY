@@ -300,7 +300,8 @@ const settled = (store: ControllerStore<RunSurfaceState>): Promise<Exclude<RunSu
   });
 
 const openSurface = async (world: World, routeId = 'route-map') => {
-  const store = world.services.run?.create(routeId);
+  // These baseline scenarios start through the preview's approved handover.
+  const store = world.services.run?.create(routeId, { approvedStart: true });
   if (!store) throw new Error('the root constructed no run member');
   return { store, state: await settled(store) };
 };
@@ -554,7 +555,7 @@ test('G06.04 criterion 1: the confirmed switch retires the switched-away surface
   assert.ok(controllerA);
   controllerA.getState().openCard('stop-1'); // the position the person left
 
-  const surfaceB = world.services.run?.create('route-other', { confirmedSwitch: true });
+  const surfaceB = world.services.run?.create('route-other', { confirmedSwitch: true, approvedStart: true });
   if (!surfaceB) throw new Error('the root constructed no run member');
   const stateB = await settled(surfaceB);
   assert.equal(stateB.status, 'ready');
@@ -571,10 +572,9 @@ test('G06.04 criterion 1: the confirmed switch retires the switched-away surface
   assert.ok(reopenedA !== undefined && reopenedA !== surfaceA.store);
 });
 
-// The repeat walk (11 §4.3): after End the finished walk's surface is
-// evicted — the next open starts a NEW session (new session_id, clean sets),
-// the finished row stays history.
-test('G06.04 criterion 2: after End the cache evicts — the repeat walk opens a fresh session', async () => {
+// #862: End evicts the surface, but ungated re-entry cannot silently start
+// a new walk. An explicit preview Start still permits a clean repeat walk.
+test('G06.04 criterion 2 / #862: after End the ungated surface stays non-live until Start', async () => {
   const world = mapWorld();
   const first = await openSurface(world);
   const controllerA = first.state.status === 'ready' ? first.state.controller : null;
@@ -586,14 +586,28 @@ test('G06.04 criterion 2: after End the cache evicts — the repeat walk opens a
   controllerA.getState().end();
   assert.equal(getSession(world.driver, firstSessionId)?.state, 'finished');
 
-  const second = world.services.run?.create('route-map');
-  assert.ok(second !== undefined && second !== first.store); // evicted, not reused
+  const ungated = world.services.run?.create('route-map');
+  assert.ok(ungated !== undefined && ungated !== first.store); // evicted, not reused
+  assert.deepEqual(await settled(ungated), { status: 'unavailable', reason: 'run#start-requires-preview' });
+  assert.equal(getLiveSession(world.driver), null);
+  assert.equal(world.locationPort.commands.filter((command) => command.startsWith('start ')).length, 1);
+  const second = world.services.run?.create('route-map', { approvedStart: true });
+  assert.ok(second !== undefined && second !== first.store);
   const stateSecond = await settled(second);
   assert.equal(stateSecond.status, 'ready');
   const runSecond = stateSecond.controller.getState().run;
   assert.ok(runSecond.phase !== 'Idle');
   assert.notEqual(runSecond.sessionId, firstSessionId);
   assert.deepEqual(runSecond.heard, []); // clean sets
+});
+
+test('#862: a forged confirmedSwitch param alone cannot bypass preview approval', async () => {
+  const world = mapWorld();
+  const store = world.services.run?.create('route-map', { confirmedSwitch: true });
+  assert.ok(store);
+  assert.deepEqual(await settled(store), { status: 'unavailable', reason: 'run#start-requires-preview' });
+  assert.equal(getLiveSession(world.driver), null);
+  assert.equal(world.locationPort.commands.filter((command) => command.startsWith('start ')).length, 0);
 });
 
 // The refused surface does not stick in the cache (the review's High): a
