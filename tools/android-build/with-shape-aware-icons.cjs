@@ -1,6 +1,5 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { withDangerousMod } = require('expo/config-plugins');
 
 const DENSITIES = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'];
 
@@ -30,12 +29,14 @@ function installLauncherIcons(projectRoot) {
   fs.writeFileSync(roundXml, xml.replace(standard, '@mipmap/ic_launcher_round_foreground'));
 }
 
-module.exports = (config) =>
-  config.android?.adaptiveIcon
-    ? withDangerousMod(config, ['android', async (modConfig) => {
-        installLauncherIcons(modConfig.modRequest.projectRoot);
-        return modConfig;
-      }])
-    : config;
+module.exports = (config) => {
+  if (!config.android?.adaptiveIcon) return config;
+  // Portable Windows tests load installLauncherIcons without installing Expo.
+  const { withDangerousMod } = require('expo/config-plugins');
+  return withDangerousMod(config, ['android', async (modConfig) => {
+    installLauncherIcons(modConfig.modRequest.projectRoot);
+    return modConfig;
+  }]);
+};
 
 module.exports.installLauncherIcons = installLauncherIcons;
