@@ -114,7 +114,7 @@ const settled = async (store) => {
 };
 
 // 1. The walk starts; the person opens stop-1's card — the panel is Half.
-const surfaceA = services.run.create('route-map');
+const surfaceA = services.run.create('route-map', { approvedStart: true });
 const stateA = await settled(surfaceA);
 const controllerA = stateA.controller;
 controllerA.getState().openCard('stop-1');
@@ -125,7 +125,7 @@ console.log(`surface A (route-map): session=${left.run.sessionId} panel=${left.p
 // preview — one transaction finishes walk-1 and starts walk-2; the
 // switched-away surface retires (Ended, wakelock released) and the cache
 // evicts it.
-const surfaceB = services.run.create('route-other', { confirmedSwitch: true });
+const surfaceB = services.run.create('route-other', { confirmedSwitch: true, approvedStart: true });
 const stateB = await settled(surfaceB);
 const controllerB = stateB.controller;
 console.log(
@@ -154,7 +154,12 @@ controllerB.getState().selectStory('ostop-1', 'ostory-1');
 audioPort.finish(1);
 controllerB.getState().end();
 console.log(`finish after one story: walk-2=${getSession(driver, 'walk-2')?.state} heard=${JSON.stringify(getSession(driver, 'walk-2')?.heard)}`);
-const surfaceC = services.run.create('route-other');
+const ungated = await settled(services.run.create('route-other'));
+if (ungated.status !== 'unavailable' || ungated.reason !== 'run#start-requires-preview') {
+  throw new Error('ungated repeat walk was not refused');
+}
+console.log(`ungated repeat walk: ${ungated.reason}; live=${getLiveSession(driver)?.sessionId ?? 'none'}`);
+const surfaceC = services.run.create('route-other', { approvedStart: true });
 const stateC = await settled(surfaceC);
 if (stateC.status !== 'ready') throw new Error(`repeat walk refused: ${stateC.reason}`);
 const runC = stateC.controller.getState().run;
