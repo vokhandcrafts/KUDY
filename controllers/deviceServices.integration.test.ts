@@ -303,6 +303,8 @@ async function installedActiveWalk(): Promise<ReturnType<typeof nodeSqliteDriver
   if (!preview) throw new Error('the fixture has no preview');
   await settledPreview(preview);
   await preview.getState().download();
+  await preview.getState().refresh();
+  assert.equal(preview.getState().button.enabled, true);
   assert.equal(await preview.getState().start(), 'handover');
   const run = services.run?.create('route-491', { approvedStart: true });
   if (!run) throw new Error('the fixture has no run');
