@@ -217,12 +217,11 @@ describe("route placeholders (19 §2.5)", () => {
 });
 
 describe("city surface on the published catalog (G06.01.a)", () => {
-  // #339 criterion 1: the cold start opens the catalog, not +not-found — the
-  // index route redirects to the canonical entry (screens-and-transitions,
-  // Explore row: «Уваход: старт дадатка»), no screen of its own. Deleting
-  // app/index.tsx breaks the static import at the file level; dropping the
-  // redirect turns this red on "/".
-  test("the cold start (/) opens the catalog through the index redirect", async () => {
+  // #339 criterion 1: cold start still opens the catalog, now after the
+  // owner-approved animated entry screen. Deleting app/index.tsx breaks the
+  // static import; dropping its timed replacement keeps the card absent.
+  test("the cold start (/) opens the catalog after the animated entry", async () => {
+    jest.useFakeTimers();
     serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
     renderRouter(
       {
@@ -231,6 +230,8 @@ describe("city surface on the published catalog (G06.01.a)", () => {
       },
       { initialUrl: "/" },
     );
+    act(() => jest.advanceTimersByTime(7_100));
+    jest.useRealTimers();
     expect(await screen.findByTestId("guide-card-guide-route-a1")).toBeTruthy();
   });
 
