@@ -147,6 +147,9 @@ export interface RunSurfaceDeps {
   // through the switch-guide transaction. A cached surface (the walk is
   // already live) ignores it.
   readonly confirmedSwitch?: boolean;
+  // #862: only a confirmed preview handover may create a fresh walk.
+  // Re-entry without it may recover an existing live session but never start.
+  readonly approvedStart?: boolean;
   // G21.21 (ADR G21.20 §3.2, owner edit 1): the preview's explicit audio
   // choice carried through the route params. It is validated against the
   // pinned version's available audio locales; absent or foreign falls to the
@@ -245,6 +248,7 @@ async function resolve(store: ControllerStore<RunSurfaceState>, deps: RunSurface
   // resolution); the screens read it, the engine owns the truth.
   let audioLocale: string | null = null;
   if (controller.getState().run.phase === 'Idle') {
+    if (!deps.approvedStart) return unavailable('run#start-requires-preview');
     // No live row for this route: the surface opened for a fresh handover
     // (the preview gated the §4.1 dialog and handed over), so the walk
     // starts here — through the confirmed switch-guide transaction when the

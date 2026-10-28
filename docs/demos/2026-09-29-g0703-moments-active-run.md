@@ -76,7 +76,7 @@ const services = createServices({
   audio,
   now: () => clock.now(),
 });
-const store = services.run.create('route-map');
+const store = services.run.create('route-map', { approvedStart: true });
 let surface;
 for (let i = 0; i < 200; i++) {
   surface = store.getState();
@@ -185,7 +185,7 @@ const services = createServices({
   audio,
   now: () => clock.now(),
 });
-const store = services.run.create('route-map');
+const store = services.run.create('route-map', { approvedStart: true });
 let surface;
 for (let i = 0; i < 200; i++) {
   surface = store.getState();

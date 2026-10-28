@@ -300,6 +300,9 @@ export default function RoutePreview() {
     const outcome = await controller.start();
     if (outcome === "handover") {
       const audio = controller.audioChoice;
+      // #862: the preview Start gate authorizes the fresh walk before
+      // navigation. A direct Run mount has no such authorization.
+      services.run?.create(routeId, { approvedStart: true, audio });
       router.push(audio !== null ? `/run/${routeId}?audio=${audio}` : `/run/${routeId}`);
     }
   };
@@ -588,6 +591,7 @@ export default function RoutePreview() {
               // never silently drops the chips' selection into the default.
               state.confirmHandover();
               const audio = state.audioChoice;
+              services.run?.create(routeId, { approvedStart: true, confirmedSwitch: true, audio });
               router.push(
                 audio !== null
                   ? `/run/${routeId}?confirmedSwitch=1&audio=${audio}`

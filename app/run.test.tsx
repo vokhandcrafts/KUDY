@@ -174,11 +174,20 @@ function memoryBundles(files: Record<string, string>): BundlesStore {
 // LocationService instance the app owns. Session-store and recovery
 // overrides pass through for the recovery/panel scenarios.
 
-const withRunRoutes = (services: ReturnType<typeof createServices>) => ({
+const withRunRoutes = (
+  services: ReturnType<typeof createServices>,
+  options: { confirmedSwitch?: boolean } = {},
+) => {
+  // A normal mounted Run test is entered after preview Start. Set up the
+  // same approved handover; a confirmed switch must also be authorized by
+  // that handover, never by a URL query. Raw deep-link tests stay ungated.
+  services.run?.create('route-map', { approvedStart: true, ...options });
+  return {
   _layout: layoutWith(services),
   "run/[id]": Run,
   feedback: FeedbackForm,
-});
+  };
+};
 
 // The stateful session for the AC4 walk: the fake row records the durable
 // deltas through the same checkpoint path the production row takes, and the
@@ -248,6 +257,16 @@ afterEach(() => {
 });
 
 describe("run map surface", () => {
+  test("#862: a direct Run deep link cannot start a walk or arm GPS", async () => {
+    const env = runSessionTracked();
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles('be')), run: { session: env.session } });
+    renderRouter({ _layout: layoutWith(services), "run/[id]": Run }, { initialUrl: "/run/route-map?confirmedSwitch=1" });
+    await screen.findByTestId('run-unavailable-reason');
+    expect(screen.queryByTestId('btn-run-pause')).toBeNull();
+    expect(env.starts()).toBe(0);
+    expect(env.locationPort.commands.filter((command) => command.startsWith('start '))).toHaveLength(0);
+  });
+
   test("only the demo build labels the run diagram", async () => {
     const previous = process.env.EXPO_PUBLIC_DEMO_MODE;
     try {
@@ -599,10 +618,11 @@ describe("run map surface", () => {
   test("G06.04 NAV8: the confirmed «Завяршыць і пачаць» starts through the switch, not a refusal", async () => {
     const { session, switched } = switchWorld();
     const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session } });
-    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map?confirmedSwitch=1" });
-    // The surface started: without the flag the live other-route row would
-    // refuse this Start (one-unfinished-session rule) and the screen would
-    // render its unavailable reason instead of the map.
+    // The preview's completed §4.1 switch handover is trusted composition
+    // state, not a forgeable confirmedSwitch URL parameter (#862).
+    renderRouter(withRunRoutes(services, { confirmedSwitch: true }), { initialUrl: "/run/route-map" });
+    // The surface starts through startSwitch: without the trusted switch
+    // handover the other live row would refuse the new walk.
     await screen.findByTestId("run-map");
     expect(switched()).toBe("walk-other");
   });

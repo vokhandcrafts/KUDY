@@ -79,11 +79,11 @@ const deliver = () => {
   }
 };
 
-const first = await settled(services.run.create('route-demo'));
+const first = await settled(services.run.create('route-demo', { approvedStart: true }));
 deliver();
 const before = first.controller.getState().run.lastFix.at;
 
-const second = await settled(services.run.create('route-other'));
+const second = await settled(services.run.create('route-other', { approvedStart: true }));
 deliver();
 const after = first.controller.getState().run.lastFix.at;
 
