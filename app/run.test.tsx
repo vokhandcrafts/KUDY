@@ -174,11 +174,16 @@ function memoryBundles(files: Record<string, string>): BundlesStore {
 // LocationService instance the app owns. Session-store and recovery
 // overrides pass through for the recovery/panel scenarios.
 
-const withRunRoutes = (services: ReturnType<typeof createServices>) => ({
+const withRunRoutes = (services: ReturnType<typeof createServices>) => {
+  // A normal mounted Run test is entered after preview Start. Set up the
+  // same approved handover; raw deep-link tests use the ungated routes below.
+  services.run?.create('route-map', { approvedStart: true });
+  return {
   _layout: layoutWith(services),
   "run/[id]": Run,
   feedback: FeedbackForm,
-});
+  };
+};
 
 // The stateful session for the AC4 walk: the fake row records the durable
 // deltas through the same checkpoint path the production row takes, and the
@@ -248,6 +253,16 @@ afterEach(() => {
 });
 
 describe("run map surface", () => {
+  test("#862: a direct Run deep link cannot start a walk or arm GPS", async () => {
+    const env = runSessionTracked();
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles('be')), run: { session: env.session } });
+    renderRouter({ _layout: layoutWith(services), "run/[id]": Run }, { initialUrl: "/run/route-map?confirmedSwitch=1" });
+    await screen.findByTestId('run-unavailable-reason');
+    expect(screen.queryByTestId('btn-run-pause')).toBeNull();
+    expect(env.starts()).toBe(0);
+    expect(env.locationPort.commands.filter((command) => command.startsWith('start '))).toHaveLength(0);
+  });
+
   test("only the demo build labels the run diagram", async () => {
     const previous = process.env.EXPO_PUBLIC_DEMO_MODE;
     try {
