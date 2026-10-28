@@ -18,7 +18,7 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 ## Што трэба зрабіць
 
 ### 2026-10-28 — правер GPS-рэгрэсію пасля завяршэння прагулкі (#862)
-Што зрабіць: на загружаным Android-эмулятары запусці `node tools/e2e-android/run-e2e.mjs --suite gps` з актуальнага PR і правер, што deep link пасля End не стварае сесіі і не ўключае GPS. Не мержы PR да паспяховых абавязковых CI, Showboat і code review.
+Што зрабіць: на загружаным Android-эмулятары запусці `node tools/e2e-android/run-e2e.mjs --suite gps` з актуальнага PR і правер, што deep link пасля End не стварае сесіі і не ўключае GPS. Не мержы PR да паспяховых абавязковых CI, Showboat і code review. Пасля мержу знімі `agent:running` са звязанага issue #862.
 PR: https://github.com/vokhandcrafts/KUDY/pull/869 · Issue: https://github.com/vokhandcrafts/KUDY/issues/862
 
 ### 2026-10-23 — праверы натыўны фонавы GPS на прыладзе
