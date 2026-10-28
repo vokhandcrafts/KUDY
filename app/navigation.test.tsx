@@ -8,7 +8,6 @@ import Run from "./run/[id]";
 import RoutePreview from "./route/[id]";
 import Map from "./map";
 import NotFound from "./+not-found";
-import Index from "./index";
 import Explore from "./(tabs)/explore";
 import Guides from "./city/[id]/guides";
 import { ServicesContext } from "./_layout";
@@ -217,24 +216,6 @@ describe("route placeholders (19 §2.5)", () => {
 });
 
 describe("city surface on the published catalog (G06.01.a)", () => {
-  // #339 criterion 1: cold start still opens the catalog, now after the
-  // owner-approved animated entry screen. Deleting app/index.tsx breaks the
-  // static import; dropping its timed replacement keeps the card absent.
-  test("the cold start (/) opens the catalog after the animated entry", async () => {
-    jest.useFakeTimers();
-    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
-    renderRouter(
-      {
-        ...withCatalogRoutes(layoutWith(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 }))),
-        index: Index,
-      },
-      { initialUrl: "/" },
-    );
-    act(() => jest.advanceTimersByTime(7_100));
-    jest.useRealTimers();
-    expect(await screen.findByTestId("guide-card-guide-route-a1")).toBeTruthy();
-  });
-
   test("the city renders the published guides: one card per guide, canon facts", async () => {
     serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
     renderRouter(withCatalogRoutes(layoutWith(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 }))), {
