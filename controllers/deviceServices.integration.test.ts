@@ -197,7 +197,8 @@ test('G20.20: the free synthetic package walks the whole production composition'
 
   // 3. Start: the per-route readiness gate evaluates the downloaded layer,
   //    the walk opens Active on the production session store.
-  const runStore = services.run?.create('route-491');
+  assert.equal(await preview.getState().start(), 'handover');
+  const runStore = services.run?.create('route-491', { approvedStart: true });
   if (!runStore) throw new Error('the root constructed no run member');
   await settledRun(runStore);
   const surface = runStore.getState();
@@ -302,7 +303,8 @@ async function installedActiveWalk(): Promise<ReturnType<typeof nodeSqliteDriver
   if (!preview) throw new Error('the fixture has no preview');
   await settledPreview(preview);
   await preview.getState().download();
-  const run = services.run?.create('route-491');
+  assert.equal(await preview.getState().start(), 'handover');
+  const run = services.run?.create('route-491', { approvedStart: true });
   if (!run) throw new Error('the fixture has no run');
   await settledRun(run);
   assert.equal(run.getState().status, 'ready');
@@ -901,7 +903,8 @@ test('G21.21 mixed_language_offline_restart: fr text and en audio through the pr
   assert.ok(fs.files.has('/root/bundles/route-553/1/en/base/audio/story-1.m4a'));
 
   // 3. The handover carries the choice: the walk starts with the en pin.
-  const runStore = services.run?.create('route-553', { audio: 'en' });
+  assert.equal(await preview.getState().start(), 'handover');
+  const runStore = services.run?.create('route-553', { approvedStart: true, audio: 'en' });
   if (!runStore) throw new Error('the root constructed no run member');
   await settledRun(runStore);
   const surface = runStore.getState();
@@ -1056,7 +1059,8 @@ test('G21.21 text_only_no_audio: a guide without audio walks text-only through t
   await preview.getState().refresh();
   assert.equal(preview.getState().button.action, 'start');
 
-  const runStore = services.run?.create('route-553-text');
+  assert.equal(await preview.getState().start(), 'handover');
+  const runStore = services.run?.create('route-553-text', { approvedStart: true });
   if (!runStore) throw new Error('the root constructed no run member');
   await settledRun(runStore);
   const surface = runStore.getState();
