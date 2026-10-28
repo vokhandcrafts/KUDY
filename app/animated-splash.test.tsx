@@ -27,7 +27,7 @@ function advance(ms: number) {
   act(() => jest.advanceTimersByTime(ms));
 }
 
-function svgProp(id: string, name: "transform" | "opacity" | "d") {
+function svgProp(id: string, name: "matrix" | "opacity" | "d") {
   return screen.getByTestId(id).props[name] as unknown;
 }
 
@@ -54,11 +54,11 @@ test("cold start shows a vector dragon with arriving paws, then opens Explore af
   expect(screen.getByTestId("splash-paw-right").findAllByType(Path).length).toBeGreaterThan(0);
   expect(brandVisible()).toBe(false);
 
-  const firstLeftPaw = svgProp("splash-paw-left", "transform");
-  const firstRightPaw = svgProp("splash-paw-right", "transform");
+  const firstLeftPaw = svgProp("splash-paw-left", "matrix");
+  const firstRightPaw = svgProp("splash-paw-right", "matrix");
   advance(1_200);
-  expect(svgProp("splash-paw-left", "transform")).not.toEqual(firstLeftPaw);
-  expect(svgProp("splash-paw-right", "transform")).not.toEqual(firstRightPaw);
+  expect(svgProp("splash-paw-left", "matrix")).not.toEqual(firstLeftPaw);
+  expect(svgProp("splash-paw-right", "matrix")).not.toEqual(firstRightPaw);
   expect(screen.queryByTestId("screen-Explore")).toBeNull();
 
   advance(5_900);
@@ -70,10 +70,10 @@ test("the side move happens during the blink; the mouth moves before KUDY appear
   renderColdStart();
 
   advance(3_300);
-  const headBefore = svgProp("splash-head", "transform");
+  const headBefore = svgProp("splash-head", "matrix");
   const eyesBefore = svgProp("splash-eyes", "opacity");
   advance(350);
-  expect(svgProp("splash-head", "transform")).not.toEqual(headBefore);
+  expect(svgProp("splash-head", "matrix")).not.toEqual(headBefore);
   expect(svgProp("splash-eyes", "opacity")).not.toEqual(eyesBefore);
   expect(brandVisible()).toBe(false);
 
