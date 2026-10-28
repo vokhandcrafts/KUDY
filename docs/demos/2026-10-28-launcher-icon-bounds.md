@@ -11,17 +11,13 @@
 Праверка рэсурсаў, кантракту Expo і рэсурсаў, якія копіюе build plugin:
 
 ```sh
-node --test test/app-icon-config.test.mjs test/app-icon-bounds.test.mjs tools/android-build/with-shape-aware-icons.test.mjs 2>&1 | grep -E '^✔ '
+node --test --test-reporter=tap test/app-icon-config.test.mjs test/app-icon-bounds.test.mjs tools/android-build/with-shape-aware-icons.test.mjs 2>&1 | grep -E '^# (tests|pass|fail) '
 ```
 
 ```output
-✔ square launcher frame reaches the output edges (not an inset painted frame)
-✔ round adaptive border occupies the Android masked viewport edge
-✔ square adaptive foreground is not the round image and fills its square mask
-✔ Expo config carries the accepted brand icon, adaptive layers and splash
-✔ every configured brand asset file exists in the repository
-✔ demo build keeps its own icon and does not inherit the production adaptive icon
-✔ native prebuild install uses distinct square/round launcher images and foregrounds
+# tests 7
+# pass 7
+# fail 0
 ```
 
 Праверка рэальнай рэгенерацыі натыўных рэсурсаў: `npx expo prebuild --platform android --no-install`;
