@@ -3,7 +3,6 @@ import Svg, { ClipPath, Defs, Ellipse, G, Path, Rect } from "react-native-svg";
 
 import paths from "../assets/kudy-splash/dragon-paths.json";
 import { tokens } from "./design-tokens";
-import { uiStrings } from "./ui-strings";
 
 export const SPLASH_DURATION_MS = 7_000;
 
@@ -12,7 +11,6 @@ const paper = "#F5EDDF";
 const muzzle = "#e4bd8f";
 const face = "#743d25";
 const paw = "#a85f35";
-const brandName = uiStrings("be").myKudy;
 
 function ease(value: number): number {
   const x = Math.max(0, Math.min(1, value));
@@ -32,7 +30,7 @@ function Part({ name }: { name: keyof typeof paths }) {
   );
 }
 
-export function AnimatedSplash({ elapsedMs }: { elapsedMs: number }) {
+export function AnimatedSplash({ elapsedMs, brandName }: { elapsedMs: number; brandName: string }) {
   const time = Math.max(0, Math.min(SPLASH_DURATION_MS, elapsedMs));
   const leftPawY = time < 420 ? 230 : time < 760 ? segment(time, 420, 760, 230, 0) : 0;
   const rightPawY = time < 720 ? 230 : time < 1_070 ? segment(time, 720, 1_070, 230, 0) : 0;

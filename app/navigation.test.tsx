@@ -4,6 +4,7 @@ import { act, render } from "@testing-library/react-native";
 import { fireEvent, renderRouter, screen, within } from "expo-router/testing-library";
 
 import My from "./(tabs)/my";
+import Index from "./index";
 import Run from "./run/[id]";
 import RoutePreview from "./route/[id]";
 import Map from "./map";
@@ -216,6 +217,22 @@ describe("route placeholders (19 §2.5)", () => {
 });
 
 describe("city surface on the published catalog (G06.01.a)", () => {
+  // #339 criterion 1: the cold start opens the catalog, not +not-found — the
+  // index route plays the approved splash (visual-language, 2026-10-28) and
+  // redirects to Explore after 7 s, so the cards are awaited past the splash
+  // window on real timers (10 s ceiling; RTL cleanup unmounts the timers).
+  test("the cold start (/) opens the catalog through the index splash", async () => {
+    serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
+    renderRouter(
+      {
+        ...withCatalogRoutes(layoutWith(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 }))),
+        index: Index,
+      },
+      { initialUrl: "/" },
+    );
+    expect(await screen.findByTestId("guide-card-guide-route-a1", { timeout: 10_000 })).toBeTruthy();
+  });
+
   test("the city renders the published guides: one card per guide, canon facts", async () => {
     serve({ "catalog.json": CATALOG_TEXT, [POINTER_PATH]: INDEX_TEXT });
     renderRouter(withCatalogRoutes(layoutWith(createServices({ catalogOrigin: "https://catalog.test", catalogSha256: sha256 }))), {
