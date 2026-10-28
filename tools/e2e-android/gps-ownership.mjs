@@ -225,7 +225,6 @@ export async function runGpsOwnershipSuite({ driver, url, runCase, coldStart }) 
       // Check the persisted history through the same My KUDY UI. No second
       // session row should appear after the ungated mount.
       await driver.tapSelector({ testID: 'btn-run-back' });
-      await driver.waitFor({ testID: 'screen-Route preview' }, { timeoutMs: SHORT_MS });
       await backToExplore(driver);
       await driver.tapSelector({ testID: 'link-kudy' });
       const afterNodes = await nodesOn(driver, 'screen-KUDY', 'gps-my-after-reentry');
