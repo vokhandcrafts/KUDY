@@ -191,7 +191,7 @@ export async function runGpsOwnershipSuite({ driver, url, runCase, coldStart }) 
       await snapshot(driver, 'returned-to-run');
     });
 
-  await runCase('gps: End releases everything; the deep-link re-entry auto-starts a fresh walk (G20.42-F1); ending it releases again',
+  await runCase('gps: End releases everything; ungated deep-link re-entry remains non-live (#862)',
     'gps-end', driver, async () => {
       await driver.tapSelector({ testID: 'btn-run-end' });
       await driver.waitFor({ testID: 'end-confirm-dialog' }, { timeoutMs: SHORT_MS, dumpBasename: 'dump-gps-end-dialog.xml' });
@@ -210,31 +210,34 @@ export async function runGpsOwnershipSuite({ driver, url, runCase, coldStart }) 
       assert.ok(historyRows.length >= 1, 'the ended session never reached the My KUDY history');
       console.log(`gps: ended session is history: ${historyRows.map((row) => row.resourceId).join(', ')}`);
 
-      // Re-entry onto the run route of the ended session. The recorded
-      // outcome (2026-10-25, artifacts 2026-10-24T22-03-35-829Z): the surface
-      // auto-starts a FRESH walk (runSurfaceController starts whenever it
-      // mounts with an Idle phase — the preview's §4.1 gate is bypassed by
-      // the deep link) and the GPS arms again. Follow-up defect: #862.
+      // #862: a direct link has no preview-approved Start. It must neither
+      // create a session row nor re-arm the walk's location subscription.
       await driver.launchDeepLink(`kudy:///run/${FREE}`);
-      await driver.waitFor({ testID: 'screen-Run' }, { timeoutMs: SHORT_MS, dumpBasename: 'dump-gps-reentry-run.xml' });
+      await driver.waitFor({ testID: 'run-unavailable-reason' }, { timeoutMs: SHORT_MS, dumpBasename: 'dump-gps-reentry-run.xml' });
       await snapshot(driver, 'after-reentry');
       const reentryNodes = parseDump((await driver.dump('dump-gps-reentry-state.xml')).xml);
-      const autoStarted =
-        findNode(reentryNodes, { testID: 'btn-run-pause' }) !== undefined &&
-        findNode(reentryNodes, { testID: 'run-ended' }) === undefined;
-      console.log(`gps: deep-link re-entry after End auto-started a fresh walk: ${String(autoStarted)}`);
-      assert.ok(autoStarted, 'expected the recorded auto-start (G20.42-F1); the re-entry rendered neither a live run nor run-ended');
-      const reentryOps = await waitForOpCount(driver, 1);
-      console.log(`gps: the ungated re-entry holds ${String(reentryOps.length)} location op — recorded as follow-up defect #862`);
-
-      // The ungated walk is not ours to keep: the same End path must release
-      // it, which restores the no-walk precondition of the city-owner case.
-      await driver.tapSelector({ testID: 'btn-run-end' });
-      await driver.waitFor({ testID: 'end-confirm-dialog' }, { timeoutMs: SHORT_MS, dumpBasename: 'dump-gps-end-dialog-2.xml' });
-      await driver.tapSelector({ testID: 'btn-end-confirm-accept' });
-      await driver.waitFor({ testID: 'run-ended' }, { timeoutMs: SHORT_MS });
+      requireId(reentryNodes, 'run-unavailable');
+      assert.equal(findNode(reentryNodes, { testID: 'btn-run-pause' }), undefined, 'ungated link started a walk');
       await waitForOpCount(driver, 0);
-      await snapshot(driver, 'after-ending-ungated-walk');
+      await waitForLocationListeners(driver, false);
+      await assertNoRevival(driver, 'reentry-no-revival', () => driver.geoFix(WALK_LAT + 0.001, WALK_LNG + 0.002));
+
+      // Check the persisted history through the same My KUDY UI. No second
+      // session row should appear after the ungated mount.
+      await driver.tapSelector({ testID: 'btn-run-back' });
+      await driver.waitFor({ testID: 'screen-Route preview' }, { timeoutMs: SHORT_MS });
+      await backToExplore(driver);
+      await driver.tapSelector({ testID: 'link-kudy' });
+      const afterNodes = await nodesOn(driver, 'screen-KUDY', 'gps-my-after-reentry');
+      const afterRows = afterNodes.filter((node) => node.resourceId.startsWith('my-session-'));
+      assert.deepEqual(
+        afterRows.map((row) => row.resourceId).sort(),
+        historyRows.map((row) => row.resourceId).sort(),
+        'ungated Run re-entry created a session row',
+      );
+      // The next GPS ownership case begins from the non-live Run surface.
+      await driver.launchDeepLink(`kudy:///run/${FREE}`);
+      await driver.waitFor({ testID: 'run-unavailable-reason' }, { timeoutMs: SHORT_MS });
     });
 
   await runCase('gps: with no walk live the Nearby surface is the explicit city owner', 'gps-city', driver, async () => {
