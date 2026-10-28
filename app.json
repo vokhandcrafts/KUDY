@@ -48,7 +48,7 @@
       ],
       "icon": "./assets/kudy-icon/icon.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/kudy-icon/android-adaptive-foreground.png",
+        "foregroundImage": "./assets/kudy-icon/android-adaptive-square-foreground.png",
         "backgroundImage": "./assets/kudy-icon/android-adaptive-background.png",
         "backgroundColor": "#F5EDDF"
       }
@@ -74,7 +74,8 @@
       "expo-router",
       "expo-font",
       "expo-sqlite",
-      "./tools/android-build/with-playback-only.cjs"
+      "./tools/android-build/with-playback-only.cjs",
+      "./tools/android-build/with-shape-aware-icons.cjs"
     ],
     "icon": "./assets/kudy-icon/icon.png",
     "splash": {
