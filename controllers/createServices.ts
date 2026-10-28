@@ -239,6 +239,8 @@ export interface Services {
           routeId: string,
           options?: {
             readonly confirmedSwitch?: boolean;
+            // #862: supplied only by the preview after its Start gate.
+            readonly approvedStart?: boolean;
             // G21.21 (ADR G21.20 §3.2): the preview's explicit audio choice.
             readonly audio?: string | null;
           },
@@ -714,6 +716,7 @@ export function createServices(ports: ServicePorts): Services {
           },
           localePreference,
           confirmedSwitch: options?.confirmedSwitch,
+          approvedStart: options?.approvedStart === true,
           // G21.21 (ADR G21.20 §3.2): the preview's audio choice rides the
           // route params; the surface validates it against the pinned
           // version's audio facts and resolves the owner's default.
