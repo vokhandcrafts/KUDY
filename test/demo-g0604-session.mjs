@@ -158,7 +158,6 @@ const ungated = await settled(services.run.create('route-other'));
 if (ungated.status !== 'unavailable' || ungated.reason !== 'run#start-requires-preview') {
   throw new Error('ungated repeat walk was not refused');
 }
-console.log(`ungated repeat walk: ${ungated.reason}; live=${getLiveSession(driver)?.sessionId ?? 'none'}`);
 const surfaceC = services.run.create('route-other', { approvedStart: true });
 const stateC = await settled(surfaceC);
 if (stateC.status !== 'ready') throw new Error(`repeat walk refused: ${stateC.reason}`);
