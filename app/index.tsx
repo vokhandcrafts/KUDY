@@ -20,7 +20,7 @@ export default function Index() {
   useEffect(() => {
     if (reduceMotion) return;
     const startedAt = Date.now();
-    let frame: ReturnType<typeof setTimeout>;
+    let frame: ReturnType<typeof setTimeout> | undefined;
     const tick = () => {
       const elapsed = Math.min(SPLASH_DURATION_MS, Date.now() - startedAt);
       setElapsedMs(elapsed);
@@ -29,10 +29,11 @@ export default function Index() {
         frame = setTimeout(tick, Math.max(1, startedAt + next - Date.now()));
       }
     };
-    frame = setTimeout(tick, nextSplashSampleMs(0) ?? SPLASH_DURATION_MS);
+    const firstSample = nextSplashSampleMs(0);
+    if (firstSample !== null) frame = setTimeout(tick, firstSample);
     const complete = setTimeout(() => router.replace("/explore"), SPLASH_DURATION_MS);
     return () => {
-      clearTimeout(frame);
+      if (frame !== undefined) clearTimeout(frame);
       clearTimeout(complete);
     };
   }, [reduceMotion, router]);
