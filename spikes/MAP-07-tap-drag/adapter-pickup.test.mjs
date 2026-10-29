@@ -89,6 +89,15 @@ test('real demo adapter: quick tap, stationary pickup, immediate drag, cancellat
     assert.equal(piece.style.transform, 'translate(56px, 50px)');
     assert.equal(status.textContent, 'Дзеянняў: 1');
 
+    // A coalesced final pointerup may be the first sample above threshold.
+    // Even following a hold it must move the fragment, not discard the drag.
+    down(pointer(6, 90, 100));
+    await sleep(145);
+    up(pointer(6, 120, 120));
+    for (let i = 0; i < 160; i += 1) runFrame();
+    assert.equal(piece.style.transform, 'translate(86px, 70px)');
+    assert.equal(status.textContent, 'Дзеянняў: 1');
+
     down(pointer(4, 80, 80));
     window.fire('pointerdown', pointer(5, 350, 300));
     await sleep(145);
