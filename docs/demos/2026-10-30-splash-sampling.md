@@ -1,6 +1,6 @@
 # Splash sampling: proof for #871
 
-The fixed 7,000 ms splash previously called the React state setter every 32 ms, including static holds. The phase-aware scheduler now plans **130** scene samples before the 6,000 ms brand endpoint, versus **219** periodic callbacks across seven seconds (ceil(7000 / 32)). This measures scheduled JS callbacks, **not** native frame rate or GPU rendering time.
+The fixed 7,000 ms splash previously called the React state setter every 32 ms, including static holds. The phase-aware scheduler now plans **130** scene samples before the 6,000 ms brand endpoint, versus **218** periodic callbacks before the seven-second redirect (floor(7000 / 32)). This measures scheduled JS callbacks, **not** native frame rate or GPU rendering time.
 
 The first focused regression measures those counts from the production `nextSplashSampleMs` function. The second checks the head matrix changes during the 1,500–3,000 ms head-drop window. The third rejects any periodic `setInterval` introduced into the cold-start route.
 
