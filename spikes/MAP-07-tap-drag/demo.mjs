@@ -41,6 +41,9 @@ export function mountDemo(board, status) {
     active = null;
     const captured = entry.element.hasPointerCapture(entry.pointerId);
     if (event && captured) {
+      // The last pointerup sample can cross the drag threshold on its own.
+      // Process it before deciding whether a stationary hold was navigation.
+      entry.engine.move(point(event));
       const grabbed = entry.pickup.release();
       // Holding still is a grab, not a delayed navigation tap. Moving beyond
       // the gesture threshold remains immediate even before the pickup timer.
