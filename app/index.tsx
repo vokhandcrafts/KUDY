@@ -29,7 +29,7 @@ export default function Index() {
         frame = setTimeout(tick, Math.max(1, startedAt + next - Date.now()));
       }
     };
-    frame = setTimeout(tick, 420);
+    frame = setTimeout(tick, nextSplashSampleMs(0) ?? SPLASH_DURATION_MS);
     const complete = setTimeout(() => router.replace("/explore"), SPLASH_DURATION_MS);
     return () => {
       clearTimeout(frame);
