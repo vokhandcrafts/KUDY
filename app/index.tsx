@@ -14,6 +14,7 @@ export default function Index() {
   const router = useRouter();
   const reduceMotion = useReducedMotion();
   const brandName = uiStrings(useUiLocale()).myKudy;
+  // Phase-aware sampling follows the fixed splash timeline.
   const [elapsedMs, setElapsedMs] = useState(0);
 
   useEffect(() => {
