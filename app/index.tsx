@@ -20,12 +20,19 @@ export default function Index() {
   useEffect(() => {
     if (reduceMotion) return;
     const startedAt = Date.now();
-    const frame = setInterval(() => {
-      setElapsedMs(Math.min(SPLASH_DURATION_MS, Date.now() - startedAt));
-    }, 32);
+    let frame: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      const elapsed = Math.min(SPLASH_DURATION_MS, Date.now() - startedAt);
+      setElapsedMs(elapsed);
+      const next = nextSplashSampleMs(elapsed);
+      if (next !== null) {
+        frame = setTimeout(tick, Math.max(1, startedAt + next - Date.now()));
+      }
+    };
+    frame = setTimeout(tick, 420);
     const complete = setTimeout(() => router.replace("/explore"), SPLASH_DURATION_MS);
     return () => {
-      clearInterval(frame);
+      clearTimeout(frame);
       clearTimeout(complete);
     };
   }, [reduceMotion, router]);
