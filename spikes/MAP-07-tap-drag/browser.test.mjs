@@ -15,7 +15,7 @@ test('MAP-07 browser: pointer, keyboard, cancellation, resize and touch scroll',
   await once(server, 'listening');
   let browser;
   try {
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true, ...(process.env.MAP07_CHROMIUM_PATH && { executablePath: process.env.MAP07_CHROMIUM_PATH }) });
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
@@ -32,18 +32,41 @@ test('MAP-07 browser: pointer, keyboard, cancellation, resize and touch scroll',
       await page.mouse.move(start.x, start.y);
       await page.mouse.down();
       await page.mouse.move(start.x + dx, start.y + dy, { steps: 5 });
+      assert.equal(await element.getAttribute('data-picked'), '', 'drag should lift immediately, without waiting for long press');
       await page.mouse.up();
     };
     await first.click();
     assert.equal(await status.textContent(), 'Дзеянняў: 1');
+    // The user should see a tiny grab/lift while holding still, before any drag.
+    const heldAt = await center(first);
+    await page.mouse.move(heldAt.x, heldAt.y);
+    await page.mouse.down();
+    assert.equal(await first.getAttribute('data-pressed'), '');
+    await page.waitForFunction(() => {
+      const piece = document.querySelector('#first');
+      return piece.hasAttribute('data-picked') && Number.parseFloat(getComputedStyle(piece).scale) > 1.01;
+    });
+    assert.equal(await first.getAttribute('data-dragging'), null);
+    await page.mouse.up();
+    assert.equal(await first.getAttribute('data-picked'), null);
+    assert.equal(await status.textContent(), 'Дзеянняў: 1', 'hold/release must not navigate');
+    await page.waitForFunction(() => Number.parseFloat(getComputedStyle(document.querySelector('#first')).scale) === 1);
     const original = await first.boundingBox();
     await drag(first, 44, 30);
+    await page.waitForFunction((originX) => {
+      const x = document.querySelector('#first').getBoundingClientRect().x;
+      return Math.abs(x - originX - 44) < .5;
+    }, original.x);
     assert.equal(Math.round((await first.boundingBox()).x - original.x), 44);
     assert.equal(await status.textContent(), 'Дзеянняў: 1');
     const disabledCenter = await center(soon);
     await page.mouse.click(disabledCenter.x, disabledCenter.y);
     const beforeSoon = await soon.boundingBox();
     await drag(soon, -30, -20);
+    await page.waitForFunction((originX) => {
+      const x = document.querySelector('#soon').getBoundingClientRect().x;
+      return Math.abs(x - originX + 30) < .5;
+    }, beforeSoon.x);
     assert.equal(Math.round((await soon.boundingBox()).x - beforeSoon.x), -30);
     assert.equal(await status.textContent(), 'Дзеянняў: 1');
     await first.focus();
@@ -73,7 +96,7 @@ test('MAP-07 browser: pointer, keyboard, cancellation, resize and touch scroll',
         element.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, pointerId: 1,
           clientX: box.x + box.width / 2 + dx, clientY: box.y + box.height / 2, buttons: 1 }));
       }
-      await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+      await new Promise((done) => requestAnimationFrame(done));
       observer.disconnect();
       return count;
     });
@@ -105,6 +128,10 @@ test('MAP-07 browser: pointer, keyboard, cancellation, resize and touch scroll',
     await touch('touchMove', [{ x: p.x + 30, y: p.y + 25, id: 1 }]);
     await touch('touchEnd', []);
     assert.equal(await status.textContent(), 'Дзеянняў: 1');
+    await page.waitForFunction((originalX) => {
+      const rect = document.querySelector('#first').getBoundingClientRect();
+      return Math.abs(rect.x + rect.width / 2 - originalX - 30) < .5;
+    }, p.x);
     assert.equal(Math.round((await center(first)).x - p.x), 30);
     const board = await page.locator('#board').boundingBox();
     const x = board.x + board.width - 8;
@@ -113,6 +140,21 @@ test('MAP-07 browser: pointer, keyboard, cancellation, resize and touch scroll',
     await touch('touchEnd', []);
     await page.waitForFunction(() => window.scrollY > 50);
     assert.ok(await page.evaluate(() => window.scrollY > 50));
+    // Reduced motion removes all visual movement cues, but leaves an accessible
+    // static picked state and immediate gesture positioning.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.reload();
+    const reducedCenter = await center(first);
+    await page.mouse.move(reducedCenter.x, reducedCenter.y);
+    await page.mouse.down();
+    await page.waitForFunction(() => document.querySelector('#first').hasAttribute('data-picked'));
+    assert.equal(await first.evaluate((element) => getComputedStyle(element).scale), '1');
+    assert.equal(await first.evaluate((element) => Number.parseFloat(getComputedStyle(element).translate)), 0);
+    await page.mouse.up();
+    assert.equal(await status.textContent(), 'Дзеянняў: 0');
+    await first.focus();
+    await page.keyboard.press('Enter');
+    assert.equal(await status.textContent(), 'Дзеянняў: 1');
     assert.deepEqual(errors, []);
     if (process.env.MAP07_SCREENSHOT) {
       await page.evaluate(() => window.scrollTo(0, 0));
