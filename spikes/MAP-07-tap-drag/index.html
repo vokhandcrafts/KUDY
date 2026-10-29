@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="be">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MAP-07 · Перацягванне</title>
+<link rel="stylesheet" href="demo.css">
+<main>
+  <p class="eyebrow">KUDY · MAP-07 · тэхнічны прататып</p>
+  <h1>Націсні або перасунь</h1>
+  <p>Кароткі націск выклікае дзеянне. Рух адразу перасоўвае фігуру. «Скора» таксама можна перацягваць.</p>
+  <p>Пракручвай старонку па вольнай паперы вакол фігур. Краі экрана застаюцца вольнымі для сістэмных жэстаў.</p>
+  <output id="status" aria-live="polite">Дзеянняў: 0</output>
+  <section id="board" aria-label="Пробная вобласць перацягвання">
+    <button class="piece" id="first" type="button">Фігура A</button>
+    <button class="piece round" id="second" type="button">Фігура B</button>
+    <button class="piece soon" id="soon" type="button" aria-disabled="true">Скора</button>
+  </section>
+  <p>Гэта асобны прыклад з простымі фігурамі. Ён не адкрывае раздзелы KUDY і не задае выгляд будучай карты.</p>
+  <p>Tab і Enter дазваляюць праверыць звычайнае дзеянне без перацягвання. Escape адмяняе жэст. Змена памеру вобласці вяртае фігуры ў яе межы.</p>
+  <div class="scroll-proof"><h2>Праверка пракруткі</h2><p>Гэты тэкст знаходзіцца ніжэй пробнай вобласці. Пустая паверхня не захоплівае pointer і не блакуе скрол.</p></div>
+</main>
+<script type="module" src="demo.mjs"></script>
+</html>

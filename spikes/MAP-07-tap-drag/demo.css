@@ -1,0 +1,14 @@
+:root { color-scheme: light; font: 16px/1.45 system-ui,sans-serif; color: #22262b; background: #faf7f2; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 680px; margin: auto; padding: max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left)); }
+h1 { font-size: clamp(26px,6vw,40px); line-height: 1.15; }
+.eyebrow { color: #1d6b4f; font-size: 13px; }
+output { display: block; padding: 12px 0; font-weight: 600; }
+#board { position: relative; height: 360px; border: 1px solid #c9c1b1; border-radius: 12px; }
+.piece { position: absolute; left: 0; top: 0; width: 104px; height: 76px; border: 2px solid #1d6b4f; border-radius: 12px; background: #fff; color: #22262b; font: inherit; font-weight: 600; touch-action: none; user-select: none; cursor: grab; }
+.piece:focus-visible { outline: 3px solid #1d6b4f; outline-offset: 3px; }
+.piece[data-dragging] { cursor: grabbing; z-index: 1; }
+.round { border-radius: 50%; }
+.soon { border-style: dashed; }
+.scroll-proof { margin-top: 40vh; padding-bottom: 20vh; }
