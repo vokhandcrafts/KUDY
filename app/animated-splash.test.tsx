@@ -117,3 +117,10 @@ test("the splash clock skips inactive windows but reaches each motion endpoint",
   expect(nextSplashSampleMs(5_000)).toBe(5_550);
   expect(nextSplashSampleMs(6_000)).toBeNull();
 });
+
+test("cold start does not run a 32 ms periodic whole-scene renderer", () => {
+  jest.useFakeTimers();
+  const intervals = jest.spyOn(global, "setInterval");
+  renderColdStart();
+  expect(intervals).not.toHaveBeenCalledWith(expect.any(Function), 32);
+});
