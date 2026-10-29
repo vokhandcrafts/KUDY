@@ -149,6 +149,6 @@ test("phase clock emits fewer scene updates than a fixed 32 ms interval", () => 
     elapsed = next;
   }
   expect(samples).toBe(130);
-  expect(Math.ceil(SPLASH_DURATION_MS / 32)).toBe(219);
-  expect(samples).toBeLessThan(Math.ceil(SPLASH_DURATION_MS / 32));
+  expect(Math.floor(SPLASH_DURATION_MS / 32)).toBe(218);
+  expect(samples).toBeLessThan(Math.floor(SPLASH_DURATION_MS / 32));
 });
