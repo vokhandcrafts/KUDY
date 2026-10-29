@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="be">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KUDY · MAP-05 · Фрагменты меню · прапанова</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px; background: #e9e7e1; color: #22262b; font: 400 16px/1.45 "Golos Text", system-ui, sans-serif; }
+main { max-width: 1160px; margin: auto; }
+h1 { font-size: 28px; line-height: 1.2; margin: 4px 0 10px; }
+h2 { font-size: 20px; margin: 0 0 8px; }
+p { margin: 4px 0 12px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.explain { max-width: 78ch; }
+.proposal { border: 1px solid #b7afa2; border-radius: 10px; padding: 12px; background: #fff; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 8px 9px; text-align: left; border-bottom: 1px solid #d8d2c6; vertical-align: top; }
+th { font-weight: 600; }
+code { overflow-wrap: anywhere; }
+.legend { font-size: 13px; }
+.board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+section.theme { border-radius: 16px; padding: 18px; background: var(--paper); color: var(--ink); border: 1px solid var(--line); min-width: 0; }
+section.theme[data-theme="light"] {
+  --paper: #faf7f2; --card: #ffffff; --ink: #22262b; --muted: #6b7280;
+  --line: #d8d2c6; --accent: #1d6b4f; --accent-ink: #ffffff;
+  --disabled-ink: #6b7280; --disabled-line: #6b7280;
+}
+section.theme[data-theme="dark"] {
+  --paper: #171d1c; --card: #232c29; --ink: #f2f1e9; --muted: #c4d0ca;
+  --line: #45534c; --accent: #80d4ad; --accent-ink: #0d2a1e;
+  --disabled-ink: #9aa8a1; --disabled-line: #6d7c72;
+}
+.theme > p { color: var(--muted); font-size: 13px; }
+.samples { display: grid; gap: 12px; }
+.sample { display: grid; grid-template-columns: minmax(110px, 140px) minmax(0, 1fr); gap: 10px; align-items: center; }
+.sample-name { color: var(--muted); font-size: 13px; }
+.fragment { position: relative; display: flex; align-items: center; gap: 12px; padding: 15px; min-height: 64px; min-width: 0; background: var(--card); color: var(--ink); border: 2px solid var(--line); border-radius: 13px 18px 15px 12px; font-weight: 600; }
+.fragment .icon { flex: none; width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.fragment .words { min-width: 0; overflow-wrap: anywhere; }
+.fragment .flag { display: inline-block; font-size: 12px; line-height: 1.35; font-weight: 400; margin-top: 3px; color: inherit; }
+.fragment[data-state="enabled"] { border-color: var(--accent); }
+.fragment[data-state="pressed"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); transform: translateY(2px); }
+.fragment[data-state="dragging"] { border-style: dashed; border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 3px; }
+.fragment[data-state="snapped"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.fragment[data-state="snapped"]::after { content: ""; width: 12px; height: 4px; background: var(--accent); position: absolute; right: -12px; top: calc(50% - 2px); }
+.fragment[data-state="disabled"] { border-color: var(--disabled-line); color: var(--disabled-ink); border-style: dashed; }
+.fragment:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.checks { margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.check { background: #fff; border: 1px solid #d8d2c6; border-radius: 10px; padding: 15px; min-width: 0; }
+.check .fragment { margin-top: 10px; }
+.check .long { font-size: 20px; line-height: 1.45; }
+.check small { display: block; margin-top: 10px; }
+svg.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+@media (max-width: 850px) { body { padding: 12px; } .board, .checks { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .sample { grid-template-columns: 90px minmax(0, 1fr); } .fragment { padding: 11px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <symbol id="book" viewBox="0 0 24 24"><path d="M12 6c-3-2-6-2-9-1v13c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1Z M12 6v13"/></symbol>
+  <symbol id="pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15 9-2 5-4 1 2-5 4-1Z"/></symbol>
+  <symbol id="archive" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="4" rx="1"/><path d="M6 9v10h12V9 M10 13h4"/></symbol>
+</svg>
+<main>
+  <header>
+    <div class="eyebrow">KUDY · MAP-05 · 29.10.2026 · праектны specimen</div>
+    <h1>Падпісы, іконкі і станы фрагментаў</h1>
+    <p class="explain">Гэта <strong>прапанова для агляду</strong>, не production UI і не геаметрыя гістарычнай карты. Нейтральныя фігуры заменяцца выразкамі адной майстар-карты ў MAP-04. Навігацыя працуе праз звычайны націск; складанне фрагментаў неабавязковае.</p>
+  </header>
+  <div class="proposal">
+    <h2>Інвентар дзеючых пунктаў</h2>
+    <p class="legend">Подпісы прыходзяць з наяўных ключоў; стрэлка ў зыходным радку застаецца часткай радка, пакуль #766 не прыме іншае рашэнне. Назвы і іконкі ў макеце — толькі кандыдаты.</p>
+    <table>
+      <thead><tr><th>Пункт</th><th>Зыходны ключ</th><th>Існы маршрут</th><th>Іконка · прапанова</th></tr></thead>
+      <tbody>
+        <tr data-key="native.chrome.guidesLink" data-path="/city/gdansk/guides"><td>Гіды →</td><td><code>native.chrome.guidesLink</code></td><td><code>/city/gdansk/guides</code></td><td>BookOpen</td></tr>
+        <tr data-key="native.chrome.nearby" data-path="/map"><td>Побач →</td><td><code>native.chrome.nearby</code></td><td><code>/map</code></td><td>MapPin</td></tr>
+        <tr data-key="native.chrome.whatToDo" data-path="/discovery"><td>Чым заняцца →</td><td><code>native.chrome.whatToDo</code></td><td><code>/discovery</code></td><td>Compass</td></tr>
+        <tr data-key="native.chrome.kudyLink" data-path="/my"><td>KUDY →</td><td><code>native.chrome.kudyLink</code></td><td><code>/my</code></td><td>Archive</td></tr>
+        <tr data-key="pending:880" data-path="none"><td>Будучы пункт · Soon</td><td>Няма (чакае #880)</td><td>Няма</td><td>Без іконкі да рашэння</td></tr>
+      </tbody>
+    </table>
+    <p class="legend">«Прагулка» (<code>native.chrome.walk</code>) — асобнае дзеючае дзеянне ў каталожнай паверхні, не пяты самастойны маршрут у гэтай спецыфікацыі. Крыніцы: <code>app/(tabs)/explore.tsx</code>, <code>components/guide-card.tsx</code>, <code>contracts/ui-messages/source.json</code>.</p>
+  </div>
+  <div class="board">
+    <section class="theme" data-theme="light" aria-label="Светлая тэма">
+      <h2>Светлая тэма</h2><p>Папера / чарніла / зялёны акцэнт · production-токены канона</p>
+      <div class="samples">
+        <div class="sample"><span class="sample-name">Enabled · гатова</span><div class="fragment" data-state="enabled"><svg class="icon" aria-hidden="true"><use href="#book"/></svg><span class="words">Гіды →<span class="flag">Адкрыць раздзел</span></span></div></div>
+        <div class="sample"><span class="sample-name">Pressed · націснута</span><div class="fragment" data-state="pressed"><svg class="icon" aria-hidden="true"><use href="#pin"/></svg><span class="words">Побач →<span class="flag">Націснута</span></span></div></div>
+        <div class="sample"><span class="sample-name">Dragging · рух</span><div class="fragment" data-state="dragging"><svg class="icon" aria-hidden="true"><use href="#compass"/></svg><span class="words">Чым заняцца →<span class="flag">Перамяшчэнне</span></span></div></div>
+        <div class="sample"><span class="sample-name">Snapped · разам</span><div class="fragment" data-state="snapped"><svg class="icon" aria-hidden="true"><use href="#archive"/></svg><span class="words">KUDY →<span class="flag">Злучана з суседам</span></span></div></div>
+        <div class="sample"><span class="sample-name">Disabled · Soon</span><div class="fragment" data-state="disabled"><span class="words">Будучы пункт<span class="flag">Яшчэ недаступна · можна перамясціць</span></span></div></div>
+      </div>
+    </section>
+    <section class="theme" data-theme="dark" aria-label="Цёмная тэма">
+      <h2>Цёмная тэма</h2><p>Значэнні з <code>docs/design/dark-theme.md</code>, без інверсіі выявы карты</p>
+      <div class="samples">
+        <div class="sample"><span class="sample-name">Enabled · гатова</span><div class="fragment" data-state="enabled"><svg class="icon" aria-hidden="true"><use href="#book"/></svg><span class="words">Гіды →<span class="flag">Адкрыць раздзел</span></span></div></div>
+        <div class="sample"><span class="sample-name">Pressed · націснута</span><div class="fragment" data-state="pressed"><svg class="icon" aria-hidden="true"><use href="#pin"/></svg><span class="words">Побач →<span class="flag">Націснута</span></span></div></div>
+        <div class="sample"><span class="sample-name">Dragging · рух</span><div class="fragment" data-state="dragging"><svg class="icon" aria-hidden="true"><use href="#compass"/></svg><span class="words">Чым заняцца →<span class="flag">Перамяшчэнне</span></span></div></div>
+        <div class="sample"><span class="sample-name">Snapped · разам</span><div class="fragment" data-state="snapped"><svg class="icon" aria-hidden="true"><use href="#archive"/></svg><span class="words">KUDY →<span class="flag">Злучана з суседам</span></span></div></div>
+        <div class="sample"><span class="sample-name">Disabled · Soon</span><div class="fragment" data-state="disabled"><span class="words">Будучы пункт<span class="flag">Яшчэ недаступна · можна перамясціць</span></span></div></div>
+      </div>
+    </section>
+  </div>
+  <div class="checks">
+    <div class="check">
+      <h2>Доўгі подпіс · 1,25×</h2>
+      <p>Прапановы радкоў не ўводзяцца ў лакалізацыю: тут толькі нагрузачная праверка пераносу.</p>
+      <div class="fragment"><svg class="icon" aria-hidden="true"><use href="#compass"/></svg><span class="words long">Незвычайна доўгая назва раздзела з гісторыямі і вандроўкамі</span></div>
+    </div>
+    <div class="check">
+      <h2>Без іконкі і без drag</h2>
+      <p>Тэкст мусіць працаваць без графікі. Падпісаны элемент даступны праз tap, без абавязковай зборкі.</p>
+      <div class="fragment"><span class="words">Гіды →<span class="flag">Адкрыць раздзел</span></span></div>
+      <small>Для screen reader / клавіятуры патрэбная асобная альтэрнатыва перамяшчэння ў MAP-10.</small>
+    </div>
+  </div>
+  <p class="legend">Прапановы: назвы іконак і подпісы станаў падлягаюць рэдакцыйнаму прагляду (#766/#771); дзіцячы пункт і яго назва належаць #880. Гэта статычная параўнальная дошка, не імітацыя гатовага gesture-рухавіка.</p>
+</main>
+</body>
+</html>
