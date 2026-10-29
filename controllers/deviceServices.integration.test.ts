@@ -159,6 +159,120 @@ const phaseBecomes = async (controller: { getState(): { run: { phase: string } }
   assert.fail(`the phase never reached ${phase}`);
 };
 
+
+/** #815: the production root, real run controller and pipeline under a controlled wall clock.
+ * Only the OS ports are fakes; no threshold or candidate handling is mocked.
+ */
+async function controlledDwellWalk() {
+  const clock = { time: 1_000_000 };
+  const osLocation = new FakeLocationOsPort();
+  const location = new LocationService({
+    port: osLocation,
+    clock: { now: () => clock.time, schedule: () => () => {} },
+    permissions: { foreground: 'fg', background: 'bg' },
+  });
+  const device = createDeviceServicePorts({
+    ...facilities(nodeSqliteDriver()),
+    location,
+    runClock: { now: () => clock.time },
+  });
+  const services = createServices(device.ports);
+  const preview = services.preview?.create('route-491');
+  assert.ok(preview, 'the installed preview must exist');
+  await settledPreview(preview);
+  await preview.getState().download();
+  await preview.getState().refresh();
+  assert.equal(await preview.getState().start(), 'handover');
+  const runStore = services.run?.create('route-491', { approvedStart: true });
+  assert.ok(runStore, 'the installed run must exist');
+  await settledRun(runStore);
+  const surface = runStore.getState();
+  assert.equal(surface.status, 'ready');
+  if (surface.status !== 'ready') throw new Error('expected the installed Run surface');
+  const controller = surface.controller;
+  assert.equal(controller.getState().run.phase, 'Active');
+  const startCommand = osLocation.commands.find((command) => command.startsWith('start '));
+  assert.ok(startCommand, 'production Start must arm the OS location subscription');
+  const subscription = Number(startCommand.slice('start '.length));
+  const [place] = JSON.parse(PLACES_JSON) as Array<{ lat: number; lng: number }>;
+  const emit = (elapsedMs: number, northMeters = 0, accuracy = 5) => {
+    clock.time = 1_000_000 + elapsedMs;
+    osLocation.emitFix(subscription, {
+      lat: place.lat + northMeters / 111_195,
+      lng: place.lng,
+      accuracy,
+      at: clock.time,
+    });
+  };
+  const state = () => {
+    const run = controller.getState().run;
+    if (run.phase === 'Idle') throw new Error('walk unexpectedly idle');
+    return run;
+  };
+  return { controller, device, emit, state, osLocation };
+}
+
+test('G20.35: canonical dwell uses the active production path; identical paused fix stream cannot trigger', async () => {
+  const active = await controlledDwellWalk();
+  try {
+    for (let second = 0; second < 6; second += 1) {
+      active.emit(second * 1000);
+      assert.deepEqual(active.state().autoFired, [], 'no trigger on first fix or before dwell threshold');
+      assert.equal(active.state().playing, null);
+    }
+    active.emit(6000);
+    assert.deepEqual(active.state().autoFired, ['stop-1'], 'one trigger at the canonical threshold');
+    assert.equal(active.state().playing?.owner, 'guide', 'positive control must actually launch audio');
+    active.emit(7000);
+    assert.deepEqual(active.state().autoFired, ['stop-1'], 'no duplicate trigger');
+  } finally {
+    active.controller.getState().end();
+    active.device.teardown();
+  }
+
+  const paused = await controlledDwellWalk();
+  try {
+    paused.emit(0);
+    paused.controller.getState().pauseSession();
+    await phaseBecomes(paused.controller, 'Paused');
+    assert.equal(paused.osLocation.activeSubscriptions(), 0, 'pause must release GPS');
+    for (let second = 1; second <= 7; second += 1) paused.emit(second * 1000);
+    assert.deepEqual(paused.state().autoFired, [], 'paused walk cannot consume the same trigger stream');
+    assert.equal(paused.state().playing, null, 'paused walk must not launch audio');
+    assert.equal(paused.state().phase, 'Paused');
+  } finally {
+    paused.controller.getState().end();
+    paused.device.teardown();
+  }
+});
+
+test('G20.35: departing the radius resets canonical dwell through production composition', async () => {
+  const walk = await controlledDwellWalk();
+  try {
+    walk.emit(0);
+    walk.emit(2000);
+    assert.deepEqual(walk.state().autoFired, []);
+    // Gradual, physically plausible samples pass the speed/accuracy gates.
+    // The 3-fix smoothed latitude moves outside the 30 m stop radius.
+    walk.emit(60_000, 100);
+    walk.emit(61_000, 100);
+    walk.emit(62_000, 100);
+    assert.deepEqual(walk.state().autoFired, [], 'leaving the radius resets the accumulator');
+    walk.emit(122_000);
+    walk.emit(123_000);
+    walk.emit(124_000); // first smoothed fix back within the radius; credits zero time
+    for (let ms = 125_000; ms < 130_000; ms += 1000) {
+      walk.emit(ms);
+      assert.deepEqual(walk.state().autoFired, [], 'time outside must not be credited on re-entry');
+    }
+    walk.emit(130_000);
+    assert.deepEqual(walk.state().autoFired, ['stop-1'], 'trigger only after new continuous dwell');
+  } finally {
+    walk.controller.getState().end();
+    walk.device.teardown();
+  }
+});
+
 test('G20.20: the free synthetic package walks the whole production composition', async () => {
   const sharedDriver = nodeSqliteDriver();
   const firstFacilities = { ...facilities(sharedDriver), guideHintValues: loadGuideHintValues(), foreground: () => true };
