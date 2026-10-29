@@ -7,7 +7,7 @@ import { Path } from "react-native-svg";
 
 import { AnimatedSplash } from "./animated-splash";
 
-type SvgPathNode = { props: { d?: unknown; fill?: unknown } };
+type SvgPathNode = { props: { d?: unknown; fill?: unknown }; parent: SvgPathNode | null };
 
 test("both raised paws have separate, contrasting vector claws", () => {
   render(<AnimatedSplash elapsedMs={1_200} brandName="KUDY" />);
@@ -17,11 +17,17 @@ test("both raised paws have separate, contrasting vector claws", () => {
     const claws = screen.getByTestId(`splash-claws-${side}`);
     const clawPaths: SvgPathNode[] = claws.findAllByType(Path);
     const pawPaths: SvgPathNode[] = paw.findAllByType(Path);
-    const pawFill = pawPaths[0]?.props.fill;
+    let pawFill: unknown;
+    let node: SvgPathNode | null = pawPaths[0] ?? null;
+    while (node && typeof pawFill !== "string") {
+      pawFill = node.props.fill;
+      node = node.parent;
+    }
 
     expect(clawPaths.length).toBeGreaterThanOrEqual(3);
     expect(new Set(clawPaths.map((path) => String(path.props.d ?? ""))).size).toBeGreaterThanOrEqual(3);
-    expect(clawPaths.some((path) => {
+    expect(typeof pawFill).toBe("string");
+    expect(clawPaths.every((path) => {
       const fill = path.props.fill ?? claws.props.fill;
       return typeof fill === "string" && fill !== "none" && fill !== pawFill;
     })).toBe(true);
