@@ -29,7 +29,6 @@ const Part = memo(function Part({ name }: { name: keyof typeof paths }) {
   );
 });
 
-
 type SplashHeadProps = {
   side: number;
   headY: number;
@@ -76,9 +75,8 @@ const SplashHead = memo(function SplashHead({ side, headY, facing, blink, mouth,
 });
 
 const SplashPawLeft = memo(function SplashPawLeft({ y }: { y: number }) {
-  const leftPawY = y;
   return (
-            <G testID="splash-paw-left" transform={`translate(0 ${leftPawY})`}>
+            <G testID="splash-paw-left" transform={`translate(0 ${y})`}>
               <G transform="translate(295 966) scale(1.06 1.12) translate(-295 -966)"><Part name="pawL" /></G>
               <G testID="splash-claws-left" transform="translate(0 8)" fill="#f8deb4" stroke="#743d25" strokeWidth={2.5} strokeLinejoin="round">
                 <Path d="M203 906 C209 900 221 903 224 911 C226 923 219 936 215 944 C208 938 204 925 203 906Z" fill="#f8deb4" />
@@ -90,9 +88,8 @@ const SplashPawLeft = memo(function SplashPawLeft({ y }: { y: number }) {
 });
 
 const SplashPawRight = memo(function SplashPawRight({ y }: { y: number }) {
-  const rightPawY = y;
   return (
-            <G testID="splash-paw-right" transform={`translate(0 ${rightPawY})`}>
+            <G testID="splash-paw-right" transform={`translate(0 ${y})`}>
               <G transform="translate(695 966) scale(1.06 1.12) translate(-695 -966)"><Part name="pawR" /></G>
               <G testID="splash-claws-right" transform="translate(0 8)" fill="#f8deb4" stroke="#743d25" strokeWidth={2.5} strokeLinejoin="round">
                 <Path d="M602 909 C608 903 620 906 623 915 C625 927 618 940 614 947 C607 940 603 927 602 909Z" fill="#f8deb4" />
