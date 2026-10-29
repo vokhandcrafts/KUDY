@@ -6,6 +6,7 @@ import { afterEach, expect, jest, test } from "@jest/globals";
 import { act } from "@testing-library/react-native";
 import { renderRouter, screen } from "expo-router/testing-library";
 import { Path } from "react-native-svg";
+import { nextSplashSampleMs } from "../components/animated-splash";
 
 import Explore from "./(tabs)/explore";
 import Index from "./index";
@@ -103,4 +104,16 @@ test("the KUDY word is a full-width centered line, not a content-sized box", () 
   const style = flatStyle(screen.getByTestId("splash-brand"));
   expect(style.width).toBe("100%");
   expect(style.textAlign).toBe("center");
+});
+
+// #871: the clock skips still holds instead of repainting the SVG tree.
+test("the splash clock skips inactive windows but reaches each motion endpoint", () => {
+  expect(nextSplashSampleMs(0)).toBe(420);
+  expect(nextSplashSampleMs(420)).toBe(452);
+  expect(nextSplashSampleMs(1_070)).toBe(1_500);
+  expect(nextSplashSampleMs(2_995)).toBe(3_000);
+  expect(nextSplashSampleMs(3_000)).toBe(3_460);
+  expect(nextSplashSampleMs(3_820)).toBe(4_050);
+  expect(nextSplashSampleMs(5_000)).toBe(5_550);
+  expect(nextSplashSampleMs(6_000)).toBeNull();
 });
