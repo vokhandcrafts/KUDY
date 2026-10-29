@@ -45,6 +45,7 @@ section.theme[data-theme="dark"] {
 .fragment[data-state="snapped"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
 .fragment[data-state="snapped"]::after { content: ""; width: 12px; height: 4px; background: var(--accent); position: absolute; right: -12px; top: calc(50% - 2px); }
 .fragment[data-state="disabled"] { border-color: var(--disabled-line); color: var(--disabled-ink); border-style: dashed; }
+/* Future-only focus proposal: static fragments are not keyboard-focusable; MAP-10 owns interaction. */
 .fragment:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 .checks { margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .check { background: #fff; border: 1px solid #d8d2c6; border-radius: 10px; padding: 15px; min-width: 0; }
@@ -120,6 +121,7 @@ svg.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
       <small>Для screen reader / клавіятуры патрэбная асобная альтэрнатыва перамяшчэння ў MAP-10.</small>
     </div>
   </div>
+  <p class="legend">Фокусная рамка <code>:focus-visible</code> — толькі прапанова для будучага інтэрактыўнага UI (MAP-10). Статычныя фрагменты не даступныя праз Tab, не рэагуюць на Enter і не адкрываюць маршруты.</p>
   <p class="legend">Прапановы: назвы іконак і подпісы станаў падлягаюць рэдакцыйнаму прагляду (#766/#771); дзіцячы пункт і яго назва належаць #880. Гэта статычная параўнальная дошка, не імітацыя гатовага gesture-рухавіка.</p>
 </main>
 </body>
