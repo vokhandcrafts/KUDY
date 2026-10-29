@@ -58,3 +58,33 @@
 - 2026-10-29 · Codex: перад production патрэбныя React Native adapter,
   прыладавая праверка жэстаў і поўная a11y-прыёмка ў наступных MAP-задачах.
   Форма карты, snap, захаванне пазіцый і новыя пункты меню тут не вызначаюцца.
+
+## Працяг: адчуванне «схапіў» (2026-10-29)
+
+- Дададзена асобная фаза падхопу: пры дотыку лёгкае прыцісканне; пасля
+  120 мс утрымання — зрух на 3 px уверх, маштаб 1.035 і мяккі цень.
+  Калі перацягванне пачалося раней, гэты стан уключаецца адразу, без затрымкі
+  перамяшчэння. Утрыманне без руху не адкрывае раздзел; кароткі tap працуе.
+- `pickup-feedback.mjs` валодае таймерам і скідам пры release/cancel.
+  `adapter-pickup.test.mjs` правярае рэальнае падключэнне да demo: tap,
+  доўгае ўтрыманне, drag, другі pointer і клавіятуру. Ключавыя станы
+  пацверджаныя таксама `pickup-feedback.test.mjs`.
+- `weighted-motion.mjs` асобна згладжвае толькі бачную пазіцыю; жэставы
+  рухавік `tap-drag.mjs` і замарожаныя крытэрыі не змененыя.
+  `reduced motion` адключае анімацыю, але захоўвае статычную прыкмету захопу.
+- У асобным worktree: `node --test spikes/MAP-07-tap-drag/tap-drag.test.mjs
+  spikes/MAP-07-tap-drag/edge-cases.test.mjs
+  spikes/MAP-07-tap-drag/weighted-motion.test.mjs
+  spikes/MAP-07-tap-drag/pickup-feedback.test.mjs` — 21 pass;
+  `node --test spikes/MAP-07-tap-drag/adapter-pickup.test.mjs` — 1 pass.
+  `npm run arch:check` — OK (650 modules, 0 violations).
+- `npm run typecheck` у sandbox гэтага worktree — не правераны:
+  TS6053 на `spikes/G00.03-sandbox-grant/server/device-auth.mjs`.
+  Браўзерны opt-in E2E — не пройдзены: няма Playwright headless shell;
+  сістэмны Chromium у абмежаваным sandbox спыніўся з `SIGTRAP`.
+  Android/WayDroid і FPS не правяраліся. Гэта не выдаецца за pass.
+  Новы Showboat verify не выкананы: `uvx` недаступны ў sandbox.
+  Папярэдні Showboat-доказ адносіцца да базавага drag без новай фазы падхопу.
+- Production home, навігацыя, форма гістарычнай карты, snap і persistence
+  не закранутыя. Паказальнікі таймера і анімацыі вызваляюцца пры адмене
+  і закрыцці старонкі.
