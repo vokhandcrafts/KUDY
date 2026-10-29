@@ -6,7 +6,7 @@ import { afterEach, expect, jest, test } from "@jest/globals";
 import { act } from "@testing-library/react-native";
 import { renderRouter, screen } from "expo-router/testing-library";
 import { Path } from "react-native-svg";
-import { nextSplashSampleMs } from "../components/animated-splash";
+import { nextSplashSampleMs, SPLASH_DURATION_MS } from "../components/animated-splash";
 
 import Explore from "./(tabs)/explore";
 import Index from "./index";
@@ -118,9 +118,37 @@ test("the splash clock skips inactive windows but reaches each motion endpoint",
   expect(nextSplashSampleMs(6_000)).toBeNull();
 });
 
-test("cold start does not run a 32 ms periodic whole-scene renderer", () => {
+test("cold start does not run any periodic whole-scene renderer", () => {
   jest.useFakeTimers();
   const intervals = jest.spyOn(global, "setInterval");
   renderColdStart();
-  expect(intervals).not.toHaveBeenCalledWith(expect.any(Function), 32);
+  expect(intervals).not.toHaveBeenCalled();
+});
+
+test("head descends during its own phase, before the blink or side move", () => {
+  jest.useFakeTimers();
+  renderColdStart();
+  advance(1_500);
+  const headAtStart = svgProp("splash-head", "matrix");
+  advance(600);
+  const headDuringDrop = svgProp("splash-head", "matrix");
+  expect(headDuringDrop).not.toEqual(headAtStart);
+  advance(900);
+  expect(svgProp("splash-head", "matrix")).not.toEqual(headDuringDrop);
+  expect(screen.queryByTestId("screen-Explore")).toBeNull();
+});
+
+test("phase clock emits fewer scene updates than a fixed 32 ms interval", () => {
+  let elapsed = 0;
+  let samples = 0;
+  for (;;) {
+    const next = nextSplashSampleMs(elapsed);
+    if (next === null) break;
+    expect(next).toBeGreaterThan(elapsed);
+    samples++;
+    elapsed = next;
+  }
+  expect(samples).toBe(130);
+  expect(Math.ceil(SPLASH_DURATION_MS / 32)).toBe(219);
+  expect(samples).toBeLessThan(Math.ceil(SPLASH_DURATION_MS / 32));
 });
