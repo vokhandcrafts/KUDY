@@ -65,6 +65,8 @@ test('both themes show all required states, textual cues and fallback specimens'
   assert.match(specimen, /Без іконкі і без drag/);
   assert.match(specimen, /class="words long"/);
   assert.match(specimen, /:focus-visible/);
+  assert.match(specimen, /Future-only focus proposal: static fragments are not keyboard-focusable/);
+  assert.match(specimen, /Статычныя фрагменты не даступныя праз Tab/);
   assert.match(specimen, /prefers-reduced-motion: reduce/);
 });
 
