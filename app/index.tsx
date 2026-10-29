@@ -4,7 +4,7 @@ import { useReducedMotion } from "react-native-reanimated";
 
 import { useUiLocale } from "./_layout";
 import { uiStrings } from "../components/ui-strings";
-import { AnimatedSplash, SPLASH_DURATION_MS } from "../components/animated-splash";
+import { AnimatedSplash, SPLASH_DURATION_MS, nextSplashSampleMs } from "../components/animated-splash";
 
 // The native splash stays on screen until the JS route is ready. This route
 // then plays the approved vector intro before replacing itself with Explore.
