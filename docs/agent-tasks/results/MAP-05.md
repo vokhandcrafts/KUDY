@@ -11,7 +11,7 @@
 - [Брыф «Атлас знаходак» v1, 08.10.2026](../../design/brand/atlas-brief.md): спакойная папера, зялёны акцэнт, свабода навігацыі.
 - [Рэестр дызайн-рашэнняў](../../design/brand/decisions.md): B06/B06.1 — назвы меню ўсё яшчэ адкрытыя; прынятая назва калекцыі не робіцца пунктам меню аўтаматычна.
 - [Візуальны канон](../../design/visual-language.md), [цёмная тэма](../../design/dark-theme.md), вытворныя токены ў components/design-tokens.ts.
-- Рэальны UI: app/(tabs)/explore.tsx, components/guide-card.tsx, components/ui-strings.ts, contracts/ui-messages/source.json. Крыніца — main пры стварэнні галіны chatgpt/883 29.10.2026.
+- Рэальны UI: app/(tabs)/explore.tsx, components/guide-card.tsx, components/ui-strings.ts, contracts/ui-messages/source.json. Крыніца — main, каміт af6c5846292e71d72a21f0b6dc3646cf84c976ce пры стварэнні галіны chatgpt/883 29.10.2026.
 - Сумежныя рашэнні: [#766](https://github.com/vokhandcrafts/KUDY/issues/766), [#771](https://github.com/vokhandcrafts/KUDY/issues/771), [#880](https://github.com/vokhandcrafts/KUDY/issues/880).
 
 ## Крытэрый 1 — рэальны інвентар, не новыя маршруты
