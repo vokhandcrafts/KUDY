@@ -212,3 +212,9 @@
   сьют поўнай пашкоджанасці ўсіх радкоў гэтыя выпадкі не ізалюе.
   Выпраўлена: controllers/catalog/catalogSnapshot.integration.test.ts —
   issue #855.
+
+- key: ineffective-claw-contrast-guard — тэст кіпцікаў параўноўвае іх колер
+  з фактычным колерам лапкі, у тым ліку калі той зададзены на бацькоўскай
+  SVG-групе. Калі ўсе кіпцікі атрымаюць колер лапкі, тэст мусіць упасці;
+  параўнанне з `undefined` не ахоўвае кантраст.
+  Выпраўлена: components/animated-splash-quality.test.tsx — issue #876.
