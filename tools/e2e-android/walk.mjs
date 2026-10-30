@@ -117,10 +117,34 @@ async function waitForAudioActive(driver, expected) {
   }
 }
 
+// A nearby-guide hint rendered above the Run card in the failing Android
+// artifact: its bounds covered the center of btn-card-play. UIAutomator
+// still found the button, but Android delivered the tap to the hint instead.
+// The Run surface now hides hints while the card is open; this guard also
+// dismisses a hint if it was visible before the card finished rendering.
+export async function dismissGuideHintBeforePlay(driver) {
+  const deadline = Date.now() + SHORT_MS;
+  let dismissed = false;
+  for (;;) {
+    const nodes = parseDump((await driver.dump('dump-walk-play-uncovered.xml')).xml);
+    const hint = findNode(nodes, { testID: 'guide-hint-card' });
+    if (!hint) return;
+    if (!dismissed) {
+      const button = findNode(nodes, { testID: 'btn-hint-dismiss' });
+      assert.ok(button, 'nearby guide hint covers Play but has no dismiss button');
+      await driver.tapNode(button);
+      dismissed = true;
+    }
+    if (Date.now() >= deadline) throw new Error('nearby guide hint still covers the Play button after dismissal');
+    await delay();
+  }
+}
+
 // The fixture recording is six seconds long. Arm the physical observation
 // before the one tap: waiting for adb input to finish can miss a short play.
 // Only Android playback counts as success; an engine/UI bar alone never does.
 export async function tapPlayAndWaitForAudio(driver) {
+  await dismissGuideHintBeforePlay(driver);
   const node = await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
   const observation = waitForAudioActive(driver, true);
   try {
