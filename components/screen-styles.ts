@@ -4,7 +4,8 @@
 // (implementation-rules 3).
 import { StyleSheet } from "react-native";
 
-import { tokens } from "./design-tokens";
+import { darkTokens, tokens } from "./design-tokens";
+import { useThemeStyles } from "./theme";
 
 // Issue #435: canon §3 gives Alegreya the guide and story names only —
 // every other screen title (rubrics, place names, collections) stays on
@@ -34,3 +35,15 @@ export const screenStyles = StyleSheet.create({
     fontFamily: tokens.fontFamilyDisplay,
   },
 });
+
+// #436 — preserve the existing light screenStyles export and its typography
+// contract; detail screens select a dark equivalent at render time.
+const darkScreenStyles = StyleSheet.create({
+  screen: { ...screenStyles.screen, backgroundColor: darkTokens.colorPaper },
+  title: { ...screenStyles.title, color: darkTokens.colorInk },
+  displayTitle: { ...screenStyles.displayTitle, color: darkTokens.colorInk },
+});
+
+export function useScreenStyles() {
+  return useThemeStyles(screenStyles, darkScreenStyles);
+}
