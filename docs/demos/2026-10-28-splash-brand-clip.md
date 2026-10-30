@@ -25,7 +25,7 @@ PASS app/animated-splash-reduced-motion.test.tsx
 PASS app/animated-splash.test.tsx
 Snapshots:   0 total
 Test Suites: 2 passed, 2 total
-Tests:       4 passed, 4 total
+Tests:       8 passed, 8 total
 ```
 
 Вывад каманды нармалізаваны, каб гард не залежаў ад машыны: jest дадае
