@@ -57,3 +57,6 @@ tools/e2e-android/artifacts/
 # machine JSON committed to the evidence dir is escape-encoded, the raw pulls are not.
 docs/testing/evidence/2026-10-11-g718/runtime/
 
+
+# Design-QA spec map: rendered locally from map.json, never tracked
+docs/specifications/design-qa/index.html
