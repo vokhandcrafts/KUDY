@@ -21,8 +21,8 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 Што зрабіць: выберы варыянт A (толькі Główne Miasto) ці B (Stare Miasto разам з Główne Miasto), гістарычную эпоху і пачатковыя 4–5 частак. Асобна пацвердзі дапушчальную схематызацыю і крыніцу production-асновы пасля праверкі правоў на канкрэтны скан; занясі рашэнні ў issue #882.
 PR: https://github.com/vokhandcrafts/KUDY/pull/906 · Issue: https://github.com/vokhandcrafts/KUDY/issues/882
 
-### 2026-10-30 — завяршы прыёмку G20.35 пасля CI
-Што зрабіць: правер канчатковы Android CI і незалежнае рэв’ю PR #903 перад зліццём. Mutation-тэсты і Showboat 0.6.1 ужо сапраўды прайшлі ў GitHub Actions (спасылкі ў `docs/agent-tasks/results/G20.35.md`), таму не паўтарай іх без прычыны. Лакальны эмулятар не запускай; пасля паспяховага зліцця здымі пазнаку `agent:running` з #815.
+### 2026-10-30 — завяршы прыёмку G20.35 пасля новага рэв'ю
+Што зрабіць: перад зліццём PR #903 правер паўторны CI на апошнім каміце пасля выпраўлення заўваг Voka/Judge і атрымай новы незалежны станоўчы вердыкт Judge. Папярэднія Android CI і Showboat ужо былі зялёныя на `eaf061e`; свежыя вынікі занясі ў `docs/agent-tasks/results/G20.35.md`. Лакальны эмулятар не запускай; пасля merge здымі `agent:running` з #815.
 PR: https://github.com/vokhandcrafts/KUDY/pull/903 · Issue: https://github.com/vokhandcrafts/KUDY/issues/815
 
 ### 2026-10-29 — змержы праўку літарала ў гараўчым тэсце MAP-05
