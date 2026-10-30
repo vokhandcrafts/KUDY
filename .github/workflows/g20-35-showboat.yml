@@ -1,0 +1,28 @@
+name: g20-35-showboat
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: Install test dependencies
+        run: npm ci
+      - name: Install pinned uv in an isolated temporary venv
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/kudy-showboat-uv"
+          "$RUNNER_TEMP/kudy-showboat-uv/bin/pip" install uv==0.9.7
+      - name: Verify G20.35 proof with Showboat 0.6.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/kudy-showboat-uv/bin/uvx" showboat==0.6.1 verify docs/demos/2026-10-30-g20-35-dwell-proof.md
