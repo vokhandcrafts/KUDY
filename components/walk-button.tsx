@@ -15,26 +15,30 @@ import { StyleSheet } from "react-native";
 
 import type { Services } from "../controllers/createServices";
 import { PressableSurface } from "./pressable-surface";
-import { tokens } from "./design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "./design-tokens";
+import { useThemeStyles } from "./theme";
 import { ScaledText } from "./scaled-text";
 import { uiStrings } from "./ui-strings";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   button: {
     alignSelf: "flex-start",
-    backgroundColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
-    marginBottom: tokens.spaceM,
-    padding: tokens.spaceM,
+    backgroundColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
+    marginBottom: palette.spaceM,
+    padding: palette.spaceM,
   },
   label: {
-    color: tokens.colorAccentInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorAccentInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 export function WalkButton({ walk, locale = "be" }: { walk?: Services["walk"]; locale?: string }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const router = useRouter();
   const [live, setLive] = useState(() => walk?.liveSession() ?? null);
   useFocusEffect(
