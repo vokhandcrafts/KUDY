@@ -15,9 +15,12 @@ const configPath = 'controllers/deviceServices.ts';
 const orchestratorPath = 'controllers/run/runOrchestrator.ts';
 
 function command(exe, args, cwd, timeout = 60_000) {
+  // node:test marks its workers with NODE_TEST_CONTEXT; passing that marker
+  // to a nested --test process silently skips test files and exits zero.
+  const { NODE_TEST_CONTEXT: _parentTestContext, ...childEnv } = process.env;
   const result = spawnSync(exe, args, {
     cwd, encoding: 'utf8', timeout, maxBuffer: 8 * 1024 * 1024,
-    env: { ...process.env, NODE_NO_WARNINGS: '1' },
+    env: { ...childEnv, NODE_NO_WARNINGS: '1' },
   });
   if (result.error) throw result.error;
   return result;
