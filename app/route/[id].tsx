@@ -26,7 +26,8 @@ import { usePreviewController } from "../../controllers/catalog/usePreviewContro
 import { useStoreState } from "../../controllers/useControllerStore";
 import { BackButton } from "../../components/back-button";
 import { CanonIcon } from "../../components/canon-icon";
-import { tokens } from "../../components/design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "../../components/design-tokens";
+import { useThemeStyles } from "../../components/theme";
 import { AccessBadge, LocalesLine, offerShownInTextLocale, StateBanner } from "../../components/guide-card";
 import { LoadingIndicator } from "../../components/loading-indicator";
 import {
@@ -36,13 +37,13 @@ import {
 } from "../../components/modal-dialog";
 import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
-import { screenStyles } from "../../components/screen-styles";
+import { useScreenStyles } from "../../components/screen-styles";
 import { uiStrings } from "../../components/ui-strings";
 import { UpgradeOffer } from "../../components/upgrade-offer";
 import { WalkButton } from "../../components/walk-button";
 import { useServices, useUiLocale } from "../_layout";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   // G06.10.b: the interface text renders the UI family (canon §3, Golos
   // Text); the strong styles take the named 600 face. While the faces load
   // (and in tests without them) the unknown family names fall back to the
@@ -51,29 +52,29 @@ const styles = StyleSheet.create({
   // a failed download is never a dead end.
   downloadRetry: {
     alignSelf: "flex-start",
-    borderColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginTop: tokens.spaceS,
-    paddingHorizontal: tokens.spaceM,
-    paddingVertical: tokens.spaceS,
+    marginTop: palette.spaceS,
+    paddingHorizontal: palette.spaceM,
+    paddingVertical: palette.spaceS,
   },
   downloadRetryLabel: {
-    color: tokens.colorAccent,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorAccent,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
   },
   summary: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
   theme: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceS,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceS,
   },
   // G21.21: the audio choice chips — the pill row under the locales line,
   // the selected chip reads the accent outline (the canon ghost pair for
@@ -81,145 +82,149 @@ const styles = StyleSheet.create({
   audioPicker: {
     flexDirection: "row",
     flexWrap: "wrap",
-    columnGap: tokens.spaceS,
-    marginTop: tokens.spaceS,
+    columnGap: palette.spaceS,
+    marginTop: palette.spaceS,
   },
   audioChip: {
-    borderRadius: tokens.radiusPill,
+    borderRadius: palette.radiusPill,
     borderWidth: 1,
-    borderColor: tokens.colorDisabledLine,
-    paddingHorizontal: tokens.spaceM,
+    borderColor: palette.colorDisabledLine,
+    paddingHorizontal: palette.spaceM,
     paddingVertical: 4,
   },
   audioChipSelected: {
-    borderColor: tokens.colorAccent,
+    borderColor: palette.colorAccent,
   },
   audioChipLabel: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
     fontSize: 12,
   },
   audioChipLabelSelected: {
-    color: tokens.colorAccent,
-    fontFamily: tokens.fontFamilyUiStrong,
+    color: palette.colorAccent,
+    fontFamily: palette.fontFamilyUiStrong,
     fontSize: 12,
-    fontWeight: tokens.fontWeightStrong,
+    fontWeight: palette.fontWeightStrong,
   },
   fact: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceS,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginTop: palette.spaceS,
   },
   // G06.10.c (issue #403): the wrapped facts own the row's spacing — the
   // icon (canon tokens, deep import) sits beside the fact text, and the row
   // is the one accessibility element announcing the fact once.
   factRow: {
     alignItems: "center",
-    columnGap: tokens.spaceS,
+    columnGap: palette.spaceS,
     flexDirection: "row",
-    marginTop: tokens.spaceS,
+    marginTop: palette.spaceS,
   },
   factRowLabel: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
   },
   stops: {
-    marginTop: tokens.spaceM,
+    marginTop: palette.spaceM,
   },
   stopRow: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceS,
-    padding: tokens.spaceM,
+    marginBottom: palette.spaceS,
+    padding: palette.spaceM,
   },
   stopName: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   stopPlace: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
     fontSize: 12,
     marginTop: 2,
   },
   stopAnnounce: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceS,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginTop: palette.spaceS,
   },
   lockBadge: {
     alignSelf: "flex-start",
-    backgroundColor: tokens.colorBadgePaid,
-    borderRadius: tokens.radiusPill,
-    marginTop: tokens.spaceS,
+    backgroundColor: palette.colorBadgePaid,
+    borderRadius: palette.radiusPill,
+    marginTop: palette.spaceS,
     overflow: "hidden",
-    paddingHorizontal: tokens.spaceS,
+    paddingHorizontal: palette.spaceS,
     paddingVertical: 2,
   },
   mainButton: {
     alignItems: "center",
-    backgroundColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
-    marginTop: tokens.spaceM,
-    padding: tokens.spaceM,
+    backgroundColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
+    marginTop: palette.spaceM,
+    padding: palette.spaceM,
   },
   // Issue #430 (варыянт А): the disabled primary reads — transparent fill,
   // the canon ghost pair through the mirror, no opacity substitute (§5).
   mainButtonDisabled: {
     backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: tokens.colorDisabledLine,
+    borderColor: palette.colorDisabledLine,
   },
   mainButtonLabel: {
-    color: tokens.colorAccentInk,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorAccentInk,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   mainButtonLabelDisabled: {
-    color: tokens.colorDisabledInk,
+    color: palette.colorDisabledInk,
   },
   buttonReason: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceS,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginTop: palette.spaceS,
   },
   buttonDetail: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
     fontSize: 12,
     marginTop: 2,
   },
   unavailable: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
   },
   confirmText: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
   // G08.05: the §8 state line after the store leg finished — «Куплена ·
   // трэба загрузіць», the muted honest fact under the description.
   purchasedPending: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
-    marginTop: tokens.spaceS,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
+    marginTop: palette.spaceS,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 export default function RoutePreview() {
+  const screenStyles = useScreenStyles();
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
   const router = useRouter();
   const services = useServices();
