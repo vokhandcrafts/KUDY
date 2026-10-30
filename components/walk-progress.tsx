@@ -18,7 +18,8 @@ import Animated, {
 } from "react-native-reanimated";
 import type { WithTimingConfig } from "react-native-reanimated";
 
-import { tokens } from "./design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "./design-tokens";
+import { useThemeStyles } from "./theme";
 
 // One pace for the whole pattern (founder quiz 2026-09-29): the fill's ease
 // and the figure's cross-fade share it — a living line, never a spring.
@@ -27,26 +28,26 @@ const PROGRESS_TIMING: WithTimingConfig = {
   easing: Easing.inOut(Easing.ease),
 };
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   // The canon strip exactly as UX 04 (issue #350) drew it: 6px accent fill
   // on the line track with the muted 1px edge (≥3:1 on the card) — one home
   // for the strip's visuals now (implementation-rules 2).
   track: {
-    backgroundColor: tokens.colorLine,
-    borderColor: tokens.colorMuted,
+    backgroundColor: palette.colorLine,
+    borderColor: palette.colorMuted,
     borderRadius: 999,
     borderWidth: 1,
     height: 6,
   },
   fill: {
-    backgroundColor: tokens.colorAccent,
+    backgroundColor: palette.colorAccent,
     height: "100%",
   },
   figureRow: {
     marginBottom: 2,
   },
   figure: {
-    color: tokens.colorMuted,
+    color: palette.colorMuted,
     fontSize: 12,
   },
   // The outgoing figure overlays the incoming one — the two layers together
@@ -55,6 +56,8 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 export type WalkProgressProps = {
   // The audible audio's own line (09 §6.3), 0..1 — clamped, never invented.
@@ -79,6 +82,7 @@ export function WalkProgress({
   fillTestID = "walk-progress-fill",
   figureTestID = "walk-progress-figure",
 }: WalkProgressProps) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const reduceMotion = useReducedMotion();
   // The percent the strip shows: the same rounding the Run bar used before
   // G06.10.f (the existing run assertions read «25%»), clamped 0..100.
