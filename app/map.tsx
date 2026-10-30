@@ -34,6 +34,7 @@ import { darkTokens, tokens, type ThemeTokens } from "../components/design-token
 import { useThemeStyles } from "../components/theme";
 
 const createStyles = (palette: ThemeTokens) => StyleSheet.create({
+  screen: { backgroundColor: palette.colorPaper },
   title: {
     color: palette.colorInk,
     fontSize: palette.fontTitleSize,
@@ -288,13 +289,12 @@ export default function Map() {
   const insets = useSafeAreaInsets();
   return (
     <View
-      style={{
-        backgroundColor: tokens.colorPaper,
+      style={[styles.screen, {
         flex: 1,
         padding: tokens.spaceL,
         paddingTop: insets.top + tokens.spaceL,
         paddingBottom: insets.bottom + tokens.spaceL,
-      }}
+      }]}
       testID="screen-Map"
     >
       {/* UX 02 (issue #348): the Nearby surface gains its one back element —
