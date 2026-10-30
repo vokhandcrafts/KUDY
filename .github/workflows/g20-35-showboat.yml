@@ -2,6 +2,19 @@ name: g20-35-showboat
 on:
   pull_request:
     branches: [main]
+    paths:
+      - '.github/workflows/g20-35-showboat.yml'
+      - 'app/run/**'
+      - 'controllers/deviceServices.ts'
+      - 'controllers/deviceServices.integration.test.ts'
+      - 'controllers/run/runOrchestrator.ts'
+      - 'core/engine/**'
+      - 'core/pipeline/**'
+      - 'tools/ci/g20-35-mutation.test.mjs'
+      - 'tools/e2e-android/walk.mjs'
+      - 'tools/e2e-android/walk.test.mjs'
+      - 'docs/demos/2026-10-30-g20-35-dwell-proof.md'
+      - 'docs/agent-tasks/results/G20.35.md'
 permissions:
   contents: read
 jobs:
