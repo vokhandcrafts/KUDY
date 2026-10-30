@@ -5,7 +5,9 @@
  * Callbacks run synchronously; adapters should coalesce paint work per frame.
  */
 export function createTapDrag({ position, size, bounds, threshold = 8, disabled = false, onTap, onMove }) {
-  const { left, top, right, bottom } = bounds;
+  // Missing bounds is an invalid configuration too: destructure into empties so the
+  // finite check below diagnoses it with the same documented RangeError.
+  const { left, top, right, bottom } = bounds ?? {};
   const maxX = right - size.width;
   const maxY = bottom - size.height;
   if (![position.x, position.y, size.width, size.height, left, top, right, bottom, threshold].every(Number.isFinite)

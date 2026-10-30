@@ -26,7 +26,7 @@ test('Final pointer sample, foreign events and returned snapshots cannot create 
 });
 
 test('Invalid geometry is diagnosed; non-finite movement cannot corrupt the position', () => {
-  for (const change of [{ threshold: 0 }, { position: { x: NaN, y: 0 } }, { size: { width: 300, height: 40 } }]) {
+  for (const change of [{ threshold: 0 }, { position: { x: NaN, y: 0 } }, { size: { width: 300, height: 40 } }, { bounds: undefined }, { bounds: null }]) {
     assert.throws(() => createTapDrag({ ...options, ...change }), RangeError);
   }
   const engine = createTapDrag({ ...options, onTap: () => {}, onMove: () => {} });
