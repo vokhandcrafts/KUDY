@@ -29,39 +29,43 @@ import {
 } from "../components/guide-card";
 import { BackButton } from "../components/back-button";
 import { PressableSurface } from "../components/pressable-surface";
-import { screenStyles } from "../components/screen-styles";
+import { useScreenStyles } from "../components/screen-styles";
 import { uiStrings } from "../components/ui-strings";
-import { tokens } from "../components/design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "../components/design-tokens";
+import { useThemeStyles } from "../components/theme";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   chip: {
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusPill,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusPill,
     borderWidth: 1,
-    paddingHorizontal: tokens.spaceS,
+    paddingHorizontal: palette.spaceS,
     paddingVertical: 4,
-    marginRight: tokens.spaceS,
-    marginBottom: tokens.spaceS,
+    marginRight: palette.spaceS,
+    marginBottom: palette.spaceS,
   },
-  chipActive: { backgroundColor: tokens.colorBadgeFree },
-  chipRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: tokens.spaceS },
-  chipText: { color: tokens.colorInk, fontSize: 12 },
+  chipActive: { backgroundColor: palette.colorBadgeFree },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", marginBottom: palette.spaceS },
+  chipText: { color: palette.colorInk, fontSize: 12 },
   sectionTitle: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceS,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceS,
   },
-  facts: { color: tokens.colorMuted, fontSize: 12, marginTop: tokens.spaceS },
+  facts: { color: palette.colorMuted, fontSize: 12, marginTop: palette.spaceS },
   disclosure: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorAccent,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
-  gap: { height: tokens.spaceM },
+  gap: { height: palette.spaceM },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 function Chip({ label, active, onPress, testID }: { label: string; active: boolean; onPress: () => void; testID: string }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <PressableSurface accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: active }} onPress={onPress} style={[styles.chip, active ? styles.chipActive : null]} testID={testID}>
       <Text style={styles.chipText}>{label}</Text>
@@ -89,6 +93,7 @@ function OfferCard({
   locale: string;
   onOpen: (offer: DiscoveryOffer) => void;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const title = localizedPick(offer.localized.title, [locale]);
   const summary = localizedPick(offer.localized.summary, [locale]);
   const href =
@@ -133,6 +138,7 @@ function DiscoveryBody({
   strings: ReturnType<typeof uiStrings>;
   locale: string;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   if (state.surface.kind === "loading") return <CityMessage text={strings.loading} />;
   if (state.surface.kind === "unavailable") {
     return (
@@ -246,6 +252,7 @@ function DiscoveryBody({
 }
 
 export default function Discovery() {
+  const screenStyles = useScreenStyles();
   const services = useServices();
   // G14.04.d (issue #305): the words read the switchable display locale —
   // a switch re-renders them in place, no restart.
