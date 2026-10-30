@@ -6,6 +6,7 @@ import { afterEach, expect, jest, test } from "@jest/globals";
 import { act } from "@testing-library/react-native";
 import { renderRouter, screen } from "expo-router/testing-library";
 import { Path } from "react-native-svg";
+import { nextSplashSampleMs, SPLASH_DURATION_MS } from "../components/animated-splash";
 
 import Explore from "./(tabs)/explore";
 import Index from "./index";
@@ -103,4 +104,51 @@ test("the KUDY word is a full-width centered line, not a content-sized box", () 
   const style = flatStyle(screen.getByTestId("splash-brand"));
   expect(style.width).toBe("100%");
   expect(style.textAlign).toBe("center");
+});
+
+// #871: the clock skips still holds instead of repainting the SVG tree.
+test("the splash clock skips inactive windows but reaches each motion endpoint", () => {
+  expect(nextSplashSampleMs(0)).toBe(420);
+  expect(nextSplashSampleMs(420)).toBe(452);
+  expect(nextSplashSampleMs(1_070)).toBe(1_500);
+  expect(nextSplashSampleMs(2_995)).toBe(3_000);
+  expect(nextSplashSampleMs(3_000)).toBe(3_460);
+  expect(nextSplashSampleMs(3_820)).toBe(4_050);
+  expect(nextSplashSampleMs(5_000)).toBe(5_550);
+  expect(nextSplashSampleMs(6_000)).toBeNull();
+});
+
+test("cold start does not run any periodic whole-scene renderer", () => {
+  jest.useFakeTimers();
+  const intervals = jest.spyOn(global, "setInterval");
+  renderColdStart();
+  expect(intervals).not.toHaveBeenCalled();
+});
+
+test("head descends during its own phase, before the blink or side move", () => {
+  jest.useFakeTimers();
+  renderColdStart();
+  advance(1_500);
+  const headAtStart = svgProp("splash-head", "matrix");
+  advance(600);
+  const headDuringDrop = svgProp("splash-head", "matrix");
+  expect(headDuringDrop).not.toEqual(headAtStart);
+  advance(900);
+  expect(svgProp("splash-head", "matrix")).not.toEqual(headDuringDrop);
+  expect(screen.queryByTestId("screen-Explore")).toBeNull();
+});
+
+test("phase clock emits fewer scene updates than a fixed 32 ms interval", () => {
+  let elapsed = 0;
+  let samples = 0;
+  for (;;) {
+    const next = nextSplashSampleMs(elapsed);
+    if (next === null) break;
+    expect(next).toBeGreaterThan(elapsed);
+    samples++;
+    elapsed = next;
+  }
+  expect(samples).toBe(130);
+  expect(Math.floor(SPLASH_DURATION_MS / 32)).toBe(218);
+  expect(samples).toBeLessThan(Math.floor(SPLASH_DURATION_MS / 32));
 });

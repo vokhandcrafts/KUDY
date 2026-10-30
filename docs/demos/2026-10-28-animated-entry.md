@@ -11,7 +11,7 @@ set -o pipefail; npx jest --config jest.config.js --runInBand app/animated-splas
 
 ```output
 Test Suites: 3 passed, 3 total
-Tests:       24 passed, 24 total
+Tests:       29 passed, 29 total
 ```
 
 Кадр ніжэй — зацверджаны HTML-прататып як візуальны арыенцір. Жывы выгляд React Native на прыладзе пакуль не правераны.
