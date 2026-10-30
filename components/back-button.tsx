@@ -16,27 +16,30 @@ import { useRouter } from "expo-router";
 import ArrowLeftIcon from "lucide-react-native/icons/arrow-left";
 
 import { CanonIcon } from "./canon-icon";
-import { tokens } from "./design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "./design-tokens";
+import { useThemeStyles } from "./theme";
 import { ScaledText } from "./scaled-text";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   touch: {
     alignItems: "flex-start",
     justifyContent: "center",
-    marginBottom: tokens.spaceM,
+    marginBottom: palette.spaceM,
     minHeight: 48,
     minWidth: 48,
   },
   row: {
     alignItems: "center",
-    columnGap: tokens.spaceS,
+    columnGap: palette.spaceS,
     flexDirection: "row",
   },
   label: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorAccent,
+    fontSize: palette.fontBaseSize,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 export function BackButton({
   label,
@@ -47,6 +50,7 @@ export function BackButton({
   onPress?: () => void;
   testID: string;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const router = useRouter();
   return (
     <Pressable
