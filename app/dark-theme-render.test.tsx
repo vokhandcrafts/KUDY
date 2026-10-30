@@ -26,7 +26,16 @@ afterEach(() => {
 
 function openDiscovery(url: string) {
   serve({ "catalog.json": CATALOG_FIXTURES["catalog.json"], [CATALOG_POINTER]: CATALOG_FIXTURES[CATALOG_POINTER] });
-  const services = createServices({ catalogOrigin: "https://cdn.test", catalogSha256: sha256 });
+  let cached: Uint8Array | null = null;
+  const services = createServices({
+    catalogOrigin: "https://cdn.test",
+    catalogSha256: sha256,
+    discoverySnapshot: {
+      read: async () => cached,
+      write: async (next: Uint8Array) => { cached = next; },
+    },
+    discoveryAnalytics: { offerShown: () => {}, offerOpened: () => {} },
+  });
   renderRouter({
     _layout: layoutWith(services),
     discovery: Discovery,
