@@ -17,7 +17,7 @@ import ArrowLeftIcon from "lucide-react-native/icons/arrow-left";
 
 import { CanonIcon } from "./canon-icon";
 import { darkTokens, tokens, type ThemeTokens } from "./design-tokens";
-import { useThemeStyles } from "./theme";
+import { useThemeStyles, useThemeTokens } from "./theme";
 import { ScaledText } from "./scaled-text";
 
 const createStyles = (palette: ThemeTokens) => StyleSheet.create({
@@ -51,6 +51,7 @@ export function BackButton({
   testID: string;
 }) {
   const styles = useThemeStyles(lightStyles, darkStyles);
+  const palette = useThemeTokens();
   const router = useRouter();
   return (
     <Pressable
@@ -62,7 +63,7 @@ export function BackButton({
       testID={testID}
     >
       <View style={styles.row}>
-        <CanonIcon glyph={ArrowLeftIcon} label={label} color={tokens.colorAccent} />
+        <CanonIcon glyph={ArrowLeftIcon} label={label} color={palette.colorAccent} />
         <ScaledText style={styles.label}>{label}</ScaledText>
       </View>
     </Pressable>
