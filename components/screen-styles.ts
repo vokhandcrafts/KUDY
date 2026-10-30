@@ -38,10 +38,11 @@ export const screenStyles = StyleSheet.create({
 
 // #436 — preserve the existing light screenStyles export and its typography
 // contract; detail screens select a dark equivalent at render time.
+const { displayTitle } = screenStyles;
 const darkScreenStyles = StyleSheet.create({
   screen: { ...screenStyles.screen, backgroundColor: darkTokens.colorPaper },
   title: { ...screenStyles.title, color: darkTokens.colorInk },
-  displayTitle: { ...screenStyles.displayTitle, color: darkTokens.colorInk },
+  displayTitle: { ...displayTitle, color: darkTokens.colorInk },
 });
 
 export function useScreenStyles() {
