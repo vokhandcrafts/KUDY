@@ -23,6 +23,6 @@ export function useThemeTokens() {
   return useThemeScheme() === "dark" ? darkTokens : tokens;
 }
 
-export function useThemeStyles<T>(light: T, dark: T): T {
+export function useThemeStyles<Light, Dark>(light: Light, dark: Dark): Light | Dark {
   return useThemeScheme() === "dark" ? dark : light;
 }
