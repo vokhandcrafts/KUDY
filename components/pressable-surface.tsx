@@ -83,7 +83,7 @@ export const PressableSurface = forwardRef<ComponentRef<typeof Pressable>, Surfa
     const palette = useThemeTokens();
     // Canon ink with 10% alpha, rather than a light-only hardcoded ripple.
     const hex = palette.colorInk.slice(1);
-    const rippleColor = `rgba(${parseInt(hex.slice(0, 2), 16)}, ${parseInt(hex.slice(2, 4), 16)}, ${parseInt(hex.slice(4, 6), 16)}, 0.1)`;
+    const rippleColor = palette === tokens ? RIPPLE_COLOR : `rgba(${parseInt(hex.slice(0, 2), 16)}, ${parseInt(hex.slice(2, 4), 16)}, ${parseInt(hex.slice(4, 6), 16)}, 0.1)`;
     return (
       <Pressable
         ref={ref}
