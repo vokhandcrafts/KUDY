@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { assertNoReadyStart, waitForRun, locationListeners, waitForManualStart, tapMapPoint, visiblePointStatus, startWalkAtLocation, previewNodesWith, tapPlayAndWaitForAudio } from './walk.mjs';
+import { assertNoReadyStart, waitForRun, locationListeners, waitForManualStart, tapMapPoint, visiblePointStatus, startWalkAtLocation, previewNodesWith, tapPlayAndWaitForAudio, dismissGuideHintBeforePlay } from './walk.mjs';
 
 test('walk scrolls clipped preview lock badges into the UIAutomator viewport', async () => {
   let position = 0;
@@ -164,6 +164,7 @@ test('manual Play arms the native playback observer before the one Android tap',
   let started = false;
   let sawPreTapProbe = false;
   const driver = {
+    dump: async () => ({ xml: '<node resource-id="screen-Run"/>' }),
     waitFor: async (selector) => {
       assert.deepEqual(selector, { testID: 'btn-card-play' });
       calls.push('button visible');
@@ -193,4 +194,29 @@ Events log: playback activity
   await tapPlayAndWaitForAudio(driver);
   assert.equal(calls.filter((call) => call === 'one tap').length, 1);
   assert.ok(calls.includes('native audio probe'), 'the physical player was observed');
+});
+
+
+test('walk dismisses a nearby guide hint obscuring manual Play before any Play tap', async () => {
+  const taps = [];
+  let hintVisible = true;
+  const driver = {
+    dump: async () => ({
+      xml: '<node resource-id="screen-Run"/>' +
+        (hintVisible
+          ? '<node resource-id="guide-hint-card" bounds="[44,1641][1036,2263]"/>' +
+            '<node resource-id="btn-hint-dismiss" bounds="[80,2096][1000,2228]"/>'
+          : '<node resource-id="btn-card-play" bounds="[69,1590][1011,1722]"/>'),
+    }),
+    tapNode: async (node) => {
+      assert.equal(node.resourceId, 'btn-hint-dismiss', 'never tap obscured Play');
+      taps.push(node.resourceId);
+      hintVisible = false;
+    },
+  };
+  await dismissGuideHintBeforePlay(driver);
+  assert.deepEqual(taps, ['btn-hint-dismiss']);
+  assert.equal(hintVisible, false);
+  await dismissGuideHintBeforePlay(driver);
+  assert.equal(taps.length, 1, 'an absent hint is not dismissed again');
 });
