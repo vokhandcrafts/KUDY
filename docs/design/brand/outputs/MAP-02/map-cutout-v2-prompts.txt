@@ -1,0 +1,25 @@
+Step 1 input: map-cutout-v1.png
+
+Edit this exact transparent map asset. Make ONLY its protruding river endings look smoothly finished, so the illustration reads as a self-contained cutout.
+
+The current asset has straight hard-cropped water extensions touching the image boundaries: two narrow horizontal arms on the LEFT, the river entering at UPPER RIGHT, a diagonal branch extending off the RIGHT, the broad river exiting at LOWER RIGHT/BOTTOM, and a thin stream trailing down from the lower moat.
+
+Shorten ONLY the protruding water tips as needed and finish each with a gentle organic curved/tapered ending fully INSIDE the canvas. No straight rectangular chops, sharp diagonal cutoff lines, long pipe-like stubs or edges cut by the canvas. Use smooth rounded water contours with a very short antialiased transition into genuine transparency. Preserve the illustrated water's existing teal fill, dark bank line and restrained drawn style; do not add heavy blur or glow.
+
+The main large river on the RIGHT must remain as a substantial recognizable continuous part of the asset. Keep the fortified city and all actual water connections around it. Do NOT remove a main moat or the large right river. Only resolve their external cut-off ends.
+
+PRESERVE ALL THE REST unchanged: district boundaries, seven region shapes, internal roads, trees, low bastions, bridges, original orientation/proportions, KUDY palette, no buildings, and no text/UI. Preserve the same canvas dimensions if possible and leave a little genuine transparent breathing space around every outermost river tip.
+The asset is ONE whole assembled map; no pieces or menu labels.
+Output real RGBA transparency. All background stays transparent, and cream land inside the city stays visible. Do not paint a white rectangle or checkerboard.
+
+Step 2 input: map-cutout-v2-step1.png
+
+Correct ONLY the river-end finishing on this transparent map cutout.
+The last edit made the narrow river tips look like shiny ROUND PIPE CAPS. Remove that appearance.
+
+At the two LEFT protruding river arms: shorten them substantially back toward the city's outer bank, leaving only a very short softly curved matte water edge outside the moat. No long finger-like tubes. Remove the circular bulges, white oval highlights and dark rings at the ends.
+At the thin BOTTOM stream protruding below the bastion: trim the trailing tip back close to the outer moat edge with a simple organic curved end. No bulb or teardrop appendage.
+At the large RIGHT river's top, side branch and bottom ends: keep its present flowing broad organic outer silhouette, but REMOVE all the pale oval cap-like highlights. Make the endpoint's fill and sparse ripple strokes identical to the rest of the river, no special glowing tip.
+
+The whole should look like a deliberately cropped self-contained CARTOGRAPHIC ILLUSTRATION, not hoses, liquid droplets or capped pipes. Smooth silhouette contours, matte teal water, clean alpha transparency, no blur/glow. Every end should remain inside the canvas.
+Keep everything else exactly as it is: city/district geometry, land fills, trees, bridges, low bastions, KUDY colors, orientation and no buildings. Do not add any objects or text. Keep transparent background.
