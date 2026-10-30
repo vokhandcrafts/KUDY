@@ -50,6 +50,7 @@ test('G20.35 mutation proof: zero production dwell and broken pause must fail ac
   const tempParent = fs.mkdtempSync(path.join(os.tmpdir(), 'kudy-g2035-'));
   const worktree = path.join(tempParent, 'checkout');
   let attached = false;
+  let depsLinked = false;
   try {
     const added = command('git', ['worktree', 'add', '--detach', worktree, 'HEAD'], root);
     assert.equal(added.status, 0, `create isolated checkout: ${added.stderr}`);
@@ -61,6 +62,7 @@ test('G20.35 mutation proof: zero production dwell and broken pause must fail ac
     assert.ok(fs.existsSync(deps), 'npm ci must run before mutation proof');
     fs.symlinkSync(deps, path.join(worktree, 'node_modules'),
       process.platform === 'win32' ? 'junction' : 'dir');
+    depsLinked = true;
 
     const configFile = path.join(worktree, configPath);
     const originalConfig = fs.readFileSync(configFile, 'utf8');
@@ -87,6 +89,9 @@ test('G20.35 mutation proof: zero production dwell and broken pause must fail ac
     expectRegressionFailure(worktree, 'removed Pause/Resume dwell resets', 'pause time and pre-pause dwell cannot count');
     fs.writeFileSync(orchestratorFile, originalOrchestrator);
   } finally {
+    // Windows directory junctions must be detached before Git removes the
+    // worktree, so recursive cleanup never follows shared dependencies.
+    if (depsLinked) fs.unlinkSync(path.join(worktree, 'node_modules'));
     if (attached) {
       const removed = command('git', ['worktree', 'remove', '--force', worktree], root);
       assert.equal(removed.status, 0, `remove isolated checkout: ${removed.stderr}`);
