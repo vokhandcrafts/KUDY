@@ -108,16 +108,17 @@ let sessionCounter = 0;
 const facilities = (
   driver: ReturnType<typeof nodeSqliteDriver> = nodeSqliteDriver(),
   disk = fakeFsModule,
+  wakeCalls: string[] = wakelockCalls,
 ) => ({
   driver,
   sha256: async (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex'),
   newSessionId: () => `walk-${String(++sessionCounter).padStart(3, '0')}`,
   keepAwake: {
     activate: async (tag: string) => {
-      wakelockCalls.push(`activate:${tag}`);
+      wakeCalls.push(`activate:${tag}`);
     },
     deactivate: (tag: string) => {
-      wakelockCalls.push(`deactivate:${tag}`);
+      wakeCalls.push(`deactivate:${tag}`);
     },
   },
   location: new LocationService({
@@ -175,7 +176,7 @@ async function controlledDwellWalk() {
     permissions: { foreground: 'fg', background: 'bg' },
   });
   const device = createDeviceServicePorts({
-    ...facilities(nodeSqliteDriver(), makeFakeFsModule(makeFakeFs())),
+    ...facilities(nodeSqliteDriver(), makeFakeFsModule(makeFakeFs()), []),
     location,
     runClock: { now: () => clock.time },
   });
