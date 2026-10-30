@@ -105,7 +105,10 @@ const fakeFsModule = makeFakeFsModule(fs);
 const wakelockCalls: string[] = [];
 let sessionCounter = 0;
 
-const facilities = (driver: ReturnType<typeof nodeSqliteDriver> = nodeSqliteDriver()) => ({
+const facilities = (
+  driver: ReturnType<typeof nodeSqliteDriver> = nodeSqliteDriver(),
+  disk = fakeFsModule,
+) => ({
   driver,
   sha256: async (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex'),
   newSessionId: () => `walk-${String(++sessionCounter).padStart(3, '0')}`,
@@ -126,11 +129,11 @@ const facilities = (driver: ReturnType<typeof nodeSqliteDriver> = nodeSqliteDriv
   fileSystem: {
     // The fake classes carry only the surface the adapters use; the casts
     // are the test-side seam (the Expo/OS boundary), typed never upstream.
-    File: fakeFsModule.File as never,
-    Directory: fakeFsModule.Directory as never,
+    File: disk.File as never,
+    Directory: disk.Directory as never,
     freeBytes: () => 1_000_000_000,
   },
-  bundlesRoot: fakeFsModule.Paths.document as never,
+  bundlesRoot: disk.Paths.document as never,
   origin: ORIGIN,
 });
 
@@ -172,7 +175,7 @@ async function controlledDwellWalk() {
     permissions: { foreground: 'fg', background: 'bg' },
   });
   const device = createDeviceServicePorts({
-    ...facilities(nodeSqliteDriver()),
+    ...facilities(nodeSqliteDriver(), makeFakeFsModule(makeFakeFs())),
     location,
     runClock: { now: () => clock.time },
   });
@@ -193,11 +196,12 @@ async function controlledDwellWalk() {
   assert.equal(controller.getState().run.phase, 'Active');
   const startCommand = osLocation.commands.find((command) => command.startsWith('start '));
   assert.ok(startCommand, 'production Start must arm the OS location subscription');
-  const subscription = Number(startCommand.slice('start '.length));
   const [place] = JSON.parse(PLACES_JSON) as Array<{ lat: number; lng: number }>;
   const emit = (elapsedMs: number, northMeters = 0, accuracy = 5) => {
     clock.time = 1_000_000 + elapsedMs;
-    osLocation.emitFix(subscription, {
+    const currentStart = osLocation.commands.filter((command) => command.startsWith('start ')).at(-1);
+    assert.ok(currentStart, 'the walk must have started a location subscription');
+    osLocation.emitFix(Number(currentStart.slice('start '.length)), {
       lat: place.lat + northMeters / 111_195,
       lng: place.lng,
       accuracy,
@@ -212,7 +216,7 @@ async function controlledDwellWalk() {
   return { controller, device, emit, state, osLocation };
 }
 
-test('G20.35: canonical dwell uses the active production path; identical paused fix stream cannot trigger', async () => {
+test('G20.35: canonical dwell uses the active production path; pause and resume require fresh dwell', async () => {
   const active = await controlledDwellWalk();
   try {
     for (let second = 0; second < 6; second += 1) {
@@ -233,13 +237,26 @@ test('G20.35: canonical dwell uses the active production path; identical paused 
   const paused = await controlledDwellWalk();
   try {
     paused.emit(0);
+    paused.emit(1000);
+    paused.emit(2000);
+    assert.deepEqual(paused.state().autoFired, [], 'two seconds of dwell is insufficient');
     paused.controller.getState().pauseSession();
     await phaseBecomes(paused.controller, 'Paused');
     assert.equal(paused.osLocation.activeSubscriptions(), 0, 'pause must release GPS');
-    for (let second = 1; second <= 7; second += 1) paused.emit(second * 1000);
-    assert.deepEqual(paused.state().autoFired, [], 'paused walk cannot consume the same trigger stream');
+    for (let second = 3; second <= 60; second += 1) paused.emit(second * 1000);
+    assert.deepEqual(paused.state().autoFired, [], 'stopped GPS fixes do not reach the paused walk');
     assert.equal(paused.state().playing, null, 'paused walk must not launch audio');
-    assert.equal(paused.state().phase, 'Paused');
+    paused.controller.getState().resumeSession();
+    await phaseBecomes(paused.controller, 'Active');
+    assert.equal(paused.osLocation.activeSubscriptions(), 1, 'resume must rearm GPS');
+    for (let second = 61; second < 67; second += 1) {
+      paused.emit(second * 1000);
+      assert.deepEqual(paused.state().autoFired, [], 'pause time and pre-pause dwell cannot count');
+      assert.equal(paused.state().playing, null);
+    }
+    paused.emit(67_000);
+    assert.deepEqual(paused.state().autoFired, ['stop-1'], 'fresh continuous dwell eventually triggers');
+    assert.equal(paused.state().playing?.owner, 'guide');
   } finally {
     paused.controller.getState().end();
     paused.device.teardown();
@@ -968,6 +985,7 @@ test('G21.21 mixed_language_offline_restart: fr text and en audio through the pr
 
   const locationPort = new FakeLocationOsPort();
   const audioPort = new FakeAudioPlayerPort();
+  const clock = { time: 1_000_000 };
   const sharedDriver = nodeSqliteDriver();
   const first = createDeviceServicePorts({
     ...facilities(sharedDriver),
@@ -977,9 +995,10 @@ test('G21.21 mixed_language_offline_restart: fr text and en audio through the pr
     preferredLocales: () => ['fr'],
     location: new LocationService({
       port: locationPort,
-      clock: { now: () => 0, schedule: () => () => {} },
+      clock: { now: () => clock.time, schedule: () => () => {} },
       permissions: { foreground: 'fg', background: 'bg' },
     }),
+    runClock: { now: () => clock.time },
     audio: new AudioService({ createPort: () => audioPort }),
   });
   const services = createServices(first.ports);
@@ -1043,10 +1062,10 @@ test('G21.21 mixed_language_offline_restart: fr text and en audio through the pr
   // 4. The GPS trigger sounds the EN layer for the fr text story.
   const started = locationPort.commands.filter((command) => command.startsWith('start '));
   const subscription = Number(started[started.length - 1].slice('start '.length));
-  // The session clock is the composition's own wall clock — the fixes carry
-  // its timestamps so the freshness window (09 invariant 8) accepts them.
-  for (const offset of [0, 200, 400]) {
-    locationPort.emitFix(subscription, { lat: 54.352, lng: 18.648, accuracy: 5, at: Date.now() + offset });
+  // Production dwell takes six seconds; the OS and Run use the same clock.
+  for (const offset of [0, 1000, 2000, 3000, 4000, 5000, 6000]) {
+    clock.time = 1_000_000 + offset;
+    locationPort.emitFix(subscription, { lat: 54.352, lng: 18.648, accuracy: 5, at: clock.time });
   }
   for (let tries = 0; tries < 200; tries += 1) {
     if (audioPort.commands.some((command) => command.startsWith('play '))) break;
