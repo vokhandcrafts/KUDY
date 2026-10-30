@@ -22,7 +22,7 @@ import {
 import { useServices, useUiLocale } from "../_layout";
 import {
   AccessBadge,
-  cardStyle,
+  useCardStyle,
   CityMessage,
   DISPLAY_LOCALES,
   GuideCard,
@@ -69,6 +69,7 @@ function CollectionBody({
   strings: ReturnType<typeof uiStrings>;
 }) {
   const styles = useThemeStyles(lightStyles, darkStyles);
+  const cardStyle = useCardStyle();
   const byKey = new Map(offers.map((offer) => [memberKey(offer.ref), offer]));
   const resolved: DiscoveryOffer[] = [];
   let unresolved = 0;
