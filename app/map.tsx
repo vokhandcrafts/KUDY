@@ -63,7 +63,7 @@ const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   demoMapLabel: {
     backgroundColor: "#fffdf7",
     borderRadius: 9,
-    color: palette.colorInk,
+    color: tokens.colorInk,
     fontSize: 13,
     fontWeight: palette.fontWeightStrong,
     left: 13,
