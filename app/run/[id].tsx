@@ -1005,15 +1005,19 @@ export default function Run() {
           </ScrollView>
         </View>
       ) : null}
-      {/* G07.05: the quiet card never becomes a second row over the player
-          (R07) — it renders below the panel surface, dismissible, and its
-          only action is the preview open; the session and its progress stay
-          (AC5). */}
-      <GuideHintMount
-        binding={services.hints}
-        locale={ready?.locale ?? locale}
-        onOpen={(routeId) => router.push(`/route/${routeId}`)}
-      />
+      {/* G07.05: the nearby hint belongs to the idle map, not a manual
+          story card or the audible player bar. On Android it used to overlay
+          btn-card-play while Half was open (PR #903 Android E2E artifact),
+          intercepting the user's tap even though the button was accessible.
+          Hiding the mount does not dismiss the hint: closing the card
+          restores it without changing session or audio state. */}
+      {run.panel === "peek" && playing === null ? (
+        <GuideHintMount
+          binding={services.hints}
+          locale={ready?.locale ?? locale}
+          onOpen={(routeId) => router.push(`/route/${routeId}`)}
+        />
+      ) : null}
       {endConfirm ? (
         // UX 06 (issue #352) AC3: the confirmation is a real modal — the
         // decline (and the system Back, the shell's onRequestClose) leaves
