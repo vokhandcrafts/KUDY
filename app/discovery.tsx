@@ -22,7 +22,7 @@ import {
 import { useServices, useUiLocale } from "./_layout";
 import {
   AccessBadge,
-  cardStyle,
+  useCardStyle,
   CityMessage,
   LocalesLine,
   StateBanner,
@@ -94,6 +94,7 @@ function OfferCard({
   onOpen: (offer: DiscoveryOffer) => void;
 }) {
   const styles = useThemeStyles(lightStyles, darkStyles);
+  const cardStyle = useCardStyle();
   const title = localizedPick(offer.localized.title, [locale]);
   const summary = localizedPick(offer.localized.summary, [locale]);
   const href =
