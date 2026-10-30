@@ -13,6 +13,7 @@ import type { ComponentType } from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
 
 import { tokens } from "./design-tokens";
+import { useThemeTokens } from "./theme";
 
 // The structural shape of a Lucide glyph; typed locally so the barrel never
 // appears in an import of this file.
@@ -21,7 +22,7 @@ export type CanonGlyph = ComponentType<{ color?: string; size?: number }>;
 export function CanonIcon({
   glyph: Glyph,
   label,
-  color = tokens.colorInk,
+  color,
   size = tokens.fontBaseSize,
   style,
   testID,
@@ -35,12 +36,13 @@ export function CanonIcon({
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }) {
+  const palette = useThemeTokens();
   if (label.trim().length === 0) {
     throw new Error("CanonIcon: the screen-reader label is required (visual-language.md §9)");
   }
   return (
     <View accessible={true} accessibilityLabel={label} pointerEvents="none" style={style} testID={testID}>
-      <Glyph color={color} size={size} />
+      <Glyph color={color ?? palette.colorInk} size={size} />
     </View>
   );
 }
