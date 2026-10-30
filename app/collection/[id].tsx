@@ -29,23 +29,26 @@ import {
 } from "../../components/guide-card";
 import { BackButton } from "../../components/back-button";
 import { PressableSurface } from "../../components/pressable-surface";
-import { screenStyles } from "../../components/screen-styles";
+import { useScreenStyles } from "../../components/screen-styles";
 import { uiStrings } from "../../components/ui-strings";
-import { tokens } from "../../components/design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "../../components/design-tokens";
+import { useThemeStyles } from "../../components/theme";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   description: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
   note: {
-    color: tokens.colorMuted,
+    color: palette.colorMuted,
     fontSize: 12,
-    marginBottom: tokens.spaceM,
+    marginBottom: palette.spaceM,
   },
-  memberGap: { marginBottom: tokens.spaceM },
+  memberGap: { marginBottom: palette.spaceM },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 // Members are guide/place refs (validated on load) — the identity pair is
 // the key; a stable id is never derived from the list position (21 §3.1).
@@ -65,6 +68,7 @@ function CollectionBody({
   offers: readonly DiscoveryOffer[];
   strings: ReturnType<typeof uiStrings>;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const byKey = new Map(offers.map((offer) => [memberKey(offer.ref), offer]));
   const resolved: DiscoveryOffer[] = [];
   let unresolved = 0;
@@ -126,6 +130,7 @@ function CollectionBody({
 }
 
 export default function Collection() {
+  const screenStyles = useScreenStyles();
   const params = useLocalSearchParams<{ id: string }>();
   const services = useServices();
   // G14.04.d (issue #305): the words read the switchable display locale —
