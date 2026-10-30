@@ -39,7 +39,7 @@ test('menu specimen documents only the actual routes and existing localization k
     { key: 'pending:880', path: 'none' },
   ]);
   assert.equal(guideCard.match(/ACTIVE_CITY_ID = "([^"]+)"/)?.[1], 'gdansk');
-  assert.ok(guideCard.includes('/city/' + String.fromCharCode(36) + '{ACTIVE_CITY_ID}/guides'));
+  assert.ok(guideCard.includes('/city/${ACTIVE_CITY_ID}/guides'));
   assert.ok(guideCard.includes('uiStrings(locale).guidesLink'));
   for (const { key, path, property } of nav) {
     assert.ok(strings.some((entry) => entry.id === key), key + ' must exist in the canonical catalog');

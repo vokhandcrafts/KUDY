@@ -21,6 +21,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 Што зрабіць: калі лакальныя каманды зноў даступныя, запусці не-прыладныя праверкі з `docs/agent-tasks/results/G20.35.md`, Showboat і незалежнае рэвью PR #903. Эмулятар не запускай паводле бягучага абмежавання; у issue #815 зафіксуй, што натыўная прыёмка не праведзеная. Пасля паспяховага зліцця здымі пазнаку `agent:running` з #815.
 PR: https://github.com/vokhandcrafts/KUDY/pull/903 · Issue: https://github.com/vokhandcrafts/KUDY/issues/815
 
+### 2026-10-29 — змержы праўку літарала ў гараўчым тэсце MAP-05
+Што зрабіць: змержы PR #900 — літарал `$` у ахоўным тэсце MAP-05 больш не схаваны пад String.fromCharCode(36), у must-flag дададзены пункт для рэв'ю і суддзі. Змена дробная (тэст + дакументацыя), пайплайн рэв'ю не гнаўся. Пасля мержу знімі `agent:running` са звязанага issue #896.
+PR: https://github.com/vokhandcrafts/KUDY/pull/900 · Issue: https://github.com/vokhandcrafts/KUDY/issues/896
+
 ### 2026-10-28 — абнаві KUDY на Android для праверкі іконкі
 Што зрабіць: пасля зліцця PR #872 перазбяры Android APK з Expo prebuild і ўсталюй яго нанова на тэлефон. Правер, што медная круглая рамка супадае з мяжой круглай іконкі, а квадратная — з мяжой квадратнай.
 PR: https://github.com/vokhandcrafts/KUDY/pull/872

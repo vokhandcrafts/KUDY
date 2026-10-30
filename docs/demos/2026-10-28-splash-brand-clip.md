@@ -17,16 +17,22 @@
 (`width: "100%"`, `textAlign: "center"` у `components/animated-splash.tsx`):
 
 ```sh
-LD_LIBRARY_PATH=$HOME/.local/lib npx jest --config jest.config.js app/animated-splash.test.tsx app/animated-splash-reduced-motion.test.tsx 2>&1 | grep -E "^(PASS|FAIL)|^(Tests|Test Suites|Snapshots):"
+LD_LIBRARY_PATH=$HOME/.local/lib npx jest --config jest.config.js app/animated-splash.test.tsx app/animated-splash-reduced-motion.test.tsx 2>&1 | grep -E "^(PASS|FAIL)|^(Tests|Test Suites|Snapshots):" | sed -E 's/ \([0-9.]+ (s|ms)\)$//' | LC_ALL=C sort
 ```
 
 ```output
 PASS app/animated-splash-reduced-motion.test.tsx
 PASS app/animated-splash.test.tsx
+Snapshots:   0 total
 Test Suites: 2 passed, 2 total
 Tests:       4 passed, 4 total
-Snapshots:   0 total
 ```
+
+Вывад каманды нармалізаваны, каб гард не залежаў ад машыны: jest дадае
+`(NN.NNN s)` толькі да марудных сьютаў (на халодным кэшы тут каля 26 с) і
+друкуе сьюты ў парадку завяршэння, таму `sed` адкідвае таймінгі, а
+`LC_ALL=C sort` уніфікаваў парадак радкоў — запісаны блок супадае з вывадам
+і на цёплым, і на халодным прагоне.
 
 Доказ на эмулятары (AVD kudy-test, 1080 × 2400, density 2.625): да фікса
 uiautomator паказваў тэкставую скрынку `[354,1556][725,1701]` — 371 px,
