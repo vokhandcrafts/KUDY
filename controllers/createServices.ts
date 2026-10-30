@@ -468,6 +468,9 @@ export function createServices(ports: ServicePorts): Services {
           get run() {
             return store.getState().run;
           },
+          get panel() {
+            return store.getState().panel;
+          },
           subscribe: (listener) => store.subscribe(listener),
         },
       };
