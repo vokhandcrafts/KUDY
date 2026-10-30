@@ -96,9 +96,9 @@ export interface DeviceFacilities {
   guideHintValues?: GuideHintValues;
   foreground?: () => boolean;
   onForeground?: (listener: () => void) => () => void;
-  /** The feedback retry clock; production uses the app process timers. */
   /** Inject a shared wall clock at the OS boundary for deterministic walk regressions. */
   runClock?: RunClock;
+  /** The feedback retry clock; production uses the app process timers. */
   feedbackClock?: {
     now: () => number;
     schedule: (delayMs: number, callback: () => void) => () => void;
