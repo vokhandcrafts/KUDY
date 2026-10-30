@@ -147,7 +147,9 @@ const darkStyles = createStyles(darkTokens);
 // G15.03 (issue #70) — the ordinary card style of the canon (visual-language
 // §5 «card»), exported for the discovery surfaces: the same card kind, never
 // a new look (новы выгляд — допіс у канон, не мясцовая стылізацыя).
-export const cardStyle = lightStyles.card;
+export function useCardStyle() {
+  return useThemeStyles(lightStyles, darkStyles).card;
+}
 
 // The city surfaces' shared body (G06.05): one FlatList owns scrolling on
 // both screens. Its header holds the caller's leading slot (brand or Back),
