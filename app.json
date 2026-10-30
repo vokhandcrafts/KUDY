@@ -74,6 +74,7 @@
       "expo-asset",
       "expo-router",
       "expo-font",
+      "expo-system-ui",
       "expo-sqlite",
       "./tools/android-build/with-playback-only.cjs",
       "./tools/android-build/with-shape-aware-icons.cjs"
