@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-10-31 — змержы фікс NAV1 у патрабаваннях дзіцячага меню
+Што зрабіць: змержы PR #928 — NAV1 у kids-menu-requirements.md цяпер цытуе поўны кананічны ланцуг з карткай гіда (11 §16.1), а ў must-flag-запіс canon-quote-truncated дададзены інстанс issue #902. Змена дробная (два дакументныя файлы), пайплайн рэв'ю не гнаўся. Пасля мержу знімі `agent:running` з issue #902.
+PR: https://github.com/vokhandcrafts/KUDY/pull/928 · Issue: https://github.com/vokhandcrafts/KUDY/issues/902
+
 ### 2026-10-30 — правер натыўную светлую і цёмную тэмы KUDY (#436)
 Што зрабіць: збяры Android-версію з PR #907 і на прыладзе правер Explore, прэв'ю, статус-бар, Run, кантраст і павялічаны шрыфт у абедзвюх сістэмных тэмах; захавай скрыншоты і вынікі ў #436. Запусці і пацвердзі Showboat-дэманстрацыю перад пераводам PR з Draft; без гэтых доказаў не мержы. Пасля дазволенага мерджу знімі `agent:running` з issue #436.
 PR: https://github.com/vokhandcrafts/KUDY/pull/907 · Issue: https://github.com/vokhandcrafts/KUDY/issues/436
