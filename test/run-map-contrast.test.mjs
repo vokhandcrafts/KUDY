@@ -46,7 +46,7 @@ function styleBlock(source, home, name) {
 }
 
 function tokenOf(block, property) {
-  const match = block.match(new RegExp(`${property}:\\s*tokens\\.(\\w+)`));
+  const match = block.match(new RegExp(`${property}:\\s*(?:tokens|palette)\\.(\\w+)`));
   assert.ok(match, `the style block must set ${property} from a design token`);
   const entry = surfaceTokens.get(match[1]);
   assert.ok(entry, `tokens.${match[1]} must exist in components/design-tokens.ts`);
@@ -89,19 +89,24 @@ test('every marker fill keeps ≥3:1 against the canon map background (WCAG 1.4.
   }
 });
 
-test('the peek bar progress strip stays identifiable on the card (≥3:1 edge)', () => {
-  // G06.10.f (issue #406): the strip lives in the walk-progress component —
-  // the guard reads its `track` and `fill` blocks there.
-  const card = surfaceTokens.get('colorCard').hex;
+test('the peek bar progress strip stays identifiable in light and dark chrome (≥3:1 edge)', () => {
+  // G06.10.f / #436: inspect the single production style owner, and
+  // resolve both palettes instead of assuming static light tokens.
   const track = styleBlock(strip, 'components/walk-progress.tsx', 'track');
   const edge = tokenOf(track, 'borderColor');
-  const edgeRatio = contrast(edge.hex, card);
-  assert.ok(edgeRatio >= 3,
-    `track border ${edge.hex} on card ${card}: ${edgeRatio.toFixed(2)}:1 < 3:1`);
   const fill = tokenOf(styleBlock(strip, 'components/walk-progress.tsx', 'fill'), 'backgroundColor');
-  const fillRatio = contrast(fill.hex, card);
-  assert.ok(fillRatio >= 3,
-    `fill ${fill.hex} on card ${card}: ${fillRatio.toFixed(2)}:1 < 3:1`);
+  const card = surfaceTokens.get('colorCard');
+  const resolve = (entry, mode) => mode === 'dark'
+    ? (canon.darkTheme.tokens[entry.canon] ?? entry.hex) : entry.hex;
+  for (const mode of ['light', 'dark']) {
+    const cardHex = resolve(card, mode);
+    const edgeHex = resolve(edge, mode);
+    const fillHex = resolve(fill, mode);
+    assert.ok(contrast(edgeHex, cardHex) >= 3,
+      mode + ' track border ' + edgeHex + ' against ' + cardHex + ' fails ≥3:1');
+    assert.ok(contrast(fillHex, cardHex) >= 3,
+      mode + ' fill ' + fillHex + ' against ' + cardHex + ' fails ≥3:1');
+  }
 });
 
 test('guard is wired into npm test (implementation-rules 1 and 7)', () => {

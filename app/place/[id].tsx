@@ -34,98 +34,101 @@ import {
 } from "../../components/modal-dialog";
 import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
-import { screenStyles } from "../../components/screen-styles";
-import { tokens } from "../../components/design-tokens";
+import { useScreenStyles } from "../../components/screen-styles";
+import { darkTokens, tokens, type ThemeTokens } from "../../components/design-tokens";
+import { useThemeStyles } from "../../components/theme";
 import { useVisibleMomentPlayback, type VisibleMoment } from "../../components/use-visible-moment-playback";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   // G06.10.b: the interface text renders the UI family (canon §3, Golos
   // Text); the strong styles take the named 600 face. While the faces load
   // (and in tests without them) the unknown family names fall back to the
   // system font — weights and sizes hold.
   summary: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceS,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceS,
   },
   facts: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
   note: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
   refusal: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
   card: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    padding: tokens.spaceM,
-    marginBottom: tokens.spaceM,
+    padding: palette.spaceM,
+    marginBottom: palette.spaceM,
   },
   cardLabel: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceS,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceS,
   },
   cardBody: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceS,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceS,
   },
   live: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceS,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceS,
   },
   link: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginTop: tokens.spaceS,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginTop: palette.spaceS,
   },
   playButton: {
     alignSelf: "flex-start",
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    paddingHorizontal: tokens.spaceM,
-    paddingVertical: tokens.spaceS,
+    paddingHorizontal: palette.spaceM,
+    paddingVertical: palette.spaceS,
   },
   playText: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   // G16.03 (issue #74): the visit confirmation's words — the dialog shell
   // carries the card and the two action styles.
   confirmText: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceM,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceM,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 function MomentCard({
   moment,
@@ -138,6 +141,7 @@ function MomentCard({
   playback: VisibleMoment;
   strings: ReturnType<typeof placeDetailStrings>;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   // The refusal note is this card's local UI state: the outcome's named
   // reason, never a second copy of the player's truth.
   const [refusal, setRefusal] = useState<string | null>(null);
@@ -211,6 +215,8 @@ function MomentCard({
 }
 
 export default function PlaceDetail() {
+  const screenStyles = useScreenStyles();
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const services = useServices();
   // G14.04.d (issue #305): the words read the switchable display locale —
   // a switch re-renders them in place, no restart.

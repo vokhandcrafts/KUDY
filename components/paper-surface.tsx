@@ -20,6 +20,7 @@ import {
 
 import grainSource from "../assets/paper-grain.png";
 import { tokens } from "./design-tokens";
+import { useThemeScheme, useThemeTokens } from "./theme";
 
 const styles = StyleSheet.create({
   surface: {
@@ -49,12 +50,14 @@ export function PaperSurface({
   testID?: string;
 }>) {
   const { width, height } = useWindowDimensions();
+  const palette = useThemeTokens();
+  const theme = useThemeScheme();
   return (
-    <View style={[styles.surface, style]} testID={testID}>
+    <View style={[styles.surface, { backgroundColor: palette.colorPaper }, style]} testID={testID}>
       <Image
         source={grainSource}
         resizeMode="repeat"
-        style={[styles.grain, { width, height }]}
+        style={[styles.grain, { width, height }, theme === "dark" ? { tintColor: palette.colorInk } : null]}
         accessible={false}
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"

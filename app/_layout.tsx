@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore } from "react";
 import { createServices, type Services } from "../controllers/createServices";
 import { useAppFonts } from "../components/fonts";
+import { statusBarStyle, useThemeScheme } from "../components/theme";
 
 // The device composition binding is loaded lazily and only when a catalog
 // origin is configured: the render tests import the screens that import this
@@ -45,6 +46,9 @@ export function useUiLocale(): string {
 }
 
 export default function RootLayout() {
+  // #436: repaint native chrome on an OS theme change without rebuilding
+  // services, Run, audio or location ownership.
+  const theme = useThemeScheme();
   // G20.20 (issue #491): the ONE production service set comes from the
   // device composition root (controllers/deviceRoot.ts — the only file that
   // binds the Expo facilities); with no catalog origin configured the root
@@ -65,11 +69,9 @@ export default function RootLayout() {
   useAppFonts();
   return (
     <ServicesContext.Provider value={services}>
-      {/* Issue #428: the clock and status-bar icons must stay readable on
-          the light paper everywhere — one dark-content config here at the
-          navigation root, no screen sets its own ("dark" resolves to RN's
-          dark-content on both platforms). */}
-      <StatusBar style="dark" />
+      {/* #428/#436: one root status bar, dark glyphs on light chrome and
+          light glyphs on dark chrome. The accepted light splash is separate. */}
+      <StatusBar style={statusBarStyle(theme)} />
       {/* UX 02 (issue #348): the native header is off — it printed raw route
           names as titles and duplicated the screens' own back; every screen
           owns its frame (one BackButton, safe-area padding). */}

@@ -41,66 +41,67 @@ import {
 } from "../../contracts/ui-locales";
 import { useServices, useUiLocale } from "../_layout";
 import { BackButton } from "../../components/back-button";
-import { tokens } from "../../components/design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "../../components/design-tokens";
+import { useThemeStyles } from "../../components/theme";
 import { LoadingIndicator } from "../../components/loading-indicator";
 import { PaperSurface } from "../../components/paper-surface";
 import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
 import { uiStrings } from "../../components/ui-strings";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   screen: {
     flex: 1,
-    padding: tokens.spaceL,
+    padding: palette.spaceL,
   },
   title: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontTitleSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceM,
+    color: palette.colorInk,
+    fontSize: palette.fontTitleSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceM,
   },
   section: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginTop: tokens.spaceM,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginTop: palette.spaceM,
   },
   row: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceS,
-    padding: tokens.spaceM,
+    marginBottom: palette.spaceS,
+    padding: palette.spaceM,
   },
   rowTitle: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   rowLine: {
-    color: tokens.colorMuted,
+    color: palette.colorMuted,
     fontSize: 12,
     marginTop: 2,
   },
   unavailable: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
   },
   // G06.05 (AC4): the named retry of a failed history read — the manual
   // exit, styled like the catalog's retry.
   retryButton: {
     alignSelf: "flex-start",
-    borderColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginTop: tokens.spaceS,
-    paddingHorizontal: tokens.spaceM,
-    paddingVertical: tokens.spaceS,
+    marginTop: palette.spaceS,
+    paddingHorizontal: palette.spaceM,
+    paddingVertical: palette.spaceS,
   },
   retryLabel: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorAccent,
+    fontSize: palette.fontBaseSize,
   },
   // G14.04.d (issue #305): the language row — three self-named chips in one
   // calm line; the selected chip carries the accent border and ink, the
@@ -108,26 +109,26 @@ const styles = StyleSheet.create({
   localeRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: tokens.spaceS,
-    marginTop: tokens.spaceS,
+    gap: palette.spaceS,
+    marginTop: palette.spaceS,
   },
   localeChip: {
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    paddingHorizontal: tokens.spaceM,
-    paddingVertical: tokens.spaceS,
+    paddingHorizontal: palette.spaceM,
+    paddingVertical: palette.spaceS,
   },
   localeChipSelected: {
-    borderColor: tokens.colorAccent,
+    borderColor: palette.colorAccent,
   },
   localeChipLabel: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
   },
   localeChipLabelSelected: {
-    color: tokens.colorAccent,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorAccent,
+    fontWeight: palette.fontWeightStrong,
   },
   // G22.06 (issue #611): the FlatList owns the scroll — it fills the surface
   // under the fixed back button.
@@ -135,6 +136,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 // The local calendar day of a durable timestamp (UX 05, issue #351): the
 // day the walk happened in the user's zone. The earlier deterministic UTC
@@ -147,6 +150,7 @@ const localDay = (at: number): string => {
 };
 
 export default function My() {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const services = useServices();
   // G14.04.d (issue #305): the words read the switchable display locale —
   // a switch re-renders them in place, no restart.
@@ -326,6 +330,7 @@ function sessionLanguageLabel(locale: string): string {
 // The row's language line (G21.17): one spelling for the live and the
 // finished rows — a sibling copy is a jscpd clone.
 function SessionLocaleLine({ row }: { row: { sessionId: string; locale: string } }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <ScaledText style={styles.rowLine} testID={`my-session-locale-${row.sessionId}`}>
       {sessionLanguageLabel(row.locale)}
@@ -361,6 +366,7 @@ function LiveRow({
   guideTitle: (routeId: string) => string;
   strings: ReturnType<typeof uiStrings>;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <View style={styles.row} testID={`my-session-${row.sessionId}`}>
       <ScaledText style={styles.rowTitle}>{guideTitle(row.routeId)}</ScaledText>
@@ -388,6 +394,7 @@ function HistoryRow({
   guideTitle: (routeId: string) => string;
   strings: ReturnType<typeof uiStrings>;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <View style={styles.row} testID={`my-session-${summary.sessionId}`}>
       <ScaledText style={styles.rowTitle}>{guideTitle(summary.routeId)}</ScaledText>
@@ -420,6 +427,7 @@ function OwnRatings({
   strings: ReturnType<typeof feedbackStrings>;
   onEdit: (target: FeedbackStateView["target"]) => void;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <View testID="my-ratings">
       <ScaledText style={styles.section} testID="my-ratings-section">
@@ -479,6 +487,7 @@ function UiLocaleRow({
   onPick: (code: CompleteUiLocaleCode) => void;
   strings: ReturnType<typeof uiStrings>;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const codes = OPEN_UI_LOCALES;
   return (
     <View testID="my-ui-locale">
