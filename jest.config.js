@@ -7,7 +7,13 @@ process.env.TZ = "America/Anchorage";
 
 module.exports = {
   preset: "jest-expo",
-  testMatch: ["<rootDir>/app/**/*.test.tsx", "<rootDir>/components/**/*.test.tsx"],
+  testMatch: ["<rootDir>/app/**/*.test.tsx", "<rootDir>/components/**/*.test.tsx", "<rootDir>/docs/design/brand/outputs/menu-map-city-only/native/**/*.test.tsx"],
+  transform: {
+    "menu-map-city-only[/\\\\](magnet|amber-light)\\.mjs$": ["babel-jest", {
+      presets: [require.resolve("babel-preset-expo", { paths: [require.resolve("expo/package.json")] })],
+      caller: { name: "metro", bundler: "metro", platform: "ios" },
+    }],
+  },
   // G06.10.c (issue #403): jest reads the "react-native" export condition,
   // which hands lucide-react-native's deep icon imports their ESM .mjs build —
   // an extension babel-jest's transform pattern never matches. The CJS build
