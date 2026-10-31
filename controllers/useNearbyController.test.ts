@@ -103,6 +103,7 @@ interface World {
   audio: AudioService;
   events: GuideHintEventRecord[];
   runRef: { current: RunState };
+  panelRef: { current: 'peek' | 'half' | 'full' };
   runListeners: Array<() => void>;
   released: { fixes: number; audio: number };
   foregroundRef: { current: boolean };
@@ -123,6 +124,7 @@ function makeWorld(options?: {
   points?: GuideHintPoint[];
   pointsReady?: Promise<void>;
   run?: RunState;
+  panel?: 'peek' | 'half' | 'full';
   foreground?: boolean;
   store?: GuideHintStore;
   telemetry?: GuideHintTelemetryPort | null;
@@ -156,10 +158,14 @@ function makeWorld(options?: {
   openDatabase(driver);
   const events: GuideHintEventRecord[] = [];
   const runRef = { current: options?.run ?? { phase: 'Idle' as const } };
+  const panelRef = { current: options?.panel ?? ('peek' as const) };
   const runListeners: Array<() => void> = [];
   const runSource: NearbyHintRunSource = {
     get run() {
       return runRef.current;
+    },
+    get panel() {
+      return panelRef.current;
     },
     subscribe: (listener) => {
       runListeners.push(listener);
@@ -208,6 +214,7 @@ function makeWorld(options?: {
     audio,
     events,
     runRef,
+    panelRef,
     runListeners,
     released,
     foregroundRef,
@@ -503,6 +510,40 @@ test('AC2: durable limits — a shown guide never repeats in the window, dismiss
   assert.notEqual(state.kind, 'ready');
   // The carry source holds this window's shown∪dismissed ids.
   assert.deepEqual(world.binding.foregroundCarry(), ['route-near']);
+});
+
+test('Run story panel keeps unseen hints out of shown rows, telemetry and cooldown', async () => {
+  for (const panel of ['half', 'full'] as const) {
+    const world = makeWorld({ run: activeRun(), panel, offers: [offer('route-near')] });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    world.emitFix(NEAR.lat, NEAR.lng);
+    world.clock.nowMs += 21_000;
+    world.emitFix(NEAR.lat, NEAR.lng);
+    assert.deepEqual(world.storeState(), { kind: 'hidden', reason: 'quiet' });
+    assert.equal(world.events.length, 0, 'an unmounted hint must not emit shown telemetry');
+    assert.deepEqual(listSessionGuideHints(world.driver, 'walk-1'), [], 'no invisible session shown row');
+    assert.deepEqual(world.binding.foregroundCarry(), [], 'no invisible hint Start carry');
+
+    // Leave the radius before closing the story: neither showing the map nor
+    // coming back may consume a cooldown for a hint nobody saw.
+    world.clock.nowMs += 1_000;
+    world.emitFix(FAR.lat, FAR.lng);
+    world.panelRef.current = 'peek';
+    world.notifyRun();
+    assert.notEqual(world.storeState().kind, 'ready');
+    assert.equal(world.events.length, 0);
+    assert.deepEqual(listSessionGuideHints(world.driver, 'walk-1'), []);
+
+    // A fresh arrival and full dwell can still show this guide once.
+    world.clock.nowMs += 1_000;
+    world.emitFix(NEAR.lat, NEAR.lng);
+    world.clock.nowMs += 21_000;
+    world.emitFix(NEAR.lat, NEAR.lng);
+    assert.equal(world.storeState().kind, 'ready');
+    assert.equal(world.events.filter((event) => event.type === 'guide_nearby_shown').length, 1);
+    assert.equal(listSessionGuideHints(world.driver, 'walk-1').length, 1);
+    world.binding.dispose();
+  }
 });
 
 test('AC2: session scope — one show per session, the active guide never advertises itself', async () => {

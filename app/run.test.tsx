@@ -18,10 +18,14 @@ import { runMapStrings } from "../controllers/run/runMap";
 import { createFeedbackSync } from "../services/feedbackSync";
 import { NOW, okPut, openIdentifiedStore, scriptedTransport, secretBox } from "../tests/feedback/queue-fixture";
 import { createServices } from "../controllers/createServices";
+import { createControllerStore } from "../controllers/createControllerStore";
+import type { GuideHintEventRecord, GuideHintStore, NearbyHintState } from "../controllers/useNearbyController";
 import type { RunSessionPorts } from "../controllers/run/runSurfaceController";
 import type { BundlesStore, Readiness, Tier } from "../services/contentRepo/types";
 import { FakeLocationOsPort } from "../services/location/fake-port";
-import { flatStyle, layoutWith, makeRunSession } from "../test/render-helpers";
+import { CATALOG_FIXTURES, flatStyle, layoutWith, makeRunSession, serve, sha256 } from "../test/render-helpers";
+import type { GuideHintValues } from "../services/config";
+import hintValuesJson from "../contracts/hints/guide-hints.values.v1.json";
 import { tokens } from "../components/design-tokens";
 import * as Reanimated from "react-native-reanimated";
 
@@ -334,6 +338,111 @@ describe("run map surface", () => {
     act(() => fireEvent(map, "onDidFailLoadingMap"));
     expect(screen.getByText("Карта загружаецца або недаступная — паказана схема кропак маршруту")).toBeTruthy();
     expect(screen.getByTestId("run-map-retry")).toBeTruthy();
+  });
+
+  // #903: the Run panel must not mount a nearby hint over manual Play.
+  // Reverting the Run surface gate to an unconditional GuideHintMount
+  // displays the card in Half and Full, and makes this test fail.
+  test("Run panel hides a ready nearby hint while a story card is open", async () => {
+    const env = makeRunSession();
+    const services = createServices({ bundlesStore: memoryBundles(layerFiles("be")), run: { session: env.session } });
+    const hintStore = createControllerStore<NearbyHintState>(() => ({
+      kind: "ready",
+      suggestionId: "test-hint",
+      context: "active",
+      guides: [{ routeId: "other-route", title: "Побач", paid: false }],
+    }));
+    // Supply a ready hint binding to the real Run render. The separate
+    // nearby-controller test proves that a hidden card records no shown row.
+    Object.assign(services, {
+      hints: {
+        store: hintStore,
+        dispose: () => {},
+        dismiss: () => {},
+        openPreview: () => {},
+        foregroundCarry: () => [],
+      },
+    });
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    expect(screen.getByTestId("guide-hint-card")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("run-marker-stop-1"));
+    expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+    expect(screen.queryByTestId("guide-hint-card")).toBeNull();
+
+    fireEvent.press(screen.getByTestId("btn-panel-read"));
+    expect(screen.getByTestId("run-panel-full")).toBeTruthy();
+    expect(screen.queryByTestId("guide-hint-card")).toBeNull();
+
+    fireEvent.press(screen.getByTestId("btn-panel-close"));
+    fireEvent.press(screen.getByTestId("btn-panel-close"));
+    expect(screen.getByTestId("run-panel-bar")).toBeTruthy();
+    expect(screen.getByTestId("guide-hint-card")).toBeTruthy();
+  });
+
+  // The production createServices liveRunSource getter must forward the
+  // live Run panel to the real nearby hint controller. Removing that getter
+  // makes this test record an invisible guide_nearby_shown and fail.
+  test("Run panel quiet gate reaches real hint controller through createServices", async () => {
+    serve(CATALOG_FIXTURES);
+    const env = makeRunSession();
+    let nowMs = 0;
+    const shown: string[] = [];
+    const events: GuideHintEventRecord[] = [];
+    const hintStore: GuideHintStore = {
+      recordShown: ({ guideIds }) => { shown.push(...guideIds); },
+      recordDismissed: () => {},
+      sessionShown: () => shown,
+      cooldownBlocked: () => shown,
+    };
+    const services = createServices({
+      bundlesStore: memoryBundles(layerFiles("be")),
+      run: { session: env.session },
+      catalogOrigin: "https://catalog.test",
+      catalogSha256: sha256,
+      location: env.location,
+      audio: env.session.audio,
+      now: () => nowMs,
+      guideHints: {
+        store: hintStore,
+        values: hintValuesJson as GuideHintValues,
+        points: () => [{ guideId: "guide-route-a1", lat: 54.402, lng: 18.6 }],
+        foreground: () => true,
+        telemetry: { record: (event) => { events.push(event); } },
+      },
+    });
+    expect(services.hints).toBeDefined();
+    renderRouter(withRunRoutes(services), { initialUrl: "/run/route-map" });
+    await screen.findByTestId("run-map");
+    await act(async () => {});
+    const commands = env.locationPort.commands.filter((value) => value.startsWith("start "));
+    expect(commands).not.toHaveLength(0);
+    const sub = Number(commands[commands.length - 1].slice("start ".length));
+    const emitFix = (ms: number) => {
+      nowMs = ms;
+      env.advance(ms);
+      act(() => {
+        env.locationPort.emitFix(sub, { lat: 54.402, lng: 18.6, accuracy: 10, at: ms });
+      });
+    };
+
+    fireEvent.press(screen.getByTestId("run-marker-stop-1"));
+    expect(screen.getByTestId("run-panel-half")).toBeTruthy();
+    emitFix(0);
+    emitFix(21_000);
+    expect(services.hints?.store.getState()).toMatchObject({ kind: "hidden", reason: "quiet" });
+    expect(shown).toHaveLength(0);
+    expect(events).toHaveLength(0);
+    expect(screen.queryByTestId("guide-hint-card")).toBeNull();
+
+    // The same hint may show only after the panel closes and a fresh fix
+    // confirms the person is still in range: it was not spent while hidden.
+    fireEvent.press(screen.getByTestId("btn-panel-close"));
+    emitFix(22_000);
+    await waitFor(() => expect(screen.getByTestId("guide-hint-card")).toBeTruthy());
+    expect(shown).toEqual(["guide-route-a1"]);
+    expect(events.map((event) => event.type)).toEqual(["guide_nearby_shown"]);
   });
 
   test("AC3: a marker tap opens the point card on the panel and starts nothing", async () => {

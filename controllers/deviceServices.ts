@@ -52,6 +52,8 @@ import {
   sessionStoreOver,
 } from './sessionPorts.ts';
 import { defaultEngineConfig } from '../core/engine/reducer.ts';
+import { defaultPipelineConfig } from '../core/pipeline/pipeline.ts';
+import type { RunClock } from './run/runOrchestrator.ts';
 import type { GuideHintValues } from '../services/config.ts';
 import type { GuideHintPoint } from './useNearbyController.ts';
 
@@ -94,6 +96,8 @@ export interface DeviceFacilities {
   guideHintValues?: GuideHintValues;
   foreground?: () => boolean;
   onForeground?: (listener: () => void) => () => void;
+  /** Inject a shared wall clock at the OS boundary for deterministic walk regressions. */
+  runClock?: RunClock;
   /** The feedback retry clock; production uses the app process timers. */
   feedbackClock?: {
     now: () => number;
@@ -372,9 +376,9 @@ export function createDeviceServicePorts(facilities: DeviceFacilities): DeviceSe
         location,
         audio,
         audioUriFor,
-        clock: { now: () => Date.now() },
+        clock: facilities.runClock ?? { now: () => Date.now() },
         engineConfig: defaultEngineConfig,
-        pipelineConfig: { dwellMs: 0 },
+        pipelineConfig: defaultPipelineConfig,
         sessionStore: sessionStoreOver(driver),
         readiness: HONEST_REFUSAL,
         packageStops: createRunPackageStopsPort({ driver, bundlesStore, preferredLocales }),

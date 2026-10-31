@@ -311,6 +311,9 @@ export class RunOrchestrator {
   pauseSession(): boolean {
     if (this.engineState.phase !== 'Active' && this.engineState.phase !== 'Paused') return false;
     this.dispatch({ type: 'Pause' });
+    // The first accepted fix after Resume must begin a fresh continuous dwell.
+    // A paused wall-clock interval cannot carry over from the old GPS window.
+    this.pipelineState = initialPipelineState;
     this.location.setMode('paused'); // 11 §4.2: the subscription goes with the geofences
     return true;
   }
@@ -318,6 +321,8 @@ export class RunOrchestrator {
   resumeSession(): boolean {
     if (this.engineState.phase !== 'Paused') return false; // Resume exists only from Paused (ADR G01.03 §3.3)
     this.dispatch({ type: 'Resume' });
+    // Reset even after restoration or rejected fixes while Paused.
+    this.pipelineState = initialPipelineState;
     this.location.setMode('active-guide');
     return true;
   }
