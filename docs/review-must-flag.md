@@ -242,3 +242,13 @@
   свежы лік, не лічбу са старога запісу; састарэлая лічба ў дыфе —
   знаходка, нават калі астатняе ідэальна. Выпраўлена:
   docs/agent-tasks/results/MAP-07.md, радок arch:check — issue #897.
+
+- key: showboat-trigger-coverage — калі Showboat-дэма правяраецца job-ам у
+  `.github/workflows/`, фільтр `paths:` мусіць пералічваць файлы, якія
+  каманды дэмы выконваюць непасрэдна, і panel-gate крыніцы, змены якіх дэма
+  павінна выяўляць: тэставы файл `app/run.test.tsx` не пакрываецца суседнім
+  глабам `app/run/**`, а змена panel-gate крыніц
+  (`controllers/createServices.ts`, `controllers/useNearbyController.ts`,
+  `controllers/useNearbyController.test.ts`) без запісу ў `paths:` не
+  перазапускае `proof` — запісаны вывод дэмы састарэе маўкліўна.
+  Выпраўлена: .github/workflows/g20-35-showboat.yml, спіс `paths:` — issue #933.
