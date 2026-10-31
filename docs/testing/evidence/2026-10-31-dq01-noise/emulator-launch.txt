@@ -1,0 +1,4 @@
+# запуск тэст-эмульятара (з journalctl --user -u kudy-dq01-emul-test):
+paź 31 20:51:56 viktar systemd[907]: Started [ZCode-3.17.1-linux-x64.AppImage] /usr/sbin/env ANDROID_HOME=/home/viktar/Android/Sdk /home/viktar/Android/Sdk/emulator/emulator -avd kudy-test -no-window -no-audio -no-snapshot -gpu swiftshader_indirect -memory 2048 -port 5554.
+# запуск CI-эмульятара (systemctl --user show kudy-dq01-emul-ci -p ExecStart):
+ExecStart={ path=/usr/sbin/env ; argv[]=/usr/sbin/env ANDROID_HOME=/home/viktar/Android/Sdk /home/viktar/Android/Sdk/emulator/emulator -avd kudy-ci -no-window -no-audio -no-snapshot -gpu swiftshader_indirect -memory 2048 -port 5556 ; ignore_errors=no ; start_time=[Sat 2026-10-31 21:56:52 CET] ; stop_time=[n/a] ; pid=269285 ; code=(null) ; status=0/0 }
