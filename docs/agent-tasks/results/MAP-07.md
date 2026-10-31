@@ -77,7 +77,8 @@
   spikes/MAP-07-tap-drag/weighted-motion.test.mjs
   spikes/MAP-07-tap-drag/pickup-feedback.test.mjs` — 21 pass;
   `node --test spikes/MAP-07-tap-drag/adapter-pickup.test.mjs` — 1 pass.
-  `npm run arch:check` — OK (650 modules, 0 violations).
+  `npm run arch:check` — OK (656 modules, 0 violations; лічба абноўлена
+  2026-10-31 свежым ранам супраць фінальнага HEAD — issue #897).
 - `npm run typecheck` у sandbox гэтага worktree — не правераны:
   TS6053 на `spikes/G00.03-sandbox-grant/server/device-auth.mjs`.
   Браўзерны opt-in E2E — не пройдзены: няма Playwright headless shell;
