@@ -27,6 +27,17 @@ test('guard: the app/ component suite is wired into npm test (implementation-rul
   );
 });
 
+test('guard: map-menu behavioral suites remain in the root runners', () => {
+  const folder = 'docs/design/brand/outputs/menu-map-city-only';
+  for (const suite of ['magnet.test.mjs', 'amber-light.test.mjs', 'native/model.test.mjs']) {
+    assert.ok(pkg.scripts.test.includes(`${folder}/${suite}`), `npm test must run ${suite}`);
+  }
+  assert.ok(
+    jestConfig.includes(`${folder}/native/**/*.test.tsx`),
+    'Jest must discover the map-menu responder and accessibility suite',
+  );
+});
+
 // G06.10.f (issue #406): the reanimated base must stay jest-mocked through
 // the official mock plus the controllable useReducedMotion stub — dropping
 // the mapping loads the real base and its worklet runtime, which jest
