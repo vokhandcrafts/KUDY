@@ -1,5 +1,7 @@
 # Agent instructions
 
+For a design-QA review, read `docs/agent-rules/design-qa.md` and run it on request and before closing any task that changes the interface. Design-QA is not run in CI and needs no model API key. Record unavailable device or baseline evidence as NOT-VERIFIED.
+
 Before completing any implementation task, read and follow `docs/agent-rules/showboat.md`. It defines the mandatory, measurable conditions for creating a Showboat proof of work.
 
 Before implementing any fix or feature, read and follow `docs/agent-rules/implementation-rules.md`. It lists the recurring defect patterns from the 2026-09-15 architecture review and the fix campaign (reverted-fix guards, contract restatement drift, platform assumptions, generated mirrors, runner wiring, stale docs, executor collisions) with the mandatory pre-push check for each.
