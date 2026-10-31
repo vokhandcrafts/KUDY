@@ -2236,11 +2236,11 @@
     },
     {
       "id": "web.ui.privacyAppData",
-      "value": "Die App funktioniert ohne Konto. Sie führt auf dem Gerät ein lokales Ereignisprotokoll (welche Geschichten geöffnet wurden, welche Routen geladen wurden) und speichert geladene Inhalte. Das Protokoll enthält weder Namen noch frei eingegebenen Text und ist an eine zufällige Gerätekennung gebunden — das sind pseudonymisierte, keine anonymen Daten.",
-      "reviewedSourceHash": "440680a83706fc8e822376da9efc4e06bef21b3f33ecc4566ef35f3c68ec5470",
+      "value": "Die App funktioniert ohne Konto. Sie führt auf dem Gerät ein lokales Ereignisprotokoll (welche Geschichten geöffnet wurden, welche Routen geladen wurden) und speichert geladene Inhalte. Das Protokoll enthält weder Namen noch frei eingegebenen Text und ist an eine zufällige Gerätekennung gebunden — das sind pseudonymisierte, keine anonymen Daten. Bei der Installation vergibt der KUDY-Server dem Gerät eine zufällige Kennung und ein Geheimnis: Auf dem Server bleiben die Kennung und ein Hash des Geheimnisses, das Geheimnis selbst wird nur auf dem Gerät aufbewahrt und signiert seine Anfragen an den KUDY-Server. Zur Drosselung der Anfragefrequenz speichert der Server einen Einweg-Hash der IP-Adresse. Bewertungen von Routen und Orten, die in der App abgegeben werden (Note und ausgewählte Gründe, ohne freien Text), gehen ebenfalls an den KUDY-Server und werden dort zusammen mit der Gerätekennung aufbewahrt.",
+      "reviewedSourceHash": "68c45b57ab5c69d195e92f67dba57f813221a5b923633d989661f711e67fab6d",
       "review": {
         "outcome": "approved",
-        "note": "поўны абзац перададзены паводле сэнсу; гарды «ніколі / толькі / без» захаваныя ў перакладзе"
+        "note": "#853: дапоўнена сервернай рэгістрацыяй прылады, hash IP і ацэнкамі на серверы KUDY (D03/D04/D06 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
       }
     },
     {
@@ -2254,11 +2254,11 @@
     },
     {
       "id": "web.ui.privacyDeletion",
-      "value": "Datenlöschung: In der App gibt es im Bereich My KUDY die Taste zum Löschen des Geräts — sie bereinigt das Ereignisprotokoll auf dem Server und den Geräteeintrag; geladene Inhalte bleiben. Ein Brief oder ein Antrag ist nicht nötig.",
-      "reviewedSourceHash": "6620748446af7ada3e3599b198bf82640983b0568c88d3c19f97e59b25bfc897",
+      "value": "Datenlöschung: In der App gibt es im Bereich My KUDY die Taste zum Löschen des Geräts — sie bereinigt das Ereignisprotokoll auf dem Server und den Geräteeintrag, zusammen mit ihm die Bewertungsdaten auf dem Server und das Geheimnis auf dem Gerät; geladene Inhalte bleiben. Ein Brief oder ein Antrag ist nicht nötig. Die Taste löscht keine Einträge in den App-Stores oder bei RevenueCat: Diese verwahrt und löscht der jeweilige Dienst nach seinen Regeln.",
+      "reviewedSourceHash": "a581b5a8f4c1dca0bc1e1ba3d5e46f810affdd19aca5cb1598e0c12e4598ec62",
       "review": {
         "outcome": "approved",
-        "note": "адмаўленне захаванае даслоўна; сэнс правераны супраць арыгіналу"
+        "note": "#853: дададзены межы выдалення (крамы і RevenueCat не выдаляюцца) і ацэнкі/сакрэт у каскадзе (D03/D06/D07 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
       }
     },
     {
@@ -2281,11 +2281,11 @@
     },
     {
       "id": "web.ui.privacyPurchases",
-      "value": "Käufe laufen über die App-Stores (App Store, Google Play): Die Zahlungsdaten verarbeitet der Store, die App zeichnet nur den Kaufvorgang auf — Route, Variante, Ergebnis — ohne Bankdaten.",
-      "reviewedSourceHash": "9befc36b7704fa57cf77cb50c7277a86c5dd0ebd6fcdd4ee8f69d48d6a993dce",
+      "value": "Käufe laufen über die App-Stores (App Store, Google Play): Die Zahlungsdaten verarbeitet der Store, die App zeichnet nur den Kaufvorgang auf — Route, Variante, Ergebnis — ohne Bankdaten. Über die Berechtigungen verfügt ein eigener Dienst, RevenueCat: Die App sendet ihm die zufällige Gerätekennung als Käuferkennung sowie die Anfragen zum Kauf oder zur Bestätigung früherer Käufe; Zahlungen selbst laufen nur über den Store. Der KUDY-Server führt eine technische Aufzeichnung der Kaufereignisse (Produkt, Store, Gültigkeitsdauer) ohne Zahlungsdaten.",
+      "reviewedSourceHash": "a702717ee9ee00b5a45328c9959e4663335a1f91be11824d6846b1b967a7ebbe",
       "review": {
         "outcome": "approved",
-        "note": "тэрмін па глоссарыі G21.19: purchase → Kauf (glossary.json#purchase); сэнс радка правераны"
+        "note": "#853: крыніца дапоўнена RevenueCat, device UUID як ідэнтыфікатарам пакупніка і серверным улікам падзей (D07/D08 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
       },
       "terminology": {
         "status": "resolved",

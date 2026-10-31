@@ -2100,11 +2100,11 @@
     },
     {
       "id": "web.ui.privacyAppData",
-      "value": "La aplicación funciona sin cuenta. Lleva en el dispositivo un registro local de eventos (qué historias se abrían, qué rutas se descargaban) y guarda las descargas de contenido. El registro no contiene ni nombres ni texto libre y va ligado a un identificador aleatorio del dispositivo: son datos seudonimizados, no anónimos.",
-      "reviewedSourceHash": "440680a83706fc8e822376da9efc4e06bef21b3f33ecc4566ef35f3c68ec5470",
+      "value": "La aplicación funciona sin cuenta. Lleva en el dispositivo un registro local de eventos (qué historias se abrían, qué rutas se descargaban) y guarda las descargas de contenido. El registro no contiene ni nombres ni texto libre y va ligado a un identificador aleatorio del dispositivo: son datos seudonimizados, no anónimos. Al instalarse la aplicación, el servidor de KUDY asigna al dispositivo un identificador aleatorio y un secreto: en el servidor quedan el identificador y el hash del secreto, el secreto mismo se guarda solo en el dispositivo y firma sus solicitudes al servidor de KUDY. Para limitar la frecuencia de solicitudes, el servidor guarda un hash unidireccional de la dirección IP. Las valoraciones de rutas y lugares dadas en la aplicación (la puntuación y los motivos elegidos, sin texto libre) también van al servidor de KUDY y se guardan allí junto con el identificador del dispositivo.",
+      "reviewedSourceHash": "68c45b57ab5c69d195e92f67dba57f813221a5b923633d989661f711e67fab6d",
       "review": {
         "outcome": "approved",
-        "note": "адмаўленні «ні імён, ні тэксту», «не ананімныя» захаваныя; тэрмін seudonimizados — юрыдычны стандарт"
+        "note": "#853: дапоўнена сервернай рэгістрацыяй прылады, hash IP і ацэнкамі на серверы KUDY (D03/D04/D06 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
       }
     },
     {
@@ -2118,11 +2118,11 @@
     },
     {
       "id": "web.ui.privacyDeletion",
-      "value": "Eliminación de datos: en la aplicación, en la sección My KUDY, hay un botón de eliminación del dispositivo: limpia el registro de eventos del servidor y el registro del dispositivo; las descargas de contenido se quedan. No hace falta enviar carta ni solicitud.",
-      "reviewedSourceHash": "6620748446af7ada3e3599b198bf82640983b0568c88d3c19f97e59b25bfc897",
+      "value": "Eliminación de datos: en la aplicación, en la sección My KUDY, hay un botón de eliminación del dispositivo: limpia el registro de eventos del servidor y el registro del dispositivo, junto con ellos los datos de valoraciones en el servidor y el secreto en el dispositivo; las descargas de contenido se quedan. No hace falta enviar carta ni solicitud. El botón no borra los registros en las tiendas de aplicaciones ni en RevenueCat: los guarda y los borra el servicio correspondiente según sus reglas.",
+      "reviewedSourceHash": "a581b5a8f4c1dca0bc1e1ba3d5e46f810affdd19aca5cb1598e0c12e4598ec62",
       "review": {
         "outcome": "approved",
-        "note": "адмаўленне «ліст ці заяўку дасылаць не трэба» захаванае; раздзел My KUDY — як у арыгінале"
+        "note": "#853: дададзены межы выдалення (крамы і RevenueCat не выдаляюцца) і ацэнкі/сакрэт у каскадзе (D03/D06/D07 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
       }
     },
     {
@@ -2145,11 +2145,11 @@
     },
     {
       "id": "web.ui.privacyPurchases",
-      "value": "Las compras pasan por las tiendas de aplicaciones (App Store, Google Play): los datos de pago los procesa la tienda, y la aplicación solo registra el hecho de la compra — la ruta, la variante, el resultado — sin datos bancarios.",
-      "reviewedSourceHash": "9befc36b7704fa57cf77cb50c7277a86c5dd0ebd6fcdd4ee8f69d48d6a993dce",
+      "value": "Las compras pasan por las tiendas de aplicaciones (App Store, Google Play): los datos de pago los procesa la tienda, y la aplicación solo registra el hecho de la compra — la ruta, la variante, el resultado — sin datos bancarios. Los derechos sobre lo comprado los gestiona un servicio aparte, RevenueCat: la aplicación le envía el identificador aleatorio del dispositivo como identificador del comprador y las solicitudes de compra o de confirmación de compras anteriores; los pagos van solo por la tienda. El servidor de KUDY guarda un registro técnico de los eventos de compra (producto, tienda, plazo de validez) sin datos de pago.",
+      "reviewedSourceHash": "a702717ee9ee00b5a45328c9959e4663335a1f91be11824d6846b1b967a7ebbe",
       "review": {
         "outcome": "approved",
-        "note": "адмаўленне «без банкаўскіх рэквізітаў» захаванае; тэрмін purchase → compra (glossary.json#purchase)"
+        "note": "#853: крыніца дапоўнена RevenueCat, device UUID як ідэнтыфікатарам пакупніка і серверным улікам падзей (D07/D08 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
       }
     },
     {
