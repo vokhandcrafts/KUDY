@@ -63,3 +63,34 @@ export const tokens = {
   // pins this mirror entry to that range, not to the token value string.
   texturePaperGrainOpacity: 0.05, // texture.paper-grain
 } as const;
+
+
+// #436 — approved DT-2 dark-chrome values from the darkTheme machine block in
+// docs/design/visual-language.md. The light map, marker colors and typography
+// deliberately stay unchanged (DT-4); test/design-runtime-theme.test.mjs pins
+// every override to the accepted canon. Never invert content imagery.
+export const darkTokens = {
+  ...tokens,
+  colorPaper: '#171d1c',
+  colorInk: '#f2f1e9',
+  colorMuted: '#c4d0ca',
+  colorAccent: '#80d4ad',
+  colorAccentInk: '#0d2a1e',
+  colorCard: '#232c29',
+  colorLine: '#45534c',
+  colorShelfAccent: '#65cb9c',
+  colorShelfLine: '#35403a',
+  colorDisabledInk: '#9aa8a1',
+  colorDisabledLine: '#6d7c72',
+  colorBadgePaid: '#493b23',
+  colorBadgeFree: '#263b31',
+  colorBadgeMixed: '#332c47',
+  colorNoticeBg: '#3a3119',
+  colorNoticeBorder: '#7d6b3a',
+  colorErrorBg: '#3a201b',
+  colorErrorBorder: '#8a4a42',
+  colorHintBg: '#1c2833',
+  colorHintBorder: '#3e5871',
+} as const;
+
+export type ThemeTokens = typeof tokens | typeof darkTokens;

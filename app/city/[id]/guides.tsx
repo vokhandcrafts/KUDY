@@ -11,18 +11,22 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCatalogController } from "../../../controllers/catalog/useCatalogController";
 import { useServices, useUiLocale } from "../../_layout";
 import { BackButton } from "../../../components/back-button";
-import { tokens } from "../../../components/design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "../../../components/design-tokens";
+import { useThemeStyles } from "../../../components/theme";
 import { CityCatalogBody } from "../../../components/guide-card";
 import { uiStrings } from "../../../components/ui-strings";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   screen: {
-    backgroundColor: tokens.colorPaper,
+    backgroundColor: palette.colorPaper,
     flex: 1,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 export default function Guides() {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const services = useServices();
   // G14.04.d (issue #305): the words read the switchable display locale —
   // a switch re-renders them in place, no restart.

@@ -112,6 +112,23 @@ test('criterion 3: Resume exists only from Paused, clears the suspension and reb
   ]);
 });
 
+test('G20.35: Paused rejects a playable dwell event even if it reaches the engine', () => {
+  const fix = {
+    lat: 54.352, lng: 18.648, accuracy: 5, at: NOW,
+    distances: new Map([['stop-plain', 0]]),
+  };
+  const dwellEvent = { type: 'DwellCompleted' as const, stopId: 'stop-plain', radius: 30 };
+  const active = sessionOf(step(started(), { type: 'LocationAccepted', fix }, NOW, CONFIG));
+  const positive = step(active, dwellEvent, NOW, CONFIG);
+  assert.ok(positive.commands.some((command) => command.type === 'PlayStory'), 'active input must play');
+
+  const paused = sessionOf(step(active, { type: 'Pause' }, NOW, CONFIG));
+  const afterFix = sessionOf(step(paused, { type: 'LocationAccepted', fix }, NOW, CONFIG));
+  const rejected = step(afterFix, dwellEvent, NOW, CONFIG);
+  assert.deepEqual(rejected.state, afterFix, 'paused dwell must not burn an automatic attempt');
+  assert.deepEqual(rejected.commands, [], 'paused dwell must not launch audio');
+});
+
 test('criterion 3: Resume from Active is a no-op', () => {
   const active = started();
   const result = step(active, { type: 'Resume' }, NOW, CONFIG);

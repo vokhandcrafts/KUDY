@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { assertNoReadyStart, waitForRun, locationListeners, waitForManualStart, tapMapPoint, visiblePointStatus, startWalkAtLocation, previewNodesWith } from './walk.mjs';
+import { assertNoReadyStart, waitForRun, locationListeners, waitForManualStart, tapMapPoint, visiblePointStatus, startWalkAtLocation, previewNodesWith, tapPlayAndWaitForAudio, dismissGuideHintBeforePlay } from './walk.mjs';
 
 test('walk scrolls clipped preview lock badges into the UIAutomator viewport', async () => {
   let position = 0;
@@ -156,4 +156,67 @@ test('manual Run declines accuracy settings while location is deliberately off',
   };
   await waitForRun(driver, 'manual', false);
   assert.equal(declined, true);
+});
+
+
+test('manual Play arms the native playback observer before the one Android tap', async () => {
+  const calls = [];
+  let started = false;
+  let sawPreTapProbe = false;
+  const driver = {
+    dump: async () => ({ xml: '<node resource-id="screen-Run"/>' }),
+    waitFor: async (selector) => {
+      assert.deepEqual(selector, { testID: 'btn-card-play' });
+      calls.push('button visible');
+      return { bounds: '[20,20][100,80]' };
+    },
+    exec: async (args) => {
+      if (args[1] === 'pidof') {
+        sawPreTapProbe = true;
+        return { stdout: '4321\n' };
+      }
+      assert.deepEqual(args, ['shell', 'dumpsys', 'audio']);
+      calls.push('native audio probe');
+      return {
+        stdout: `players:
+AudioPlaybackConfiguration /4321 state:${started ? 'started' : 'stopped'}
+Events log: playback activity
+`,
+      };
+    },
+    tapNode: async (node) => {
+      assert.equal(sawPreTapProbe, true, 'observation must start before the tap');
+      assert.equal(node.bounds, '[20,20][100,80]');
+      started = true;
+      calls.push('one tap');
+    },
+  };
+  await tapPlayAndWaitForAudio(driver);
+  assert.equal(calls.filter((call) => call === 'one tap').length, 1);
+  assert.ok(calls.includes('native audio probe'), 'the physical player was observed');
+});
+
+
+test('walk dismisses a nearby guide hint obscuring manual Play before any Play tap', async () => {
+  const taps = [];
+  let hintVisible = true;
+  const driver = {
+    dump: async () => ({
+      xml: '<node resource-id="screen-Run"/>' +
+        (hintVisible
+          ? '<node resource-id="guide-hint-card" bounds="[44,1641][1036,2263]"/>' +
+            '<node resource-id="btn-hint-dismiss" bounds="[80,2096][1000,2228]"/>'
+          : '<node resource-id="btn-card-play" bounds="[69,1590][1011,1722]"/>'),
+    }),
+    tapNode: async (node) => {
+      assert.equal(node.resourceId, 'btn-hint-dismiss', 'never tap obscured Play');
+      taps.push(node.resourceId);
+      hintVisible = false;
+    },
+  };
+  await dismissGuideHintBeforePlay(driver);
+  assert.deepEqual(taps, ['btn-hint-dismiss']);
+  assert.equal(hintVisible, false);
+  await dismissGuideHintBeforePlay(driver);
+  assert.equal(taps.length, 1, 'an absent hint is not dismissed again');
 });

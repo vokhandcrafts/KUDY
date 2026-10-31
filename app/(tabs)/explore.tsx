@@ -14,40 +14,44 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useCatalogController } from "../../controllers/catalog/useCatalogController";
 import { useServices, useUiLocale } from "../_layout";
-import { tokens } from "../../components/design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "../../components/design-tokens";
+import { useThemeStyles } from "../../components/theme";
 import { CityCatalogBody, StateBanner } from "../../components/guide-card";
 import { PaperSurface } from "../../components/paper-surface";
 import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
 import { uiStrings } from "../../components/ui-strings";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   brand: {
-    color: tokens.colorAccent,
+    color: palette.colorAccent,
     fontSize: 14,
-    fontWeight: tokens.fontWeightStrong,
+    fontWeight: palette.fontWeightStrong,
     letterSpacing: 2,
-    marginBottom: tokens.spaceM,
+    marginBottom: palette.spaceM,
   },
   middleLink: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   middleRow: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceS,
-    padding: tokens.spaceM,
+    marginBottom: palette.spaceS,
+    padding: palette.spaceM,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 // One middle-slot entry (G07.01's «Побач», G15.03's «Чым заняцца»): the
 // tappable marker and the role of UX 03 (issue #349) — hitSlop lifts the
 // target to ≥44dp; the href and the word stay the surface's own.
 function SurfaceLink({ href, label, testID }: { href: string; label: string; testID: string }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <Link href={href} asChild>
       <PressableSurface accessibilityRole="link" accessibilityLabel={label} hitSlop={12} style={styles.middleRow} testID={testID}>
@@ -58,6 +62,7 @@ function SurfaceLink({ href, label, testID }: { href: string; label: string; tes
 }
 
 export default function Explore() {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const services = useServices();
   // G14.04.d (issue #305): the words read the switchable display locale —
   // a switch re-renders them in place, no restart.

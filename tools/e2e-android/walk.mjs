@@ -100,9 +100,60 @@ async function waitForAudioActive(driver, expected) {
   const deadline = Date.now() + SHORT_MS;
   for (;;) {
     if ((await activeAudioPlayers(driver)) === expected) return;
-    if (Date.now() >= deadline) throw new Error(`native audio player did not become ${expected ? 'active' : 'stopped'}`);
+    if (Date.now() >= deadline) {
+      // Separate a lost manual tap from an engine launch without a player.
+      let screen = 'UI dump unavailable';
+      try {
+        const nodes = parseDump((await driver.dump('dump-walk-audio-timeout.xml')).xml);
+        const ids = ['screen-Run', 'run-paused', 'run-ended', 'run-preview',
+          'btn-card-play', 'btn-bar-playpause', 'run-autoplay-suspended'];
+        screen = ids.filter((id) => findNode(nodes, { testID: id })).join(', ') || 'no Run markers visible';
+      } catch (error) {
+        screen = error instanceof Error ? error.message : String(error);
+      }
+      throw new Error(`native audio player did not become ${expected ? 'active' : 'stopped'}; UI: ${screen}`);
+    }
     await delay();
   }
+}
+
+// A nearby-guide hint rendered above the Run card in the failing Android
+// artifact: its bounds covered the center of btn-card-play. UIAutomator
+// still found the button, but Android delivered the tap to the hint instead.
+// The Run surface now hides hints while the card is open; this guard also
+// dismisses a hint if it was visible before the card finished rendering.
+export async function dismissGuideHintBeforePlay(driver) {
+  const deadline = Date.now() + SHORT_MS;
+  let dismissed = false;
+  for (;;) {
+    const nodes = parseDump((await driver.dump('dump-walk-play-uncovered.xml')).xml);
+    const hint = findNode(nodes, { testID: 'guide-hint-card' });
+    if (!hint) return;
+    if (!dismissed) {
+      const button = findNode(nodes, { testID: 'btn-hint-dismiss' });
+      assert.ok(button, 'nearby guide hint covers Play but has no dismiss button');
+      await driver.tapNode(button);
+      dismissed = true;
+    }
+    if (Date.now() >= deadline) throw new Error('nearby guide hint still covers the Play button after dismissal');
+    await delay();
+  }
+}
+
+// The fixture recording is six seconds long. Arm the physical observation
+// before the one tap: waiting for adb input to finish can miss a short play.
+// Only Android playback counts as success; an engine/UI bar alone never does.
+export async function tapPlayAndWaitForAudio(driver) {
+  await dismissGuideHintBeforePlay(driver);
+  const node = await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
+  const observation = waitForAudioActive(driver, true);
+  try {
+    await driver.tapNode(node);
+  } catch (error) {
+    void observation.catch(() => {});
+    throw error;
+  }
+  await observation;
 }
 
 export async function waitForRun(driver, slug, allowLocationSettings = true) {
@@ -278,9 +329,7 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     // Replay the already heard stop 1 so stop 2 remains unheard for End.
     // Pause still exercises active audio rather than an idle session.
     await tapMapPoint(driver, 'e2e-stop-1');
-    await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
-    await driver.tapSelector({ testID: 'btn-card-play' });
-    await waitForAudioActive(driver, true);
+    await tapPlayAndWaitForAudio(driver);
     await driver.tapSelector({ testID: 'btn-run-pause' });
     await driver.waitFor({ testID: 'run-paused' }, { timeoutMs: SHORT_MS });
     await waitForAudioActive(driver, false);
@@ -343,9 +392,7 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
       await waitForRun(driver, 'no-location-entry', false);
       await assertNoPlaying(driver, 2500, 'no-fresh-position');
       await tapMapPoint(driver, 'e2e-stop-2');
-      await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
-      await driver.tapSelector({ testID: 'btn-card-play' });
-      await waitForAudioActive(driver, true);
+      await tapPlayAndWaitForAudio(driver);
     } finally {
       await driver.exec(['shell', 'cmd', 'location', 'set-location-enabled', 'true']);
     }

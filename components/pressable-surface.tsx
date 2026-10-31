@@ -24,7 +24,8 @@ import {
   type ViewStyle,
 } from "react-native";
 
-import { tokens } from "./design-tokens";
+import { darkTokens, tokens } from "./design-tokens";
+import { useThemeStyles, useThemeTokens } from "./theme";
 
 // 10% ink alpha — a derived shade of color.ink (#22262b), see the file head.
 const RIPPLE_COLOR = "rgba(34, 38, 43, 0.1)";
@@ -69,20 +70,30 @@ const shelfStyles = StyleSheet.create({
   },
 });
 
+const darkShelfStyles = StyleSheet.create({
+  accent: { ...shelfStyles.accent, borderBottomColor: darkTokens.colorShelfAccent },
+  line: { ...shelfStyles.line, borderBottomColor: darkTokens.colorShelfLine },
+});
+
 type SurfaceProps = PressableProps & { shelf?: ShelfShade };
 
 export const PressableSurface = forwardRef<ComponentRef<typeof Pressable>, SurfaceProps>(
   function PressableSurface({ style, shelf, disabled, ...rest }: SurfaceProps, ref) {
+    const activeShelfStyles = useThemeStyles(shelfStyles, darkShelfStyles);
+    const palette = useThemeTokens();
+    // Canon ink with 10% alpha, rather than a light-only hardcoded ripple.
+    const hex = palette.colorInk.slice(1);
+    const rippleColor = palette === tokens ? RIPPLE_COLOR : `rgba(${parseInt(hex.slice(0, 2), 16)}, ${parseInt(hex.slice(2, 4), 16)}, ${parseInt(hex.slice(4, 6), 16)}, 0.1)`;
     return (
       <Pressable
         ref={ref}
         disabled={disabled}
         {...rest}
-        android_ripple={{ color: RIPPLE_COLOR }}
+        android_ripple={{ color: rippleColor }}
         style={(state) => {
           const base = typeof style === "function" ? style(state) : style;
           const layers: StyleProp<ViewStyle>[] = [base, styles.touchTarget];
-          if (shelf) layers.push(shelfStyles[shelf]);
+          if (shelf) layers.push(activeShelfStyles[shelf]);
           if (state.pressed) layers.push(styles.pressed);
           // The dip is the enabled press's move: a disabled pressable keeps
           // its resting shelf and never translates (canon §5).

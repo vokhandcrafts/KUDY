@@ -152,7 +152,9 @@
   запісам адкрыць канон-радок і пераканацца, што цытата супадае з ім
   даслоўна.
   Выпраўлена: docs/agent-tasks/results/G06.10.b.md, заўвага «Канаённы дрыфт
-  для ўладара канона» — issue #412.
+  для ўладара канона» — issue #412;
+  docs/agent-tasks/results/kids-menu-requirements.md, пункт NAV1 (скарочаны
+  ланцуг без карткі гіда) — issue #902.
 
 - key: missing-back-press-test — рэндэр-сюіта экрану, які трымае форму ў
   singleton-сторы кантролера, прайгравае рэальны выхад з маршрута: прэс
@@ -233,3 +235,20 @@
   знаходка; negative-тэст мусіць рваць вяртанне простай дэструктывізацыі.
   Выпраўлена: spikes/MAP-07-tap-drag/tap-drag.mjs,
   spikes/MAP-07-tap-drag/edge-cases.test.mjs — issue #898.
+
+- key: stale-counts — лічбы з выводаў праверак (модулі arch:check, тэсты,
+  пакеты) у results-дакументах і тэксце PR капіруюцца з рана супраць
+  фінальнага HEAD у сесіі пушу: перазапусці праверку перад пушам і ўпішы
+  свежы лік, не лічбу са старога запісу; састарэлая лічба ў дыфе —
+  знаходка, нават калі астатняе ідэальна. Выпраўлена:
+  docs/agent-tasks/results/MAP-07.md, радок arch:check — issue #897.
+
+- key: showboat-trigger-coverage — калі Showboat-дэма правяраецца job-ам у
+  `.github/workflows/`, фільтр `paths:` мусіць пералічваць файлы, якія
+  каманды дэмы выконваюць непасрэдна, і panel-gate крыніцы, змены якіх дэма
+  павінна выяўляць: тэставы файл `app/run.test.tsx` не пакрываецца суседнім
+  глабам `app/run/**`, а змена panel-gate крыніц
+  (`controllers/createServices.ts`, `controllers/useNearbyController.ts`,
+  `controllers/useNearbyController.test.ts`) без запісу ў `paths:` не
+  перазапускае `proof` — запісаны вывод дэмы састарэе маўкліўна.
+  Выпраўлена: .github/workflows/g20-35-showboat.yml, спіс `paths:` — issue #933.

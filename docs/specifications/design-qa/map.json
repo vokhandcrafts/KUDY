@@ -1,0 +1,417 @@
+{
+  "schemaVersion": 2,
+  "source": {
+    "kind": "files"
+  },
+  "spec": {
+    "id": "kudy-design-qa",
+    "title": "Сістэма праверкі дызайну KUDY",
+    "sourceUrl": "2026-10-30-design-qa-system.md",
+    "version": 1,
+    "allowedRepositories": [
+      {
+        "name": "vokhandcrafts/KUDY",
+        "baseBranches": [
+          "main"
+        ]
+      }
+    ]
+  },
+  "root": {
+    "id": "SPEC-DESIGN-QA",
+    "identifier": "SPEC-DESIGN-QA",
+    "url": "2026-10-30-design-qa-system.md"
+  },
+  "components": [
+    {
+      "key": "a11y",
+      "id": "c-a11y",
+      "title": "Праверкі даступнасці",
+      "description": "Назвы і памер мішэняў з дампа",
+      "shape": "rect",
+      "x": 30,
+      "y": 210
+    },
+    {
+      "key": "agent",
+      "id": "c-agent",
+      "title": "Дызайн-QA агент",
+      "description": "Правілы, другі праход, журнал вердыктаў",
+      "shape": "rect",
+      "x": 445,
+      "y": 210
+    },
+    {
+      "key": "baselines",
+      "id": "c-baselines",
+      "title": "Ухваленыя ўзоры",
+      "description": "PNG, якія ўхваліў уладальнік",
+      "shape": "database",
+      "x": 860,
+      "y": 210
+    },
+    {
+      "key": "capture",
+      "id": "c-capture",
+      "title": "visual:check",
+      "description": "Здымак на эмулятары і параўнанне з узорам",
+      "shape": "rect",
+      "x": 30,
+      "y": 530
+    },
+    {
+      "key": "images",
+      "id": "c-images",
+      "title": "Праверка выяў",
+      "description": "Чэкліст брыфа і тэхнічны скрыпт",
+      "shape": "rect",
+      "x": 445,
+      "y": 530
+    },
+    {
+      "key": "mockups",
+      "id": "c-mockups",
+      "title": "Перадправерка макетаў",
+      "description": "HTML-макет супраць канона",
+      "shape": "rect",
+      "x": 860,
+      "y": 530
+    },
+    {
+      "key": "report",
+      "id": "c-report",
+      "title": "Справаздача",
+      "description": "Вердыкт, розніцы, знаходкі, не праверанае",
+      "shape": "rect",
+      "x": 30,
+      "y": 850
+    },
+    {
+      "key": "spec",
+      "id": "c-spec",
+      "title": "Спецыфікацыя і задачы",
+      "description": "Узгодненая спецыфікацыя, карткі і індэкс",
+      "shape": "rect",
+      "x": 445,
+      "y": 850
+    },
+    {
+      "key": "specimen",
+      "id": "c-specimen",
+      "title": "Dev-экран",
+      "description": "Малюе гісторыі без інтэрфейсу Storybook для здымкаў",
+      "shape": "rect",
+      "x": 860,
+      "y": 850
+    },
+    {
+      "key": "stories",
+      "id": "c-stories",
+      "title": "Гісторыі станаў",
+      "description": "Адзіная крыніца станаў кампанента ў *.stories.tsx",
+      "shape": "rect",
+      "x": 30,
+      "y": 1170
+    },
+    {
+      "key": "storybook",
+      "id": "c-storybook",
+      "title": "Storybook на тэлефоне",
+      "description": "Прагляд і кантролы станаў у dev-зборцы",
+      "shape": "rect",
+      "x": 445,
+      "y": 1170
+    }
+  ],
+  "connections": [
+    {
+      "key": "a11y-report",
+      "id": "e-a11y-report",
+      "from": "c-a11y",
+      "to": "c-report",
+      "kind": "request",
+      "label": "Факты"
+    },
+    {
+      "key": "baselines-capture",
+      "id": "e-baselines-capture",
+      "from": "c-baselines",
+      "to": "c-capture",
+      "kind": "dependency",
+      "label": "Узор"
+    },
+    {
+      "key": "capture-report",
+      "id": "e-capture-report",
+      "from": "c-capture",
+      "to": "c-report",
+      "kind": "request",
+      "label": "Розніцы"
+    },
+    {
+      "key": "images-agent",
+      "id": "e-images-agent",
+      "from": "c-images",
+      "to": "c-agent",
+      "kind": "request",
+      "label": "Вынік праверкі"
+    },
+    {
+      "key": "mockups-agent",
+      "id": "e-mockups-agent",
+      "from": "c-mockups",
+      "to": "c-agent",
+      "kind": "request",
+      "label": "Вынік праверкі"
+    },
+    {
+      "key": "report-agent",
+      "id": "e-report-agent",
+      "from": "c-report",
+      "to": "c-agent",
+      "kind": "request",
+      "label": "Доказы"
+    },
+    {
+      "key": "spec-agent",
+      "id": "e-spec-agent",
+      "from": "c-spec",
+      "to": "c-agent",
+      "kind": "dependency",
+      "label": "Правілы"
+    },
+    {
+      "key": "specimen-capture",
+      "id": "e-specimen-capture",
+      "from": "c-specimen",
+      "to": "c-capture",
+      "kind": "request",
+      "label": "Здымак"
+    },
+    {
+      "key": "stories-specimen",
+      "id": "e-stories-specimen",
+      "from": "c-stories",
+      "to": "c-specimen",
+      "kind": "dependency",
+      "label": "Станы"
+    },
+    {
+      "key": "stories-storybook",
+      "id": "e-stories-storybook",
+      "from": "c-stories",
+      "to": "c-storybook",
+      "kind": "dependency",
+      "label": "Станы"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "DQ-00",
+      "identifier": "DQ-00",
+      "title": "DQ-00 — Publish the design-QA specification and task series",
+      "url": "tasks/DQ-00.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-01",
+      "identifier": "DQ-01",
+      "title": "DQ-01 — Measure emulator screenshot noise and pick the reference AVD",
+      "url": "tasks/DQ-01.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-02",
+      "identifier": "DQ-02",
+      "title": "DQ-02 — Guide-card stories and the dev-only specimen screen",
+      "url": "tasks/DQ-02.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-03",
+      "identifier": "DQ-03",
+      "title": "DQ-03 — Build the visual:check capture, compare and report tool",
+      "url": "tasks/DQ-03.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-04",
+      "identifier": "DQ-04",
+      "title": "DQ-04 — ⚠️ Owner: approve the first baselines (guide card and Explore)",
+      "url": "tasks/DQ-04.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-05",
+      "identifier": "DQ-05",
+      "title": "DQ-05 — Write the design-QA agent rules",
+      "url": "tasks/DQ-05.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-06",
+      "identifier": "DQ-06",
+      "title": "DQ-06 — Accessibility checks from the UI dump",
+      "url": "tasks/DQ-06.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-07",
+      "identifier": "DQ-07",
+      "title": "DQ-07 — ⚠️ Owner: benchmark the design-QA agent and start the verdict ledger",
+      "url": "tasks/DQ-07.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-08",
+      "identifier": "DQ-08",
+      "title": "DQ-08 — ⚠️ Owner: add the dark theme to the visual matrix",
+      "url": "tasks/DQ-08.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-09",
+      "identifier": "DQ-09",
+      "title": "DQ-09 — ⚠️ Owner: add German and a small screen to the visual matrix",
+      "url": "tasks/DQ-09.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-10",
+      "identifier": "DQ-10",
+      "title": "DQ-10 — Run visual:check in the Android CI workflow",
+      "url": "tasks/DQ-10.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-11",
+      "identifier": "DQ-11",
+      "title": "DQ-11 — Check generated images against the brand brief",
+      "url": "tasks/DQ-11.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-12",
+      "identifier": "DQ-12",
+      "title": "DQ-12 — Preflight HTML mockups against the canon",
+      "url": "tasks/DQ-12.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    },
+    {
+      "id": "DQ-13",
+      "identifier": "DQ-13",
+      "title": "DQ-13 — Storybook React Native on the device",
+      "url": "tasks/DQ-13.md",
+      "evidence": {
+        "type": "file_review",
+        "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+      }
+    }
+  ],
+  "mapping": [
+    {
+      "componentId": "c-spec",
+      "taskId": "DQ-00"
+    },
+    {
+      "componentId": "c-capture",
+      "taskId": "DQ-01"
+    },
+    {
+      "componentId": "c-specimen",
+      "taskId": "DQ-02"
+    },
+    {
+      "componentId": "c-stories",
+      "taskId": "DQ-02"
+    },
+    {
+      "componentId": "c-capture",
+      "taskId": "DQ-03"
+    },
+    {
+      "componentId": "c-report",
+      "taskId": "DQ-03"
+    },
+    {
+      "componentId": "c-baselines",
+      "taskId": "DQ-04"
+    },
+    {
+      "componentId": "c-agent",
+      "taskId": "DQ-05"
+    },
+    {
+      "componentId": "c-a11y",
+      "taskId": "DQ-06"
+    },
+    {
+      "componentId": "c-agent",
+      "taskId": "DQ-07"
+    },
+    {
+      "componentId": "c-baselines",
+      "taskId": "DQ-08"
+    },
+    {
+      "componentId": "c-baselines",
+      "taskId": "DQ-09"
+    },
+    {
+      "componentId": "c-capture",
+      "taskId": "DQ-10"
+    },
+    {
+      "componentId": "c-images",
+      "taskId": "DQ-11"
+    },
+    {
+      "componentId": "c-mockups",
+      "taskId": "DQ-12"
+    },
+    {
+      "componentId": "c-storybook",
+      "taskId": "DQ-13"
+    }
+  ],
+  "links": []
+}

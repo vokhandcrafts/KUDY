@@ -13,7 +13,8 @@ import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
 import type { CatalogGuideCard, CatalogSurfaceState } from "../controllers/catalog/catalogController.ts";
 import type { Services } from "../controllers/createServices.ts";
 import { PressableSurface } from "./pressable-surface";
-import { tokens } from "./design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "./design-tokens";
+import { useThemeStyles } from "./theme";
 import { ScaledText } from "./scaled-text";
 import { uiStrings } from "./ui-strings";
 import { LoadingIndicator } from "./loading-indicator";
@@ -46,56 +47,56 @@ export function isWide(width: number): boolean {
   return width >= 821;
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   card: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    padding: tokens.spaceM,
+    padding: palette.spaceM,
   },
   cardSummary: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceS,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceS,
   },
   cardTitle: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceS,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceS,
   },
   locales: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceS,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginTop: palette.spaceS,
   },
   banner: {
-    borderRadius: tokens.radiusBase,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceM,
-    padding: tokens.spaceM,
+    marginBottom: palette.spaceM,
+    padding: palette.spaceM,
   },
   bannerError: {
-    backgroundColor: tokens.colorErrorBg,
-    borderColor: tokens.colorErrorBorder,
+    backgroundColor: palette.colorErrorBg,
+    borderColor: palette.colorErrorBorder,
   },
   bannerNotice: {
-    backgroundColor: tokens.colorNoticeBg,
-    borderColor: tokens.colorNoticeBorder,
+    backgroundColor: palette.colorNoticeBg,
+    borderColor: palette.colorNoticeBorder,
   },
   bannerText: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
   },
   bannerDetail: {
-    color: tokens.colorMuted,
+    color: palette.colorMuted,
     fontSize: 12,
-    marginTop: tokens.spaceS,
+    marginTop: palette.spaceS,
   },
   list: { flex: 1 },
-  listContent: { paddingHorizontal: tokens.spaceL, paddingBottom: tokens.spaceL },
-  row: { marginBottom: tokens.spaceM },
+  listContent: { paddingHorizontal: palette.spaceL, paddingBottom: palette.spaceL },
+  row: { marginBottom: palette.spaceM },
   columns: {
     justifyContent: "space-between",
   },
@@ -104,47 +105,51 @@ const styles = StyleSheet.create({
   },
   badge: {
     alignSelf: "flex-start",
-    backgroundColor: tokens.colorBadgeFree,
-    borderRadius: tokens.radiusPill,
+    backgroundColor: palette.colorBadgeFree,
+    borderRadius: palette.radiusPill,
     overflow: "hidden",
-    paddingHorizontal: tokens.spaceS,
+    paddingHorizontal: palette.spaceS,
     paddingVertical: 2,
   },
-  badgeMixed: { backgroundColor: tokens.colorBadgeMixed },
-  badgePaid: { backgroundColor: tokens.colorBadgePaid },
+  badgeMixed: { backgroundColor: palette.colorBadgeMixed },
+  badgePaid: { backgroundColor: palette.colorBadgePaid },
   badgeText: {
-    color: tokens.colorInk,
+    color: palette.colorInk,
     fontSize: 12,
   },
   // G06.05 (AC4): the named retry of the failed catalog load — the manual
   // exit styled like the other outlined actions (the walk button's frame).
   retryButton: {
     alignSelf: "flex-start",
-    borderColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginTop: tokens.spaceS,
-    paddingHorizontal: tokens.spaceM,
-    paddingVertical: tokens.spaceS,
+    marginTop: palette.spaceS,
+    paddingHorizontal: palette.spaceM,
+    paddingVertical: palette.spaceS,
   },
   retryLabel: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorAccent,
+    fontSize: palette.fontBaseSize,
   },
   // The city surfaces' shared title (the two screens' own style was the
   // same object — G06.05 moved the body into CityCatalogBody).
   cityTitle: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontTitleSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceM,
+    color: palette.colorInk,
+    fontSize: palette.fontTitleSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceM,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 // G15.03 (issue #70) — the ordinary card style of the canon (visual-language
 // §5 «card»), exported for the discovery surfaces: the same card kind, never
 // a new look (новы выгляд — допіс у канон, не мясцовая стылізацыя).
-export const cardStyle = styles.card;
+export function useCardStyle() {
+  return useThemeStyles(lightStyles, darkStyles).card;
+}
 
 // The city surfaces' shared body (G06.05): one FlatList owns scrolling on
 // both screens. Its header holds the caller's leading slot (brand or Back),
@@ -168,6 +173,7 @@ export function CityCatalogBody({
   leading?: ReactNode;
   middle?: ReactNode;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const wide = isWide(useWindowDimensions().width);
   const guides = catalogGuides(catalog, locale);
   const from = variant === "rubric" ? "rubric" : "city";
@@ -211,6 +217,7 @@ export function AccessBadge({
   access: CatalogGuideCard["access"];
   locale?: string;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const tone = access === "paid" ? styles.badgePaid : access === "mixed" ? styles.badgeMixed : null;
   const label = uiStrings(locale).access[access];
   return (
@@ -242,6 +249,7 @@ export function LocalesLine({
   testID?: string;
   locale?: string;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const strings = uiStrings(locale);
   if (!localesKnown) {
     return (
@@ -284,6 +292,7 @@ export function GuideCard({
   from?: "city" | "rubric" | "discovery" | "collection";
   locale?: string;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const strings = uiStrings(locale);
   return (
     <Link href={{ pathname: `/route/${card.routeId}`, params: from ? { from } : {} }} asChild>
@@ -317,6 +326,7 @@ export function StateBanner({
   detail?: string;
   testID: string;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <View
       accessibilityLiveRegion="polite"
@@ -330,6 +340,7 @@ export function StateBanner({
 }
 
 function GuidesLink({ locale }: { locale: string }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <Link href={`/city/${ACTIVE_CITY_ID}/guides`} asChild>
       <PressableSurface
@@ -348,6 +359,7 @@ function GuidesLink({ locale }: { locale: string }) {
 // (nothing published) and the no-cache error (21 §3.3 — the normal city page
 // without discovery).
 export function CityMessage({ text }: { text: string }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <ScaledText style={styles.locales} testID="city-message">
       {text}
@@ -375,6 +387,7 @@ export function CatalogStateView({
   locale?: string;
   onRetry?: () => void;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const strings = uiStrings(locale);
   if (state === null) {
     return <StateBanner tone="notice" reason={strings.catalogUnavailable} testID="catalog-unavailable" />;

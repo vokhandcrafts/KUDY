@@ -26,7 +26,8 @@ import { BackButton } from "../../components/back-button";
 import { uiStrings } from "../../components/ui-strings";
 import { GuideHintMount } from "../../components/GuideHintCard";
 import { PressableSurface } from "../../components/pressable-surface";
-import { tokens } from "../../components/design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "../../components/design-tokens";
+import { useThemeStyles } from "../../components/theme";
 import { LoadingIndicator } from "../../components/loading-indicator";
 import {
   ModalDialog,
@@ -52,28 +53,28 @@ const STATUS_COLOR: Record<string, string> = {
   locked: tokens.colorMarkerLocked,
 };
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   screen: {
-    backgroundColor: tokens.colorPaper,
+    backgroundColor: palette.colorPaper,
     flex: 1,
-    padding: tokens.spaceL,
+    padding: palette.spaceL,
   },
   centered: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceL,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginTop: palette.spaceL,
   },
   reason: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceS,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    marginTop: palette.spaceS,
   },
   map: {
     // UX 04 (issue #350): the canon map background (color.map) — the marker
     // tokens' contrast pairs are declared against it, not against card white.
     backgroundColor: tokens.colorMap,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
     flex: 1,
     overflow: "hidden",
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     color: tokens.colorInk,
     fontSize: 13,
-    fontWeight: tokens.fontWeightStrong,
+    fontWeight: palette.fontWeightStrong,
     left: 13,
     overflow: "hidden",
     paddingHorizontal: 9,
@@ -98,9 +99,9 @@ const styles = StyleSheet.create({
     top: 13,
   },
   note: {
-    color: tokens.colorMuted,
+    color: palette.colorMuted,
     fontSize: 12,
-    marginTop: tokens.spaceS,
+    marginTop: palette.spaceS,
   },
   marker: {
     alignItems: "center",
@@ -118,12 +119,12 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 2,
     elevation: 2,
-    height: tokens.markerSize,
+    height: palette.markerSize,
     shadowColor: tokens.colorInk,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.25,
     shadowRadius: 2,
-    width: tokens.markerSize,
+    width: palette.markerSize,
   },
   poi: {
     backgroundColor: tokens.colorBadgeMixed,
@@ -148,122 +149,122 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   pausedBanner: {
-    backgroundColor: tokens.colorNoticeBg,
-    borderColor: tokens.colorNoticeBorder,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorNoticeBg,
+    borderColor: palette.colorNoticeBorder,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceS,
-    padding: tokens.spaceM,
+    marginBottom: palette.spaceS,
+    padding: palette.spaceM,
   },
   pausedText: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
   },
   // G06.05 (AC4/AC5): the degradation banners share the paused banner's
   // notice box; their hint lines render muted below the primary word.
   bannerDetailText: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceS,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginTop: palette.spaceS,
   },
   // The card's story-layer switch (AC3): the two tabs read as one group.
   layerRow: {
     flexDirection: "row",
-    gap: tokens.spaceS,
-    marginTop: tokens.spaceS,
+    gap: palette.spaceS,
+    marginTop: palette.spaceS,
   },
   layerTab: {
     alignItems: "center",
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
     flex: 1,
-    paddingVertical: tokens.spaceS,
-    paddingHorizontal: tokens.spaceM,
+    paddingVertical: palette.spaceS,
+    paddingHorizontal: palette.spaceM,
   },
   layerTabActive: {
-    borderColor: tokens.colorAccent,
+    borderColor: palette.colorAccent,
   },
   layerLabel: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorAccent,
+    fontSize: palette.fontBaseSize,
   },
   // Long action labels must remain reachable at the capped text scale.
   sessionActions: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: tokens.spaceS,
-    marginBottom: tokens.spaceS,
+    gap: palette.spaceS,
+    marginBottom: palette.spaceS,
   },
   sessionButton: {
     alignItems: "center",
-    borderColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    padding: tokens.spaceS,
+    padding: palette.spaceS,
   },
   sessionLabel: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorAccent,
+    fontSize: palette.fontBaseSize,
   },
   resumeButton: {
     alignItems: "center",
-    backgroundColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
-    marginTop: tokens.spaceS,
-    padding: tokens.spaceM,
+    backgroundColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
+    marginTop: palette.spaceS,
+    padding: palette.spaceM,
   },
   resumeLabel: {
-    color: tokens.colorAccentInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorAccentInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   preview: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceS,
-    padding: tokens.spaceM,
+    marginBottom: palette.spaceS,
+    padding: palette.spaceM,
   },
   previewName: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   previewStatus: {
-    color: tokens.colorMuted,
+    color: palette.colorMuted,
     fontSize: 12,
     marginTop: 2,
   },
   closeButton: {
     alignSelf: "flex-start",
-    marginTop: tokens.spaceS,
+    marginTop: palette.spaceS,
   },
   closeLabel: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorAccent,
+    fontSize: palette.fontBaseSize,
   },
   attribution: {
     alignSelf: "flex-start",
-    marginTop: tokens.spaceS,
+    marginTop: palette.spaceS,
   },
   attributionText: {
-    color: tokens.colorMuted,
+    color: palette.colorMuted,
     // UX 04 (issue #350, AC5): the readable 12dp floor applies to the
     // attribution line as well.
     fontSize: 12,
   },
   // The history panel (G06.03): one sheet over the map, three heights.
   panel: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderTopLeftRadius: tokens.radiusBase,
-    borderTopRightRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderTopLeftRadius: palette.radiusBase,
+    borderTopRightRadius: palette.radiusBase,
     borderTopWidth: 1,
     bottom: 0,
     left: 0,
-    padding: tokens.spaceM,
+    padding: palette.spaceM,
     position: "absolute",
     right: 0,
   },
@@ -274,141 +275,144 @@ const styles = StyleSheet.create({
     height: "92%",
   },
   panelBar: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
     borderTopWidth: 1,
     bottom: 0,
     left: 0,
-    padding: tokens.spaceM,
+    padding: palette.spaceM,
     position: "absolute",
     right: 0,
   },
   barTitle: {
-    color: tokens.colorInk,
+    color: palette.colorInk,
     flexShrink: 1,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   barRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: tokens.spaceS,
+    gap: palette.spaceS,
   },
   barControl: {
     minHeight: 48,
     justifyContent: "center",
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    paddingHorizontal: tokens.spaceM,
-    paddingVertical: tokens.spaceS,
+    paddingHorizontal: palette.spaceM,
+    paddingVertical: palette.spaceS,
   },
   barControlLabel: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorAccent,
+    fontSize: palette.fontBaseSize,
   },
   progressGap: {
     // G06.10.f (issue #406): the strip's canon visuals (6px accent on line,
     // the muted edge) live in the walk-progress component — the bar keeps
     // only its own layout gap.
-    marginTop: tokens.spaceS,
+    marginTop: palette.spaceS,
   },
   nowPlayingRow: {
     minHeight: 48,
     justifyContent: "center",
-    borderColor: tokens.colorNoticeBorder,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorNoticeBorder,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceS,
-    padding: tokens.spaceS,
+    marginBottom: palette.spaceS,
+    padding: palette.spaceS,
   },
   nowPlayingText: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
   },
   transcriptHeading: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginTop: tokens.spaceS,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginTop: palette.spaceS,
   },
   transcriptNote: {
-    color: tokens.colorMuted,
+    color: palette.colorMuted,
     fontSize: 12,
     marginTop: 2,
   },
   transcriptBody: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
     marginTop: 2,
   },
   readButton: {
     alignItems: "center",
-    borderColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginTop: tokens.spaceS,
-    padding: tokens.spaceS,
+    marginTop: palette.spaceS,
+    padding: palette.spaceS,
   },
   readLabel: {
-    color: tokens.colorAccent,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorAccent,
+    fontSize: palette.fontBaseSize,
   },
   // The finish confirmation's words (UX 06, issue #352) — the shell carries
   // the card and the two action styles.
   confirmText: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
-  missedList: { marginTop: tokens.spaceS, maxHeight: 180 },
+  missedList: { marginTop: palette.spaceS, maxHeight: 180 },
   missedRow: {
-    borderBottomColor: tokens.colorLine,
+    borderBottomColor: palette.colorLine,
     borderBottomWidth: 1,
     minHeight: 44,
-    padding: tokens.spaceS,
+    padding: palette.spaceS,
     justifyContent: "center",
   },
   missedTitle: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   // G16.03 (issue #74): the End invitation's quiet card — the invite sits in
   // the scroll flow under the ended word, never over the map or the controls.
   feedbackInvite: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceM,
-    marginTop: tokens.spaceM,
-    padding: tokens.spaceM,
+    marginBottom: palette.spaceM,
+    marginTop: palette.spaceM,
+    padding: palette.spaceM,
   },
   feedbackInviteText: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceS,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceS,
   },
   feedbackInviteRow: {
-    columnGap: tokens.spaceS,
+    columnGap: palette.spaceS,
     flexDirection: "row",
     flexWrap: "wrap",
   },
   feedbackInviteButton: {
     alignSelf: "flex-start",
-    backgroundColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
-    paddingHorizontal: tokens.spaceM,
-    paddingVertical: tokens.spaceS,
+    backgroundColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
+    paddingHorizontal: palette.spaceM,
+    paddingVertical: palette.spaceS,
   },
   feedbackInviteButtonLabel: {
-    color: tokens.colorAccentInk,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorAccentInk,
+    fontSize: palette.fontBaseSize,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 export default function Run() {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const { id, confirmedSwitch, audio } = useLocalSearchParams<{
     id: string;
     confirmedSwitch?: string;
@@ -1005,15 +1009,19 @@ export default function Run() {
           </ScrollView>
         </View>
       ) : null}
-      {/* G07.05: the quiet card never becomes a second row over the player
-          (R07) — it renders below the panel surface, dismissible, and its
-          only action is the preview open; the session and its progress stay
-          (AC5). */}
-      <GuideHintMount
-        binding={services.hints}
-        locale={ready?.locale ?? locale}
-        onOpen={(routeId) => router.push(`/route/${routeId}`)}
-      />
+      {/* G07.05: the nearby hint belongs to the idle map, not a manual
+          story card or the audible player bar. On Android it used to overlay
+          btn-card-play while Half was open (PR #903 Android E2E artifact),
+          intercepting the user's tap even though the button was accessible.
+          Hiding the mount does not dismiss the hint: closing the card
+          restores it without changing session or audio state. */}
+      {run.panel === "peek" && playing === null ? (
+        <GuideHintMount
+          binding={services.hints}
+          locale={ready?.locale ?? locale}
+          onOpen={(routeId) => router.push(`/route/${routeId}`)}
+        />
+      ) : null}
       {endConfirm ? (
         // UX 06 (issue #352) AC3: the confirmation is a real modal — the
         // decline (and the system Back, the shell's onRequestClose) leaves

@@ -1,0 +1,8 @@
+{
+  "root": {
+    "id": "SPEC-DESIGN-QA",
+    "identifier": "SPEC-DESIGN-QA",
+    "url": "2026-10-30-design-qa-system.md"
+  },
+  "tasksDirectory": "tasks"
+}

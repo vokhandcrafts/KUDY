@@ -5,21 +5,24 @@
 // treats every app/ file as a route (issue #339).
 import { ActivityIndicator, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
-import { tokens } from "./design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "./design-tokens";
+import { useThemeStyles } from "./theme";
 import { ScaledText } from "./scaled-text";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   row: {
     alignItems: "center",
     flexDirection: "row",
-    gap: tokens.spaceS,
+    gap: palette.spaceS,
   },
   text: {
-    color: tokens.colorMuted,
+    color: palette.colorMuted,
     flexShrink: 1,
-    fontSize: tokens.fontBaseSize,
+    fontSize: palette.fontBaseSize,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 export function LoadingIndicator({
   text,
@@ -30,6 +33,7 @@ export function LoadingIndicator({
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     // G06.05 (AC1): the row is announced with the state text — the spinner
     // itself is decorative and stays silent.
