@@ -1,0 +1,1236 @@
+{
+  "generatedAt": "2026-10-31T21:02:24.467Z",
+  "root": "/home/viktar/worktrees/kudy-dq01/.scratch/dq01-noise/captures",
+  "within": {
+    "ci": {
+      "explore-b": {
+        "size": "1080x2340",
+        "files": [
+          "explore-b-1.png",
+          "explore-b-2.png",
+          "explore-b-3.png",
+          "explore-b-4.png",
+          "explore-b-5.png"
+        ],
+        "pairs": [
+          {
+            "pair": "explore-b-1.png vs explore-b-2.png",
+            "pixels": 2419200,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "explore-b-1.png vs explore-b-3.png",
+            "pixels": 2419200,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "explore-b-1.png vs explore-b-4.png",
+            "pixels": 2419200,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "explore-b-1.png vs explore-b-5.png",
+            "pixels": 2419200,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          }
+        ]
+      },
+      "my": {
+        "size": "1080x2340",
+        "files": [
+          "my-1.png",
+          "my-2.png",
+          "my-3.png",
+          "my-4.png",
+          "my-5.png"
+        ],
+        "pairs": [
+          {
+            "pair": "my-1.png vs my-2.png",
+            "pixels": 2419200,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "my-1.png vs my-3.png",
+            "pixels": 2419200,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "my-1.png vs my-4.png",
+            "pixels": 2419200,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "my-1.png vs my-5.png",
+            "pixels": 2419200,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          }
+        ]
+      }
+    },
+    "local": {
+      "explore-b": {
+        "size": "1080x2400",
+        "files": [
+          "explore-b-1.png",
+          "explore-b-2.png",
+          "explore-b-3.png",
+          "explore-b-4.png",
+          "explore-b-5.png"
+        ],
+        "pairs": [
+          {
+            "pair": "explore-b-1.png vs explore-b-2.png",
+            "pixels": 2484000,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "explore-b-1.png vs explore-b-3.png",
+            "pixels": 2484000,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "explore-b-1.png vs explore-b-4.png",
+            "pixels": 2484000,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "explore-b-1.png vs explore-b-5.png",
+            "pixels": 2484000,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          }
+        ]
+      },
+      "my": {
+        "size": "1080x2400",
+        "files": [
+          "my-1.png",
+          "my-2.png",
+          "my-3.png",
+          "my-4.png",
+          "my-5.png"
+        ],
+        "pairs": [
+          {
+            "pair": "my-1.png vs my-2.png",
+            "pixels": 2484000,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "my-1.png vs my-3.png",
+            "pixels": 2484000,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "my-1.png vs my-4.png",
+            "pixels": 2484000,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          },
+          {
+            "pair": "my-1.png vs my-5.png",
+            "pixels": 2484000,
+            "atThresholds": {
+              "0": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.05": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.1": {
+                "diffPixels": 0,
+                "diffPct": 0
+              },
+              "0.2": {
+                "diffPixels": 0,
+                "diffPct": 0
+              }
+            },
+            "maskDiffPixels": 0,
+            "bbox": null,
+            "regions": [],
+            "cropTop": 100
+          }
+        ]
+      }
+    }
+  },
+  "cross": [
+    {
+      "pair": "explore-b-1 (rescaled 1080x2300 → 1080x2240)",
+      "pixels": 2419200,
+      "atThresholds": {
+        "0": {
+          "diffPixels": 1531810,
+          "diffPct": 63.3189
+        },
+        "0.05": {
+          "diffPixels": 400850,
+          "diffPct": 16.5695
+        },
+        "0.1": {
+          "diffPixels": 142902,
+          "diffPct": 5.907
+        },
+        "0.2": {
+          "diffPixels": 98044,
+          "diffPct": 4.0527
+        }
+      },
+      "maskDiffPixels": 142902,
+      "bbox": [
+        32,
+        80,
+        1040,
+        2224
+      ],
+      "regions": [
+        {
+          "bbox": [
+            32,
+            160,
+            1040,
+            1744
+          ]
+        },
+        {
+          "bbox": [
+            64,
+            896,
+            992,
+            1088
+          ]
+        },
+        {
+          "bbox": [
+            80,
+            1648,
+            624,
+            1712
+          ]
+        },
+        {
+          "bbox": [
+            64,
+            1104,
+            592,
+            1152
+          ]
+        },
+        {
+          "bbox": [
+            544,
+            1440,
+            928,
+            1488
+          ]
+        },
+        {
+          "bbox": [
+            384,
+            2192,
+            688,
+            2224
+          ]
+        },
+        {
+          "bbox": [
+            32,
+            80,
+            160,
+            128
+          ]
+        }
+      ],
+      "rescaledFrom": "1080x2300"
+    },
+    {
+      "pair": "explore-b-2 (rescaled 1080x2300 → 1080x2240)",
+      "pixels": 2419200,
+      "atThresholds": {
+        "0": {
+          "diffPixels": 1531810,
+          "diffPct": 63.3189
+        },
+        "0.05": {
+          "diffPixels": 400850,
+          "diffPct": 16.5695
+        },
+        "0.1": {
+          "diffPixels": 142902,
+          "diffPct": 5.907
+        },
+        "0.2": {
+          "diffPixels": 98044,
+          "diffPct": 4.0527
+        }
+      },
+      "maskDiffPixels": 142902,
+      "bbox": [
+        32,
+        80,
+        1040,
+        2224
+      ],
+      "regions": [
+        {
+          "bbox": [
+            32,
+            160,
+            1040,
+            1744
+          ]
+        },
+        {
+          "bbox": [
+            64,
+            896,
+            992,
+            1088
+          ]
+        },
+        {
+          "bbox": [
+            80,
+            1648,
+            624,
+            1712
+          ]
+        },
+        {
+          "bbox": [
+            64,
+            1104,
+            592,
+            1152
+          ]
+        },
+        {
+          "bbox": [
+            544,
+            1440,
+            928,
+            1488
+          ]
+        },
+        {
+          "bbox": [
+            384,
+            2192,
+            688,
+            2224
+          ]
+        },
+        {
+          "bbox": [
+            32,
+            80,
+            160,
+            128
+          ]
+        }
+      ],
+      "rescaledFrom": "1080x2300"
+    },
+    {
+      "pair": "explore-b-3 (rescaled 1080x2300 → 1080x2240)",
+      "pixels": 2419200,
+      "atThresholds": {
+        "0": {
+          "diffPixels": 1531810,
+          "diffPct": 63.3189
+        },
+        "0.05": {
+          "diffPixels": 400850,
+          "diffPct": 16.5695
+        },
+        "0.1": {
+          "diffPixels": 142902,
+          "diffPct": 5.907
+        },
+        "0.2": {
+          "diffPixels": 98044,
+          "diffPct": 4.0527
+        }
+      },
+      "maskDiffPixels": 142902,
+      "bbox": [
+        32,
+        80,
+        1040,
+        2224
+      ],
+      "regions": [
+        {
+          "bbox": [
+            32,
+            160,
+            1040,
+            1744
+          ]
+        },
+        {
+          "bbox": [
+            64,
+            896,
+            992,
+            1088
+          ]
+        },
+        {
+          "bbox": [
+            80,
+            1648,
+            624,
+            1712
+          ]
+        },
+        {
+          "bbox": [
+            64,
+            1104,
+            592,
+            1152
+          ]
+        },
+        {
+          "bbox": [
+            544,
+            1440,
+            928,
+            1488
+          ]
+        },
+        {
+          "bbox": [
+            384,
+            2192,
+            688,
+            2224
+          ]
+        },
+        {
+          "bbox": [
+            32,
+            80,
+            160,
+            128
+          ]
+        }
+      ],
+      "rescaledFrom": "1080x2300"
+    },
+    {
+      "pair": "explore-b-4 (rescaled 1080x2300 → 1080x2240)",
+      "pixels": 2419200,
+      "atThresholds": {
+        "0": {
+          "diffPixels": 1531810,
+          "diffPct": 63.3189
+        },
+        "0.05": {
+          "diffPixels": 400850,
+          "diffPct": 16.5695
+        },
+        "0.1": {
+          "diffPixels": 142902,
+          "diffPct": 5.907
+        },
+        "0.2": {
+          "diffPixels": 98044,
+          "diffPct": 4.0527
+        }
+      },
+      "maskDiffPixels": 142902,
+      "bbox": [
+        32,
+        80,
+        1040,
+        2224
+      ],
+      "regions": [
+        {
+          "bbox": [
+            32,
+            160,
+            1040,
+            1744
+          ]
+        },
+        {
+          "bbox": [
+            64,
+            896,
+            992,
+            1088
+          ]
+        },
+        {
+          "bbox": [
+            80,
+            1648,
+            624,
+            1712
+          ]
+        },
+        {
+          "bbox": [
+            64,
+            1104,
+            592,
+            1152
+          ]
+        },
+        {
+          "bbox": [
+            544,
+            1440,
+            928,
+            1488
+          ]
+        },
+        {
+          "bbox": [
+            384,
+            2192,
+            688,
+            2224
+          ]
+        },
+        {
+          "bbox": [
+            32,
+            80,
+            160,
+            128
+          ]
+        }
+      ],
+      "rescaledFrom": "1080x2300"
+    },
+    {
+      "pair": "explore-b-5 (rescaled 1080x2300 → 1080x2240)",
+      "pixels": 2419200,
+      "atThresholds": {
+        "0": {
+          "diffPixels": 1531810,
+          "diffPct": 63.3189
+        },
+        "0.05": {
+          "diffPixels": 400850,
+          "diffPct": 16.5695
+        },
+        "0.1": {
+          "diffPixels": 142902,
+          "diffPct": 5.907
+        },
+        "0.2": {
+          "diffPixels": 98044,
+          "diffPct": 4.0527
+        }
+      },
+      "maskDiffPixels": 142902,
+      "bbox": [
+        32,
+        80,
+        1040,
+        2224
+      ],
+      "regions": [
+        {
+          "bbox": [
+            32,
+            160,
+            1040,
+            1744
+          ]
+        },
+        {
+          "bbox": [
+            64,
+            896,
+            992,
+            1088
+          ]
+        },
+        {
+          "bbox": [
+            80,
+            1648,
+            624,
+            1712
+          ]
+        },
+        {
+          "bbox": [
+            64,
+            1104,
+            592,
+            1152
+          ]
+        },
+        {
+          "bbox": [
+            544,
+            1440,
+            928,
+            1488
+          ]
+        },
+        {
+          "bbox": [
+            384,
+            2192,
+            688,
+            2224
+          ]
+        },
+        {
+          "bbox": [
+            32,
+            80,
+            160,
+            128
+          ]
+        }
+      ],
+      "rescaledFrom": "1080x2300"
+    },
+    {
+      "pair": "my-1 (rescaled 1080x2300 → 1080x2240)",
+      "pixels": 2419200,
+      "atThresholds": {
+        "0": {
+          "diffPixels": 2389240,
+          "diffPct": 98.7616
+        },
+        "0.05": {
+          "diffPixels": 105629,
+          "diffPct": 4.3663
+        },
+        "0.1": {
+          "diffPixels": 94375,
+          "diffPct": 3.9011
+        },
+        "0.2": {
+          "diffPixels": 71461,
+          "diffPct": 2.9539
+        }
+      },
+      "maskDiffPixels": 94375,
+      "bbox": [
+        32,
+        112,
+        1040,
+        2224
+      ],
+      "regions": [
+        {
+          "bbox": [
+            32,
+            352,
+            1040,
+            1184
+          ]
+        },
+        {
+          "bbox": [
+            48,
+            112,
+            240,
+            176
+          ]
+        },
+        {
+          "bbox": [
+            32,
+            224,
+            176,
+            304
+          ]
+        },
+        {
+          "bbox": [
+            384,
+            2192,
+            688,
+            2224
+          ]
+        }
+      ],
+      "rescaledFrom": "1080x2300"
+    },
+    {
+      "pair": "my-2 (rescaled 1080x2300 → 1080x2240)",
+      "pixels": 2419200,
+      "atThresholds": {
+        "0": {
+          "diffPixels": 2389240,
+          "diffPct": 98.7616
+        },
+        "0.05": {
+          "diffPixels": 105629,
+          "diffPct": 4.3663
+        },
+        "0.1": {
+          "diffPixels": 94375,
+          "diffPct": 3.9011
+        },
+        "0.2": {
+          "diffPixels": 71461,
+          "diffPct": 2.9539
+        }
+      },
+      "maskDiffPixels": 94375,
+      "bbox": [
+        32,
+        112,
+        1040,
+        2224
+      ],
+      "regions": [
+        {
+          "bbox": [
+            32,
+            352,
+            1040,
+            1184
+          ]
+        },
+        {
+          "bbox": [
+            48,
+            112,
+            240,
+            176
+          ]
+        },
+        {
+          "bbox": [
+            32,
+            224,
+            176,
+            304
+          ]
+        },
+        {
+          "bbox": [
+            384,
+            2192,
+            688,
+            2224
+          ]
+        }
+      ],
+      "rescaledFrom": "1080x2300"
+    },
+    {
+      "pair": "my-3 (rescaled 1080x2300 → 1080x2240)",
+      "pixels": 2419200,
+      "atThresholds": {
+        "0": {
+          "diffPixels": 2389240,
+          "diffPct": 98.7616
+        },
+        "0.05": {
+          "diffPixels": 105629,
+          "diffPct": 4.3663
+        },
+        "0.1": {
+          "diffPixels": 94375,
+          "diffPct": 3.9011
+        },
+        "0.2": {
+          "diffPixels": 71461,
+          "diffPct": 2.9539
+        }
+      },
+      "maskDiffPixels": 94375,
+      "bbox": [
+        32,
+        112,
+        1040,
+        2224
+      ],
+      "regions": [
+        {
+          "bbox": [
+            32,
+            352,
+            1040,
+            1184
+          ]
+        },
+        {
+          "bbox": [
+            48,
+            112,
+            240,
+            176
+          ]
+        },
+        {
+          "bbox": [
+            32,
+            224,
+            176,
+            304
+          ]
+        },
+        {
+          "bbox": [
+            384,
+            2192,
+            688,
+            2224
+          ]
+        }
+      ],
+      "rescaledFrom": "1080x2300"
+    },
+    {
+      "pair": "my-4 (rescaled 1080x2300 → 1080x2240)",
+      "pixels": 2419200,
+      "atThresholds": {
+        "0": {
+          "diffPixels": 2389240,
+          "diffPct": 98.7616
+        },
+        "0.05": {
+          "diffPixels": 105629,
+          "diffPct": 4.3663
+        },
+        "0.1": {
+          "diffPixels": 94375,
+          "diffPct": 3.9011
+        },
+        "0.2": {
+          "diffPixels": 71461,
+          "diffPct": 2.9539
+        }
+      },
+      "maskDiffPixels": 94375,
+      "bbox": [
+        32,
+        112,
+        1040,
+        2224
+      ],
+      "regions": [
+        {
+          "bbox": [
+            32,
+            352,
+            1040,
+            1184
+          ]
+        },
+        {
+          "bbox": [
+            48,
+            112,
+            240,
+            176
+          ]
+        },
+        {
+          "bbox": [
+            32,
+            224,
+            176,
+            304
+          ]
+        },
+        {
+          "bbox": [
+            384,
+            2192,
+            688,
+            2224
+          ]
+        }
+      ],
+      "rescaledFrom": "1080x2300"
+    },
+    {
+      "pair": "my-5 (rescaled 1080x2300 → 1080x2240)",
+      "pixels": 2419200,
+      "atThresholds": {
+        "0": {
+          "diffPixels": 2389240,
+          "diffPct": 98.7616
+        },
+        "0.05": {
+          "diffPixels": 105629,
+          "diffPct": 4.3663
+        },
+        "0.1": {
+          "diffPixels": 94375,
+          "diffPct": 3.9011
+        },
+        "0.2": {
+          "diffPixels": 71461,
+          "diffPct": 2.9539
+        }
+      },
+      "maskDiffPixels": 94375,
+      "bbox": [
+        32,
+        112,
+        1040,
+        2224
+      ],
+      "regions": [
+        {
+          "bbox": [
+            32,
+            352,
+            1040,
+            1184
+          ]
+        },
+        {
+          "bbox": [
+            48,
+            112,
+            240,
+            176
+          ]
+        },
+        {
+          "bbox": [
+            32,
+            224,
+            176,
+            304
+          ]
+        },
+        {
+          "bbox": [
+            384,
+            2192,
+            688,
+            2224
+          ]
+        }
+      ],
+      "rescaledFrom": "1080x2300"
+    }
+  ]
+}
