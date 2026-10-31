@@ -1,0 +1,28 @@
+[local] 2026-10-31T20:54:50.596Z adb: /home/viktar/Android/Sdk/platform-tools/adb; serial: emulator-5554; out: /home/viktar/worktrees/kudy-dq01/.scratch/dq01-noise/captures/local
+[local] 2026-10-31T20:54:50.633Z boot completed
+[local] 2026-10-31T20:54:50.633Z installing android/app/build/outputs/apk/debug/app-debug.apk …
+[local] 2026-10-31T20:54:52.029Z installed
+[local] 2026-10-31T20:54:52.325Z APK SHA-256: 2a3b9f86aa210933350c8e90b015f083f1bee8d30e16e5fce9ea0be197c84fe6
+[local] 2026-10-31T20:54:52.325Z settling 45 s after install (boot + dexopt window)…
+[local] 2026-10-31T20:55:39.798Z snapshot: {"settings":{"window_animation_scale":"1.0","transition_animation_scale":"1.0","animator_duration_scale":"null"},"font_scale":"1.0","wm_density":"Physical density: 420"}
+[local] 2026-10-31T20:55:39.848Z animation scales = 0 (status bar handled by cropped inset in comparison)
+[local] 2026-10-31T20:55:39.851Z spawn /usr/bin/node /home/viktar/worktrees/kudy-dq01/tools/e2e-origin/serve-e2e-origin.mjs --port 8802 --out /home/viktar/worktrees/kudy-dq01/.scratch/dq01-noise/captures/local/origin (pid 269054, log /home/viktar/worktrees/kudy-dq01/.scratch/dq01-noise/captures/local/origin.log)
+[local] 2026-10-31T20:55:40.364Z origin ready on :8802
+[local] 2026-10-31T20:55:40.370Z spawn /usr/bin/node /home/viktar/worktrees/kudy-dq01/node_modules/expo/bin/cli start --dev-client --port 8085 --max-workers 2 (pid 269067, log /home/viktar/worktrees/kudy-dq01/.scratch/dq01-noise/captures/local/metro.log)
+[local] 2026-10-31T20:55:41.878Z metro ready on :8085
+[local] 2026-10-31T20:55:50.471Z phase B: fixture guide card visible
+[local] 2026-10-31T20:55:55.909Z captured explore-b-1.png
+[local] 2026-10-31T20:55:58.356Z captured explore-b-2.png
+[local] 2026-10-31T20:56:00.796Z captured explore-b-3.png
+[local] 2026-10-31T20:56:03.243Z captured explore-b-4.png
+[local] 2026-10-31T20:56:05.684Z captured explore-b-5.png
+[local] 2026-10-31T20:56:09.833Z KUDY tab visible
+[local] 2026-10-31T20:56:15.482Z captured my-1.png
+[local] 2026-10-31T20:56:18.105Z captured my-2.png
+[local] 2026-10-31T20:56:20.727Z captured my-3.png
+[local] 2026-10-31T20:56:23.362Z captured my-4.png
+[local] 2026-10-31T20:56:25.988Z captured my-5.png
+[local] 2026-10-31T20:56:25.988Z done in 95 s
+[local] 2026-10-31T20:56:25.988Z stopped metro (pid 269067)
+[local] 2026-10-31T20:56:25.988Z stopped origin (pid 269054)
+[local] 2026-10-31T20:56:26.054Z restored settings: {"window_animation_scale":"1.0","transition_animation_scale":"1.0","animator_duration_scale":"null"}

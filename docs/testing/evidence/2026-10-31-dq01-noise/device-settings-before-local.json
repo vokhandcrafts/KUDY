@@ -1,0 +1,9 @@
+{
+  "settings": {
+    "window_animation_scale": "1.0",
+    "transition_animation_scale": "1.0",
+    "animator_duration_scale": "null"
+  },
+  "font_scale": "1.0",
+  "wm_density": "Physical density: 420"
+}
