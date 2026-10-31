@@ -520,7 +520,7 @@ test('Run story panel keeps unseen hints out of shown rows, telemetry and cooldo
     world.clock.nowMs += 21_000;
     world.emitFix(NEAR.lat, NEAR.lng);
     assert.deepEqual(world.storeState(), { kind: 'hidden', reason: 'quiet' });
-    assert.deepEqual(world.events, [], 'an unmounted hint must not emit shown telemetry');
+    assert.equal(world.events.length, 0, 'an unmounted hint must not emit shown telemetry');
     assert.deepEqual(listSessionGuideHints(world.driver, 'walk-1'), [], 'no invisible session shown row');
     assert.deepEqual(world.binding.foregroundCarry(), [], 'no invisible hint Start carry');
 
@@ -531,7 +531,7 @@ test('Run story panel keeps unseen hints out of shown rows, telemetry and cooldo
     world.panelRef.current = 'peek';
     world.notifyRun();
     assert.notEqual(world.storeState().kind, 'ready');
-    assert.deepEqual(world.events, []);
+    assert.equal(world.events.length, 0);
     assert.deepEqual(listSessionGuideHints(world.driver, 'walk-1'), []);
 
     // A fresh arrival and full dwell can still show this guide once.
