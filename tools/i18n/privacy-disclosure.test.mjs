@@ -36,8 +36,12 @@ test('be source names RevenueCat, the device registration, the IP hash and the d
   assert.ok(purchases.includes('ідэнтыфікатар прылады'), 'privacyPurchases ties RevenueCat to the device identifier');
 
   const appData = sourceText(PRIVACY_APP_DATA);
-  assert.ok(appData.includes('hash IP-адраса'), 'privacyAppData must disclose the one-way IP hash');
+  assert.ok(appData.includes('аднабаковы hash IP-адраса'), 'privacyAppData must disclose the one-way IP hash');
   assert.ok(appData.includes('hash сакрэта'), 'privacyAppData must disclose the server-side secret hash');
+  assert.ok(
+    appData.includes('перадаецца серверу KUDY з кожным яе запытам як ключ доступа'),
+    'privacyAppData must state the bearer mechanism (the secret travels with every request)',
+  );
   assert.ok(appData.includes('Ацэнкі маршрутаў і месцаў'), 'privacyAppData must disclose the server-held ratings');
   assert.ok(appData.includes('без вольнага тэксту'), 'ratings disclosure keeps the no-free-text boundary');
 
@@ -46,19 +50,51 @@ test('be source names RevenueCat, the device registration, the IP hash and the d
   assert.ok(deletion.includes('не выдаляе'), 'privacyDeletion must state what the button does not erase');
 });
 
-// Per-locale markers of the privacyAppData disclosures (the one-way IP hash
-// wording and the KUDY server name). zh is written as escapes so this source
-// file stays ASCII; the probes must stay in sync with the translated records.
+// Per-locale markers that pin each privacyAppData disclosure sentence
+// individually (voka #942 round 2): dropping one sentence must fail the
+// guard, so every probe matches only its own sentence. zh entries are written
+// as escapes so this source file stays ASCII.
 const APPDATA_PROBES = {
-  be: ['hash', 'KUDY'],
-  en: ['hash', 'KUDY'],
-  uk: ['hash', 'KUDY'],
-  cs: ['hash', 'KUDY'],
-  de: ['Hash', 'KUDY'],
-  es: ['hash', 'KUDY'],
-  fr: ['hachage', 'KUDY'],
-  sv: ['hash', 'KUDY'],
-  zh: ['\u54C8\u5E0C', 'KUDY'],
+  en: {
+    ipHash: 'one-way hash of the IP address',
+    ratings: 'selected reasons',
+    accessKey: 'as the access key',
+  },
+  uk: {
+    ipHash: 'односторонній hash IP-адреси',
+    ratings: 'вибрані причини',
+    accessKey: 'як ключ доступу',
+  },
+  cs: {
+    ipHash: 'jednosměrný hash IP adresy',
+    ratings: 'vybrané důvody',
+    accessKey: 'jako přístupový klíč',
+  },
+  de: {
+    ipHash: 'Einweg-Hash der IP-Adresse',
+    ratings: 'ausgewählte Gründe',
+    accessKey: 'als Zugriffsschlüssel',
+  },
+  es: {
+    ipHash: 'hash unidireccional de la dirección IP',
+    ratings: 'los motivos elegidos',
+    accessKey: 'como clave de acceso',
+  },
+  fr: {
+    ipHash: 'hachage unidirectionnel',
+    ratings: 'les raisons choisies',
+    accessKey: "comme clé d'accès",
+  },
+  sv: {
+    ipHash: 'envägs-hash av IP-adressen',
+    ratings: 'valda skäl',
+    accessKey: 'som åtkomstnyckel',
+  },
+  zh: {
+    ipHash: '\u5355\u5411\u54C8\u5E0C',
+    ratings: '\u6240\u9009\u539f\u56e0',
+    accessKey: '\u4f5c\u4e3a\u8bbf\u95ee\u5bc6\u94a5',
+  },
 };
 
 for (const locale of COMPLETE_UI_LOCALES.filter((code) => code !== 'be')) {
@@ -78,10 +114,10 @@ for (const locale of COMPLETE_UI_LOCALES.filter((code) => code !== 'be')) {
     }
     const appData = set.records.find((record) => record.id === PRIVACY_APP_DATA);
     assert.ok(appData, `${locale}: translation record ${PRIVACY_APP_DATA} exists`);
-    for (const probe of APPDATA_PROBES[locale]) {
+    for (const [disclosure, probe] of Object.entries(APPDATA_PROBES[locale])) {
       assert.ok(
         appData.value.includes(probe),
-        `${locale}: ${PRIVACY_APP_DATA} must keep the "${probe}" disclosure marker`,
+        `${locale}: ${PRIVACY_APP_DATA} must keep the ${disclosure} disclosure (${probe})`,
       );
     }
   });
