@@ -1232,5 +1232,155 @@
       ],
       "rescaledFrom": "1080x2300"
     }
-  ]
+  ],
+  "statusbar": {
+    "cropUsedInMainTables": 100,
+    "pairs": [
+      {
+        "pair": "explore-b-1.png vs explore-b-3.png",
+        "pixels": 2592000,
+        "atThresholds": {
+          "0": {
+            "diffPixels": 215,
+            "diffPct": 0.0083
+          },
+          "0.05": {
+            "diffPixels": 163,
+            "diffPct": 0.0063
+          },
+          "0.1": {
+            "diffPixels": 120,
+            "diffPct": 0.0046
+          },
+          "0.2": {
+            "diffPixels": 65,
+            "diffPct": 0.0025
+          }
+        },
+        "bboxExact": [
+          135,
+          50,
+          153,
+          78
+        ],
+        "note": "full frame, status bar not cropped; diff = status-bar clock crossing a minute boundary"
+      },
+      {
+        "pair": "explore-b-1.png vs explore-b-4.png",
+        "pixels": 2592000,
+        "atThresholds": {
+          "0": {
+            "diffPixels": 215,
+            "diffPct": 0.0083
+          },
+          "0.05": {
+            "diffPixels": 163,
+            "diffPct": 0.0063
+          },
+          "0.1": {
+            "diffPixels": 120,
+            "diffPct": 0.0046
+          },
+          "0.2": {
+            "diffPixels": 65,
+            "diffPct": 0.0025
+          }
+        },
+        "bboxExact": [
+          135,
+          50,
+          153,
+          78
+        ],
+        "note": "full frame, status bar not cropped; diff = status-bar clock crossing a minute boundary"
+      },
+      {
+        "pair": "explore-b-1.png vs explore-b-5.png",
+        "pixels": 2592000,
+        "atThresholds": {
+          "0": {
+            "diffPixels": 215,
+            "diffPct": 0.0083
+          },
+          "0.05": {
+            "diffPixels": 163,
+            "diffPct": 0.0063
+          },
+          "0.1": {
+            "diffPixels": 120,
+            "diffPct": 0.0046
+          },
+          "0.2": {
+            "diffPixels": 65,
+            "diffPct": 0.0025
+          }
+        },
+        "bboxExact": [
+          135,
+          50,
+          153,
+          78
+        ],
+        "note": "full frame, status bar not cropped; diff = status-bar clock crossing a minute boundary"
+      },
+      {
+        "pair": "my-1.png vs my-4.png",
+        "pixels": 2527200,
+        "atThresholds": {
+          "0": {
+            "diffPixels": 327,
+            "diffPct": 0.0129
+          },
+          "0.05": {
+            "diffPixels": 275,
+            "diffPct": 0.0109
+          },
+          "0.1": {
+            "diffPixels": 242,
+            "diffPct": 0.0096
+          },
+          "0.2": {
+            "diffPixels": 189,
+            "diffPct": 0.0075
+          }
+        },
+        "bboxExact": [
+          234,
+          55,
+          253,
+          85
+        ],
+        "note": "full frame, status bar not cropped; diff = status-bar clock crossing a minute boundary"
+      },
+      {
+        "pair": "my-1.png vs my-5.png",
+        "pixels": 2527200,
+        "atThresholds": {
+          "0": {
+            "diffPixels": 327,
+            "diffPct": 0.0129
+          },
+          "0.05": {
+            "diffPixels": 275,
+            "diffPct": 0.0109
+          },
+          "0.1": {
+            "diffPixels": 242,
+            "diffPct": 0.0096
+          },
+          "0.2": {
+            "diffPixels": 189,
+            "diffPct": 0.0075
+          }
+        },
+        "bboxExact": [
+          234,
+          55,
+          253,
+          85
+        ],
+        "note": "full frame, status bar not cropped; diff = status-bar clock crossing a minute boundary"
+      }
+    ]
+  }
 }
