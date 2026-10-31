@@ -5,9 +5,13 @@ on:
     paths:
       - '.github/workflows/g20-35-showboat.yml'
       - 'app/run/**'
+      - 'app/run.test.tsx'
+      - 'controllers/createServices.ts'
       - 'controllers/deviceServices.ts'
       - 'controllers/deviceServices.integration.test.ts'
       - 'controllers/run/runOrchestrator.ts'
+      - 'controllers/useNearbyController.ts'
+      - 'controllers/useNearbyController.test.ts'
       - 'core/engine/**'
       - 'core/pipeline/**'
       - 'tools/ci/g20-35-mutation.test.mjs'
