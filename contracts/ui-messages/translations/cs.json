@@ -2044,11 +2044,11 @@
     },
     {
       "id": "web.ui.privacyAppData",
-      "value": "Aplikace funguje bez účtu. Ve zařízení vede místní log událostí (které příběhy se otevíraly, které trasy se stáhly) a ukládá stažený obsah. Log neobsahuje žádná jména ani volný text a je vázaný na náhodný identifikátor zařízení — jde o pseudonymizovaná, nikoli anonymní data. Při instalaci vydá server KUDY zařízení náhodný identifikátor a tajemství: na serveru zůstávají identifikátor a hash tajemství, samo tajemství se uchovává jen v zařízení a podepisuje jeho žádosti na server KUDY. Pro omezení frekvence žádostí uchovává server jednosměrný hash IP adresy. Hodnocení tras a míst zadaná v aplikaci (hodnocení a vybrané důvody, bez volného textu) také jdou na server KUDY a uchovávají se tam spolu s identifikátorem zařízení.",
-      "reviewedSourceHash": "68c45b57ab5c69d195e92f67dba57f813221a5b923633d989661f711e67fab6d",
+      "value": "Aplikace funguje bez účtu. Ve zařízení vede místní log událostí (které příběhy se otevíraly, které trasy se stáhly) a ukládá stažený obsah. Log neobsahuje žádná jména ani volný text a je vázaný na náhodný identifikátor zařízení — jde o pseudonymizovaná, nikoli anonymní data. Při instalaci vydá server KUDY zařízení náhodný identifikátor a tajemství: na serveru zůstávají identifikátor a hash tajemství, samo tajemství se uchovává jen v zařízení a předává se serveru KUDY s každou jeho žádostí jako přístupový klíč. Pro omezení frekvence žádostí uchovává server jednosměrný hash IP adresy. Hodnocení tras a míst zadaná v aplikaci (hodnocení a vybrané důvody, bez volného textu) také jdou na server KUDY a uchovávají se tam spolu s identifikátorem zařízení.",
+      "reviewedSourceHash": "4104b0c2d8a23c83895b7efff2f96349560349a8cac4c462f921566bf5c1e71d",
       "review": {
         "outcome": "approved",
-        "note": "#853: дапоўнена сервернай рэгістрацыяй прылады, hash IP і ацэнкамі на серверы KUDY (D03/D04/D06 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
+        "note": "#853: дапоўнена сервернай рэгістрацыяй прылады, hash IP і ацэнкамі на серверы KUDY (D03/D04/D06 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md Праўка #942 (voka): «падпісвае запыты» заменена на фактычны bearer-механізм."
       }
     },
     {

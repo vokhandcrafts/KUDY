@@ -1,6 +1,6 @@
 # APR-08.b — узгадненне палітыкі прыватнасці з фактычнымі патокамі
 
-Дата: **2026-10-31**. Задача: [#853](https://github.com/vokhandcrafts/KUDY/issues/853). Эпік: [#299](https://github.com/vokhandcrafts/KUDY/issues/299). База: main `0920d5e8`, галінка `zcode/853`. Выканаўца: ZCode (GLM-5.3), асобны клон `KUDY-853`. Тып: змена тэкстаў UI-каталогаў (дадзеныя + генерацыя), **не Play Console submission** і не release-зборка.
+Дата: **2026-10-31**. Задача: [#853](https://github.com/vokhandcrafts/KUDY/issues/853). Эпік: [#299](https://github.com/vokhandcrafts/KUDY/issues/299). База: main `f9e40dd` (PR #942, галінка `zcode/853`). Выканаўца: ZCode (GLM-5.3), асобны клон `KUDY-853`. Тып: змена тэкстаў UI-каталогаў (дадзеныя + генерацыя), **не Play Console submission** і не release-зборка.
 
 ## Мяжа доказу
 
@@ -18,7 +18,7 @@
 | Запіс | Атрымальнікі, названыя цяпер | Мовы | Evidence |
 | --- | --- | --- | --- |
 | `web.ui.privacyPurchases` | крамы (App Store, Google Play), RevenueCat (UUID прылады як ідэнтыфікатар пакупніка; purchase/confirm), сервер KUDY (тэхнічны ўлік падзей) | be + en/uk/cs/de/es/fr/sv/zh | `contracts/ui-messages/source.json` (sourceHash `a702717e…`), па адным запісу ў кожным translations-файле; guard-тэст правярае RevenueCat ва ўсіх дзевяці |
-| `web.ui.privacyAppData` | прылада (лакальны лог, загрузкі), сервер KUDY (рэгістрацыя: UUID + hash сакрэта; аднабаковы hash IP; серверныя ацэнкі без вольнага тэксту) | be + усе восем | `contracts/ui-messages/source.json` (sourceHash `68c45b57…`); guard-тэст пінуе be-крыніцу |
+| `web.ui.privacyAppData` | прылада (лакальны лог, загрузкі), сервер KUDY (рэгістрацыя: UUID + hash сакрэта; bearer-сакрэт у кожным запыце; аднабаковы hash IP; серверныя ацэнкі без вольнага тэксту) | be + усе восем | `contracts/ui-messages/source.json` (sourceHash `4104b0c2…`); guard-тэст пінуе be-крыніцу і 8 моваў (пробы hash/KUDY) |
 | `web.ui.privacyDeletion` | сервер KUDY (запіс прылады + лог + ацэнкі), прылада (сакрэт), мяжа: крамы і RevenueCat не выдаляюцца | be + усе восем | `contracts/ui-messages/source.json` (sourceHash `a581b5a8…`); guard-тэст правярае RevenueCat ва ўсіх дзевяці |
 
 `web.ui.privacyAnalytics` і `web.ui.privacyRetention` наўмысна не кранутыя: іх сцверджанні (згода на аналітыку; TTL сырых падзей і агрэгаты) не ўваходзяць у D12; супярэчнасць агрэгатаў — доўг [#849](https://github.com/vokhandcrafts/KUDY/issues/849).
@@ -37,6 +37,14 @@
 8. de `privacyAppData`/`privacyDeletion` — двукроп'е перад поўным сказам: вялікая літара («: Auf dem Server…», «: Diese verwahrt…»).
 
 Страчаных адмаўленняў, дададзеных ад сябе сцвярджэнняў і абяцанняў provider-side deletion рэв'ю не знайшло. Пасля замен перазапушчаны генерацыя і ўсе i18n-гейты — зялёныя.
+
+## Код-рэвью PR #942 (вока, раўнд 1, 2026-10-31)
+
+Знаходкі і праўкі:
+
+1. **High (`bearer-described-as-signing`)**: тэксты казалі «сакрэт падпісвае запыты», а фактычны механізм — сакрэт перадаецца цалкам у кожным запыце як `Authorization: Bearer <secret>` (`services/device.ts:203`, `services/analytics.ts:174`, `services/feedbackSync.ts:151`; сервер — `verifyBearer` у `device-core.ts`, без HMAC). Формулёўка заменена на «захоўваецца толькі на прыладзе і перадаецца серверу KUDY з кожным запытам як ключ доступа» ў be-крыніцы і ўсіх 8 моваў; hash і golden пераздыманыя, генерацыя і гейты перазапушчаны. Сэнсавая спраўка новых 8 сказаў — асобным чыстакантэкстным праходам.
+2. **Medium (`incomplete-translation-guard`)**: guard-тэст дапоўнены per-locale пробамі appData (hash-тэрмін мовы + KUDY) для ўсіх дзевяці моваў — адкат адкрыццяў у cs/de/es/fr/sv/zh цяпер рве тэст.
+3. **Low (`stale-base-ref`)**: база results-дакументу выпраўлена на `f9e40dd`.
 
 ## Праверкі (2026-10-31, HEAD галінкі)
 

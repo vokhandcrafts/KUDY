@@ -2289,11 +2289,11 @@
     },
     {
       "id": "web.ui.privacyAppData",
-      "value": "L'application fonctionne sans compte. Elle tient sur l'appareil un journal local des événements (quelles histoires ont été ouvertes, quels itinéraires ont été téléchargés) et conserve les téléchargements de contenu. Le journal ne contient ni noms ni texte libre et est lié à un identifiant aléatoire d'appareil — ce sont des données pseudonymisées, pas anonymes. À l'installation, le serveur KUDY attribue à l'appareil un identifiant aléatoire et un secret : le serveur garde l'identifiant et un hachage du secret, le secret lui-même reste uniquement sur l'appareil et signe ses demandes au serveur KUDY. Pour limiter la fréquence des demandes, le serveur conserve un hachage unidirectionnel de l'adresse IP. Les évaluations d'itinéraires et de lieux données dans l'application (la note et les raisons choisies, sans texte libre) vont également au serveur KUDY et y sont conservées avec l'identifiant de l'appareil.",
-      "reviewedSourceHash": "68c45b57ab5c69d195e92f67dba57f813221a5b923633d989661f711e67fab6d",
+      "value": "L'application fonctionne sans compte. Elle tient sur l'appareil un journal local des événements (quelles histoires ont été ouvertes, quels itinéraires ont été téléchargés) et conserve les téléchargements de contenu. Le journal ne contient ni noms ni texte libre et est lié à un identifiant aléatoire d'appareil — ce sont des données pseudonymisées, pas anonymes. À l'installation, le serveur KUDY attribue à l'appareil un identifiant aléatoire et un secret : le serveur garde l'identifiant et un hachage du secret, le secret lui-même reste uniquement sur l'appareil et est transmis au serveur KUDY avec chacune de ses demandes comme clé d'accès. Pour limiter la fréquence des demandes, le serveur conserve un hachage unidirectionnel de l'adresse IP. Les évaluations d'itinéraires et de lieux données dans l'application (la note et les raisons choisies, sans texte libre) vont également au serveur KUDY et y sont conservées avec l'identifiant de l'appareil.",
+      "reviewedSourceHash": "4104b0c2d8a23c83895b7efff2f96349560349a8cac4c462f921566bf5c1e71d",
       "review": {
         "outcome": "approved",
-        "note": "#853: дапоўнена сервернай рэгістрацыяй прылады, hash IP і ацэнкамі на серверы KUDY (D03/D04/D06 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
+        "note": "#853: дапоўнена сервернай рэгістрацыяй прылады, hash IP і ацэнкамі на серверы KUDY (D03/D04/D06 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md Праўка #942 (voka): «падпісвае запыты» заменена на фактычны bearer-механізм."
       }
     },
     {

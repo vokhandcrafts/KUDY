@@ -46,8 +46,23 @@ test('be source names RevenueCat, the device registration, the IP hash and the d
   assert.ok(deletion.includes('не выдаляе'), 'privacyDeletion must state what the button does not erase');
 });
 
+// Per-locale markers of the privacyAppData disclosures (the one-way IP hash
+// wording and the KUDY server name). zh is written as escapes so this source
+// file stays ASCII; the probes must stay in sync with the translated records.
+const APPDATA_PROBES = {
+  be: ['hash', 'KUDY'],
+  en: ['hash', 'KUDY'],
+  uk: ['hash', 'KUDY'],
+  cs: ['hash', 'KUDY'],
+  de: ['Hash', 'KUDY'],
+  es: ['hash', 'KUDY'],
+  fr: ['hachage', 'KUDY'],
+  sv: ['hash', 'KUDY'],
+  zh: ['\u54C8\u5E0C', 'KUDY'],
+};
+
 for (const locale of COMPLETE_UI_LOCALES.filter((code) => code !== 'be')) {
-  test(`${locale}: shipped privacy paragraphs keep the RevenueCat naming`, () => {
+  test(`${locale}: shipped privacy paragraphs keep the RevenueCat naming and appData disclosures`, () => {
     const set = loadUiMessageTranslations(
       join(root, `contracts/ui-messages/translations/${locale}.json`),
       sourceDoc,
@@ -59,6 +74,14 @@ for (const locale of COMPLETE_UI_LOCALES.filter((code) => code !== 'be')) {
       assert.ok(
         record.value.includes('RevenueCat'),
         `${locale}: ${id} must keep the RevenueCat brand name (brand names stay Latin)`,
+      );
+    }
+    const appData = set.records.find((record) => record.id === PRIVACY_APP_DATA);
+    assert.ok(appData, `${locale}: translation record ${PRIVACY_APP_DATA} exists`);
+    for (const probe of APPDATA_PROBES[locale]) {
+      assert.ok(
+        appData.value.includes(probe),
+        `${locale}: ${PRIVACY_APP_DATA} must keep the "${probe}" disclosure marker`,
       );
     }
   });

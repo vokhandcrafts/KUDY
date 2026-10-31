@@ -1852,11 +1852,11 @@
     },
     {
       "id": "web.ui.privacyAppData",
-      "value": "The app works without an account. It keeps an on-device local event log (which stories were opened, which routes were downloaded) and stores content downloads. The log contains no names and no free-form text and is tied to a random device identifier — this is pseudonymised, not anonymous, data. When the app is installed, the KUDY server issues the device a random identifier and a secret: the server keeps the identifier and a hash of the secret, the secret itself stays only on the device and signs its requests to the KUDY server. To rate-limit requests, the server keeps a one-way hash of the IP address. Ratings of routes and places given in the app (a score and selected reasons, no free-form text) are also sent to the KUDY server and kept there together with the device identifier.",
-      "reviewedSourceHash": "68c45b57ab5c69d195e92f67dba57f813221a5b923633d989661f711e67fab6d",
+      "value": "The app works without an account. It keeps an on-device local event log (which stories were opened, which routes were downloaded) and stores content downloads. The log contains no names and no free-form text and is tied to a random device identifier — this is pseudonymised, not anonymous, data. When the app is installed, the KUDY server issues the device a random identifier and a secret: the server keeps the identifier and a hash of the secret, the secret itself is stored only on the device and is sent to the KUDY server with every device request as the access key. To rate-limit requests, the server keeps a one-way hash of the IP address. Ratings of routes and places given in the app (a score and selected reasons, no free-form text) are also sent to the KUDY server and kept there together with the device identifier.",
+      "reviewedSourceHash": "4104b0c2d8a23c83895b7efff2f96349560349a8cac4c462f921566bf5c1e71d",
       "review": {
         "outcome": "approved",
-        "note": "#853: дапоўнена сервернай рэгістрацыяй прылады, hash IP і ацэнкамі на серверы KUDY (D03/D04/D06 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
+        "note": "#853: дапоўнена сервернай рэгістрацыяй прылады, hash IP і ацэнкамі на серверы KUDY (D03/D04/D06 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md Праўка #942 (voka): «падпісвае запыты» заменена на фактычны bearer-механізм."
       }
     },
     {
