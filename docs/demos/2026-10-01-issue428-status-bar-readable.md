@@ -2,8 +2,10 @@
 
 *Showboat demo задачи #428 (эпік #346): гадзіннік і цішоткі статус-бара мелі
 сістэмны дэфолт і знікалі на светлай паперы #faf7f2. Фікс: адна канфігурацыя
-expo-status-bar `style="dark"` (эквівалент RN dark-content) у корані
-навігацыі `app/_layout.tsx`; экраны нічога не задаюць. Створана 2026-10-01.*
+expo-status-bar у корані навігацыі `app/_layout.tsx` —
+`style={statusBarStyle(theme)}` (тэмавы рэзолвер з #436; у светлым рэжыме
+дае dark-content, RN-эквівалент); экраны нічога не задаюць. Створана
+2026-10-01.*
 
 <!-- showboat-id: issue428-status-bar -->
 
@@ -18,12 +20,13 @@ git grep -l "<StatusBar" -- app/ components/ test/
 
 ```output
 app/_layout.tsx
+test/design-runtime-theme.test.mjs
 test/render-helpers.tsx
 ```
 
 Крытэр 2 — гард `app/status-bar.test.tsx`: мантаваньне рэальнага
 RootLayout (не люстры) з жарцамі-прабам на expo-status-bar і праверка, што
-корань задае `style="dark"`.
+корань у змоўклівым (светлым) рэндэры дае `style="dark"`.
 
 ```sh
 node_modules/.bin/jest app/status-bar.test.tsx 2>&1 | grep -E "^(Tests:|Test Suites:)"
@@ -31,31 +34,32 @@ node_modules/.bin/jest app/status-bar.test.tsx 2>&1 | grep -E "^(Tests:|Test Sui
 
 ```output
 Test Suites: 1 passed, 1 total
-Tests:       1 passed, 1 total
+Tests:       2 passed, 2 total
 ```
 
 Рэверт-эксперымент (implementation-rules 1): скрыпт выдаляе радок
-канфігурацыі з камітнага дрэва, гард чырвоны (падае дакладна тэст #428),
-файл аднаўляецца з git — HEAD камітнага дрэва нясе фікс.
+канфігурацыі з камітнага дрэва (без прывязкі да канцоў радкоў — CRLF/LF),
+гард чырвоны (падае дакладна тэст #428), файл аднаўляецца з git — HEAD
+камітнага дрэва нясе фікс.
 
 ```sh
 node --input-type=module -e '
 import { readFileSync, writeFileSync } from "node:fs";
 const p = "app/_layout.tsx";
 const t = readFileSync(p, "utf8");
-const line = "      <StatusBar style=\"dark\" />\n";
-if (!t.includes(line)) { console.error("no config line"); process.exit(1); }
+const line = /^[ \t]*<StatusBar style=\{statusBarStyle\(theme\)\} \/>\r?\n/m;
+if (!line.test(t)) { console.error("no config line"); process.exit(1); }
 writeFileSync(p, t.replace(line, ""));
-console.log("removed the dark-content line");
+console.log("removed the statusBarStyle line");
 '
 node_modules/.bin/jest app/status-bar.test.tsx 2>&1 | grep -E "^(Tests:|Test Suites:)"
 git checkout -- app/_layout.tsx
 ```
 
 ```output
-removed the dark-content line
+removed the statusBarStyle line
 Test Suites: 1 failed, 1 total
-Tests:       1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
 ```
 
 Крытэр 3 — жывыя скрыншоты. Захаваныя ў `.scratch/issue-428/screens/`
