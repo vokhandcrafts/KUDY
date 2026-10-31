@@ -1,6 +1,6 @@
 # APR-08.b — узгадненне палітыкі прыватнасці з фактычнымі патокамі
 
-Дата: **2026-10-31**. Задача: [#853](https://github.com/vokhandcrafts/KUDY/issues/853). Эпік: [#299](https://github.com/vokhandcrafts/KUDY/issues/299). База: main `f9e40dd` (PR #942, галінка `zcode/853`). Выканаўца: ZCode (GLM-5.3), асобны клон `KUDY-853`. Тып: змена тэкстаў UI-каталогаў (дадзеныя + генерацыя), **не Play Console submission** і не release-зборка.
+Дата: **2026-10-31**. Задача: [#853](https://github.com/vokhandcrafts/KUDY/issues/853). Эпік: [#299](https://github.com/vokhandcrafts/KUDY/issues/299). База на пачатак працы: main `f9e40dd`; фінальная база рэв'ю раўнду 3: main `7e63354` (#935), інтэграваная ў галінку мержам `2a2ef87` (PR #942, галінка `zcode/853`). Выканаўца: ZCode (GLM-5.3), асобны клон `KUDY-853`. Тып: змена тэкстаў UI-каталогаў (дадзеныя + генерацыя), **не Play Console submission** і не release-зборка.
 
 ## Мяжа доказу
 
