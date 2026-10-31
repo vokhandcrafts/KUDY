@@ -1,0 +1,296 @@
+{
+  "spec": {
+    "id": "kudy-design-qa",
+    "title": "Сістэма праверкі дызайну KUDY",
+    "sourceUrl": "2026-10-30-design-qa-system.md",
+    "version": 1,
+    "allowedRepositories": [
+      {
+        "name": "vokhandcrafts/KUDY",
+        "baseBranches": [
+          "main"
+        ]
+      }
+    ]
+  },
+  "root": {
+    "id": "SPEC-DESIGN-QA",
+    "identifier": "SPEC-DESIGN-QA",
+    "url": "2026-10-30-design-qa-system.md"
+  },
+  "components": [
+    {
+      "key": "spec",
+      "title": "Спецыфікацыя і задачы",
+      "description": "Узгодненая спецыфікацыя, карткі і індэкс",
+      "shape": "rect"
+    },
+    {
+      "key": "stories",
+      "title": "Гісторыі станаў",
+      "description": "Адзіная крыніца станаў кампанента ў *.stories.tsx",
+      "shape": "rect"
+    },
+    {
+      "key": "specimen",
+      "title": "Dev-экран",
+      "description": "Малюе гісторыі без інтэрфейсу Storybook для здымкаў",
+      "shape": "rect"
+    },
+    {
+      "key": "storybook",
+      "title": "Storybook на тэлефоне",
+      "description": "Прагляд і кантролы станаў у dev-зборцы",
+      "shape": "rect"
+    },
+    {
+      "key": "capture",
+      "title": "visual:check",
+      "description": "Здымак на эмулятары і параўнанне з узорам",
+      "shape": "rect"
+    },
+    {
+      "key": "baselines",
+      "title": "Ухваленыя ўзоры",
+      "description": "PNG, якія ўхваліў уладальнік",
+      "shape": "database"
+    },
+    {
+      "key": "a11y",
+      "title": "Праверкі даступнасці",
+      "description": "Назвы і памер мішэняў з дампа",
+      "shape": "rect"
+    },
+    {
+      "key": "report",
+      "title": "Справаздача",
+      "description": "Вердыкт, розніцы, знаходкі, не праверанае",
+      "shape": "rect"
+    },
+    {
+      "key": "agent",
+      "title": "Дызайн-QA агент",
+      "description": "Правілы, другі праход, журнал вердыктаў",
+      "shape": "rect"
+    },
+    {
+      "key": "images",
+      "title": "Праверка выяў",
+      "description": "Чэкліст брыфа і тэхнічны скрыпт",
+      "shape": "rect"
+    },
+    {
+      "key": "mockups",
+      "title": "Перадправерка макетаў",
+      "description": "HTML-макет супраць канона",
+      "shape": "rect"
+    }
+  ],
+  "connections": [
+    {
+      "key": "stories-specimen",
+      "fromKey": "stories",
+      "toKey": "specimen",
+      "kind": "dependency",
+      "label": "Станы"
+    },
+    {
+      "key": "stories-storybook",
+      "fromKey": "stories",
+      "toKey": "storybook",
+      "kind": "dependency",
+      "label": "Станы"
+    },
+    {
+      "key": "specimen-capture",
+      "fromKey": "specimen",
+      "toKey": "capture",
+      "kind": "request",
+      "label": "Здымак"
+    },
+    {
+      "key": "baselines-capture",
+      "fromKey": "baselines",
+      "toKey": "capture",
+      "kind": "dependency",
+      "label": "Узор"
+    },
+    {
+      "key": "capture-report",
+      "fromKey": "capture",
+      "toKey": "report",
+      "kind": "request",
+      "label": "Розніцы"
+    },
+    {
+      "key": "a11y-report",
+      "fromKey": "a11y",
+      "toKey": "report",
+      "kind": "request",
+      "label": "Факты"
+    },
+    {
+      "key": "report-agent",
+      "fromKey": "report",
+      "toKey": "agent",
+      "kind": "request",
+      "label": "Доказы"
+    },
+    {
+      "key": "images-agent",
+      "fromKey": "images",
+      "toKey": "agent",
+      "kind": "request",
+      "label": "Вынік праверкі"
+    },
+    {
+      "key": "mockups-agent",
+      "fromKey": "mockups",
+      "toKey": "agent",
+      "kind": "request",
+      "label": "Вынік праверкі"
+    },
+    {
+      "key": "spec-agent",
+      "fromKey": "spec",
+      "toKey": "agent",
+      "kind": "dependency",
+      "label": "Правілы"
+    }
+  ],
+  "assignments": [
+    {
+      "componentKey": "spec",
+      "taskIds": [
+        "DQ-00"
+      ]
+    },
+    {
+      "componentKey": "stories",
+      "taskIds": [
+        "DQ-02"
+      ]
+    },
+    {
+      "componentKey": "specimen",
+      "taskIds": [
+        "DQ-02"
+      ]
+    },
+    {
+      "componentKey": "storybook",
+      "taskIds": [
+        "DQ-13"
+      ]
+    },
+    {
+      "componentKey": "capture",
+      "taskIds": [
+        "DQ-01",
+        "DQ-03",
+        "DQ-10"
+      ]
+    },
+    {
+      "componentKey": "baselines",
+      "taskIds": [
+        "DQ-04",
+        "DQ-08",
+        "DQ-09"
+      ]
+    },
+    {
+      "componentKey": "a11y",
+      "taskIds": [
+        "DQ-06"
+      ]
+    },
+    {
+      "componentKey": "report",
+      "taskIds": [
+        "DQ-03"
+      ]
+    },
+    {
+      "componentKey": "agent",
+      "taskIds": [
+        "DQ-05",
+        "DQ-07"
+      ]
+    },
+    {
+      "componentKey": "images",
+      "taskIds": [
+        "DQ-11"
+      ]
+    },
+    {
+      "componentKey": "mockups",
+      "taskIds": [
+        "DQ-12"
+      ]
+    }
+  ],
+  "evidence": {
+    "DQ-00": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-01": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-02": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-03": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-04": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-05": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-06": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-07": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-08": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-09": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-10": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-11": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-12": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    },
+    "DQ-13": {
+      "type": "file_review",
+      "acceptanceCriteria": "Праверыць крытэрыі прыёмкі ў картцы задачы і доказ у docs/agent-tasks/results"
+    }
+  },
+  "links": [],
+  "source": {
+    "kind": "files"
+  }
+}

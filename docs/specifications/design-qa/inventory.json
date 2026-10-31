@@ -1,0 +1,96 @@
+{
+  "source": {
+    "kind": "files"
+  },
+  "root": {
+    "id": "SPEC-DESIGN-QA",
+    "identifier": "SPEC-DESIGN-QA",
+    "url": "2026-10-30-design-qa-system.md"
+  },
+  "leaves": [
+    {
+      "id": "DQ-00",
+      "identifier": "DQ-00",
+      "title": "DQ-00 — Publish the design-QA specification and task series",
+      "url": "tasks/DQ-00.md"
+    },
+    {
+      "id": "DQ-01",
+      "identifier": "DQ-01",
+      "title": "DQ-01 — Measure emulator screenshot noise and pick the reference AVD",
+      "url": "tasks/DQ-01.md"
+    },
+    {
+      "id": "DQ-02",
+      "identifier": "DQ-02",
+      "title": "DQ-02 — Guide-card stories and the dev-only specimen screen",
+      "url": "tasks/DQ-02.md"
+    },
+    {
+      "id": "DQ-03",
+      "identifier": "DQ-03",
+      "title": "DQ-03 — Build the visual:check capture, compare and report tool",
+      "url": "tasks/DQ-03.md"
+    },
+    {
+      "id": "DQ-04",
+      "identifier": "DQ-04",
+      "title": "DQ-04 — ⚠️ Owner: approve the first baselines (guide card and Explore)",
+      "url": "tasks/DQ-04.md"
+    },
+    {
+      "id": "DQ-05",
+      "identifier": "DQ-05",
+      "title": "DQ-05 — Write the design-QA agent rules",
+      "url": "tasks/DQ-05.md"
+    },
+    {
+      "id": "DQ-06",
+      "identifier": "DQ-06",
+      "title": "DQ-06 — Accessibility checks from the UI dump",
+      "url": "tasks/DQ-06.md"
+    },
+    {
+      "id": "DQ-07",
+      "identifier": "DQ-07",
+      "title": "DQ-07 — ⚠️ Owner: benchmark the design-QA agent and start the verdict ledger",
+      "url": "tasks/DQ-07.md"
+    },
+    {
+      "id": "DQ-08",
+      "identifier": "DQ-08",
+      "title": "DQ-08 — ⚠️ Owner: add the dark theme to the visual matrix",
+      "url": "tasks/DQ-08.md"
+    },
+    {
+      "id": "DQ-09",
+      "identifier": "DQ-09",
+      "title": "DQ-09 — ⚠️ Owner: add German and a small screen to the visual matrix",
+      "url": "tasks/DQ-09.md"
+    },
+    {
+      "id": "DQ-10",
+      "identifier": "DQ-10",
+      "title": "DQ-10 — Run visual:check in the Android CI workflow",
+      "url": "tasks/DQ-10.md"
+    },
+    {
+      "id": "DQ-11",
+      "identifier": "DQ-11",
+      "title": "DQ-11 — Check generated images against the brand brief",
+      "url": "tasks/DQ-11.md"
+    },
+    {
+      "id": "DQ-12",
+      "identifier": "DQ-12",
+      "title": "DQ-12 — Preflight HTML mockups against the canon",
+      "url": "tasks/DQ-12.md"
+    },
+    {
+      "id": "DQ-13",
+      "identifier": "DQ-13",
+      "title": "DQ-13 — Storybook React Native on the device",
+      "url": "tasks/DQ-13.md"
+    }
+  ]
+}
