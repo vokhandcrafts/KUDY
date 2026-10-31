@@ -30,27 +30,29 @@ import { LoadingIndicator } from "../components/loading-indicator";
 import { PressableSurface } from "../components/pressable-surface";
 import { ScaledText } from "../components/scaled-text";
 import { uiStrings } from "../components/ui-strings";
-import { tokens } from "../components/design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "../components/design-tokens";
+import { useThemeStyles } from "../components/theme";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
+  screen: { backgroundColor: palette.colorPaper },
   title: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontTitleSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceS,
+    color: palette.colorInk,
+    fontSize: palette.fontTitleSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceS,
   },
   mapNote: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
   demoMap: {
     backgroundColor: "#eaf1eb",
     borderColor: "#cbdccf",
-    borderRadius: tokens.radiusBase,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
     height: 174,
-    marginBottom: tokens.spaceM,
+    marginBottom: palette.spaceM,
     overflow: "hidden",
   },
   demoStreet: {
@@ -64,7 +66,7 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     color: tokens.colorInk,
     fontSize: 13,
-    fontWeight: tokens.fontWeightStrong,
+    fontWeight: palette.fontWeightStrong,
     left: 13,
     overflow: "hidden",
     paddingHorizontal: 9,
@@ -86,49 +88,51 @@ const styles = StyleSheet.create({
   demoPinText: {
     color: "#fffdf7",
     fontSize: 15,
-    fontWeight: tokens.fontWeightStrong,
+    fontWeight: palette.fontWeightStrong,
   },
   modeHeader: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceS,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceS,
   },
   note: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
   card: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    padding: tokens.spaceM,
-    marginBottom: tokens.spaceM,
+    padding: palette.spaceM,
+    marginBottom: palette.spaceM,
   },
   cardTitle: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceS,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceS,
   },
   cardSummary: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceS,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceS,
   },
   cardMeta: {
     alignItems: "center",
     flexDirection: "row",
-    gap: tokens.spaceS,
+    gap: palette.spaceS,
   },
   facts: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceS,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginTop: palette.spaceS,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 // The card's facts line: the availability split (L01: text without audio
 // never promises audio) and the authored duration range — every figure
@@ -153,6 +157,7 @@ function NearbyCard({
   strings: ReturnType<typeof nearbyStrings>;
   locale: string;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const title = offer.title ?? offer.route_id ?? offer.place_id ?? offer.offer_id;
   // G07.01 #809 device pass: the spoken label localizes the access word —
   // the raw access token ('free') leaked into the screen-reader label while
@@ -229,6 +234,7 @@ function locationNote(view: NearbyLocationView, strings: ReturnType<typeof nearb
 }
 
 function DemoMapPreview({ locale }: { locale: string }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const strings = uiStrings(locale);
   return (
     <View style={styles.demoMap} testID="nearby-demo-map" accessibilityLabel={strings.demoNearbyMapAccessibility}>
@@ -250,6 +256,7 @@ function DemoMapPreview({ locale }: { locale: string }) {
 }
 
 export default function Map() {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const services = useServices();
   // One binding per open: the factory resolves the offers store and the
   // location guard (the composition root owns both — 19 §4.2).
@@ -282,13 +289,12 @@ export default function Map() {
   const insets = useSafeAreaInsets();
   return (
     <View
-      style={{
-        backgroundColor: tokens.colorPaper,
+      style={[styles.screen, {
         flex: 1,
         padding: tokens.spaceL,
         paddingTop: insets.top + tokens.spaceL,
         paddingBottom: insets.bottom + tokens.spaceL,
-      }}
+      }]}
       testID="screen-Map"
     >
       {/* UX 02 (issue #348): the Nearby surface gains its one back element —

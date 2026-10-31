@@ -10,28 +10,33 @@ import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BackButton } from "../components/back-button";
-import { tokens } from "../components/design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "../components/design-tokens";
+import { useThemeStyles } from "../components/theme";
 import { ScaledText } from "../components/scaled-text";
-import { screenStyles } from "../components/screen-styles";
+import { useScreenStyles } from "../components/screen-styles";
 import { uiStrings } from "../components/ui-strings";
 import { useServices, useUiLocale } from "./_layout";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   hint: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceS,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginTop: palette.spaceS,
   },
   title: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontTitleSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontTitleSize,
+    fontWeight: palette.fontWeightStrong,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 export default function NotFound() {
+  const screenStyles = useScreenStyles();
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const services = useServices();
   // G14.04.d (issue #305): the words read the switchable display locale —
   // a switch re-renders them in place, no restart.

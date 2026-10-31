@@ -22,8 +22,13 @@ import { tokens } from "./design-tokens";
 // assertions below read the mock's value, so only a wrapper that actually
 // consumes the mirror renders the overridden shade.
 jest.mock("./design-tokens", () => {
-  const actual = jest.requireActual("./design-tokens") as { tokens: Record<string, string> };
-  return { tokens: { ...actual.tokens, colorShelfAccent: "#00aa55" } };
+  const actual = jest.requireActual("./design-tokens") as {
+    tokens: Record<string, string>;
+    darkTokens: Record<string, string>;
+  };
+  // Keep the dark palette exported: the shared wrapper now supports both
+  // schemes, while the light accent remains an intentionally synthetic guard.
+  return { ...actual, tokens: { ...actual.tokens, colorShelfAccent: "#00aa55" } };
 });
 
 function renderShelf(shade: ShelfShade, pressed = false) {

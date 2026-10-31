@@ -20,7 +20,8 @@ import { GUIDE_HINT_STRINGS } from "./guide-hint-strings.generated";
 
 import { PressableSurface } from "./pressable-surface";
 import { ScaledText } from "./scaled-text";
-import { tokens } from "./design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "./design-tokens";
+import { useThemeStyles } from "./theme";
 import type { NearbyHintBinding, NearbyHintState } from "../controllers/useNearbyController";
 
 export function guideHintStrings(locale: string): GuideHintStrings {
@@ -32,43 +33,45 @@ export function guideHintStrings(locale: string): GuideHintStrings {
   return locale === "zh" ? GUIDE_HINT_STRINGS.zh : locale === "sv" ? GUIDE_HINT_STRINGS.sv : locale === "cs" ? GUIDE_HINT_STRINGS.cs : locale === "es" ? GUIDE_HINT_STRINGS.es : locale === "fr" ? GUIDE_HINT_STRINGS.fr : locale === "en" ? GUIDE_HINT_STRINGS.en : locale === "de" ? GUIDE_HINT_STRINGS.de : GUIDE_HINT_STRINGS.be;
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   card: {
-    backgroundColor: tokens.colorHintBg,
-    borderColor: tokens.colorHintBorder,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorHintBg,
+    borderColor: palette.colorHintBorder,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceM,
-    marginTop: tokens.spaceM,
-    padding: tokens.spaceM,
+    marginBottom: palette.spaceM,
+    marginTop: palette.spaceM,
+    padding: palette.spaceM,
   },
   heading: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   row: {
-    marginTop: tokens.spaceS,
-    padding: tokens.spaceS,
+    marginTop: palette.spaceS,
+    padding: palette.spaceS,
   },
   rowTitle: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
   },
   paidMark: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
   },
   dismiss: {
     alignItems: "center",
-    marginTop: tokens.spaceS,
-    padding: tokens.spaceS,
+    marginTop: palette.spaceS,
+    padding: palette.spaceS,
   },
   dismissLabel: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 // The screens' one mount line (map, run): reads the app-wide hint binding's
 // store and renders the card only from a ready state. The store hook is the
@@ -125,6 +128,7 @@ export function GuideHintCard({
   onOpen: (routeId: string) => void;
   onDismiss: () => void;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <View style={styles.card} testID="guide-hint-card">
       <ScaledText style={styles.heading}>{heading}</ScaledText>

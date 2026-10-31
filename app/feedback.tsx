@@ -22,108 +22,113 @@ import {
 } from "../controllers/useFeedbackController";
 import { useServices, useUiLocale } from "./_layout";
 import { BackButton } from "../components/back-button";
-import { tokens } from "../components/design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "../components/design-tokens";
+import { useThemeStyles } from "../components/theme";
 import { PressableSurface } from "../components/pressable-surface";
 import { ScaledText } from "../components/scaled-text";
-import { screenStyles } from "../components/screen-styles";
+import { useScreenStyles } from "../components/screen-styles";
 import { uiStrings } from "../components/ui-strings";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   hint: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
-    marginBottom: tokens.spaceM,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
+    marginBottom: palette.spaceM,
   },
   factsLine: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
     fontSize: 12,
-    marginBottom: tokens.spaceM,
+    marginBottom: palette.spaceM,
   },
   delivery: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceM,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceM,
   },
   diagnostic: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
     fontSize: 12,
-    marginBottom: tokens.spaceM,
+    marginBottom: palette.spaceM,
   },
   section: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
-    marginBottom: tokens.spaceS,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
+    marginBottom: palette.spaceS,
   },
   chipRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: tokens.spaceS,
-    marginBottom: tokens.spaceM,
+    gap: palette.spaceS,
+    marginBottom: palette.spaceM,
   },
   chip: {
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
     minHeight: 44,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: tokens.spaceM,
-    paddingVertical: tokens.spaceS,
+    paddingHorizontal: palette.spaceM,
+    paddingVertical: palette.spaceS,
   },
   chipSelected: {
-    borderColor: tokens.colorAccent,
+    borderColor: palette.colorAccent,
   },
   chipLabel: {
-    color: tokens.colorMuted,
-    fontFamily: tokens.fontFamilyUi,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorMuted,
+    fontFamily: palette.fontFamilyUi,
+    fontSize: palette.fontBaseSize,
   },
   chipLabelSelected: {
-    color: tokens.colorAccent,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorAccent,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontWeight: palette.fontWeightStrong,
   },
   action: {
     alignSelf: "flex-start",
-    backgroundColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
-    marginBottom: tokens.spaceS,
-    marginTop: tokens.spaceM,
-    paddingHorizontal: tokens.spaceL,
-    paddingVertical: tokens.spaceM,
+    backgroundColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
+    marginBottom: palette.spaceS,
+    marginTop: palette.spaceM,
+    paddingHorizontal: palette.spaceL,
+    paddingVertical: palette.spaceM,
   },
   actionLabel: {
-    color: tokens.colorAccentInk,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorAccentInk,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   quietAction: {
     alignSelf: "flex-start",
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceS,
-    paddingHorizontal: tokens.spaceM,
-    paddingVertical: tokens.spaceS,
+    marginBottom: palette.spaceS,
+    paddingHorizontal: palette.spaceM,
+    paddingVertical: palette.spaceS,
   },
   quietLabel: {
-    color: tokens.colorInk,
-    fontFamily: tokens.fontFamilyUiStrong,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorInk,
+    fontFamily: palette.fontFamilyUiStrong,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 export default function FeedbackForm() {
+  const screenStyles = useScreenStyles();
+  const styles = useThemeStyles(lightStyles, darkStyles);
   const params = useLocalSearchParams<{
     kind?: string;
     id?: string;

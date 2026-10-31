@@ -12,34 +12,35 @@ import { StyleSheet, View } from "react-native";
 
 import { PressableSurface } from "./pressable-surface";
 import { ScaledText } from "./scaled-text";
-import { tokens } from "./design-tokens";
+import { darkTokens, tokens, type ThemeTokens } from "./design-tokens";
+import { useThemeStyles } from "./theme";
 
-const styles = StyleSheet.create({
+const createStyles = (palette: ThemeTokens) => StyleSheet.create({
   card: {
-    backgroundColor: tokens.colorCard,
-    borderColor: tokens.colorLine,
-    borderRadius: tokens.radiusBase,
+    backgroundColor: palette.colorCard,
+    borderColor: palette.colorLine,
+    borderRadius: palette.radiusBase,
     borderWidth: 1,
-    marginBottom: tokens.spaceM,
-    marginTop: tokens.spaceM,
-    padding: tokens.spaceM,
+    marginBottom: palette.spaceM,
+    marginTop: palette.spaceM,
+    padding: palette.spaceM,
   },
   title: {
-    color: tokens.colorInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   body: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
-    marginTop: tokens.spaceS,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
+    marginTop: palette.spaceS,
   },
   buy: {
     alignItems: "center",
-    backgroundColor: tokens.colorAccent,
-    borderRadius: tokens.radiusBase,
-    marginTop: tokens.spaceM,
-    padding: tokens.spaceM,
+    backgroundColor: palette.colorAccent,
+    borderRadius: palette.radiusBase,
+    marginTop: palette.spaceM,
+    padding: palette.spaceM,
   },
   // Issue #430 (варыянт А): the disabled buy reads through the canon ghost
   // pair (canon §5) — the transparent fill shows the card, no opacity
@@ -47,28 +48,30 @@ const styles = StyleSheet.create({
   buyDisabled: {
     backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: tokens.colorDisabledLine,
+    borderColor: palette.colorDisabledLine,
   },
   buyLabel: {
-    color: tokens.colorAccentInk,
-    fontSize: tokens.fontBaseSize,
-    fontWeight: tokens.fontWeightStrong,
+    color: palette.colorAccentInk,
+    fontSize: palette.fontBaseSize,
+    fontWeight: palette.fontWeightStrong,
   },
   buyLabelDisabled: {
-    color: tokens.colorDisabledInk,
+    color: palette.colorDisabledInk,
   },
   // The decline stays quiet: a plain text row, not a second accent button —
   // the card keeps one main action (the visual-language buttons rule).
   dismiss: {
     alignItems: "center",
-    marginTop: tokens.spaceS,
-    padding: tokens.spaceS,
+    marginTop: palette.spaceS,
+    padding: palette.spaceS,
   },
   dismissLabel: {
-    color: tokens.colorMuted,
-    fontSize: tokens.fontBaseSize,
+    color: palette.colorMuted,
+    fontSize: palette.fontBaseSize,
   },
 });
+const lightStyles = createStyles(tokens);
+const darkStyles = createStyles(darkTokens);
 
 export function UpgradeOffer({
   title,
@@ -89,6 +92,7 @@ export function UpgradeOffer({
   onDismiss: () => void;
   onRendered: () => void;
 }) {
+  const styles = useThemeStyles(lightStyles, darkStyles);
   return (
     <View style={styles.card} testID="upgrade-offer" onLayout={onRendered}>
       <ScaledText style={styles.title}>{title}</ScaledText>
