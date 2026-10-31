@@ -10,7 +10,7 @@ test('both agent entrypoints require on-request and pre-closure UI review outsid
     assert.match(body, /docs\/agent-rules\/design-qa\.md/);
     assert.match(body, /on request/i);
     assert.match(body, /before closing.*interface/i);
-    assert.match(body, /not (?:run|in) CI/i);
+    assert.match(body, /not (?:run )?in CI/i);
     assert.match(body, /no (?:model )?API key/i);
   }
 });
