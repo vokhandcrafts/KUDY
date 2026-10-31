@@ -352,7 +352,7 @@ export function createNearbyHintController(deps: NearbyHintDeps): NearbyHintBind
       (run.phase === 'Active' && (run.autoplaySuspended || run.focusLostAt !== null || run.playing !== null)) ||
       playback.kind === 'playing' ||
       playback.kind === 'paused' ||
-      (run.phase === 'Active' && runStore?.panel !== undefined && runStore.panel !== 'peek') ||
+      (runStore?.panel !== undefined && runStore.panel !== 'peek') ||
       deps.commercialDialogUp?.() === true;
     if (quiet) {
       quietSince = quietSince ?? at;
