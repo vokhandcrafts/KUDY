@@ -30,7 +30,7 @@ node --test --test-reporter=spec test/run-map-contrast.test.mjs 2>&1 | grep -E "
 ✔ the Run map background is the canon color.map, not card white
 ✔ every marker status carries its canon color.marker.* fill
 ✔ every marker fill keeps ≥3:1 against the canon map background (WCAG 1.4.11)
-✔ the peek bar progress strip stays identifiable on the card (≥3:1 edge)
+✔ the peek bar progress strip stays identifiable in light and dark chrome (≥3:1 edge)
 ✔ guard is wired into npm test (implementation-rules 1 and 7)
 ℹ tests 5
 ℹ pass 5
@@ -43,7 +43,7 @@ node_modules/.bin/jest app/run.test.tsx 2>&1 | grep -E "^(Test Suites:|Tests:)"
 
 ```output
 Test Suites: 1 passed, 1 total
-Tests:       22 passed, 22 total
+Tests:       46 passed, 46 total
 ```
 
 Эксперымент па зняцці фіксу (implementation-rules 1) выкананы ў гэтай
