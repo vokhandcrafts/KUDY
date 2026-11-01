@@ -48,12 +48,14 @@ const DEFAULT_APK = path.join(REPO_ROOT, 'android', 'app', 'build', 'outputs', '
 const METRO_READY_TIMEOUT_MS = 120000;
 const METRO_START_RETRIES = 2;
 const SERVER_READY_TIMEOUT_MS = 60000;
-const FIRST_BUNDLE_TIMEOUT_MS = 420000;
-const BUNDLE_TIMEOUT_MS = 180000;
+// Exported bundle timeouts: the DQ-03 visual capture reuses the same cold
+// start budget (implementation-rules 3) instead of restating the numbers.
+export const FIRST_BUNDLE_TIMEOUT_MS = 420000;
+export const BUNDLE_TIMEOUT_MS = 180000;
 const CASE_TIMEOUT_MS = 30000;
 const APP_JSON = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'app.json'), 'utf8'));
-const APP_PACKAGE = APP_JSON.expo.android.package;
-const FIXTURE_GUIDE_ROUTE_ID = 'e2e-free-guide';
+export const APP_PACKAGE = APP_JSON.expo.android.package;
+export const FIXTURE_GUIDE_ROUTE_ID = 'e2e-free-guide';
 
 const require = createRequire(import.meta.url);
 const EXPO_CLI = require.resolve('expo/bin/cli');
@@ -84,7 +86,7 @@ const info = (message) => console.log(`-- ${message}`);
 
 // ---------- prerequisite resolution (suite-level skip) ----------
 
-async function resolveTarget({ serial, apk }) {
+export async function resolveTarget({ serial, apk }) {
   const adbPath = resolveAdb();
   if (adbPath === null) return { skip: 'adb not found (set KUDY_ADB or ANDROID_HOME, or install platform-tools)' };
 
@@ -216,7 +218,7 @@ function waitForPortClosed(port, timeoutMs) {
   });
 }
 
-async function startMetro({ port, env, logPath }) {
+export async function startMetro({ port, env, logPath }) {
   for (let attempt = 1; attempt <= METRO_START_RETRIES; attempt += 1) {
     const child = startGroupProcess(
       process.execPath,
@@ -242,7 +244,7 @@ async function startMetro({ port, env, logPath }) {
   throw new DriverError('Metro start: unreachable state');
 }
 
-async function startOriginServer({ port, logPath, outDir, fault, packages }) {
+export async function startOriginServer({ port, logPath, outDir, fault, packages }) {
   const child = startGroupProcess(process.execPath, [ORIGIN_TOOL, '--port', String(port), ...(outDir ? ['--out', outDir] : []),
     ...(fault ? ['--fault', fault] : []), ...(packages ? ['--packages', packages] : [])], {
     cwd: REPO_ROOT,
@@ -260,7 +262,7 @@ async function startOriginServer({ port, logPath, outDir, fault, packages }) {
 
 // ---------- case plumbing ----------
 
-const devClientUrl = (metroPort) =>
+export const devClientUrl = (metroPort) =>
   `kudy://expo-development-client/?url=${encodeURIComponent(`http://localhost:${metroPort}`)}`;
 
 export async function coldStart(driver, url, { timeoutMs, caseSlug }) {
