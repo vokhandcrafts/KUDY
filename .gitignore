@@ -66,3 +66,5 @@ docs/specifications/design-qa/index.html
 
 # DQ-13 (issue #914): machine-local story registration, rebuilt by storybook:generate
 /.rnstorybook/storybook.requires.ts
+
+.voka
