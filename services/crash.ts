@@ -13,7 +13,7 @@
 // injected digest over the trimmed message, so a report cannot carry
 // secrets, guide content, coordinates or free text — structurally, not by a
 // filter's judgement.
-import { setSetting } from './db/db.ts';
+import { CRASH_CONSENT_KEY, setSetting } from './db/db.ts';
 import type { SqlDriver } from './db/types.ts';
 import { readConsentState } from './consent.ts';
 
@@ -23,7 +23,7 @@ export type CrashConsent = 'granted' | 'revoked';
 // §10 consent precedent (asked before the first send; refusal keeps the app
 // fully working). Never derived from the analytics consent (criterion 2;
 // the cross tests pin the independence in both directions).
-const CONSENT_KEY = 'crash_consent';
+const CONSENT_KEY = CRASH_CONSENT_KEY;
 
 export class CrashError extends Error {
   rule: 'invalid_consent_state' | 'invalid_crash_kind' | 'sink_failed';

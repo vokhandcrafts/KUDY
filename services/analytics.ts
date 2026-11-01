@@ -18,10 +18,11 @@
 // The analytics consent key is defined once in services/db (with the
 // settings SQL) since G09.03: the device-delete wipe (clearDeviceAccountState)
 // must clear exactly the row this module owns, from the same constant.
-import { ANALYTICS_CONSENT_KEY, setSetting } from './db/db.ts';
+import { ANALYTICS_CONSENT_KEY, isDeviceDeletionPending, setSetting } from './db/db.ts';
 import type { SqlDriver } from './db/types.ts';
 import type { DeviceIdentity } from './device.ts';
 import { flushEvents, type EventSender, type OutgoingEvent } from './eventLog.ts';
+import { withDeviceLifecycle } from './device-lifecycle.ts';
 import { readConsentState } from './consent.ts';
 import { assertNotRedirected, parseSecureEndpointUrl, SecureUrlError } from './secure-url.ts';
 
@@ -75,9 +76,11 @@ export function setAnalyticsConsent(driver: SqlDriver, consent: AnalyticsConsent
 // sent and silently retire never-sent events — exactly the queue loss
 // criterion 2 forbids.
 export async function flushAnalytics(driver: SqlDriver, send: EventSender): Promise<number> {
-  if (getAnalyticsConsent(driver) !== 'granted') return 0;
-  return flushEvents(driver, send, {
-    beforeBatch: () => getAnalyticsConsent(driver) === 'granted',
+  return withDeviceLifecycle(driver, async () => {
+    if (isDeviceDeletionPending(driver) || getAnalyticsConsent(driver) !== 'granted') return 0;
+    return flushEvents(driver, send, {
+      beforeBatch: () => !isDeviceDeletionPending(driver) && getAnalyticsConsent(driver) === 'granted',
+    });
   });
 }
 

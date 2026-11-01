@@ -12,9 +12,10 @@
 // tables; supabase/functions/feedback/feedback-core.ts PUT_REQUIRED_FIELDS /
 // DELETE_REQUIRED_FIELDS / validateReadBody) — copied verbatim at the one
 // transport boundary, camelCase ends here.
-import { getDeviceId, inTransaction } from './db/db.ts';
+import { getDeviceId, inTransaction, isDeviceDeletionPending } from './db/db.ts';
 import type { SqlDriver, SqlValue } from './db/types.ts';
-import type { SecureSecretStore } from './device.ts';
+import { recoverPendingLocalDeletion, type SecureSecretStore } from './device.ts';
+import { withDeviceLifecycle } from './device-lifecycle.ts';
 import { withWaitLimit } from './network-wait.ts';
 import { assertNotRedirected, parseSecureEndpointUrl, SecureUrlError } from './secure-url.ts';
 import {
@@ -431,6 +432,11 @@ export function createFeedbackSync(deps: {
     };
     // The age limit is local state. It applies even when registration has
     // never succeeded and there is no device identity to send with.
+    await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
+    if (isDeviceDeletionPending(deps.driver)) {
+      report.skippedNoIdentity = true;
+      return report;
+    }
     report.stoppedStale = stopExpiredPending();
     const secret = await deps.secretStore.getSecret();
     if (secret === null || getDeviceId(deps.driver) === null) {
@@ -469,24 +475,28 @@ export function createFeedbackSync(deps: {
     flush(): Promise<FlushReport> {
       const running = inflightFlush.get(deps.driver);
       if (running) return running;
-      const promise = flushOnce().finally(() => inflightFlush.delete(deps.driver));
+      const promise = withDeviceLifecycle(deps.driver, flushOnce).finally(() => inflightFlush.delete(deps.driver));
       inflightFlush.set(deps.driver, promise);
       return promise;
     },
 
     async resolveConflict(target: FeedbackTarget): Promise<ResolveOutcome> {
-      const secret = await deps.secretStore.getSecret();
-      if (secret === null || getDeviceId(deps.driver) === null) return { status: 'no-identity' };
-      let response: FeedbackTransportResponse;
-      try {
-        response = await transport.read(toWireTarget(target));
-      } catch {
-        return { status: 'unreadable', httpStatus: 0 };
-      }
-      if (response.status !== 200) return { status: 'unreadable', httpStatus: response.status };
-      const read = validateReadBody(response.body);
-      storeAcknowledgedRead(deps.driver, target, read, { now: now() });
-      return { status: 'resolved', revision: read.revision, score: read.deleted ? null : read.score, deleted: read.deleted };
+      return withDeviceLifecycle(deps.driver, async () => {
+        await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
+        if (isDeviceDeletionPending(deps.driver)) return { status: 'no-identity' };
+        const secret = await deps.secretStore.getSecret();
+        if (secret === null || getDeviceId(deps.driver) === null) return { status: 'no-identity' };
+        let response: FeedbackTransportResponse;
+        try {
+          response = await transport.read(toWireTarget(target));
+        } catch {
+          return { status: 'unreadable', httpStatus: 0 };
+        }
+        if (response.status !== 200) return { status: 'unreadable', httpStatus: response.status };
+        const read = validateReadBody(response.body);
+        storeAcknowledgedRead(deps.driver, target, read, { now: now() });
+        return { status: 'resolved', revision: read.revision, score: read.deleted ? null : read.score, deleted: read.deleted };
+      });
     },
   };
 }

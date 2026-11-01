@@ -11,13 +11,17 @@
 // is wiped, the server-side orphan is reclaimed by device-delete retention
 // (G09.03), and until `/v1/link` exists a reinstall loses the old identity
 // by design (09 §2).
-import { clearDeviceAccountState, getDeviceId, setDeviceId } from './db/db.ts';
+import {
+  clearDeviceAccountState, getDeviceDeleteState, getDeviceId, isDeviceDeletionPending,
+  setDeviceDeleteState, setDeviceId, type DeviceDeleteState,
+} from './db/db.ts';
+import { deviceDeletionRequested, markDeviceDeletionRequested, withDeviceLifecycle } from './device-lifecycle.ts';
 import type { SqlDriver } from './db/types.ts';
 import { NETWORK_WAIT_LIMITS, withWaitLimit } from './network-wait.ts';
 import { assertNotRedirected, parseSecureEndpointUrl, SecureUrlError } from './secure-url.ts';
 
 export class DeviceError extends Error {
-  rule: 'network_failed' | 'rate_limited' | 'server_error' | 'invalid_response' | 'unsafe_endpoint';
+  rule: 'network_failed' | 'rate_limited' | 'server_error' | 'invalid_response' | 'unsafe_endpoint' | 'deletion_pending';
 
   constructor(rule: DeviceError['rule'], message: string, options?: { cause?: unknown }) {
     super(message, options);
@@ -127,9 +131,12 @@ export function ensureDeviceIdentity(deps: {
   /** Wait limit override for the default transport (tests; the owner is NETWORK_WAIT_LIMITS.deviceMs). */
   waitLimitMs?: number;
 }): Promise<DeviceIdentity> {
+  if (deviceDeletionRequested(deps.driver) || getDeviceDeleteState(deps.driver) === 'pending_remote') {
+    return Promise.reject(new DeviceError('deletion_pending', 'device deletion needs an explicit retry'));
+  }
   const running = inflight.get(deps.driver);
   if (running) return running;
-  const promise = registerOnce(deps).finally(() => {
+  const promise = withDeviceLifecycle(deps.driver, () => registerOnce(deps)).finally(() => {
     inflight.delete(deps.driver);
   });
   inflight.set(deps.driver, promise);
@@ -143,6 +150,13 @@ async function registerOnce(deps: {
   transport?: DeviceRegistrationTransport;
   waitLimitMs?: number;
 }): Promise<DeviceIdentity> {
+  // Finish a server-acknowledged local wipe after a crash before ever
+  // accessing or recreating an identity. An unresolved remote request never
+  // implicitly re-registers: the caller must explicitly retry deletion.
+  await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
+  if (isDeviceDeletionPending(deps.driver)) {
+    throw new DeviceError('deletion_pending', 'device deletion needs an explicit retry');
+  }
   const secret = await deps.secretStore.getSecret();
   const storedDeviceId = getDeviceId(deps.driver);
   if (secret !== null && storedDeviceId !== null) {
@@ -176,7 +190,7 @@ async function registerOnce(deps: {
 
 export interface DeviceDeleteTransport {
   /** Requests the canonical `DELETE /v1/device` with the device bearer. */
-  deleteDevice(baseUrl: string, deviceSecret: string): Promise<{ status: number }>;
+  deleteDevice(baseUrl: string, deviceSecret: string): Promise<{ status: number; body?: unknown }>;
 }
 
 function defaultDeleteTransport(waitLimitMs: number): DeviceDeleteTransport {
@@ -197,7 +211,7 @@ function defaultDeleteTransport(waitLimitMs: number): DeviceDeleteTransport {
       }
       try {
         // G20.10 (§N4): the deletion wait is finite and covers the body read.
-        const { status } = await withWaitLimit('wait-device', waitLimitMs, async (signal) => {
+        const answer = await withWaitLimit('wait-device', waitLimitMs, async (signal) => {
           const response = await fetch(endpoint, {
             method: 'DELETE',
             headers: { authorization: `Bearer ${deviceSecret}` },
@@ -205,10 +219,18 @@ function defaultDeleteTransport(waitLimitMs: number): DeviceDeleteTransport {
             signal,
           });
           assertNotRedirected(endpoint, response, 'device deletion');
-          await response.text();
-          return { status: response.status };
+          const raw = await response.text();
+          let body: unknown = null;
+          if (raw !== '') {
+            try {
+              body = JSON.parse(raw);
+            } catch {
+              body = raw;
+            }
+          }
+          return { status: response.status, body };
         });
-        return { status };
+        return answer;
       } catch (error) {
         if (error instanceof SecureUrlError) {
           throw new DeviceError('unsafe_endpoint', error.message, { cause: error });
@@ -219,21 +241,34 @@ function defaultDeleteTransport(waitLimitMs: number): DeviceDeleteTransport {
   };
 }
 
-/**
- * Deletes the device account: the server call goes first, and the local
- * durable state is wiped only after the server confirmed. 204 — the account
- * was live and is gone (the server's FK cascades took the event log and the
- * grant cache). 403 — the device is already gone on the server (a lost 204
- * after a committed delete, or a secret that matches no row): the local wipe
- * still completes, because every later authenticated call would 403 the
- * same way and the old queue must never resurrect the account (`21` §6).
- * Any other status, or a network failure, wipes nothing — the retry is safe
- * because the server delete is idempotent. Downloaded bundles (zone A) and
- * run progress stay (09 §5, `21` §6); the DB wipe is one transaction
- * (clearDeviceAccountState), the secret store goes last, so a crash
- * mid-flow leaves the retry path intact — symmetric to the registration
- * crash window above.
- */
+// Persist the server decision separately from local completion. A lost 204
+// followed by 403 is indistinguishable from a wrong secret: neither proves
+// remote erasure. This accessor intentionally exposes only those two states.
+export type DeviceDeletionResult = { local: 'complete'; remote: 'remote_confirmed' | 'remote_unverified' };
+
+function remoteResult(state: DeviceDeleteState): DeviceDeletionResult {
+  return { local: 'complete', remote: state.endsWith('confirmed') ? 'remote_confirmed' : 'remote_unverified' };
+}
+
+export function getLastDeviceDeletionResult(driver: SqlDriver): DeviceDeletionResult | null {
+  const state = getDeviceDeleteState(driver);
+  return state?.startsWith('complete_') ? remoteResult(state) : null;
+}
+
+// Recover the local half even when the previous process crashed after the
+// SQLite transaction and before SecureStore cleared. Never erase the secret
+// when there has been no validated remote answer.
+export async function recoverPendingLocalDeletion(driver: SqlDriver, secretStore: SecureSecretStore): Promise<void> {
+  const state = getDeviceDeleteState(driver);
+  if (state !== 'cleanup_remote_confirmed' && state !== 'cleanup_remote_unverified') return;
+  clearDeviceAccountState(driver);
+  await secretStore.clearSecret();
+  setDeviceDeleteState(driver, state === 'cleanup_remote_confirmed'
+    ? 'complete_remote_confirmed' : 'complete_remote_unverified');
+}
+
+/** Deletion never claims remote success on 403 or missing credentials. */
+
 export async function deleteDeviceAccount(deps: {
   driver: SqlDriver;
   secretStore: SecureSecretStore;
@@ -242,22 +277,45 @@ export async function deleteDeviceAccount(deps: {
   transport?: DeviceDeleteTransport;
   /** Wait limit override for the default transport (tests; the owner is NETWORK_WAIT_LIMITS.deviceMs). */
   waitLimitMs?: number;
-}): Promise<void> {
-  const secret = await deps.secretStore.getSecret();
-  if (secret === null) {
+}): Promise<DeviceDeletionResult> {
+  const releaseRequest = markDeviceDeletionRequested(deps.driver);
+  return withDeviceLifecycle(deps.driver, async () => {
+    await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
+    const previous = getDeviceDeleteState(deps.driver);
+    if (previous?.startsWith('complete_') && getDeviceId(deps.driver) === null) {
+      return remoteResult(previous);
+    }
+    // Persist this barrier before network activity. A failure is durable:
+    // neither registration nor a sender may revive an old account.
+    setDeviceDeleteState(deps.driver, 'pending_remote');
+    const secret = await deps.secretStore.getSecret();
+    if (secret === null) {
     // No identity to authenticate: no server account is reachable under a
     // secret nobody holds (an incomplete registration pair — the next
     // ensureDeviceIdentity re-registers), so the deletion is the local wipe
     // only, and never a re-registration for the old state.
-    clearDeviceAccountState(deps.driver);
-    await deps.secretStore.clearSecret();
-    return;
-  }
-  const transport = deps.transport ?? defaultDeleteTransport(deps.waitLimitMs ?? NETWORK_WAIT_LIMITS.deviceMs);
-  const response = await transport.deleteDevice(deps.baseUrl, secret);
-  if (response.status !== 204 && response.status !== 403) {
-    throw new DeviceError('server_error', `device delete failed with status ${response.status}`);
-  }
-  clearDeviceAccountState(deps.driver);
-  await deps.secretStore.clearSecret();
+      setDeviceDeleteState(deps.driver, 'cleanup_remote_unverified');
+      await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
+      return { local: 'complete', remote: 'remote_unverified' };
+    }
+    const transport = deps.transport ?? defaultDeleteTransport(deps.waitLimitMs ?? NETWORK_WAIT_LIMITS.deviceMs);
+    const response = await transport.deleteDevice(deps.baseUrl, secret);
+    if (response.status !== 204 && response.status !== 403) {
+      throw new DeviceError('server_error', `device delete failed with status ${response.status}`);
+    }
+    if (response.status === 403) {
+      const body = response.body;
+      if (typeof body !== 'object' || body === null || Array.isArray(body) ||
+          Object.keys(body).length !== 1 || (body as { error?: unknown }).error !== 'device_auth_failed') {
+        throw new DeviceError('invalid_response', 'device delete: unverified 403 response');
+      }
+    } else if (response.body !== null && response.body !== undefined && response.body !== '') {
+      throw new DeviceError('invalid_response', 'device delete: 204 must have an empty body');
+    }
+    const remote = response.status === 204 ? 'remote_confirmed' : 'remote_unverified';
+    setDeviceDeleteState(deps.driver, remote === 'remote_confirmed'
+      ? 'cleanup_remote_confirmed' : 'cleanup_remote_unverified');
+    await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
+    return { local: 'complete', remote };
+  }).finally(releaseRequest);
 }

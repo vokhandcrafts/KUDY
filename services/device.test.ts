@@ -11,7 +11,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { getAnalyticsConsent, setAnalyticsConsent } from './analytics.ts';
-import { getDeviceId, openDatabase, setDeviceId, setSetting, upsertBundleAsset } from './db/db.ts';
+import { getCrashConsent, setCrashConsent } from './crash.ts';
+import { getDeviceDeleteState, getDeviceId, getSetting, openDatabase, setDeviceId, setSetting, upsertBundleAsset } from './db/db.ts';
 import type { SqlDriver } from './db/types.ts';
 import { nodeSqliteDriver } from './db/test-fixture.ts';
 import {
@@ -344,7 +345,7 @@ test('G20.10 stalled_device_no_identity: an unresolved registration stores nothi
 const DELETE_BASE = 'https://example.functions.supabase.co/functions/v1';
 const event = eventFactory('33333333-3333-4333-8333-');
 
-function scriptedDeleteTransport(responses: Array<{ status: number } | Error>) {
+function scriptedDeleteTransport(responses: Array<{ status: number; body?: unknown } | Error>) {
   const calls: string[] = [];
   const transport: DeviceDeleteTransport = {
     deleteDevice: async (baseUrl, secret) => {
@@ -363,6 +364,7 @@ function scriptedDeleteTransport(responses: Array<{ status: number } | Error>) {
 function seedAccountState(driver: SqlDriver): void {
   setDeviceId(driver, REGISTRATION.device_id);
   setAnalyticsConsent(driver, 'granted');
+  setCrashConsent(driver, 'granted');
   emitEvent(driver, event());
   driver
     .prepare("INSERT INTO feedback_local (target, revision, score, state) VALUES ('guide:gda-1:1:be', 2, 4, 'sent')")
@@ -395,6 +397,7 @@ function expectWiped(driver: SqlDriver, store: SecureSecretStore & { saved(): st
   assert.equal(getDeviceId(driver), null, 'the device row is gone');
   assert.equal(store.saved(), null, 'the device secret is cleared');
   assert.equal(getAnalyticsConsent(driver), null, 'the consent state is back to never-asked');
+  assert.equal(getCrashConsent(driver), null, 'crash consent must be forgotten');
   assert.equal(rowCount(driver, 'event_queue'), 0, 'the local event queue is wiped');
   assert.equal(rowCount(driver, 'feedback_local'), 0, 'the feedback state is wiped (criterion 4)');
   assert.equal(rowCount(driver, 'feedback_outbox'), 0, 'the old outbox never restores the feedback');
@@ -408,7 +411,7 @@ function expectUntouched(driver: SqlDriver, store: SecureSecretStore & { saved()
   assert.equal(rowCount(driver, 'feedback_local'), 1);
   assert.equal(rowCount(driver, 'feedback_outbox'), 1);
   assert.equal(rowCount(driver, 'bundle_asset'), 1, 'downloads are never touched by the delete flow');
-  assert.equal(rowCount(driver, 'settings'), 2, 'the unrelated setting survives');
+  assert.equal(getSetting(driver, 'unrelated_setting'), 'keep', 'the unrelated setting survives');
 }
 
 test('G09.03: 204 wipes queue, consent, feedback tables, device row and secret — downloads stay (criterion 1)', async () => {
@@ -424,8 +427,7 @@ test('G09.03: 204 wipes queue, consent, feedback tables, device row and secret �
   assert.deepEqual(calls, [`${DELETE_BASE}|${REGISTRATION.device_secret}`], 'the bearer goes to DELETE /v1/device');
   expectWiped(driver, store);
   assert.equal(rowCount(driver, 'bundle_asset'), 1, 'downloaded bundles stay (09 §5)');
-  const kept = driver.prepare('SELECT value FROM settings').get() as { value: string };
-  assert.equal(kept.value, 'keep', 'the settings wipe is consent-key scoped');
+  assert.equal(getSetting(driver, 'unrelated_setting'), 'keep', 'the settings wipe is consent-key scoped');
 });
 
 test('G09.03: 403 — an already-deleted device (a lost 204) still completes the local wipe', async () => {
@@ -434,7 +436,7 @@ test('G09.03: 403 — an already-deleted device (a lost 204) still completes the
   const driver = nodeSqliteDriver();
   openDatabase(driver);
   seedAccountState(driver);
-  const { transport } = scriptedDeleteTransport([{ status: 403 }]);
+  const { transport } = scriptedDeleteTransport([{ status: 403, body: { error: 'device_auth_failed' } }]);
 
   await deleteDeviceAccount({ driver, secretStore: store, baseUrl: DELETE_BASE, transport });
 

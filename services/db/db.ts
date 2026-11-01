@@ -654,6 +654,38 @@ export function getDeviceId(driver: SqlDriver): string | null {
 // «Стан згоды — у settings»). The literal lives here — with the settings SQL
 // — as the single definition; services/analytics reads and writes through it.
 export const ANALYTICS_CONSENT_KEY = 'analytics_consent';
+export const CRASH_CONSENT_KEY = 'crash_consent';
+// Non-secret, persisted state machine for an interrupted device deletion.
+// Retained after completion so a 403 cannot be upgraded to remote confirmation
+// by a restart. The server bearer itself remains in SecureStore only.
+export const DEVICE_DELETE_STATE_KEY = 'device_delete_state';
+
+export type DeviceDeleteState =
+  | 'pending_remote'
+  | 'cleanup_remote_confirmed'
+  | 'cleanup_remote_unverified'
+  | 'complete_remote_confirmed'
+  | 'complete_remote_unverified';
+
+export function getDeviceDeleteState(driver: SqlDriver): DeviceDeleteState | null {
+  const state = getSetting(driver, DEVICE_DELETE_STATE_KEY);
+  if (state === null) return null;
+  if (state !== 'pending_remote' && state !== 'cleanup_remote_confirmed' &&
+      state !== 'cleanup_remote_unverified' && state !== 'complete_remote_confirmed' &&
+      state !== 'complete_remote_unverified') {
+    throw new DbError('device-delete-state-invalid', 'invalid persisted device deletion state');
+  }
+  return state;
+}
+
+export function setDeviceDeleteState(driver: SqlDriver, state: DeviceDeleteState): void {
+  setSetting(driver, DEVICE_DELETE_STATE_KEY, state);
+}
+
+export function isDeviceDeletionPending(driver: SqlDriver): boolean {
+  const state = getDeviceDeleteState(driver);
+  return state !== null && !state.startsWith('complete_');
+}
 
 // G09.03 — the client half of device data deletion (09 §5): after the server
 // answers, the device row, the local event queue, the feedback tables (`21`
@@ -668,7 +700,7 @@ export function clearDeviceAccountState(driver: SqlDriver): void {
     driver.prepare('DELETE FROM event_queue').run();
     driver.prepare('DELETE FROM feedback_local').run();
     driver.prepare('DELETE FROM feedback_outbox').run();
-    driver.prepare('DELETE FROM settings WHERE key = ?').run(ANALYTICS_CONSENT_KEY);
+    driver.prepare('DELETE FROM settings WHERE key IN (?, ?)').run(ANALYTICS_CONSENT_KEY, CRASH_CONSENT_KEY);
     driver.prepare('DELETE FROM device WHERE singleton = 1').run();
   });
 }
