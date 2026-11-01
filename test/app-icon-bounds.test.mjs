@@ -31,9 +31,12 @@ test('round adaptive border occupies the Android masked viewport edge', () => {
   const png = image('android-adaptive-foreground.png');
   assert.equal(png.width, 1024);
   assert.equal(png.height, 1024);
-  // 72/108 of a 1024 adaptive foreground = approximately 683 pixels visible.
-  // The copper ring must cross the mask perimeter at radius 337-342.
+  // 72/108 of a 1024 adaptive foreground = approximately 683 pixels visible
+  // (mask radius ~341.5). Owner clarification 2026-11-01: the copper ring is
+  // the outermost band — solid copper must reach the mask perimeter with no
+  // cream halo outside it (ring solid band spans radius ~332-342).
   assert.ok(copper(pixel(png, 844, 512)), 'the copper ring sits inside an empty outer halo');
+  assert.ok(copper(pixel(png, 853, 512)), 'solid copper must reach the mask perimeter (no cream sliver)');
   assert.equal(pixel(png, 925, 512)[3], 0, 'the extra area outside the mask stays transparent');
 });
 
