@@ -2,6 +2,7 @@
 
 @docs/agent-rules/showboat.md
 @docs/agent-rules/code-review.md
+@docs/agent-rules/review-gate.md
 @docs/agent-rules/design-qa.md
 @docs/agent-rules/documentation-language.md
 
