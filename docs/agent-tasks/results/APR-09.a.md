@@ -50,6 +50,15 @@
 - LOW `russian-word-in-design` — выпраўлена `безопасна` на `бяспечна`.
 - Гэта выпраўленні **дызайну**, а не runtime. Абарона ад страты даных, уключэнне Android XML, аднаўленне праз cloud/D2D, `npm test`, Showboat і прыёмка #833 **не праведзены**. Апошні Judge `NOT APPROVED` застаецца дзейным да новай незалежнай праверкі.
 
+## Заўвага Voka на `2d7486ce` (2026-11-01)
+
+- [Voka review](https://github.com/vokhandcrafts/KUDY/pull/956#issuecomment-6561874289): MEDIUM `inconsistent-applied-snapshot-identity` — дызайн вызначаў пару `(sourceInstallationId, snapshotId)`, але журнал ужытых копій памылкова ўлічваў толькі `snapshotId`.
+- Выпраўлена ў §4: `portable_applied_snapshot` мае складаны `PRIMARY KEY (source_installation_id, snapshot_id)` і `payload_sha256`; усе імпарты і паўторы параўноўваюць **поўную пару і змесціва**, у адной транзакцыі. Аднолькавы `snapshotId` ад розных установак не выклікае памылковага прапуску.
+- Удакладненыя змены `snapshotId`: SHA-256 кананічнага лакальнага змесціва без палёў ідэнтычнасці і `pendingSnapshots`; пасля змены даных новы ID, пасля паўторнага экспарту без змяненняў ранейшы. Новыя `pendingSnapshots` апрацоўваюцца нават пры раней ужытым асноўным snapshot.
+- У §7 запісаныя тэсты на розныя ўстаноўкі з аднолькавым ID, паўторы, рознае змесціва пры той жа пары, змены паміж экспартамі і незалежны імпарт новых pending-здымкаў. **Тэсты не запускаліся**: гэта толькі ўдакладненні дызайну.
+
+**Статус #833 не змяніўся:** AC1 — PARTIAL, AC2–8 — OPEN/NOT-RUN, Judge — NOT APPROVED; ніякіх runtime-змен, Android restore ці Showboat.
+
 ## Знешні статус
 
 Правілы CI-тэсту `human-actions-status-guard.test.mjs` прачытаныя; адпаведны новы запіс правераны па тых жа ўмовах у сесіі, але каманда `node --test` **не запускалася**. Android-тэсты, `npm test`, typecheck, arch:check, jscpd і Showboat па-ранейшаму не запускаліся ў гэтай сесіі. Стан issue пасля дакументальных выпраўленняў: `agent:blocked` да поўнай рэалізацыі і сапраўдных прыладавых доказаў. Ніякіх runtime-змен не было.
