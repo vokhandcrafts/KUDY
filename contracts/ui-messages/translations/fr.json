@@ -2289,11 +2289,11 @@
     },
     {
       "id": "web.ui.privacyAppData",
-      "value": "L'application fonctionne sans compte. Elle tient sur l'appareil un journal local des événements (quelles histoires ont été ouvertes, quels itinéraires ont été téléchargés) et conserve les téléchargements de contenu. Le journal ne contient ni noms ni texte libre et est lié à un identifiant aléatoire d'appareil — ce sont des données pseudonymisées, pas anonymes.",
-      "reviewedSourceHash": "440680a83706fc8e822376da9efc4e06bef21b3f33ecc4566ef35f3c68ec5470",
+      "value": "L'application fonctionne sans compte. Elle tient sur l'appareil un journal local des événements (quelles histoires ont été ouvertes, quels itinéraires ont été téléchargés) et conserve les téléchargements de contenu. Le journal ne contient ni noms ni texte libre et est lié à un identifiant aléatoire d'appareil — ce sont des données pseudonymisées, pas anonymes. À l'installation, le serveur KUDY attribue à l'appareil un identifiant aléatoire et un secret : le serveur garde l'identifiant et un hachage du secret, le secret lui-même reste uniquement sur l'appareil et est transmis au serveur KUDY avec chacune de ses demandes comme clé d'accès. Pour limiter la fréquence des demandes, le serveur conserve un hachage unidirectionnel de l'adresse IP. Les évaluations d'itinéraires et de lieux données dans l'application (la note et les raisons choisies, sans texte libre) vont également au serveur KUDY et y sont conservées avec l'identifiant de l'appareil.",
+      "reviewedSourceHash": "4104b0c2d8a23c83895b7efff2f96349560349a8cac4c462f921566bf5c1e71d",
       "review": {
         "outcome": "approved",
-        "note": "прыватнасць: «pseudonymisées, pas anonymes» захаванае дакладна"
+        "note": "#853: дапоўнена сервернай рэгістрацыяй прылады, hash IP і ацэнкамі на серверы KUDY (D03/D04/D06 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md Праўка #942 (voka): «падпісвае запыты» заменена на фактычны bearer-механізм."
       }
     },
     {
@@ -2307,11 +2307,11 @@
     },
     {
       "id": "web.ui.privacyDeletion",
-      "value": "Suppression des données : dans l'application, dans la section My KUDY, il y a un bouton de suppression de l'appareil — il nettoie le journal d'événements sur le serveur et l'enregistrement de l'appareil ; les téléchargements de contenu restent. Ni lettre ni demande à envoyer.",
-      "reviewedSourceHash": "6620748446af7ada3e3599b198bf82640983b0568c88d3c19f97e59b25bfc897",
+      "value": "Suppression des données : dans l'application, dans la section My KUDY, il y a un bouton de suppression de l'appareil — il nettoie le journal d'événements sur le serveur et l'enregistrement de l'appareil, avec eux les données d'évaluations sur le serveur et le secret sur l'appareil ; les téléchargements de contenu restent. Ni lettre ni demande à envoyer. Le bouton ne supprime pas les enregistrements dans les boutiques d'applications ni chez RevenueCat : le service concerné les garde et les supprime selon ses propres règles.",
+      "reviewedSourceHash": "a581b5a8f4c1dca0bc1e1ba3d5e46f810affdd19aca5cb1598e0c12e4598ec62",
       "review": {
         "outcome": "approved",
-        "note": "выдаленне даных: кнопка выдалення прылады ў My KUDY перакладзеная дакладна"
+        "note": "#853: дададзены межы выдалення (крамы і RevenueCat не выдаляюцца) і ацэнкі/сакрэт у каскадзе (D03/D06/D07 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
       }
     },
     {
@@ -2341,11 +2341,11 @@
     },
     {
       "id": "web.ui.privacyPurchases",
-      "value": "Les achats passent par les boutiques d'applications (App Store, Google Play) : les données de paiement sont traitées par la boutique, et l'application n'enregistre que le fait de l'achat — itinéraire, variante, résultat — sans données bancaires.",
-      "reviewedSourceHash": "9befc36b7704fa57cf77cb50c7277a86c5dd0ebd6fcdd4ee8f69d48d6a993dce",
+      "value": "Les achats passent par les boutiques d'applications (App Store, Google Play) : les données de paiement sont traitées par la boutique, et l'application n'enregistre que le fait de l'achat — itinéraire, variante, résultat — sans données bancaires. Les droits sur les achats sont gérés par un service distinct, RevenueCat : l'application lui envoie l'identifiant aléatoire de l'appareil comme identifiant d'acheteur et les demandes d'achat ou de confirmation d'achats antérieurs ; les paiements passent uniquement par la boutique. Le serveur KUDY garde un enregistrement technique des événements d'achat (produit, boutique, durée de validité) sans données de paiement.",
+      "reviewedSourceHash": "a702717ee9ee00b5a45328c9959e4663335a1f91be11824d6846b1b967a7ebbe",
       "review": {
         "outcome": "approved",
-        "note": "сэнс адпавядае арыгіналу; tutoiement; UI-рэгістр правераны"
+        "note": "#853: крыніца дапоўнена RevenueCat, device UUID як ідэнтыфікатарам пакупніка і серверным улікам падзей (D07/D08 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
       },
       "terminology": {
         "status": "resolved",

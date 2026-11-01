@@ -1852,10 +1852,11 @@
     },
     {
       "id": "web.ui.privacyAppData",
-      "value": "The app works without an account. It keeps an on-device local event log (which stories were opened, which routes were downloaded) and stores content downloads. The log contains no names and no free-form text and is tied to a random device identifier — this is pseudonymised, not anonymous, data.",
-      "reviewedSourceHash": "440680a83706fc8e822376da9efc4e06bef21b3f33ecc4566ef35f3c68ec5470",
+      "value": "The app works without an account. It keeps an on-device local event log (which stories were opened, which routes were downloaded) and stores content downloads. The log contains no names and no free-form text and is tied to a random device identifier — this is pseudonymised, not anonymous, data. When the app is installed, the KUDY server issues the device a random identifier and a secret: the server keeps the identifier and a hash of the secret, the secret itself is stored only on the device and is sent to the KUDY server with every device request as the access key. To rate-limit requests, the server keeps a one-way hash of the IP address. Ratings of routes and places given in the app (a score and selected reasons, no free-form text) are also sent to the KUDY server and kept there together with the device identifier.",
+      "reviewedSourceHash": "4104b0c2d8a23c83895b7efff2f96349560349a8cac4c462f921566bf5c1e71d",
       "review": {
-        "outcome": "approved"
+        "outcome": "approved",
+        "note": "#853: дапоўнена сервернай рэгістрацыяй прылады, hash IP і ацэнкамі на серверы KUDY (D03/D04/D06 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md Праўка #942 (voka): «падпісвае запыты» заменена на фактычны bearer-механізм."
       }
     },
     {
@@ -1868,10 +1869,11 @@
     },
     {
       "id": "web.ui.privacyDeletion",
-      "value": "Data deletion: in the app, the My KUDY section has a device-deletion button — it clears the event log on the server and the device record; content downloads stay. No email or request needs to be sent.",
-      "reviewedSourceHash": "6620748446af7ada3e3599b198bf82640983b0568c88d3c19f97e59b25bfc897",
+      "value": "Data deletion: in the app, the My KUDY section has a device-deletion button — it clears the event log on the server and the device record, together with them the ratings data on the server and the secret on the device; content downloads stay. No email or request needs to be sent. This button does not delete records held by the app stores or by RevenueCat: those are kept and deleted by the respective service under its own rules.",
+      "reviewedSourceHash": "a581b5a8f4c1dca0bc1e1ba3d5e46f810affdd19aca5cb1598e0c12e4598ec62",
       "review": {
-        "outcome": "approved"
+        "outcome": "approved",
+        "note": "#853: дададзены межы выдалення (крамы і RevenueCat не выдаляюцца) і ацэнкі/сакрэт у каскадзе (D03/D06/D07 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
       }
     },
     {
@@ -1893,10 +1895,11 @@
     },
     {
       "id": "web.ui.privacyPurchases",
-      "value": "Purchases go through the app stores (App Store, Google Play): payment data is handled by the store, and the app records only the purchase event fact — route, tier, outcome — with no banking details.",
-      "reviewedSourceHash": "9befc36b7704fa57cf77cb50c7277a86c5dd0ebd6fcdd4ee8f69d48d6a993dce",
+      "value": "Purchases go through the app stores (App Store, Google Play): payment data is handled by the store, and the app records only the purchase event fact — route, variant, outcome — with no banking details. Entitlements are managed by a separate service, RevenueCat: the app sends it the random device identifier as the buyer identifier and the requests to purchase or to confirm earlier purchases; payments themselves go only through the store. The KUDY server keeps a technical record of purchase events (product, store, validity term) with no payment details.",
+      "reviewedSourceHash": "a702717ee9ee00b5a45328c9959e4663335a1f91be11824d6846b1b967a7ebbe",
       "review": {
-        "outcome": "approved"
+        "outcome": "approved",
+        "note": "#853: крыніца дапоўнена RevenueCat, device UUID як ідэнтыфікатарам пакупніка і серверным улікам падзей (D07/D08 інвентара APR-08); сэнсавы рэв'ю перакладу — у results/APR-08.b.md"
       }
     },
     {

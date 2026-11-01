@@ -11642,19 +11642,19 @@
    "id": "web.ui.privacyAppData",
    "locale": "be",
    "args": null,
-   "out": "Дадатак працуе без акаўнта. Ён вядзе на прыладзе лакальны лог падзей (якія гісторыі адкрываліся, якія маршруты загрузіліся) і захоўвае загрузкі кантэнту. Лог не змяшчае ні імён, ні вольнага тэксту і прывязаны да выпадковага ідэнтыфікатара прылады — гэта псеўданімізаваныя, а не ананімныя даныя."
+   "out": "Дадатак працуе без акаўнта. Ён вядзе на прыладзе лакальны лог падзей (якія гісторыі адкрываліся, якія маршруты загрузіліся) і захоўвае загрузкі кантэнту. Лог не змяшчае ні імён, ні вольнага тэксту і прывязаны да выпадковага ідэнтыфікатара прылады — гэта псеўданімізаваныя, а не ананімныя даныя. Пры ўсталёўцы сервер KUDY выдае прыладзе выпадковы ідэнтыфікатар і сакрэт: на серверы застаюцца ідэнтыфікатар і hash сакрэта, сам сакрэт захоўваецца толькі на прыладзе і перадаецца серверу KUDY з кожным яе запытам як ключ доступа. Для абмежавання частаты запытаў сервер захоўвае аднабаковы hash IP-адраса. Ацэнкі маршрутаў і месцаў, дадзеныя ў дадатку (адзнака і выбраныя прычыны, без вольнага тэксту), таксама ідуць на сервер KUDY і трымаюцца там разам з ідэнтыфікатарам прылады."
   },
   {
    "id": "web.ui.privacyAppData",
    "locale": "en",
    "args": null,
-   "out": "The app works without an account. It keeps an on-device local event log (which stories were opened, which routes were downloaded) and stores content downloads. The log contains no names and no free-form text and is tied to a random device identifier — this is pseudonymised, not anonymous, data."
+   "out": "The app works without an account. It keeps an on-device local event log (which stories were opened, which routes were downloaded) and stores content downloads. The log contains no names and no free-form text and is tied to a random device identifier — this is pseudonymised, not anonymous, data. When the app is installed, the KUDY server issues the device a random identifier and a secret: the server keeps the identifier and a hash of the secret, the secret itself is stored only on the device and is sent to the KUDY server with every device request as the access key. To rate-limit requests, the server keeps a one-way hash of the IP address. Ratings of routes and places given in the app (a score and selected reasons, no free-form text) are also sent to the KUDY server and kept there together with the device identifier."
   },
   {
    "id": "web.ui.privacyAppData",
    "locale": "uk",
    "args": null,
-   "out": "Додаток працює без акаунта. Він веде на пристрої локальний лог подій (які історії відкривалися, які маршрути завантажилися) і зберігає завантаження контенту. Лог не містить ні імен, ні вільного тексту і прив’язаний до випадкового ідентифікатора пристрою — це псевдонімізовані, а не анонімні дані."
+   "out": "Додаток працює без акаунта. Він веде на пристрої локальний лог подій (які історії відкривалися, які маршрути завантажилися) і зберігає завантаження контенту. Лог не містить ні імен, ні вільного тексту і прив’язаний до випадкового ідентифікатора пристрою — це псевдонімізовані, а не анонімні дані. Під час встановлення сервер KUDY видає пристрою випадковий ідентифікатор і секрет: на сервері залишаються ідентифікатор і hash секрету, сам секрет зберігається лише на пристрої та передається серверу KUDY з кожним його запитом як ключ доступу. Для обмеження частоти запитів сервер зберігає односторонній hash IP-адреси. Оцінки маршрутів і місць, поставлені в додатку (оцінка та вибрані причини, без вільного тексту), також ідуть на сервер KUDY і зберігаються там разом з ідентифікатором пристрою."
   },
   {
    "id": "web.ui.privacyContact",
@@ -11678,19 +11678,19 @@
    "id": "web.ui.privacyDeletion",
    "locale": "be",
    "args": null,
-   "out": "Выдаленне даных: у дадатку, у раздзеле My KUDY, ёсць кнопка выдалення прылады — яна ачышчае лог падзей на серверы і запіс прылады; загрузкі кантэнту застаюцца. Ліст ці заяўку дасылаць не трэба."
+   "out": "Выдаленне даных: у дадатку, у раздзеле My KUDY, ёсць кнопка выдалення прылады — яна ачышчае лог падзей на серверы і запіс прылады, разам з ім — дадзеныя ацэнак на серверы і сакрэт на прыладзе; загрузкі кантэнту застаюцца. Ліст ці заяўку дасылаць не трэба. Гэтая кнопка не выдаляе запісы ў крамах прыкладанняў і ў RevenueCat: іх трымае і выдаляе адпаведны сэрвіс паводле сваіх правілаў."
   },
   {
    "id": "web.ui.privacyDeletion",
    "locale": "en",
    "args": null,
-   "out": "Data deletion: in the app, the My KUDY section has a device-deletion button — it clears the event log on the server and the device record; content downloads stay. No email or request needs to be sent."
+   "out": "Data deletion: in the app, the My KUDY section has a device-deletion button — it clears the event log on the server and the device record, together with them the ratings data on the server and the secret on the device; content downloads stay. No email or request needs to be sent. This button does not delete records held by the app stores or by RevenueCat: those are kept and deleted by the respective service under its own rules."
   },
   {
    "id": "web.ui.privacyDeletion",
    "locale": "uk",
    "args": null,
-   "out": "Видалення даних: у додатку, у розділі My KUDY, є кнопка видалення пристрою — вона очищає лог подій на сервері і запис пристрою; завантаження контенту залишаються. Лист чи заявку надсилати не треба."
+   "out": "Видалення даних: у додатку, у розділі My KUDY, є кнопка видалення пристрою — вона очищає лог подій на сервері і запис пристрою, разом з ним — дані оцінок на сервері та секрет на пристрої; завантаження контенту залишаються. Лист чи заявку надсилати не треба. Кнопка не видаляє записи в крамницях застосунків і в RevenueCat: їх тримає і видаляє відповідний сервіс за своїми правилами."
   },
   {
    "id": "web.ui.privacyIntro",
@@ -11732,19 +11732,19 @@
    "id": "web.ui.privacyPurchases",
    "locale": "be",
    "args": null,
-   "out": "Пакупкі праходзяць праз крамы прыкладанняў (App Store, Google Play): плацёжныя даныя апрацоўвае крама, а дадатак запісвае толькі факт падзеі пакупкі — маршрут, варыянт, вынік — без банкаўскіх рэквізітаў."
+   "out": "Пакупкі праходзяць праз крамы прыкладанняў (App Store, Google Play): плацёжныя даныя апрацоўвае крама, а дадатак запісвае толькі факт падзеі пакупкі — маршрут, варыянт, вынік — без банкаўскіх рэквізітаў. Правамі на купленае кіруе асобны сэрвіс RevenueCat: дадатак перадае яму выпадковы ідэнтыфікатар прылады як ідэнтыфікатар пакупніка і запыты на куплю ці на пацверджанне раней зробленых пакупак; плацяжы пры гэтым ідуць толькі праз краму. Сервер KUDY трымае тэхнічны ўлік падзей пакупак (прадукт, крама, тэрмін дзеяння) без плацёжных рэквізітаў."
   },
   {
    "id": "web.ui.privacyPurchases",
    "locale": "en",
    "args": null,
-   "out": "Purchases go through the app stores (App Store, Google Play): payment data is handled by the store, and the app records only the purchase event fact — route, tier, outcome — with no banking details."
+   "out": "Purchases go through the app stores (App Store, Google Play): payment data is handled by the store, and the app records only the purchase event fact — route, variant, outcome — with no banking details. Entitlements are managed by a separate service, RevenueCat: the app sends it the random device identifier as the buyer identifier and the requests to purchase or to confirm earlier purchases; payments themselves go only through the store. The KUDY server keeps a technical record of purchase events (product, store, validity term) with no payment details."
   },
   {
    "id": "web.ui.privacyPurchases",
    "locale": "uk",
    "args": null,
-   "out": "Покупки проходять через крамниці застосунків (App Store, Google Play): платіжні дані обробляє крамниця, а додаток записує лише факт події покупки — маршрут, варіант, результат — без банківських реквізитів."
+   "out": "Покупки проходять через крамниці застосунків (App Store, Google Play): платіжні дані обробляє крамниця, а додаток записує лише факт події покупки — маршрут, варіант, результат — без банківських реквізитів. Правами на придбане керує окремий сервіс RevenueCat: додаток передає йому випадковий ідентифікатор пристрою як ідентифікатор покупця та запити на покупку чи на підтвердження раніше зроблених покупок; платежі при цьому ідуть лише через крамницю. Сервер KUDY веде технічний облік подій покупок (продукт, крамниця, термін дії) без платіжних реквізитів."
   },
   {
    "id": "web.ui.privacyRetention",
