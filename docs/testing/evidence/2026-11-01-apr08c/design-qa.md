@@ -13,7 +13,7 @@
 
 [NOT-VERIFIED] Lock-screen controls бачныя на debug-здымку пасля Pause, але няма іерархіі даступнасці або праверкі памеру/семантыкі элементаў. Патрэбны UI dump для гэтага стану.
 
-[NOT-VERIFIED] Release Android і натыўнае перапыненне; debug-відэа і unit-тэсты не пацвярджаюць іх. Патрэбны release APK/AAB з SHA і сцэнар incoming call або audio focus loss.
+[NOT-VERIFIED] Release Android; debug-відэа, [паспяховы incoming-call trace](android-debug-call-trace.txt) і unit-тэсты не пацвярджаюць release runtime. Патрэбны release APK/AAB з SHA і яго натыўны capture.
 
 ## Другі праход: адхіленыя кандыдаты
 

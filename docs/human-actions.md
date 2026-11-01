@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-11-01 — дай release Android-зборку для APR-08.c (#854)
+Што зрабіць: забяспеч release APK/AAB `by.kudy.app` з SHA-256 на аддаленым Android runner або ўкажы гатовы EAS-праект і дазволены спосаб зборкі. Перадай зборку і доступ да натыўнага trace, каб дапоўніць праверку start, pause, stop, заблакаванага экрана, званка і foreground-апавяшчэння; лакальны эмулятар перагружае камп’ютар.
+PR: [draft #948](https://github.com/vokhandcrafts/KUDY/pull/948) · Issue: [#854](https://github.com/vokhandcrafts/KUDY/issues/854)
+
 ### 2026-10-31 — прыёмка меню-карты перад production (MAP-02)
 Што зрабіць: перад production-прыёмкай правер кампанент на фізічнай прыладзе, зацвердзі гістарычную рамку і перыяд ды правер правы на аснову. Кампанент яшчэ трэба падключыць да навігацыі, шрыфты застаюцца драфтам.
 PR: [draft #924](https://github.com/vokhandcrafts/KUDY/pull/924) · Issue: [#885](https://github.com/vokhandcrafts/KUDY/issues/885) · Кампанент: [інтэграцыя](design/brand/outputs/menu-map-city-only/native/README.md)

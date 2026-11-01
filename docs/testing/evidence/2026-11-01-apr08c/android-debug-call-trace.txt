@@ -1,0 +1,17 @@
+Крыніца: https://github.com/vokhandcrafts/KUDY/actions/runs/41316777091
+Head: 455d3f0d12f24cc2773ba7b88acc7d143036c739
+Асяроддзе: GitHub runner, Android 36 emulator, debug APK by.kudy.app
+APK SHA-256: не апублікаваны гэтым CI-прагонам
+
+Санітызаваныя радкі з паспяховага CI-журнала:
+
+-- walk: incoming call interrupts audio without automatic resume
+APR08C_CALL_MEDIA_SESSION PAUSED position=382
+PASS walk: incoming call interrupts audio without automatic resume
+walk: 6 passed, 0 failed
+
+Скрыпт зрабіў сінтэтычны ўваходны званок праз Android emulator console, прыняў яго,
+праверыў адсутнасць актыўнага аўдыёплэера і стан KUDY media session PAUSED на 382 мс
+пры шасцісекундным трэку, скончыў званок і праз секунду праверыў, што аўдыё не
+аднавілася без дзеяння карыстальніка. Гэта debug-доказ перапынення; release runtime
+і дакладны SHA APK гэтага прагону не правераны.
