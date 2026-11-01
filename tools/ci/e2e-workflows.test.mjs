@@ -52,6 +52,7 @@ test('visual:check runs after the suites and always uploads its report as a non-
   assert.equal(visual.if, 'always()', 'visual:check must run even when the suites fail');
   assert.match(visual.run, /--out visual-check-report/, 'the report must land in the artifact directory');
   assert.match(visual.run, /tee android-e2e-logs\/visual-check\.log/, 'the verdict log must be captured alongside the other e2e logs');
+  assert.match(visual.run, /\|\| visual_status=\$\?/, 'the exit status must be captured, so a failing verdict cannot abort the step before the echo under bash -e');
   // Non-gating while unstable: the last command echoes the recorded status
   // instead of exiting with it, so the step can never fail the job.
   const lastLine = visual.run.trimEnd().split('\n').filter((line) => line.trim()).pop();
