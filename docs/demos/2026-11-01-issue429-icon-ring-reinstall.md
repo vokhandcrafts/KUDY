@@ -45,10 +45,12 @@ node --test --test-reporter=tap test/app-icon-config.test.mjs test/app-icon-boun
 
 ```sh
 cmp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp assets/kudy-icon/native-android/ic_launcher-xxxhdpi.webp && echo legacy-identical
+cmp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp assets/kudy-icon/native-android/ic_launcher_round-xxxhdpi.webp && echo round-identical
 cmp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round_foreground.webp assets/kudy-icon/native-android/ic_launcher_round_foreground-xxxhdpi.webp && echo round-fg-identical
 ```
 
 ```output
 legacy-identical
+round-identical
 round-fg-identical
 ```

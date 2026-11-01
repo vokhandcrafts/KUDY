@@ -1,7 +1,7 @@
 {
   "package": "app-icon-copper-framed-v1",
   "status": "accepted",
-  "decision": "https://github.com/vokhandcrafts/KUDY/issues/429 (owner comment 2026-10-26); geometric bounds update 2026-10-28 without a repaint: docs/demos/2026-10-28-launcher-icon-bounds.md; owner clarification 2026-11-01 - the copper ring is the outermost band at the round-mask perimeter, round export rescaled x1.032 without a repaint: docs/demos/2026-11-01-issue429-icon-ring-edge.md",
+  "decision": "https://github.com/vokhandcrafts/KUDY/issues/429 (owner comment 2026-10-26); geometric bounds update 2026-10-28 without a repaint: docs/demos/2026-10-28-launcher-icon-bounds.md; owner clarification 2026-11-01 (round: the copper ring is the outermost band at the mask perimeter) accepted as decisions.md row I1 with the marked screenshot docs/testing/evidence/2026-11-01-issue429-reinstall/owner-marked-ring-position.png; round export rescaled x1.032 without a repaint: docs/demos/2026-11-01-issue429-icon-ring-edge.md",
   "rights": "docs/design/visual-language.md §3 «Брэнд-іконка і splash — запіс правоў (прынята заснавальнікам 2026-10-26)»",
   "files": {
     "icon.png": "f33e393b102ce07ee6f95cd84f5bcbe9cfb49cced1338ae96c3695bdf73bd0a2",
