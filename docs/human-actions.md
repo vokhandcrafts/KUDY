@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-11-01 — змержы запаўненне handoff у results APR-08.b (#945)
+Што зрабіць: змержы PR — ён замяняе плясхолдар у раздзеле «Handoff #299» results-дакументу APR-08.b.md рэальным запісам каментара. Пасля мержу issue #945 закрыецца сама; калі пазнака `agent:running` застанецца на закрытым issue, знімі яе.
+PR: [#946](https://github.com/vokhandcrafts/KUDY/pull/946) · Issue: [#945](https://github.com/vokhandcrafts/KUDY/issues/945)
+
 ### 2026-10-31 — прыёмка меню-карты перад production (MAP-02)
 Што зрабіць: перад production-прыёмкай правер кампанент на фізічнай прыладзе, зацвердзі гістарычную рамку і перыяд ды правер правы на аснову. Кампанент яшчэ трэба падключыць да навігацыі, шрыфты застаюцца драфтам.
 PR: [draft #924](https://github.com/vokhandcrafts/KUDY/pull/924) · Issue: [#885](https://github.com/vokhandcrafts/KUDY/issues/885) · Кампанент: [інтэграцыя](design/brand/outputs/menu-map-city-only/native/README.md)
