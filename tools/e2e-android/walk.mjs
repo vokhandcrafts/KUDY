@@ -167,7 +167,7 @@ async function startMediaProofVideo(driver) {
   await driver.exec(['shell', 'rm', '-f', remote]);
   const child = spawn(driver.adbPath, [
     '-s', driver.serial, 'shell', 'screenrecord', '--size', '480x1040',
-    '--bit-rate', '600000', '--time-limit', '25', remote,
+    '--bit-rate', '400000', '--time-limit', '45', remote,
   ], { stdio: ['ignore', 'ignore', 'pipe'] });
   let errorOutput = '';
   child.stderr.on('data', (chunk) => { errorOutput += chunk.toString('utf8'); });
@@ -454,7 +454,9 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
       const finishVideo = await startMediaProofVideo(driver);
       try {
         await tapPlayAndWaitForAudio(driver);
-        await driver.tapSelector({ testID: 'btn-bar-playpause' });
+        // The synthetic track lasts six seconds. A fresh UIAutomator dump can
+        // outlast it, so pause through the Android media session immediately.
+        await driver.exec(['shell', 'input', 'keyevent', 'KEYCODE_MEDIA_PAUSE']);
         await waitForAudioActive(driver, false);
         await recordMediaServiceState(driver, 'paused');
         await driver.exec(['shell', 'cmd', 'statusbar', 'expand-notifications']);
