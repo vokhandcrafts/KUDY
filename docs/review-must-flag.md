@@ -289,3 +289,14 @@
   Выпраўлена: docs/specifications/design-qa/2026-10-30-design-qa-system.md,
   §1.1 (`tools/e2e-android/driver.mjs:340` → `:342`, exec `screencap`) —
   issue #925.
+
+- key: incomplete-source-list — крыніца выключэння або правілы ў рэгістры
+  цытуе адзін файл-прыклад, калі ўмова дзейнічае для ўсіх месцаў у кодзе:
+  рэв'юер, што правярае іншы экран, не звярае выключэнне і дае хібную
+  знаходку. Крыніца называе ўмову (напрыклад, «лютае выкарыстанне
+  `hitSlop` у зыходніках»), а не пералік файлаў, які састарэе пры пераносе
+  кода.
+  Выпраўлена: docs/design-qa/exceptions.md, радок `hitSlop` (цытаваў толькі
+  `app/(tabs)/explore.tsx`; на каміце фіксу hitSlop таксама ў
+  `app/place/[id].tsx`, `app/run/[id].tsx`, `components/back-button.tsx`,
+  `components/guide-card.tsx`) — issue #938.
