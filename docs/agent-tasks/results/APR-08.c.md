@@ -27,3 +27,9 @@ Frozen unit-тэсты, зыходнік SDK і Android debug-прагон па�
 - Праверыць на Android release APK/AAB з вядомым SHA start, pause, resume, stop, screen lock, interruption, notification і фактычны FGS lifecycle; запісаць санітызаваны trace і Android-відэа.
 - На фінальным head паўтарыць поўную CI-матрыцу пасля з'яўлення release-доказу.
 - Паўтарыць design-QA пасля з'яўлення натыўных capture; Showboat ужо правераны.
+
+## Voka High: pending-media-session-after-stop (2026-11-01)
+
+На head `b9a62f55` Voka знайшоў асінхронную гонку: `AudioControlsService.pendingPlayer` мог перажыць хуткі Play → Stop і аднавіць сесію пры пазнейшым `onCreate`. У PR дададзены ідэмпатэнтны натыўны патч, прывязаны да Expo Audio **1.1.1**, праз існы Android config plugin: `clearPlayer(player)` скасоўвае толькі адкладзеную або актыўную сесію гэтага плэера, а пусты сэрвіс пасля адкладзенага запуску спыняецца ў `onStartCommand`. Замена плэера не павінна адключаць іншага ўладальніка. Памылка распазнавання SDK спыняе prebuild, замест частковай падмены.
+
+Даказальная лакальная праверка: `node --test tools/android-build/expo-audio-fgs-patch.test.mjs tools/e2e-android/walk.test.mjs tools/e2e-android/media-service-state.test.mjs` — **15/15**. Патч двойчы паспяхова прымяняўся да асобнай часовай копіі сапраўдных Kotlin-файлаў Expo Audio 1.1.1 (без змен у ўсталяванай залежнасці). Android E2E пасля двух хуткіх тапанняў Play/Stop правярае стан сэрвісу і апавяшчэння двойчы з затрымкай; вынік аддаленага запуску **NOT-VERIFIED**. Release-runtime па-ранейшаму **NOT-VERIFIED**.

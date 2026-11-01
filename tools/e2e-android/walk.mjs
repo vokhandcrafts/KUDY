@@ -525,4 +525,23 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     await new Promise((resolve) => setTimeout(resolve, 1000));
     assert.equal(await activeAudioPlayers(driver), false, 'audio resumed without user action after the call ended');
   });
+
+  await runCase('walk: rapid Play then Stop cannot resurrect the media service', 'walk-rapid-stop', driver, async () => {
+    // The preceding call case left stop 2 selected. Switch stories rather
+    // than toggling the same card closed.
+    await tapMapPoint(driver, 'e2e-stop-1');
+    await dismissGuideHintBeforePlay(driver);
+    // Capture both node coordinates before Play; no UIAutomator dump may run
+    // between taps, since the six-second fixture would mask the startup race.
+    const play = await driver.waitFor({ testID: 'btn-card-play' }, { timeoutMs: SHORT_MS });
+    const stop = await driver.waitFor({ testID: 'btn-run-pause' }, { timeoutMs: SHORT_MS });
+    await driver.tapNode(play);
+    await driver.tapNode(stop);
+    await waitForAudioActive(driver, false);
+    // Check twice: a late Android onCreate must not resurrect the service.
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await recordMediaServiceState(driver, 'stopped');
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    await recordMediaServiceState(driver, 'stopped');
+  });
 }
