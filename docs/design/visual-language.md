@@ -350,7 +350,8 @@ mascot-only (a11y-плашка `screens.md`).
     "size.scale-button":      { "value": "40px", "use": "шырыня кнопкі шкалы ацэнак" },
     "panel.body-max-height":  { "value": "320px", "use": "межа пракруткі цела панэлі Run" },
     "texture.paper-grain":    { "value": "згенераваны тайлавы асет, непразрыстасць 4–5% паверх color.paper", "use": "фон спакойных экранаў (Explore, My KUDY); дазволеныя і забароненыя месцы — у paperGrain" },
-    "dialog.max-width":       { "value": "400px", "use": "максімальная шырыня дыялога" }
+    "dialog.max-width":       { "value": "400px", "use": "максімальная шырыня дыялога" },
+    "content.max-width":      { "value": "640px", "use": "максімальная шырыня кантэнту экрана на акнах ≥600dp (APR-10.b, зафіксавана 2026-11-02): трымае радок тэксту ў межах 45–75 сімвалаў; ніжэй за кап няма эфекту" }
   },
   "darkTheme": {
     "ownerDecision": "https://github.com/vokhandcrafts/KUDY/issues/860#issuecomment-6449790474",

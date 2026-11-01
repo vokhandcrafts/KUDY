@@ -41,6 +41,7 @@ import {
 } from "../../contracts/ui-locales";
 import { useServices, useUiLocale } from "../_layout";
 import { BackButton } from "../../components/back-button";
+import { contentWidthStyle } from "../../components/content-width";
 import { darkTokens, tokens, type ThemeTokens } from "../../components/design-tokens";
 import { useThemeStyles } from "../../components/theme";
 import { LoadingIndicator } from "../../components/loading-indicator";
@@ -213,6 +214,9 @@ export default function My() {
       <FlatList
         testID="scroll-my"
         style={styles.list}
+        // APR-10.b (issue #959): the settings content keeps the canon content
+        // width on wide windows (inert below the cap).
+        contentContainerStyle={contentWidthStyle}
         data={ready?.rows ?? NO_ROWS}
         keyExtractor={(row) => row.sessionId}
         renderItem={({ item }) => <HistoryRow summary={item} guideTitle={guideTitle} strings={strings} />}
