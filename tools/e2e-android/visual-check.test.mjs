@@ -280,6 +280,14 @@ test('planCapture: only the selected surfaces schedule their phases', () => {
   assert.deepEqual(planCapture(exploreBOnly), { exploreA: false, stories: false, exploreB: true });
 });
 
+test('CLI --surface without a value is a usage error, not a crash', () => {
+  const dir = tmpDir('visual-surfacevalue-');
+  const outDir = path.join(dir, 'out');
+  const result = runCli(['--out', outDir, '--from', dir, '--surface'], {});
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /--surface requires a value/);
+});
+
 test('CLI --surface that selects nothing is a usage error, never a silent empty verdict', () => {
   const dir = tmpDir('visual-emptysurface-');
   const outDir = path.join(dir, 'out');

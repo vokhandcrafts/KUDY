@@ -278,6 +278,8 @@ export function buildReport({ results, outDir, baselinesDir, mode }) {
   lines.push('');
   lines.push(`**${verdictLine}**`);
   lines.push('');
+  lines.push(`Паверхні: ${[...new Set(results.map((result) => result.surface))].join(', ')}.`);
+  lines.push('');
   lines.push(
     `Матрыца V1: светлая тэма × шрыфт 1 / 1.5 × мова be. Параўнанне без верхніх ${COMPARISON.cropTopPx} px ` +
       `(статусбар, DQ-01); pixelmatch 5.3.0, парог ${COMPARISON.threshold}, максімальная доля розных пікселяў ` +
@@ -550,8 +552,12 @@ export async function captureAll({ driver, matrix, capturesDir, metroPort, origi
 function parseArgs(argv) {
   const value = (flag) => {
     const index = argv.indexOf(flag);
-    return index === -1 ? null : argv[index + 1];
+    return index === -1 ? null : argv[index + 1] ?? null;
   };
+  if (argv.includes('--surface') && value('--surface') === null) {
+    console.error('--surface requires a value (example: --surface guide-card,explore)');
+    process.exit(2);
+  }
   const has = (flag) => argv.includes(flag);
   const surfaceArg = value('--surface');
   return {
