@@ -46,3 +46,14 @@ Frozen unit-тэсты, зыходнік SDK і Android debug-прагон па�
 - **Medium — release manifest check раней прапускаўся.** У існы абавязковы job `lint` workflow `required-checks.yml` дадзены Android prebuild, `:app:processReleaseMainManifest`, строгі `test -s` і запуск `android-merged-media-fgs.test.mjs` з відавочным `KUDY_RELEASE_MANIFEST`. Тэст-ахоўнік правярае звязку і адхіляе выдаленне любога кроку. Вынік GitHub CI для новага SHA пакуль **NOT-VERIFIED**.
 
 Лакальныя Node-тэсты не замяняюць натыўнае пацвярджэнне і не пацвярджаюць release runtime. Поўная Android-зборка і эмулятар на гэтай машыне не запускаліся.
+
+## Voka review follow-up: lifecycle + CI scope (2026-11-01)
+
+На галаве `705c959d` Voka зафіксаваў [тры заўвагі](https://github.com/vokhandcrafts/KUDY/pull/948#issuecomment-6563323400). У гэтым раўндзе выпраўлена не асобная паслядоўнасць таймераў, а абодва парадкі падзей `stopSelf()` / `onStartCommand(B)` / `onDestroy()`:
+
+- **High, stale-listener-on-service-restart.** Пры старым `onDestroy` `playbackListener` адлучаецца ад `currentPlayer.ref` і скідаецца **да** `mediaSession.release()`; MediaSession і player pointers чысцяцца перад рэстартам B. Guard правярае парадак адлучэння і што ад старога сэрвісу не застаецца другая падпіска.
+- **Medium, stale-stop-request-after-recovery.** `stopRequested` скідаецца пасля паспяхова прынятага `onStartCommand` з новым плэерам, таму наступныя A→B замены выкарыстоўваюць жывы сэрвіс. Асобны `stopMayDestroy` захоўвае маркер магчымай запозненай деструкцыі; толькі ён дазваляе `onDestroy` перанесці жывога плэера ў наступны lifecycle.
+- **Medium, workflow-outside-approved-scope.** У `#854` забароненыя змены `.github`; змена `required-checks.yml` з `705c959d` **адкачваецца ў гэтым PR**, новы guard workflow у `tools/ci/` не ўключаецца. Асобнае дазволенае CI-выпраўленне трэба рабіць паводле [#963](https://github.com/vokhandcrafts/KUDY/issues/963), якое пакінута ў backlog, без паслаблення наяўных checks.
+
+Новыя source-level regression checks у `tools/android-build/expo-audio-fgs-patch.test.mjs` пакрываюць абодва парадкі станаў, чыстку слухача да вызвалення session, паўторны prebuild і адхіленне змененага SDK. Android E2E прайграе A→B, Play пасля idle-stop і хуткі Play→Stop; **толькі фактычны Android runner можа пацвердзіць runtime**. Release APK/AAB, runtime trace і CI на новым SHA — **NOT-VERIFIED** да вынікаў GitHub runner. Ніводная праверка Node не падаецца як доказ Android runtime.
+

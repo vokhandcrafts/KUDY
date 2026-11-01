@@ -82,19 +82,6 @@ jobs:
         # invocation is pinned by tools/ci/check-required-checks.mjs and the
         # failure semantics by the arch-check sandbox suite (tools/arch).
         run: npm run arch:check
-      # #854: this already-required lint job must validate the merged RELEASE manifest.
-      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Android release manifest FGS check
-        run: |
-          set -euo pipefail
-          npx expo prebuild --platform android --no-install
-          (cd android && ./gradlew :app:processReleaseMainManifest --no-daemon --max-workers=1 --console=plain)
-          manifest=android/app/build/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml
-          test -s "$manifest"
-          KUDY_RELEASE_MANIFEST="$manifest" node --test test/android-merged-media-fgs.test.mjs
   server-typecheck:
     # G20.13 (#484): the production Deno entrypoints are type-checked in the
     # environment their code runs in. Operator authorization for this exact

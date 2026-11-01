@@ -52,6 +52,11 @@ function patchService(source) {
     `    // A queued start can be cancelled before onCreate by an immediate Stop.
     // Claim any replacement that arrived after an old stopSelf request.
     activatePendingPlayer()
+    // The fresh start request has been delivered. Android may still call
+    // onDestroy for the earlier stopSelf, tracked independently below.
+    if (currentPlayer != null) {
+      stopRequested = false
+    }
     // Delay shutdown so a replacement player can cancel the idle stop.
     if (currentPlayer == null) {
       scheduleIdleStop()
@@ -91,13 +96,16 @@ function patchService(source) {
     'AudioControlsService.clearPlayer');
   next = replaceOnce(next,
     `  companion object {`,
-    `  // All calls are on Android's main thread. A replacement cancels the
-  // scheduled stop before Android can destroy the new player's session.
+    `  // All lifecycle calls occur on Android's main thread. A new start
+  // cancels idle shutdown; stopMayDestroy stays set until onDestroy to
+  // protect a replacement against an already requested teardown.
   private val idleStopHandler = Handler(Looper.getMainLooper())
   private var stopRequested = false
+  private var stopMayDestroy = false
   private val idleStopRunnable = Runnable {
     if (currentPlayer == null && pendingPlayer == null) {
       stopRequested = true
+      stopMayDestroy = true
       stopSelf()
     }
   }
@@ -149,9 +157,16 @@ function patchService(source) {
     super.onDestroy()`,
     `  override fun onDestroy() {
     cancelIdleStop()
-    val restartPlayer = if (stopRequested && currentPlayer != null && pendingPlayer == null) currentPlayer else null
+    val restartPlayer = if (stopMayDestroy && currentPlayer != null && pendingPlayer == null) currentPlayer else null
     val restartMetadata = currentMetadata
     val restartOptions = currentOptions
+    // Detach BEFORE releasing the old session. Otherwise the old listener
+    // still fires against a released MediaSession after B restarts.
+    playbackListener?.let { listener ->
+      currentPlayer?.ref?.removeListener(listener)
+    }
+    playbackListener = null
+    currentPlayer?.isActiveForLockScreen = false
     super.onDestroy()`,
     'AudioControlsService.onDestroy');
   next = replaceOnce(next,
@@ -160,6 +175,7 @@ function patchService(source) {
   }
 `,
     `    mediaSession?.release()
+    mediaSession = null
     currentPlayer = null
     if (restartPlayer != null) {
       pendingPlayer = restartPlayer

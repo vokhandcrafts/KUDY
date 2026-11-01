@@ -124,7 +124,7 @@ test('#854: replacing A with B cancels A idle shutdown before it can destroy B',
   patchExpoAudioNative(root);
   const source = fs.readFileSync(service, 'utf8');
   assert.match(source, /private fun scheduleIdleStop\(\) \{[\s\S]*?postDelayed\(idleStopRunnable, 1000L\)/);
-  assert.match(source, /if \(currentPlayer == null && pendingPlayer == null\) \{\s*stopRequested = true\s*stopSelf\(\)/);
+  assert.match(source, /if \(currentPlayer == null && pendingPlayer == null\) \{\s*stopRequested = true\s*stopMayDestroy = true\s*stopSelf\(\)/);
   assert.match(source, /if \(player != null\) \{\s*cancelIdleStop\(\)/);
   assert.match(source, /service\.setActivePlayerInternal\(null\)\s*service\.scheduleIdleStop\(\)/);
   assert.doesNotMatch(source, /service\.setActivePlayerInternal\(null\)\s*service\.stopSelf\(\)/,
@@ -136,7 +136,7 @@ test('#854: activation after stopSelf restarts service, including the onDestroy 
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   patchExpoAudioNative(root);
   const source = fs.readFileSync(service, 'utf8');
-  assert.match(source, /stopRequested = true\s*stopSelf\(\)/,
+  assert.match(source, /stopRequested = true\s*stopMayDestroy = true\s*stopSelf\(\)/,
     'idle shutdown must mark the instance as stopping');
   assert.match(source, /service != null && !\(player != null && service\.stopRequested\)/,
     'a new player must not attach directly to a service already stopping');
@@ -146,10 +146,41 @@ test('#854: activation after stopSelf restarts service, including the onDestroy 
     'a restarted start command must claim B even if onCreate does not run');
   assert.match(source, /override fun onCreate\([\s\S]*?activatePendingPlayer\(\)/,
     'a new service must also claim the pending player');
-  assert.match(source, /override fun onDestroy\([\s\S]*?if \(stopRequested && currentPlayer != null && pendingPlayer == null\)/,
+  assert.match(source, /override fun onDestroy\([\s\S]*?if \(stopMayDestroy && currentPlayer != null && pendingPlayer == null\)/,
     'the dying service must recover B only if a new pending owner was not already queued');
   assert.match(source, /startPlaybackService\(applicationContext\)/,
     'onDestroy must request a fresh lifecycle when B survived an old stopSelf');
+});
+
+test('#854: a fresh start clears the routing flag but retains the in-flight destroy guard', (t) => {
+  const { root, service } = makeFixture();
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  patchExpoAudioNative(root);
+  const source = fs.readFileSync(service, 'utf8');
+  assert.match(source, /stopRequested = true\s*stopMayDestroy = true\s*stopSelf\(\)/);
+  assert.match(source, /activatePendingPlayer\(\)[\s\S]*?if \(currentPlayer != null\) \{\s*stopRequested = false/);
+  assert.match(source, /if \(stopMayDestroy && currentPlayer != null && pendingPlayer == null\)/);
+  assert.match(source, /service != null && !\(player != null && service\.stopRequested\)/);
+});
+
+test('#854: forced onDestroy detaches the only B listener before releasing its session', (t) => {
+  const { root, service } = makeFixture();
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  patchExpoAudioNative(root);
+  const source = fs.readFileSync(service, 'utf8');
+  const fromDestroy = source.indexOf('  override fun onDestroy()');
+  const toCompanion = source.indexOf('  companion object {', fromDestroy);
+  assert.ok(fromDestroy >= 0 && toCompanion > fromDestroy, 'onDestroy lifecycle must be present');
+  const body = source.slice(fromDestroy, toCompanion);
+  assert.match(body, /playbackListener\?\.let \{ listener ->\s*currentPlayer\?\.ref\?\.removeListener\(listener\)\s*\}/);
+  assert.match(body, /playbackListener = null/);
+  assert.match(body, /currentPlayer\?\.isActiveForLockScreen = false/);
+  assert.ok(body.indexOf('removeListener(listener)') < body.indexOf('mediaSession?.release()'),
+    'stale callback must be detached before the old MediaSession is released');
+  assert.ok(body.indexOf('playbackListener = null') < body.indexOf('mediaSession?.release()'),
+    'old service must not retain B listener on restart');
+  assert.match(body, /mediaSession = null\s*currentPlayer = null/);
+  assert.match(body, /pendingPlayer = restartPlayer[\s\S]*?startPlaybackService\(applicationContext\)/);
 });
 
 test('#854: native patch rejects SDK drift atomically', (t) => {
