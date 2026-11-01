@@ -188,6 +188,26 @@ test('readHitSlops reports unbindable and unreadable hitSlop instead of guessing
   assert.equal(braces[0].slop, null);
 });
 
+test('call-site resolution never binds a tag outside every function body', () => {
+  // An arrow component after a closed declaration must not inherit the
+  // declaration's call sites — a wrong bind would grant hitSlop credit to a
+  // node the code never slops (review finding, hitSlop-misbinding).
+  const source = [
+    'function LegacyBanner() {',
+    '  return <Pressable hitSlop={8} testID="probe-banner">;',
+    '}',
+    '',
+    'const Chip = (props) => (',
+    '  <Pressable hitSlop={12} testID={chipID}>',
+    ');',
+  ].join('\n');
+  const registry = readHitSlops([{ file: 'd.tsx', code: source }]);
+  assert.deepEqual(
+    registry.map((entry) => [entry.testID, entry.testIDPrefix]),
+    [['probe-banner', null], [null, null]],
+  );
+});
+
 test('hitSlopForId prefers an exact testID over a longer registry of prefixes', () => {
   const registry = [
     { testID: 'link-guides', testIDPrefix: null, slop: { top: 1, right: 1, bottom: 1, left: 1 }, source: 'a:1' },
@@ -252,18 +272,24 @@ function runCli(args) {
 
 // One --from run seeded the same way every CLI test: identical captures and
 // baselines for both explore-a slots, optional density manifest, optional
-// dump content for both slots (null = no dumps at all).
-function seedExploreRun({ dir, color, density = null, dump = null }) {
+// dump content for both slots (null = no dumps at all). `layout: 'driver'`
+// seeds the REAL capture layout — dumps in `<dir>/driver`, captures in
+// `<dir>/captures` — so a --from session must find them through
+// `<captures>/../driver`; the default 'captures' layout is what hand-made
+// --from directories and the earlier tests use.
+function seedExploreRun({ dir, color, density = null, dump = null, layout = 'captures' }) {
   const capturesDir = path.join(dir, 'captures');
   const baselinesDir = path.join(dir, 'baselines');
+  const dumpDir = layout === 'driver' ? path.join(dir, 'driver') : capturesDir;
   fs.mkdirSync(capturesDir, { recursive: true });
   fs.mkdirSync(baselinesDir, { recursive: true });
+  fs.mkdirSync(dumpDir, { recursive: true });
   if (density !== null) {
     fs.writeFileSync(path.join(capturesDir, 'manifest.json'), `${JSON.stringify({ a11y: { densityPxPerDp: density } })}\n`);
   }
   for (const scale of [1, 1.5]) {
     if (dump !== null) {
-      fs.writeFileSync(path.join(capturesDir, dumpBasenameForSlot({ surface: 'explore-a', story: null, scale })), dump);
+      fs.writeFileSync(path.join(dumpDir, dumpBasenameForSlot({ surface: 'explore-a', story: null, scale })), dump);
     }
     fs.writeFileSync(path.join(capturesDir, `explore-a_font${scale}-be.png`), solidPng(...SIZE, color));
     fs.writeFileSync(path.join(baselinesDir, `explore-a@font${scale}-be.png`), solidPng(...SIZE, color));
@@ -271,26 +297,30 @@ function seedExploreRun({ dir, color, density = null, dump = null }) {
   return { capturesDir, baselinesDir };
 }
 
+// Seed a --from fixture, run the CLI against it and return the result with
+// a lazy report reader — the one shape every CLI test asserts on.
+function runFromFixture({ name, color = [7, 7, 7], density = 2, dump = null, layout = 'captures' }) {
+  const dir = tmpDir(name);
+  const outDir = path.join(dir, 'out');
+  const { capturesDir, baselinesDir } = seedExploreRun({ dir, color, density, dump, layout });
+  const result = runCli(['--from', capturesDir, '--baselines-dir', baselinesDir, '--out', outDir, '--surface', 'explore-a']);
+  return { result, outDir, report: () => fs.readFileSync(path.join(outDir, 'report.md'), 'utf8') };
+}
+
 // A --from run over fixture dumps: the unlabeled icon button in both slots
 // is a RULE, the run exits non-zero and the manifest carries the findings.
 test('CLI --from reports dump RULE findings, blocks the exit and fills the manifest', () => {
-  const dir = tmpDir('a11y-rule-');
-  const outDir = path.join(dir, 'out');
-  const { capturesDir, baselinesDir } = seedExploreRun({
-    dir,
-    color: [7, 7, 7],
-    density: 2,
+  const { result, outDir, report } = runFromFixture({
+    name: 'a11y-rule-',
     dump: dumpXml([clickable('probe/icon-send', '[10,100][58,148]')]),
   });
-  const result = runCli(['--from', capturesDir, '--baselines-dir', baselinesDir, '--out', outDir, '--surface', 'explore-a']);
   assert.equal(result.status, 1, `stderr: ${result.stderr}`);
   // The +1 NOT-VERIFIED is the registry-level unbound back-button hitSlop —
   // every run states it openly instead of silently ignoring the site.
   assert.match(result.stdout, /a11y — RULE 2 · OPINION 0 · NOT-VERIFIED 1/);
-  const report = fs.readFileSync(path.join(outDir, 'report.md'), 'utf8');
-  assert.match(report, /## Даступнасць \(дамп\)/);
-  assert.match(report, /\[RULE\] explore-a@font1-be/);
-  assert.match(report, /screen-reader подпісы на кожнай icon-only кнопцы/);
+  assert.match(report(), /## Даступнасць \(дамп\)/);
+  assert.match(report(), /\[RULE\] explore-a@font1-be/);
+  assert.match(report(), /screen-reader подпісы на кожнай icon-only кнопцы/);
   const manifest = JSON.parse(fs.readFileSync(path.join(outDir, 'manifest.json'), 'utf8'));
   assert.equal(manifest.a11y.densityPxPerDp, 2);
   assert.equal(manifest.a11y.findings.filter((finding) => finding.class === 'RULE').length, 2);
@@ -298,27 +328,46 @@ test('CLI --from reports dump RULE findings, blocks the exit and fills the manif
 });
 
 test('CLI --from without dumps is NOT-VERIFIED per slot and does not block', () => {
-  const dir = tmpDir('a11y-nodump-');
-  const outDir = path.join(dir, 'out');
-  const { capturesDir, baselinesDir } = seedExploreRun({ dir, color: [8, 8, 8] });
-  const result = runCli(['--from', capturesDir, '--baselines-dir', baselinesDir, '--out', outDir, '--surface', 'explore-a']);
+  const { result } = runFromFixture({ name: 'a11y-nodump-', color: [8, 8, 8], density: null });
   assert.equal(result.status, 0, `stderr: ${result.stderr}`);
   assert.match(result.stdout, /a11y — RULE 0 · OPINION 0 · NOT-VERIFIED 3/);
 });
 
 test('CLI --from measures an OPINION for a small labelled node outside the registry', () => {
-  const dir = tmpDir('a11y-opinion-');
-  const outDir = path.join(dir, 'out');
-  const { capturesDir, baselinesDir } = seedExploreRun({
-    dir,
+  const { result, report } = runFromFixture({
+    name: 'a11y-opinion-',
     color: [9, 9, 9],
-    density: 2,
     dump: dumpXml([clickable('probe/tiny', '[0,0][24,24]', { desc: 'дробная' })]),
   });
-  const result = runCli(['--from', capturesDir, '--baselines-dir', baselinesDir, '--out', outDir, '--surface', 'explore-a']);
   assert.equal(result.status, 0, 'an OPINION never blocks');
   assert.match(result.stdout, /a11y — RULE 0 · OPINION 2 · NOT-VERIFIED 1/);
-  const report = fs.readFileSync(path.join(outDir, 'report.md'), 'utf8');
-  assert.match(report, /\[OPINION\] explore-a@font1-be/);
-  assert.match(report, /эфектыўная з hitSlop 12×12 dp/);
+  assert.match(report(), /\[OPINION\] explore-a@font1-be/);
+  assert.match(report(), /эфектыўная з hitSlop 12×12 dp/);
+});
+
+// The real capture layout: dumps live in `<dir>/driver`, the --from call
+// points at `<dir>/captures` — the run must find them through
+// `<captures>/../driver` or the a11y pass silently degrades to NOT-VERIFIED.
+test('CLI --from finds the dumps of a real capture run through captures/../driver', () => {
+  const { result, report } = runFromFixture({
+    name: 'a11y-driver-',
+    dump: dumpXml([clickable('probe/icon-send', '[10,100][58,148]')]),
+    layout: 'driver',
+  });
+  assert.equal(result.status, 1, `stderr: ${result.stderr}`);
+  assert.match(result.stdout, /a11y — RULE 2 · OPINION 0 · NOT-VERIFIED 1/);
+  assert.match(report(), /\[RULE\] explore-a@font1-be/);
+});
+
+// A truncated dump must surface as NOT-VERIFIED with a reason, never vanish
+// into a clean verdict (implementation-rules 14).
+test('CLI --from reports a corrupt dump as NOT-VERIFIED (цэласны дамп)', () => {
+  const { result, report } = runFromFixture({
+    name: 'a11y-corrupt-',
+    color: [8, 8, 8],
+    dump: '<hierarchy rotation="0"><node text="" resource-id="probe/x" class="c" content-desc="" clickable="true" bounds="[0,0][24,24]">',
+  });
+  assert.equal(result.status, 0, 'NOT-VERIFIED never blocks');
+  assert.match(result.stdout, /a11y — RULE 0 · OPINION 0 · NOT-VERIFIED 3/);
+  assert.match(report(), /цэласны дамп/);
 });

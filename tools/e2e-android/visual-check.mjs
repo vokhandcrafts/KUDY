@@ -794,7 +794,11 @@ async function runCheck(args) {
       a11yFindings.push({ slot: null, class: 'NOT-VERIFIED', rule: null, measured: null, requires: 'прывязка hitSlop да testID (літарал, шаблон альбо сайты выкліку)', evidence: entry.source });
     }
   }
-  const dumpDirs = [path.join(outDir, 'driver'), capturesDir, path.join(capturesDir, 'driver')];
+  // The real capture layout (captureAll) writes dumps into the run's driver
+  // artifacts directory — from a `--from <captures-dir>` session that is
+  // `<captures>/../driver`. The other candidates serve hand-made --from
+  // directories and unit tests.
+  const dumpDirs = [path.join(outDir, 'driver'), path.join(capturesDir, '..', 'driver'), capturesDir, path.join(capturesDir, 'driver')];
   for (const slotEntry of slots) {
     const dumpName = dumpBasenameForSlot(slotEntry);
     const dumpPath = dumpDirs.map((dir) => path.join(dir, dumpName)).find((candidate) => fs.existsSync(candidate));

@@ -172,14 +172,47 @@ function enclosingTagBody(code, hitIndex) {
 
 const lineAt = (code, index) => code.slice(0, index).split('\n').length;
 
-// `testID={testID}` — resolve the prop variable through the same-file call
-// sites of the enclosing `function Name(`: every `<Name … testID="…">`
-// literal becomes a bound entry with the same slop.
+// End of a `function Name(…) {…}` body. The body-opening brace is the first
+// `{` outside the parameter parentheses (TypeScript destructuring and type
+// annotations live inside them); the end is its matching `}`. A shape this
+// cannot read (e.g. an inline object return type) yields -1 → no binding,
+// which surfaces as NOT-VERIFIED instead of a guess.
+function functionBodyEnd(code, declIndex) {
+  let parenDepth = 0;
+  let openBrace = -1;
+  for (let i = declIndex; i < code.length; i += 1) {
+    const ch = code[i];
+    if (ch === '(') parenDepth += 1;
+    else if (ch === ')') parenDepth -= 1;
+    else if (ch === '{' && parenDepth === 0) {
+      openBrace = i;
+      break;
+    }
+  }
+  if (openBrace === -1) return -1;
+  let depth = 0;
+  for (let i = openBrace; i < code.length; i += 1) {
+    if (code[i] === '{') depth += 1;
+    if (code[i] === '}') {
+      depth -= 1;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+// `testID={testID}` — resolve the prop variable through the call sites of
+// the nearest `function Name(` whose body actually contains the tag (an
+// arrow component outside every declaration must not inherit a foreign
+// function's call sites — that would grant hitSlop credit to a node the
+// code never slops). No enclosing declaration → no binding.
 function callSiteTestIDs(code, tagIndex) {
-  const before = code.slice(0, tagIndex);
   const decl = /function\s+([A-Za-z_$][\w$]*)\s*\(/g;
   let name = null;
-  for (const match of before.matchAll(decl)) name = match[1]; // nearest preceding declaration
+  for (const match of code.slice(0, tagIndex).matchAll(decl)) {
+    const bodyEnd = functionBodyEnd(code, match.index);
+    if (bodyEnd !== -1 && tagIndex < bodyEnd) name = match[1]; // nearest enclosing
+  }
   if (!name) return [];
   const ids = [];
   for (const usage of code.matchAll(new RegExp(`<${name}\\b[^>]*>`, 'g'))) {
