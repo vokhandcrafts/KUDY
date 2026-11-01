@@ -34,6 +34,17 @@ const serviceSource = `
     postOrStartForegroundNotification(startInForeground = false)
     return super.onStartCommand(intent, flags, startId)
   }
+  private fun setActivePlayerInternal(
+    player: AudioPlayer?,
+    metadata: Metadata? = null,
+    options: AudioLockScreenOptions? = null
+  ) {
+    // Detach listener from previous player
+  }
+  override fun onDestroy() {
+    super.onDestroy()
+    instance = null
+  }
   companion object {
     private var pendingPlayer: AudioPlayer? = null
     private var pendingMetadata: Metadata? = null
@@ -65,11 +76,24 @@ test('#854: native patch cancels a pending Play before service onCreate', (t) =>
   assert.match(p, /override fun sharedObjectDidRelease\([\s\S]*?AudioControlsService\.clearPlayer\(this@AudioPlayer\)/);
   assert.match(s, /if \(pendingPlayer === player\) \{\s*pendingPlayer = null/);
   assert.match(s, /if \(service\.currentPlayer === player\)/);
-  assert.match(s, /if \(currentPlayer == null\) \{\s*stopSelf\(startId\)/);
+  assert.match(s, /if \(currentPlayer == null\) \{\s*scheduleIdleStop\(\)/);
   const first = [p, s];
   patchExpoAudioNative(root);
   assert.deepEqual([fs.readFileSync(player, 'utf8'), fs.readFileSync(service, 'utf8')], first,
     'repeated Expo prebuild must not duplicate the native patch');
+});
+
+test('#854: replacing A with B cancels A idle shutdown before it can destroy B', (t) => {
+  const { root, service } = makeFixture();
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  patchExpoAudioNative(root);
+  const source = fs.readFileSync(service, 'utf8');
+  assert.match(source, /private fun scheduleIdleStop\(\) \{[\s\S]*?postDelayed\(idleStopRunnable, 1000L\)/);
+  assert.match(source, /if \(currentPlayer == null && pendingPlayer == null\) \{\s*stopSelf\(\)/);
+  assert.match(source, /if \(player != null\) \{\s*cancelIdleStop\(\)/);
+  assert.match(source, /service\.setActivePlayerInternal\(null\)\s*service\.scheduleIdleStop\(\)/);
+  assert.doesNotMatch(source, /service\.setActivePlayerInternal\(null\)\s*service\.stopSelf\(\)/,
+    'immediate stopSelf races against player B activation');
 });
 
 test('#854: native patch rejects SDK drift atomically', (t) => {

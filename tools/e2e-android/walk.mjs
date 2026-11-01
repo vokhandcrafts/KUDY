@@ -526,8 +526,22 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     assert.equal(await activeAudioPlayers(driver), false, 'audio resumed without user action after the call ended');
   });
 
+  await runCase('walk: replacing track A with B preserves B media session', 'walk-replace', driver, async () => {
+    await tapMapPoint(driver, 'e2e-stop-1');
+    await tapPlayAndWaitForAudio(driver);
+    await tapMapPoint(driver, 'e2e-stop-2');
+    await tapPlayAndWaitForAudio(driver);
+    // Hold B in Pause for longer than the old idle-stop grace period.
+    // A late stopSelf from A must not destroy B's MediaSessionService.
+    await driver.exec(['shell', 'input', 'keyevent', 'KEYCODE_MEDIA_PAUSE']);
+    await waitForAudioActive(driver, false);
+    await recordMediaServiceState(driver, 'paused');
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await recordMediaServiceState(driver, 'paused');
+  });
+
   await runCase('walk: rapid Play then Stop cannot resurrect the media service', 'walk-rapid-stop', driver, async () => {
-    // The preceding call case left stop 2 selected. Switch stories rather
+    // The replacement case left stop 2 selected. Switch stories rather
     // than toggling the same card closed.
     await tapMapPoint(driver, 'e2e-stop-1');
     await dismissGuideHintBeforePlay(driver);

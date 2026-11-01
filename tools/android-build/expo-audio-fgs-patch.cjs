@@ -50,9 +50,9 @@ function patchService(source) {
     `    // Ensure channel exists and update current notification
     postOrStartForegroundNotification(startInForeground = false)`,
     `    // A queued start can be cancelled before onCreate by an immediate Stop.
-    // Stop the empty service instead of leaving an FGS start pending.
+    // Delay shutdown so a replacement player can cancel the idle stop.
     if (currentPlayer == null) {
-      stopSelf(startId)
+      scheduleIdleStop()
       return START_NOT_STICKY
     }
     // Ensure channel exists and update current notification
@@ -73,11 +73,49 @@ function patchService(source) {
       getInstance()?.let { service ->
         if (service.currentPlayer === player) {
           service.setActivePlayerInternal(null)
-          service.stopSelf()
+          service.scheduleIdleStop()
         }
       }
     }`,
     'AudioControlsService.clearPlayer');
+  next = replaceOnce(next,
+    `  companion object {`,
+    `  // All calls are on Android's main thread. A replacement cancels the
+  // scheduled stop before Android can destroy the new player's session.
+  private val idleStopHandler = Handler(Looper.getMainLooper())
+  private val idleStopRunnable = Runnable {
+    if (currentPlayer == null && pendingPlayer == null) {
+      stopSelf()
+    }
+  }
+
+  private fun scheduleIdleStop() {
+    idleStopHandler.removeCallbacks(idleStopRunnable)
+    idleStopHandler.postDelayed(idleStopRunnable, 1000L)
+  }
+
+  private fun cancelIdleStop() {
+    idleStopHandler.removeCallbacks(idleStopRunnable)
+  }
+
+  companion object {`,
+    'AudioControlsService.idleStop');
+  next = replaceOnce(next,
+    `  ) {
+    // Detach listener from previous player`,
+    `  ) {
+    if (player != null) {
+      cancelIdleStop()
+    }
+    // Detach listener from previous player`,
+    'AudioControlsService.setActivePlayerInternal');
+  next = replaceOnce(next,
+    `  override fun onDestroy() {
+    super.onDestroy()`,
+    `  override fun onDestroy() {
+    cancelIdleStop()
+    super.onDestroy()`,
+    'AudioControlsService.onDestroy');
   return next;
 }
 
