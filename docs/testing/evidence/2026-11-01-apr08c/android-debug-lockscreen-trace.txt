@@ -1,0 +1,18 @@
+Крыніца: https://github.com/vokhandcrafts/KUDY/actions/runs/41307042352
+Head: 6c0a49b1641329d49ecaed19dee5129811dc7664
+Асяроддзе: GitHub runner, Android 36 emulator, debug APK by.kudy.app
+APK SHA-256: 5b3fff8eb97716e9a908c5d815ce4f939f2e2807f3469291ce6016865730181b
+Відэа: android-debug-lockscreen.mp4, 44.789 s, 655362 bytes
+Відэа SHA-256: c0f2be119e793e08aad29c1a809e0b8ad7d8ef0f8caf90ca00332e40ae868e3c
+Кадр: android-debug-lockscreen.png, 480x1040, t=20 s
+Кадр SHA-256: 5e3c3cd526a88c9212e873d510543ce7ebadd845b0b08091ecf02b0632106b59
+
+Санітызаваныя факты з журнала GitHub runner:
+- Pause: AudioControlsService ёсць у dumpsys activity services.
+- Pause: NotificationRecord pkg=by.kudy.app, channel=expo_audio_channel, flags=NO_CLEAR|FOREGROUND_SERVICE.
+- Pause: media_session змяшчае by.kudy.app.
+- Заблакаваны PIN-экран: відэа і кадр паказваюць KUDY media controls і кнопку Play пасля паўзы.
+- Stop праз Pause walk: у dumpsys notification больш няма NotificationRecord для expo_audio_channel; ServiceRecord яшчэ ёсць, але кароткі CI-журнал не фіксуе яго isForeground стан.
+- Suite: smoke 11/11, walk 5/5, discovery 4/4.
+
+Гэта debug-доказ. Release APK/AAB, натыўнае перапыненне і канчатковы foreground-стан сэрвісу пасля Stop не правераны.
