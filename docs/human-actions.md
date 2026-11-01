@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-11-01 — мерж праверак даступнасці з дампа (DQ-06)
+Што зрабіць: калі аўтаматычны мерж пайплайна не адбудзецца (branch protection ці чырвоны CI) — замерж PR рукамі пасля зелёнага суддзі і знімі лэйбл `agent:running` з issue. Калі PR ужо змержаны аўтаматам — запіс састарэлы, выдалі яго.
+PR: [#950](https://github.com/vokhandcrafts/KUDY/pull/950) · Issue: [#916](https://github.com/vokhandcrafts/KUDY/issues/916)
+
 ### 2026-10-31 — прыёмка меню-карты перад production (MAP-02)
 Што зрабіць: перад production-прыёмкай правер кампанент на фізічнай прыладзе, зацвердзі гістарычную рамку і перыяд ды правер правы на аснову. Кампанент яшчэ трэба падключыць да навігацыі, шрыфты застаюцца драфтам.
 PR: [draft #924](https://github.com/vokhandcrafts/KUDY/pull/924) · Issue: [#885](https://github.com/vokhandcrafts/KUDY/issues/885) · Кампанент: [інтэграцыя](design/brand/outputs/menu-map-city-only/native/README.md)

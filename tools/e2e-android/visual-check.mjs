@@ -43,6 +43,7 @@ import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 
 import { DriverError, E2eDriver, findNode, listBootedDevices, parseDump, resolveAdb } from './driver.mjs';
+import { MIN_TARGET_DP, checkA11y, listHitSlopSources, parseA11yTree, readHitSlops } from './visual-a11y.mjs';
 import {
   APP_PACKAGE,
   BUNDLE_TIMEOUT_MS,
@@ -135,6 +136,13 @@ export function slotId(surfaceId, scale, locale) {
 export function captureFileName(slot) {
   if (/@/.test(slot) === false) throw new Error(`captureFileName: slot ${JSON.stringify(slot)} has no @`);
   return `${slot.replace('@', '_')}.png`;
+}
+
+// The dump file the capture writes for one slot (captureAll) — the DQ-06
+// a11y pass re-derives the same name from this single definition instead
+// of restating the pattern (implementation-rules 2).
+export function dumpBasenameForSlot({ surface, story, scale }) {
+  return story ? `dump-story-${story}-font${scale}.xml` : `dump-${surface}-font${scale}.xml`;
 }
 
 export function loadMatrix() {
@@ -270,7 +278,7 @@ function relativeLink(fromDir, targetPath) {
   return path.relative(fromDir, targetPath).replaceAll(path.sep, '/');
 }
 
-export function buildReport({ results, outDir, baselinesDir, mode }) {
+export function buildReport({ results, outDir, baselinesDir, mode, a11y = null }) {
   const counts = verdictCounts(results);
   const verdictLine = `visual:check — ${VERDICT_ORDER.map((verdict) => `${verdict} ${counts[verdict]}`).join(' · ')}`;
   const lines = [];
@@ -330,11 +338,58 @@ export function buildReport({ results, outDir, baselinesDir, mode }) {
       lines.push(`- ${result.slot} — ${result.reason}`);
     }
   }
+  if (a11y !== null) {
+    const a11yCounts = a11yCountsOf(a11y.findings);
+    lines.push('');
+    lines.push('## Даступнасць (дамп)');
+    lines.push('');
+    lines.push(
+      `**a11y — ${A11Y_ORDER.map((cls) => `${cls} ${a11yCounts[cls]}`).join(' · ')}**`,
+    );
+    lines.push('');
+    lines.push(
+      a11y.densityPxPerDp === null
+        ? 'Шчыльнасць прылады невядомая — памеры мішэняў не вымераныя (NOT-VERIFIED).'
+        : `Шчыльнасць ${a11y.densityPxPerDp} px/dp; мінімум мішэні ${MIN_TARGET_DP} dp; hitSlop прачытаны з кода (дамп яго не бачыць, exceptions.md).`,
+    );
+    const byClass = (cls) => a11y.findings.filter((finding) => finding.class === cls);
+    lines.push('');
+    for (const finding of byClass('RULE')) lines.push(...a11yFindingLines(finding));
+    // OPINION is capped at three per report (spec §6.4); the manifest keeps
+    // every finding, so nothing measured is lost.
+    const opinions = byClass('OPINION');
+    for (const finding of opinions.slice(0, 3)) lines.push(...a11yFindingLines(finding));
+    if (opinions.length > 3) {
+      lines.push(`яшчэ ${opinions.length - 3} OPINION не паказана — поўны спіс у manifest.json`);
+      lines.push('');
+    }
+    for (const finding of byClass('NOT-VERIFIED')) lines.push(`- ${finding.slot ?? 'рэестр hitSlop'} — ${finding.evidence}; патрабуецца: ${finding.requires}`);
+  }
   lines.push('');
-  return { report: lines.join('\n'), verdictLine, counts };
+  return { report: lines.join('\n'), verdictLine, counts, a11yCounts: a11y === null ? null : a11yCountsOf(a11y.findings) };
 }
 
-export function buildManifest({ mode, results, matrix, device, commit, apkSha256, baselinesDir }) {
+const A11Y_ORDER = ['RULE', 'OPINION', 'NOT-VERIFIED'];
+
+function a11yCountsOf(findings) {
+  const counts = Object.fromEntries(A11Y_ORDER.map((cls) => [cls, 0]));
+  for (const finding of findings) counts[finding.class] += 1;
+  return counts;
+}
+
+// One finding in the spec §6.4 shape: class + slot, rule, measurement,
+// evidence, need.
+function a11yFindingLines(finding) {
+  const lines = [
+    `[${finding.class}] ${finding.slot ?? 'рэестр hitSlop'}`,
+    `Правіла: ${finding.rule}`,
+  ];
+  if (finding.measured) lines.push(`Вымерана: ${finding.measured}`);
+  lines.push(`Доказ: ${finding.evidence}`, `Патрабуецца: ${finding.requires}`, '');
+  return lines;
+}
+
+export function buildManifest({ mode, results, matrix, device, commit, apkSha256, baselinesDir, a11y = null }) {
   return {
     tool: 'visual:check',
     mode,
@@ -347,6 +402,14 @@ export function buildManifest({ mode, results, matrix, device, commit, apkSha256
     comparison: COMPARISON,
     apkSha256: apkSha256 ?? null,
     baselinesDir,
+    a11y:
+      a11y === null
+        ? null
+        : {
+            densityPxPerDp: a11y.densityPxPerDp,
+            hitSlopSources: a11y.hitSlopSources,
+            findings: a11y.findings,
+          },
     slots: results.map((result) => ({
       slot: result.slot,
       surface: result.surface,
@@ -481,7 +544,7 @@ export async function captureAll({ driver, matrix, capturesDir, metroPort, origi
           caseSlug: `explore-a-font${scale}`,
         });
         if (plan.exploreA) {
-          await waitSettled(driver, { testID: 'screen-Explore' }, { timeoutMs: 30000, dumpBasename: `dump-explore-a-font${scale}.xml` });
+          await waitSettled(driver, { testID: 'screen-Explore' }, { timeoutMs: 30000, dumpBasename: dumpBasenameForSlot({ surface: 'explore-a', story: null, scale }) });
           await shot('explore-a', scale);
         }
 
@@ -491,7 +554,7 @@ export async function captureAll({ driver, matrix, capturesDir, metroPort, origi
             await waitSettled(
               driver,
               { testID: `dev-specimen/story-${surface.story}` },
-              { timeoutMs: 30000, dumpBasename: `dump-story-${surface.story}-font${scale}.xml` },
+              { timeoutMs: 30000, dumpBasename: dumpBasenameForSlot({ surface: surface.id, story: surface.story, scale }) },
             );
             await shot(surface.id, scale);
           }
@@ -522,7 +585,7 @@ export async function captureAll({ driver, matrix, capturesDir, metroPort, origi
         await waitSettled(
           driver,
           { testID: `guide-card-${FIXTURE_GUIDE_ROUTE_ID}` },
-          { timeoutMs: 30000, dumpBasename: `dump-explore-b-font${scale}.xml` },
+          { timeoutMs: 30000, dumpBasename: dumpBasenameForSlot({ surface: 'explore-b', story: null, scale }) },
         );
         await shot('explore-b', scale);
       }
@@ -579,6 +642,22 @@ function failToRun(reason) {
   process.exit(1);
 }
 
+// A --from run has no device to ask — it takes the density the original
+// capture recorded in its manifest. No readable manifest → null, and the
+// a11y pass reports the target sizes as NOT-VERIFIED instead of guessing.
+function densityFromManifest(capturesDir) {
+  for (const candidate of [path.join(capturesDir, '..', 'manifest.json'), path.join(capturesDir, 'manifest.json')]) {
+    try {
+      const manifest = JSON.parse(fs.readFileSync(candidate, 'utf8'));
+      const density = manifest?.a11y?.densityPxPerDp;
+      if (typeof density === 'number' && Number.isFinite(density) && density > 0) return density;
+    } catch {
+      // missing or unreadable manifest — try the next candidate
+    }
+  }
+  return null;
+}
+
 // Group aliases of --surface: the spec §9.1 acceptance command names the
 // groups, not the individual surfaces. Each alias expands against the full
 // matrix, never a hand-maintained list.
@@ -628,6 +707,7 @@ async function runCheck(args) {
   let device = null;
   let apkSha256 = null;
   let driver = null;
+  let densityPxPerDp = null;
 
   if (mode === 'capture') {
     // Hard prerequisites (criterion 5): resolveTarget answers with a skip
@@ -648,6 +728,9 @@ async function runCheck(args) {
       serial: target.serial,
     };
     apkSha256 = fs.existsSync(target.apkPath) ? sha256File(target.apkPath) : null;
+    // DQ-06: the dump bounds are px — the dp math needs the panel density.
+    const densityProp = Number(await getprop(driver, 'ro.sf.lcd_density'));
+    densityPxPerDp = Number.isFinite(densityProp) && densityProp > 0 ? densityProp / 160 : null;
     if (!target.skipInstall) {
       console.log(`-- installing ${APP_PACKAGE} from ${target.apkPath}`);
       await driver.install(target.apkPath);
@@ -658,6 +741,9 @@ async function runCheck(args) {
   }
 
   const commit = await gitCommit();
+  if (mode !== 'capture' && densityPxPerDp === null) {
+    densityPxPerDp = densityFromManifest(capturesDir);
+  }
   let results;
   if (mode === 'capture') {
     console.log('-- capturing the V1 matrix (light theme, font 1/1.5, locale be) — this starts Metro and the origin');
@@ -695,6 +781,45 @@ async function runCheck(args) {
     return { ...base, ...comparison, diffImagePath };
   });
 
+  // DQ-06: measured accessibility facts from the captured dumps (spec §5,
+  // §6.2). The registry reads hitSlop from the sources on every run — a new
+  // hitSlop site is picked up without touching this file; a site that
+  // cannot bind to a testID is NOT-VERIFIED, never silently ignored.
+  const slopRegistry = readHitSlops(listHitSlopSources(REPO_ROOT));
+  const a11yFindings = [];
+  for (const entry of slopRegistry) {
+    if (entry.slop === null) {
+      a11yFindings.push({ slot: null, class: 'NOT-VERIFIED', rule: null, measured: null, requires: 'чытэльнае значэнне hitSlop у кодзе', evidence: entry.source });
+    } else if (entry.testID === null && entry.testIDPrefix === null) {
+      a11yFindings.push({ slot: null, class: 'NOT-VERIFIED', rule: null, measured: null, requires: 'прывязка hitSlop да testID (літарал, шаблон альбо сайты выкліку)', evidence: entry.source });
+    }
+  }
+  // The real capture layout (captureAll) writes dumps into the run's driver
+  // artifacts directory — from a `--from <captures-dir>` session that is
+  // `<captures>/../driver`. The other candidates serve hand-made --from
+  // directories and unit tests.
+  const dumpDirs = [path.join(outDir, 'driver'), path.join(capturesDir, '..', 'driver'), capturesDir, path.join(capturesDir, 'driver')];
+  for (const slotEntry of slots) {
+    const dumpName = dumpBasenameForSlot(slotEntry);
+    const dumpPath = dumpDirs.map((dir) => path.join(dir, dumpName)).find((candidate) => fs.existsSync(candidate));
+    if (dumpPath === undefined) {
+      a11yFindings.push({ slot: slotEntry.slot, class: 'NOT-VERIFIED', rule: null, measured: null, requires: dumpName, evidence: `шукалі ў: ${dumpDirs.join(', ')}` });
+      continue;
+    }
+    const tree = parseA11yTree(fs.readFileSync(dumpPath, 'utf8'));
+    for (const message of tree.diagnostics) {
+      a11yFindings.push({ slot: slotEntry.slot, class: 'NOT-VERIFIED', rule: null, measured: null, requires: 'цэласны дамп', evidence: `${dumpName}; ${message}` });
+    }
+    for (const finding of checkA11y({ clickable: tree.clickable, pxPerDp: densityPxPerDp, registry: slopRegistry, dumpName })) {
+      a11yFindings.push({ slot: slotEntry.slot, ...finding });
+    }
+  }
+  const a11y = {
+    densityPxPerDp,
+    hitSlopSources: slopRegistry.filter((entry) => entry.slop !== null).map((entry) => entry.source),
+    findings: a11yFindings,
+  };
+
   // The baseline guard (criterion 2): this is the only call site, and it is
   // reached only when the flag is present — a run without `--update` leaves
   // the baselines directory untouched.
@@ -703,14 +828,19 @@ async function runCheck(args) {
     console.log(`-- baselines written: ${written.length} (owner approval pending, DQ-04)`);
   }
 
-  const { report, verdictLine, counts } = buildReport({ results, outDir, baselinesDir: args.baselinesDir, mode });
+  const { report, verdictLine, counts, a11yCounts } = buildReport({ results, outDir, baselinesDir: args.baselinesDir, mode, a11y });
   fs.writeFileSync(path.join(outDir, 'report.md'), report);
-  const manifest = buildManifest({ mode, results, matrix: filteredMatrix, device, commit, apkSha256, baselinesDir: args.baselinesDir });
+  const manifest = buildManifest({ mode, results, matrix: filteredMatrix, device, commit, apkSha256, baselinesDir: args.baselinesDir, a11y });
   fs.writeFileSync(path.join(outDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   console.log(verdictLine);
+  if (a11yCounts !== null) {
+    console.log(`a11y — ${A11Y_ORDER.map((cls) => `${cls} ${a11yCounts[cls]}`).join(' · ')}`);
+  }
   console.log(`report: ${path.join(outDir, 'report.md')}`);
   console.log(`manifest: ${path.join(outDir, 'manifest.json')}`);
-  const blocked = counts.DIFF + counts.FAIL;
+  // A RULE finding blocks like a pixel FAIL: it is a violated accepted rule
+  // (spec §6.4). OPINION and NOT-VERIFIED never block.
+  const blocked = counts.DIFF + counts.FAIL + (a11yCounts?.RULE ?? 0);
   process.exit(blocked > 0 ? 1 : 0);
 }
 
