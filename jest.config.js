@@ -37,7 +37,7 @@ module.exports = {
     // this identity mock — the real UI root needs the machine-local generated
     // requires module and native peers jest cannot host. The guard is
     // app/storybook.test.tsx itself: dropping the mapping dies on the missing
-    // ../.storybook/storybook.requires module.
+    // .rnstorybook/storybook.requires module.
     "^\\.\\./\\.rnstorybook(/.*)?$": "<rootDir>/test/storybook-ui-mock.tsx",
     "^lucide-react-native/icons/(.*)$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/icons/$1.js",
   },
