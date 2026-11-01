@@ -21,7 +21,6 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 Што зрабіць: забяспеч ізаляваны лакальны кэш або магчымасць усталяваць pinned dev-залежнасці для `tsc`, `dependency-cruiser`, `jscpd`, `@electric-sql/pglite`; падай даступны тэставы report host з выключна сінтэтычнымі данымі для праверкі выдалення захаваных feedback-экспартаў. Production-доступы і асабістыя даныя не перадавай.
 Issue: [#835](https://github.com/vokhandcrafts/KUDY/issues/835)
 
-
 ### 2026-10-31 — прыёмка меню-карты перад production (MAP-02)
 Што зрабіць: перад production-прыёмкай правер кампанент на фізічнай прыладзе, зацвердзі гістарычную рамку і перыяд ды правер правы на аснову. Кампанент яшчэ трэба падключыць да навігацыі, шрыфты застаюцца драфтам.
 PR: [draft #924](https://github.com/vokhandcrafts/KUDY/pull/924) · Issue: [#885](https://github.com/vokhandcrafts/KUDY/issues/885) · Кампанент: [інтэграцыя](design/brand/outputs/menu-map-city-only/native/README.md)

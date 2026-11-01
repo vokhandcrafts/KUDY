@@ -15,7 +15,7 @@
 import { getDeviceId, inTransaction, isDeviceDeletionPending } from './db/db.ts';
 import type { SqlDriver, SqlValue } from './db/types.ts';
 import { recoverPendingLocalDeletion, type SecureSecretStore } from './device.ts';
-import { withDeviceLifecycle } from './device-lifecycle.ts';
+import { deviceDeletionRequested, withDeviceLifecycle } from './device-lifecycle.ts';
 import { withWaitLimit } from './network-wait.ts';
 import { assertNotRedirected, parseSecureEndpointUrl, SecureUrlError } from './secure-url.ts';
 import {
@@ -433,7 +433,7 @@ export function createFeedbackSync(deps: {
     // The age limit is local state. It applies even when registration has
     // never succeeded and there is no device identity to send with.
     await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
-    if (isDeviceDeletionPending(deps.driver)) {
+    if (deviceDeletionRequested(deps.driver) || isDeviceDeletionPending(deps.driver)) {
       report.skippedNoIdentity = true;
       return report;
     }
@@ -456,6 +456,7 @@ export function createFeedbackSync(deps: {
     // schedule and is picked up by a later flush.
     const attempted = new Set<string>();
     for (;;) {
+      if (deviceDeletionRequested(deps.driver) || isDeviceDeletionPending(deps.driver)) break;
       const due = (deps.driver.prepare(`${OUTBOX_SELECT} WHERE transport_state = 'pending' ORDER BY created_at, mutation_id`).all() as OutboxRow[]).filter(
         (row) =>
           !attempted.has(row.mutation_id) &&
@@ -463,6 +464,7 @@ export function createFeedbackSync(deps: {
       );
       if (due.length === 0) break;
       for (const row of due) {
+        if (deviceDeletionRequested(deps.driver) || isDeviceDeletionPending(deps.driver)) break;
         attempted.add(row.mutation_id);
         await dispatchOne(row, report);
       }
@@ -483,7 +485,7 @@ export function createFeedbackSync(deps: {
     async resolveConflict(target: FeedbackTarget): Promise<ResolveOutcome> {
       return withDeviceLifecycle(deps.driver, async () => {
         await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
-        if (isDeviceDeletionPending(deps.driver)) return { status: 'no-identity' };
+        if (deviceDeletionRequested(deps.driver) || isDeviceDeletionPending(deps.driver)) return { status: 'no-identity' };
         const secret = await deps.secretStore.getSecret();
         if (secret === null || getDeviceId(deps.driver) === null) return { status: 'no-identity' };
         let response: FeedbackTransportResponse;

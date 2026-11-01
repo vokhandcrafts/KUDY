@@ -142,6 +142,37 @@ test('APR-07.a: registration requested during deletion never creates a replaceme
   assert.equal(getDeviceId(driver), null);
 });
 
+
+test('APR-07.a: request for deletion stops analytics before dispatching another batch', async () => {
+  const driver = fresh();
+  const secret = store();
+  for (let n = 0; n < 260; n += 1) {
+    emitEvent(driver, {
+      eventId: `cccccccc-1111-4111-8111-${String(n).padStart(12, '0')}`,
+      type: 'fixture', at: n + 4, schemaVersion: 1, payload: '{}',
+    });
+  }
+  let begin!: () => void;
+  const firstBatch = new Promise<void>((resolve) => { begin = resolve; });
+  let permit!: () => void;
+  const gate = new Promise<void>((resolve) => { permit = resolve; });
+  let sends = 0;
+  const flushing = flushAnalytics(driver, async () => {
+    sends += 1;
+    if (sends === 1) { begin(); await gate; }
+  });
+  await firstBatch;
+  const deleting = deleteDeviceAccount({
+    driver, secretStore: secret, baseUrl: BASE,
+    transport: { deleteDevice: async () => ({ status: 204 }) },
+  });
+  permit();
+  await Promise.all([flushing, deleting]);
+  assert.equal(sends, 1, 'no second network batch once deletion is requested');
+  assert.equal(count(driver, 'event_queue'), 0);
+  assert.equal(getAnalyticsConsent(driver), null);
+});
+
 test('APR-07.a: canonical 403 cleans locally but permanently reports remote_unverified', async () => {
   const driver = fresh();
   const secret = store();
@@ -175,6 +206,86 @@ test('APR-07.a: every noncanonical/malformed 403 keeps the only credential and p
       driver, secretStore: secret, baseUrl: BASE,
       transport: { register: async () => { throw new Error('must not register'); } },
     }), { rule: 'deletion_pending' });
+  }
+});
+
+
+
+test('APR-07.a: corrupt persisted deletion phase fails closed with named diagnostic', async () => {
+  const driver = fresh();
+  const secret = store();
+  setSetting(driver, 'device_delete_state', 'unknown_phase');
+  assert.throws(() => getDeviceDeleteState(driver), { rule: 'device-delete-state-invalid' });
+  await assert.rejects(ensureDeviceIdentity({
+    driver, secretStore: secret, baseUrl: BASE,
+    transport: { register: async () => { throw new Error('do not register'); } },
+  }), { rule: 'device-delete-state-invalid' });
+  await assert.rejects(flushAnalytics(driver, async () => { throw new Error('do not send'); }), { rule: 'device-delete-state-invalid' });
+  assert.equal(secret.current(), SECRET);
+  assert.equal(getDeviceId(driver), ID);
+});
+
+test('APR-07.a: absent SecureStore credential completes local-only with remote uncertainty', async () => {
+  const driver = fresh();
+  const secret = store();
+  await secret.clearSecret();
+  const result = await deleteDeviceAccount({
+    driver, secretStore: secret, baseUrl: BASE,
+    transport: { deleteDevice: async () => { throw new Error('no bearer is available'); } },
+  });
+  assert.deepEqual(result, { local: 'complete', remote: 'remote_unverified' });
+  assert.equal(getDeviceId(driver), null);
+  assert.equal(getAnalyticsConsent(driver), null);
+  assert.equal(getCrashConsent(driver), null);
+});
+
+test('APR-07.a: default HTTPS deletion timeout retains credential and retry state', async () => {
+  const driver = fresh();
+  const secret = store();
+  const stub = stubGlobalFetch(() => new Promise<Response>(() => { /* stalled endpoint */ }));
+  try {
+    await assert.rejects(deleteDeviceAccount({ driver, secretStore: secret, baseUrl: BASE, waitLimitMs: 20 }), { rule: 'network_failed' });
+    assert.equal(stub.requests.length, 1);
+    assert.equal(getDeviceDeleteState(driver), 'pending_remote');
+    assert.equal(getDeviceId(driver), ID);
+    assert.equal(secret.current(), SECRET);
+    assert.equal(getLastDeviceDeletionResult(driver), null);
+  } finally {
+    stub.restore();
+  }
+});
+
+test('APR-07.a: retry after a lost 204 reports remote_unverified, not inferred success', async () => {
+  const driver = fresh();
+  const secret = store();
+  let calls = 0;
+  const transport = { deleteDevice: async () => {
+    calls += 1;
+    if (calls === 1) throw new Error('204 response lost after server delete');
+    return { status: 403, body: { error: 'device_auth_failed' } };
+  } };
+  await assert.rejects(deleteDeviceAccount({ driver, secretStore: secret, baseUrl: BASE, transport }), /response lost/);
+  assert.equal(isDeviceDeletionPending(driver), true);
+  const result = await deleteDeviceAccount({ driver, secretStore: secret, baseUrl: BASE, transport });
+  assert.equal(calls, 2);
+  assert.deepEqual(result, { local: 'complete', remote: 'remote_unverified' });
+  assert.equal(getLastDeviceDeletionResult(driver)?.remote, 'remote_unverified');
+});
+
+test('APR-07.a: default HTTPS canonical 403 is unverified, never remote_confirmed', async () => {
+  const driver = fresh();
+  const secret = store();
+  const stub = stubGlobalFetch(async () => new Response(JSON.stringify({ error: 'device_auth_failed' }), {
+    status: 403, headers: { 'content-type': 'application/json' },
+  }));
+  try {
+    const result = await deleteDeviceAccount({ driver, secretStore: secret, baseUrl: BASE });
+    assert.equal(result.remote, 'remote_unverified');
+    assert.equal(stub.requests.length, 1);
+    assert.equal(secret.current(), null);
+    assert.equal(getDeviceId(driver), null);
+  } finally {
+    stub.restore();
   }
 });
 
@@ -226,6 +337,43 @@ test('APR-07.a: restart after SecureStore failure resumes cleanup without a seco
     assert.equal(count(restored.driver, 'event_queue'), 0);
     assert.equal(getSetting(restored.driver, 'language'), 'be');
     restored.close();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+
+test('APR-07.a: pending remote deletion survives restart and requires explicit retry', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'kudy-device-remote-'));
+  const path = join(dir, 'local.sqlite');
+  const secret = store();
+  try {
+    const original = nodeSqliteFileDriver(path);
+    fresh(original.driver);
+    await assert.rejects(deleteDeviceAccount({
+      driver: original.driver, secretStore: secret, baseUrl: BASE,
+      transport: { deleteDevice: async () => { throw new Error('offline'); } },
+    }), /offline/);
+    original.close();
+
+    const next = nodeSqliteFileDriver(path);
+    assert.equal(getDeviceDeleteState(next.driver), 'pending_remote');
+    await assert.rejects(ensureDeviceIdentity({
+      driver: next.driver, secretStore: secret, baseUrl: BASE,
+      transport: { register: async () => { throw new Error('must not register'); } },
+    }), { rule: 'deletion_pending' });
+    let sent = 0;
+    assert.equal(await flushAnalytics(next.driver, async () => { sent += 1; }), 0);
+    assert.equal(sent, 0);
+    assert.equal(secret.current(), SECRET);
+    assert.equal(count(next.driver, 'event_queue'), 1);
+    const done = await deleteDeviceAccount({
+      driver: next.driver, secretStore: secret, baseUrl: BASE,
+      transport: { deleteDevice: async () => ({ status: 403, body: { error: 'device_auth_failed' } }) },
+    });
+    assert.equal(done.remote, 'remote_unverified');
+    assert.equal(count(next.driver, 'event_queue'), 0);
+    next.close();
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

@@ -22,7 +22,7 @@ import { ANALYTICS_CONSENT_KEY, isDeviceDeletionPending, setSetting } from './db
 import type { SqlDriver } from './db/types.ts';
 import type { DeviceIdentity } from './device.ts';
 import { flushEvents, type EventSender, type OutgoingEvent } from './eventLog.ts';
-import { withDeviceLifecycle } from './device-lifecycle.ts';
+import { deviceDeletionRequested, withDeviceLifecycle } from './device-lifecycle.ts';
 import { readConsentState } from './consent.ts';
 import { assertNotRedirected, parseSecureEndpointUrl, SecureUrlError } from './secure-url.ts';
 
@@ -77,9 +77,9 @@ export function setAnalyticsConsent(driver: SqlDriver, consent: AnalyticsConsent
 // criterion 2 forbids.
 export async function flushAnalytics(driver: SqlDriver, send: EventSender): Promise<number> {
   return withDeviceLifecycle(driver, async () => {
-    if (isDeviceDeletionPending(driver) || getAnalyticsConsent(driver) !== 'granted') return 0;
+    if (deviceDeletionRequested(driver) || isDeviceDeletionPending(driver) || getAnalyticsConsent(driver) !== 'granted') return 0;
     return flushEvents(driver, send, {
-      beforeBatch: () => !isDeviceDeletionPending(driver) && getAnalyticsConsent(driver) === 'granted',
+      beforeBatch: () => !deviceDeletionRequested(driver) && !isDeviceDeletionPending(driver) && getAnalyticsConsent(driver) === 'granted',
     });
   });
 }

@@ -131,7 +131,13 @@ export function ensureDeviceIdentity(deps: {
   /** Wait limit override for the default transport (tests; the owner is NETWORK_WAIT_LIMITS.deviceMs). */
   waitLimitMs?: number;
 }): Promise<DeviceIdentity> {
-  if (deviceDeletionRequested(deps.driver) || getDeviceDeleteState(deps.driver) === 'pending_remote') {
+  let pendingRemote = false;
+  try {
+    pendingRemote = getDeviceDeleteState(deps.driver) === 'pending_remote';
+  } catch (error) {
+    return Promise.reject(error);
+  }
+  if (deviceDeletionRequested(deps.driver) || pendingRemote) {
     return Promise.reject(new DeviceError('deletion_pending', 'device deletion needs an explicit retry'));
   }
   const running = inflight.get(deps.driver);
@@ -268,7 +274,6 @@ export async function recoverPendingLocalDeletion(driver: SqlDriver, secretStore
 }
 
 /** Deletion never claims remote success on 403 or missing credentials. */
-
 export async function deleteDeviceAccount(deps: {
   driver: SqlDriver;
   secretStore: SecureSecretStore;
@@ -290,10 +295,8 @@ export async function deleteDeviceAccount(deps: {
     setDeviceDeleteState(deps.driver, 'pending_remote');
     const secret = await deps.secretStore.getSecret();
     if (secret === null) {
-    // No identity to authenticate: no server account is reachable under a
-    // secret nobody holds (an incomplete registration pair — the next
-    // ensureDeviceIdentity re-registers), so the deletion is the local wipe
-    // only, and never a re-registration for the old state.
+      // With no bearer, remote erasure cannot be proven or requested.
+      // Clear only local device-owned data, without a new registration.
       setDeviceDeleteState(deps.driver, 'cleanup_remote_unverified');
       await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
       return { local: 'complete', remote: 'remote_unverified' };

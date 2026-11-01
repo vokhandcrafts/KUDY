@@ -77,6 +77,36 @@ test('CSV in -> export saved -> listed -> removed', (t) => {
   assert.deepEqual(fs.readdirSync(path.join(dir, 'exports')), []);
 });
 
+test('APR-07.a: a saved synthetic report is removed and regenerated from post-delete rows', (t) => {
+  const dir = tempDir(t);
+  const exportsDir = path.join(dir, 'exports');
+  const csvFile = path.join(dir, 'feedback.csv');
+  fs.writeFileSync(csvFile, CSV, 'utf8');
+
+  const before = capture(() => run(['--from-csv', csvFile, '--out-dir', exportsDir, '--computed-at', FIXED_AT]));
+  before.restoreExit();
+  assert.equal(before.exitCode, undefined);
+  assert.equal(fs.readdirSync(exportsDir).length, 1, 'synthetic pre-delete export is saved');
+
+  // The real admin SQL query is run again after deletion; this fixture models
+  // its now-empty CSV result. No client-facing reporting privileges are used.
+  fs.writeFileSync(csvFile, CSV.split('\n')[0] + '\n', 'utf8');
+  const purged = capture(() => run(['--remove-saved', '--all', '--out-dir', exportsDir]));
+  purged.restoreExit();
+  assert.equal(purged.exitCode, undefined);
+  assert.deepEqual(fs.readdirSync(exportsDir), []);
+
+  const after = capture(() => run(['--from-csv', csvFile, '--out-dir', exportsDir, '--computed-at', '2026-11-01T00:00:00.000Z']));
+  after.restoreExit();
+  assert.equal(after.exitCode, undefined);
+  const saved = fs.readdirSync(exportsDir);
+  assert.equal(saved.length, 1);
+  assert.notEqual(saved[0], 'feedback-report-2026-10-04T19-00-00.000Z.json');
+  const doc = JSON.parse(fs.readFileSync(path.join(exportsDir, saved[0]), 'utf8'));
+  assert.deepEqual(doc.aggregates, []);
+  assert.equal(doc.period, null);
+});
+
 test('a broken CSV file exits 1 with named diagnostics on stderr', (t) => {
   const dir = tempDir(t);
   const csvFile = path.join(dir, 'broken.csv');

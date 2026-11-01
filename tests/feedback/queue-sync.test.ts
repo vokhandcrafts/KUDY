@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { clearDeviceAccountState } from '../../services/db/db.ts';
+import { deleteDeviceAccount } from '../../services/device.ts';
 import {
   applyAcknowledgement,
   deleteFeedback,
@@ -324,6 +325,37 @@ test('device deletion mid-flight: the late response is dropped, nothing is resur
   assert.equal(after.skippedNoIdentity, true);
   assert.equal(transport.calls.length, 1, 'no further dispatch');
   assert.equal(secrets.saved, 0);
+});
+
+
+test('APR-07.a: queued deletion prevents a second feedback mutation after the active send', async () => {
+  const driver = openIdentifiedStore();
+  saveDraft(driver, GUIDE_TARGET, DRAFT, { now: NOW });
+  sendNow(driver, GUIDE_TARGET, { now: NOW, mutationId: M1 });
+  saveDraft(driver, PLACE_TARGET, { ...DRAFT, score: 3 }, { now: NOW + 1 });
+  sendNow(driver, PLACE_TARGET, { now: NOW + 1, mutationId: M2 });
+  const first = deferred<undefined>();
+  const onWire = deferred<undefined>();
+  const transport = scriptedTransport(({ index }) => {
+    if (index === 0) { onWire.resolve(undefined); return first.promise.then(() => okPut(1)); }
+    throw new Error('second mutation must not be dispatched after a delete request');
+  });
+  const secrets = secretBox(SECRET);
+  const flushing = makeSync(driver, secrets, transport).flush();
+  await onWire.promise;
+  let confirmed = false;
+  const deleting = deleteDeviceAccount({
+    driver, secretStore: secrets, baseUrl: BASE_URL,
+    transport: { deleteDevice: async () => { confirmed = true; return { status: 204 }; } },
+  });
+  first.resolve(undefined);
+  const report = await flushing;
+  await deleting;
+  assert.equal(transport.calls.length, 1);
+  assert.equal(report.dispatched, 1);
+  assert.equal(confirmed, true);
+  assert.equal(rawOutbox(driver).length, 0);
+  assert.equal(Number(driver.prepare('SELECT COUNT(*) AS n FROM feedback_local').get()?.n), 0);
 });
 
 test('flush delivers several targets one at a time in their queue order', async () => {
