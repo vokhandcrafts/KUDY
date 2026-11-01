@@ -42,7 +42,15 @@ Guard-маркеры адсутнасці: be «агрэгаваныя лічб�
 
 ## Вердікт праверак
 
-<!-- GATES: fill after the full npm test run at the code-identical commit -->
+Прагон npm test на каміце `cbf8cb0` (код гэтага PR без дакументальных лічбаў; наступны каміт дадае толькі лічбы гэтага раздзела):
+
+- `npm run messages:generate:check` — ✅ 17 файлаў fresh
+- `npm run messages:check` — ✅ shipped locales complete, reviewed and fresh
+- `npm run typecheck` — ✅ без памылак
+- `npm run arch:check` — ✅ 679 modules, 0 violations
+- `npx --yes jscpd@5.1.2 --config .jscpd.json --no-tips .` — ✅ 0 clones (19.5s)
+- `npm test` — ✅ 2894 tests / 2813 pass / 8 fail; набор фэйлаў пабайтова ідэнтычны чыстаму main `b4baef3` (там 2884/2803/8, тыя ж 8 імён; +10 тэстаў = новыя guard'ы гэтага PR). Дыф-нейтральнасць даказана паўнымі логамі абодвух прагонаў.
+- Рэверт-эксперымент ✅: guard падае на адноўленым en-сцвярджэнні і называем прычыну.
 
 ## Далейшыя крокі
 
