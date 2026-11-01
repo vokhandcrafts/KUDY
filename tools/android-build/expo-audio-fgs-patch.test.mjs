@@ -7,6 +7,15 @@ import { test } from 'node:test';
 import { patchExpoAudioNative } from './expo-audio-fgs-patch.cjs';
 
 const playerSource = `
+  private var playing = false
+  private fun addPlayerListeners() = ref.addListener(object : Player.Listener {
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+      playing = isPlaying
+    }
+  }
+  fun currentStatus(): Map<String, Any?> = mapOf(
+      "playing" to ref.isPlaying,
+  )
   fun setActiveForLockScreen(active: Boolean, metadata: Metadata? = null, options: AudioLockScreenOptions? = null) {
     if (active) {
       this.metadata = metadata
@@ -181,6 +190,19 @@ test('#854: forced onDestroy detaches the only B listener before releasing its s
     'old service must not retain B listener on restart');
   assert.match(body, /mediaSession = null\s*currentPlayer = null/);
   assert.match(body, /pendingPlayer = restartPlayer[\s\S]*?startPlaybackService\(applicationContext\)/);
+});
+
+test('#854: Media3 USER_REQUEST/REMOTE origins are attached to the same playback status transition', (t) => {
+  const { root, player } = makeFixture();
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  patchExpoAudioNative(root);
+  const source = fs.readFileSync(player, 'utf8');
+  assert.match(source, /onPlayWhenReadyChanged\(playWhenReady: Boolean, reason: Int\)/);
+  assert.match(source, /PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST/);
+  assert.match(source, /PLAY_WHEN_READY_CHANGE_REASON_REMOTE/);
+  assert.match(source, /lastKudyUserControlTransition = if \(pendingKudyUserControl == isPlaying\) isPlaying else null/);
+  assert.match(source, /pendingKudyUserControl = null\s*playing = isPlaying/);
+  assert.match(source, /"kudyNativeUserControl" to \([\s\S]*?lastKudyUserControlTransition == ref.isPlaying/);
 });
 
 test('#854: native patch rejects SDK drift atomically', (t) => {

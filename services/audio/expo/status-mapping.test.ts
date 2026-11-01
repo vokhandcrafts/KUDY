@@ -66,6 +66,42 @@ test('a pause command maps to paused and a resume command to resumed', () => {
   ]);
 });
 
+test('#854: first loaded Playing after initial buffering is launch, not native Resume', () => {
+  const { events, play, feed } = makeMapper();
+  play();
+  feed(status({ playing: false, isLoaded: false, playbackState: 'buffering' }));
+  feed({ ...status({ playing: true }), kudyNativeUserControl: true } as AudioStatus);
+  assert.deepEqual(events, []);
+});
+
+test('#854: Android media controls yield user paused/resumed events, not audio focus events', () => {
+  const { events, play, feed } = makeMapper();
+  play();
+  feed(status({ playing: true }));
+  feed({ ...status({ playing: false }), kudyNativeUserControl: true } as AudioStatus);
+  feed({ ...status({ playing: true }), kudyNativeUserControl: true } as AudioStatus);
+  assert.deepEqual(events, [{ type: 'paused', key: 1 }, { type: 'resumed', key: 1 }]);
+});
+
+test('#854: real focus loss/regain stays a focus event without native user intent', () => {
+  const { events, play, feed } = makeMapper();
+  play();
+  feed(status({ playing: true }));
+  feed({ ...status({ playing: false }), kudyNativeUserControl: false } as AudioStatus);
+  feed({ ...status({ playing: true }), kudyNativeUserControl: false } as AudioStatus);
+  assert.deepEqual(events, [{ type: 'focus-loss' }, { type: 'focus-regain' }]);
+});
+
+test('#854: a user Play after focus loss clears pending focus state without phantom regain', () => {
+  const { events, play, feed } = makeMapper();
+  play();
+  feed(status({ playing: true }));
+  feed(status({ playing: false }));
+  feed({ ...status({ playing: true }), kudyNativeUserControl: true } as AudioStatus);
+  feed(status({ playing: false }));
+  assert.deepEqual(events, [{ type: 'focus-loss' }, { type: 'resumed', key: 1 }, { type: 'focus-loss' }]);
+});
+
 test('an interruption maps to focus-loss, never finished, and the launch survives a regain', () => {
   const { events, play, feed } = makeMapper();
   play();

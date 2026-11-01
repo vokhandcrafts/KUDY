@@ -66,6 +66,9 @@ export function createStatusMapper(): StatusMapper {
   // No source expected: statuses are a removed player's late ticks.
   let closed = false;
   let lastPlaying: boolean | null = null;
+  // First physical Play belongs to launch activation, even if an initial
+  // buffering tick reported playing=false before the first true status.
+  let hasPlayed = false;
 
   function resetLedger(): void {
     pausePending = false;
@@ -74,6 +77,7 @@ export function createStatusMapper(): StatusMapper {
     wasLoaded = false;
     settled = false;
     lastPlaying = null;
+    hasPlayed = false;
   }
 
   return {
@@ -118,14 +122,30 @@ export function createStatusMapper(): StatusMapper {
       }
 
       const playing = status.playing;
+      // Expo Audio's Android adapter adds this one-bit origin fact from
+      // Media3 Player.Listener. MediaSession button presses bypass the TS
+      // port, so they cannot be inferred from the port command ledger.
+      // Absence of the fact (iOS or ordinary Android focus changes) keeps
+      // the existing focus-loss/regain classification.
+      const nativeUserControl = (status as AudioStatus & { kudyNativeUserControl?: boolean }).kudyNativeUserControl === true;
       const previous = lastPlaying;
       lastPlaying = playing;
-      if (previous === null || previous === playing) return null;
+      if (previous === null) {
+        if (playing) hasPlayed = true;
+        return null;
+      }
+      if (previous === playing) return null;
+      if (playing && !hasPlayed) {
+        hasPlayed = true;
+        return null;
+      }
 
       if (previous && !playing) {
         // true → false: our pause command, or the OS took the output.
-        if (pausePending) {
+        if (pausePending || nativeUserControl) {
           pausePending = false;
+          resumePending = false;
+          focusLost = false;
           return { type: 'paused' };
         }
         focusLost = true;
@@ -136,8 +156,10 @@ export function createStatusMapper(): StatusMapper {
       // false → true: our resume, or the output came back after an
       // interruption. Nothing sounds by itself otherwise (R03) — a start
       // right after the play command is the launch opening, not an event.
-      if (resumePending) {
+      if (resumePending || nativeUserControl) {
         resumePending = false;
+        pausePending = false;
+        focusLost = false;
         return { type: 'resumed' };
       }
       if (focusLost) {

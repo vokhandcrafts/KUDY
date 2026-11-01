@@ -4,7 +4,17 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { assertNoReadyStart, waitForRun, locationListeners, waitForManualStart, tapMapPoint, visiblePointStatus, startWalkAtLocation, previewNodesWith, tapPlayAndWaitForAudio, dismissGuideHintBeforePlay } from './walk.mjs';
+import { assertNoReadyStart, waitForRun, locationListeners, waitForManualStart, tapMapPoint, visiblePointStatus, startWalkAtLocation, previewNodesWith, tapPlayAndWaitForAudio, dismissGuideHintBeforePlay, waitForAudioBarState } from './walk.mjs';
+
+test('#854 Android media-button changes the audio bar, not the run/focus suspension state', async () => {
+  let label = 'Pause audio';
+  const driver = { dump: async () => ({ xml: `<node resource-id="btn-bar-playpause" content-desc="${label}"/>` }) };
+  assert.equal(await waitForAudioBarState(driver, label, false), 'Pause audio');
+  label = 'Play audio';
+  assert.equal(await waitForAudioBarState(driver, 'Pause audio', true), 'Play audio');
+  const invalid = { dump: async () => ({ xml: '<node resource-id="btn-bar-playpause" content-desc="Play audio"/><node resource-id="run-autoplay-suspended"/>' }) };
+  await assert.rejects(waitForAudioBarState(invalid, 'Pause audio', true), /incorrectly suspended autoplay/);
+});
 
 test('walk scrolls clipped preview lock badges into the UIAutomator viewport', async () => {
   let position = 0;

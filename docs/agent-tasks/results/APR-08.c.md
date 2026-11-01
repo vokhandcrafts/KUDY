@@ -57,3 +57,9 @@ Frozen unit-тэсты, зыходнік SDK і Android debug-прагон па�
 
 Новыя source-level regression checks у `tools/android-build/expo-audio-fgs-patch.test.mjs` пакрываюць абодва парадкі станаў, чыстку слухача да вызвалення session, паўторны prebuild і адхіленне змененага SDK. Android E2E прайграе A→B, Play пасля idle-stop і хуткі Play→Stop; **толькі фактычны Android runner можа пацвердзіць runtime**. Release APK/AAB, runtime trace і CI на новым SHA — **NOT-VERIFIED** да вынікаў GitHub runner. Ніводная праверка Node не падаецца як доказ Android runtime.
 
+
+## Review follow-up (2026-11-01) — pre-push verification record
+
+Voka на head `5e806345` выявіў `lockscreen-controls-misclassified-as-focus` (High) і `multiline-notification-record-missed` (Medium). Лакальны кандыдат дадае Android Media3 user-action origin у status payload Expo Audio (з захаваннем focus-loss/focus-regain), карэктны mapper і праверку Android UI-падзей медыякнопак. Для `dumpsys notification` замест праверкі радкоў выкарыстоўваецца асобны парсер поўных `NotificationRecord`, з праверкай канала і FGS-бітмаскі.
+
+Пацверджана локальна: mapper/test, native patch fixture, notification-record test і walk helper tests; два новыя mapper regression-тэсты былі чырвоныя да праўкі. Патч двойчы ідэмпатэнтна прымяняецца да Expo SDK 54 Kotlin-source з GitHub. **Няма пацвярджэння, што гэта той самы npm tarball Expo Audio 1.1.1 або што Kotlin-код скампіляваны.** Android device, release runtime, full CI — **NOT-VERIFIED**. Typecheck і arch:check не прайшлі з-за адсутных `tsc` і `dependency-cruiser` у ізаляваным checkout; іх нельга лічыць зялёнымі. Перад push адзначана, што гэтая лакальная праверка не замяняе Android CI і рэальны runtime; PR #948 застаецца Draft да незалежнага рэв’ю.

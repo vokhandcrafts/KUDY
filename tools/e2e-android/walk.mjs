@@ -9,6 +9,7 @@ import fs from 'node:fs';
 
 import { findNode, parseDump } from './driver.mjs';
 import { assertMediaServiceState } from './media-service-state.mjs';
+import { assertMediaNotificationState } from './media-notification-state.mjs';
 
 const SHORT_MS = 30000;
 const DOWNLOAD_MS = 120000;
@@ -197,6 +198,24 @@ async function startMediaProofVideo(driver) {
   };
 }
 
+export async function waitForAudioBarState(driver, previousLabel, changed) {
+  const deadline = Date.now() + SHORT_MS;
+  for (;;) {
+    const nodes = parseDump((await driver.dump('dump-walk-media-button.xml')).xml);
+    const bar = findNode(nodes, { testID: 'btn-bar-playpause' });
+    if (bar && typeof bar.contentDesc === 'string' && bar.contentDesc.length > 0 &&
+      (changed ? bar.contentDesc !== previousLabel : bar.contentDesc === previousLabel)) {
+      assert.ok(!findNode(nodes, { testID: 'run-autoplay-suspended' }),
+        'media-button action incorrectly suspended autoplay as audio focus loss');
+      assert.ok(!findNode(nodes, { testID: 'run-paused' }),
+        'audio-only media-button action must not pause the entire walking session');
+      return bar.contentDesc;
+    }
+    if (Date.now() >= deadline) throw new Error('media button did not update engine playback UI');
+    await delay();
+  }
+}
+
 async function recordMediaServiceState(driver, label) {
   const services = (await driver.exec(['shell', 'dumpsys', 'activity', 'services'])).stdout;
   const sessions = (await driver.exec(['shell', 'dumpsys', 'media_session'])).stdout;
@@ -205,18 +224,14 @@ async function recordMediaServiceState(driver, label) {
   fs.writeFileSync(driver.artifactPath(`apr08c-${label}-sessions.txt`), sessions);
   fs.writeFileSync(driver.artifactPath(`apr08c-${label}-notifications.txt`), notifications);
   const { excerpt: serviceExcerpt, foreground } = assertMediaServiceState(services, label);
-  const notificationLines = notifications.split(/\r?\n/).filter((line) => /by\.kudy\.app/.test(line)).slice(0, 8);
+  const notificationExcerpt = assertMediaNotificationState(notifications, label);
   console.log(`APR08C_${label}_SERVICE ${serviceExcerpt}`);
   console.log(`APR08C_${label}_FOREGROUND ${foreground}`);
-  console.log(`APR08C_${label}_NOTIFICATIONS ${notificationLines.join(' | ') || '(absent)'}`);
+  console.log(`APR08C_${label}_NOTIFICATIONS ${notificationExcerpt}`);
   console.log(`APR08C_${label}_MEDIA_SESSION ${sessions.includes('by.kudy.app') ? 'package present' : 'package absent'}`);
   if (label === 'paused') {
     assert.ok(sessions.includes('by.kudy.app'), 'Android media session is absent during a paused audio session');
-    assert.ok(notificationLines.some((line) => line.includes('FOREGROUND_SERVICE')),
-      'Android foreground media notification is absent during a paused audio session');
-  } else if (label === 'stopped') {
-    assert.ok(!notificationLines.some((line) => line.includes('NotificationRecord') && line.includes('expo_audio_channel')),
-      'Android media notification remains after Stop');
+    // assertMediaNotificationState already verified the exact media channel and FGS flag.
   }
 }
 
@@ -557,10 +572,22 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     await recordMediaServiceState(driver, 'paused');
   });
 
-  await runCase('walk: rapid Play then Stop cannot resurrect the media service', 'walk-rapid-stop', driver, async () => {
-    // The restart case left stop 1 selected. Switch stories rather than
-    // toggling the same card closed.
+  await runCase('walk: native media buttons keep the Run UI in sync', 'walk-native-media-buttons', driver, async () => {
     await tapMapPoint(driver, 'e2e-stop-2');
+    await tapPlayAndWaitForAudio(driver);
+    const before = await driver.waitFor({ testID: 'btn-bar-playpause' }, { timeoutMs: SHORT_MS });
+    assert.ok(before.contentDesc, 'audio bar control must expose its action');
+    await driver.exec(['shell', 'input', 'keyevent', 'KEYCODE_MEDIA_PAUSE']);
+    await waitForAudioActive(driver, false);
+    await waitForAudioBarState(driver, before.contentDesc, true);
+    await driver.exec(['shell', 'input', 'keyevent', 'KEYCODE_MEDIA_PLAY']);
+    await waitForAudioActive(driver, true);
+    await waitForAudioBarState(driver, before.contentDesc, false);
+  });
+
+  await runCase('walk: rapid Play then Stop cannot resurrect the media service', 'walk-rapid-stop', driver, async () => {
+    // The media-button case left stop 2 selected: switch to another story.
+    await tapMapPoint(driver, 'e2e-stop-1');
     await dismissGuideHintBeforePlay(driver);
     // Capture both node coordinates before Play; no UIAutomator dump may run
     // between taps, since the six-second fixture would mask the startup race.

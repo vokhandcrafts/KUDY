@@ -42,6 +42,39 @@ function patchPlayer(source) {
       AudioControlsService.clearPlayer(this@AudioPlayer)
       playerScope.cancel()`,
     'AudioPlayer.sharedObjectDidRelease');
+  next = replaceOnce(next,
+    `  private var playing = false`,
+    `  private var playing = false
+  // Expo Audio has no origin field in AudioStatus. The intent is latched
+  // for the matching isPlaying transition so the status mapper can tell
+  // media-button Play/Pause from real audio focus interruption.
+  private var pendingKudyUserControl: Boolean? = null
+  private var lastKudyUserControlTransition: Boolean? = null`,
+    'AudioPlayer.native user control state');
+  next = replaceOnce(next,
+    `  private fun addPlayerListeners() = ref.addListener(object : Player.Listener {
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+      playing = isPlaying`,
+    `  private fun addPlayerListeners() = ref.addListener(object : Player.Listener {
+    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+      pendingKudyUserControl = if (
+        reason == Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST ||
+        reason == Player.PLAY_WHEN_READY_CHANGE_REASON_REMOTE
+      ) playWhenReady else null
+    }
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+      lastKudyUserControlTransition = if (pendingKudyUserControl == isPlaying) isPlaying else null
+      pendingKudyUserControl = null
+      playing = isPlaying`,
+    'AudioPlayer.native media button reason');
+  next = replaceOnce(next,
+    `      "playing" to ref.isPlaying,`,
+    `      "playing" to ref.isPlaying,
+      "kudyNativeUserControl" to (
+        pendingKudyUserControl == ref.isPlaying || lastKudyUserControlTransition == ref.isPlaying
+      ),`,
+    'AudioPlayer.status exposes native action origin');
   return next;
 }
 
