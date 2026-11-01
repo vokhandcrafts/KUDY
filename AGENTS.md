@@ -6,7 +6,7 @@ Before completing any implementation task, read and follow `docs/agent-rules/sho
 
 Before implementing any fix or feature, read and follow `docs/agent-rules/implementation-rules.md`. It lists the recurring defect patterns from the 2026-09-15 architecture review and the fix campaign (reverted-fix guards, contract restatement drift, platform assumptions, generated mirrors, runner wiring, stale docs, executor collisions) with the mandatory pre-push check for each.
 
-When reviewing a diff, a PR, a branch before merge, or code you or another agent just wrote, read and follow `docs/agent-rules/code-review.md`. It defines review scope, the pre-checks to run before reading, the KUDY checklist, and the severity-graded output format.
+When reviewing a diff, a PR, a branch before merge, or code you or another agent just wrote, read and follow `docs/agent-rules/code-review.md`. It defines review scope, the pre-checks to run before reading, the KUDY checklist, and the severity-graded output format. Also read `docs/agent-rules/review-gate.md`: both Voka and Judge apply the 1-CRITICAL / 1-HIGH / 3-MEDIUM threshold, and every unresolved non-blocking finding must be filed in a labeled GitHub Issue naming its source PR before merge readiness is green.
 
 When you claim, execute, block or hand back a task tracked as a GitHub issue in this repository, read and follow `docs/agent-rules/issue-workflow.md`. It defines the status-label protocol shared with the dispatcher, the claim and handback comments, and the PR contract that closes the issue on merge.
 

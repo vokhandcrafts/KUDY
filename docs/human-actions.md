@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-11-01 — увядзенне агульнага парога Voka/Judge
+Што зрабіць: пасля незалежнага рэв’ю і абавязковых праверак змержы KUDY PR #961 і Tool-Lib PR #165. Абнаві ўсталяваныя лакальныя копіі Voka/Judge і канфігурацыю знешніх ботаў з кананічных Tool-Lib скілаў; пераканайся, што яны ствараюць Issues з `voka-finding`/`judge-finding` і не пасылаюць merge-сігнал пры 3 Medium. Пасля выканання выдалі запіс.
+PR: [KUDY #961](https://github.com/vokhandcrafts/KUDY/pull/961) · [Tool-Lib #165](https://github.com/vokhandcrafts/Tool-Lib/pull/165)
+
 ### 2026-11-01 — змержы запаўненне handoff у results APR-08.b (#945)
 Што зрабіць: змержы PR — ён замяняе плясхолдар у раздзеле «Handoff #299» results-дакументу APR-08.b.md рэальным запісам каментара. Пасля мержу issue #945 закрыецца сама; калі пазнака `agent:running` застанецца на закрытым issue, знімі яе. Калі PR ужо змержаны — запіс састарэлы, выдалі яго.
 PR: [#946](https://github.com/vokhandcrafts/KUDY/pull/946) · Issue: [#945](https://github.com/vokhandcrafts/KUDY/issues/945)

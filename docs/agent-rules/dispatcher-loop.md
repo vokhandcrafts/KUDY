@@ -13,7 +13,13 @@ only writes product code and a review JSON.
 
 ## Reviewer
 
-Follow `code-review.md`. When the dispatcher asks for structured output, use
+Follow `code-review.md` **and `review-gate.md`**. Voka and Judge apply the
+same thresholds; 3 distinct MEDIUM findings across their latest same-HEAD
+reviews block the combined PR gate. On PASS, every remaining finding must
+have a linked GitHub Issue with the reviewer's finding label before the
+workflow is complete. Report merge readiness separately.
+
+When the dispatcher asks for structured output, use
 the prompt in the dispatcher repo (`prompts/reviewer.md`): JSON findings with
 P0–P3. A fenced ` ```json ` block is accepted; a model `approve` line is not.
 

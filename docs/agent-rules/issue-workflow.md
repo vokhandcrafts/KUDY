@@ -121,16 +121,28 @@ same defect there as a missing one. Work happens on a branch named `<tool>/<issu
 
    `Closes #N` is mandatory: the issue closes when the PR merges, and the merge is
    the completion signal both the operator and the automation understand.
-5. Merging is authorized (owner decision, 2026-09-26): once the code review and
-   the judge verdicts are both green, the pipeline may squash-merge its own PR
-   to `main` and delete the branch. Never merge without both green verdicts,
-   never change GitHub checks or branch protection, never read or invent tokens
-   (`dispatcher-loop.md` applies to you).
+5. Merging is authorized (owner decision, 2026-09-26; revised review
+   thresholds 2026-11-01): follow [review-gate.md](review-gate.md).
+   The combined review gate FAILS at 1 CRITICAL, 1 HIGH, or 3 distinct
+   MEDIUM findings across Voka and Judge's latest same-HEAD reports.
+   Remaining LOW and up to 2 MEDIUM findings do not block **by severity**,
+   but every remaining non-blocking finding must have a verified GitHub Issue
+   with the originating PR and `voka-finding` / `judge-finding` labels
+   before merge readiness can be green. Both reviews must be current, all
+   other required checks and acceptance criteria must pass, and the Judge
+   approval must be independent. The pipeline may then squash-merge its own
+   PR to `main` and delete the branch. Never merge without all these gates;
+   never change GitHub checks or branch protection, never read or invent
+   tokens (`dispatcher-loop.md` applies to you).
 6. After the merge: remove `agent:running` from the (now closed) issue. Nothing else
    is needed. If the PR was closed without merging, hand the task back (§6).
 
-Review findings on the PR (human or CodeRabbit) are fixed in the same branch —
-never open a duplicate PR for the same issue.
+Blocking review findings on the PR are fixed in the same branch, with a fresh
+review; never open a duplicate PR for the same issue. Findings allowed by the
+Voka/Judge threshold are tracked in GitHub Issues as specified by
+`review-gate.md`; they need not be fixed in the source PR. An Issue for
+follow-up debt is distinct from the original implementation Issue. Do not
+silently create duplicate finding Issues on each review rerun.
 
 ## 6. Blocked and hand-back
 
