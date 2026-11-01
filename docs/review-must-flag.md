@@ -300,3 +300,12 @@
   `app/(tabs)/explore.tsx`; на каміце фіксу hitSlop таксама ў
   `app/place/[id].tsx`, `app/run/[id].tsx`, `components/back-button.tsx`,
   `components/guide-card.tsx`) — issue #938.
+
+- key: missing-spec-check — першы праход design-QA (`design-qa.md` First
+  pass) аднаўляе ўсе праверкі раздзела «Што правярае сам» спецы design-QA
+  §6.2, а не толькі частку пераліку: галінка «Кожная гісторыя (стан) мае
+  здымак; новы стан не з'яўляецца без запісу ў каноне» мае ўласны пункт
+  (стан без здымку — NOT-VERIFIED; новы стан без запісу ў каноне — на
+  разгляд уладальніка). Калі праверка з §6.2 знікае з першага праходу без
+  аргумента пераносу — знаходка, нават калі астатні пералік поўны.
+  Выпраўлена: docs/agent-rules/design-qa.md, First pass — issue #939.

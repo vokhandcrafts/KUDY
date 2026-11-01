@@ -17,6 +17,7 @@ Run a design-QA review **on request** and **before closing any task that changes
 - Examine text clipping and tap geometry with a valid UI tree plus source evidence. A 48 dp target remains **OPINION** until an accepted owner decision adds it to canon (design-QA spec §12). The UI dump does not include hitSlop; a small visible rectangle alone cannot justify a RULE.
 - Screenshot mismatches without a violated accepted rule are DIFF, never RULE. Changes to approved baselines require owner review.
 - Respect DT-4 light cartography, DT-6 light splash and light/dark disabled-token distinctions from the exception register.
+- Story states: per the [design-QA spec §6.2](../specifications/design-qa/2026-10-30-design-qa-system.md) canon («Што правярае сам») — «Кожная гісторыя (стан) мае здымак; новы стан не з'яўляецца без запісу ў каноне»: every story (state) has a capture, and a new state does not appear without a canon entry. A state without a capture is **NOT-VERIFIED**; a new state without a canon entry is reported for owner review.
 
 ## Finding classes
 
