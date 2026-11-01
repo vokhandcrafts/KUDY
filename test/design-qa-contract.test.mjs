@@ -30,3 +30,41 @@ test('design-QA rules keep evidence, second-pass rejection and accepted exceptio
     assert.ok(exceptions.includes(exception), 'missing exception: ' + exception);
   }
 });
+
+test('design-QA contract pins the rule elements its guard cites', () => {
+  // Verbatim pins: each assertion fails on one judge mutation (issue #937)
+  // that silently reverted a contract element while path-anywhere matches
+  // stayed green. No end-of-line anchors: checkouts may hold CRLF bytes.
+  const claude = read('CLAUDE.md');
+  assert.match(claude, /^@docs\/agent-rules\/design-qa\.md/m);
+
+  const rules = read('docs/agent-rules/design-qa.md');
+  assert.match(rules, /Drafts, mockups, proposals, and unmerged changes are \*\*not\*\* rules\./);
+  assert.match(
+    rules,
+    /\| RULE \| Exact accepted source\/section or decision ID \*\*and\*\* concrete measured evidence or reproducible artifact showing its violation \| Blocks design-QA green \|/,
+  );
+  assert.match(
+    rules,
+    /A RULE without either a cited \*\*accepted\*\* rule or evidence must be dropped or reclassified as a nonblocking suggestion where useful\./,
+  );
+  assert.match(rules, /^## Required report/m);
+  assert.match(rules, /^- Verdict: RULE_BLOCKED \/ OWNER_DIFF_REVIEW \/ NO_VERIFIED_RULE \/ INSUFFICIENT_EVIDENCE/m);
+  assert.match(
+    rules,
+    /\*\*surface\/state \| approved baseline \| current PNG \| difference PNG \| region\/threshold \| owner verdict\*\*/,
+  );
+  for (const field of [
+    '[RULE] surface / state / theme / font / locale',
+    'Accepted rule: file §section or accepted decision ID',
+    'Evidence: artifact/command and observed measurement',
+    'Expected: canonical measurable condition',
+    'Reproduce: executable check or source of evidence',
+    '[DIFF] surface; three artifact links; observed region; owner verdict pending',
+    '[OPINION] suggestion; reason not in canon',
+    '[NOT-VERIFIED] scope; missing input; what evidence is needed',
+  ]) {
+    assert.ok(rules.includes(field), 'missing report field: ' + field);
+  }
+  assert.match(rules, /second-pass rejected candidates/i);
+});
