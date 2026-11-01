@@ -11,10 +11,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import { DEFAULT_BASELINES_DIR, allSlots, loadMatrix } from './visual-check.mjs';
 
-const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..');
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 test('every guide-card story of the V1 matrix has a baseline (DQ-03 criterion 4)', () => {
   const matrix = loadMatrix();

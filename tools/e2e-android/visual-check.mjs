@@ -146,6 +146,19 @@ export function loadMatrix() {
   };
 }
 
+// Which capture phases the selected surfaces need — the pure half of the
+// capture orchestration (unit-tested without a device). The per-scale cold
+// start always runs when any phase needs the device: it loads the bundle
+// and applies the font scale the story links and shots rely on.
+export function planCapture(matrix) {
+  const ids = new Set(matrix.surfaces.map((surface) => surface.id));
+  return {
+    exploreA: ids.has('explore-a'),
+    stories: matrix.surfaces.some((surface) => surface.story),
+    exploreB: ids.has('explore-b'),
+  };
+}
+
 export function allSlots(matrix) {
   const slots = [];
   for (const surface of matrix.surfaces) {
@@ -447,58 +460,70 @@ export async function captureAll({ driver, matrix, capturesDir, metroPort, origi
     return target;
   };
   const snapshot = await snapshotSettings(driver);
+  const plan = planCapture(matrix);
   let metro = null;
   let origin = null;
   try {
     // Phase A: Metro without a catalog origin — the honest Explore state and
-    // every story surface. One Metro serves both font scales; each scale is
-    // applied before its cold start so the fresh process reads it.
-    metro = await startMetro({ port: metroPort, env: {}, logPath: path.join(logDir, 'metro-a.log') });
-    for (const scale of matrix.scales) {
-      await applyCaptureSettings(driver, scale);
-      await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
-      await coldStart(driver, devClientUrl(metroPort), {
-        timeoutMs: scale === matrix.scales[0] ? FIRST_BUNDLE_TIMEOUT_MS : BUNDLE_TIMEOUT_MS,
-        caseSlug: `explore-a-font${scale}`,
-      });
-      await waitSettled(driver, { testID: 'screen-Explore' }, { timeoutMs: 30000, dumpBasename: `dump-explore-a-font${scale}.xml` });
-      await shot('explore-a', scale);
+    // the story surfaces the plan asks for. One Metro serves both font
+    // scales; each scale is applied before its cold start so the fresh
+    // process reads it. The cold start itself always runs: the bundle load
+    // and the font scale it applies are what the story links rely on.
+    if (plan.exploreA || plan.stories) {
+      metro = await startMetro({ port: metroPort, env: {}, logPath: path.join(logDir, 'metro-a.log') });
+      for (const scale of matrix.scales) {
+        await applyCaptureSettings(driver, scale);
+        await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
+        await coldStart(driver, devClientUrl(metroPort), {
+          timeoutMs: scale === matrix.scales[0] ? FIRST_BUNDLE_TIMEOUT_MS : BUNDLE_TIMEOUT_MS,
+          caseSlug: `explore-a-font${scale}`,
+        });
+        if (plan.exploreA) {
+          await waitSettled(driver, { testID: 'screen-Explore' }, { timeoutMs: 30000, dumpBasename: `dump-explore-a-font${scale}.xml` });
+          await shot('explore-a', scale);
+        }
 
-      for (const surface of matrix.surfaces.filter((entry) => entry.story)) {
-        await driver.launchDeepLink(`kudy:///dev-specimen?component=guide-card&story=${surface.story}`);
-        await waitSettled(
-          driver,
-          { testID: `dev-specimen/story-${surface.story}` },
-          { timeoutMs: 30000, dumpBasename: `dump-story-${surface.story}-font${scale}.xml` },
-        );
-        await shot(surface.id, scale);
+        if (plan.stories) {
+          for (const surface of matrix.surfaces.filter((entry) => entry.story)) {
+            await driver.launchDeepLink(`kudy:///dev-specimen?component=guide-card&story=${surface.story}`);
+            await waitSettled(
+              driver,
+              { testID: `dev-specimen/story-${surface.story}` },
+              { timeoutMs: 30000, dumpBasename: `dump-story-${surface.story}-font${scale}.xml` },
+            );
+            await shot(surface.id, scale);
+          }
+        }
       }
+      await stopGroupProcess(metro, metroPort, 'metro-visual-a');
+      metro = null;
     }
-    await stopGroupProcess(metro, metroPort, 'metro-visual-a');
-    metro = null;
 
     // Phase B: the fixture catalog origin, a fresh Metro with the origin
-    // baked into the bundle, and Explore with the catalog loaded.
-    origin = await startOriginServer({ port: originPort, logPath: path.join(logDir, 'origin-b.log'), outDir: path.join(logDir, 'origin') });
-    await driver.exec(['reverse', `tcp:${originPort}`, `tcp:${originPort}`]);
-    metro = await startMetro({
-      port: metroPort,
-      env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://localhost:${originPort}` },
-      logPath: path.join(logDir, 'metro-b.log'),
-    });
-    for (const scale of matrix.scales) {
-      await applyCaptureSettings(driver, scale);
-      await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
-      await coldStart(driver, devClientUrl(metroPort), {
-        timeoutMs: scale === matrix.scales[0] ? FIRST_BUNDLE_TIMEOUT_MS : BUNDLE_TIMEOUT_MS,
-        caseSlug: `explore-b-font${scale}`,
+    // baked into the bundle, and Explore with the catalog loaded — only
+    // when an explore surface is selected.
+    if (plan.exploreB) {
+      origin = await startOriginServer({ port: originPort, logPath: path.join(logDir, 'origin-b.log'), outDir: path.join(logDir, 'origin') });
+      await driver.exec(['reverse', `tcp:${originPort}`, `tcp:${originPort}`]);
+      metro = await startMetro({
+        port: metroPort,
+        env: { EXPO_PUBLIC_CATALOG_ORIGIN: `http://localhost:${originPort}` },
+        logPath: path.join(logDir, 'metro-b.log'),
       });
-      await waitSettled(
-        driver,
-        { testID: `guide-card-${FIXTURE_GUIDE_ROUTE_ID}` },
-        { timeoutMs: 30000, dumpBasename: `dump-explore-b-font${scale}.xml` },
-      );
-      await shot('explore-b', scale);
+      for (const scale of matrix.scales) {
+        await applyCaptureSettings(driver, scale);
+        await driver.exec(['reverse', `tcp:${metroPort}`, `tcp:${metroPort}`]);
+        await coldStart(driver, devClientUrl(metroPort), {
+          timeoutMs: scale === matrix.scales[0] ? FIRST_BUNDLE_TIMEOUT_MS : BUNDLE_TIMEOUT_MS,
+          caseSlug: `explore-b-font${scale}`,
+        });
+        await waitSettled(
+          driver,
+          { testID: `guide-card-${FIXTURE_GUIDE_ROUTE_ID}` },
+          { timeoutMs: 30000, dumpBasename: `dump-explore-b-font${scale}.xml` },
+        );
+        await shot('explore-b', scale);
+      }
     }
   } finally {
     const cleanup = await Promise.allSettled([
@@ -548,15 +573,39 @@ function failToRun(reason) {
   process.exit(1);
 }
 
+// Group aliases of --surface: the spec §9.1 acceptance command names the
+// groups, not the individual surfaces. Each alias expands against the full
+// matrix, never a hand-maintained list.
+const SURFACE_ALIASES = Object.freeze({
+  'guide-card': (surfaces) => surfaces.filter((surface) => surface.story),
+  explore: (surfaces) => surfaces.filter((surface) => /^explore-/.test(surface.id)),
+});
+
 function selectSurfaces(matrix, surfaceArg) {
   if (surfaceArg === null) return matrix.surfaces;
   const requested = surfaceArg.split(',').map((name) => name.trim()).filter(Boolean);
-  const unknown = requested.filter((id) => !matrix.surfaces.some((surface) => surface.id === id));
-  if (unknown.length > 0) {
-    console.error(`unknown surface(s): ${unknown.join(', ')} (known: ${matrix.surfaces.map((surface) => surface.id).join(', ')})`);
+  if (requested.length === 0) {
+    console.error('--surface selected nothing (example: --surface guide-card,explore)');
     process.exit(2);
   }
-  return matrix.surfaces.filter((surface) => requested.includes(surface.id));
+  const unknown = requested.filter(
+    (name) => !SURFACE_ALIASES[name] && !matrix.surfaces.some((surface) => surface.id === name),
+  );
+  if (unknown.length > 0) {
+    console.error(`unknown surface(s): ${unknown.join(', ')} (known: guide-card, explore, ${matrix.surfaces.map((surface) => surface.id).join(', ')})`);
+    process.exit(2);
+  }
+  const selected = [];
+  const seen = new Set();
+  for (const name of requested) {
+    for (const surface of SURFACE_ALIASES[name] ? SURFACE_ALIASES[name](matrix.surfaces) : [matrix.surfaces.find((surface) => surface.id === name)]) {
+      if (!seen.has(surface.id)) {
+        seen.add(surface.id);
+        selected.push(surface);
+      }
+    }
+  }
+  return selected;
 }
 
 async function runCheck(args) {

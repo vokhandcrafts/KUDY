@@ -60,3 +60,6 @@ docs/testing/evidence/2026-10-11-g718/runtime/
 
 # Design-QA spec map: rendered locally from map.json, never tracked
 docs/specifications/design-qa/index.html
+
+# voka reviewer workspace (machine-local review drafts)
+.voka/

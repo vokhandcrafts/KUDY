@@ -57,8 +57,8 @@ node --test --experimental-strip-types tools/e2e-android/visual-check.test.mjs 2
 ```
 
 ```output
-ℹ tests 18
-ℹ pass 18
+ℹ tests 21
+ℹ pass 21
 ℹ fail 0
 ```
 

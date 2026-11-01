@@ -25,6 +25,7 @@ import {
   comparePair,
   loadMatrix,
   parseStoryNames,
+  planCapture,
   slotId,
   storySurfacesFromNames,
   writeBaselines,
@@ -266,6 +267,42 @@ test('CLI without the APK exits non-zero with the reason', () => {
   assert.notEqual(result.status, 0);
   assert.match(result.stdout, /FAILED TO RUN: dev-client APK not found/);
   assert.doesNotMatch(result.stdout, /PASS \d/);
+});
+
+test('planCapture: only the selected surfaces schedule their phases', () => {
+  const full = loadMatrix();
+  assert.deepEqual(planCapture(full), { exploreA: true, stories: true, exploreB: true });
+  const storiesOnly = { ...full, surfaces: full.surfaces.filter((surface) => surface.story) };
+  assert.deepEqual(planCapture(storiesOnly), { exploreA: false, stories: true, exploreB: false });
+  const exploreOnly = { ...full, surfaces: full.surfaces.filter((surface) => /^explore-/.test(surface.id)) };
+  assert.deepEqual(planCapture(exploreOnly), { exploreA: true, stories: false, exploreB: true });
+  const exploreBOnly = { ...full, surfaces: full.surfaces.filter((surface) => surface.id === 'explore-b') };
+  assert.deepEqual(planCapture(exploreBOnly), { exploreA: false, stories: false, exploreB: true });
+});
+
+test('CLI --surface that selects nothing is a usage error, never a silent empty verdict', () => {
+  const dir = tmpDir('visual-emptysurface-');
+  const outDir = path.join(dir, 'out');
+  const result = runCli(['--out', outDir, '--from', dir, '--surface', ','], {});
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /--surface selected nothing/);
+});
+
+test('CLI --surface accepts the spec §9.1 group aliases guide-card and explore', () => {
+  const dir = tmpDir('visual-alias-');
+  const capturesDir = path.join(dir, 'captures');
+  const baselinesDir = path.join(dir, 'baselines');
+  const outDir = path.join(dir, 'out');
+  for (const surface of ['explore-a', 'explore-b']) {
+    for (const scale of [1, 1.5]) {
+      const slot = slotId(surface, scale, 'be');
+      writePng(capturesDir, captureFileName(slot), makePng(...SIZE, [7, 7, 7]));
+      writePng(baselinesDir, `${slot}.png`, makePng(...SIZE, [7, 7, 7]));
+    }
+  }
+  const result = runCli(['--from', capturesDir, '--baselines-dir', baselinesDir, '--out', outDir, '--surface', 'explore'], {});
+  assert.equal(result.status, 0, `stderr: ${result.stderr}`);
+  assert.match(fs.readFileSync(path.join(outDir, 'report.md'), 'utf8'), /PASS 4/);
 });
 
 test('CLI with an unknown surface name exits with a usage error naming the known surfaces', () => {
