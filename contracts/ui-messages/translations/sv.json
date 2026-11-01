@@ -2098,11 +2098,11 @@
     },
     {
       "id": "web.ui.privacyRetention",
-      "value": "Lagringstid: råa skickade händelser sparas i 14 månader och raderas sedan av ett schemalagt jobb; aggregerade siffror per rutt finns kvar utan enhetsidentifierare.",
-      "reviewedSourceHash": "e859c436d72b484bfcf48110c474213d847ef7326797107354710ba929c6fa52",
+      "value": "Lagringstid: råa skickade händelser sparas i 14 månader och raderas sedan av ett schemalagt jobb.",
+      "reviewedSourceHash": "fd59ba45063f461563c0857bc76897e5e03998fc53cc40afb2e488745df0dcb9",
       "review": {
         "outcome": "approved",
-        "note": "прыватнасць: тэрмін захавання; 14 месяцаў даслоўна"
+        "note": "прыватнасць: тэрмін захавання; 14 месяцаў даслоўна · #849 крытэр 5, 2026-11-01: сцвярджэнне пра агрэгаваныя лічбы знята (сховішча агрэгатаў не існуе — retention-core.ts); астатні тэкст без зменаў."
       }
     },
     {

@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-11-01 — Supabase-рунтайм для крытэраў 1–3 APR-08.a
+Што зрабіць: вызначы фактычны Supabase project/environment і спосаб запуску `runRetentionSweep`; на staging з сінтэтычнымі радкамі прадэманструй boundary values (14 месяцаў / 24 гадзіны / 30 дзён), паўторны запуск без дублявання і fail/retry; у production пацвердзі расклад і апошнія прогоны па абязлічаных метрыках — без чытання PII. Вынікі пазнач у [#849](https://github.com/vokhandcrafts/KUDY/issues/849) і [#299](https://github.com/vokhandcrafts/KUDY/issues/299); разам з гэтым вырашы пытанне cleanup-у `devices` (крытэр 6).
+Issue: [#849](https://github.com/vokhandcrafts/KUDY/issues/849) — выкананая частка (крытэр 5) у results [APR-08.a.md](docs/agent-tasks/results/APR-08.a.md)
+
 ### 2026-11-01 — мерж Storybook на прыладзе (DQ-13)
 Што зрабіць: калі аўтаматычны мерж пайплайна не адбудзецца (branch protection ці чырвоны CI) — замерж PR рукамі пасля зелёнага суддзі і знімі лэйбл `agent:running` з issue. Калі PR ужо змержаны аўтаматам — запіс састарэлы, выдалі яго.
 PR: [#957](https://github.com/vokhandcrafts/KUDY/pull/957) · Issue: [#914](https://github.com/vokhandcrafts/KUDY/issues/914)

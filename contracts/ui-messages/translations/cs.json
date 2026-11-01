@@ -2098,11 +2098,11 @@
     },
     {
       "id": "web.ui.privacyRetention",
-      "value": "Doba uchování: syrové odeslané události se uchovávají 14 měsíců, poté se mažou naplánovaným úkolem; agregované čísla podle tras zůstávají bez identifikátoru zařízení.",
-      "reviewedSourceHash": "e859c436d72b484bfcf48110c474213d847ef7326797107354710ba929c6fa52",
+      "value": "Doba uchování: syrové odeslané události se uchovávají 14 měsíců, poté se mažou naplánovaným úkolem.",
+      "reviewedSourceHash": "fd59ba45063f461563c0857bc76897e5e03998fc53cc40afb2e488745df0dcb9",
       "review": {
         "outcome": "approved",
-        "note": "тэрмін захавання 14 месяцаў даслоўна; сырыя падзеі → syrové události"
+        "note": "тэрмін захавання 14 месяцаў даслоўна; сырыя падзеі → syrové události · #849 крытэр 5, 2026-11-01: сцвярджэнне пра агрэгаваныя лічбы знята (сховішча агрэгатаў не існуе — retention-core.ts); астатні тэкст без зменаў."
       }
     },
     {
