@@ -61,4 +61,11 @@
 
 ## Handoff #299
 
-*(fill after posting the handoff comment)*
+Handoff у эпік [#299](https://github.com/vokhandcrafts/KUDY/issues/299) апублікаваны 2026-10-31 20:42 UTC — [каментар](https://github.com/vokhandcrafts/KUDY/issues/299#issuecomment-6548877117).
+
+Што запісана ў handoff:
+
+- тэксты #853 гатовыя: PR #942, матрыца доказаў у гэтым дакуменце, guard `tools/i18n/privacy-disclosure.test.mjs`, правераная дэма;
+- блокер, перададзены ў #299: production/network trace release-зборкі з сінтэтычнымі акаўнтамі (#853 AC1) на дэв-хасце недаступны — запісаны як відавочнае невядомае, а не як адсутнасць патокаў;
+- звязаныя задачы: retention sweep — [#849](https://github.com/vokhandcrafts/KUDY/issues/849), узмацненне выдалення — [#835](https://github.com/vokhandcrafts/KUDY/issues/835)/[#836](https://github.com/vokhandcrafts/KUDY/issues/836);
+- дэплой вэб-канала і тэрмін Play Console submission — рашэнне ўладара.
