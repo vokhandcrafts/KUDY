@@ -79,6 +79,22 @@ jobs:
               exit 1
             fi
           done
+      # DQ-10: the pixel gate is not a merge gate until the runs show fewer
+      # than 1 false failure in 20 (spec §8.1) — the step records the verdict
+      # and always uploads the report and diffs, but never fails the job.
+      - name: run visual:check (non-gating report)
+        if: always()
+        run: |
+          set -o pipefail
+          visual_status=0
+          npm run visual:check -- --out visual-check-report 2>&1 | tee android-e2e-logs/visual-check.log || visual_status=$?
+          echo "visual:check exit status: $visual_status (0 = clean verdict; non-zero = DIFF/FAIL/RULE or FAILED TO RUN — non-gating until stable, the report and diffs are uploaded as an artifact)"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: visual-check-report
+          path: visual-check-report/
+          if-no-files-found: warn
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with:

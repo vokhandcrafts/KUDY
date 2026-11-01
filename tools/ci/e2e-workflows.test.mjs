@@ -41,6 +41,29 @@ test('Android E2E runs smoke, walk and discovery for every PR', () => {
   assert.match(source, /tools\/e2e-android\/artifacts\//);
 });
 
+test('visual:check runs after the suites and always uploads its report as a non-gating artifact', () => {
+  const { source, workflow } = read('android-e2e.yml');
+  const steps = workflow.jobs['smoke-and-walk'].steps;
+  const suiteIndex = steps.findIndex((step) => step.run?.includes('npm run e2e:android -- --suite "$suite"'));
+  const visualIndex = steps.findIndex((step) => step.run?.includes('npm run visual:check'));
+  assert.ok(suiteIndex !== -1, 'suites step missing');
+  assert.ok(visualIndex > suiteIndex, 'visual:check must run after the e2e suites');
+  const visual = steps[visualIndex];
+  assert.equal(visual.if, 'always()', 'visual:check must run even when the suites fail');
+  assert.match(visual.run, /--out visual-check-report/, 'the report must land in the artifact directory');
+  assert.match(visual.run, /tee android-e2e-logs\/visual-check\.log/, 'the verdict log must be captured alongside the other e2e logs');
+  // Non-gating while unstable: the last command echoes the recorded status
+  // instead of exiting with it, so the step can never fail the job.
+  const lastLine = visual.run.trimEnd().split('\n').filter((line) => line.trim()).pop();
+  assert.match(lastLine, /^echo /, 'the visual:check step must always end green (non-gating)');
+  const uploadIndex = steps.findIndex((step) => step.uses?.startsWith('actions/upload-artifact@') && step.with?.name === 'visual-check-report');
+  assert.ok(uploadIndex > visualIndex, 'the report upload must follow the visual:check step');
+  const upload = steps[uploadIndex];
+  assert.equal(upload.if, 'always()', 'the report artifact must upload on every run outcome');
+  assert.match(upload.with.path, /visual-check-report/);
+  assert.match(source, /name: visual-check-report/);
+});
+
 test('every action in the E2E workflows uses a full commit SHA', () => {
   for (const name of ['web-e2e.yml', 'android-e2e.yml']) {
     const { workflow } = read(name);
