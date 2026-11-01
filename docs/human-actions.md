@@ -17,13 +17,13 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-11-01 — Supabase-рунтайм для крытэраў 1–3 APR-08.a
+Што зрабіць: вызначы фактычны Supabase project/environment і спосаб запуску `runRetentionSweep`; на staging з сінтэтычнымі радкамі прадэманструй boundary values (14 месяцаў / 24 гадзіны / 30 дзён), паўторны запуск без дублявання і fail/retry; у production пацвердзі расклад і апошнія прогоны па абязлічаных метрыках — без чытання PII. Вынікі пазнач у [#849](https://github.com/vokhandcrafts/KUDY/issues/849) і [#299](https://github.com/vokhandcrafts/KUDY/issues/299); разам з гэтым вырашы пытанне cleanup-у `devices` (крытэр 6).
+PR: [#964](https://github.com/vokhandcrafts/KUDY/pull/964) · Issue: [#849](https://github.com/vokhandcrafts/KUDY/issues/849) — выкананая частка (крытэр 5) у results [APR-08.a.md](docs/agent-tasks/results/APR-08.a.md)
+
 ### 2026-11-01 — пераўсталюй дэмапакет на тэлефоне (кольца іконкі)
 Што зрабіць: перазбяры dev-client і ўсталюй APK на тэлефон — устаноўка да праўкі 28.10 паказвае меднае кольца іконкі ўсярэдзіне з крэмавым абадком, у main ужо гатовая геаметрыя з кольцам на самой мяжы. Правер на эмулятары і кадры да/пасля — у звязаным PR.
 PR: [#966](https://github.com/vokhandcrafts/KUDY/pull/966) · Issue: [#429](https://github.com/vokhandcrafts/KUDY/issues/429)
-
-### 2026-11-01 — змержы запаўненне handoff у results APR-08.b (#945)
-Што зрабіць: змержы PR — ён замяняе плясхолдар у раздзеле «Handoff #299» results-дакументу APR-08.b.md рэальным запісам каментара. Пасля мержу issue #945 закрыецца сама; калі пазнака `agent:running` застанецца на закрытым issue, знімі яе. Калі PR ужо змержаны — запіс састарэлы, выдалі яго.
-PR: [#946](https://github.com/vokhandcrafts/KUDY/pull/946) · Issue: [#945](https://github.com/vokhandcrafts/KUDY/issues/945)
 
 ### 2026-11-01 — мерж Storybook на прыладзе (DQ-13)
 Што зрабіць: калі аўтаматычны мерж пайплайна не адбудзецца (branch protection ці чырвоны CI) — замерж PR рукамі пасля зелёнага суддзі і знімі лэйбл `agent:running` з issue. Калі PR ужо змержаны аўтаматам — запіс састарэлы, выдалі яго.

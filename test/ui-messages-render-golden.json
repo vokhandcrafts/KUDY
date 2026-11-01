@@ -11750,19 +11750,19 @@
    "id": "web.ui.privacyRetention",
    "locale": "be",
    "args": null,
-   "out": "Тэрмін захавання: сырыя адпраўленыя падзеі захоўваюцца 14 месяцаў, потым выдаляюцца заданнем; агрэгаваныя лічбы па маршрутах застаюцца без ідэнтыфікатара прылады."
+   "out": "Тэрмін захавання: сырыя адпраўленыя падзеі захоўваюцца 14 месяцаў, потым выдаляюцца заданнем."
   },
   {
    "id": "web.ui.privacyRetention",
    "locale": "en",
    "args": null,
-   "out": "Retention: raw sent events are kept for 14 months, then deleted by a scheduled job; aggregated counts per route remain without the device identifier."
+   "out": "Retention: raw sent events are kept for 14 months, then deleted by a scheduled job."
   },
   {
    "id": "web.ui.privacyRetention",
    "locale": "uk",
    "args": null,
-   "out": "Термін зберігання: сирі надіслані події зберігаються 14 місяців, потім видаляються заданням; агреговані числа за маршрутами залишаються без ідентифікатора пристрою."
+   "out": "Термін зберігання: сирі надіслані події зберігаються 14 місяців, потім видаляються заданням."
   },
   {
    "id": "web.ui.privacyTitle",

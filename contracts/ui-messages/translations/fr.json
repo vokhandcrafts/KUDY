@@ -2357,11 +2357,11 @@
     },
     {
       "id": "web.ui.privacyRetention",
-      "value": "Durée de conservation : les événements bruts envoyés sont conservés 14 mois, puis supprimés selon le calendrier ; les chiffres agrégés par itinéraires restent sans identifiant d'appareil.",
-      "reviewedSourceHash": "e859c436d72b484bfcf48110c474213d847ef7326797107354710ba929c6fa52",
+      "value": "Durée de conservation : les événements bruts envoyés sont conservés 14 mois, puis supprimés selon le calendrier.",
+      "reviewedSourceHash": "fd59ba45063f461563c0857bc76897e5e03998fc53cc40afb2e488745df0dcb9",
       "review": {
         "outcome": "approved",
-        "note": "сэнс адпавядае арыгіналу; tutoiement; UI-рэгістр правераны"
+        "note": "сэнс адпавядае арыгіналу; tutoiement; UI-рэгістр правераны · #849 крытэр 5, 2026-11-01: сцвярджэнне пра агрэгаваныя лічбы знята (сховішча агрэгатаў не існуе — retention-core.ts); астатні тэкст без зменаў."
       }
     },
     {

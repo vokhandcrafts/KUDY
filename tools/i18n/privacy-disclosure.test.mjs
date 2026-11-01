@@ -6,6 +6,14 @@
 // any of those disclosures from the be source or dropping the RevenueCat
 // naming from a shipped translation fails here — a stale-claims guard, not a
 // style check.
+//
+// APR-08.a (issue #849, criterion 5): web.ui.privacyRetention must keep the
+// honest state — the 14-month retention of raw events — and must NOT promise
+// stored per-route aggregates: retention-core.ts states «no aggregate table
+// exists yet», so the claim is unproven. The absence probes pin the direction
+// of failure: re-adding an aggregate promise to any language must fail here
+// until a real aggregate store exists (then the guard is consciously updated
+// together with the store and the anonymization evidence).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dirname, join } from 'node:path';
@@ -28,6 +36,26 @@ function sourceText(id) {
 const PRIVACY_PURCHASES = 'web.ui.privacyPurchases';
 const PRIVACY_APP_DATA = 'web.ui.privacyAppData';
 const PRIVACY_DELETION = 'web.ui.privacyDeletion';
+const PRIVACY_RETENTION = 'web.ui.privacyRetention';
+
+// APR-08.a criterion 5: the stored-aggregate promise was removed in every
+// language (no aggregate table exists — retention-core.ts), while the proven
+// 14-month raw-event retention stays. The zh fragments are escapes so this
+// source file stays ASCII.
+const RETENTION_PROBES = {
+  be: { aggregate: 'агрэгаваныя лічбы', retention: '14 месяцаў' },
+  en: { aggregate: 'aggregated counts', retention: '14 months' },
+  uk: { aggregate: 'агреговані числа', retention: '14 місяців' },
+  cs: { aggregate: 'agregované čísla', retention: '14 měsíců' },
+  de: { aggregate: 'aggregierte Zahlen', retention: '14 Monate' },
+  es: { aggregate: 'cifras agregadas', retention: '14 meses' },
+  fr: { aggregate: 'chiffres agrégés', retention: '14 mois' },
+  sv: { aggregate: 'aggregerade siffror', retention: '14 månader' },
+  zh: {
+    aggregate: '\u6309\u8DEF\u7EBF\u6C47\u603B\u7684\u6570\u5B57',
+    retention: '14\u4E2A\u6708',
+  },
+};
 
 test('be source names RevenueCat, the device registration, the IP hash and the deletion boundary', () => {
   const purchases = sourceText(PRIVACY_PURCHASES);
@@ -120,5 +148,37 @@ for (const locale of COMPLETE_UI_LOCALES.filter((code) => code !== 'be')) {
         `${locale}: ${PRIVACY_APP_DATA} must keep the ${disclosure} disclosure (${probe})`,
       );
     }
+  });
+}
+
+test('be source states the 14-month retention without promising stored aggregates', () => {
+  const retention = sourceText(PRIVACY_RETENTION);
+  assert.ok(
+    retention.includes(RETENTION_PROBES.be.retention),
+    'privacyRetention must keep the 14-month raw-event retention',
+  );
+  assert.ok(
+    !retention.includes(RETENTION_PROBES.be.aggregate),
+    'privacyRetention must not promise stored per-route aggregates (no aggregate table exists — APR-08.a #849)',
+  );
+});
+
+for (const locale of COMPLETE_UI_LOCALES.filter((code) => code !== 'be')) {
+  test(`${locale}: shipped privacyRetention keeps the retention term and drops the aggregate promise`, () => {
+    const set = loadUiMessageTranslations(
+      join(root, `contracts/ui-messages/translations/${locale}.json`),
+      sourceDoc,
+      COMPLETE_UI_LOCALES,
+    );
+    const record = set.records.find((record) => record.id === PRIVACY_RETENTION);
+    assert.ok(record, `${locale}: translation record ${PRIVACY_RETENTION} exists`);
+    assert.ok(
+      record.value.includes(RETENTION_PROBES[locale].retention),
+      `${locale}: ${PRIVACY_RETENTION} must keep the 14-month retention (${RETENTION_PROBES[locale].retention})`,
+    );
+    assert.ok(
+      !record.value.includes(RETENTION_PROBES[locale].aggregate),
+      `${locale}: ${PRIVACY_RETENTION} must not promise stored per-route aggregates (no aggregate table exists — APR-08.a #849)`,
+    );
   });
 }
