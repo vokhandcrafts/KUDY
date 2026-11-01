@@ -81,6 +81,20 @@ test("image metadata: corrupt input yields a diagnostic, not a throw", () => {
   assert.ok(readImageMeta(truncated, "cut.png").error);
 });
 
+test("image metadata: an invalid PNG color type yields a diagnostic", () => {
+  // sig + IHDR(13) + dummy CRC: color type 5 is not a legal PNG value.
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(1, 0);
+  ihdr.writeUInt32BE(1, 4);
+  ihdr[8] = 8;  // bit depth
+  ihdr[9] = 5;  // color type: invalid
+  const png = Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    Buffer.from([0, 0, 0, 13]), Buffer.from("IHDR", "ascii"), ihdr, Buffer.alloc(4),
+  ]);
+  assert.equal(readImageMeta(png, "bad-type.png").error, "png-color-type");
+});
+
 test("the accepted icon package (#429) passes with its committed provenance", () => {
   const result = checkImage(join(REPO, "assets/kudy-icon/icon.png"));
   assert.deepEqual(result.findings, []);
@@ -170,9 +184,14 @@ test("a malformed provenance object answers with diagnostics", () => {
 test("an unreadable image or missing provenance answers with diagnostics", () => {
   const result = checkImage(join(tmp, "does-not-exist.png"));
   assert.deepEqual(result.findings.map((f) => f.rule), ["image"]);
+  assert.equal(result.decision, null);
+  assert.equal(result.bytes, null);
+  assert.equal(result.sha256, null);
   const { dir, imagePath } = withImage("img.png");
   const result2 = checkImage(imagePath, { provenance: join(dir, "absent.json") });
   assert.deepEqual(result2.findings.map((f) => f.rule), ["provenance-missing"]);
+  assert.equal(result2.decision, null);
+  assert.equal(result2.bytes, readFileSync(FIXTURE_PNG).length);
 });
 
 test("main() without arguments prints usage and fails", () => {

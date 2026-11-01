@@ -43,19 +43,20 @@ files — `assets/kudy-icon/**` is pinned `-text` in `.gitattributes` for this.
 | 2 | No text baked into the image | [Issue #921](https://github.com/vokhandcrafts/KUDY/issues/921); canon [§3](../design/visual-language.md) — captions are runtime overlays (the splash KUDY label appears after the dragon movement, owner decision 2026-10-28), never part of the art | Visual inspection of the full image area |
 | 3 | Palette roles only from accepted canon values | [visual-language.md](../design/visual-language.md) machine block; [decisions.md](../design/brand/decisions.md) accepted rows only — B04.1–B04.3 are proposals, not rules; canon §10 for new values. The #429 package palette belongs to that accepted asset (canon §3) | Dominant colors listed against canon tokens and proposals |
 | 4 | Status `draft`/`accepted` with a decision link | Spec §1.3 «Чарнавікі — не зацверджаны дызайн» and §5; provenance `status` + `decision` fields | `provenance.json` of the image + script pass |
-| 5 | Provenance and rights record | Canon §3 (record-rights precedent), §6 («Любы новы асет дракона трапляе ў канон разам з запісам права на выкарыстанне»); spec §5 (checksum in provenance), §6.1 item 4 | `provenance.json` (`rights` field) + script pass |
+| 5 | Provenance and rights record | Canon §3 (record-rights precedent), §6 («Любы новы асет дракона трапляе у канон разам з запісам права на выкарыстанне»); spec §2 (тэхнічныя праверкі выяў) and §6.2 («сума ў паходжанні»), §6.1 item 4 | `provenance.json` (`rights` field) + script pass |
 
 A draft is referenced nowhere as an accepted asset; directories under
 `docs/design/brand/outputs/` and `docs/design/brand/references/` hold drafts
-(A1/B2 — «эскізы для параўнання, не гатовыя асеты») until an owner decision
+(A1/B2 — [references/README.md](../design/brand/references/README.md):
+«эскізы для параўнання, не гатовыя асеты») until an owner decision
 accepts them. Generating new images and changing accepted assets are out of
 scope of any check run.
 
 ## 3. Findings
 
 - A script failure is a technical finding with the script output as evidence;
-  checksum and status enforcement are hard rules (spec §5: «тэхнічныя праверкі
-  (памер, празрыстасць, сума)»).
+  checksum and status enforcement are hard rules (spec §2, row «Згенераваныя
+  выявы»: «тэхнічныя праверкі (памер, празрыстасць, сума)»).
 - Agent-check violations cite their accepted source and evidence per
   [design-QA policy](../agent-rules/design-qa.md) finding classes; a palette
   remark without a cited accepted rule stays `OPINION`.

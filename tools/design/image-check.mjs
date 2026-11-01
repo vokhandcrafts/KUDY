@@ -39,7 +39,7 @@ export function pngMeta(buffer) {
         return { error: "png-ihdr-truncated", message: "PNG IHDR chunk is truncated" };
       }
       const colorType = buffer[offset + 17];
-      if (colorType === 1 || colorType > 6) {
+      if (![0, 2, 3, 4, 6].includes(colorType)) {
         return { error: "png-color-type", message: `PNG color type ${colorType} is not valid` };
       }
       ihdr = {
@@ -155,7 +155,7 @@ export function checkImage(imagePath, options = {}) {
     buffer = readFileSync(imagePath);
   } catch (error) {
     add("image", `cannot read the image: ${error.message}`);
-    return { image: imagePath, meta: null, status: null, provenancePath, findings };
+    return { image: imagePath, meta: null, status: null, decision: null, provenancePath, bytes: null, sha256: null, findings };
   }
   const sha256 = createHash("sha256").update(buffer).digest("hex");
   const bytes = buffer.length;
@@ -167,7 +167,7 @@ export function checkImage(imagePath, options = {}) {
     provenance = JSON.parse(readFileSync(provenancePath, "utf8"));
   } catch (error) {
     add("provenance-missing", `cannot read the provenance file ${provenancePath}: ${error.message}`);
-    return { image: imagePath, meta, status: null, provenancePath, bytes, sha256, findings };
+    return { image: imagePath, meta, status: null, decision: null, provenancePath, bytes, sha256, findings };
   }
   findings.push(...checkProvenance(provenance, { fileName: basename(imagePath), sha256 }));
   return {

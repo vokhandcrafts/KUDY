@@ -49,8 +49,8 @@ cp /tmp/dq11-image-check.mjs.bak tools/design/image-check.mjs
 
 ```output
 removed the checksum and status findings
-ℹ tests 16
-ℹ pass 13
+ℹ tests 17
+ℹ pass 14
 ℹ fail 3
 ```
 
@@ -61,7 +61,7 @@ node --test --experimental-strip-types tools/design/image-check.test.mjs 2>&1 | 
 ```
 
 ```output
-ℹ tests 16
-ℹ pass 16
+ℹ tests 17
+ℹ pass 17
 ℹ fail 0
 ```
