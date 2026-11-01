@@ -192,6 +192,15 @@
   `tools/ci/g25-handoff-guard.test.mjs` параўноўвае поўныя наборы
   `Blocked-by` у картцы і G25-індэксе і правярае забарону ранняй
   перадачы ва ўсіх трох крыніцах — issue #845.
+  Выпраўлена: для гейта DQ-05 тэст
+  `test/design-qa-contract.test.mjs` («design-QA contract pins the rule
+  elements its guard cites») пінуе даслоўна чатыры элементы кантракту:
+  import-радок `@docs/agent-rules/design-qa.md` у `CLAUDE.md`, мяжу
+  чарнавік/правіла з раздзела «Inputs and accepted sources»,
+  патрабаванне цытаванай прынятай крыніцы і вымярэння для класа RULE
+  з табліцы класаў, і шаблон раздзела «Required report» (загаловак,
+  радок вердыкту, калоны DIFF-табліцы, палі фармата знаходак);
+  мутацыя любога з элементаў рве сюіту — issue #937.
   Жывы стан GitHub issue #708 рэв'юер правярае асобна:
   `gh issue view 708 --repo vokhandcrafts/KUDY --json body --jq .body`;
   радок `Blocked-by` трэба параўнаць з
