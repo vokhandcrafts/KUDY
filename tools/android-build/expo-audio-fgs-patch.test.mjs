@@ -30,9 +30,21 @@ const playerSource = `
 `;
 
 const serviceSource = `
+  override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     // Ensure channel exists and update current notification
     postOrStartForegroundNotification(startInForeground = false)
     return super.onStartCommand(intent, flags, startId)
+  }
+  override fun onCreate() {
+    super.onCreate()
+    instance = this
+    createNotificationChannelIfNeeded()
+
+    pendingPlayer?.let { player ->
+      setActivePlayerInternal(player, pendingMetadata, pendingOptions)
+      pendingPlayer = null
+      pendingMetadata = null
+    }
   }
   private fun setActivePlayerInternal(
     player: AudioPlayer?,
@@ -44,6 +56,8 @@ const serviceSource = `
   override fun onDestroy() {
     super.onDestroy()
     instance = null
+    mediaSession?.release()
+    currentPlayer = null
   }
   companion object {
     private var pendingPlayer: AudioPlayer? = null
@@ -51,6 +65,27 @@ const serviceSource = `
     private var pendingOptions: AudioLockScreenOptions? = null
     fun getInstance(): AudioControlsService? = instance
     fun setActivePlayer(
+      context: Context,
+      player: AudioPlayer?,
+      metadata: Metadata? = null,
+      options: AudioLockScreenOptions? = null
+    ) {
+      val service = getInstance()
+      if (service != null) {
+        service.setActivePlayerInternal(player, metadata, options)
+      } else {
+        val intent = Intent(context, AudioControlsService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          context.startForegroundService(intent)
+        } else {
+          context.startService(intent)
+        }
+
+        pendingPlayer = player
+        pendingMetadata = metadata
+        pendingOptions = options
+      }
+    }
 `;
 
 function makeFixture() {
@@ -89,11 +124,32 @@ test('#854: replacing A with B cancels A idle shutdown before it can destroy B',
   patchExpoAudioNative(root);
   const source = fs.readFileSync(service, 'utf8');
   assert.match(source, /private fun scheduleIdleStop\(\) \{[\s\S]*?postDelayed\(idleStopRunnable, 1000L\)/);
-  assert.match(source, /if \(currentPlayer == null && pendingPlayer == null\) \{\s*stopSelf\(\)/);
+  assert.match(source, /if \(currentPlayer == null && pendingPlayer == null\) \{\s*stopRequested = true\s*stopSelf\(\)/);
   assert.match(source, /if \(player != null\) \{\s*cancelIdleStop\(\)/);
   assert.match(source, /service\.setActivePlayerInternal\(null\)\s*service\.scheduleIdleStop\(\)/);
   assert.doesNotMatch(source, /service\.setActivePlayerInternal\(null\)\s*service\.stopSelf\(\)/,
     'immediate stopSelf races against player B activation');
+});
+
+test('#854: activation after stopSelf restarts service, including the onDestroy boundary', (t) => {
+  const { root, service } = makeFixture();
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  patchExpoAudioNative(root);
+  const source = fs.readFileSync(service, 'utf8');
+  assert.match(source, /stopRequested = true\s*stopSelf\(\)/,
+    'idle shutdown must mark the instance as stopping');
+  assert.match(source, /service != null && !\(player != null && service\.stopRequested\)/,
+    'a new player must not attach directly to a service already stopping');
+  assert.match(source, /pendingPlayer = player[\s\S]*?startPlaybackService\(context\)/,
+    'a new start must retain player B before requesting a service start');
+  assert.match(source, /override fun onStartCommand\([\s\S]*?activatePendingPlayer\(\)/,
+    'a restarted start command must claim B even if onCreate does not run');
+  assert.match(source, /override fun onCreate\([\s\S]*?activatePendingPlayer\(\)/,
+    'a new service must also claim the pending player');
+  assert.match(source, /override fun onDestroy\([\s\S]*?if \(stopRequested && currentPlayer != null && pendingPlayer == null\)/,
+    'the dying service must recover B only if a new pending owner was not already queued');
+  assert.match(source, /startPlaybackService\(applicationContext\)/,
+    'onDestroy must request a fresh lifecycle when B survived an old stopSelf');
 });
 
 test('#854: native patch rejects SDK drift atomically', (t) => {

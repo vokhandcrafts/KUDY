@@ -50,6 +50,8 @@ function patchService(source) {
     `    // Ensure channel exists and update current notification
     postOrStartForegroundNotification(startInForeground = false)`,
     `    // A queued start can be cancelled before onCreate by an immediate Stop.
+    // Claim any replacement that arrived after an old stopSelf request.
+    activatePendingPlayer()
     // Delay shutdown so a replacement player can cancel the idle stop.
     if (currentPlayer == null) {
       scheduleIdleStop()
@@ -61,6 +63,15 @@ function patchService(source) {
   next = replaceOnce(next,
     `    fun getInstance(): AudioControlsService? = instance`,
     `    fun getInstance(): AudioControlsService? = instance
+
+    private fun startPlaybackService(context: Context) {
+      val intent = Intent(context, AudioControlsService::class.java)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        context.startForegroundService(intent)
+      } else {
+        context.startService(intent)
+      }
+    }
 
     // Clear only this player's pending/active session. Checking identity
     // prevents a late release of A from cancelling replacement player B.
@@ -83,8 +94,10 @@ function patchService(source) {
     `  // All calls are on Android's main thread. A replacement cancels the
   // scheduled stop before Android can destroy the new player's session.
   private val idleStopHandler = Handler(Looper.getMainLooper())
+  private var stopRequested = false
   private val idleStopRunnable = Runnable {
     if (currentPlayer == null && pendingPlayer == null) {
+      stopRequested = true
       stopSelf()
     }
   }
@@ -101,6 +114,28 @@ function patchService(source) {
   companion object {`,
     'AudioControlsService.idleStop');
   next = replaceOnce(next,
+    `    pendingPlayer?.let { player ->
+      setActivePlayerInternal(player, pendingMetadata, pendingOptions)
+      pendingPlayer = null
+      pendingMetadata = null
+    }`,
+    `    activatePendingPlayer()`,
+    'AudioControlsService.onCreate pending activation');
+  next = replaceOnce(next,
+    `  private fun setActivePlayerInternal(`,
+    `  private fun activatePendingPlayer() {
+    val player = pendingPlayer ?: return
+    val metadata = pendingMetadata
+    val options = pendingOptions
+    pendingPlayer = null
+    pendingMetadata = null
+    pendingOptions = null
+    setActivePlayerInternal(player, metadata, options)
+  }
+
+  private fun setActivePlayerInternal(`,
+    'AudioControlsService.activatePendingPlayer');
+  next = replaceOnce(next,
     `  ) {
     // Detach listener from previous player`,
     `  ) {
@@ -114,8 +149,51 @@ function patchService(source) {
     super.onDestroy()`,
     `  override fun onDestroy() {
     cancelIdleStop()
+    val restartPlayer = if (stopRequested && currentPlayer != null && pendingPlayer == null) currentPlayer else null
+    val restartMetadata = currentMetadata
+    val restartOptions = currentOptions
     super.onDestroy()`,
     'AudioControlsService.onDestroy');
+  next = replaceOnce(next,
+    `    mediaSession?.release()
+    currentPlayer = null
+  }
+`,
+    `    mediaSession?.release()
+    currentPlayer = null
+    if (restartPlayer != null) {
+      pendingPlayer = restartPlayer
+      pendingMetadata = restartMetadata
+      pendingOptions = restartOptions
+      startPlaybackService(applicationContext)
+    }
+  }
+`,
+    'AudioControlsService.onDestroy restart');
+  next = replaceOnce(next,
+    `      if (service != null) {
+        service.setActivePlayerInternal(player, metadata, options)
+      } else {
+        val intent = Intent(context, AudioControlsService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          context.startForegroundService(intent)
+        } else {
+          context.startService(intent)
+        }
+
+        pendingPlayer = player
+        pendingMetadata = metadata
+        pendingOptions = options
+      }`,
+    `      if (service != null && !(player != null && service.stopRequested)) {
+        service.setActivePlayerInternal(player, metadata, options)
+      } else {
+        pendingPlayer = player
+        pendingMetadata = metadata
+        pendingOptions = options
+        startPlaybackService(context)
+      }`,
+    'AudioControlsService.setActivePlayer restart');
   return next;
 }
 

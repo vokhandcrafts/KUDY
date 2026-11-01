@@ -540,10 +540,27 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
     await recordMediaServiceState(driver, 'paused');
   });
 
-  await runCase('walk: rapid Play then Stop cannot resurrect the media service', 'walk-rapid-stop', driver, async () => {
-    // The replacement case left stop 2 selected. Switch stories rather
-    // than toggling the same card closed.
+  await runCase('walk: new playback remains active after an idle-stop boundary', 'walk-restart', driver, async () => {
+    await driver.tapSelector({ testID: 'btn-run-pause' });
+    await driver.waitFor({ testID: 'run-paused' }, { timeoutMs: SHORT_MS });
+    await waitForAudioActive(driver, false);
+    // Outlast the old 1000 ms stopSelf callback before activating a new source.
+    // Device scheduling determines whether onDestroy already completed.
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    await driver.tapSelector({ testID: 'btn-run-resume' });
     await tapMapPoint(driver, 'e2e-stop-1');
+    await tapPlayAndWaitForAudio(driver);
+    await driver.exec(['shell', 'input', 'keyevent', 'KEYCODE_MEDIA_PAUSE']);
+    await waitForAudioActive(driver, false);
+    await recordMediaServiceState(driver, 'paused');
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await recordMediaServiceState(driver, 'paused');
+  });
+
+  await runCase('walk: rapid Play then Stop cannot resurrect the media service', 'walk-rapid-stop', driver, async () => {
+    // The restart case left stop 1 selected. Switch stories rather than
+    // toggling the same card closed.
+    await tapMapPoint(driver, 'e2e-stop-2');
     await dismissGuideHintBeforePlay(driver);
     // Capture both node coordinates before Play; no UIAutomator dump may run
     // between taps, since the six-second fixture would mask the startup race.

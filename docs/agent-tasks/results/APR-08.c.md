@@ -39,3 +39,10 @@ Frozen unit-тэсты, зыходнік SDK і Android debug-прагон па�
 Пасля фіксацыі `f5a08704` Voka знайшоў другую гонку: `clearPlayer(A)` выклікаў `stopSelf()` да актывацыі B, і Android мог знішчыць новы MediaSession пры закрыцці старога сэрвісу. Прамы `stopSelf()` заменены на запланаванае праз 1000 мс завяршэнне, якое выконваецца толькі калі адсутнічаюць `currentPlayer` і `pendingPlayer`. Актывацыя B скасоўвае запланаванае завяршэнне; `onDestroy` выдаляе callback. Асобны Android E2E-сцэнар па чарзе запускае A і B, ставіць B на паўзу і двойчы правярае, што застаюцца foreground media service і notification.
 
 Натыўныя Android вынікі на новым head, уключаючы гонкі замены і выпускны APK/AAB, пакуль **NOT-VERIFIED**. Лакальныя Node-тэсты правяраюць змест патча і яго паўторнае прымяненне, але не даказваюць паводзіны Android-сэрвісу; аддалены runner абавязковы перад закрыццём #854.
+
+## Voka High + Medium (2026-11-01, head `1830b459`)
+
+- **High — stop ужо запытаны да запуску B.** Папярэдняя 1000-мс адтэрміноўка не скасоўвала `stopSelf()` пасля яго выкліку. Натыўны патч цяпер пазначае сэрвіс як `stopRequested`; пры новым Play плэер захоўваецца ў `pendingPlayer`, а Android атрымлівае новы `startForegroundService`. Адкладзеную актывацыю прымаюць і `onStartCommand`, і `onCreate`. Калі стары сэрвіс усё ж выкліча `onDestroy` з актыўным B, ён перадасць B у новы lifecycle, не падмяняючы ўжо чаканага ўладальніка. Дададзены Node-guard для абодвух шляхоў і Android E2E пасля межы idle-stop. Рэальны Android-эксперымент пакуль **NOT-VERIFIED**.
+- **Medium — release manifest check раней прапускаўся.** У існы абавязковы job `lint` workflow `required-checks.yml` дадзены Android prebuild, `:app:processReleaseMainManifest`, строгі `test -s` і запуск `android-merged-media-fgs.test.mjs` з відавочным `KUDY_RELEASE_MANIFEST`. Тэст-ахоўнік правярае звязку і адхіляе выдаленне любога кроку. Вынік GitHub CI для новага SHA пакуль **NOT-VERIFIED**.
+
+Лакальныя Node-тэсты не замяняюць натыўнае пацвярджэнне і не пацвярджаюць release runtime. Поўная Android-зборка і эмулятар на гэтай машыне не запускаліся.
