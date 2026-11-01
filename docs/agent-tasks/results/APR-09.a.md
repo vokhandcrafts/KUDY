@@ -5,20 +5,35 @@
 ## Што зроблена
 
 - Прачытаныя ADR [APR-09](../../architecture/decisions/APR-09-android-backup.md), актуальныя `services/db/schema.ts`, `services/db/db.ts`, `services/db/types.ts`, `services/device.ts`, `services/device-secure-store.ts`, `controllers/deviceRoot.ts`, `controllers/deviceServices.ts`, `controllers/sessionPorts.ts`, `services/analytics.ts`, `services/crash.ts`, `services/feedbackSync.ts`, `app.json` і правілы для агентаў.
-- Складзены [праект дызайну](../../architecture/decisions/APR-09.a-portable-progress-design.md) з дазволенымі табліцамі і калонак, небяспечнымі чэргамі, канфліктамі імпарту, асобным інертным станам незавершанай прагулкі, абодвума фарматамі Android XML і матрыцай праверак.
-- Запісаныя два адкрытыя тэхнічныя бар'еры: (а) бяспечнае аднаўленне `active`/`paused` без аўтастарту; (б) адрозненне старога OS restore ад абнаўлення той самай устаноўкі, каб не знішчыць чэргі і ідэнтычнасць існага карыстальніка.
+- Складзены [праект дызайну](../../architecture/decisions/APR-09.a-portable-progress-design.md) з дазволенымі табліцамі і калонкамі, небяспечнымі чэргамі, канфліктамі імпарту, асобнай табліцай для неактыўнай незавершанай прагулкі, абодвума фарматамі Android XML і матрыцай праверак.
+- Удакладнена, што незавершаныя сесіі захоўваюцца ў асобнай табліцы без змены `session.state`, а стары OS restore супраць звычайнага абнаўлення застаецца адкрытым release-gate.
 
 ## Крытэрыі #833
 
 | № | Стан на 2026-11-01 | Што засталося |
 | --- | --- | --- |
-| 1 | PARTIAL | Праект дызайну запісаны, але яшчэ не прыняты і не правераны на Android |
+| 1 | PARTIAL | Праект дызайну дапоўнены пасля Voka review, але яшчэ не прыняты і не правераны на Android |
 | 2–3 | OPEN | Сапраўдны экспарт/імпарт, захаванне прагрэсу і праверка забароненых даных |
 | 4 | OPEN | Expo config plugin і праверка поўных XML |
 | 5 | OPEN | Паводзінскія тэсты і адмоўныя сцэнарыі |
 | 6 | OPEN | Свежы merged release manifest і рэверсійныя праверкі |
 | 7 | NOT-RUN | Ізаляваныя Android cloud/D2D, legacy/12+, pre-policy restore |
 | 8 | OPEN | Абнаўленне ADR/GP-14 пасля доказаў і праверкі праекта |
+
+## Заўвагі Voka да PR #956 (2026-11-01)
+
+| Ключ | Што выпраўлена | Абмежаванне |
+| --- | --- | --- |
+| `missing-label-removal-note` (HIGH) | У `docs/human-actions.md` дададзена яўнае зняцце `agent:running` пасля мержу, з улікам `agent:blocked` | Праверка guard застаецца за CI |
+| `acceptance-criteria-unmet` (MEDIUM) | PR застаецца Draft; `Closes #833` да завяршэння крытэрыяў заменена на спасылку без аўтаматычнага закрыцця | AC2–8 не выкананыя, PR не мержыць |
+| `undefined-import-merge-policy` (MEDIUM) | У §4.2 дакументаваныя `guide_hint_last`, поўны ключ `migration_log`, лакальны прыярытэт `ui_locale` і адкат пры канфлікце | Рэальны код і тэсты не напісаныя |
+| `undefined-export-import-trigger` (MEDIUM) | У §4.1 прадугледжаныя экспарт пасля commit, серыялізацыя, `noBackupFilesDir` маркер паходжання і асобны кандыдат на імпарт | Old-policy restore і crash windows не правераныя |
+| `inert-state-schema-scope` (LOW) | У §4.3 асобная табліца `restore_pending_session`; `session.state` не змяняецца | Патрэбная дабаўная міграцыя і прыладавая праверка |
+| `mixed-script-text` (LOW) | Выпраўленыя `палi`, `тестах`, `тест` у дызайне | Праверка тэксту ў ізаляванай змене, не поўны lint праекта |
+
+## Знешні статус
+
+Правілы CI-тэсту `human-actions-status-guard.test.mjs` прачытаныя; адпаведны новы запіс правераны па тых жа ўмовах у сесіі, але каманда `node --test` **не запускалася**. Android-тэсты, `npm test`, typecheck, arch:check, jscpd і Showboat па-ранейшаму не запускаліся ў гэтай сесіі. Стан issue пасля дакументальных выпраўленняў: `agent:blocked` да поўнай рэалізацыі і сапраўдных прыладавых доказаў. Ніякіх runtime-змен не было.
 
 ## Фактычныя праверкі
 
