@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- DQ-12 (#922) seeded fixture: deliberately violates the canon twice —
+     an off-canon accent color and a state name the canon does not accept.
+     test/mockup-preflight.test.mjs asserts the readable findings. -->
+<html lang="be">
+<head>
+  <meta charset="utf-8">
+  <title>Сеяны мокап для перадправеркі</title>
+  <style>
+    section.theme[data-theme="light"] {
+      --paper: #faf7f2;
+      --ink: #22262b;
+      --accent: #ff00ff;
+    }
+  </style>
+</head>
+<body>
+  <section class="theme" data-theme="light">
+    <button data-state="enabled">Гіды</button>
+    <button data-state="hover">Гіды (зяны стан)</button>
+  </section>
+</body>
+</html>
