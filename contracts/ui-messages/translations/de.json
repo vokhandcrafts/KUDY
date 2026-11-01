@@ -2298,11 +2298,11 @@
     },
     {
       "id": "web.ui.privacyRetention",
-      "value": "Speicherdauer: Roh gesendete Ereignisse werden 14 Monate aufbewahrt und dann planmäßig gelöscht; aggregierte Zahlen zu Routen bleiben ohne Gerätekennung.",
-      "reviewedSourceHash": "e859c436d72b484bfcf48110c474213d847ef7326797107354710ba929c6fa52",
+      "value": "Speicherdauer: Roh gesendete Ereignisse werden 14 Monate aufbewahrt und dann planmäßig gelöscht.",
+      "reviewedSourceHash": "fd59ba45063f461563c0857bc76897e5e03998fc53cc40afb2e488745df0dcb9",
       "review": {
         "outcome": "approved",
-        "note": "поўны абзац перададзены паводле сэнсу; гарды «ніколі / толькі / без» захаваныя ў перакладзе"
+        "note": "поўны абзац перададзены паводле сэнсу; гарды «ніколі / толькі / без» захаваныя ў перакладзе · #849 крытэр 5, 2026-11-01: сцвярджэнне пра агрэгаваныя лічбы знята (сховішча агрэгатаў не існуе — retention-core.ts); астатні тэкст без зменаў."
       }
     },
     {

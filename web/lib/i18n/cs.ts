@@ -46,7 +46,7 @@ export const cs = {
   "privacyIntro": "KUDY jsou audioprůvodci pro městské procházky. Tato stránka popisuje, která data projekt zpracovává: bezplatnou vrstvu webového kanálu a mobilní aplikaci.",
   "privacyLocation": "Poloha se používá v aplikaci během aktivní procházky: zjišťování polohy na pozadí funguje po dobu procházky a končí s ní. Aplikace neposílá přesné GPS souřadnice na server KUDY ani je neukládá do záznamu událostí. Online mapa načítá dlaždice od OpenFreeMap; tyto požadavky poskytovateli odhalují zobrazenou oblast mapy, včetně okolí aktuální polohy při zapnutém sledování. Webová verze polohu návštěvníka nezjišťuje.",
   "privacyPurchases": "Nákupy probíhají přes obchody aplikací (App Store, Google Play): platební údaje zpracovává obchod a aplikace zaznamenává jen fakt nákupu — trasu, variantu, výsledek — bez bankovních údajů. Nárok na zakoupené spravuje samostatná služba RevenueCat: aplikace jí posílá náhodný identifikátor zařízení jako identifikátor kupujícího a žádosti o nákup či o potvrzení dřívějších nákupů; platby samy jdou jen přes obchod. Server KUDY vede technickou evidenci událostí nákupu (produkt, obchod, doba platnosti) bez platebních údajů.",
-  "privacyRetention": "Doba uchování: syrové odeslané události se uchovávají 14 měsíců, poté se mažou naplánovaným úkolem; agregované čísla podle tras zůstávají bez identifikátoru zařízení.",
+  "privacyRetention": "Doba uchování: syrové odeslané události se uchovávají 14 měsíců, poté se mažou naplánovaným úkolem.",
   "privacyTitle": "Soukromí",
   "privacyWeb": "Bezplatný webový kanál nesbírá účty: registrace ani přihlášení nejsou, kontaktní údaje se nežádají. Stránky katalogu, průvodců a map se otevírají bez zadání osobních údajů.",
   "stopListHeading": "Zastavení trasy",
