@@ -20,6 +20,8 @@ mock.module('expo-audio', {
       addListener() {},
       play() { physicalPlays.push(source.uri); },
       pause() {},
+      setActiveForLockScreen() {},
+      clearLockScreenControls() {},
       remove() {},
     }) as unknown as AudioPlayer,
   },

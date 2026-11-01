@@ -26,6 +26,8 @@ mock.module('expo-audio', {
         addListener(_event: string, _listener: (status: AudioStatus) => void) {},
         play() { physicalPlays.push(source.uri); },
         pause() {},
+        setActiveForLockScreen() {},
+        clearLockScreenControls() {},
         remove() { removed.push(source.uri); },
       };
       return player as unknown as AudioPlayer;

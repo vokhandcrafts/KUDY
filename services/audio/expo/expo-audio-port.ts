@@ -80,10 +80,18 @@ export function createExpoAudioPlayerPort(options?: ExpoAudioPlayerPortOptions):
   const mapper = createStatusMapper();
   let handler: ((event: PlayerSourceEvent) => void) | null = null;
   let player: AudioPlayer | null = null;
+  let lockScreenPlayer: AudioPlayer | null = null;
   let sourceKey: number | null = null;
   // Latest status of the current player; snapshot() computes from it —
   // no second copy of the physical state lives anywhere (`09` §6.3).
   let latest: AudioStatus | null = null;
+
+  function clearLockScreen(owner: AudioPlayer | null): void {
+    if (owner && lockScreenPlayer === owner) {
+      owner.clearLockScreenControls();
+      lockScreenPlayer = null;
+    }
+  }
 
   return {
     play(source: AudioSource): void {
@@ -92,6 +100,7 @@ export function createExpoAudioPlayerPort(options?: ExpoAudioPlayerPortOptions):
       // a synchronous throw from createAudioPlayer leaves the port with no
       // player: pause()/resume() no-op and snapshot() reads an idle state
       // instead of touching the removed player's methods.
+      clearLockScreen(player);
       player?.remove();
       player = null;
       sourceKey = null;
@@ -111,31 +120,40 @@ export function createExpoAudioPlayerPort(options?: ExpoAudioPlayerPortOptions):
         if (player !== created) return;
         latest = status;
         const mapped = mapper.onStatus(status);
+        if (mapped?.type === 'finished' || mapped?.type === 'failed') clearLockScreen(created);
         if (mapped && sourceKey !== null) handler?.(withSourceKey(mapped, sourceKey));
       });
       player = created;
       sourceKey = source.key;
       latest = null;
       mapper.onCommand('play');
+      let operation = 'player start failed';
       try {
         // Identity and subscriptions are in place — only now the physical
         // player starts. expo-audio creates a player paused: creation and
         // play are separate operations (audit A26-02 — the player was
         // created and subscribed but never started).
         created.play();
+        // expo-audio 1.1.1 starts its Android MediaSessionService through
+        // this player method; a manifest declaration alone never starts it.
+        operation = 'lock-screen activation failed';
+        lockScreenPlayer = created;
+        created.setActiveForLockScreen(true, { title: 'KUDY' });
       } catch (error) {
         // The listener dies with the player — remove() is the one release;
         // the port is back to no-player, and the failure reaches the
         // existing failed-event path one level up.
+        clearLockScreen(created);
         created.remove();
         player = null;
         sourceKey = null;
         latest = null;
-        handler?.({ type: 'failed', key: source.key, reason: failureReason('player start failed', error) });
+        handler?.({ type: 'failed', key: source.key, reason: failureReason(operation, error) });
       }
     },
 
     stop(): void {
+      clearLockScreen(player);
       player?.remove();
       player = null;
       sourceKey = null;
@@ -160,6 +178,7 @@ export function createExpoAudioPlayerPort(options?: ExpoAudioPlayerPortOptions):
     },
 
     dispose(): void {
+      clearLockScreen(player);
       player?.remove();
       player = null;
       sourceKey = null;
