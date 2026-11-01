@@ -8,6 +8,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 
 import { findNode, parseDump } from './driver.mjs';
+import { assertMediaServiceState } from './media-service-state.mjs';
 
 const SHORT_MS = 30000;
 const DOWNLOAD_MS = 120000;
@@ -203,23 +204,17 @@ async function recordMediaServiceState(driver, label) {
   fs.writeFileSync(driver.artifactPath(`apr08c-${label}-services.txt`), services);
   fs.writeFileSync(driver.artifactPath(`apr08c-${label}-sessions.txt`), sessions);
   fs.writeFileSync(driver.artifactPath(`apr08c-${label}-notifications.txt`), notifications);
-  const serviceAt = services.indexOf('expo.modules.audio.service.AudioControlsService');
-  const serviceExcerpt = serviceAt < 0 ? '(absent)' : services.slice(serviceAt, serviceAt + 700).replace(/\s+/g, ' ');
-  const foreground = serviceAt < 0 ? null : services.slice(serviceAt, serviceAt + 3000).match(/\bisForeground=(true|false)[^\n]*/)?.[0] ?? null;
+  const { excerpt: serviceExcerpt, foreground } = assertMediaServiceState(services, label);
   const notificationLines = notifications.split(/\r?\n/).filter((line) => /by\.kudy\.app/.test(line)).slice(0, 8);
   console.log(`APR08C_${label}_SERVICE ${serviceExcerpt}`);
-  console.log(`APR08C_${label}_FOREGROUND ${foreground ?? '(absent)'}`);
+  console.log(`APR08C_${label}_FOREGROUND ${foreground}`);
   console.log(`APR08C_${label}_NOTIFICATIONS ${notificationLines.join(' | ') || '(absent)'}`);
   console.log(`APR08C_${label}_MEDIA_SESSION ${sessions.includes('by.kudy.app') ? 'package present' : 'package absent'}`);
   if (label === 'paused') {
-    assert.ok(serviceAt >= 0, 'AudioControlsService is not running during a paused audio session');
-    assert.match(foreground ?? '', /isForeground=true.*types=0x0*2\b/,
-      'AudioControlsService is not foreground with mediaPlayback type during Pause');
     assert.ok(sessions.includes('by.kudy.app'), 'Android media session is absent during a paused audio session');
     assert.ok(notificationLines.some((line) => line.includes('FOREGROUND_SERVICE')),
       'Android foreground media notification is absent during a paused audio session');
   } else if (label === 'stopped') {
-    assert.ok(!foreground?.includes('isForeground=true'), 'AudioControlsService remains foreground after Stop');
     assert.ok(!notificationLines.some((line) => line.includes('NotificationRecord') && line.includes('expo_audio_channel')),
       'Android media notification remains after Stop');
   }

@@ -15,3 +15,16 @@ set -o pipefail; node --test --experimental-strip-types --experimental-test-modu
 # fail 0
 # skipped 0
 ```
+
+Рэгрэсійны тэст правярае стан менавіта AudioControlsService: невядомы або супярэчлівы foreground-стан і сцяг за межамі 3000 сімвалаў не могуць быць залічаны як Stop.
+
+```bash
+set -o pipefail; node --test --test-reporter=tap tools/e2e-android/media-service-state.test.mjs | awk '/^# tests |^# pass |^# fail |^# skipped |^not ok/'
+```
+
+```output
+# tests 1
+# pass 1
+# fail 0
+# skipped 0
+```
