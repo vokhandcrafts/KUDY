@@ -1,0 +1,22 @@
+Крыніца: https://github.com/vokhandcrafts/KUDY/actions/runs/41302421244
+Head: d62b2231797d63be8dc69f0fc4f6ee60bd04b6c9
+Асяроддзе: GitHub runner, Android 36 emulator, debug APK by.kudy.app
+APK SHA-256: 1109130142913265cb9297e5ef312625f9114205a75110bda77a4bbbba0048dc
+
+Санітызаваныя радкі з failure artifact android-e2e-failure пасля натыўнай каманды KEYCODE_MEDIA_PAUSE:
+
+dumpsys activity services:
+  ServiceRecord u0 by.kudy.app/expo.modules.audio.service.AudioControlsService
+  isForeground=true foregroundId=106967076 types=0x00000002
+  foregroundNoti=Notification(channel=expo_audio_channel flags=NO_CLEAR|FOREGROUND_SERVICE)
+
+dumpsys media_session:
+  Media button session is by.kudy.app/androidx.media3.session.id.
+  package=by.kudy.app
+  state=PlaybackState {state=PAUSED(2), position=80, buffered position=6000, speed=0.0}
+
+dumpsys notification:
+  NotificationRecord pkg=by.kudy.app id=106967076 channel=expo_audio_channel
+  flags=NO_CLEAR|FOREGROUND_SERVICE
+
+Гэтыя радкі пацвярджаюць foreground media service і медыясесію ў стане Pause на debug APK. Відэа/скрыншоты гэтага няўдалага прагону не паказалі lock-screen controls; Stop і release APK не правераны.

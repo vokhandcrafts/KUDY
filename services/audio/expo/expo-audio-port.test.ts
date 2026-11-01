@@ -29,6 +29,8 @@ interface RecordingPlayer {
   playCalls: number;
   pauseCalls: number;
   removeCalls: number;
+  lockScreenCalls: number;
+  clearLockScreenCalls: number;
   // Process-wide order stamps: the test asserts listener setup precedes
   // the physical start (R1: identity and subscriptions first).
   listenOrder: number;
@@ -37,12 +39,15 @@ interface RecordingPlayer {
   play(): void;
   pause(): void;
   remove(): void;
+  setActiveForLockScreen(active: boolean): void;
+  clearLockScreenControls(): void;
   emit(status: AudioStatus): void;
 }
 
 const created: RecordingPlayer[] = [];
 let createError: Error | null = null;
 let nextPlayError: Error | null = null;
+let nextLockError: Error | null = null;
 let opCounter = 0;
 
 mock.module('expo-audio', {
@@ -56,6 +61,8 @@ mock.module('expo-audio', {
         playCalls: 0,
         pauseCalls: 0,
         removeCalls: 0,
+        lockScreenCalls: 0,
+        clearLockScreenCalls: 0,
         listenOrder: 0,
         playOrder: 0,
         addListener(event, callback) {
@@ -78,6 +85,18 @@ mock.module('expo-audio', {
         remove() {
           player.removeCalls += 1;
         },
+        setActiveForLockScreen(active) {
+          assert.equal(active, true);
+          player.lockScreenCalls += 1;
+          if (nextLockError) {
+            const error = nextLockError;
+            nextLockError = null;
+            throw error;
+          }
+        },
+        clearLockScreenControls() {
+          player.clearLockScreenCalls += 1;
+        },
         emit(status) {
           listener?.(status);
         },
@@ -97,6 +116,7 @@ function setup(): { port: AudioPlayerPort; events: PlayerSourceEvent[] } {
   created.length = 0;
   createError = null;
   nextPlayError = null;
+  nextLockError = null;
   const port = createExpoAudioPlayerPort();
   const events: PlayerSourceEvent[] = [];
   port.onSourceEvent((event) => events.push(event));
@@ -183,4 +203,19 @@ test('play_failure_cleanup: start failure removes the player exactly once and re
   port.play({ key: 6, path: 'f.m4a' });
   assert.equal(created[1].playCalls, 1);
   assert.equal(events.length, 1);
+});
+
+test('lock_screen_failure_cleanup: service activation failure releases playback and reports its own cause', () => {
+  const { port, events } = setup();
+  nextLockError = new Error('foreground start denied');
+  port.play({ key: 8, path: 'lock.m4a' });
+
+  assert.equal(created[0].playCalls, 1);
+  assert.equal(created[0].lockScreenCalls, 1);
+  assert.equal(created[0].clearLockScreenCalls, 1);
+  assert.equal(created[0].removeCalls, 1);
+  assert.deepEqual(events, [
+    { type: 'failed', key: 8, reason: 'lock-screen activation failed: foreground start denied' },
+  ]);
+  assert.deepEqual(port.snapshot(), { state: 'idle', positionMs: 0, durationMs: 0 });
 });

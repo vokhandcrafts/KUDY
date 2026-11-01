@@ -1,0 +1,18 @@
+Крыніца: https://github.com/vokhandcrafts/KUDY/actions/runs/41311807431
+Head: c7b9af762f5bda3123c7f87da5ba10b51d504af7
+Асяроддзе: GitHub runner, Android 36 emulator, debug APK by.kudy.app
+APK SHA-256: 70538f0e70abb1d2fa0f7fa61be5e1b57805e22dad69b5a9ec6d8c008c6ab8ab
+
+Санітызаваныя радкі з паспяховага CI-журнала:
+
+Пасля натыўнага Pause:
+  AudioControlsService isForeground=true types=0x00000002
+  NotificationRecord pkg=by.kudy.app channel=expo_audio_channel flags=NO_CLEAR|FOREGROUND_SERVICE
+  media_session: by.kudy.app present
+
+Праз 2 секунды пасля Pause walk (StopAudio):
+  AudioControlsService: isForeground радок адсутнічае ў 3000-сімвальным фрагменце запісу сэрвісу
+  expo_audio_channel NotificationRecord: адсутнічае
+  media_session: by.kudy.app present
+
+Suite: smoke 11/11, walk 5/5, discovery 4/4. Скрыпт праверыў, што пасля Stop у гэтым фрагменце няма isForeground=true і foreground-медыяапавяшчэння. Запіс сэрвісу і медыясесіі яшчэ прысутнічае, таму гэта доказ знікнення foreground-апавяшчэння, але не поўнага выдалення сэрвісу. Release runtime і incoming-call interruption не правераны.

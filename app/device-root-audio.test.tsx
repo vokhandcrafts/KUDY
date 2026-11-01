@@ -16,6 +16,8 @@ jest.mock('expo-audio', () => ({
     addListener() {},
     play() { mockPhysicalPlays.push(source.uri); },
     pause() {},
+    setActiveForLockScreen() {},
+    clearLockScreenControls() {},
     remove() {},
   }),
 }));
