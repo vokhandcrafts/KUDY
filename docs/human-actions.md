@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-11-01 — мерж Storybook на прыладзе (DQ-13)
+Што зрабіць: калі аўтаматычны мерж пайплайна не адбудзецца (branch protection ці чырвоны CI) — замерж PR рукамі пасля зелёнага суддзі і знімі лэйбл `agent:running` з issue. Калі PR ужо змержаны аўтаматам — запіс састарэлы, выдалі яго.
+PR: [#957](https://github.com/vokhandcrafts/KUDY/pull/957) · Issue: [#914](https://github.com/vokhandcrafts/KUDY/issues/914)
+
 ### 2026-11-01 — мерж праверак даступнасці з дампа (DQ-06)
 Што зрабіць: калі аўтаматычны мерж пайплайна не адбудзецца (branch protection ці чырвоны CI) — замерж PR рукамі пасля зелёнага суддзі і знімі лэйбл `agent:running` з issue. Калі PR ужо змержаны аўтаматам — запіс састарэлы, выдалі яго.
 PR: [#950](https://github.com/vokhandcrafts/KUDY/pull/950) · Issue: [#916](https://github.com/vokhandcrafts/KUDY/issues/916)
