@@ -288,7 +288,7 @@ export async function deleteDeviceAccount(deps: {
 }): Promise<DeviceDeletionResult> {
   const releaseRequest = markDeviceDeletionRequested(deps.driver);
   let barrierPersisted = false;
-  return withDeviceLifecycle(deps.driver, async () => {
+  return withDeviceLifecycle<DeviceDeletionResult>(deps.driver, async () => {
     await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
     const previous = getDeviceDeleteState(deps.driver);
     if (previous?.startsWith('complete_') && getDeviceId(deps.driver) === null) {
