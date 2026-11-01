@@ -9,6 +9,10 @@ A review answers two questions: **does this hold when the input, the network, or
 misbehaves**, and **does it match the contracts already agreed in `docs/`?** Everything else
 is secondary.
 
+Voka and Judge MUST also follow [review-gate.md](review-gate.md) for the exact
+1 CRITICAL / 1 HIGH / 3 MEDIUM blocking rule and mandatory GitHub Issues for
+non-blocking findings. Never conflate the review gate with merge readiness.
+
 ## 1. Scope first — never review blind
 
 State in one line before reading anything:
@@ -172,7 +176,9 @@ Close with:
 
 ```
 Summary: N critical · N high · N medium · N low
-Verdict: merge / merge after fixing the CRITICAL+HIGH items / needs rework — <one line why>
+Review verdict: PASS / FAIL (1 CRITICAL, 1 HIGH, or 3 distinct MEDIUM = FAIL)
+Tracking: COMPLETE / INCOMPLETE (GitHub Issues for remaining non-blocking findings)
+Merge readiness: READY / BLOCKED (state the independent blockers)
 ```
 
 ## 6. Review discipline
