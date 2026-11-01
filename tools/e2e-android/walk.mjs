@@ -212,6 +212,8 @@ async function recordMediaServiceState(driver, label) {
   if (label === 'paused') {
     assert.ok(serviceAt >= 0, 'AudioControlsService is not running during a paused audio session');
     assert.ok(sessions.includes('by.kudy.app'), 'Android media session is absent during a paused audio session');
+    assert.ok(notificationLines.some((line) => line.includes('FOREGROUND_SERVICE')),
+      'Android foreground media notification is absent during a paused audio session');
   }
 }
 
@@ -444,7 +446,12 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
 
   await runCase('walk: no fresh position cannot autoplay; manual Play still works', 'walk-manual', driver, async () => {
     await driver.exec(['shell', 'cmd', 'location', 'set-location-enabled', 'false']);
+    // The disposable CI emulator needs a real keyguard for lock-screen proof.
+    const lockPin = '3728';
+    let pinSet = false;
     try {
+      await driver.exec(['shell', 'locksettings', 'set-pin', lockPin]);
+      pinSet = true;
       await driver.launchDeepLink(`kudy:///route/${FREE}`);
       await waitForManualStart(driver);
       await driver.tapSelector({ testID: 'btn-start', enabled: true });
@@ -460,22 +467,29 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
         await waitForAudioActive(driver, false);
         await recordMediaServiceState(driver, 'paused');
         await driver.exec(['shell', 'cmd', 'statusbar', 'expand-notifications']);
+        await driver.exec(['shell', 'input', 'swipe', '540', '30', '540', '1700', '450']);
         await delay();
         await driver.screenshot('apr08c-notification.png');
         await driver.exec(['shell', 'input', 'keyevent', '26']);
         await delay();
-        await driver.exec(['shell', 'input', 'keyevent', '26']);
-        await delay();
+        await driver.exec(['shell', 'input', 'keyevent', 'KEYCODE_WAKEUP']);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         await driver.screenshot('apr08c-lock-screen.png');
       } finally {
         await finishVideo();
       }
-      await driver.exec(['shell', 'input', 'keyevent', '82']);
+      await driver.exec(['shell', 'input', 'swipe', '540', '1800', '540', '350', '450']);
+      await driver.exec(['shell', 'input', 'text', lockPin]);
+      await driver.exec(['shell', 'input', 'keyevent', 'KEYCODE_ENTER']);
       await driver.exec(['shell', 'cmd', 'statusbar', 'collapse']);
       await driver.tapSelector({ testID: 'btn-run-pause' });
       await recordMediaServiceState(driver, 'stopped');
     } finally {
-      await driver.exec(['shell', 'cmd', 'location', 'set-location-enabled', 'true']);
+      try {
+        if (pinSet) await driver.exec(['shell', 'locksettings', 'clear', '--old', lockPin]);
+      } finally {
+        await driver.exec(['shell', 'cmd', 'location', 'set-location-enabled', 'true']);
+      }
     }
   });
 }
