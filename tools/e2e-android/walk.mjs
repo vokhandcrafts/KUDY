@@ -501,4 +501,33 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
       }
     }
   });
+
+  await runCase('walk: incoming call interrupts audio without automatic resume', 'walk-call', driver, async () => {
+    await driver.waitFor({ testID: 'run-paused' }, { timeoutMs: SHORT_MS });
+    await driver.tapSelector({ testID: 'btn-run-resume' });
+    await tapMapPoint(driver, 'e2e-stop-2');
+    await tapPlayAndWaitForAudio(driver);
+    const number = '5550100'; // Synthetic number used only by the CI emulator.
+    let callStarted = false;
+    try {
+      await driver.exec(['emu', 'gsm', 'call', number]);
+      callStarted = true;
+      await delay();
+      await driver.exec(['emu', 'gsm', 'accept', number]);
+      await waitForAudioActive(driver, false);
+      const sessions = (await driver.exec(['shell', 'dumpsys', 'media_session'])).stdout;
+      const audio = (await driver.exec(['shell', 'dumpsys', 'audio'])).stdout;
+      fs.writeFileSync(driver.artifactPath('apr08c-call-sessions.txt'), sessions);
+      fs.writeFileSync(driver.artifactPath('apr08c-call-audio.txt'), audio);
+      const state = /package=by\.kudy\.app[\s\S]*?state=PlaybackState \{state=([A-Z]+)\(\d+\), position=(\d+)/.exec(sessions);
+      console.log(`APR08C_CALL_MEDIA_SESSION ${state ? `${state[1]} position=${state[2]}` : '(absent)'}`);
+      assert.ok(state, 'KUDY media session is absent during the simulated call');
+      assert.equal(state[1], 'PAUSED', 'the simulated call did not pause KUDY audio');
+      assert.ok(Number(state[2]) < 6000, 'audio reached its natural six-second end before call interruption was observed');
+    } finally {
+      if (callStarted) await driver.exec(['emu', 'gsm', 'cancel', number]);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    assert.equal(await activeAudioPlayers(driver), false, 'audio resumed without user action after the call ended');
+  });
 }
