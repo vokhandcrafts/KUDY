@@ -3,6 +3,8 @@
 // G23.03 driver; polling intervals only pace observations, never stand in
 // for a state transition.
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 
 import { findNode, parseDump } from './driver.mjs';
@@ -154,6 +156,63 @@ export async function tapPlayAndWaitForAudio(driver) {
     throw error;
   }
   await observation;
+}
+
+// Record the Android media surface on the CI emulator rather than running a
+// second local AVD. The clip uses only the synthetic E2E guide and is emitted
+// in bounded base64 chunks because the existing workflow uploads artifacts
+// only on failure. The result doc records the exact tested APK SHA separately.
+async function startMediaProofVideo(driver) {
+  const remote = '/sdcard/kudy-apr08c-media.mp4';
+  await driver.exec(['shell', 'rm', '-f', remote]);
+  const child = spawn(driver.adbPath, [
+    '-s', driver.serial, 'shell', 'screenrecord', '--size', '480x1040',
+    '--bit-rate', '600000', '--time-limit', '25', remote,
+  ], { stdio: ['ignore', 'ignore', 'pipe'] });
+  let errorOutput = '';
+  child.stderr.on('data', (chunk) => { errorOutput += chunk.toString('utf8'); });
+  const completed = new Promise((resolve, reject) => {
+    child.once('error', reject);
+    child.once('close', (code) => code === 0 ? resolve() : reject(new Error(`screenrecord exited ${code}: ${errorOutput.trim()}`)));
+  });
+  void completed.catch(() => {});
+  await delay();
+  return async () => {
+    await completed;
+    const local = driver.artifactPath('apr08c-media-playback.mp4');
+    await driver.exec(['pull', remote, local], { timeoutMs: 30000 });
+    const bytes = fs.readFileSync(local);
+    assert.ok(bytes.length > 10000 && bytes.subarray(0, 32).includes(Buffer.from('ftyp')),
+      `Android video is absent or invalid (${bytes.length} bytes)`);
+    assert.ok(bytes.length < 3000000, `Android video exceeds the bounded log transfer (${bytes.length} bytes)`);
+    const sha = crypto.createHash('sha256').update(bytes).digest('hex');
+    console.log(`APR08C_VIDEO sha256=${sha} bytes=${bytes.length}`);
+    if (process.env.CI) {
+      const encoded = bytes.toString('base64');
+      for (let offset = 0; offset < encoded.length; offset += 4096) {
+        console.log(`APR08C_VIDEO_CHUNK ${offset / 4096} ${encoded.slice(offset, offset + 4096)}`);
+      }
+    }
+  };
+}
+
+async function recordMediaServiceState(driver, label) {
+  const services = (await driver.exec(['shell', 'dumpsys', 'activity', 'services'])).stdout;
+  const sessions = (await driver.exec(['shell', 'dumpsys', 'media_session'])).stdout;
+  const notifications = (await driver.exec(['shell', 'dumpsys', 'notification'])).stdout;
+  fs.writeFileSync(driver.artifactPath(`apr08c-${label}-services.txt`), services);
+  fs.writeFileSync(driver.artifactPath(`apr08c-${label}-sessions.txt`), sessions);
+  fs.writeFileSync(driver.artifactPath(`apr08c-${label}-notifications.txt`), notifications);
+  const serviceAt = services.indexOf('expo.modules.audio.service.AudioControlsService');
+  const serviceExcerpt = serviceAt < 0 ? '(absent)' : services.slice(serviceAt, serviceAt + 700).replace(/\s+/g, ' ');
+  const notificationLines = notifications.split(/\r?\n/).filter((line) => /by\.kudy\.app/.test(line)).slice(0, 8);
+  console.log(`APR08C_${label}_SERVICE ${serviceExcerpt}`);
+  console.log(`APR08C_${label}_NOTIFICATIONS ${notificationLines.join(' | ') || '(absent)'}`);
+  console.log(`APR08C_${label}_MEDIA_SESSION ${sessions.includes('by.kudy.app') ? 'package present' : 'package absent'}`);
+  if (label === 'paused') {
+    assert.ok(serviceAt >= 0, 'AudioControlsService is not running during a paused audio session');
+    assert.ok(sessions.includes('by.kudy.app'), 'Android media session is absent during a paused audio session');
+  }
 }
 
 export async function waitForRun(driver, slug, allowLocationSettings = true) {
@@ -392,7 +451,27 @@ export async function runWalkSuite({ driver, url, runCase, coldStart, originLogP
       await waitForRun(driver, 'no-location-entry', false);
       await assertNoPlaying(driver, 2500, 'no-fresh-position');
       await tapMapPoint(driver, 'e2e-stop-2');
-      await tapPlayAndWaitForAudio(driver);
+      const finishVideo = await startMediaProofVideo(driver);
+      try {
+        await tapPlayAndWaitForAudio(driver);
+        await driver.tapSelector({ testID: 'btn-bar-playpause' });
+        await waitForAudioActive(driver, false);
+        await recordMediaServiceState(driver, 'paused');
+        await driver.exec(['shell', 'cmd', 'statusbar', 'expand-notifications']);
+        await delay();
+        await driver.screenshot('apr08c-notification.png');
+        await driver.exec(['shell', 'input', 'keyevent', '26']);
+        await delay();
+        await driver.exec(['shell', 'input', 'keyevent', '26']);
+        await delay();
+        await driver.screenshot('apr08c-lock-screen.png');
+      } finally {
+        await finishVideo();
+      }
+      await driver.exec(['shell', 'input', 'keyevent', '82']);
+      await driver.exec(['shell', 'cmd', 'statusbar', 'collapse']);
+      await driver.tapSelector({ testID: 'btn-run-pause' });
+      await recordMediaServiceState(driver, 'stopped');
     } finally {
       await driver.exec(['shell', 'cmd', 'location', 'set-location-enabled', 'true']);
     }
