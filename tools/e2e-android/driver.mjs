@@ -124,7 +124,9 @@ function decodeXmlEntities(value) {
 // values may legally contain `>`, so the tag ends only at a `>` outside
 // quotes. Corrupt input yields fewer nodes and diagnostics, never a throw
 // (implementation-rules 14).
-function parseNodeTag(xml, start) {
+// Exported for visual-a11y.mjs — the a11y pass reuses the same tag and
+// attribute semantics instead of restating them (implementation-rules 3).
+export function parseNodeTag(xml, start) {
   let inQuote = false;
   for (let i = start; i < xml.length; i += 1) {
     const ch = xml[i];
@@ -136,7 +138,7 @@ function parseNodeTag(xml, start) {
 
 const ATTR_RE = /([A-Za-z_][\w.-]*)="([^"]*)"/g;
 
-function parseAttributes(tagBody) {
+export function parseAttributes(tagBody) {
   const attrs = {};
   for (const match of tagBody.matchAll(ATTR_RE)) {
     attrs[match[1]] = decodeXmlEntities(match[2]);
