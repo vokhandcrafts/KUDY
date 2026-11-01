@@ -65,6 +65,20 @@ describe("DQ-02 (issue #911): the dev-only specimen screen", () => {
     }
   });
 
+  test("DQ-03: the story param renders one named story alone", async () => {
+    renderRouter(specimenRouter(), { initialUrl: "/dev-specimen?component=guide-card&story=free" });
+    expect(await screen.findByTestId("dev-specimen/story-free")).toBeTruthy();
+    for (const other of namedGuideCardStories().filter((story) => story.name !== "free")) {
+      expect(screen.queryByTestId(`dev-specimen/story-${other.name}`)).toBeNull();
+    }
+  });
+
+  test("DQ-03: an unknown story name renders the honest notice, never a story", async () => {
+    renderRouter(specimenRouter(), { initialUrl: "/dev-specimen?component=guide-card&story=nowhere" });
+    expect(await screen.findByTestId("dev-specimen/unknown")).toBeTruthy();
+    expect(screen.queryByTestId("dev-specimen/story-free")).toBeNull();
+  });
+
   test("an unknown component name renders the honest notice, never a story", async () => {
     renderRouter(specimenRouter(), { initialUrl: "/dev-specimen?component=nowhere" });
     expect(await screen.findByTestId("dev-specimen/unknown")).toBeTruthy();
