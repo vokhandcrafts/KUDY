@@ -1,5 +1,6 @@
 const path = require("node:path");
 const { getDefaultConfig } = require("expo/metro-config");
+const { withStorybook } = require("@storybook/react-native/metro/withStorybook");
 
 const config = getDefaultConfig(__dirname);
 
@@ -31,4 +32,21 @@ config.resolver.resolveRequest = (context, moduleName, platform, extra) => {
     : context.resolveRequest(context, moduleName, platform, extra);
 };
 
-module.exports = config;
+// DQ-13 (issue #914): the on-device Storybook joins the bundle only when the
+// build runs with EXPO_PUBLIC_STORYBOOK=1 (criterion 2) — withStorybook is
+// the official @storybook/react-native wrapper: with enabled=false it
+// resolves every @storybook/* request to an empty module, and because the
+// route imports .rnstorybook/root.tsx (not an index.*) the entry itself
+// falls to the wrapper's {type: "empty"} branch — the production bundle
+// keeps zero files of the @storybook packages (tools/metro-config/
+// storybook-gate.test.mjs pins the behaviour and the wiring). The flag is
+// read once at config load; flipping it requires a Metro restart. Telemetry
+// is shut off for the metro integration itself (criterion 3) — withStorybook
+// reports a "dev" event at config load unless this is set; no websockets
+// option and no MCP flag are passed, so the wrapper's channel server branch
+// is never taken.
+process.env.STORYBOOK_DISABLE_TELEMETRY = "1";
+module.exports = withStorybook(config, {
+  enabled: process.env.EXPO_PUBLIC_STORYBOOK === "1",
+  configPath: path.resolve(__dirname, "./.rnstorybook"),
+});

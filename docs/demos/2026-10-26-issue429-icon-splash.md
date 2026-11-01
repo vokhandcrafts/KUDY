@@ -120,3 +120,13 @@ Splash на халодным старце таго ж APK: крэмавы фон
 іконкай па цэнтры (Android 12+ splash з `splashscreen_background`).
 
 ![Splash на халодным старце: крэмавы фон і дракон па цэнтры](../testing/evidence/2026-10-26-issue429/splash-cold-start.png)
+
+---
+
+Дадатак ад 2026-11-01 (DQ-11, PR з issue #921): сумы ў блоку 2 і
+канфіг у блоку 5 вышэй — гісторыя першапачатковай інтэграцыі
+2026-10-26; удакладненне межаў 2026-10-28 (`docs/demos/2026-10-28-launcher-icon-bounds.md`,
+#872) змяніла байты экспартаў і adaptive-канфіг, таму `showboat verify`
+гэтай дэмы сёння падае. Актуальныя кантрольныя сумы і канфігавыя палі —
+`assets/kudy-icon/provenance.json` і
+`docs/agent-tasks/results/DQ-11.md`; прынятыя экспарты не перамалёўваліся.

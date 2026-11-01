@@ -63,3 +63,6 @@ docs/specifications/design-qa/index.html
 
 # voka reviewer workspace (machine-local review drafts)
 .voka/
+
+# DQ-13 (issue #914): machine-local story registration, rebuilt by storybook:generate
+/.rnstorybook/storybook.requires.ts

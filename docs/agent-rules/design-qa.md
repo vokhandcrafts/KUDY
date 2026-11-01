@@ -8,7 +8,7 @@ Run a design-QA review **on request** and **before closing any task that changes
 2. Use [visual-language.md](../design/visual-language.md) and its machine token block as canon. Read [screens-and-transitions.md](../design/screens-and-transitions.md) for changed screen behavior. In [brand/decisions.md](../design/brand/decisions.md), **only explicitly accepted** rows constitute rules. Accepted portions of the brand brief require a traceable owner acceptance record. Drafts, mockups, proposals, and unmerged changes are **not** rules.
 3. Read [exceptions.md](../design-qa/exceptions.md) and available owner verdicts/ledger. A missing ledger is NOT-VERIFIED, not automatic approval.
 4. If available, inspect the visual:check approved baseline, current screenshot, diff PNG, manifest (device/API/theme/font scale/locale/fixture/commit), accessibility tree dump, and source code for invisible touch padding such as hitSlop. Compare only equivalent captures. Do not fabricate artifacts or measurements.
-5. For changed images, record known asset provenance and refer dedicated image verification to DQ-11; any unperformed check is NOT-VERIFIED.
+5. For changed images, record known asset provenance and refer dedicated image verification to DQ-11 ([image-checklist.md](../design-qa/image-checklist.md)); any unperformed check is NOT-VERIFIED.
 
 ## First pass
 
@@ -17,6 +17,7 @@ Run a design-QA review **on request** and **before closing any task that changes
 - Examine text clipping and tap geometry with a valid UI tree plus source evidence. A 48 dp target remains **OPINION** until an accepted owner decision adds it to canon (design-QA spec §12). The UI dump does not include hitSlop; a small visible rectangle alone cannot justify a RULE.
 - Screenshot mismatches without a violated accepted rule are DIFF, never RULE. Changes to approved baselines require owner review.
 - Respect DT-4 light cartography, DT-6 light splash and light/dark disabled-token distinctions from the exception register.
+- Story states: per the [design-QA spec §6.2](../specifications/design-qa/2026-10-30-design-qa-system.md) canon («Што правярае сам») — «Кожная гісторыя (стан) мае здымак; новы стан не з'яўляецца без запісу ў каноне»: every story (state) has a capture, and a new state does not appear without a canon entry. A state without a capture is **NOT-VERIFIED**; a new state without a canon entry is reported for owner review.
 
 ## Finding classes
 
