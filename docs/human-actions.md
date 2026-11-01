@@ -17,6 +17,10 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
+### 2026-11-01 — працяг APR-09.a (Android backup)
+Што зрабіць: перадай draft PR #956 выканаўцу з Node, adb і ізаляванымі Android cloud/D2D асяроддзямі. Завяршы runtime, рэгрэсійныя і прыладавыя праверкі; не мержы PR, пакуль крытэрыі #833 не пацверджаныя і judge не зялёны.
+PR: [draft #956](https://github.com/vokhandcrafts/KUDY/pull/956) · Issue: [#833](https://github.com/vokhandcrafts/KUDY/issues/833)
+
 ### 2026-11-01 — мерж праверак даступнасці з дампа (DQ-06)
 Што зрабіць: калі аўтаматычны мерж пайплайна не адбудзецца (branch protection ці чырвоны CI) — замерж PR рукамі пасля зелёнага суддзі і знімі лэйбл `agent:running` з issue. Калі PR ужо змержаны аўтаматам — запіс састарэлы, выдалі яго.
 PR: [#950](https://github.com/vokhandcrafts/KUDY/pull/950) · Issue: [#916](https://github.com/vokhandcrafts/KUDY/issues/916)
