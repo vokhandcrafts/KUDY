@@ -83,6 +83,83 @@ test('APR-07.a: completed delete preserves durable walk history, hints, caches a
   assert.ok(Number(driver.prepare("SELECT enqueue_seq FROM event_queue WHERE event_id = 'bbbbbbbb-1111-4111-8111-111111111111'").get()?.enqueue_seq) >= nextBefore);
 });
 
+
+test('APR-07.a: failed persistence of initial deletion marker pauses senders until explicit retry', async () => {
+  const actual = nodeSqliteDriver();
+  let failMarker = false;
+  const driver: SqlDriver = {
+    execSql: (sql) => actual.execSql(sql),
+    prepare: (sql) => {
+      const statement = actual.prepare(sql);
+      return {
+        run: (...params) => {
+          if (failMarker && sql.startsWith('INSERT INTO settings') && params[0] === 'device_delete_state') {
+            throw new Error('injected durable marker write failure');
+          }
+          return statement.run(...params);
+        },
+        get: (...params) => statement.get(...params),
+        all: (...params) => statement.all(...params),
+      };
+    },
+  };
+  fresh(driver);
+  const secret = store();
+  failMarker = true;
+  await assert.rejects(deleteDeviceAccount({
+    driver, secretStore: secret, baseUrl: BASE,
+    transport: { deleteDevice: async () => { throw new Error('must not reach server'); } },
+  }), /injected durable marker write failure/);
+  assert.equal(getDeviceDeleteState(driver), null, 'the failed marker must not be fabricated');
+  assert.equal(getDeviceId(driver), ID);
+  assert.equal(secret.current(), SECRET);
+  assert.equal(await flushAnalytics(driver, async () => { throw new Error('old work sent'); }), 0);
+  await assert.rejects(ensureDeviceIdentity({
+    driver, secretStore: secret, baseUrl: BASE,
+    transport: { register: async () => { throw new Error('identity revived'); } },
+  }), { rule: 'deletion_pending' });
+  failMarker = false;
+  const result = await deleteDeviceAccount({
+    driver, secretStore: secret, baseUrl: BASE,
+    transport: { deleteDevice: async () => ({ status: 204 }) },
+  });
+  assert.equal(result.remote, 'remote_confirmed');
+  assert.equal(count(driver, 'event_queue'), 0);
+  assert.equal(secret.current(), null);
+});
+
+
+test('APR-07.a: acknowledged SQLite cleanup failure auto-recovers before a fresh registration', async () => {
+  const actual = nodeSqliteDriver();
+  let failCleanup = false;
+  const driver: SqlDriver = {
+    execSql: (sql) => actual.execSql(sql),
+    prepare: (sql) => {
+      if (failCleanup && sql === 'DELETE FROM event_queue') throw new Error('cleanup database unavailable');
+      return actual.prepare(sql);
+    },
+  };
+  fresh(driver);
+  const secret = store();
+  failCleanup = true;
+  await assert.rejects(deleteDeviceAccount({
+    driver, secretStore: secret, baseUrl: BASE,
+    transport: { deleteDevice: async () => ({ status: 204 }) },
+  }), /cleanup database unavailable/);
+  assert.equal(getDeviceDeleteState(driver), 'cleanup_remote_confirmed');
+  failCleanup = false;
+  const identity = await ensureDeviceIdentity({
+    driver, secretStore: secret, baseUrl: BASE,
+    transport: { register: async () => ({
+      status: 201, body: { device_id: ID, device_secret: 'fresh-only' },
+    }) },
+  });
+  assert.equal(identity.deviceSecret, 'fresh-only');
+  assert.equal(getDeviceDeleteState(driver), 'complete_remote_confirmed');
+  assert.equal(getCrashConsent(driver), null);
+  assert.equal(count(driver, 'event_queue'), 0);
+});
+
 test('APR-07.a: interrupted SQLite cleanup keeps phase and is recoverable', async () => {
   const driver = fresh();
   const secret = store();

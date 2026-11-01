@@ -15,7 +15,10 @@ import {
   clearDeviceAccountState, getDeviceDeleteState, getDeviceId, isDeviceDeletionPending,
   setDeviceDeleteState, setDeviceId, type DeviceDeleteState,
 } from './db/db.ts';
-import { deviceDeletionRequested, markDeviceDeletionRequested, withDeviceLifecycle } from './device-lifecycle.ts';
+import {
+  blockAfterUnpersistedDelete, deletionBarrierPersisted, deviceDeletionRequested,
+  markDeviceDeletionRequested, withDeviceLifecycle,
+} from './device-lifecycle.ts';
 import type { SqlDriver } from './db/types.ts';
 import { NETWORK_WAIT_LIMITS, withWaitLimit } from './network-wait.ts';
 import { assertNotRedirected, parseSecureEndpointUrl, SecureUrlError } from './secure-url.ts';
@@ -284,15 +287,19 @@ export async function deleteDeviceAccount(deps: {
   waitLimitMs?: number;
 }): Promise<DeviceDeletionResult> {
   const releaseRequest = markDeviceDeletionRequested(deps.driver);
+  let barrierPersisted = false;
   return withDeviceLifecycle(deps.driver, async () => {
     await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
     const previous = getDeviceDeleteState(deps.driver);
     if (previous?.startsWith('complete_') && getDeviceId(deps.driver) === null) {
+      deletionBarrierPersisted(deps.driver);
       return remoteResult(previous);
     }
     // Persist this barrier before network activity. A failure is durable:
     // neither registration nor a sender may revive an old account.
     setDeviceDeleteState(deps.driver, 'pending_remote');
+    barrierPersisted = true;
+    deletionBarrierPersisted(deps.driver);
     const secret = await deps.secretStore.getSecret();
     if (secret === null) {
       // With no bearer, remote erasure cannot be proven or requested.
@@ -320,5 +327,19 @@ export async function deleteDeviceAccount(deps: {
       ? 'cleanup_remote_confirmed' : 'cleanup_remote_unverified');
     await recoverPendingLocalDeletion(deps.driver, deps.secretStore);
     return { local: 'complete', remote };
+  }).catch((error: unknown) => {
+    // If the initial SQLite marker itself fails, no durable pause can be
+    // claimed; nevertheless keep this process's senders stopped. Explicit
+    // retry is the only release from this in-memory fallback.
+    if (!barrierPersisted) {
+      try {
+        // An existing cleanup phase is already a durable barrier: allow the
+        // normal restart path to retry it automatically when storage returns.
+        if (!isDeviceDeletionPending(deps.driver)) blockAfterUnpersistedDelete(deps.driver);
+      } catch {
+        blockAfterUnpersistedDelete(deps.driver);
+      }
+    }
+    throw error;
   }).finally(releaseRequest);
 }

@@ -6,11 +6,23 @@ import type { SqlDriver } from './db/types.ts';
 
 const tails = new WeakMap<SqlDriver, Promise<void>>();
 const deleteRequests = new WeakMap<SqlDriver, number>();
+// If even the initial durable deletion marker cannot be written, keep
+// this process fail-closed until an explicit retry persists that marker.
+// SQLite failure cannot be guaranteed durable across process termination.
+const unpersistedDelete = new WeakSet<SqlDriver>();
+
+export function blockAfterUnpersistedDelete(driver: SqlDriver): void {
+  unpersistedDelete.add(driver);
+}
+
+export function deletionBarrierPersisted(driver: SqlDriver): void {
+  unpersistedDelete.delete(driver);
+}
 
 // A registration initiated while deletion is queued behind an active sender
 // must not be registered after the delete has already completed.
 export function deviceDeletionRequested(driver: SqlDriver): boolean {
-  return (deleteRequests.get(driver) ?? 0) > 0;
+  return unpersistedDelete.has(driver) || (deleteRequests.get(driver) ?? 0) > 0;
 }
 
 export function markDeviceDeletionRequested(driver: SqlDriver): () => void {
