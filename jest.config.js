@@ -34,10 +34,11 @@ module.exports = {
     "^react-native-reanimated$": "<rootDir>/test/reanimated-mock.js",
     "^react-native-reanimated/mock$": "<rootDir>/test/reanimated-mock-subpath.js",
     // DQ-13 (issue #914): the route suite mounts the Storybook surface through
-    // this identity mock — the real UI root needs the machine-local generated
+    // this identity mock — the real UI root pulls the storybook runtime whose
+    // dist build jest cannot parse, on top of the machine-local generated
     // requires module and native peers jest cannot host. The guard is
-    // app/storybook.test.tsx itself: dropping the mapping dies on the missing
-    // .rnstorybook/storybook.requires module.
+    // app/storybook.test.tsx itself: dropping the mapping dies on the
+    // storybook dist parse error.
     "^\\.\\./\\.rnstorybook(/.*)?$": "<rootDir>/test/storybook-ui-mock.tsx",
     "^lucide-react-native/icons/(.*)$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/icons/$1.js",
   },
