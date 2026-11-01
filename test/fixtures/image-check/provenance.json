@@ -1,0 +1,8 @@
+{
+  "status": "draft",
+  "decision": "DQ-11 draft example (issue #921): a synthetic 64x64 shape, not a brand asset — it stays a draft until an owner decision link accepts it",
+  "rights": "generated for the DQ-11 test fixture by the task executor; test-only bytes",
+  "files": {
+    "draft-example.png": "62d7895fd3c408a13593a41669f3ef5795f8b31d0e142d737e6043300529b098"
+  }
+}

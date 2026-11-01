@@ -49,3 +49,7 @@ web/lib/i18n/??.ts eol=lf
 
 # Issue 429: the brand icon bytes are checksummed against the owner package SHA256SUMS.
 assets/kudy-icon/** -text
+
+# Issue 921 (DQ-11): the draft fixture bytes carry a sha256 recorded in the
+# fixture provenance.json; no EOL conversion may touch them (rule 4).
+test/fixtures/image-check/** -text

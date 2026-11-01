@@ -8,7 +8,7 @@ Run a design-QA review **on request** and **before closing any task that changes
 2. Use [visual-language.md](../design/visual-language.md) and its machine token block as canon. Read [screens-and-transitions.md](../design/screens-and-transitions.md) for changed screen behavior. In [brand/decisions.md](../design/brand/decisions.md), **only explicitly accepted** rows constitute rules. Accepted portions of the brand brief require a traceable owner acceptance record. Drafts, mockups, proposals, and unmerged changes are **not** rules.
 3. Read [exceptions.md](../design-qa/exceptions.md) and available owner verdicts/ledger. A missing ledger is NOT-VERIFIED, not automatic approval.
 4. If available, inspect the visual:check approved baseline, current screenshot, diff PNG, manifest (device/API/theme/font scale/locale/fixture/commit), accessibility tree dump, and source code for invisible touch padding such as hitSlop. Compare only equivalent captures. Do not fabricate artifacts or measurements.
-5. For changed images, record known asset provenance and refer dedicated image verification to DQ-11; any unperformed check is NOT-VERIFIED.
+5. For changed images, record known asset provenance and refer dedicated image verification to DQ-11 ([image-checklist.md](../design-qa/image-checklist.md)); any unperformed check is NOT-VERIFIED.
 
 ## First pass
 
