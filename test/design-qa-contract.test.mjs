@@ -68,3 +68,16 @@ test('design-QA contract pins the rule elements its guard cites', () => {
   }
   assert.match(rules, /second-pass rejected candidates/i);
 });
+
+test('design-QA first pass carries the spec 6.2 story-capture and canon-entry check', () => {
+  // Verbatim pins: each assertion fails when a §6.2 check silently leaves the
+  // first pass (issue #939). No end-of-line anchors: checkouts may hold CRLF bytes.
+  const spec = read('docs/specifications/design-qa/2026-10-30-design-qa-system.md');
+  const canon =
+    "Кожная гісторыя (стан) мае здымак; новы стан не з'яўляецца без запісу ў каноне";
+  assert.ok(spec.includes(canon), 'spec §6.2 canon line drifted');
+  const rules = read('docs/agent-rules/design-qa.md');
+  assert.ok(rules.includes(canon), 'first pass no longer quotes the §6.2 canon line');
+  assert.match(rules, /A state without a capture is \*\*NOT-VERIFIED\*\*/);
+  assert.match(rules, /a new state without a canon entry is reported for owner review/);
+});
