@@ -1,11 +1,14 @@
 // MAP-05 (#883): pin the proposal to actual routes, localization keys,
 // the approved theme canon, and the existing npm-test glob (test/*.test.mjs).
+// DQ-12 (#922): the canon colors, contrast pairs and state names run through
+// the shared mockup preflight (test/mockup-preflight.mjs); the structural
+// pins below stay MAP-05-specific.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { contrast } from './wcag-contrast.mjs';
+import { checkMockup, formatFindings } from './mockup-preflight.mjs';
 import { loadCanon } from './design-canon.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -23,13 +26,6 @@ const nav = [
   { key: 'native.chrome.kudyLink', path: '/my', property: 'kudyLink' },
 ];
 const states = ['enabled', 'pressed', 'dragging', 'snapped', 'disabled'];
-
-function themeVars(theme) {
-  const css = specimen.match(new RegExp('section\\.theme\\[data-theme="' + theme + '"\\]\\s*\\{([^}]+)\\}'))?.[1];
-  assert.ok(css, theme + ' theme token block exists');
-  return Object.fromEntries([...css.matchAll(/--([a-z-]+):\s*(#[a-f0-9]{6})/gi)]
-    .map(([, key, value]) => [key, value.toLowerCase()]));
-}
 
 test('menu specimen documents only the actual routes and existing localization keys', () => {
   const entries = [...specimen.matchAll(/<tr data-key="([^"]+)" data-path="([^"]+)"/g)]
@@ -71,22 +67,26 @@ test('both themes show all required states, textual cues and fallback specimens'
 });
 
 test('light/dark specimen colors match canon and clear contrast thresholds', () => {
-  const mappings = {
-    paper: 'color.paper', card: 'color.card', ink: 'color.ink',
-    muted: 'color.muted', line: 'color.line', accent: 'color.accent',
-    'accent-ink': 'color.accent-ink', 'disabled-ink': 'color.disabled-ink',
-    'disabled-line': 'color.disabled-line',
-  };
-  for (const theme of ['light', 'dark']) {
-    const vars = themeVars(theme);
-    for (const [name, token] of Object.entries(mappings)) {
-      const expected = theme === 'dark' ? canon.darkTheme.tokens[token] ?? canon.tokens[token].value : canon.tokens[token].value;
-      assert.equal(vars[name], expected.toLowerCase(), theme + ': ' + token);
-    }
-    assert.ok(contrast(vars.ink, vars.card) >= 4.5, theme + ': regular label');
-    assert.ok(contrast(vars['disabled-ink'], vars.card) >= 4.5, theme + ': disabled label');
-    assert.ok(contrast(vars['accent-ink'], vars.accent) >= 4.5, theme + ': pressed label');
-    assert.ok(contrast(vars.accent, vars.paper) >= 3, theme + ': highlight outline');
-    assert.ok(contrast(vars['disabled-line'], vars.paper) >= 3, theme + ': disabled border');
-  }
+  const findings = checkMockup(specimen, {
+    label: 'MAP-05 specimen',
+    canon,
+    strings,
+    themes: ['light', 'dark'],
+    mappings: {
+      paper: 'color.paper', card: 'color.card', ink: 'color.ink',
+      muted: 'color.muted', line: 'color.line', accent: 'color.accent',
+      'accent-ink': 'color.accent-ink', 'disabled-ink': 'color.disabled-ink',
+      'disabled-line': 'color.disabled-line',
+    },
+    contrastPairs: [
+      { fg: 'ink', bg: 'card', why: 'regular label' },
+      { fg: 'disabled-ink', bg: 'card', why: 'disabled label' },
+      { fg: 'accent-ink', bg: 'accent', why: 'pressed label' },
+      { fg: 'accent', bg: 'paper', min: 3, why: 'highlight outline' },
+      { fg: 'disabled-line', bg: 'paper', min: 3, why: 'disabled border' },
+    ],
+    states,
+    keys: nav.map(({ key }) => key),
+  });
+  assert.deepEqual(findings, [], formatFindings(findings));
 });
