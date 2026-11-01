@@ -55,7 +55,8 @@ function extractThemeVars(html, theme) {
 
 // Runs every rule over one mockup and returns the findings:
 // [{ rule, message }] with `rule` one of theme-block, canon-token, contrast,
-// state, localization-key. Options:
+// state, localization-key, plus the guard rules `canon` (canon not loaded)
+// and `html` (empty markup). Options:
 //   label         — mockup name used in every message
 //   canon         — loadCanon() result (required)
 //   strings       — records of contracts/ui-messages/source.json (optional)
