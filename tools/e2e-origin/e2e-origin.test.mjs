@@ -266,6 +266,8 @@ test('an unnamed missing file answers 404 and containment holds (rule 3)', async
   const port = await listen(server);
   const base = `http://127.0.0.1:${port}`;
   try {
+    assert.equal((await fetch(`${base}//catalog.json`)).status, 200, 'double-slash requests serve the catalog');
+    assert.equal((await fetch(`${base}/%2Fcatalog.json`)).status, 200, 'encoded leading slash serves the catalog');
     assert.equal((await fetch(`${base}/no-such-file.json`)).status, 404);
     assert.equal((await fetch(`${base}/%2e%2e/package.json`)).status, 404, 'traversal must not escape the origin root');
   } finally {
