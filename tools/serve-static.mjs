@@ -4,7 +4,7 @@
 // the diff is extracted, not pasted).
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { extname, join, normalize, sep } from 'node:path';
+import { extname, resolve, sep } from 'node:path';
 
 const mime = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.json':'application/json', '.svg':'image/svg+xml' };
 
@@ -13,9 +13,13 @@ const mime = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; chars
 // request (AR-2, #79; same idiom as G00.03 grant-server.mjs).
 export function resolveStaticFile(root, pathname) {
   if (pathname.endsWith('/')) pathname += 'index.html';
-  const relative = pathname === '/' ? 'index.html' : decodeURIComponent(pathname.slice(1));
-  const file = normalize(join(root, relative));
-  if (!file.startsWith(root + sep)) return null;
+  // A doubled leading separator is still a path inside the served root.
+  const relative = (pathname === '/' ? 'index.html' : decodeURIComponent(pathname.slice(1)))
+    .replace(/^[\\/]+/, '');
+  const directory = resolve(root);
+  const file = resolve(directory, relative);
+  const prefix = directory.endsWith(sep) ? directory : directory + sep;
+  if (!file.startsWith(prefix)) return null;
   return file;
 }
 
