@@ -17,10 +17,6 @@ PR: спасылка (калі ёсць звязаны issue — дадаць і
 
 ## Што трэба зрабіць
 
-### 2026-11-02 — правер выпраўленне статычнага сервера
-Што зрабіць: атрымай незалежнае рэв'ю PR #967 і дачакайся ўсіх абавязковых CI-праверак; перад мержам запусці і правер Showboat, які быў недаступны ў абмежаваным асяроддзі агента. Калі праверкі прайшлі, выведзі PR з Draft і змержы; пасля выдалі гэты запіс.
-PR: [#967](https://github.com/vokhandcrafts/KUDY/pull/967)
-
 ### 2026-11-01 — Supabase-рунтайм для крытэраў 1–3 APR-08.a
 Што зрабіць: вызначы фактычны Supabase project/environment і спосаб запуску `runRetentionSweep`; на staging з сінтэтычнымі радкамі прадэманструй boundary values (14 месяцаў / 24 гадзіны / 30 дзён), паўторны запуск без дублявання і fail/retry; у production пацвердзі расклад і апошнія прогоны па абязлічаных метрыках — без чытання PII. Вынікі пазнач у [#849](https://github.com/vokhandcrafts/KUDY/issues/849) і [#299](https://github.com/vokhandcrafts/KUDY/issues/299); разам з гэтым вырашы пытанне cleanup-у `devices` (крытэр 6).
 PR: [#964](https://github.com/vokhandcrafts/KUDY/pull/964) · Issue: [#849](https://github.com/vokhandcrafts/KUDY/issues/849) — выкананая частка (крытэр 5) у results [APR-08.a.md](docs/agent-tasks/results/APR-08.a.md)
