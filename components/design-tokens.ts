@@ -44,6 +44,10 @@ export const tokens = {
   spaceM: 12, // space.m
   spaceL: 16, // space.l
   dialogMaxWidth: 400, // dialog.max-width — дыялог, гл. visual-language §4
+  // Issue #959 (APR-10.b, 2026-11-02) — кап шырыні кантэнту на акнах ≥600dp
+  // (канон content.max-width): радок тэксту трымаецца ў межах 45–75 сімвалаў.
+  // Ніжэй за кап стыль без эфекту, таму адзін безумоўны кап на ўсе акны.
+  contentMaxWidth: 640, // content.max-width — максімальная шырыня кантэнту
   fontBaseSize: 16, // font.base-size
   fontTitleSize: 18, // font.size-title — памер загалоўка экрана
   fontWeightStrong: '600', // font.weight-strong

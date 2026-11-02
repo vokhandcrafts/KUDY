@@ -13,6 +13,7 @@ import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
 import type { CatalogGuideCard, CatalogSurfaceState } from "../controllers/catalog/catalogController.ts";
 import type { Services } from "../controllers/createServices.ts";
 import { PressableSurface } from "./pressable-surface";
+import { contentWidthStyle } from "./content-width";
 import { darkTokens, tokens, type ThemeTokens } from "./design-tokens";
 import { useThemeStyles } from "./theme";
 import { ScaledText } from "./scaled-text";
@@ -95,7 +96,9 @@ const createStyles = (palette: ThemeTokens) => StyleSheet.create({
     marginTop: palette.spaceS,
   },
   list: { flex: 1 },
-  listContent: { paddingHorizontal: palette.spaceL, paddingBottom: palette.spaceL },
+  // APR-10.b (issue #959): the body keeps the canon content width on wide
+  // windows (contentWidthStyle is inert below the cap).
+  listContent: { paddingHorizontal: palette.spaceL, paddingBottom: palette.spaceL, ...contentWidthStyle },
   row: { marginBottom: palette.spaceM },
   columns: {
     justifyContent: "space-between",

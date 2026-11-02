@@ -35,6 +35,7 @@ import {
   ModalDialogAccept,
   ModalDialogCancel,
 } from "../../components/modal-dialog";
+import { contentWidthStyle } from "../../components/content-width";
 import { PressableSurface } from "../../components/pressable-surface";
 import { ScaledText } from "../../components/scaled-text";
 import { useScreenStyles } from "../../components/screen-styles";
@@ -321,8 +322,10 @@ export default function RoutePreview() {
           reachable while the stops list is scrolled (AC2). */}
       <BackButton label={strings.back} testID="btn-preview-back" />
       {/* UX 01 (issue #347): the surface scrolls — every stop and the main
-          button stay reachable beyond the fold; the §4.1 overlay stays above. */}
-      <ScrollView testID="scroll-preview">
+          button stay reachable beyond the fold; the §4.1 overlay stays above.
+          APR-10.b (issue #959): the content keeps the canon content width on
+          wide windows (contentWidthStyle is inert below the cap). */}
+      <ScrollView testID="scroll-preview" contentContainerStyle={contentWidthStyle}>
         <WalkButton walk={services.walk} locale={locale} />
         {state.surface.kind === "loading" ? <LoadingIndicator text={strings.loading} /> : null}
         {state.surface.kind === "unavailable" ? (
