@@ -1,0 +1,36 @@
+# APR-01 — прагон release-APK з AAB на 16 KB эмулятары (2026-11-02)
+
+Хост: Windows 10.0.26200 x64, Node v24.13.0.
+Эмулятар: Android Emulator 37.2.12.0, AVD KUDY_APR01_16K.
+Вобраз: system-images;android-36.1;google_apis_ps16k;x86_64 (16 KB Page Size Google APIs, r04).
+Сцэнар: бут без snapshot-save, усталяванне universal.apk праз adb install.
+
+## Памер старонкі прылады
+
+> D:/KUDY-Android/sdk/platform-tools/adb.exe -s emulator-5554 shell getconf PAGE_SIZE
+16384
+> adb shell getprop ro.build.version.release
+16
+
+## Усталёўванне universal.apk (сабраны bundletool 1.18.3 з app-release.aab)
+
+> adb -s emulator-5554 install -r universal.apk
+Performing Streamed Install
+Success
+
+## Запуск
+
+> adb shell am start -n by.kudy.app/.MainActivity
+Starting: Intent { cmp=by.kudy.app/.MainActivity }
+> adb shell pidof by.kudy.app
+3777
+> adb shell dumpsys activity activities | grep topResumedActivity
+    topResumedActivity=ActivityRecord{32776469 u0 by.kudy.app/.MainActivity t8}
+
+## Памылкі натыўных бібліятэк у logcat
+
+grep -iE "UnsatisfiedLink|dlopen failed|page size|not 16" (поўны logcat):
+адзіныя супадзенні — сістэмны WVCdm (Widevine, oemcrypto) на эмульятары,
+да дадатка не датычыцца. Памылак узроўню E ад by.kudy.app: 0.
+Screencap: app-by.kudy-16k.png — галоўнае меню адмалёўваецца, афлайн-стан
+«Каталог недаступны» паказаны сумленна (кантэнт-сервер на прыладзе няма).

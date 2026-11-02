@@ -1,0 +1,101 @@
+aab-x\base\lib\arm64-v8a\libandroidx.graphics.path.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libappmodules.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libbarhopper_v3.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libc++_shared.so p_align=16384 loads=4 OK
+aab-x\base\lib\arm64-v8a\libexpo-modules-core.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libexpo-sqlite.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libfbjni.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libgesturehandler.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libgifimage.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libhermes.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libhermestooling.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libimagepipeline.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libjsi.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libmaplibre.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libnative-filters.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libnative-imagetranscoder.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libreactnative.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libreact_codegen_RNCSlider.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libreact_codegen_rnscreens.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libreact_codegen_rnsvg.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libreact_codegen_safeareacontext.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libreanimated.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\librnscreens.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libstatic-webp.so p_align=16384 loads=3 OK
+aab-x\base\lib\arm64-v8a\libworklets.so p_align=16384 loads=3 OK
+aab-x\base\lib\armeabi-v7a\libandroidx.graphics.path.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libappmodules.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libbarhopper_v3.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libc++_shared.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libexpo-modules-core.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libexpo-sqlite.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libfbjni.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libgesturehandler.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libgifimage.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libhermes.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libhermestooling.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libimagepipeline.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libjsi.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libmaplibre.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libnative-filters.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libnative-imagetranscoder.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libreactnative.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libreact_codegen_RNCSlider.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libreact_codegen_rnscreens.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libreact_codegen_rnsvg.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libreact_codegen_safeareacontext.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libreanimated.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\librnscreens.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libstatic-webp.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\armeabi-v7a\libworklets.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libandroidx.graphics.path.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libappmodules.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libbarhopper_v3.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libc++_shared.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libexpo-modules-core.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libexpo-sqlite.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libfbjni.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libgesturehandler.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libgifimage.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libhermes.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libhermestooling.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libimagepipeline.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libjsi.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libmaplibre.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libnative-filters.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libnative-imagetranscoder.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libreactnative.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libreact_codegen_RNCSlider.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libreact_codegen_rnscreens.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libreact_codegen_rnsvg.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libreact_codegen_safeareacontext.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libreanimated.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\librnscreens.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libstatic-webp.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86\libworklets.so ELF32-SKIP (arm64-v8a images are ELF64)
+aab-x\base\lib\x86_64\libandroidx.graphics.path.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libappmodules.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libbarhopper_v3.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libc++_shared.so p_align=16384 loads=4 OK
+aab-x\base\lib\x86_64\libexpo-modules-core.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libexpo-sqlite.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libfbjni.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libgesturehandler.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libgifimage.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libhermes.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libhermestooling.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libimagepipeline.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libjsi.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libmaplibre.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libnative-filters.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libnative-imagetranscoder.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libreactnative.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libreact_codegen_RNCSlider.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libreact_codegen_rnscreens.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libreact_codegen_rnsvg.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libreact_codegen_safeareacontext.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libreanimated.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\librnscreens.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libstatic-webp.so p_align=16384 loads=3 OK
+aab-x\base\lib\x86_64\libworklets.so p_align=16384 loads=3 OK
+checked=50 failed=0
