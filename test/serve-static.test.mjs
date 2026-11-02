@@ -18,6 +18,14 @@ test('static resolver serves inside the filesystem root', () => {
   assert.equal(resolveStaticFile(base, '/index.html'), join(base, 'index.html'));
 });
 
+test('static resolver preserves redundant and encoded leading separators', () => {
+  const base = resolve('fixture-public');
+  for (const root of [base, base + sep, 'fixture-public']) {
+    assert.equal(resolveStaticFile(root, '//catalog.json'), join(base, 'catalog.json'));
+    assert.equal(resolveStaticFile(root, '/%2Fcatalog.json'), join(base, 'catalog.json'));
+  }
+});
+
 test('static resolver still denies traversal and sibling-prefix escapes', () => {
   const base = resolve('fixture-public');
   for (const root of [base, base + sep, 'fixture-public']) {
